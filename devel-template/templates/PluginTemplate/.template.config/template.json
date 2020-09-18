@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft Corporation",
+  "classifications": [ "Common", "Plugin" ],
+  "identity": "Microsoft.Performance.ToolKit.PluginTemplate",
+  "name": "Microsoft Performance ToolKit Plugin",
+  "shortName": "ptkplugin",
+  "tags": {
+      "language": "C#",
+      "type": "project"
+  }
+}

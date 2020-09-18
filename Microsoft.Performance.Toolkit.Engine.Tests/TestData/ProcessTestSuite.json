@@ -1,0 +1,510 @@
+{
+    "description": "test cases for ToolkitEngine.Process",
+    "testCases": [
+        {
+            "id": "0001",
+            "description": "Test One Source Cooker processes correctly",
+            "cookersToEnable": [
+                "Source4Parser/Source4DataCooker"
+            ],
+            "filePaths": [
+                "TestData\\source123_test_data.s123d",
+                "TestData\\source4_test_data.s4d",
+                "TestData\\source5_test_data.s5d"
+            ],
+            "expectedOutputs": {
+                "Source4Parser/Source4DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source4Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source4Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source4Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source4Row4"
+                    }
+                ]
+            },
+            "throwingOutputs": [
+                "Source123Parser/Source1DataCooker/Objects",
+                "Source123Parser/Source2DataCooker/Objects",
+                "Source123Parser/Source3DataCooker/Objects",
+                "Source123Parser/Source3DataCooker/Source1Objects",
+                "Source123Parser/Source3DataCooker/Source2Objects",
+                "Source5Parser/Source5DataCooker/Objects",
+                "/Composite1Cooker/Output",
+                "/Composite2Cooker/Output",
+                "/Composite3Cooker/Output",
+                "/Composite4Cooker/Output"
+            ]
+        },
+        {
+            "id": "0002",
+            "description": "Test A source cooker that depends on other source cookers",
+            "cookersToEnable": [
+                "Source123Parser/Source3DataCooker"
+            ],
+            "filePaths": [
+                "TestData\\source123_test_data.s123d",
+                "TestData\\source4_test_data.s4d",
+                "TestData\\source5_test_data.s5d"
+            ],
+            "expectedOutputs": {
+                "Source123Parser/Source1DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source123Row1"
+                    }
+                ],
+                "Source123Parser/Source2DataCooker/Objects": [
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source123Row2"
+                    }
+                ],
+                "Source123Parser/Source3DataCooker/Objects": [
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source123Row3"
+                    }
+                ],
+                "Source123Parser/Source3DataCooker/Source1Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source123Row1"
+                    }
+                ],
+                "Source123Parser/Source3DataCooker/Source2Objects": [
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source123Row2"
+                    }
+                ]
+            },
+            "throwingOutputs": [
+                "Source4Parser/Source4DataCooker/Objects",
+                "Source5Parser/Source5DataCooker/Objects",
+                "/Composite1Cooker/Output",
+                "/Composite2Cooker/Output",
+                "/Composite3Cooker/Output",
+                "/Composite4Cooker/Output"
+            ]
+        },
+        {
+            "id": "0003",
+            "description": "Test one composite cooker that depends on one source cooker.",
+            "cookersToEnable": [
+                "/Composite2Cooker"
+            ],
+            "filePaths": [
+                "TestData\\source123_test_data.s123d",
+                "TestData\\source4_test_data.s4d",
+                "TestData\\source5_test_data.s5d"
+            ],
+            "expectedOutputs": {
+                "Source5Parser/Source5DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source5Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source5Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source5Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source5Row4"
+                    },
+                    {
+                        "key": 5,
+                        "id": 5,
+                        "data": "Source5Row5"
+                    }
+                ],
+                "/Composite2Cooker/Output": [
+                    {
+                        "key": 5,
+                        "source5Count": 5
+                    }
+                ]
+            },
+            "throwingOutputs": [
+                "Source123Parser/Source1DataCooker/Objects",
+                "Source123Parser/Source2DataCooker/Objects",
+                "Source123Parser/Source3DataCooker/Objects",
+                "Source123Parser/Source3DataCooker/Source1Objects",
+                "Source123Parser/Source3DataCooker/Source2Objects",
+                "Source4Parser/Source4DataCooker/Objects",
+                "/Composite1Cooker/Output",
+                "/Composite3Cooker/Output",
+                "/Composite4Cooker/Output"
+            ]
+        },
+        {
+            "id": "0004",
+            "description": "Test one composite cooker that depends on one source cooker and one composite cooker",
+            "comments":[
+                "Note that a composite cooker does not have to be enabled.",
+                "A composite cooker will always be available as long as all",
+                "of its dependencies are available. Thus, we get the side effect",
+                "of potentially more than just the cooker that you are interested",
+                "in being available."
+            ],
+            "cookersToEnable": [
+                "/Composite3Cooker"
+            ],
+            "filePaths": [
+                "TestData\\source123_test_data.s123d",
+                "TestData\\source4_test_data.s4d",
+                "TestData\\source5_test_data.s5d"
+            ],
+            "expectedOutputs": {
+                "Source123Parser/Source3DataCooker/Objects": [
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source123Row3"
+                    }
+                ],
+                "Source4Parser/Source4DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source4Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source4Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source4Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source4Row4"
+                    }
+                ],
+                "Source5Parser/Source5DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source5Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source5Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source5Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source5Row4"
+                    },
+                    {
+                        "key": 5,
+                        "id": 5,
+                        "data": "Source5Row5"
+                    }
+                ],
+                "/Composite1Cooker/Output": [
+                    {
+                        "key": 5,
+                        "source3Count": 1,
+                        "source4Count": 4
+                    }
+                ],
+                "/Composite3Cooker/Output": [
+                    {
+                        "key": 6,
+                        "composite1Count": 1,
+                        "source5Count": 5
+                    }
+                ]
+            },
+            "throwingOutputs": []
+        },
+        {
+            "id": "0005",
+            "description": "Test one composite cooker that depends on two composite cookers",
+            "debugBreak": true,
+            "cookersToEnable": [
+                "/Composite4Cooker"
+            ],
+            "filePaths": [
+                "TestData\\source123_test_data.s123d",
+                "TestData\\source4_test_data.s4d",
+                "TestData\\source5_test_data.s5d"
+            ],
+            "expectedOutputs": {
+                "Source123Parser/Source3DataCooker/Objects": [
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source123Row3"
+                    }
+                ],
+                "Source4Parser/Source4DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source4Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source4Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source4Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source4Row4"
+                    }
+                ],
+                "Source5Parser/Source5DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source5Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source5Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source5Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source5Row4"
+                    },
+                    {
+                        "key": 5,
+                        "id": 5,
+                        "data": "Source5Row5"
+                    }
+                ],
+                "/Composite1Cooker/Output": [
+                    {
+                        "key": 5,
+                        "source3Count": 1,
+                        "source4Count": 4
+                    }
+                ],
+                "/Composite3Cooker/Output": [
+                    {
+                        "key": 6,
+                        "composite1Count": 1,
+                        "source5Count": 5
+                    }
+                ],
+                "/Composite4Cooker/Output": [
+                    {
+                        "key": 2,
+                        "composite1Count": 1,
+                        "composite3Count": 1,
+                    }
+                ]
+            },
+            "throwingOutputs": []
+        },
+
+
+        {
+            "id": "0006",
+            "description": "Test Many Source Cookers process correctly",
+            "cookersToEnable": [
+                "Source123Parser/Source1DataCooker",
+                "Source123Parser/Source2DataCooker"
+            ],
+            "filePaths": [
+                "TestData\\source123_test_data.s123d",
+                "TestData\\source4_test_data.s4d",
+                "TestData\\source5_test_data.s5d"
+            ],
+            "expectedOutputs": {
+                "Source123Parser/Source1DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source123Row1"
+                    }
+                ],
+                "Source123Parser/Source2DataCooker/Objects": [
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source123Row2"
+                    }
+                ]
+            },
+            "throwingOutputs": [
+                "Source123Parser/Source3DataCooker/Objects",
+                "Source123Parser/Source3DataCooker/Source1Objects",
+                "Source123Parser/Source3DataCooker/Source2Objects",
+                "Source4Parser/Source4DataCooker/Objects",
+                "Source5Parser/Source5DataCooker/Objects",
+                "/Composite1Cooker/Output",
+                "/Composite2Cooker/Output",
+                "/Composite3Cooker/Output",
+                "/Composite4Cooker/Output"
+            ]
+        },
+        {
+            "id": "0007",
+            "description": "Test Enabling Everything",
+            "cookersToEnable": [
+                "/Composite1Cooker",
+                "/Composite2Cooker",
+                "/Composite3Cooker",
+                "/Composite4Cooker",
+            ],
+            "filePaths": [
+                "TestData\\source123_test_data.s123d",
+                "TestData\\source4_test_data.s4d",
+                "TestData\\source5_test_data.s5d"
+            ],
+            "expectedOutputs": {
+                "Source123Parser/Source1DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source123Row1"
+                    }
+                ],
+                "Source123Parser/Source2DataCooker/Objects": [
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source123Row2"
+                    }
+                ],
+                "Source123Parser/Source3DataCooker/Objects": [
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source123Row3"
+                    }
+                ],
+                "Source4Parser/Source4DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source4Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source4Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source4Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source4Row4"
+                    }
+                ],
+                "Source5Parser/Source5DataCooker/Objects": [
+                    {
+                        "key": 1,
+                        "id": 1,
+                        "data": "Source5Row1"
+                    },
+                    {
+                        "key": 2,
+                        "id": 2,
+                        "data": "Source5Row2"
+                    },
+                    {
+                        "key": 3,
+                        "id": 3,
+                        "data": "Source5Row3"
+                    },
+                    {
+                        "key": 4,
+                        "id": 4,
+                        "data": "Source5Row4"
+                    },
+                    {
+                        "key": 5,
+                        "id": 5,
+                        "data": "Source5Row5"
+                    }
+                ],
+                "/Composite1Cooker/Output": [
+                    {
+                        "key": 5,
+                        "source3Count": 1,
+                        "source4Count": 4
+                    }
+                ],
+                "/Composite2Cooker/Output": [
+                    {
+                        "key": 5,
+                        "source5Count": 5,
+                    }
+                ],
+                "/Composite3Cooker/Output": [
+                    {
+                        "key": 6,
+                        "composite1Count": 1,
+                        "source5Count": 5
+                    }
+                ],
+                "/Composite4Cooker/Output": [
+                    {
+                        "key": 2,
+                        "composite1Count": 1,
+                        "composite3Count": 1,
+                    }
+                ]
+            },
+            "throwingOutputs": []
+        }
+    ]
+}

@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>Microsoft.Performance.SDK.Runtime.NetCoreApp</AssemblyName>
+    <RootNamespace>Microsoft.Performance.SDK.Runtime.NetCoreApp</RootNamespace>
+    <Authors>Microsoft Corporation</Authors>
+    <Company>Microsoft Corporation</Company>
+    <Product>Performance ToolKit</Product>
+    <Description>Contains .NET Core specific components of the Performance Toolkit Runtime.</Description>
+    <Copyright>Copyright © 2020 Microsoft Corporation</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime\Microsoft.Performance.SDK.Runtime.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ScopedAppDomain.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="TestData\source123_test_data.s123d" />
+    <None Remove="TestData\source4_test_data.s4d" />
+    <None Remove="TestData\source5_test_data.s5d" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestData\source5_test_data.s5d" />
+    <Content Include="TestData\source4_test_data.s4d">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\source123_test_data.s123d">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="ScopedAppDomain.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime.NetCoreApp\Microsoft.Performance.SDK.Runtime.NetCoreApp.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime\Microsoft.Performance.SDK.Runtime.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Toolkit.Engine\Microsoft.Performance.Toolkit.Engine.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Testing\Microsoft.Performance.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="TestData\source5_test_data.s5d">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestData\ProcessTestSuite.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
