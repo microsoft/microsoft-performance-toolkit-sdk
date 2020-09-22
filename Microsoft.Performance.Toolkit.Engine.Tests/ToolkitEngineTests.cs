@@ -1082,7 +1082,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         private static IEnumerable<object[]> ProcessTestData()
         {
-            var suite = EngineProcessTestsLoader.Load("TestData\\ProcessTestSuite.json");
+            var suite = EngineProcessTestsLoader.Load("TestData/ProcessTestSuite.json");
             foreach (var testCase in suite.TestCases)
             {
                 yield return new[] { testCase, };
