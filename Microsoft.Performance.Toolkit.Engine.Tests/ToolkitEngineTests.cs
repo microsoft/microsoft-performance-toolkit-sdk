@@ -987,10 +987,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         [TestMethod]
         [FunctionalTest]
-        [DeploymentItem(@"TestData\source123_test_data.s123d")]
-        [DeploymentItem(@"TestData\source4_test_data.s4d")]
-        [DeploymentItem(@"TestData\source5_test_data.s5d")]
-        [DeploymentItem(@"TestData\ProcessTestSuite.json")]
+        [DeploymentItem(@"TestData/source123_test_data.s123d")]
+        [DeploymentItem(@"TestData/source4_test_data.s4d")]
+        [DeploymentItem(@"TestData/source5_test_data.s5d")]
+        [DeploymentItem(@"TestData/ProcessTestSuite.json")]
         [DynamicData(nameof(ProcessTestData), DynamicDataSourceType.Method)]
         public void Process_WhenComplete_DataWasProcessed(
             EngineProcessTestCaseDto testCase)
@@ -1095,10 +1095,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         [TestMethod]
         [FunctionalTest]
-        [DeploymentItem(@"TestData\source123_test_data.s123d")]
-        [DeploymentItem(@"TestData\source4_test_data.s4d")]
-        [DeploymentItem(@"TestData\source5_test_data.s5d")]
-        [DeploymentItem(@"TestData\ProcessTestSuite.json")]
+        [DeploymentItem(@"TestData/source123_test_data.s123d")]
+        [DeploymentItem(@"TestData/source4_test_data.s4d")]
+        [DeploymentItem(@"TestData/source5_test_data.s5d")]
+        [DeploymentItem(@"TestData/ProcessTestSuite.json")]
         [DynamicData(nameof(ProcessTestData), DynamicDataSourceType.Method)]
         public void Process_Isolated_WhenComplete_DataWasProcessed(
             EngineProcessTestCaseDto testCase)
