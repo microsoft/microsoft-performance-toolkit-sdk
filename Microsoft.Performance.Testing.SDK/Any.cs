@@ -54,7 +54,7 @@ namespace Microsoft.Performance.Testing.SDK
         {
             public Uri GetUri()
             {
-                return new Uri("C:\\test.txt");
+                return new Uri("C:/test.txt");
             }
         }
     }

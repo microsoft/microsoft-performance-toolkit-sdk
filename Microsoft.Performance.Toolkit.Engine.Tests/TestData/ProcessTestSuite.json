@@ -8,9 +8,9 @@
                 "Source4Parser/Source4DataCooker"
             ],
             "filePaths": [
-                "TestData\\source123_test_data.s123d",
-                "TestData\\source4_test_data.s4d",
-                "TestData\\source5_test_data.s5d"
+                "TestData/source123_test_data.s123d",
+                "TestData/source4_test_data.s4d",
+                "TestData/source5_test_data.s5d"
             ],
             "expectedOutputs": {
                 "Source4Parser/Source4DataCooker/Objects": [
@@ -56,9 +56,9 @@
                 "Source123Parser/Source3DataCooker"
             ],
             "filePaths": [
-                "TestData\\source123_test_data.s123d",
-                "TestData\\source4_test_data.s4d",
-                "TestData\\source5_test_data.s5d"
+                "TestData/source123_test_data.s123d",
+                "TestData/source4_test_data.s4d",
+                "TestData/source5_test_data.s5d"
             ],
             "expectedOutputs": {
                 "Source123Parser/Source1DataCooker/Objects": [
@@ -113,9 +113,9 @@
                 "/Composite2Cooker"
             ],
             "filePaths": [
-                "TestData\\source123_test_data.s123d",
-                "TestData\\source4_test_data.s4d",
-                "TestData\\source5_test_data.s5d"
+                "TestData/source123_test_data.s123d",
+                "TestData/source4_test_data.s4d",
+                "TestData/source5_test_data.s5d"
             ],
             "expectedOutputs": {
                 "Source5Parser/Source5DataCooker/Objects": [
@@ -178,9 +178,9 @@
                 "/Composite3Cooker"
             ],
             "filePaths": [
-                "TestData\\source123_test_data.s123d",
-                "TestData\\source4_test_data.s4d",
-                "TestData\\source5_test_data.s5d"
+                "TestData/source123_test_data.s123d",
+                "TestData/source4_test_data.s4d",
+                "TestData/source5_test_data.s5d"
             ],
             "expectedOutputs": {
                 "Source123Parser/Source3DataCooker/Objects": [
@@ -264,9 +264,9 @@
                 "/Composite4Cooker"
             ],
             "filePaths": [
-                "TestData\\source123_test_data.s123d",
-                "TestData\\source4_test_data.s4d",
-                "TestData\\source5_test_data.s5d"
+                "TestData/source123_test_data.s123d",
+                "TestData/source4_test_data.s4d",
+                "TestData/source5_test_data.s5d"
             ],
             "expectedOutputs": {
                 "Source123Parser/Source3DataCooker/Objects": [
@@ -359,9 +359,9 @@
                 "Source123Parser/Source2DataCooker"
             ],
             "filePaths": [
-                "TestData\\source123_test_data.s123d",
-                "TestData\\source4_test_data.s4d",
-                "TestData\\source5_test_data.s5d"
+                "TestData/source123_test_data.s123d",
+                "TestData/source4_test_data.s4d",
+                "TestData/source5_test_data.s5d"
             ],
             "expectedOutputs": {
                 "Source123Parser/Source1DataCooker/Objects": [
@@ -401,9 +401,9 @@
                 "/Composite4Cooker",
             ],
             "filePaths": [
-                "TestData\\source123_test_data.s123d",
-                "TestData\\source4_test_data.s4d",
-                "TestData\\source5_test_data.s5d"
+                "TestData/source123_test_data.s123d",
+                "TestData/source4_test_data.s4d",
+                "TestData/source5_test_data.s5d"
             ],
             "expectedOutputs": {
                 "Source123Parser/Source1DataCooker/Objects": [
