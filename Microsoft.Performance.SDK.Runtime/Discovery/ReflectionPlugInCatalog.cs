@@ -54,7 +54,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             if (this.referenceFactory(type, out CustomDataSourceReference reference))
             {
                 Debug.Assert(reference != null);
-                this.loadedDataSources.TryAdd(type, reference);
+                try
+                {
+                    this.loadedDataSources.Add(type, reference);
+                }
+                catch { }                
             }
         }
 

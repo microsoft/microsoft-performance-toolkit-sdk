@@ -34,7 +34,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
 
         internal static PlugInConfiguration ConfigurationFromDTO(this PlugInConfigurationDTO source, ILogger logger)
         {
-            var options = new HashSet<ConfigurationOption>(source.Options.Length);
+            var options = new HashSet<ConfigurationOption>();
             foreach (var configurationOption in source.Options)
             {
                 options.Add(configurationOption.ConfigurationOptionFromDTO());
