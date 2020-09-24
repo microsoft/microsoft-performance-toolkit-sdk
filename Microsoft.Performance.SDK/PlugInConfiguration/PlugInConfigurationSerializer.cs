@@ -59,8 +59,8 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
                     paramName: nameof(plugInDirectory));
             }
 
-            using var fileStream = File.OpenRead(pathToDefaultConfiguration);
-            return ReadFromStream(fileStream, logger);
+            using (var fileStream = File.OpenRead(pathToDefaultConfiguration))
+                return ReadFromStream(fileStream, logger);
         }
 
         /// <summary>
@@ -164,11 +164,12 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
 
             try
             {
-                using var writer = JsonReaderWriterFactory.CreateJsonWriter(
-                    configurationStream, Encoding.Default, false, true, "    ");
-
-                var serializer = new DataContractJsonSerializer(typeof(PlugInConfigurationDTO));
-                serializer.WriteObject(writer, outputConfiguration);
+                using (var writer = JsonReaderWriterFactory.CreateJsonWriter(
+                    configurationStream, Encoding.Default, false, true, "    "))
+                {
+                    var serializer = new DataContractJsonSerializer(typeof(PlugInConfigurationDTO));
+                    serializer.WriteObject(writer, outputConfiguration);
+                }
             }
             catch (Exception e)
             {
