@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -15,6 +16,7 @@ namespace Microsoft.Performance.SDK
     /// </summary>
     [TypeConverter(typeof(TimeRangeConverter))]
     [StructLayout(LayoutKind.Sequential)]
+    [DebuggerDisplay("{StartTime.ToNanoseconds}ns - {EndTime.ToNanoseconds}ns")]
     public struct TimeRange
         : IEquatable<TimeRange>,
           IFormatForClipboard,
