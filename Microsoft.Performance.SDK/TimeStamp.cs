@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Performance.SDK
@@ -13,6 +14,7 @@ namespace Microsoft.Performance.SDK
     /// </summary>
     [TypeConverter(typeof(TimestampConverter))]
     [StructLayout(LayoutKind.Sequential)]
+    [DebuggerDisplay("{ToNanoseconds}ns")]
     public readonly struct Timestamp
         : IComparable<Timestamp>,
           IEquatable<Timestamp>,
