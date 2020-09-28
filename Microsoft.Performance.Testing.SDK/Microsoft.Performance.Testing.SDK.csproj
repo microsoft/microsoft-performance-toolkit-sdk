@@ -2,11 +2,29 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>Microsoft.Performance.Testing.SDK</AssemblyName>
+    <RootNamespace>Microsoft.Performance.Testing.SDK</RootNamespace>
+    <Authors>Microsoft Corporation</Authors>
+    <Company>Microsoft Corporation</Company>
+    <Product>Performance ToolKit</Product>
+    <Description>Contains SDK specific test utilities.</Description>
+    <Copyright>Copyright © 2020 Microsoft Corporation</Copyright>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime\Microsoft.Performance.SDK.Runtime.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
