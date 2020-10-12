@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Performance.SDK" Version="0.108.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\sample\DataExtensionsSample.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\ImagesTableConfiguration.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  
+</Project>

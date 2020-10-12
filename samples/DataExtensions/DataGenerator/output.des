@@ -1,0 +1,66 @@
+{
+  "DataRecordCount": 12,
+  "WallClock": "1999-12-31T23:59:59Z",
+  "Data": [
+    {
+      "Name": "ProcessLoad",
+      "Value": "GXsiTmFtZSI6IndwYS5leGUiLCJJZCI6MX0=",
+      "Timestamp": "23521"
+    },
+    {
+      "Name": "ProcessLoad",
+      "Value": "GnsiTmFtZSI6Im1haWwuZXhlIiwiSWQiOjN9",
+      "Timestamp": "47008"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "VHsiUGF0aCI6ImM6XFx3cGFcXHdwYS5leGUiLCJQcm9jZXNzSWQiOjEsIkxvYWRBZGRyZXNzIjoyMTQ3NDgzNjQ4LCJJbWFnZVNpemUiOjYzNDI1fQ==",
+      "Timestamp": "70495"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "ansiUGF0aCI6ImM6XFx3cGFcXG1pY3Jvc29mdC5wZXJmb3JtYW5jZS5zZGsuZGxsIiwiUHJvY2Vzc0lkIjoxLCJMb2FkQWRkcmVzcyI6MjE0Nzg3Njg2NCwiSW1hZ2VTaXplIjo5ODEzNX0=",
+      "Timestamp": "93982"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "aXsiUGF0aCI6ImM6XFx3cGFcXG1pY3Jvc29mdC5wZXJmb3JtYW5jZS51aS5kbGwiLCJQcm9jZXNzSWQiOjEsIkxvYWRBZGRyZXNzIjoyMTU0ODIzNjgwLCJJbWFnZVNpemUiOjQ5ODEzfQ==",
+      "Timestamp": "117469"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "bXsiUGF0aCI6ImM6XFx3cGFcXG1pY3Jvc29mdC5wZXJmb3JtYW5jZS5zaGVsbC5kbGwiLCJQcm9jZXNzSWQiOjEsIkxvYWRBZGRyZXNzIjoyMTU1MjgyNDMyLCJJbWFnZVNpemUiOjYxMzE4N30=",
+      "Timestamp": "140956"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "a3siUGF0aCI6ImM6XFx3cGFcXG1pY3Jvc29mdC5wZXJmb3JtYW5jZS5iYXNlLmRsbCIsIlByb2Nlc3NJZCI6MSwiTG9hZEFkZHJlc3MiOjIxNTU5Mzc3OTIsIkltYWdlU2l6ZSI6NjM0MjV9",
+      "Timestamp": "164443"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "WHsiUGF0aCI6ImM6XFxtYWlsXFxtYWlsLmV4ZSIsIlByb2Nlc3NJZCI6MywiTG9hZEFkZHJlc3MiOjIxNDc0ODM2NDgsIkltYWdlU2l6ZSI6NjM0MTY4MX0=",
+      "Timestamp": "187930"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "XnsiUGF0aCI6ImM6XFxtYWlsXFxtYWlsX2hlbHBlci5kbGwiLCJQcm9jZXNzSWQiOjMsIkxvYWRBZGRyZXNzIjoyMTU1MDg1ODI0LCJJbWFnZVNpemUiOjY0ODkxNn0=",
+      "Timestamp": "211417"
+    },
+    {
+      "Name": "ImageLoad",
+      "Value": "aHsiUGF0aCI6ImM6XFx3aW5kb3dzXFxzeXN0ZW0zMlxca2VybmVsMzIuZGxsIiwiUHJvY2Vzc0lkIjozLCJMb2FkQWRkcmVzcyI6MjE1NjM5NjU0NCwiSW1hZ2VTaXplIjo5ODQxNjR9",
+      "Timestamp": "234904"
+    },
+    {
+      "Name": "CSwitch",
+      "Value": "I3siT2xkVGhyZWFkSWQiOjEzLCJOZXdUaHJlYWRJZCI6NTB9",
+      "Timestamp": "258391"
+    },
+    {
+      "Name": "CSwitch",
+      "Value": "I3siT2xkVGhyZWFkSWQiOjUwLCJOZXdUaHJlYWRJZCI6Njh9",
+      "Timestamp": "281878"
+    }
+  ]
+}

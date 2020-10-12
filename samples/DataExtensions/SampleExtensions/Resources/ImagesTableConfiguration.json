@@ -1,0 +1,208 @@
+{
+  "Tables": [
+    {
+      "Configurations": [
+        {
+          "ChartType": 0,
+          "ColumnRoles": [
+
+          ],
+          "Columns": [
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 0,
+                "TextAlignment": 0,
+                "Width": 243
+              },
+              "Metadata": {
+                "Description": "Image Path",
+                "Guid": "8abac44b-9582-419e-a0c4-14240e905e94",
+                "IsPercent": false,
+                "Name": "Image Path"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 0,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Pivot Column",
+                "Guid": "319e867f-245a-436e-9735-db620f844edc",
+                "IsPercent": false,
+                "Name": "Pivot Column"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 0,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Left Freeze Column",
+                "Guid": "4d35a44e-804b-454e-9375-568543e198c2",
+                "IsPercent": false,
+                "Name": "Left Freeze Column"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 1,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Load Address",
+                "Guid": "afed486e-1e0f-46cb-9e1b-5033e6d6dcff",
+                "IsPercent": false,
+                "Name": "Load Address"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 2,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Image Size",
+                "Guid": "fdf8e716-3c49-48e0-9530-c7e63bd21fb0",
+                "IsPercent": false,
+                "Name": "Image Size"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 3,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Pid",
+                "Guid": "544dc6fc-2b99-4b02-900c-2b6026e9cd17",
+                "IsPercent": false,
+                "Name": "Pid"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": -1,
+                "TextAlignment": 0,
+                "Width": 120
+              },
+              "Metadata": {
+                "Description": "Process Name",
+                "Guid": "e64b7f42-9a90-4db6-82c3-a6956b0816eb",
+                "IsPercent": false,
+                "Name": "Process Name"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 0,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Right Freeze Column",
+                "Guid": "a755cec5-bbc4-4e9f-bdb3-cb78b56ddcfa",
+                "IsPercent": false,
+                "Name": "Right Freeze Column"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 0,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Graph Column",
+                "Guid": "a5ce8faf-5668-49fc-82bc-d2c482086c06",
+                "IsPercent": false,
+                "Name": "Graph Column"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 4,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Load Time",
+                "Guid": "a63a086c-2a45-4844-b2c9-0c82b0976572",
+                "IsPercent": false,
+                "Name": "Load Time"
+              }
+            },
+            {
+              "DisplayHints": {
+                "AggregationMode": 0,
+                "CellFormat": null,
+                "IsVisible": true,
+                "SortOrder": 0,
+                "SortPriority": 5,
+                "TextAlignment": 0,
+                "Width": 80
+              },
+              "Metadata": {
+                "Description": "Unload Time",
+                "Guid": "2d336d80-5201-4c5e-9580-0c73f8fb9507",
+                "IsPercent": false,
+                "Name": "Unload Time"
+              }
+            }
+          ],
+          "Layout": 3,
+          "Name": "Images by Path"
+        }
+      ],
+      "DefaultConfigurationName": "Images by Path",
+      "TableId": "3a6cf5ea-ab9e-4fc7-8ab3-1b8e5f5cdae0"
+    }
+  ],
+  "Version": 0.1
+}
