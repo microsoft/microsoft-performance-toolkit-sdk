@@ -229,7 +229,7 @@ namespace Microsoft.Performance.SDK.Processing
                 //
                 private readonly ClipTimeToViewportTimeRangePercentFormatProvider customFormatter;
 
-                private ClipTimeToViewportTimeRangePercentColumnGenerator(TGenerator timeRangeGenerator)
+                public ClipTimeToViewportTimeRangePercentColumnGenerator(TGenerator timeRangeGenerator)
                 {
                     var internalGenerator = new ClipTimeToViewportTimeRangeColumnGenerator<TGenerator>(timeRangeGenerator);
                     this.timeRangeColumnGenerator = internalGenerator;
