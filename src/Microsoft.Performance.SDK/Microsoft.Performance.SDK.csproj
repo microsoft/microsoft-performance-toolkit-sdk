@@ -1,13 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Microsoft.Performance.SDK.Runtime</AssemblyName>
-    <RootNamespace>Microsoft.Performance.SDK.Runtime</RootNamespace>
+    <AssemblyName>Microsoft.Performance.SDK</AssemblyName>
+    <RootNamespace>Microsoft.Performance.SDK</RootNamespace>
     <Authors>Microsoft Corporation</Authors>
     <Company>Microsoft Corporation</Company>
     <Product>Performance ToolKit</Product>
-    <Description>Contains the Performance Toolkit Runtime.</Description>
+    <Description>Contains the Software Development Kit (SDK) for the Performance ToolKit.</Description>
     <Copyright>Copyright © 2020 Microsoft Corporation</Copyright>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <RepositoryUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</RepositoryUrl>
@@ -23,24 +23,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>TRACE;</DefineConstants>
+    <DocumentationFile>Microsoft.Performance.SDK.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Properties\**" />
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
-    <None Include="..\LICENSE.txt">
+    <None Include="..\..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="NuGet.Versioning" Version="5.6.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
   </ItemGroup>
 
 </Project>
