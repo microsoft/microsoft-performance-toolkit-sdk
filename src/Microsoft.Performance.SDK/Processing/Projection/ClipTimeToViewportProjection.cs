@@ -258,6 +258,7 @@ namespace Microsoft.Performance.SDK.Processing
 
                 public object Clone()
                 {
+                    /// <see cref="VisibleTableRegionContainer"/> is shared with the formatter, we pass the instance into the new clone.
                     var result = new ClipTimeToViewportTimeRangePercentColumnGenerator<TGenerator>(
                         ViewportSensitiveProjection.CloneIfViewportSensitive(this.timeRangeColumnGenerator.Generator),
                         this.viewportContainer, 
