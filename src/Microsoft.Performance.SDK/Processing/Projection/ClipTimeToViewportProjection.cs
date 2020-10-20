@@ -158,12 +158,12 @@ namespace Microsoft.Performance.SDK.Processing
             {
                 internal TGenerator Generator { get; }
 
-                internal VisibleTableRegionContainer ViewPortContainer { get; }
+                private readonly VisibleTableRegionContainer viewportContainer;
 
                 public ClipTimeToViewportTimeRangeColumnGenerator(TGenerator timestampGenerator)
                 {
                     this.Generator = timestampGenerator;
-                    this.ViewPortContainer = new VisibleTableRegionContainer();
+                    this.viewportContainer = new VisibleTableRegionContainer();
                 }
 
                 // IProjection<int, Timestamp>
@@ -171,7 +171,7 @@ namespace Microsoft.Performance.SDK.Processing
                 {
                     get
                     {
-                        TimeRange viewport = this.ViewPortContainer.Viewport;
+                        TimeRange viewport = this.viewportContainer.Viewport;
 
                         TimeRange timeRange = this.Generator[value];
 
@@ -208,7 +208,7 @@ namespace Microsoft.Performance.SDK.Processing
 
                 public bool NotifyViewportChanged(IVisibleTableRegion viewport)
                 {
-                    this.ViewPortContainer.VisibleTableRegion = viewport;
+                    this.viewportContainer.VisibleTableRegion = viewport;
                     ViewportSensitiveProjection.NotifyViewportChanged(this.Generator, viewport);
                     return true;
                 }
@@ -228,14 +228,18 @@ namespace Microsoft.Performance.SDK.Processing
                 // So implement ICustomFormatter in a private class and return that object.
                 //
                 private readonly ClipTimeToViewportTimeRangePercentFormatProvider customFormatter;
+                private readonly VisibleTableRegionContainer viewportContainer;
 
                 public ClipTimeToViewportTimeRangePercentColumnGenerator(TGenerator timeRangeGenerator)
+                    : this(timeRangeGenerator, new VisibleTableRegionContainer(), null)
                 {
-                    var internalGenerator = new ClipTimeToViewportTimeRangeColumnGenerator<TGenerator>(timeRangeGenerator);
-                    this.timeRangeColumnGenerator = internalGenerator;
+                }
 
-                    this.customFormatter =
-                        new ClipTimeToViewportTimeRangePercentFormatProvider(() => internalGenerator.ViewPortContainer.Viewport.Duration);
+                private ClipTimeToViewportTimeRangePercentColumnGenerator(TGenerator timeRangeGenerator, VisibleTableRegionContainer container, ClipTimeToViewportTimeRangePercentFormatProvider customFormatter)
+                {
+                    this.timeRangeColumnGenerator = new ClipTimeToViewportTimeRangeColumnGenerator<TGenerator>(timeRangeGenerator);
+                    this.viewportContainer = container;
+                    this.customFormatter = customFormatter ?? new ClipTimeToViewportTimeRangePercentFormatProvider(this.viewportContainer);
                 }
 
                 public TimeRange this[int value] => this.timeRangeColumnGenerator[value];
@@ -254,13 +258,17 @@ namespace Microsoft.Performance.SDK.Processing
 
                 public object Clone()
                 {
+                    /// <see cref="VisibleTableRegionContainer"/> is shared with the formatter, we pass the instance into the new clone.
                     var result = new ClipTimeToViewportTimeRangePercentColumnGenerator<TGenerator>(
-                        ViewportSensitiveProjection.CloneIfViewportSensitive(this.timeRangeColumnGenerator.Generator));
+                        ViewportSensitiveProjection.CloneIfViewportSensitive(this.timeRangeColumnGenerator.Generator),
+                        this.viewportContainer, 
+                        this.customFormatter);
                     return result;
                 }
 
                 public bool NotifyViewportChanged(IVisibleTableRegion viewport)
                 {
+                    this.viewportContainer.VisibleTableRegion = viewport;
                     this.timeRangeColumnGenerator.NotifyViewportChanged(viewport);
                     return true;
                 }
@@ -268,13 +276,13 @@ namespace Microsoft.Performance.SDK.Processing
                 private class ClipTimeToViewportTimeRangePercentFormatProvider
                     : ICustomFormatter
                 {
-                    private readonly Func<TimestampDelta> getViewportDuration;
+                    private readonly VisibleTableRegionContainer container;
 
-                    public ClipTimeToViewportTimeRangePercentFormatProvider(Func<TimestampDelta> getViewportDuration)
+                    public ClipTimeToViewportTimeRangePercentFormatProvider(VisibleTableRegionContainer container)
                     {
-                        Guard.NotNull(getViewportDuration, nameof(getViewportDuration));
+                        Guard.NotNull(container, nameof(container));
 
-                        this.getViewportDuration = getViewportDuration;
+                        this.container = container;
                     }
 
                     public string Format(string format, object arg, IFormatProvider formatProvider)
@@ -298,7 +306,7 @@ namespace Microsoft.Performance.SDK.Processing
                             throw new FormatException();
                         }
 
-                        TimestampDelta viewportDuration = getViewportDuration();
+                        TimestampDelta viewportDuration = this.container.Viewport.Duration;
                         double percent = (viewportDuration != TimestampDelta.Zero) ?
                             (100.0 * ((double)numerator.ToNanoseconds) / (viewportDuration.ToNanoseconds)) :
                             100.0;
