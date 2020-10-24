@@ -37,9 +37,7 @@ namespace SampleDriver
                     // a location specified by the user.)
                     //
 
-                    ExtensionDirectory = Path.Combine(
-                        Environment.CurrentDirectory,
-                        Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().CodeBase))
+                    ExtensionDirectory = Environment.CurrentDirectory
                 });
 
             runtime.AddFile(sampleFile);
