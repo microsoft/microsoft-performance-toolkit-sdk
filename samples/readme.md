@@ -14,7 +14,7 @@ Below are some points of comparison.
 
 A Simple Data Source requires less code to get started.
 
-An Extensible Data Source fits into a framework that requries additional code at the start of the project.
+An Extensible Data Source fits into a framework that requires additional code at the start of the project.
 
 ### Data Accessibility
 
@@ -33,7 +33,7 @@ There are two types of data cookers:
 
 #### Source Data Cookers
 
-These Data Cookers consume data from a single Custom Data Source. They take part in parsing and processing of a data source.
+These Data Cookers consume data from a single Custom Data Source. They take part in processing of a data source.
 
 #### Composite Data Cookers
 
