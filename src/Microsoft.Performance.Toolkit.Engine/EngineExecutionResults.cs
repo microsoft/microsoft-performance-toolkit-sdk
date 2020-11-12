@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -7,7 +7,10 @@ using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -20,6 +23,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly IDataExtensionRetrievalFactory retrievalFactory;
         private readonly IDataExtensionRepository repository;
         private readonly IEnumerable<DataCookerPath> sourceCookers;
+        private readonly IList<CustomDataSourceExecutor> executors;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RuntimeExecutionResults"/>
@@ -44,7 +48,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         public RuntimeExecutionResults(
             ICookedDataRetrieval cookedDataRetrieval,
             IDataExtensionRetrievalFactory retrievalFactory,
-            IDataExtensionRepository repository)
+            IDataExtensionRepository repository,
+            IList<CustomDataSourceExecutor> executors) // TRGIBEAU: Currently using the executors directly, probably want to use a map or repository
         {
             Guard.NotNull(cookedDataRetrieval, nameof(cookedDataRetrieval));
             Guard.NotNull(retrievalFactory, nameof(retrievalFactory));
@@ -54,6 +59,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.retrievalFactory = retrievalFactory;
             this.repository = repository;
             this.sourceCookers = new HashSet<DataCookerPath>(this.repository.SourceDataCookers);
+            this.executors = executors;
         }
 
         /// <summary>
@@ -214,6 +220,67 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             data = default(T);
             return false;
+        }
+
+        // TRGIBEAU: Maybe we have them pass in a factory instead?
+        public TBuilder BuildTable<TBuilder>(TableDescriptor tableDescriptor, TBuilder tableBuilder)
+            where TBuilder : class, ITableBuilder, ITableBuilderWithRowCount
+        {
+            if(TryBuildTable(tableDescriptor, tableBuilder, out TBuilder builder))
+            {
+                return builder;
+            }
+
+            throw new Exception($"Unable to Build Table ${tableBuilder}");
+        }
+
+        public bool TryBuildTable<TBuilder>(TableDescriptor tableDescriptor, TBuilder tableBuilder, out TBuilder filledTableBulder)
+            where TBuilder : class, ITableBuilder, ITableBuilderWithRowCount
+        {
+            filledTableBulder = null;
+
+            if (this.repository.TablesById.TryGetValue(tableDescriptor.Guid, out ITableExtensionReference reference))
+            {
+                try
+                {
+                    var tableRetrieval = this.retrievalFactory.CreateDataRetrievalForTable(tableDescriptor.Guid);
+
+                    if (reference.IsDataAvailableFunc != null && !reference.IsDataAvailableFunc(tableRetrieval))
+                    {
+                        return false;
+                    }
+
+                    reference.BuildTableAction(tableBuilder, tableRetrieval);
+
+                    filledTableBulder = tableBuilder;
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+                return filledTableBulder != null;
+            }
+
+
+            foreach (var executor in this.executors)
+            {
+                if (!executor.Processor.DoesTableHaveData(tableDescriptor))
+                {
+                    continue;
+                }
+                try
+                {
+                    executor.Processor.BuildTable(tableDescriptor, tableBuilder);
+                    filledTableBulder = tableBuilder;
+                }
+                catch (Exception ex) 
+                {
+
+                }                
+            }
+
+            return filledTableBulder != null;
         }
     }
 }
