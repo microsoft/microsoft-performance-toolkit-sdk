@@ -18,9 +18,11 @@ An Extensible Data Source fits into a framework that requires additional code at
 
 ### Data Accessibility
 
-An Extensible Data Source also offers more data access through Data Cookers (see below).
+Both options expose Tables which are requested when processing a data source.
 
-Coming Soon: Both options support data processing at the Table level - meaning table data may be accessed programmatically.
+An Extensible Data Source offers programmatic access to data through Data Cookers (see below).
+
+Coming Soon: Both options support programmatic data access at the Table level.
 
 #### Data Cookers
 
@@ -111,4 +113,8 @@ Optionally override the EndDataCooking method if there is work to be performed a
 To expose cooked data, Create a get property and decorate it with the DataOutputAtrribute. This data will now be addressable using the DataOutputPath that combines the DataCookerPath of the Data Cooker with the property name.
 
 If a Source Data Cooker needs access to data from another Source Data Cooker, override the RequiredDataCookers property, adding a DataCookerPath for each required Source Data Cooker. Then, override BeginDataCooking and store the ICookedDataRetrieval parameter. This can be used to access the data output from the requested Source Data Cookers.
+
+### Composite Data Cookers
+
+Composite data cookers process data after Source Data Cookers have finished processing their source directly. They may consume data from Source Data Cookers and from other Composite Data Cookers.
 
