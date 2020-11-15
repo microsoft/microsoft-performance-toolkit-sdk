@@ -1,4 +1,4 @@
-# Plug-in Options
+# Plug-in Creation for Performance SDK
 
 This document will introduce two paths for creating Performance Toolkit SDK (SDK) plug-ins:
 
@@ -18,9 +18,9 @@ An Extensible Data Source fits into a framework that requires additional code at
 
 ### Data Accessibility
 
-Both options support data processing at the Table level - meaning table data may be accessed programmatically.
+An Extensible Data Source also offers more data access through Data Cookers (see below).
 
-An Extensible Data Source also offers more granular data access through Data Cookers.
+Coming Soon: Both options support data processing at the Table level - meaning table data may be accessed programmatically.
 
 #### Data Cookers
 
@@ -74,7 +74,7 @@ An Extensible Data Source fits into a framework for processing a data source and
 
 A Source Parser is responsible for parsing a data source into individual records or events and submitting these events for further processing by Source Data Cookers.
 
-The Source Parser is responsible for packaging each parsed event and any additional context about the event into a prescribed format for consumption by Source Data Cookers. It also how an event may be identified as useful to a Source Data Cooker.
+The Source Parser is responsible for packaging each parsed event and any additional context about the event into a prescribed format for consumption by Source Data Cookers that interact with this parser.
 
 To create a Source Parser, define a public class that inherits from SourceParserBase<T, TContext, TKey>.
 
@@ -84,11 +84,10 @@ Here's a brief description of the generic parameters:
 - TContext: The type used to package contextual data for an event for this Extensible Data Source.
 - TKey: The type used to identify events for distribution to Source Data Cookers.
 
-IKeyedDataType<TKey> inherits from IComparable<TKey> and has one additional method: TKey GetKey(). This is used to determine if an event should be distributed to a Source Data Cooker.
+IKeyedDataType<TKey> inherits from IComparable<TKey> and has one additional method: TKey GetKey(). The framework uses the key to determine if an event should be distributed to a Source Data Cooker.
 
-To parse a data source
+The framework will call ProcessSource on the parser, passing in an ISourceDataProcessor<T, TContext, TKey> parameter. For each event the parser produces, it will call ISourceDataProcessor<T, TContext, TKey>.ProcessDataElement, passing in the event and event context (and a cancellation token). This event will be distributed to Source Data Cookers as appropriate.
 
-To create a data source with extensibility support, perform the following:
+### Custom Data Processor
 
-1) Create a public class that implements abstract class CustomDataSourceBase.
-2) Create a public class that implements abstract class 
+As with the Simple Data Source, this will need a Data Processor. Rather than implementing the base class CustomDataProcessorBase directly, this will implement CustomDataProcessorBaseWithSourceParser<T, TContext, TKey>.
