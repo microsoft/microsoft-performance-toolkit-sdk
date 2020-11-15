@@ -94,4 +94,21 @@ The framework will call ProcessSource on the parser, passing in an ISourceDataPr
 
 ### Source Data Cookers
 
-As mentioned previously, 
+As mentioned previously, a data cooker consumes *raw* data and processes it, producing *cooked* data. At a minimum, an Extensible Data Source needs to have Source Data Cookers to transform raw event data (type *T*) into something more meaningful to be exposed for programmatic access or for Tables.
+
+A Source Data Cooker implements abstract class BaseSourceDataCooker<T, TContext, TKey>. It needs to be public so that the for the framework to automatically find it.
+
+Each Data Cooker is identified by a path of type DataCookerPath. This unique path is passed into BaseSourceDataCooker<T, TContext, TKey> constructor. This path is used to find and access data from a Data Cooker.
+
+Override the Description property to provide a short text description of the Data Cooker.
+
+Override the DataKeys property to set which events the Source Data Cooker should receive. Alternatively, override the Options property, returning SourceDataCookerOptions.ReceiveAllDataElements, to receive all events. Note that doing this for many Source Data Cookers will make source processing take longer.
+
+Override the CookDataElement method to process events.
+
+Optionally override the EndDataCooking method if there is work to be performed after all events have been received.
+
+To expose cooked data, Create a get property and decorate it with the DataOutputAtrribute. This data will now be addressable using the DataOutputPath that combines the DataCookerPath of the Data Cooker with the property name.
+
+If a Source Data Cooker needs access to data from another Source Data Cooker, override the RequiredDataCookers property, adding a DataCookerPath for each required Source Data Cooker. Then, override BeginDataCooking and store the ICookedDataRetrieval parameter. This can be used to access the data output from the requested Source Data Cookers.
+
