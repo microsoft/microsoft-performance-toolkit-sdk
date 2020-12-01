@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+	
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
+    <Content Remove="Plugins\MockCustomDataSources\**\*.*" />
+  </ItemGroup>
+	
+
+  <ItemGroup>
+    <Compile Remove="Plugins\MockCustomDataSources\ValidFolderSchema\InstalledPlugins\1.0.0\ValidA\3.0.0\ValidSchemaA2.cs" />
+  </ItemGroup>
+	
+
+  <ItemGroup>
+    <None Include="Plugins\MockCustomDataSources\ValidFolderSchema\InstalledPlugins\1.0.0\ValidA\3.0.0\ValidSchemaA2.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\Microsoft.Performance.SDK.Runtime.NetCoreApp\Microsoft.Performance.SDK.Runtime.NetCoreApp.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Testing.SDK\Microsoft.Performance.Testing.SDK.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Plugins\MockCustomDataSources\**\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+</Project>

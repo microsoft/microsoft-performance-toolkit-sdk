@@ -62,6 +62,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
         }
 
+        public void DiscoveryStarted()
+        {
+            this.IsLoaded = false;
+        }
+
         public void DiscoveryComplete()
         {
             this.IsLoaded = true;
