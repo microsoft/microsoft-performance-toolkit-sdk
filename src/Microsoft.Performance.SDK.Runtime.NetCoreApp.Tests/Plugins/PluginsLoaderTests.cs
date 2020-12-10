@@ -101,12 +101,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                             string issue = $"ID: {codeIssue.Id}, Message: {codeIssue.GetMessage()}," +
                                 $"Location: { codeIssue.Location.GetLineSpan()}," +
                                 $"Severity: { codeIssue.Severity}";
-                            Console.WriteLine(issue);
+                            context.WriteLine(issue);
                         }
 
                         // If this Assert is hit, the SDK was likely updated to break
                         // the custom data source definitions used to test this class
-                        Assert.IsTrue(false);
+                        Assert.Fail("CustomDatasource {0} failed to compile", plugin);
                     }
                     else
                     {
@@ -445,10 +445,19 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         /// </summary>
         private static void AssertNumberCustomDataSourcesLoaded(int expected, PluginsLoader loader, params MockPluginsConsumer[] consumers)
         {
-            Assert.AreEqual(expected, loader.LoadedCustomDataSources.Count());
+            Assert.AreEqual(expected,
+                loader.LoadedCustomDataSources.Count(),
+                "The plugins loader reports having loaded {0} instead of {1} custom data sources",
+                loader.LoadedCustomDataSources.Count(),
+                expected);
             foreach (var consumer in consumers)
             {
-                Assert.AreEqual(expected, consumer.ObservedDataSources.Count);
+                Assert.AreEqual(expected,
+                    consumer.ObservedDataSources.Count,
+                    "Consumer {0} observed {1} instead of {2} custom data sources",
+                    consumer,
+                    consumer.ObservedDataSources.Count,
+                    expected);
             }
         }
 
@@ -489,9 +498,24 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                 var expected = expectedSorted[i];
                 var actual = actualSorted[i];
 
-                Assert.AreEqual(expected.Name, actual.Name);
-                Assert.AreEqual(expected.Description, actual.Description);
-                Assert.AreEqual(expected.Guid, actual.Guid);
+                Assert.AreEqual(expected.Guid,
+                    actual.Guid,
+                    "The loaded CustomDataSource at index {0} had the GUID {1} instead of {2}",
+                    i,
+                    actual.Guid,
+                    expected.Guid);
+                Assert.AreEqual(expected.Name,
+                    actual.Name,
+                    "CustomDataSource {0} was loaded with the name {1} instead of {2}",
+                    actual.Guid,
+                    actual.Name,
+                    expected.Name);
+                Assert.AreEqual(expected.Description,
+                    actual.Description,
+                    "CustomDataSource {0} was loaded with the description {1} instead of {2}",
+                    actual.Guid,
+                    actual.Description,
+                    expected.Description);
             }
         }
 
@@ -501,12 +525,20 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         ///     This means two invariants must be true:
         ///         1) <see cref="MockPluginsConsumer.ObservedDataSourcesByPluginName"/> only has one
         ///            entry for the empty string
+        ///         2) <see cref="MockPluginsConsumer.ObservedPluginVersionsByPluginName"/> is empty, since
+        ///            versions are only observed alongisde plugin names
         /// </summary>
         private void AssertNoPluginNames(MockPluginsConsumer consumer)
         {
-            Assert.AreEqual(1, consumer.ObservedDataSourcesByPluginName.Count);
-            Assert.AreEqual(0, consumer.ObservedPluginVersionsByPluginName.Count);
-            Assert.IsTrue(consumer.ObservedDataSourcesByPluginName.Keys.First() == "");
+            Assert.AreEqual(1, consumer.ObservedDataSourcesByPluginName.Count,
+                "The consumer was expected to not observe any plugin names, but it has observed" +
+                "the following plugin names: {0}", string.Join(",", consumer.ObservedDataSourcesByPluginName.Keys));
+            Assert.AreEqual(0, consumer.ObservedPluginVersionsByPluginName.Count,
+                "The consumer was expected to not observe any plugin versions, but it has observed" +
+                "the following plugin versions: {0}", string.Join(",", consumer.ObservedPluginVersionsByPluginName));
+            Assert.IsTrue(consumer.ObservedDataSourcesByPluginName.Keys.First() == "",
+                "The consumer was expected to not observe any plugin names, but it has observed" +
+                "the following plugin name: {0}", consumer.ObservedDataSourcesByPluginName.Keys.First());
         }
     }
 
