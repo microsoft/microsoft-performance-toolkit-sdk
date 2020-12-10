@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Linq;
-using Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources;
+using System.Reflection;
 
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 {
@@ -19,17 +19,18 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     ///     loading custom data sources from invalid folder schemas.
     ///     <para/>
     ///     The layout of .\MockCustomDataSources is translated 1:1 to compiled binaries
-    ///     inside of a temp folder. Each custom data sources is compiled into its own
+    ///     inside of a new folder. Each custom data sources is compiled into its own
     ///     DLL, and can be individually loaded by passing in its parent directory.
     /// </summary>
     [TestClass]
+    [DeploymentItem(@"Plugins\MockCustomDataSources\", "TestPluginsSourceCode")]
     public class PluginsLoaderTests
     {
         private const string Invalid = "InvalidFolderSchema";
 
         private const string Valid = "ValidFolderSchema";
 
-        private static string tempPath;
+        private static string compilePath;
 
         private const string AsmVersionAttrText = "using System.Reflection;\n" +
                                                   "[assembly: AssemblyVersion(\"1.0.0\")]\n" +
@@ -39,11 +40,16 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
-            // Folder in temp directory to store generated DLLs
-            tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempPath);
+            var rootDir = Path.Combine(context.DeploymentDirectory, "TestPluginsSourceCode");
 
-            var rootDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins", "MockCustomDataSources");
+            // Folder to store generated DLLs
+            compilePath = Path.Combine(context.DeploymentDirectory, "TestPluginsBinaries");
+            if (Directory.Exists(compilePath))
+            {
+                Directory.Delete(compilePath, true);
+            }
+            Directory.CreateDirectory(compilePath);
+
 
             // All references plugins need to compile
             var systemReference = MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location);
@@ -56,7 +62,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             foreach (var plugin in plugins)
             {
                 var filename = new FileInfo(Path.ChangeExtension(plugin, "dll")).Name;
-                var dllFolder = Path.Combine(tempPath, Path.GetRelativePath(rootDir, new FileInfo(plugin).Directory.FullName));
+                var dllFolder = Path.Combine(compilePath, Path.GetRelativePath(rootDir, new FileInfo(plugin).Directory.FullName));
 
                 if (!Directory.Exists(dllFolder))
                 {
@@ -172,7 +178,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         {
             (var loader, var consumer) = Setup(true);
 
-            var success = loader.TryLoadPlugin(Path.Combine(tempPath, Invalid));
+            var success = loader.TryLoadPlugin(Path.Combine(compilePath, Invalid));
             Assert.IsTrue(success);
 
             AssertNoPluginNames(consumer);
@@ -421,7 +427,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         /// </summary>
         private static string GetInvalidPath(string pluginName)
         {
-            return Path.Combine(tempPath, Invalid, pluginName);
+            return Path.Combine(compilePath, Invalid, pluginName);
         }
 
         /// <summary>
@@ -429,7 +435,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         /// </summary>
         private static string GetValidPath(string pluginName, Version pluginVersion)
         {
-            return Path.Combine(tempPath, Valid, "InstalledPlugins", "1.0.0", pluginName, pluginVersion.ToString(3));
+            return Path.Combine(compilePath, Valid, "InstalledPlugins", "1.0.0", pluginName, pluginVersion.ToString(3));
         }
 
         /// <summary>
