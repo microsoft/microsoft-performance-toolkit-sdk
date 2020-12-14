@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 {
@@ -29,6 +31,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         private const string Invalid = "InvalidFolderSchema";
 
         private const string Valid = "ValidFolderSchema";
+
+        private const string Legacy = "LegacyFolderSchema";
 
         private static string compilePath;
 
@@ -313,18 +317,73 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertObservedCDSs(expectedCDSs, consumer);
         }
 
-        /// <summary>
-        ///     Checks that every expected plugin in <paramref name="expected"/>
-        ///     was observed by <paramref name="consumer"/>
-        /// </summary>
-        private void AssertExpectedPlugins(List<Tuple<string, Version>> expected, MockPluginsConsumer consumer)
+        //
+        // Legacy schema tests
+        //
+        [TestMethod]
+        public void LegacyPluginTest()
         {
-            foreach (var plugin in expected)
+            (var loader, var consumer) = Setup(true);
+            var success = loader.TryLoadPlugin(GetLegacyPath("LegacyA"));
+            Assert.IsTrue(success);
+
+            var expectedPlugins = new List<Tuple<string, Version>>
             {
-                Assert.IsTrue(consumer.ObservedDataSourcesByPluginName.ContainsKey(plugin.Item1));
-                Assert.IsTrue(consumer.ObservedPluginVersionsByPluginName.ContainsKey(plugin.Item1));
-                Assert.IsTrue(consumer.ObservedPluginVersionsByPluginName[plugin.Item1].Contains(plugin.Item2));
-            }
+                new Tuple<string, Version>("LegacyA", null),
+            };
+            AssertExpectedPlugins(expectedPlugins, consumer);
+
+            var expectedCDSs = new Type[] { typeof(LegacySchemaA) };
+            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertLoadedCDSs(expectedCDSs, loader);
+            AssertObservedCDSs(expectedCDSs, consumer);
+        }
+
+        //
+        // Fake directory/directories tests
+        //
+        [TestMethod]
+        public void FakeDirectoryTest()
+        {
+            (var loader, var consumer) = Setup(true);
+            var success = loader.TryLoadPlugin("foo");
+            Assert.IsFalse(success);
+
+            var expectedCDSs = new Type[] { };
+            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertLoadedCDSs(expectedCDSs, loader);
+            AssertObservedCDSs(expectedCDSs, consumer);
+        }
+
+        [TestMethod]
+        public void FakeDirectoriesTest()
+        {
+            (var loader, var consumer) = Setup(true);
+            var dirs = new string[] { "foo", "bar" };
+            var success = loader.TryLoadPlugins(dirs, out var failed);
+            Assert.IsFalse(success);
+            CollectionAssert.AreEquivalent(dirs, failed.ToArray());
+
+            var expectedCDSs = new Type[] { };
+            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertLoadedCDSs(expectedCDSs, loader);
+            AssertObservedCDSs(expectedCDSs, consumer);
+        }
+
+        [TestMethod]
+        public void OneBadDirectoryTest()
+        {
+            (var loader, var consumer) = Setup(true);
+            var dirs = new string[] { GetInvalidPath("InvalidA"), "foo", GetInvalidPath("InvalidB") };
+            var success = loader.TryLoadPlugins(dirs, out var failed);
+            Assert.IsFalse(success);
+            Assert.AreEqual(1, failed.Count);
+            CollectionAssert.Contains(failed.ToArray(), "foo");
+
+            var expectedCDSs = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
+            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertLoadedCDSs(expectedCDSs, loader);
+            AssertObservedCDSs(expectedCDSs, consumer);
         }
 
         //
@@ -407,10 +466,99 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertObservedCDSs(expected1, consumer);
         }
 
+        [TestMethod]
+        public void DoubleSubscribeTest()
+        {
+            (var loader, var consumer) = Setup(true);
+            loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+
+            // Assert consumer sees first plugin
+            // Assert consumer sees InvalidA
+            var expected = new Type[] { typeof(InvalidSchemaA) };
+            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertLoadedCDSs(expected, loader);
+            AssertObservedCDSs(expected, consumer);
+
+            // Re-subscribe
+            var result = loader.Subscribe(consumer);
+            Assert.IsFalse(result, "Consumer was allowed to subscribe more than once");
+
+            // Assert observed plugins are the same
+            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertObservedCDSs(expected, consumer);
+        }
+
+        [TestMethod]
+        public void UnneededUnsubscribeTest()
+        {
+            (var loader, var consumer) = Setup(false);
+
+            var result = loader.Unsubscribe(consumer);
+
+            Assert.IsFalse(result, "Consumer was allowed to unsubscribe even though it was not subscribed");
+        }
+
+        //
+        // Concurrency sests
+        //
+
+        [TestMethod]
+        public void ConcurrentLoadTest()
+        {
+            (var loader, var consumer) = Setup(true);
+            var blockingConsumer = new BlockingPluginsConsumer();
+
+            // Load one initial plugin
+            loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+
+            // Assert consumer sees InvalidA
+            var expected0 = new Type[] { typeof(InvalidSchemaA) };
+            AssertNumberCustomDataSourcesLoaded(expected0.Length, loader, consumer);
+            AssertLoadedCDSs(expected0, loader);
+            AssertObservedCDSs(expected0, consumer);
+
+            // Subscribe the blocking consumer so that it starts to process InvalidA
+            var taskSubscribe = Task.Run(() => loader.Subscribe(blockingConsumer));
+
+            // Assert blocking consumer has not yet processed InvalidA (i.e. it's blocking)
+            Assert.AreEqual(0, blockingConsumer.ObservedDataSources.Count, "Blocking consumer observed a CDS early");
+
+            // Concurrently load a new plugin
+            var taskConcurrentLoad = Task.Run(() => loader.TryLoadPlugin(GetInvalidPath("InvalidB")));
+
+            // Assert that neither consumers has seen InvalidB yet
+            Assert.AreEqual(0, blockingConsumer.ObservedDataSources.Count, "Blocking consumer observed a CDS early");
+            Assert.AreEqual(expected0.Length, consumer.ObservedDataSources.Count, "Non-blocking consumer observed a plugin loaded while a subscribe was occuring");
+
+            // Allow InvalidA to be processed
+            blockingConsumer.ProcessOneCustomDataSource();
+            taskSubscribe.Wait();
+            Assert.IsTrue(taskSubscribe.Result, "Blocking consumer failed to subscribe");
+
+            // Assert blocking observed first plugin
+            Assert.AreEqual(expected0.Length,
+                blockingConsumer.ObservedDataSources.Count,
+                "Blocking consumer observed {0} data sources but should have observed {1}",
+                blockingConsumer.ObservedDataSources.Count,
+                expected0.Length);
+            AssertObservedCDSs(expected0, blockingConsumer);
+
+            // Allow InvalidB to be processed
+            blockingConsumer.ProcessOneCustomDataSource();
+            taskConcurrentLoad.Wait();
+            Assert.IsTrue(taskConcurrentLoad.Result, "Concurrent load failed");
+
+            // Assert both observed both plugins
+            var expected1 = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
+            AssertNumberCustomDataSourcesLoaded(expected1.Length, loader, consumer, blockingConsumer);
+            AssertLoadedCDSs(expected1, loader);
+            AssertObservedCDSs(expected1, consumer);
+        }
+
         /// <summary>
         ///     Creates the loader and consumer, subscribing the consumer if requested
         /// </summary>
-        private static ValueTuple<PluginsLoader, MockPluginsConsumer> Setup(bool subscribe)
+        private static (PluginsLoader, MockPluginsConsumer) Setup(bool subscribe)
         {
             var loader = new PluginsLoader();
             var consumer = new MockPluginsConsumer();
@@ -436,6 +584,25 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         private static string GetValidPath(string pluginName, Version pluginVersion)
         {
             return Path.Combine(compilePath, Valid, "InstalledPlugins", "1.0.0", pluginName, pluginVersion.ToString(3));
+        }
+
+        private static string GetLegacyPath(string pluginName)
+        {
+            return Path.Combine(compilePath, Legacy, CustomDataSourceConstants.CustomDataSourceRootFolderName, pluginName);
+        }
+
+        /// <summary>
+        ///     Checks that every expected plugin in <paramref name="expected"/>
+        ///     was observed by <paramref name="consumer"/>
+        /// </summary>
+        private void AssertExpectedPlugins(List<Tuple<string, Version>> expected, MockPluginsConsumer consumer)
+        {
+            foreach (var plugin in expected)
+            {
+                Assert.IsTrue(consumer.ObservedDataSourcesByPluginName.ContainsKey(plugin.Item1));
+                Assert.IsTrue(consumer.ObservedPluginVersionsByPluginName.ContainsKey(plugin.Item1));
+                Assert.IsTrue(consumer.ObservedPluginVersionsByPluginName[plugin.Item1].Contains(plugin.Item2));
+            }
         }
 
         /// <summary>
@@ -546,7 +713,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     ///     A simple plugins consumer that just keeps track of what it has seen loaded
     /// </summary>
     internal class MockPluginsConsumer
-    : IPluginsConsumer
+        : IPluginsConsumer
     {
         public Dictionary<string, List<CustomDataSourceReference>> ObservedDataSourcesByPluginName { get; }
 
@@ -561,7 +728,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             this.ObservedDataSources = new List<CustomDataSourceReference>();
         }
 
-        public void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
+        public virtual void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
         {
             var name = (pluginName != null) ? pluginName : "";
 
@@ -586,6 +753,27 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                 }
                 versions.Add(pluginVersion);
             }
+        }
+    }
+
+    /// <summary>
+    ///     A <seealso cref="MockPluginsConsumer"/> that does not return from <see cref="OnCustomDataSourceLoaded(string, Version, CustomDataSourceReference)"/>
+    ///     until <see cref="ProcessOneCustomDataSource"/> is called.
+    /// </summary>
+    internal class BlockingPluginsConsumer
+        : MockPluginsConsumer
+    {
+        private AutoResetEvent handle = new AutoResetEvent(false);
+
+        public override void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
+        {
+            handle.WaitOne();
+            base.OnCustomDataSourceLoaded(pluginName, pluginVersion, customDataSource);
+        }
+
+        public void ProcessOneCustomDataSource()
+        {
+            handle.Set();
         }
     }
 }

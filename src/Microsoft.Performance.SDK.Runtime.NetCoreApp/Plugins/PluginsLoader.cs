@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 {
@@ -53,11 +54,11 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         private readonly IDataExtensionRepositoryBuilder extensionRepository;
 
-        private readonly ICollection<IPluginsConsumer> subscribers;
+        private readonly HashSet<IPluginsConsumer> subscribers;
 
         public PluginsLoader()
         {
-            this.subscribers = new ConcurrentSet<IPluginsConsumer>();
+            this.subscribers = new HashSet<IPluginsConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(new IsolationAssemblyLoader());
             this.catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
             this.extensionRepository = new DataExtensionFactory().SingletonDataExtensionRepository;
@@ -115,6 +116,14 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         }
 
         /// <summary>
+        ///     Asynchronous version of <see cref="TryLoadPlugin(string)"/>
+        /// </summary>
+        public Task<bool> TryLoadPluginAsync(IEnumerable<string> directories)
+        {
+            return Task.Run(() => TryLoadPlugins(directories, out _));
+        }
+
+        /// <summary>
         ///     Attempts to load the plugin(s) contained within any of the given directories.
         /// </summary>
         /// <param name="directories">
@@ -160,8 +169,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
                 foreach (var source in this.catalog.PlugIns.Except(oldPlugins))
                 {
-                    var info = this.GetPluginNameAndVersion(source);
-                    this.NotifyCustomDataSourceLoaded(info.Item1, info.Item2, source);
+                    var (name, version) = this.GetPluginNameAndVersion(source);
+                    this.NotifyCustomDataSourceLoaded(name, version, source);
                 }
 
                 return failed.Count == 0;
@@ -169,39 +178,91 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         }
 
         /// <summary>
+        ///     Asynchronous version of <see cref="TryLoadPlugins(IEnumerable{string}, out IList{string})"/>
+        /// </summary>
+        public Task<(bool, IList<string>)> TryLoadPluginsAsync(IEnumerable<string> directories)
+        {
+            return Task.Run(() =>
+            {
+                var result = TryLoadPlugins(directories, out var failed);
+                return (result, failed);
+            });
+        }
+
+        /// <summary>
         ///     Registers an <see cref="IPluginsConsumer"/> to receive all future plugins, and sends all
         ///     previously loaded plugins to its <see cref="IPluginsConsumer.OnCustomDataSourceLoaded(string, CustomDataSourceReference)"/> handler.
+        ///     <para/>
+        ///     If the <paramref name="consumer"/> is already subscribed, this method does nothing.
         ///     <para/>
         ///     While the consumer is receiving all previously loaded plugins, this method blocks and
         ///     plugins cannot be loaded.
         /// </summary>
-        /// <param name="consumer">The consumer to subscribe and receive all loaded plugins</param>
-        public void Subscribe(IPluginsConsumer consumer)
+        /// <param name="consumer">
+        ///     The <see cref="IPluginsConsumer"/> to subscribe and receive all loaded plugins
+        /// </param>
+        /// <returns>
+        ///     Whether or not the <paramref name="consumer"/> is successfully subscribed. This will only
+        ///     be <c>false</c> if it is already subscribed.
+        /// </returns>
+        public bool Subscribe(IPluginsConsumer consumer)
         {
             lock (this.mutex)
             {
+                if (this.subscribers.Contains(consumer))
+                {
+                    return false;
+                }
+
                 // Manually send all the already loaded plugins to this consumer
                 foreach (var source in this.catalog.PlugIns)
                 {
-                    var info = this.GetPluginNameAndVersion(source);
-                    consumer.OnCustomDataSourceLoaded(info.Item1, info.Item2, source);
+                    var (name, version) = this.GetPluginNameAndVersion(source);
+                    consumer.OnCustomDataSourceLoaded(name, version, source);
                 }
 
                 // Subscribe to all future plugin loads
                 this.subscribers.Add(consumer);
+
+                return true;
             }
+        }
+
+        /// <summary>
+        ///     Asynchronous version of <see cref="Subscribe(IPluginsConsumer)"/>
+        /// </summary>
+        public Task<bool> SubscribeAsync(IPluginsConsumer consumer)
+        {
+            return Task.Run(() => Subscribe(consumer));
         }
 
         /// <summary>
         ///     Unregisters an <see cref="IPluginsConsumer"/> from plugins loaded in the future.
         /// </summary>
-        /// <param name="consumer"></param>
-        public void Unsubscribe(IPluginsConsumer consumer)
+        /// <param name="consumer">
+        ///     The <see cref="IPluginsConsumer"/> to unsubscribe
+        /// </param>
+        /// <returns>
+        ///     Whether or not the <paramref name="consumer"/> is successfully unsubscribed.
+        ///     This will only be <c>false</c> if it is not currently subscribed.
+        /// </returns>
+        public bool Unsubscribe(IPluginsConsumer consumer)
         {
-            this.subscribers.Remove(consumer);
+            lock (this.mutex)
+            {
+                return this.subscribers.Remove(consumer);
+            }
         }
 
-        private Tuple<string, Version> GetPluginNameAndVersion(CustomDataSourceReference cds)
+        /// <summary>
+        ///     Asynchronous version of <see cref="Unsubscribe(IPluginsConsumer)"/>
+        /// </summary>
+        public Task<bool> UnsubscribeAsync(IPluginsConsumer consumer)
+        {
+            return Task.Run(() => Unsubscribe(consumer));
+        }
+
+        private (string, Version) GetPluginNameAndVersion(CustomDataSourceReference cds)
         {
             var fileName = cds.AssemblyPath;
             Guard.NotNullOrWhiteSpace(fileName, nameof(fileName));
@@ -235,7 +296,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 pluginVersion = null;
             }
 
-            return new Tuple<string, Version>(pluginName, pluginVersion);
+            return (pluginName, pluginVersion);
         }
 
         private void NotifyCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)

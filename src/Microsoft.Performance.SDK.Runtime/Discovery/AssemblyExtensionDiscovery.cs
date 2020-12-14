@@ -216,7 +216,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
 
             watch.Stop();
-            Console.Error.WriteLine("Loaded {0} in {1}", allLoaded ? "all" : "some", watch.Elapsed);
+            Console.Error.WriteLine("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
             return allLoaded;
         }
 
