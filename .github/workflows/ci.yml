@@ -18,8 +18,8 @@ jobs:
       with:
         dotnet-version: '3.1.x'
     - name: Restore dependencies
-      run: dotnet restore "${{ env.GITHUB_WORKSPACE }}/microsoft-performance-toolkit-sdk/src/SDK.sln"
+      run: dotnet restore "${{ github.workspace }}/src/SDK.sln"
     - name: Build
-      run: dotnet build "${{ env.GITHUB_WORKSPACE }}/microsoft-performance-toolkit-sdk/src/SDK.sln" --no-restore -c Release
+      run: dotnet build "${{ github.workspace }}/src/SDK.sln" --no-restore -c Release
     - name: Test
-      run: dotnet test "${{ env.GITHUB_WORKSPACE }}/microsoft-performance-toolkit-sdk/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
+      run: dotnet test "${{ github.workspace }}/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
