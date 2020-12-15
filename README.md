@@ -1,5 +1,7 @@
 # Microsoft Performance ToolKit
 
+![Build Status](https://github.com/microsoft/microsoft-performance-toolkit-sdk/workflows/Build%20Status/badge.svg?branch=develop)
+
 Software Development Kit for the Microsoft Performance ToolKit.
 
 ## Coming Soon
