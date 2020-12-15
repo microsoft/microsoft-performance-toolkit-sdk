@@ -1,0 +1,25 @@
+name: .NET Core CI
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.x
+    - name: Restore dependencies
+      run: dotnet restore "${{ env.GITHUB_WORKSPACE }}/microsoft-performance-toolkit-sdk/src/SDK.sln"
+    - name: Build
+      run: dotnet build "${{ env.GITHUB_WORKSPACE }}/microsoft-performance-toolkit-sdk/src/SDK.sln" --no-restore -c Release
+    - name: Test
+      run: dotnet test "${{ env.GITHUB_WORKSPACE }}/microsoft-performance-toolkit-sdk/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
