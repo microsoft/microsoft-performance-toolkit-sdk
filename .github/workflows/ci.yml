@@ -12,14 +12,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout files
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
+    - name: Setup NBGV
+      uses: dotnet/nbgv@v0.4
+      with:
+        toolVersion: 3.1.91
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x'
     - name: Restore dependencies
       run: dotnet restore "${{ github.workspace }}/src/SDK.sln"
-    - name: Build
+    - name: Build solution
       run: dotnet build "${{ github.workspace }}/src/SDK.sln" --no-restore -c Release
-    - name: Test
+    - name: Run tests
       run: dotnet test "${{ github.workspace }}/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
