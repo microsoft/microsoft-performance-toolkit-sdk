@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources;
+using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -125,6 +126,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         //
 
         [TestMethod]
+        [UnitTest]
         public void SingletonInvalidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -141,6 +143,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void MultipleInvalidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -157,6 +160,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void RepeatedCDSInvalidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -178,6 +182,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void LoadRootInvalid()
         {
             (var loader, var consumer) = Setup(true);
@@ -198,6 +203,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         //
 
         [TestMethod]
+        [UnitTest]
         public void SingletonValidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -219,6 +225,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void MultipleValidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -242,6 +249,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void RepeatedValidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -270,6 +278,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void DifferentVersionsValidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -293,6 +302,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void DifferentVersionsRepeatCDSValidSchemaPlugin()
         {
             (var loader, var consumer) = Setup(true);
@@ -321,6 +331,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         // Legacy schema tests
         //
         [TestMethod]
+        [UnitTest]
         public void LegacyPluginTest()
         {
             (var loader, var consumer) = Setup(true);
@@ -343,6 +354,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         // Fake directory/directories tests
         //
         [TestMethod]
+        [UnitTest]
         public void FakeDirectoryTest()
         {
             (var loader, var consumer) = Setup(true);
@@ -356,6 +368,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void FakeDirectoriesTest()
         {
             (var loader, var consumer) = Setup(true);
@@ -371,6 +384,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void OneBadDirectoryTest()
         {
             (var loader, var consumer) = Setup(true);
@@ -391,6 +405,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         //
 
         [TestMethod]
+        [UnitTest]
         public void LateSubscribeTest()
         {
             // Defer subscribing consumer1
@@ -434,6 +449,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void UnsubscribeTest()
         {
             (var loader, var consumer) = Setup(true);
@@ -467,6 +483,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void DoubleSubscribeTest()
         {
             (var loader, var consumer) = Setup(true);
@@ -489,6 +506,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void UnneededUnsubscribeTest()
         {
             (var loader, var consumer) = Setup(false);
@@ -503,6 +521,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         //
 
         [TestMethod]
+        [UnitTest]
+        [Timeout(1000)]
         public void ConcurrentLoadTest()
         {
             (var loader, var consumer) = Setup(true);

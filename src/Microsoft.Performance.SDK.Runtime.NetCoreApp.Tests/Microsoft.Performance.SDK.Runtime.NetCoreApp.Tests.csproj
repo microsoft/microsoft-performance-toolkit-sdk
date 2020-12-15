@@ -28,6 +28,7 @@
   <ItemGroup>
 	<ProjectReference Include="..\Microsoft.Performance.SDK.Runtime.NetCoreApp\Microsoft.Performance.SDK.Runtime.NetCoreApp.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Testing.SDK\Microsoft.Performance.Testing.SDK.csproj" />
+	<ProjectReference Include="..\Microsoft.Performance.Testing\Microsoft.Performance.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>
