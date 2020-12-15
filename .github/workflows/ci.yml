@@ -19,7 +19,7 @@ jobs:
     - name: Setup NBGV
       uses: dotnet/nbgv@v0.4
       with:
-        toolVersion: 3.1.91
+        toolVersion: 3.3.37
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
