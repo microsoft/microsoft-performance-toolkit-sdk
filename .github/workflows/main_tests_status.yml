@@ -14,4 +14,4 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - uses: '${{ github.workspace }}/.github/actions/build-and-test'
+    - uses: './.github/actions/build-and-test'
