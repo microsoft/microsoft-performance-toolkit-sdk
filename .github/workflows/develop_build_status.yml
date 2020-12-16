@@ -1,0 +1,13 @@
+name: 'develop build status'
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: '${{ github.workspace }}/.github/actions/build-only'

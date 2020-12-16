@@ -1,0 +1,13 @@
+name: 'main tests status'
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: '${{ github.workspace }}/.github/actions/build-and-test'

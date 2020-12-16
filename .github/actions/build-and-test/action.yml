@@ -1,0 +1,17 @@
+name: 'Build Solution'
+description: 'Build the entire SDK solution'
+inputs:
+  dotnet-version:
+    description: 'Version of dotnet core SDK to install'
+    required: false
+    default: '3.x.1'
+  nbgv-version:
+    description: 'Version of NBGV to install'
+    required: false
+    default: 3.3.37
+runs:
+  using: "composite"
+  steps:
+    - uses: '${{ github.workspace }}/.github/actions/build-only'
+    - name: Run tests
+      run: dotnet test "${{ github.workspace }}/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
