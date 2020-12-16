@@ -5,7 +5,8 @@ on:
     branches: [ develop, main ]
 
 jobs:
-  build:
+  build-and-test:
+    name: 'Build and test'
 
     runs-on: windows-latest
 
@@ -14,4 +15,17 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - uses: './.github/actions/build-and-test'
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+    - name: Setup NBGV
+      uses: dotnet/nbgv@v0.4
+      with:
+        toolVersion: 3.3.37
+    - name: Restore dependencies
+      run: dotnet restore "${{ github.workspace }}/src/SDK.sln"
+    - name: Build solution
+      run: dotnet build "${{ github.workspace }}/src/SDK.sln" --no-restore -c Release
+    - name: Run tests
+      run: dotnet test "${{ github.workspace }}/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
