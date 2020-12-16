@@ -10,4 +10,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Checkout files
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - uses: '${{ github.workspace }}/.github/actions/build-and-test'

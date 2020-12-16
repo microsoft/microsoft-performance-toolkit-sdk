@@ -4,18 +4,14 @@ inputs:
   dotnet-version:
     description: 'Version of dotnet core SDK to install'
     required: false
-    default: '3.x.1'
+    default: '3.1.x'
   nbgv-version:
     description: 'Version of NBGV to install'
     required: false
-    default: 3.3.37
+    default: '3.3.37'
 runs:
   using: "composite"
   steps:
-    - name: Checkout files
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # avoid shallow clone so nbgv can do its work.
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
