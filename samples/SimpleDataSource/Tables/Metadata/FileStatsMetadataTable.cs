@@ -9,7 +9,7 @@ namespace SampleCustomDataSource.Tables.Metadata
     //
     // This is a sample Metadata table for .txt files
     // Metadata tables are used to expose information about the data being processed, not the actual data being processed.
-    // Metadata would be something like "number of events in the file" or "file size" or any other number of things that describes the data being processed.
+    // Metadata could be "number of events in the file," "file size," or any other number of things that describes the data being processed.
     // In this sample table, we expose three columns: File Name, Line Count and Word Count.
     //
 
@@ -20,7 +20,7 @@ namespace SampleCustomDataSource.Tables.Metadata
 
     [Table]             
     //
-    // Have the MetadataTable inherit the TableBase class
+    // Have the MetadataTable inherit the custom TableBase class
     //
     public sealed class FileStatsMetadataTable
         : TableBase
@@ -34,17 +34,17 @@ namespace SampleCustomDataSource.Tables.Metadata
             Guid.Parse("{40AF86E5-0DF8-47B1-9A01-1D6C3529B75B}"), // The GUID must be unique across all tables
             "File Stats",                                         // The MetadataTable must have a name
             "Statistics for text files",                          // The MetadataTable must have a description
-            TableDescriptor.DefaultCategory,
-            true);
+            TableDescriptor.DefaultCategory,                      // A category is optional. It useful for grouping different types of tables in the viewer's UI.
+            true);                                                // Marks this table as a metadata table
 
         //
         // Declare columns here. You can do this using the ColumnConfiguration class. 
         // It is possible to declaratively describe the table configuration as well. Please refer to our Advanced Topics Wiki for more information.
         //
         // The Column metadata describes each column in the table. 
-        // Each column must have a unique GUID and a unique name. The GUID must be unique globally; the name only unique within the table.
+        // Each column must have a unique GUID and a unique name. The GUID must be unique globally, but the name only unique within the table.
         //
-        // The UIHints provides some hints to a viewer on how to render the column. 
+        // The UIHints provides some hints to a viewer (such as WPA) on how to render the column. 
         // In this sample, we are simply saying to allocate at least 80 units of width.
         //
 

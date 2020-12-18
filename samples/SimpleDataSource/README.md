@@ -1,13 +1,15 @@
 # Introduction 
-The Performance Toolkit SDK allows for you to create AddIns to process your own data to be used by viewers like Windows Performance Analyzer (WPA). This project is a sample AddIn that you can use as a reference for creating your own AddIn. 
-It contains a Custom Data Source (CDS) that understands files with the .txt extension and a Custom Data Processor that processes simple text files with the following format:
+The Performance Toolkit SDK allows for you to create plugins to process your own data to be used by viewers like Windows Performance Analyzer (WPA). This project is a sample plugin that you can use as a reference for creating your own plugins. 
+The sample plugin contains a Custom Data Source (CDS) that understands files with the `.txt` extension and a Custom Data Processor that processes simple text files with the following format:
 
+```
 2/4/2019 9:40:00 AM, Word1 Word2 Word3 ...  
 2/4/2019 9:41:00 AM, Word4 Word5 Word6 ...  
 2/4/2019 9:42:00 AM, Word7 Word8 Word9 ...  
 2/4/2019 9:43:00 AM, Word10 Word11 Word12 ...
+```
 
-See "SampleTextFile.txt"
+See `SampleTextFile.txt`
 
 # Requirements
 1. Visual Studio 2019

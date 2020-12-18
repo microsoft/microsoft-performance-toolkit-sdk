@@ -18,7 +18,7 @@ namespace SampleCustomDataSource.Tables
     [Table]                      
 
     //
-    // Have the MetadataTable inherit the TableBase class
+    // Have the MetadataTable inherit the custom TableBase class
     //
 
     public sealed class WordTable
@@ -42,7 +42,7 @@ namespace SampleCustomDataSource.Tables
         // The Column metadata describes each column in the table. 
         // Each column must have a unique GUID and a unique name. The GUID must be unique globally; the name only unique within the table.
         //
-        // The UIHints provides some hints to a viewer on how to render the column. 
+        // The UIHints provides some hints to a viewer (such as WPA) on how to render the column. 
         // In this sample, we are simply saying to allocate at least 80 units of width.
         //
 

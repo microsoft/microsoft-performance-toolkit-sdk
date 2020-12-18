@@ -8,6 +8,7 @@ namespace SampleCustomDataSource
     // This is a sample Custom Data Source (CDS) that understands files with the .txt extension
     //
 
+    //
     // In order for a CDS to be recognized, it MUST satisfy the following:
     //  a) Be a public type
     //  b) Have a public parameterless constructor
@@ -18,8 +19,8 @@ namespace SampleCustomDataSource
 
     [CustomDataSource(
         "{F73EACD4-1AE9-4844-80B9-EB77396781D1}",  // The GUID must be unique for your Custom Data Source. You can use Visual Studio's Tools -> Create Guid… tool to create a new GUID
-        "Hello World",                             // The Custom Data Source MUST have a name
-        "A data source to say hello!")]            // The Custom Data Source MUST have a description
+        "Simple Data Source",                      // The Custom Data Source MUST have a name
+        "A data source to count words!")]          // The Custom Data Source MUST have a description
     [FileDataSource(
         ".txt",                                    // A file extension is REQUIRED
         "Text files")]                             // A description is OPTIONAL. The description is what appears in the file open menu to help users understand what the file type actually is. 
@@ -32,7 +33,7 @@ namespace SampleCustomDataSource
     // helps provide a public parameterless constructor and implement the ICustomDataSource interface
     //
 
-    public class HelloWorldCustomDataSource
+    public class SimpleCustomDataSource
         : CustomDataSourceBase
     {
         private IApplicationEnvironment applicationEnvironment;
@@ -52,12 +53,12 @@ namespace SampleCustomDataSource
             ProcessorOptions options)
         {
             //
-            // Create a new instance implementing ICustomDataProcessor here to process the specified data sources.
+            // Create a new instance of a class implementing ICustomDataProcessor here to process the specified data sources.
             // Note that you can have more advanced logic here to create different processors if you would like based on the file, or any other criteria.
             // You are not restricted to always returning the same type from this method.
             //
 
-            return new HelloWorldCustomDataProcessor(
+            return new SimpleCustomDataProcessor(
                 dataSources.Select(x => x.GetUri().LocalPath).ToArray(),
                 options,
                 this.applicationEnvironment,
@@ -68,6 +69,13 @@ namespace SampleCustomDataSource
 
         protected override bool IsFileSupportedCore(string path)
         {
+            //
+            // This method is called for every file whose filetype matches the one declared in the FileDataSource attribute. It may be useful
+            // to peek inside the file to truly determine if you can support it, especially if your CDS supports a common
+            // filetype like .txt or .csv.
+            // For this sample, we'll always return true for simplicity.
+            //
+
             return true;
         }
     }
