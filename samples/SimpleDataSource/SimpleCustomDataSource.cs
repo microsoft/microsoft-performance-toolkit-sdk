@@ -41,7 +41,12 @@ namespace SampleCustomDataSource
         protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
         {
             //
-            // Saves the given application environment into this instance
+            // Saves the given application environment into this instance. This samples does not directly use this value,
+            // but it can be used to perform various application-specific actions such as:
+            //   - presenting dialog boxes
+            //   - refreshing tables
+            //   - serializing table configurations
+            // See advanced tutorials for more information
             //
 
             this.applicationEnvironment = applicationEnvironment;

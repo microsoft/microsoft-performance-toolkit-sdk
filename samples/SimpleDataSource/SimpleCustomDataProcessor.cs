@@ -13,10 +13,14 @@ namespace SampleCustomDataSource
     //
     // This is a sample Custom Data Processor that processes simple text files.
     //
-    // Custom Data Processors are created in Custom Data Sources and are used to actually process the files.
-    // An instance of the Processor is created for each set of files you open whereas only one instance of the Custom Data Source is ever created.
+    // Custom Data Processors are created in Custom Data Sources and are used to actually process the file(s).
+    // An instance of this Processor is created for each set of files opened whereas only one instance of the Custom Data Source is ever created.
+    // Note that CustomDataProcessorBase does not require any file(s) in its constructor, so another
+    // implementation might only store/process one file per instance.
     //
     // The data processor is responsible for instantiating the proper tables based on what the user has decided to enable.
+    // To receive a callback whenever a new table is enabled, implement OnTableEnabled. This sample does not implement
+    // this callback, and assumes every table is enabled.
     //
 
     //
@@ -72,23 +76,28 @@ namespace SampleCustomDataSource
             // many disjoint tables may look at what tables are enabled in order to turn on only specific processors to avoid
             // processing everything if it doesn't have to.
             //
-            // In this sample we create a Time Stamp column that can be used for graphing. For more information on graphing, go to "Graphing" on our Wiki. Link can be found in README.md
-            //
 
+            // Timestamp relative to the first event time from all lines
             Timestamp startTime = Timestamp.MaxValue;
-            Timestamp endTime = Timestamp.MinValue;
-            DateTime firstEvent = DateTime.MinValue;
-            var contentDictionary = new Dictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>();
 
-            //
-            // In this sample, we are parsing each file in-memory inside of our ProcessAsyncCore method. It is possible to delegate
-            // the task of processing a file to a custom Parser object by extending CustomDataProcessorBaseWithSourceParser
-            // instead of CustomDataProcessorBase. See the advanced samples for more information
-            //
+            // Timestamp relative to the last event from all lines
+            Timestamp endTime = Timestamp.MinValue;
+
+            // The time of the first event from all lines
+            DateTime firstEvent = DateTime.MinValue;
+
+            // The processed data we are building
+            var contentDictionary = new Dictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>();
 
             // Used to help calculate progress
             int nFiles = this.filePaths.Length;
             var currentFile = 0;
+
+            //
+            // In this sample, we are parsing each file in-memory inside of our ProcessAsyncCore method. It is possible to delegate
+            // the task of processing a file to a custom Parser object by extending CustomDataProcessorBaseWithSourceParser
+            // instead of CustomDataProcessorBase. See the advanced samples for more information.
+            //
 
             foreach (var path in this.filePaths)
             {
@@ -102,6 +111,11 @@ namespace SampleCustomDataSource
                 foreach (var line in content)
                 {
                     var items = line.Split(new[] { ',' }, 2);
+
+                    //
+                    // Validate input. Any exceptions thrown while processing data sources bubbled up to the caller
+                    // (outside the SDK) who asked the data sources to be processed.
+                    //
 
                     if (items.Length < 2)
                     {
@@ -136,11 +150,12 @@ namespace SampleCustomDataSource
                 }
 
                 contentDictionary[path] = list.AsReadOnly();
-                this.dataSourceInfo = new DataSourceInfo(startTime.ToNanoseconds, endTime.ToNanoseconds, firstEvent.ToUniversalTime());
 
                 progress.Report(CalculateProgress(currentLine, currentFile, nLines, nFiles));
                 ++currentFile;
             }
+
+            this.dataSourceInfo = new DataSourceInfo(startTime.ToNanoseconds, endTime.ToNanoseconds, firstEvent.ToUniversalTime());
 
             this.fileContent = new ReadOnlyDictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>(contentDictionary);
 
@@ -159,6 +174,10 @@ namespace SampleCustomDataSource
 
             var type = tableDescriptor.ExtendedData["Type"] as Type;
 
+            //
+            // It is OK to not build a table in this method. The SDK keeps track of which ITableBuilders were
+            // actually built and ensures only built tables are passed along to the SDK runtime caller.
+            //
             if (type != null)
             {
                 var table = InstantiateTable(type);

@@ -15,7 +15,7 @@ namespace SampleCustomDataSource.Tables.Metadata
 
     //
     // In order for the CustomDataSourceBase to understand your metadata table, 
-    // add a MetadataTable attribute which denotes this table as metadata.
+    // pass in isMetadataTable = true in the TableDescriptor constructor for this table.
     //
 
     [Table]             

@@ -35,7 +35,7 @@ So, your CDS must do two things in its constructor:
 When it is time to process the given `IDataSource`s, the SDK will call `ProcessAsyncCore` on the instance of your CDP 
 returned by your CDS's constructor.
 
-Sometime after `ProcessAsyncCore` finishes, the SDK will call `BuildTableCore` on your CDP for each table "hooked up" to it. This
+Sometime after `ProcessAsyncCore` finishes (at least for typical SDK runtime consumers who ask the SDK to build tables only *after* asking it to process sources), the SDK will call `BuildTableCore` on your CDP for each table "hooked up" to it. This
 method receives the `TableDescriptor` of the table it must create, and is responsible for populating the `ITableBuilder` with the 
 columns that make up the table being constructed. This is most easily done by delegating the work of populating the `ITableBuilder` to an 
 instance of the class/table described by the `TableDescriptor`.

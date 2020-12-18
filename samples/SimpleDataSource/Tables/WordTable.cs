@@ -83,7 +83,7 @@ namespace SampleCustomDataSource.Tables
             }
 
             //
-            // Use Projection.Index() to get a base projection from row index to a <filename, word> tuple.
+            // Use Projection.Index() to get a base projection from row index to a <filename, time, word> tuple.
             //
 
             var baseProjection = Projection.Index(allWords);
@@ -123,7 +123,7 @@ namespace SampleCustomDataSource.Tables
             //
             //  Use the table builder to build the table. 
             //  Add and set table configuration if applicable.
-            //  Then set the row count (we have one row per file) and then add the columns using AddColumn.
+            //  Then set the row count (we have one row per word) and then add the columns using AddColumn.
             //
 
             tableBuilder.AddTableConfiguration(config)
