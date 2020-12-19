@@ -15,15 +15,15 @@ See `SampleTextFile.txt`
 1. Visual Studio 2019
 2. .NET Standard 2.0
 
-# Configuring NuGet
+# Nuget Package
 
-#### Feeds
-
-- Coming Soon!
+https://www.nuget.org/packages/Microsoft.Performance.SDK/
 
 # Instructions
 
 You can follow the instruction our Wiki page on how to create your own AddIn. You can find other topics on how to make use of the SDK including graphing, table configuration, command line options and so on.
+
+**_NOTE:_** Below links are place holders
 
 1. [Overview](https://github.com/microsoft/microsoft-performance-toolkit-sdk/wiki)
 1. [Creating your project](https://github.com/microsoft/microsoft-performance-toolkit-sdk/wiki)
