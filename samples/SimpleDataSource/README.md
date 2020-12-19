@@ -12,8 +12,8 @@ The sample plugin contains a Custom Data Source (CDS) that understands files wit
 See `SampleTextFile.txt`
 
 # Requirements
-1. Visual Studio 2019
-2. .NET Standard 2.0
+1. [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/)
+2. [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks)
 
 # Nuget Package
 
