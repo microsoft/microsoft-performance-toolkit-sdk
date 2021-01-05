@@ -5,6 +5,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -190,126 +191,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
     /// <summary>
     ///     Represents the error that occurs when an attempt is made
-    ///     to add a file for processing that no processor can handle.
+    ///     to add a Data Source for processing that no processor can handle.
     ///     This can also happen if the user requests a processor to
-    ///     process a file that it cannot process.
-    /// </summary>
-    [Serializable]
-    public class UnsupportedFileException
-        : EngineException
-    {
-        /// <inheritdoc />
-        public UnsupportedFileException() : base() { }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedFileException" />
-        ///     class for the given file.
-        /// </summary>
-        /// <param name="filePath">
-        ///     The path to the unsupported file.
-        /// </param>
-        public UnsupportedFileException(string filePath)
-            : this(filePath, (Exception)null)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedFileException" />
-        ///     class for the given file and the error that is the cause of this error.
-        /// </summary>
-        /// <param name="filePath">
-        ///     The path to the unsupported file.
-        /// </param>
-        /// <param name="inner">
-        ///     The error that is the cause of this error.
-        /// </param>
-        public UnsupportedFileException(string filePath, Exception inner)
-            : base($"The given file is not supported by any known processors", inner)
-        {
-            this.FilePath = filePath;
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedFileException" />
-        ///     class for the given file and requested data source.
-        /// </summary>
-        /// <param name="filePath">
-        ///     The path to the unsupported file.
-        /// </param>
-        /// <param name="requestedDataSource">
-        ///     The data source that was requested for the file.
-        /// </param>
-        public UnsupportedFileException(string filePath, Type requestedDataSource)
-            : this(filePath, requestedDataSource, null)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedFileException" />
-        ///     class for the given file, requested data source, and the error that is the
-        ///     cause of this error.
-        /// </summary>
-        /// <param name="filePath">
-        ///     The path to the unsupported file.
-        /// </param>
-        /// <param name="requestedDataSource">
-        ///     The data source that was requested for the file.
-        /// </param>
-        /// <param name="inner">
-        ///     The error that is the cause of this error.
-        /// </param>
-        public UnsupportedFileException(string filePath, Type requestedDataSource, Exception inner)
-            : base($"File '{filePath}' cannot be processed by '{requestedDataSource}'", inner)
-        {
-            this.FilePath = filePath;
-            this.RequestedDataSource = requestedDataSource.FullName;
-        }
-
-        /// <inheritdoc />
-        protected UnsupportedFileException(SerializationInfo info, StreamingContext context)
-        {
-            this.FilePath = info.GetString(nameof(FilePath));
-            this.RequestedDataSource = info.GetString(nameof(RequestedDataSource));
-        }
-
-        /// <summary>
-        ///     Gets the path to the file that is not supported.
-        /// </summary>
-        public string FilePath { get; }
-
-        /// <summary>
-        ///     Gets the fully qualified type name of the data source requested for
-        ///     the file. This property may be null if no data source was requested
-        ///     for the file. See <see cref="Type.FullName"/>.
-        /// </summary>
-        public string RequestedDataSource { get; }
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(FilePath), this.FilePath);
-            info.AddValue(nameof(RequestedDataSource), this.RequestedDataSource);
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            var sb = new StringBuilder(base.ToString()).AppendLine()
-                .AppendFormat("{0}: {1}", nameof(FilePath), this.FilePath);
-            if (!string.IsNullOrWhiteSpace(this.RequestedDataSource))
-            {
-                sb = sb.AppendLine()
-                    .AppendFormat("{0}: {1}", nameof(RequestedDataSource), this.RequestedDataSource);
-            }
-
-            return sb.ToString();
-        }
-    }
-
-    /// <summary>
-    ///     Represents the error that occurs when an attempt is made
-    ///     to use a data source that is unknown by the runtime.
+    ///     process a Data Source that the processor cannot process.
     /// </summary>
     [Serializable]
     public class UnsupportedDataSourceException
@@ -319,65 +203,174 @@ namespace Microsoft.Performance.Toolkit.Engine
         public UnsupportedDataSourceException() : base() { }
 
         /// <inheritdoc />
-        public UnsupportedDataSourceException(string message) : base(message) { }
+        public UnsupportedDataSourceException(string message) : base(message, null) { }
 
         /// <inheritdoc />
         public UnsupportedDataSourceException(string message, Exception inner) : base(message, inner) { }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="UnsupportedDataSourceException" />
-        ///     class for the requested data source.
+        ///     class for the given Data Source.
         /// </summary>
-        /// <param name="requestedDataSource">
-        ///     The data source that was requested.
+        /// <param name="dataSource">
+        ///     The unsupported Data Source.
         /// </param>
-        public UnsupportedDataSourceException(Type requestedDataSource)
-            : this(requestedDataSource, null)
+        public UnsupportedDataSourceException(IDataSource dataSource)
+            : this($"Data Source '{dataSource}' cannot be processed by any known Custom Data Sources.")
+        {
+            this.DataSource = dataSource.GetUri().ToString();
+            this.RequestedCustomDataSource = null;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UnsupportedDataSourceException" />
+        ///     class for the given Data Source and requested Custom Data Source.
+        /// </summary>
+        /// <param name="dataSource">
+        ///     The unsupported Data Source.
+        /// </param>
+        /// <param name="requestedDataSource">
+        ///     The Custom Data Source that was requested for the file.
+        /// </param>
+        public UnsupportedDataSourceException(IDataSource dataSource, Type requestedCustomDataSource)
+            : this(dataSource, requestedCustomDataSource, null)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedFileException" />
-        ///     class for the requested data source and the error that is the
+        ///     Initializes a new instance of the <see cref="UnsupportedDataSourceException" />
+        ///     class for the given Data Source, requested Custom Data Source, and the error that is the
         ///     cause of this error.
         /// </summary>
+        /// <param name="dataSource">
+        ///     The unsupported Data Source.
+        /// </param>
         /// <param name="requestedDataSource">
-        ///     The data source that was requested.
+        ///     The Custom Data Source that was requested for the Data Source.
         /// </param>
         /// <param name="inner">
         ///     The error that is the cause of this error.
         /// </param>
-        public UnsupportedDataSourceException(Type requestedDataSource, Exception inner)
-            : base($"Data source '{requestedDataSource}' is unknown", inner)
+        public UnsupportedDataSourceException(IDataSource dataSource, Type requestedCustomDataSource, Exception inner)
+            : base($"Data Source '{dataSource}' cannot be processed by '{requestedCustomDataSource}'", inner)
         {
-            this.RequestedDataSource = requestedDataSource.FullName;
+            this.DataSource = dataSource.GetUri().ToString();
+            this.RequestedCustomDataSource = requestedCustomDataSource?.FullName ?? string.Empty;
         }
 
         /// <inheritdoc />
         protected UnsupportedDataSourceException(SerializationInfo info, StreamingContext context)
         {
-            this.RequestedDataSource = info.GetString(nameof(RequestedDataSource));
+            this.DataSource = info.GetString(nameof(DataSource));
+            this.RequestedCustomDataSource = info.GetString(nameof(RequestedCustomDataSource));
         }
 
         /// <summary>
-        ///     Gets the fully qualified type name of the data source requested for
-        ///     the file. This property may be null if no data source was requested
-        ///     for the file. See <see cref="Type.FullName"/>.
+        ///     Gets the URI of the requested Data Source.
         /// </summary>
-        public string RequestedDataSource { get; }
+        public string DataSource { get; }
+
+        /// <summary>
+        ///     Gets the fully qualified type name of the Custom Data Source requested for
+        ///     the Data Source. This property may be null if no Custom Data Source was requested
+        ///     for the Data Source. See <see cref="Type.FullName"/>.
+        /// </summary>
+        public string RequestedCustomDataSource { get; }
 
         /// <inheritdoc />
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue(nameof(RequestedDataSource), this.RequestedDataSource);
+            info.AddValue(nameof(DataSource), this.DataSource);
+            info.AddValue(nameof(RequestedCustomDataSource), this.RequestedCustomDataSource);
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var sb = new StringBuilder(base.ToString()).AppendLine()
+                .AppendFormat("{0}: {1}", nameof(DataSource), this.DataSource);
+            if (!string.IsNullOrWhiteSpace(this.RequestedCustomDataSource))
+            {
+                sb = sb.AppendLine()
+                    .AppendFormat("{0}: {1}", nameof(RequestedCustomDataSource), this.RequestedCustomDataSource);
+            }
+
+            return sb.ToString();
+        }
+    }
+
+    /// <summary>
+    ///     Represents the error that occurs when an attempt is made
+    ///     to use a Custom Data Source that is unknown by the runtime.
+    /// </summary>
+    [Serializable]
+    public class UnsupportedCustomDataSourceException
+        : EngineException
+    {
+        /// <inheritdoc />
+        public UnsupportedCustomDataSourceException() : base() { }
+
+        /// <inheritdoc />
+        public UnsupportedCustomDataSourceException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public UnsupportedCustomDataSourceException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UnsupportedCustomDataSourceException" />
+        ///     class for the requested Custom Data Source.
+        /// </summary>
+        /// <param name="requestedCustomDataSource">
+        ///     The Custom Data Source that was requested.
+        /// </param>
+        public UnsupportedCustomDataSourceException(Type requestedCustomDataSource)
+            : this(requestedCustomDataSource, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UnsupportedDataSourceException" />
+        ///     class for the requested data source and the error that is the
+        ///     cause of this error.
+        /// </summary>
+        /// <param name="requestedCustomDataSource">
+        ///     The Custom Data Source that was requested.
+        /// </param>
+        /// <param name="inner">
+        ///     The error that is the cause of this error.
+        /// </param>
+        public UnsupportedCustomDataSourceException(Type requestedCustomDataSource, Exception inner)
+            : base($"Data source '{requestedCustomDataSource}' is unknown", inner)
+        {
+            this.RequestedCustomDataSource = requestedCustomDataSource.FullName;
+        }
+
+        /// <inheritdoc />
+        protected UnsupportedCustomDataSourceException(SerializationInfo info, StreamingContext context)
+        {
+            this.RequestedCustomDataSource = info.GetString(nameof(RequestedCustomDataSource));
+        }
+
+        /// <summary>
+        ///     Gets the fully qualified type name of the Custom Data Source requested for
+        ///     the file. This property may be null if no Custom Data Source was requested
+        ///     for the file. See <see cref="Type.FullName"/>.
+        /// </summary>
+        public string RequestedCustomDataSource { get; }
+
+        /// <inheritdoc />
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(RequestedCustomDataSource), this.RequestedCustomDataSource);
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
             return new StringBuilder(base.ToString()).AppendLine()
-                .AppendFormat("{0}: {1}", nameof(RequestedDataSource), this.RequestedDataSource)
+                .AppendFormat("{0}: {1}", nameof(RequestedCustomDataSource), this.RequestedCustomDataSource)
                 .ToString();
         }
     }
@@ -406,7 +399,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedFileException" />
+        ///     Initializes a new instance of the <see cref="UnsupportedDataSourceException" />
         ///     class for the given file and the error that is the cause of this error.
         /// </summary>
         /// <param name="filePath">

@@ -65,6 +65,34 @@ namespace Microsoft.Performance.Testing
         }
 
         /// <summary>
+        ///     Gets the value of the attribute with the given name.
+        /// </summary>
+        /// <param name="element">
+        ///     The element to interrogate.
+        /// </param>
+        /// <param name="attributeName">
+        ///     The name of the element's attribute whose value is to be retrieved.
+        /// </param>
+        /// <param name="value">
+        ///     Receives the value of the attribute, if the attribute exists; null otherwise.
+        /// </param>
+        /// <returns>
+        ///     true if the attribute existed and was retrieved; false otherwise.
+        /// </returns>
+        public static bool TryGetAttributeValueBool(this XElement element, string attributeName, out bool value)
+        {
+            value = false;
+            var attribute = element.Attributes().SingleOrDefault(x => x.Name.LocalName == attributeName);
+            if (attribute == null)
+            {
+                return false;
+            }
+
+            var rawValue = attribute.Value;
+            return bool.TryParse(rawValue, out value);
+        }
+
+        /// <summary>
         ///     Gets the children of the given element with the given name.
         /// </summary>
         /// <param name="element">

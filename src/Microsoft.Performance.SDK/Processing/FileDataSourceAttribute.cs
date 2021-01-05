@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Attribute to mark a custom data source implementation as processing
     ///     files of a specific type. This is used to instruct callers to route files
-    ///     with a given extension to the decorated custom data source for processing.
+    ///     with a given extension to the decorated Custom Data Source for processing.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class FileDataSourceAttribute
@@ -55,14 +55,11 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="description"/> is whitespace.
         /// </exception>
         public FileDataSourceAttribute(string fileExtension, string description)
+            : base(description)
         {
-            // todo: do we want to support files that do not
-            // have file extensions? How would these be denoted?
             Guard.NotNullOrWhiteSpace(fileExtension, nameof(fileExtension));
-            Guard.NotNullOrWhiteSpace(description, nameof(description));
 
             this.FileExtension = fileExtension.TrimStart('.');
-            this.Description = description;
         }
 
         /// <summary>
@@ -70,18 +67,11 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public string FileExtension { get; }
 
-        /// <summary>
-        ///     Gets the description of the file type.
-        /// </summary>
-        public string Description { get; }
-
         /// <inheritdoc />
         public bool Equals(FileDataSourceAttribute other)
         {
-            return base.Equals(other ) &&
-                !ReferenceEquals(other, null) &&
-                this.FileExtension.Equals(other.FileExtension) &&
-                this.Description.Equals(other.Description);
+            return base.Equals(other) &&
+                this.FileExtension.Equals(other.FileExtension);
         }
 
         /// <inheritdoc />
@@ -95,8 +85,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             return HashCodeUtils.CombineHashCodeValues(
                 base.GetHashCode(),
-                this.FileExtension.GetHashCode(),
-                this.Description.GetHashCode());
+                this.FileExtension.GetHashCode());
         }
 
         /// <inheritdoc />
@@ -110,6 +99,67 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             return toString.ToString();
+        }
+    }
+
+    /// <summary>
+    ///     Attribute to mark a custom data source implementation as processing
+    ///     files that do not have extensions.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    public sealed class ExtensionlessFileDataSourceAttribute
+        : DataSourceAttribute,
+          IEquatable<FileDataSourceAttribute>
+    {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="FileDataSourceAttribute"/>
+        ///     class.
+        /// </summary>
+        public ExtensionlessFileDataSourceAttribute()
+            : this("No description.")
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="FileDataSourceAttribute"/>
+        ///     class.
+        /// </summary>
+        /// <param name="description">
+        ///     A description of the file type exposed by this attribute.
+        /// </param>
+        /// <exception cref="System.ArgumentException">
+        ///     <paramref name="description"/> is whitespace.
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="description"/> is null.
+        /// </exception>
+        public ExtensionlessFileDataSourceAttribute(string description)
+            : base(description)
+        {
+        }
+
+        /// <inheritdoc />
+        public bool Equals(FileDataSourceAttribute other)
+        {
+            return base.Equals(other);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as FileDataSourceAttribute);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.Description;
         }
     }
 }

@@ -43,9 +43,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public void TryCreateReferenceForMissingDataSourceAttributeFails()
+        public void TryCreateReferenceForMissingDataSourceAttributeSucceeds()
         {
-            RunCreateFailTest(typeof(CdsWithoutDataSourceAttribute));
+            RunCreateSuccessTest(typeof(CdsWithoutDataSourceAttribute));
         }
 
         [TestMethod]
@@ -92,6 +92,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
+        public void TryCreateReferenceMultipleDataSourcesSucceeds()
+        {
+            RunCreateSuccessTest(typeof(MultiDataSourceCds));
+        }
+
+        [TestMethod]
+        [UnitTest]
         public void CloneClones()
         {
             var result = CustomDataSourceReference.TryCreateReference(
@@ -104,7 +111,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             Assert.IsNotNull(clone);
             Assert.AreEqual(reference.AssemblyPath, clone.AssemblyPath);
-            Assert.AreEqual(reference.DataSource, clone.DataSource);
+            CollectionAssert.AreEquivalent(reference.DataSources.ToList(), clone.DataSources.ToList());
             Assert.AreEqual(reference.Description, clone.Description);
             Assert.AreEqual(reference.Guid, clone.Guid);
             Assert.AreEqual(reference.Name, clone.Name);
@@ -124,10 +131,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsNotNull(reference);
 
             var metadata = type.GetCustomAttribute<CustomDataSourceAttribute>();
-            var dataSource = type.GetCustomAttribute<DataSourceAttribute>();
+            var dataSources = type.GetCustomAttributes<DataSourceAttribute>();
             var tables = ((ICustomDataSource)Activator.CreateInstance(type)).DataTables;
             Assert.IsNotNull(metadata);
-            Assert.IsNotNull(dataSource);
+            Assert.IsNotNull(dataSources);
             Assert.IsNotNull(tables);
 
             Assert.AreEqual(type.Assembly.Location, reference.AssemblyPath);
@@ -135,7 +142,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(metadata.Guid, reference.Guid);
             Assert.AreEqual(metadata.Name, reference.Name);
             Assert.AreEqual(type, reference.Type);
-            Assert.AreEqual(dataSource, reference.DataSource);
+            CollectionAssert.AreEquivalent(dataSources.ToList(), reference.DataSources.ToList());
             Assert.AreEqual(tables.Count(), reference.AvailableTables.Count());
             Assert.IsTrue(tables.All(x => reference.AvailableTables.Contains(x)));
         }
@@ -191,12 +198,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public bool IsFileSupported(string path)
+            public void SetLogger(ILogger logger)
             {
                 throw new NotImplementedException();
             }
 
-            public void SetLogger(ILogger logger)
+            public bool IsDataSourceSupported(IDataSource dataSource)
             {
                 throw new NotImplementedException();
             }
@@ -243,12 +250,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public bool IsFileSupported(string path)
+            public void SetLogger(ILogger logger)
             {
                 throw new NotImplementedException();
             }
 
-            public void SetLogger(ILogger logger)
+            public bool IsDataSourceSupported(IDataSource dataSource)
             {
                 throw new NotImplementedException();
             }
@@ -306,7 +313,67 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public bool IsFileSupported(string path)
+            public void SetLogger(ILogger logger)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool IsDataSourceSupported(IDataSource dataSource)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
+        [FileDataSource("ext")]
+        [ExtensionlessFileDataSource]
+        [DirectoryDataSource]
+        public class MultiDataSourceCds
+            : ICustomDataSource
+        {
+            private static readonly TableDescriptor[] tableDescriptors = new[]
+            {
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+            };
+
+            public MultiDataSourceCds()
+            {
+                this.DataTables = tableDescriptors;
+            }
+
+            public IEnumerable<TableDescriptor> DataTables { get; }
+
+            public IEnumerable<TableDescriptor> MetadataTables { get; }
+
+            public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
+
+            public ICustomDataProcessor CreateProcessor(IDataSource dataSource, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
+            public CustomDataSourceInfo GetAboutInfo()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Stream GetSerializationStream(SerializationSource source)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool IsDataSourceSupported(IDataSource dataSource)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
             {
                 throw new NotImplementedException();
             }

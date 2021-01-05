@@ -34,12 +34,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
                 this.MetadataTables);
         }
 
-        protected override bool IsFileSupportedCore(
-            string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
         {
             return StringComparer.OrdinalIgnoreCase.Equals(
                 Extension,
-                Path.GetExtension(path));
+                Path.GetExtension(dataSource.GetUri().LocalPath));
         }
 
         protected override void SetApplicationEnvironmentCore(

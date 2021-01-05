@@ -26,6 +26,28 @@ namespace Microsoft.Performance.SDK.Tests
         }
 
         [TestMethod]
+        public void IOTest()
+        {
+            const string file = "test.txt";
+            const string dir = "test_dir";
+            try
+            {
+                System.IO.File.WriteAllText(file, "test");
+                System.IO.Directory.CreateDirectory(dir);
+
+                Console.Out.WriteLine(System.IO.File.Exists(file));
+                Console.Out.WriteLine(System.IO.File.Exists(dir));
+                Console.Out.WriteLine(System.IO.Directory.Exists(file));
+                Console.Out.WriteLine(System.IO.Directory.Exists(dir));
+            }
+            finally
+            {
+                System.IO.File.Delete(file);
+                System.IO.Directory.Delete(dir);
+            }
+        }
+
+        [TestMethod]
         [UnitTest]
         public void NoTablesInAssemblyLeavesEmptyProperties()
         {
@@ -453,7 +475,7 @@ namespace Microsoft.Performance.SDK.Tests
                 return this.ProcessorToReturn;
             }
 
-            protected override bool IsFileSupportedCore(string path)
+            protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return true;
             }

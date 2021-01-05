@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -7,27 +7,26 @@ using System.IO;
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
-    ///     Represents a file backed data source for process.
+    ///     Represents a directory backed data source for processing.
     /// </summary>
-    public class FileDataSource
+    public class DirectoryDataSource
         : DataSource
     {
         /// <summary>
-        ///     Initializes a new <see cref="FileDataSource"/> with the specified file path.
+        ///     Initializes a new <see cref="DirectoryDataSource"/> with the specified
+        ///     directory path.
         /// </summary>
         /// <param name="path">
-        ///     The path to the file.
+        ///     The path to the directory.
         /// </param>
-        public FileDataSource(string path)
+        public DirectoryDataSource(string path)
             : base(new Uri(Path.GetFullPath(path)))
         {
-            Guard.NotNullOrWhiteSpace(path, nameof(path));
-
             this.FullPath = this.GetUri().LocalPath;
         }
 
         /// <summary>
-        ///     Gets the full path of the file.
+        ///     Gets the full path of the directory.
         /// </summary>
         public string FullPath { get; }
 
@@ -44,8 +43,8 @@ namespace Microsoft.Performance.SDK.Runtime
                 return true;
             }
 
-            return other is FileDataSource fds &&
-                this.FullPath.Equals(fds.FullPath);
+            return other is DirectoryDataSource dds &&
+                this.FullPath.Equals(dds.FullPath);
 
         }
 

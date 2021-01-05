@@ -88,4 +88,35 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.AreEqual(extension, sut.FileExtension);
         }
     }
+
+    [TestClass]
+    public class ExtensionlessFileDataSourceAttributeTests
+    {
+        [TestMethod]
+        [UnitTest]
+        public void NullDescriptionThrows()
+        {
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new ExtensionlessFileDataSourceAttribute(null));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhitespaceDescriptionThrows()
+        {
+            Assert.ThrowsException<ArgumentException>(
+                () => new ExtensionlessFileDataSourceAttribute(string.Empty));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void DescriptionIsSetWhenProvided()
+        {
+            var description = "This is a test.";
+
+            var sut = new ExtensionlessFileDataSourceAttribute(description);
+
+            Assert.AreEqual(description, sut.Description);
+        }
+    }
 }
