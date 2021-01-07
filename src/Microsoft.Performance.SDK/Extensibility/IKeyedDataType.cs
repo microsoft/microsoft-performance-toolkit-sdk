@@ -12,7 +12,6 @@ namespace Microsoft.Performance.SDK.Extensibility
     ///     A type that acts a key identifier for the data.
     /// </typeparam>
     public interface IKeyedDataType<TKey>
-        : IComparable<TKey>
     {
         /// <summary>
         ///     The type returned from this is used to determine which <see cref="IDataCooker{T,TContext,TKey}"/> will receive this data for processing.
