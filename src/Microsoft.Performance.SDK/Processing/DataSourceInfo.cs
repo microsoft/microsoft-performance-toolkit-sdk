@@ -68,7 +68,8 @@ namespace Microsoft.Performance.SDK.Processing
         ///     the beginning of the wallclock time spanned by this data source.
         /// </param>
         /// <param name="firstEventWallClockUtc">
-        ///     The UTC wallclock time of the first data point, not relative to anything.
+        ///     The UTC wallclock time of the first data point, i.e. the absolute time
+        ///     of the data point referred to in <paramref name="firstEventTimestampNanoseconds"/>.
         /// </param>
         /// <exception cref="System.ArgumentOutOfRangeException">
         ///     <paramref name="firstEventTimestampNanoseconds"/> is less than zero (0.)
