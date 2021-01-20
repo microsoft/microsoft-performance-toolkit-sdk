@@ -12,39 +12,7 @@ Every Custom Data source has to advertise the file types (data sources) are supp
 The UI Driver (WPA is recommended) dynamically loads each Custom Data Source at runtime through the SDK.
 
 
-# Custom Data Source Important Functions
-
-Below are some implementation details, however for more in depth information please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
-
-
-To implement a Custom Data Source, there needs to be a class for the interface.
-Additionally, make sure to decorate your class with the custom data source attribute. If you're custom data source is meant to open files, decorate it with the file data source attribute, specifying the file type that it supports.
-
- This class must ensure that functions IsFileSupportedCore and CreateProcessorCore have been implemented. 
- 
- The IsFileSupportedCore function below arbitrarily returns true, however, this function can be used to ensure that the data source is properly formatted as the developer expects it to be. 
- The CreateProcessorCore function below would return a Data Processor which implements the logic for building tables.
-
-```
-
-[CustomDataSource(…)]
-[FileDataSource(".ctf", “Common Trace Format")]
-public class MyCds : CustomDataSourceBase
-{
-  protected override bool IsFileSupportedCore(string path)
-  {
-    return true;
-  }
-
-  protected override ICustomDataProcessor CreateProcessorCore(…)
-  {
-    return new MyDataProcessor(…);
-  }
-
-  …
-}
-
-```
+For implementation details, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
 
 
 # Next Steps
