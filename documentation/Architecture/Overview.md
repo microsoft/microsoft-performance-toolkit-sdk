@@ -2,11 +2,11 @@
 
 This document outlines the architecture of the Microsoft Performance Toolkit SDK.
 
-For more detailed information on how to create your own project using the SDK, please view [Creating your own project](./Using-the-SDK/Creating-your-project.md). 
+For more detailed information on how to create your own project using the SDK, please view [Creating your own project](../Using-the-SDK/Creating-your-project.md). 
 
-
-For an example of a custom data source, please view [Custom Data Source Example](../samples/SimpleDataSource/SimpleCustomDataSource.cs).
-For an example of a custom data processor, please view [Custom Data Processor Example](../samples/SimpleDataSource/SimpleCustomDataProcessor.cs). 
+Examples:
+- [Custom Data Source Example](../../samples/SimpleDataSource/SimpleCustomDataSource.cs).
+- [Custom Data Processor Example](../../samples/SimpleDataSource/SimpleCustomDataProcessor.cs). 
 
 
 # Microsoft Performance Toolkit SDK
@@ -15,11 +15,8 @@ The Microsoft Performance Toolkit SDK was built to empower users to analyze any 
 Below is a brief overview of the structure of the SDK.
 
 
+![](.attachments/FileOpenOverview.png)
 
-
-![](./Architecture/.attachments/FileOpenOverview.png)
-
-Discuss how WPA, SDK, CDS
 
 # Driver
 
@@ -29,12 +26,12 @@ We recommend using Windows Performance Analyzer (WPA) to interact with the data 
 
 # SDK
 
-The SDK is primarily responsible for building relevant tables and graphs. Using logic from the [Data Processor](./Architecture/The-Data-Processing-Pipeline.md), the SDK creates custom tables and/or graphs.
+The SDK is primarily responsible for building relevant tables and graphs. Using plugin logic from the [Data Processor](./The-Data-Processing-Pipeline.md), the SDK creates custom tables and/or graphs.
 
 
 # Custom Data Source
 
-[Architecture/The Custom Data Source](./Architecture/The-Custom-Data-Source-Model.md) is a native binary which can parse the Data Source. A Custom Data Source (CDS) advertises the data source which it can parse.
+[Architecture/The Custom Data Source](.The-Custom-Data-Source-Model.md) is a native binary which can parse the Data Source. A Custom Data Source (CDS) advertises the data source which it can parse.
 If the relevant binaries exist, the CDS has the logic for creating tables from the data source in a . 
 One or more Custom Data Sources is a plugin. Plugins are compiled into binaries which are loaded into the SDK to handle table building.
 
