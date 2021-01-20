@@ -1,19 +1,19 @@
-# Abstract
+# Creating an SDK Plugin C# Project
 
 This document outlines how to use the Performance ToolKit SDK (SDK) to create
-a Plugin. A Plugin can be used for processing trace files to be used by
+an SDK plugin. A plugin can be used for processing trace files to be used by
 automation, trace extractors, or viewers such as Windows Performance Analyzer
 (WPA). This document will cover:
 1) Requirements
 2) Creating your project
-3) Configuring your project to launch WPA with your AddIn under a debugger
+3) Configuring your project to launch WPA with your plugin under a debugger
 
 For simplicity, this section will assume you are using Visual Studio 2019. The instructions may be adapted for other editors / IDEs.
 
 # Requirements
 
-1) Visual Studio 2019
-2) .NET Standard 2.1
+1. [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/)
+2. [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks)
 
 ## Visual Studio 2019
 
@@ -27,7 +27,7 @@ Install the version you desire. We recommend _Enterprise 2019_
 4) Click Install
 5) You may have to restart your computer when installation finishes.
 
-## .NET Standard 2.1
+## .NET Standard 2.0
 
 If you installed Visual Studio 2019 based on the above instructions, then you are good to go. Otherwise,
 
@@ -39,9 +39,9 @@ If you installed Visual Studio 2019 based on the above instructions, then you ar
 
 ## NuGet Feeds
 
-See [here](/Overview#configuring-visual-studio) for details on configuring NuGet in Visual Studio 2019.
+TODO: add VS instructions here
 
-# Creating Your Project
+# Creating the Project
 
 1) Launch Visual Studio 2019
 2) Click "Create new project"

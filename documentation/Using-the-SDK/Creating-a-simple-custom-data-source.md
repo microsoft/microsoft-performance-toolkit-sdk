@@ -1,9 +1,11 @@
-# Plugin Creation for Performance SDK
+# Creating a Simple Custom Data Source
+
+TODO: make this file more in-depth
 
 An SDK plugin consists of one or more custom data sources (CDSs). Each CDS utilizes the SDK 
 to create a data processing pipeline for any files that the CDS supports. It also acts as the 
 entry point for the SDK to discover and utilizes these data pipelines. A standard CDS will utilize 
-a custom data processor (CDP) to process the data sources (files) that the SDK runtime provides it.
+a custom data processor (CDP) to process the data sources (typically files) that the SDK runtime provides it.
 A plugin may also define tables that get utilized by viewers such as Windows Performance Analyzer (WPA) 
 to display the processed data in an organized, interactable collection of rows. Tables are discovered 
 and passed into CDPs by the SDK runtime.
@@ -11,14 +13,16 @@ and passed into CDPs by the SDK runtime.
 The SDK also supports advanced data processing pipelines through data cookers and extensions, 
 but these topics will be covered in the advanced tutorials (still to come!).
 
-## Implement a Simple Data Source
+## Corresponding Sample
+Refer to [/samples/SimpleDataSource](../../samples/SimpleDataSource) for source code that implements 
+the steps outlined in this file.
 
-Sample source code: `./SimpleDataSource`
+## Implement a Simple Data Source
 
 To create a simple data source, perform the following:
 
-1) Create a public class that implements the abstract class `CustomDataSourceBase`. This is your custom data source (CDS).
-2) Create a public class that implements the abstract class `CustomDataProcessorBase`. This your custom data processor (CDP).
+1) Create a public class that extends the abstract class `CustomDataSourceBase`. This is your custom data source (CDS).
+2) Create a public class that extends the abstract class `CustomDataProcessorBase`. This your custom data processor (CDP).
 3) Create one or more data tables classes. These classes must:
    - Be public and static.
    - Be decorated with `TableAttribute`.
