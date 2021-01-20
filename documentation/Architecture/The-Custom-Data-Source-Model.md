@@ -1,38 +1,66 @@
 # The Custom Data Source Model
 
+Custom Data Sources are containerized units with instructions on processing the data sources it advertises as supporting, and uses Data Processors to return 0 or more tables back to the SDK
 
-** INSERT IMAGES AND CLEAN UP LANGUAGE ** 
+The Custom Data Source Model allows developers to use any arbitrary data source with the SDK to build desired tables using plugins. 
+A plugin is one or more Custom Data Sources compiled as a package of binaries for the SDK to read.
 
-link to sample folder / real world maybe (LTTng)  ? 
 
+![](.attachments/CustomDataSource.png)
 
-# CUstom Data Source Model
-
-So each custom data source from an implementation, or sorry from an interface perspective, has to do two things. The first thing it does is advertise the data sources or file types that the data source to custom data source contains logic for, and then it needs to implement the logic for creating tables from those data sources. So it's like like we saw before the extra custom data source says it processes ETL's and it can create the tables.
-Or you feel file.
-The bare basics you only need to utilize the SDK.
-And Leslie, each custom data sources dynamically loaded at runtime by the SDK driver. So the piece example WPA.
-And a little bit terminology. One or more of these custom data sources make up a plugin and plugins are compiled into binaries which later get loaded again dynamically into the SDK.
-And this is really mission accomplished, because this means that plugins allow analysts to utilize SDK. Sorry to utilized MPA for arbitrary data sources by making custom data source is specific to the files or data sources they want to process. So yeah, mission accomplished.
-OK, so now I want to go into a little bit of how do you make one of these custom data sources and we're going to look at this. I'm at a high level and will deep dive into a real live example.
-
+Every Custom Data source has to advertise the file types (data sources) are supported. They also contain logic for data processors which creates tables from the data source.
+The UI Driver (WPA is recommended) dynamically loads each Custom Data Source at runtime through the SDK.
 
 
 # Custom Data Source Important Functions
 
-So the entry point for every custom data source is going to be a class that implements the custom data source interface. One week implement interface is to extend the custom data source based abstract class at the SDK provides. Additionally, if you do one more thing which is to decorate your class with the custom data source attribute.
-And then if you're custom data source is meant to open files, you decorate it with the file data source attribute, specifying the file type that it supports.
-Then from the interface perspective, your custom data source needs to implement two methods. The first is. This is file supported method, which will take in a path for a file that has the extension you support and you need to return whether or not you actually can support that file. For proprietary format you can probably just return true here, but for example, if you're if you're saying you can process adapt file well, you might want to look at the first few lines and make sure the file is actually something you know how to deal with.
-The second method is the create processor core method and this needs to return to class that implements the I custom Data processor interface. And as you might expect from the name, what the custom data processor does is. It contains all the logic for actually dealing with your data source and making tables.
-So in this example here returning a new instance of what I named my data processor. So now we'll take a look at how do we make these data processors?
+Below are some implementation details, however for more in depth information please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
 
 
+To implement a Custom Data Source, there needs to be a class for the interface.
+Additionally, make sure to decorate your class with the custom data source attribute. If you're custom data source is meant to open files, decorate it with the file data source attribute, specifying the file type that it supports.
 
-Each CustomDataSource
-	Advertises the file types (data sources) for which it contains logic
-	Implements logic for creating tables from opened files (data sources)
-	Is created entirely using the Performance Toolkit SDK
-	Is dynamically loaded at runtime by the SDK driver (WPA)
-One or more CDS constitute a plugin
-Plugins are compiled into binaries which later get loaded into the SDK
-Plugins allow analysts to utilize WPA for arbitrary data sources. Mission accomplished!
+ This class must ensure that functions IsFileSupportedCore and CreateProcessorCore have been implemented. 
+ 
+ The IsFileSupportedCore function below arbitrarily returns true, however, this function can be used to ensure that the data source is properly formatted as the developer expects it to be. 
+ The CreateProcessorCore function below would return a Data Processor which implements the logic for building tables.
+
+```
+
+[CustomDataSource(…)]
+[FileDataSource(".ctf", “Common Trace Format")]
+public class MyCds : CustomDataSourceBase
+{
+  protected override bool IsFileSupportedCore(string path)
+  {
+    return true;
+  }
+
+  protected override ICustomDataProcessor CreateProcessorCore(…)
+  {
+    return new MyDataProcessor(…);
+  }
+
+  …
+}
+
+```
+
+
+# Next Steps
+
+To best understand how the SDK works and how to develop SDK plugins, it is recommended to read documentation in the following order:
+1) [Architecture/Overview](./Architecture/Overview.md) to understand at a high level the various system the SDK provides
+2) [Architecture/The Custom Data Source Model](./Architecture/The-Custom-Data-Source-Model.md) to understand how the SDK allows developers to implement 
+logic for processing arbitrary data sources
+3) [Architecture/The Data Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
+can be used by tables
+4) [Architecture/Data Extensions](./Architecture/Data-Extensions.md) to understand how data involved in data processing pipelines can be used by 
+other plugins
+5) [Using the SDK/Creating an SDK Plugin C# Project](Using-the-SDK/Creating-your-project.md) to get your developer environment ready to create an SDK plugin
+6) [Using the SDK/Creating a Simple Custom Data Source](Using-the-SDK/Creating-a-simple-custom-data-source.md) to see how to create a basic plugin that can 
+take in a specific data source and output structured tables
+7) [Using the SDK/Creating a Data Processing Pipeline](Using-the-SDK/Creating-a-pipeline.md) to see how to create a data processing pipeline that 
+exposes data that can be consumed by your tables and other plugins
+8) [Using the SDK/Creating an Extended Table](Using-the-SDK/Creating-an-extended-table.md) to see how to use data cookers to obtain the data to display 
+inside of a table
