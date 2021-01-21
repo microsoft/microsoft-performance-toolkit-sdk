@@ -14,7 +14,7 @@ A Data Processor contains Source Parsers and a Data Cookers.
 
 # Source Parser
 
-The Source Parser is created by a CDS and used by the Data processor to:
+The Source Parser is bound to a procesor which is created by a CDS in order to:
 * read in raw data from the data source 
 * create a standardized data format
 
