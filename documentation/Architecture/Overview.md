@@ -45,25 +45,30 @@ If the relevant binaries exist, the CDS has the logic for creating tables from t
 One or more Custom Data Sources is a plugin. Plugins are compiled into binaries which are loaded into the SDK to handle table building.
 
 <details>
-  <summary>Custom Data Source Model</summary>
-  ## The Custom Data Source Model
 
-    A Custom Data Source is a containerized unit with instructions on how to read a custom data source.
-    Every Custom Data Source has to advertise the supported file types (data sources). They also contain logic for data processors which creates tables from the data source.
-    The tables are returned as binary instructions from the Data Processor to the SDK to create 0 or more tables.
-    The Driver (WPA is recommended) dynamically loads each Custom Data Source at runtime through the SDK.
+<summary>Custom Data Source Model</summary>
+ 
 
+A Custom Data Source is a containerized unit with instructions on how to read a custom data source.
+Every Custom Data Source has to advertise the supported file types (data sources). 
+They also contain logic for data processors which creates tables from the data source.
 
-    ![](.attachments/CustomDataSource.png)
-    Change WPA to driver
-
-    The Custom Data Source Model allows developers to use any arbitrary data source with the SDK to build desired tables using plugins. 
-    A plugin is one or more Custom Data Sources compiled as a package of binaries for the SDK to read.
-    In the above example, there must be an LTTng plugin to read those trace files.
+The tables are returned as binary instructions from the Data Processor to the SDK to create 0 or more tables.
+The Driver (WPA is recommended) dynamically loads each Custom Data Source at runtime through the SDK.
 
 
-    For implementation details, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
+![](.attachments/CustomDataSource.png)
+Change WPA to driver
+
+The Custom Data Source Model allows developers to use any arbitrary data source with the SDK to build desired tables using plugins. 
+A plugin is one or more Custom Data Sources compiled as a package of binaries for the SDK to read.
+In the above example, there must be an LTTng plugin to read those trace files.
+
+
+For implementation details, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
+
 </details>
+
 
 # Next Steps
 
