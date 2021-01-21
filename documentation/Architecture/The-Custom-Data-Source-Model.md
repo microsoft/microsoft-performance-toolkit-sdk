@@ -3,10 +3,11 @@
 A Custom Data Source is a containerized unit with instructions on how to read a custom data source.
 Every Custom Data Source has to advertise the supported file types (data sources). They also contain logic for data processors which creates tables from the data source.
 The tables are returned as binary instructions from the Data Processor to the SDK to create 0 or more tables.
-The UI Driver (we recommend WPA) dynamically loads each Custom Data Source at runtime through the SDK.
+The Driver (WPA is recommended) dynamically loads each Custom Data Source at runtime through the SDK.
 
 
 ![](.attachments/CustomDataSource.png)
+Change WPA to driver
 
 The Custom Data Source Model allows developers to use any arbitrary data source with the SDK to build desired tables using plugins. 
 A plugin is one or more Custom Data Sources compiled as a package of binaries for the SDK to read.

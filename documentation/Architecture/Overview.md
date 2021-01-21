@@ -11,7 +11,8 @@ Examples:
 
 # Microsoft Performance Toolkit SDK
 
-The Microsoft Performance Toolkit SDK was built to empower users to analyze any arbitrary data source (e.g. .etl, .txt, lttng, etc). Using the SDK, any data source (including large files) can be quickly processed to generate custom graphs and tables.
+The Microsoft Performance Toolkit SDK was built to empower users to analyze any arbitrary data source (e.g. .etl, .txt, lttng, etc). 
+Using the SDK, any data source (including large files) can be quickly processed to generate custom graphs and tables.
 Below is a brief overview of the structure of the SDK.
 
 
@@ -23,7 +24,7 @@ Below is a brief overview of the structure of the SDK.
 2) Driver passes Data Source to SDK
 3) SDK passes Data Source to the Custom Data Source
 4) Custom Data Source validates Data Source and sends plugin (compiled binaries) to SDK
-5) SDK creates default/custom tables based on the plugin logic  
+5) Plugins create default/custom tables which the SDK dynamically sends to the Driver
 6) Driver displays visualized data for interaction and manipulation
 
 
@@ -35,14 +36,39 @@ We recommend using Windows Performance Analyzer (WPA) to interact with the data 
 
 # SDK
 
-The SDK is primarily responsible for building relevant tables and graphs. Using plugin logic from the [Data Processor](./The-Data-Processing-Pipeline.md), the SDK creates custom tables and/or graphs.
-
+The SDK operates as an interface between the Driver and Custom Data Source. It facilitates the data retrieval from the CDS and dynamically loads that information to the Driver.
 
 # Custom Data Source
 
-[The Custom Data Source](.The-Custom-Data-Source-Model.md) is a native binary which can parse the Data Source. A Custom Data Source (CDS) advertises the data source which it can parse.
+A Custom Data Source (CDS) has instructions to parse the Data Source. A CDS advertises the data source which it can parse.
 If the relevant binaries exist, the CDS has the logic for creating tables from the data source in a . 
 One or more Custom Data Sources is a plugin. Plugins are compiled into binaries which are loaded into the SDK to handle table building.
+
+<details>
+
+<summary>Custom Data Source Model</summary>
+ 
+
+A Custom Data Source is a containerized unit with instructions on how to read a custom data source.
+Every Custom Data Source has to advertise the supported file types (data sources). 
+They also contain logic for data processors which creates tables from the data source.
+
+The tables are returned as binary instructions from the Data Processor to the SDK to create 0 or more tables.
+The Driver (WPA is recommended) dynamically loads each Custom Data Source at runtime through the SDK.
+
+
+![](.attachments/CustomDataSource.png)
+Change WPA to driver
+
+The Custom Data Source Model allows developers to use any arbitrary data source with the SDK to build desired tables using plugins. 
+A plugin is one or more Custom Data Sources compiled as a package of binaries for the SDK to read.
+In the above example, there must be an LTTng plugin to read those trace files.
+
+
+For implementation details, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
+
+</details>
+
 
 # Next Steps
 
