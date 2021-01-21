@@ -63,3 +63,8 @@ can create an Extended Table.
 
 As long as the DLL with your Extended Tables is available to WPA or the
 Engine, then your Table will be available for use.
+
+# Examples
+
+For some real-world examples of Extended Tables, see the [Tables](https://github.com/microsoft/Microsoft-Performance-Tools-Linux/tree/develop/LTTngDataExtensions/Tables)
+exposed by our LTTng tools.
