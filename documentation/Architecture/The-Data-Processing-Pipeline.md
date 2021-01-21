@@ -1,19 +1,22 @@
 # The Data Processing Pipeline
 
-The [Custom Data Source](./The-Custom-Data-Source-Model.md) (CDS) uses a Data Processor to read from the Data Source. Since the plugins are dynamicaly loaded into the Driver by the SDK,
+The Custom Data Source (CDS) uses a Data Processor to read from the Data Source. Since the plugins are dynamically loaded into the Driver by the SDK,
 we want to ensure that the Data Processors are efficient in reading and formatting the raw data from the data source.
 
 
 Due to the Data Processor, we can efficiently access information from multiple binaries and reuse data.
-Data  can be easily shared and the developer is granted maximal flexibility for modular code.
+Data can be easily shared and the developer is granted maximal flexibility for modular code.
 
-A Data Processor contains a Source Parser and a Data Cooker.
+A Data Processor contains Source Parsers and a Data Cookers.
+
+![](.attachments/DataProcessingPipeline.png)
+
 
 # Source Parser
 
-The Source Parser is created by a CDS and used by the Data processor to:
-	* read in raw data from the data source 
-	* create a standardized data format
+The Source Parser is bound to a procesor which is created by a CDS in order to:
+* read in raw data from the data source 
+* create a standardized data format
 
 The standardized data is then sent to a data cooker.
 
@@ -22,19 +25,14 @@ The standardized data is then sent to a data cooker.
 The Data Cooker consumes events sent from the Source Parser and specifies the data keys. 
 This allows for the standardized data to be read into a C# data structure and allows programmatic access to any data.
 
-Data Cookers can also send data to eachother and into tables through the SDK.
-
-# Data Extensions
-
-TODO 
+The platform Data cookers and Tables built on is extensible by default. This means Data Cookers can not only be referenced by 
+eachother but also referenced in other binaries and other projects.
 
 # Next Steps
 
 To best understand how the SDK works and how to develop SDK plugins, it is recommended to read documentation in the following order:
 1) [Overview](./Overview.md) to understand at a high level the various system the SDK provides
-2) [The Custom Data Source Model](./The-Custom-Data-Source-Model.md) to understand how the SDK allows developers to implement 
-logic for processing arbitrary data sources
-3) [The Data Processing Pipeline](./The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
+2) [The Data Processing Pipeline](./The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
 can be used by tables
 4) [Data Extensions](.Data-Extensions.md) to understand how data involved in data processing pipelines can be used by 
 other plugins
@@ -44,4 +42,4 @@ take in a specific data source and output structured tables
 7) [Using the SDK/Creating a Data Processing Pipeline](./Using-the-SDK/Creating-a-pipeline.md) to see how to create a data processing pipeline that 
 exposes data that can be consumed by your tables and other plugins
 8) [Using the SDK/Creating an Extended Table](./Using-the-SDK/Creating-an-extended-table.md) to see how to use data cookers to obtain the data to display 
-inside of a tableable
+inside of a table
