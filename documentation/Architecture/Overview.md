@@ -23,7 +23,7 @@ Below is a brief overview of the structure of the SDK.
 2) Driver passes Data Source to SDK
 3) SDK passes Data Source to the Custom Data Source
 4) Custom Data Source validates Data Source and sends plugin (compiled binaries) to SDK
-5) SDK creates default/custom tables based on the plugin logic  
+5) plugins creates default/custom tables which the SDK dynamically sends to the Driver
 6) Driver displays visualized data for interaction and manipulation
 
 
@@ -40,7 +40,7 @@ The SDK is primarily responsible for building relevant tables and graphs. Using 
 
 # Custom Data Source
 
-[The Custom Data Source](.The-Custom-Data-Source-Model.md) is a native binary which can parse the Data Source. A Custom Data Source (CDS) advertises the data source which it can parse.
+[The Custom Data Source](.The-Custom-Data-Source-Model.md) has instructions to parse the Data Source. A Custom Data Source (CDS) advertises the data source which it can parse.
 If the relevant binaries exist, the CDS has the logic for creating tables from the data source in a . 
 One or more Custom Data Sources is a plugin. Plugins are compiled into binaries which are loaded into the SDK to handle table building.
 
