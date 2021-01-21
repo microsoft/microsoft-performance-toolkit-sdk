@@ -25,11 +25,8 @@ The standardized data is then sent to a data cooker.
 The Data Cooker consumes events sent from the Source Parser and specifies the data keys. 
 This allows for the standardized data to be read into a C# data structure and allows programmatic access to any data.
 
-Data Cookers can also send data into tables and to eachother through the SDK.
-
-# Data Extensions
-
-TODO 
+The platform Data cookers and Tables built on is extensible by default. This means Data Cookers can not only be referenced by 
+eachother but also referenced in other binaries and other projects.
 
 # Next Steps
 
