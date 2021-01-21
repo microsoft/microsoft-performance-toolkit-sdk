@@ -38,45 +38,39 @@ We recommend using Windows Performance Analyzer (WPA) to interact with the data 
 
 The SDK operates as an interface between the Driver and Custom Data Source. It facilitates the data retrieval from the CDS and dynamically loads that information to the Driver.
 
-# Custom Data Source
+# Plugins
 
-A Custom Data Source (CDS) has instructions to parse the Data Source. A CDS advertises the data source which it can parse.
-If the relevant binaries exist, the CDS has the logic for creating tables from the data source in a . 
-One or more Custom Data Sources is a plugin. Plugins are compiled into binaries which are loaded into the SDK to handle table building.
+A plugin is one or more Custom Data Sources compiled as a package of binaries for the SDK to read. A plugin contains the logic
+to read, format, and standardize the data from particular data sources into programmatically accessible data for the SDK to serve to the Driver.
+
+![](.attachments/CustomDataSource.png)
+
+In the above example, there must be an LTTng plugin to read those trace files.
 
 <details>
 
 <summary>Custom Data Source Model</summary>
  
 
-A Custom Data Source is a containerized unit with instructions on how to read a custom data source.
+A Custom Data Source (CDS) is a containerized unit which has instructions to parse the Data Source. 
 Every Custom Data Source has to advertise the supported file types (data sources). 
-They also contain logic for data processors which creates tables from the data source.
+If the relevant binaries exist, the CDS has the logic for creating tables from the data source.
 
 The tables are returned as binary instructions from the Data Processor to the SDK to create 0 or more tables.
 The Driver (WPA is recommended) dynamically loads each Custom Data Source at runtime through the SDK.
 
-
-![](.attachments/CustomDataSource.png)
-Change WPA to driver
-
 The Custom Data Source Model allows developers to use any arbitrary data source with the SDK to build desired tables using plugins. 
-A plugin is one or more Custom Data Sources compiled as a package of binaries for the SDK to read.
-In the above example, there must be an LTTng plugin to read those trace files.
-
-
-For implementation details, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
 
 </details>
+
+For implementation details, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
 
 
 # Next Steps
 
 To best understand how the SDK works and how to develop SDK plugins, it is recommended to read documentation in the following order:
 1) [Overview](./Overview.md) to understand at a high level the various system the SDK provides
-2) [The Custom Data Source Model](./The-Custom-Data-Source-Model.md) to understand how the SDK allows developers to implement 
-logic for processing arbitrary data sources
-3) [The Data Processing Pipeline](./The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
+2) [The Data Processing Pipeline](./The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
 can be used by tables
 4) [Data Extensions](.Data-Extensions.md) to understand how data involved in data processing pipelines can be used by 
 other plugins
