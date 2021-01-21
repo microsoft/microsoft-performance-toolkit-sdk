@@ -1,13 +1,13 @@
 # The Data Processing Pipeline
 
-The Custom Data Source (CDS) uses a Data Processor to read from the Data Source. Since the plugins are dynamicaly loaded into the Driver by the SDK,
+The Custom Data Source (CDS) uses a Data Processor to read from the Data Source. Since the plugins are dynamically loaded into the Driver by the SDK,
 we want to ensure that the Data Processors are efficient in reading and formatting the raw data from the data source.
 
 
 Due to the Data Processor, we can efficiently access information from multiple binaries and reuse data.
 Data can be easily shared and the developer is granted maximal flexibility for modular code.
 
-A Data Processor contains a Source Parser and a Data Cooker.
+A Data Processor contains Source Parsers and a Data Cookers.
 
 ![](.attachments/DataProcessingPipeline.png)
 
@@ -15,8 +15,8 @@ A Data Processor contains a Source Parser and a Data Cooker.
 # Source Parser
 
 The Source Parser is created by a CDS and used by the Data processor to:
-	- read in raw data from the data source 
-	- create a standardized data format
+* read in raw data from the data source 
+* create a standardized data format
 
 The standardized data is then sent to a data cooker.
 

@@ -11,7 +11,7 @@ Examples:
 
 # Microsoft Performance Toolkit SDK
 
-The Microsoft Performance Toolkit SDK was built to empower users to analyze any arbitrary data source (e.g. .etl, .txt, lttng, etc). 
+The Microsoft Performance Toolkit SDK was built to empower users to analyze any arbitrary data source (e.g. .etl, .ctf, etc). 
 Using the SDK, any data source (including large files) can be quickly processed to generate custom graphs and tables.
 Below is a brief overview of the structure of the SDK.
 
@@ -45,7 +45,7 @@ to read, format, and standardize the data from particular data sources into prog
 
 ![](.attachments/CustomDataSource.png)
 
-In the above example, there must be an LTTng plugin to read those trace files.
+In the above example, there must be an ETL plugin to read an .etl trace file (data source).
 
 <details>
 
