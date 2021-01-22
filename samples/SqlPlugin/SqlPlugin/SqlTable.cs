@@ -144,7 +144,7 @@ namespace SqlPlugin
             var tableConfig = new TableConfiguration("SQL Trace Events by Event Class")
             {
                 Columns = new[]
-              {
+                {
                     EventClassColumn,
                     TableConfiguration.PivotColumn,
                     TableConfiguration.LeftFreezeColumn,
