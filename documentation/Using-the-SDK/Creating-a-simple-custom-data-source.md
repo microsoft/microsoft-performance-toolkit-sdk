@@ -167,6 +167,21 @@ The following are required for a Simple Data Source:
    }
    ```
 
+5. Override the BuildTableCore method. This method is responsible for instantiating a given table. This method is called for each table identified by the SDK runtime as part of this plugin (see more on this in the 'Create Tables' section). The table to build is identified by a `TableDescriptor`, passed in as a parameter to this method. If the CDP isn't interested in the given table, it may return immediately.
+
+   ```
+   protected override void BuildTableCore(
+      TableDescriptor tableDescriptor,
+      Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
+      ITableBuilder tableBuilder)
+   {
+   }
+   ```
+   
+   How a table is created is left up to the plugin author. The sample for this documentation uses reflection to instantiate an instance of the table class.
+
+   After the table object is created, the `ITableBuilder` parameter is used to populate the table with columns and row data. In this example, the build logic exists in a `Build` method on the table, which is called by this method.
+
 ## Create tables
 
 Simple custom data sources provide tables as output. A table is set of columns and rows grouped together to provide output for related data. So tables must be created to have any output.
@@ -204,3 +219,25 @@ delegating the work of populating the `ITableBuilder` to an instance of the clas
 Note that tables are "hooked up" to CDPs automatically by the SDK. **Every class that meets the requirements listed above 
 is automatically hooked up to any CDPs declared in that table's assembly.**
 
+In the sample code, the `WordTable` has a `Build` method that is called by `SimpleCustomDataProcessor`. The key code in this method uses the `ITableBuilder` to generate the table.
+
+```
+public override void Build(ITableBuilder tableBuilder)
+{
+   ...
+
+   tableBuilder.AddTableConfiguration(config)
+         .SetDefaultTableConfiguration(config)
+         .SetRowCount(allWords.Count)
+         .AddColumn(FileColumn, fileProjection)
+         .AddColumn(WordColumn, wordProjection)
+         .AddColumn(CharacterCountColumn, charCountProjection)
+         .AddColumn(TimeColumn, timeProjection);
+}
+```
+
+The `TableConfiguration` passed into `ITableBuilder.AddTableConfiguration` and `ITableBuilder.SetDefaultConfiguration` details how the table should appear.
+
+`ITableBuilder.SetRowCount` establishes the number of rows for the table, and returns an `ITableBuilderWithRowCount`.
+
+Call `ITableBuilderWithRowCount.AddColumn` to establish a column on the table. Each column requires a `ColumnConfiguration` to describe the column, and an `IProjection<,>` which allows table cell data to be retrieved for a given row number.
