@@ -53,16 +53,6 @@ namespace SqlPlugin
         public int? SPID { get; }
         public DateTime StartTime { get; }
         public DateTime? EndTime { get; }
-
-        public int CompareTo(string other)
-        {
-            return this.EventClass.CompareTo(other);
-        }
-
-        public string GetKey()
-        {
-            return this.EventClass;
-        }
     }
 
     /// <summary>
