@@ -137,7 +137,10 @@ what is required:
 
 ## Cookers
 
-__Cookers__ take data in one form and transform said data into another form.
+__Cookers__ transform Data from one form to another. A Cooker will use the
+Data Output objects from one or more sources, and perform a transformation on
+said Data, producing new Data Output(s) for other Cookers or end user
+applications to consume.
 
 __Source Cookers__ are fed data directly from a __Source Parser__ and create
 Data Outputs.
