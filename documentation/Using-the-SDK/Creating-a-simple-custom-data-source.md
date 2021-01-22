@@ -199,6 +199,6 @@ populating the  `ITableBuilder` with the columns that make up the table being co
 delegating the work of populating the `ITableBuilder` to an instance of the class/table described by the 
 `TableDescriptor`.
 
-Note that tables are "hooked up" to CDPs automatically by the SDK. **Every** class that meets the requirements listed above 
-is automatically hooked up to any CDPs declared in that table's assembly.
+Note that tables are "hooked up" to CDPs automatically by the SDK. **Every class that meets the requirements listed above 
+is automatically hooked up to any CDPs declared in that table's assembly.**
 
