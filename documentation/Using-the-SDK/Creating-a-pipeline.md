@@ -12,7 +12,7 @@ Cookers can be further broken down into:
 2) Composite Cookers
 
 All Cookers expose one or more __Data Outputs__. Data Outputs expose data that
-can be consumed by user of the DPP or other Cookers in the DPP.
+can be consumed by users of the DPP or other Cookers in the DPP.
 
 __Source Cookers__ take data directly from a Data Source Parser and produce
 __Data Outputs__. __Composite Cookers__ take data from other cookers to produce
@@ -142,8 +142,8 @@ Data Output objects from one or more sources, and perform a transformation on
 said Data, producing new Data Output(s) for other Cookers or end user
 applications to consume.
 
-__Source Cookers__ are fed data directly from a __Source Parser__ and create
-Data Outputs.
+__Source Cookers__ take data directly from a __Data Source Parser__ and from
+other Source Cookers and produce Data Outputs.
 
 __Composite Cookers__ take data from one or more Cookers (Source or Composite)
 and create Data Outputs.
