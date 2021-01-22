@@ -93,7 +93,7 @@ The following are required for a Simple Data Source:
 4. Overwrite the IsFileSupportedCore method. This is where your class will determine if a given file contains data 
    appropriate to your CDS. For example, if your CDS consumes .xml files, not all .xml files will be valid for your
    CDS. Use this method as an opportunity to filter out the files that aren't consumable by this CDS.  
-   :warning:: we intend to change this method before 1.0 release. more details to follow.
+   :warning: This method will be changed before 1.0 release. more details to follow.
    ```
    protected override bool IsFileSupportedCore(string path)
    {
