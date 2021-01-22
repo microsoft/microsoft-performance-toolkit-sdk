@@ -54,8 +54,9 @@ The following are required for a Simple Data Source:
    ```
 
 2. Overwrite the SetApplicationEnvironmentCore method. The IApplicationEnvironment parameter is stored in the base 
-   class' ApplicationEnvironment property.  
-   **Note**: we intend to make this method virtual in the base class in the future as nothing needs to be done here
+   class' ApplicationEnvironment property.
+
+      **Note**: we intend to make this method virtual in the base class in the future as nothing needs to be done here
 
    ```
    protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
@@ -107,16 +108,96 @@ The following are required for a Simple Data Source:
    }
    ```
 
-When it is time to process the given `IDataSource`s, the SDK will call `ProcessAsyncCore` on the instance of your CDP 
-returned by your CDS's constructor.
+## Implementing the Custom Data Processor Class
+
+1. Create a public class that extends the abstract class `CustomDataProcessorBase`.
+
+   ```
+   public sealed class SimpleCustomDataProcessor
+      : CustomDataProcessorBase
+   {
+   }
+   ```
+
+2. Create a constructor that calls into the base class.
+
+   ```
+   public SimpleCustomDataProcessor(
+      string[] filePaths,
+      ProcessorOptions options,
+      IApplicationEnvironment applicationEnvironment,
+      IProcessorEnvironment processorEnvironment,
+      IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
+      IEnumerable<TableDescriptor> metadataTables)
+      : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+   {
+      this.filePaths = filePaths;
+   }
+   ```
+
+
+3. Implement `ProcessAsyncCore`. This method will be called to process data sources passed into the Custom Data 
+   Processor. Typically the data in the data source is parsed and converted from some raw form into something more 
+   relevant and easily accessible to the processor.
+   
+   In this simple sample, a comma-delimited text file is parsed into event structures and stored for later use. In a 
+   more realistic case, processing would probably be broken down into smaller units. For example, there might be logic 
+   for parsing operating system processes and making that data queryable by time and or memory layout.
+
+   ```
+   protected override Task ProcessAsyncCore(
+      IProgress<int> progress,
+      CancellationToken cancellationToken)
+   {
+      ...
+   }
+   ```
+
+4. Override the GetDataSourceInfo method. `DataSourceInfo` provides the driver some information about the data source
+   to provide a better user experience. It is expected that this method will not be called before 
+   `ProcessAsync`/`ProcessAsyncCore` because the data necessary to create a `DataSourceInfo` object might not be
+   available beforehand.
+
+   ```
+   public override DataSourceInfo GetDataSourceInfo()
+   {
+         return this.dataSourceInfo;   
+   }
+   ```
+
+## Create tables
+
+Simple custom data sources provide tables as output. A table is set of columns and rows grouped together to provide output for related data. So tables must be created to have any output.
+
+Here are the requirements for a table to be discovered by the SDK runtime:
+   - Be public, static, and concrete.
+   - Be decorated with `TableAttribute`.
+   - Expose a static public field or property named TableDescriptor of type `TableDescriptor` which provides information
+     about the table. If these requirements are not met, the SDK runtime will not be able to find and pass your tables 
+     to your CDP.
+
+Here's an example from the simple example:
+
+```
+[Table]                      
+public sealed class WordTable
+   : TableBase
+{
+   public static TableDescriptor TableDescriptor => new TableDescriptor(
+      Guid.Parse("{E122471E-25A6-4F7F-BE6C-E62774FD0410}"), // The GUID must be unique across all tables
+      "Word Stats",                                         // The Table must have a name
+      "Statistics for words",                               // The Table must have a description
+      "Words");                                             // A category is optional. It useful for grouping 
+                                                            // different types of tables in the viewer's UI.
+}
+```
 
 Sometime after `ProcessAsyncCore` finishes (at least for typical SDK runtime consumers who ask the SDK to build tables 
-only *after* asking it to process sources), the SDK will call `BuildTableCore` on your CDP for each table "hooked up" 
-to it. This method receives the `TableDescriptor` of the table it must create, and is responsible for populating the 
-`ITableBuilder` with the 
-columns that make up the table being constructed. This is most easily done by delegating the work of populating the `ITableBuilder` to an 
-instance of the class/table described by the `TableDescriptor`.
+only *after* asking it to process sources), the SDK runtime will call `BuildTableCore` on your CDP for each table 
+"hooked up" to it. This method receives the `TableDescriptor` of the table it must create, and is responsible for 
+populating the  `ITableBuilder` with the columns that make up the table being constructed. This is most easily done by 
+delegating the work of populating the `ITableBuilder` to an instance of the class/table described by the 
+`TableDescriptor`.
 
-Note that tables are "hooked up" to CDPs automatically by the SDK. Any class decorated with the `TableAttribute` that has a public static
-`TableDescriptor` field/property is automatically hooked up to any CDPs declared in that table's assembly. There are ways to 
-explicitly enumerate the CDPs that a table gets hooked up to, but this will be covered in the advanced tutorials (still to come!).
+Note that tables are "hooked up" to CDPs automatically by the SDK. **Every** class that meets the requirements listed above 
+is automatically hooked up to any CDPs declared in that table's assembly.
