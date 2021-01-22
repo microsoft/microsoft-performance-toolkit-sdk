@@ -1,19 +1,29 @@
 # Creating an Extended Table
 
-An Extended Table is a Table that leverages data from a Plugin without
-being shipped with said Plugin. Extended tables are only able to leverage
-data from Cookers. If a Plugin exposes data through Cookers, then you can
-author an Extended table to leverage said Data.
+An Extended Table is a Table that leverages data from a Plugin 
+that may not neccesarilly be shipped with said Plugin. Extended tables are
+only able to leverage data from Cookers. If a Plugin exposes data through Cookers,
+then you can author an Extended table to leverage said Data.
 
 At a bare minimum, you must create a new class for your Extended Table.
 This class __MUST__ have the following items:
 1) The Table attribute
 2) A static Table Descriptor property
 3) A static BuildTable method.
+4) Declarations for the Cooker(s) that provide the data that the Table is using.
+    - May be either **RequiresCookerAttribute**s or declared in the TableDescriptor (2).
 
 ````cs
+
     // Denotes that this class exposes a Table
+    //
     [Table]
+    // One or more RequiresCooker attributes specifying the
+    // Cookers that this Table uses for data. Alternatively,
+    // you may use the 'requiredDataCookers' parameter of the
+    // TableDescriptor constructor.
+    //
+    [RequiresCooker("Cooker/Path")]
     public class SampleExtendedTable
     {
         // This property is required to define your Table. This
@@ -30,15 +40,8 @@ This class __MUST__ have the following items:
                 requiredDataCookers: new List<DataCookerPath>
                 {
                     // Paths to the Cookers that are needed for
-                    // this table.
-                    //
-                    // For robustness, you should _Always_
-                    // declare your dependencies here so that
-                    // unexpected changes in what Cookers are
-                    // available, or what Cookers run during
-                    // processing don't lead to silent failures
-                    // as your table no longer has the data it
-                    // needs.
+                    // this table. This is not needed if you are
+                    // using the RequiresCooker attributes.
                     //
                 });
             );
