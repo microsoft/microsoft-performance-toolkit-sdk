@@ -7,14 +7,16 @@ author an Extended table to leverage said Data.
 
 At a bare minimum, you must create a new class for your Extended Table.
 This class __MUST__ have the following items:
-1) A static Table Descriptor property
-2) A static BuildTable method.
+1) The Table attribute
+2) A static Table Descriptor property
+3) A static BuildTable method.
 
 ````cs
+    // Denotes that this class exposes a Table
     [Table]
     public class SampleExtendedTable
     {
-        // This method is required to define your Table. This
+        // This property is required to define your Table. This
         // tells the runtime that a Table is available, and that
         // any Cookers needed by the Table are to be scheduled for
         // execution.
