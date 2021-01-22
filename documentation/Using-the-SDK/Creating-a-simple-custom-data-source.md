@@ -201,3 +201,4 @@ delegating the work of populating the `ITableBuilder` to an instance of the clas
 
 Note that tables are "hooked up" to CDPs automatically by the SDK. **Every** class that meets the requirements listed above 
 is automatically hooked up to any CDPs declared in that table's assembly.
+
