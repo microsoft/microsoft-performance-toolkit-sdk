@@ -2,8 +2,8 @@
 This solution is the source code for the SQL plugin created during a demonstration on how to use the SDK.
 
 Step-by-step video walkthroughs on creating this plugin can be found at:
-* Part 1: creating a simple SQL custom data source and table (TODO: add link once uploaded)
-* Part 2: recreating the SQL table using the data-processing pipeline (TODO: add link once uploaded)
+* Part 1: [creating a simple SQL custom data source and table](https://microsoft.github.io/microsoft-performance-toolkit-sdk/documentation/Videos/SDK%20Video%201.mp4)
+* Part 2: [recreating the SQL table using the data-processing pipeline](https://microsoft.github.io/microsoft-performance-toolkit-sdk/documentation/Videos/SDK%20Video%202.mp4)
 
 This plugin consists of two custom data sources (each defined in its own project/assembly/namespace). Both 
 custom data sources implement logic for parsing `.xml` files that contain [SQL Server Profiler](https://docs.microsoft.com/en-us/sql/tools/sql-server-profiler/sql-server-profiler?view=sql-server-ver15) 
