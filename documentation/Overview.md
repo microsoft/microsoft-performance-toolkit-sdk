@@ -1,5 +1,5 @@
 # Abstract
-The Microsoft Performance ToolKit SDK allows developers to create "SDK plugins" that process and interpret data. 
+The Microsoft Performance Toolkit SDK allows developers to create "SDK plugins" that process and interpret data. 
 These plugins can be used by performance analysis applications that use the SDK runtime - such as [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) - to process data sources into structured, tabular data. Plugins may utilize the SDK's data-processing pipeline to both facilitate the creation of these tables and expose data that can be programmatically accessed by concurrently loaded plugins (even those without access to the originating plugin's source code).
 
 This folder contains instructions for developing SDK plugins and utilizing the SDK's various features.
@@ -8,7 +8,7 @@ This folder contains instructions for developing SDK plugins and utilizing the S
 The following are required in order to develop an SDK plugin:
 * [NuGet](https://www.nuget.org/downloads)
 * [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks)
-* A text editor (for editing your source)
+* A text editor (for editing your source code)
 
 It is recommended to use [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/) to develop an SDK plugin since it satisfies all three requirements. Future documentation assumes the use of Visual Studio, but the instructions may be adapted for other editors / IDEs.
 
@@ -23,16 +23,12 @@ Please see the [Creating your first project](Using-the-SDK/Creating-your-project
 # Recommended Reading Order
 To best understand how the SDK works and how to develop SDK plugins, it is recommended to read documentation in the following order:
 1) [Architecture/Overview](./Architecture/Overview.md) to understand at a high level the various system the SDK provides
-2) [Architecture/The Custom Data Source Model](./Architecture/The-Custom-Data-Source-Model.md) to understand how the SDK allows developers to implement 
-logic for processing arbitrary data sources
-3) [Architecture/The Data Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
+2) [Architecture/The Data Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
 can be used by tables
-4) [Architecture/Data Extensions](./Architecture/Data-Extensions.md) to understand how data involved in data processing pipelines can be used by 
-other plugins
-5) [Using the SDK/Creating an SDK Plugin C# Project](Using-the-SDK/Creating-your-project.md) to get your developer environment ready to create an SDK plugin
-6) [Using the SDK/Creating a Simple Custom Data Source](Using-the-SDK/Creating-a-simple-custom-data-source.md) to see how to create a basic plugin that can 
+3) [Using the SDK/Creating an SDK Plugin C# Project](Using-the-SDK/Creating-your-project.md) to get your developer environment ready to create an SDK plugin
+4) [Using the SDK/Creating a Simple Custom Data Source](Using-the-SDK/Creating-a-simple-custom-data-source.md) to see how to create a basic plugin that can 
 take in a specific data source and output structured tables
-7) [Using the SDK/Creating a Data Processing Pipeline](Using-the-SDK/Creating-a-pipeline.md) to see how to create a data processing pipeline that 
+5) [Using the SDK/Creating a Data Processing Pipeline](Using-the-SDK/Creating-a-pipeline.md) to see how to create a data processing pipeline that 
 exposes data that can be consumed by your tables and other plugins
-8) [Using the SDK/Creating an Extended Table](Using-the-SDK/Creating-an-extended-table.md) to see how to use data cookers to obtain the data to display 
+6) [Using the SDK/Creating an Extended Table](Using-the-SDK/Creating-an-extended-table.md) to see how to use data cookers to obtain the data to display 
 inside of a table
