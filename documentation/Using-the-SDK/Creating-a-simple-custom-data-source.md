@@ -4,9 +4,9 @@ A Custom Data Source (CDS) uses the SDK to create a data processing pipeline for
 that the CDS supports. Notably, a CDS acts as the entry point for the SDK runtime to discover and utilizes these data 
 pipelines. An SDK Plugin may contain more than one CDS.
 
-A standard CDS will utilize a custom data processor (CDP) to process the data sources that the SDK runtime provides it.
+A standard CDS will utilize a Custom Data Processor (CDP) to process the data sources that the SDK runtime provides it.
 
-A plugin may also define tables that get utilized by viewers such as Windows Performance Analyzer (WPA) to display the 
+A plugin may also define tables that can be used by viewers such as Windows Performance Analyzer (WPA) to display the 
 processed data in an organized, interactable collection of rows. Tables are discovered and passed into CDPs by the SDK 
 runtime.
 
@@ -15,17 +15,17 @@ covered in the advanced documentaton. Refer to [Overview](../Overview.md) for mo
 
 ## Corresponding Sample
 
-Refer to /samples/SimpleDataSource for source code that implements the steps outlined in this file.
+Refer to [the following sample Data Source](../../samples/SimpleDataSource/SampleAddIn.csproj) for source code that implements the steps outlined in this file.
 
 ## Requirements of a Simple Data Source
 
 The following are required for a Simple Data Source:
 
-1. Create a public class that implements the abstract class `CustomDataSourceBase`. This is your custom data source 
+1. Create a public class that implements the abstract class `CustomDataSourceBase`. This is your Custom Data Source 
    (CDS).
-2. Create a public class that implements the abstract class `CustomDataProcessorBase`. This your custom data processor 
+2. Create a public class that implements the abstract class `CustomDataProcessorBase`. This your Custom Data Processor 
    (CDP).
-3. Create one or more data tables classes. These classes must:
+3. Create one or more data table classes. These classes must:
    - Be public and static.
    - Be decorated with `TableAttribute`.
    - Expose a static public field or property named TableDescriptor of type `TableDescriptor` which provides information
@@ -54,7 +54,7 @@ The following are required for a Simple Data Source:
    }
    ```
 
-2. Overwrite the SetApplicationEnvironmentCore method. The IApplicationEnvironment parameter is stored in the base 
+2. Overwrite the `SetApplicationEnvironmentCore` method. The `IApplicationEnvironment` parameter is stored in the base 
    class' ApplicationEnvironment property.
 
       **Note**: This method will be made virtual in the base class in the future as nothing needs to be done here
@@ -65,7 +65,7 @@ The following are required for a Simple Data Source:
    }
    ```
 
-3. Overwrite the CreateProcessorCore method. When the SDK needs to process files your CDS supports, it will obtain an 
+3. Overwrite the `CreateProcessorCore` method. When the SDK needs to process files your CDS supports, it will obtain an 
    instance of your CDP by calling this method. This is also where your CDS learns about the files, passed as 
    `IDataSource`s, that it will need to process.
 
@@ -92,7 +92,7 @@ The following are required for a Simple Data Source:
             this.MetadataTables);
    }
    ```
-4. Overwrite the IsFileSupportedCore method. This is where your class will determine if a given file contains data 
+4. Overwrite the `IsFileSupportedCore` method. This is where your class will determine if a given file contains data 
    appropriate to your CDS. For example, if your CDS consumes .xml files, not all .xml files will be valid for your
    CDS. Use this method as an opportunity to filter out the files that aren't consumable by this CDS.  
    :warning: This method will be changed before 1.0 release - more details to follow.
