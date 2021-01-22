@@ -43,10 +43,16 @@ If you installed Visual Studio 2019 based on the above instructions, then you ar
 
 ## NuGet Feeds
 
-TODO: add VS instructions here
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction (VS instructions here)
+ 
+</details>
 
 <a name="createproj"></a>
-# Creating the Project
+# Creating Your Project
 
 1) Launch Visual Studio 2019
 2) Click "Create new project"  
