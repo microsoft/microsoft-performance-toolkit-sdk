@@ -15,43 +15,87 @@ open a file/data source for analysis. They provide the SDK with
 1) Information on what types of data sources your plugin supports
 2) A way to obtain a **Custom Data Processor** that implements logic for processing the data sources your plugin supports
 
-TODO: Add more
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction
+ 
+</details>
 
 ----
 
 ## Custom Data Processors
 
-TODO
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction
+ 
+</details>
+
+
 
 ----
 
 ## Tables
 
-TODO
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction
+ 
+</details>
 
 ----
 
 ## Source Parsers
 
-TODO
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction
+ 
+</details>
 
 ----
 
 ## Data Cookers
 
-TODO
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction
+ 
+</details>
 
 ----
 
 ## Data Outputs
 
-TODO
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction
+ 
+</details>
 
 ----
 
 ## Data Cooker Paths
 
-TODO
+<details>
+
+<summary>Click to Expand</summary>
+
+Under Construction
+ 
+</details>
 
 ----
 
