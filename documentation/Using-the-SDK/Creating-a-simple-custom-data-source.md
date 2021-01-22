@@ -123,8 +123,4 @@ explicitly enumerate the CDPs that a table gets hooked up to, but this will be c
 
 # Video
 
-<figure class="video_container">
-  <video controls="true" allowfullscreen="true">
-    <source src="https://microsoft.github.io/microsoft-performance-toolkit-sdk/documentation/Videos/SDK%20Video%201.mp4" type="video/mp4">
-  </video>
-</figure>
+[![homepage](../Videos/SDK%20Video%201.png)](https://microsoft.github.io/microsoft-performance-toolkit-sdk/documentation/Videos/SDK%20Video%201.mp4)
