@@ -43,7 +43,7 @@ namespace SqlPluginWithProcessingPipeline
                                                              CancellationToken cancellationToken)
         {
             // Use context to get trace start time from the source parser's DataSourceInfo
-            var traceStartTime = context.DataSourceInfo.StartWallClockUtc;
+            var traceStartTime = context.StartWallClockUtc;
 
             var offset = sqlEvent.StartTime.Subtract(traceStartTime);
             var relativeTimestamp = Timestamp.FromNanoseconds(offset.Ticks * 100);

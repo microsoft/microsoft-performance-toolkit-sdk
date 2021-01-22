@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
+using System.Xml;
 
 namespace SqlPlugin
 {
@@ -56,7 +56,7 @@ namespace SqlPlugin
            CancellationToken cancellationToken)
         {
             // Parse XML for all events
-            List<SqlEvent> sqlEvents = ParseXml();
+            List<SqlEvent> sqlEvents = ParseXml(progress);
 
             // Get start and end event DateTimes and convert them to Timestamps
             var startEvent = sqlEvents.First();
@@ -85,68 +85,101 @@ namespace SqlPlugin
             return Task.CompletedTask;
         }
 
-        private List<SqlEvent> ParseXml()
+        /// <summary>
+        ///     Parses the XML file saved in <see cref="filePath"/>.
+        ///     <para/>
+        ///     The inner workings of this method are not important for understanding
+        ///     this sample.
+        /// </summary>
+        /// <param name="progress">
+        ///     <see cref="IProgress{int}"/> to report progress to
+        /// </param>
+        /// <returns>
+        ///     The raw <see cref="SqlEvent"/> data objects that contain
+        ///     the events inside the XML file.
+        /// </returns>
+        private List<SqlEvent> ParseXml(IProgress<int> progress)
         {
-            XNamespace ns = SqlPluginConstants.SqlXmlNamespace;
-
-            var xmlDocument = XDocument.Parse(File.ReadAllText(this.filePath));
-
-            var events = xmlDocument.Element(ns + "TraceData").Element(ns + "Events").Elements(ns + "Event");
-
             var sqlEvents = new List<SqlEvent>();
-            foreach (var traceEvent in events)
+            using (FileStream stream = File.OpenRead(this.filePath))
+            using (XmlReader reader = XmlReader.Create(stream))
             {
+                bool inEvents = false;
+                string eventClass = null;
+
                 string textData = string.Empty, applicationName = string.Empty, ntUserName = string.Empty, loginName = string.Empty;
                 int? cpu = null, reads = null, writes = null, duration = null, clientProcessId = null, spid = null;
                 DateTime? startTime = null, endTime = null;
 
-                string eventClass = traceEvent.Attribute("name").Value;
-
-                var columns = traceEvent.Elements(ns + "Column");
-                foreach (var col in columns)
+                while (reader.Read())
                 {
-                    switch (col.Attribute("name").Value)
+                    switch (reader.NodeType)
                     {
-                        case "TextData":
-                            textData = col.Value;
-                            break;
-                        case "ApplicationName":
-                            applicationName = col.Value;
-                            break;
-                        case "NTUserName":
-                            ntUserName = col.Value;
-                            break;
-                        case "LoginName":
-                            loginName = col.Value;
-                            break;
-                        case "CPU":
-                            cpu = int.Parse(col.Value);
-                            break;
-                        case "Reads":
-                            reads = int.Parse(col.Value);
-                            break;
-                        case "Writes":
-                            writes = int.Parse(col.Value);
-                            break;
-                        case "Duration":
-                            duration = int.Parse(col.Value);
-                            break;
-                        case "ClientProcessID":
-                            clientProcessId = int.Parse(col.Value);
-                            break;
-                        case "SPID":
-                            spid = int.Parse(col.Value);
-                            break;
-                        case "StartTime":
-                            startTime = DateTime.Parse(col.Value).ToUniversalTime();
-                            break;
-                        case "EndTime":
-                            endTime = DateTime.Parse(col.Value).ToUniversalTime();
-                            break;
-                    }
-                }
+                        case XmlNodeType.Element:
 
-                var sqlEvent = new SqlEvent(eventClass,
+                            if (reader.Name == "Events")
+                            {
+                                inEvents = true;
+                            }
+                            else if (inEvents && reader.Name == "Event")
+                            {
+                                eventClass = reader.GetAttribute("name");
+                            }
+                            else if (eventClass != null && reader.Name == "Column")
+                            {
+                                switch (reader.GetAttribute("name"))
+                                {
+                                    case "TextData":
+                                        textData = reader.ReadElementContentAsString();
+                                        break;
+                                    case "ApplicationName":
+                                        applicationName = reader.ReadElementContentAsString();
+                                        break;
+                                    case "NTUserName":
+                                        ntUserName = reader.ReadElementContentAsString();
+                                        break;
+                                    case "LoginName":
+                                        loginName = reader.ReadElementContentAsString();
+                                        break;
+                                    case "CPU":
+                                        cpu = reader.ReadElementContentAsInt();
+                                        break;
+                                    case "Reads":
+                                        reads = reader.ReadElementContentAsInt();
+                                        break;
+                                    case "Writes":
+                                        writes = reader.ReadElementContentAsInt();
+                                        break;
+                                    case "Duration":
+                                        duration = reader.ReadElementContentAsInt();
+                                        break;
+                                    case "ClientProcessID":
+                                        clientProcessId = reader.ReadElementContentAsInt();
+                                        break;
+                                    case "SPID":
+                                        spid = reader.ReadElementContentAsInt();
+                                        break;
+                                    case "StartTime":
+                                        startTime = reader.ReadElementContentAsDateTime().ToUniversalTime();
+                                        break;
+                                    case "EndTime":
+                                        endTime = reader.ReadElementContentAsDateTime().ToUniversalTime();
+                                        break;
+
+                                }
+                            }
+
+                            break;
+
+                        case XmlNodeType.EndElement:
+
+                            if (reader.Name == "Events")
+                            {
+                                inEvents = false;
+                            }
+                            else if (inEvents && eventClass != null && reader.Name == "Event")
+                            {
+                                var sqlEvent = new SqlEvent(eventClass,
                                             textData,
                                             applicationName,
                                             ntUserName,
@@ -159,8 +192,28 @@ namespace SqlPlugin
                                             spid,
                                             startTime.Value,
                                             endTime);
+                                eventClass = null;
+                                textData = string.Empty;
+                                applicationName = string.Empty;
+                                ntUserName = string.Empty;
+                                loginName = string.Empty;
+                                cpu = null;
+                                reads = null;
+                                writes = null;
+                                duration = null;
+                                clientProcessId = null;
+                                spid = null;
+                                startTime = null;
+                                endTime = null;
 
-                sqlEvents.Add(sqlEvent);
+                                sqlEvents.Add(sqlEvent);
+                            }
+
+                            break;
+                    }
+
+                    progress.Report((int)(100.0 * stream.Position / stream.Length));
+                }
             }
 
             return sqlEvents;
