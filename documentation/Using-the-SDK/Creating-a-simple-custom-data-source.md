@@ -4,7 +4,7 @@ A Custom Data Source (CDS) uses the SDK to create a data processing pipeline for
 that the CDS supports. Notably, a CDS acts as the entry point for the SDK runtime to discover and utilizes these data 
 pipelines. An SDK Plugin may contain more than one CDS.
 
-A standard CDS will utilize a custom data processor (CDP) to process the data sources that the SDK runtime provides it.  
+A standard CDS will utilize a custom data processor (CDP) to process the data sources that the SDK runtime provides it.
 
 A plugin may also define tables that get utilized by viewers such as Windows Performance Analyzer (WPA) to display the 
 processed data in an organized, interactable collection of rows. Tables are discovered and passed into CDPs by the SDK 
@@ -21,8 +21,9 @@ Refer to /samples/SimpleDataSource for source code that implements the steps out
 
 The following are required for a Simple Data Source:
 
-1. Create a public class that extends the abstract class `CustomDataSourceBase`. This is your custom data source (CDS).
-2. Create a public class that extends the abstract class `CustomDataProcessorBase`. This your custom data processor 
+1. Create a public class that implements the abstract class `CustomDataSourceBase`. This is your custom data source 
+   (CDS).
+2. Create a public class that implements the abstract class `CustomDataProcessorBase`. This your custom data processor 
    (CDP).
 3. Create one or more data tables classes. These classes must:
    - Be public and static.
@@ -56,7 +57,7 @@ The following are required for a Simple Data Source:
 2. Overwrite the SetApplicationEnvironmentCore method. The IApplicationEnvironment parameter is stored in the base 
    class' ApplicationEnvironment property.
 
-      **Note**: we intend to make this method virtual in the base class in the future as nothing needs to be done here
+      **Note**: This method will be made virtual in the base class in the future as nothing needs to be done here
 
    ```
    protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
@@ -65,7 +66,8 @@ The following are required for a Simple Data Source:
    ```
 
 3. Overwrite the CreateProcessorCore method. When the SDK needs to process files your CDS supports, it will obtain an 
-   instance of your CDP by calling this method. This is also where your CDS learns about the files, passed as `IDataSource`s, that it will need to process.
+   instance of your CDP by calling this method. This is also where your CDS learns about the files, passed as 
+   `IDataSource`s, that it will need to process.
 
    ```
    protected override ICustomDataProcessor CreateProcessorCore(
@@ -93,7 +95,7 @@ The following are required for a Simple Data Source:
 4. Overwrite the IsFileSupportedCore method. This is where your class will determine if a given file contains data 
    appropriate to your CDS. For example, if your CDS consumes .xml files, not all .xml files will be valid for your
    CDS. Use this method as an opportunity to filter out the files that aren't consumable by this CDS.  
-   :warning: This method will be changed before 1.0 release. more details to follow.
+   :warning: This method will be changed before 1.0 release - more details to follow.
    ```
    protected override bool IsFileSupportedCore(string path)
    {
