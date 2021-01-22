@@ -120,3 +120,11 @@ instance of the class/table described by the `TableDescriptor`.
 Note that tables are "hooked up" to CDPs automatically by the SDK. Any class decorated with the `TableAttribute` that has a public static
 `TableDescriptor` field/property is automatically hooked up to any CDPs declared in that table's assembly. There are ways to 
 explicitly enumerate the CDPs that a table gets hooked up to, but this will be covered in the advanced tutorials (still to come!).
+
+# Video
+
+<figure class="video_container">
+  <video controls="true" allowfullscreen="true">
+    <source src="https://microsoft.github.io/microsoft-performance-toolkit-sdk/documentation/Videos/SDK%20Video%201.mp4" type="video/mp4">
+  </video>
+</figure>
