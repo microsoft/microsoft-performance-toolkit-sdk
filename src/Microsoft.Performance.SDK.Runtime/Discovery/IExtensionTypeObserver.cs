@@ -23,6 +23,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         void ProcessType(Type type, string sourceName);
 
         /// <summary>
+        ///     Called when type discovery is started.
+        /// </summary>
+        void DiscoveryStarted();
+
+        /// <summary>
         ///     Called when type discovery is complete.
         /// </summary>
         void DiscoveryComplete();

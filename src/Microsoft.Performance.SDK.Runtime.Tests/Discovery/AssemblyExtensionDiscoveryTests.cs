@@ -54,6 +54,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         }
 
         internal bool Completed { get; set; }
+
+        public void DiscoveryStarted()
+        {
+            this.Completed = false;
+        }
+
         public void DiscoveryComplete()
         {
             Assert.IsFalse(this.Completed);
