@@ -8,7 +8,7 @@ For more detailed information on how to create your own project using the SDK, p
 ## High-Level Interfaces
 
 The Microsoft Performance Toolkit SDK was built to empower users to analyze arbitrary data source (such as `.etl` files, `.ctf` files, SQL server logs, etc). 
-Users can develop *SDK plugins* that contain logic for processing data sources into tables, which are sent to the *SDK driver* (such as 
+Users can develop extensible *SDK plugins* that contain logic for processing data sources into tables, which are sent to the *SDK driver* (such as 
 the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer)) to render. At the highest 
 level, it exposes the following interfaces:
 
@@ -28,7 +28,7 @@ accessed by anyone - not just other plugins. See the Plugins section for more in
 4) Each plugin given the data sources returns *tables* to the SDK. Note that a plugin which advertises support for a data source may return no tables, but that 
 is unlikely to happen in practice.
 5) The SDK outputs all tables created by plugins to the SDK driver.
-6) The SDK driver does whatever it wishes with the tables. In WPA, the tables are rendered as interactable and manipulable graphs.
+6) The SDK driver does whatever it wishes with the tables. For example, WPA displays the tables along with interactable and manipulable graphs.
 
 Note that in this simplified example only *one* data source is given to the SDK. In practice, multiple data sources may be passed in simultatenously. The SDK 
 handles mapping data sources to the correct plugins, and each plugin sees as input a *list* of data sources for which it advertises support. 
@@ -43,8 +43,8 @@ to process. For GUI drivers, these data sources are typically the file paths a u
 more programmatic drivers such as scripts may pass down hard-coded data sources. 
 
 We recommend using the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) 
-as the SDK driver since it grants a plethora of tools for performance analysis. WPA is a Windows-only tool; creating a cross-platform 
-solution is a long term goal.
+as the SDK driver since it grants a plethora of tools for performance analysis. For more information on how to install WPA, 
+see [Using the SDK/Installing WPA](Using-the-SDK/Installing-WPA.md). 
 
 Creating an SDK driver is currently outside the scope of this documentation, although it may be added in the future.
 
@@ -54,11 +54,11 @@ Creating an SDK driver is currently outside the scope of this documentation, alt
 The SDK operates as a common interface between the driver and plugins. It facilitates 
 1) Loading plugins at the request of the SDK driver
 2) Distributing data sources to the appropriate plugins
-3) Providing the SDK driver populated tables created by loaded plugins
-4) Processing (also known as cooking) data within a plugin through a [processing pipeline](./The-Data-Processing-Pipeline)
-5) Querying and piping data between either two concurrently loaded plugins or a loaded plugin and an assembly with programmatic 
+3) Processing (also known as cooking) data within a plugin through a [processing pipeline](./The-Data-Processing-Pipeline)
+4) Querying and piping data between either two concurrently loaded plugins or a loaded plugin and an assembly with programmatic 
    access to the running instance of the SDK (even if the data originates from a plugin which the destination does 
    not have the source code for)
+5) Providing the SDK driver populated tables created by loaded plugins
 
 ## Plugins
 
@@ -70,8 +70,8 @@ From an interface perspective, a plugin is a collection of
 
 that work together to
 1) Consume specific data sources that the SDK provides
-2) Create populated tables that get sent to the SDK
-3) Expose data that can be programmatically accessed by outside sources, such as other plugins
+2) Expose data that can be programmatically accessed by outside sources, such as other plugins
+3) Create populated tables that get sent to the SDK
 
 A plugin is an **abstract collection of these objects** which can be bundled together for distribution and loaded as a single 
 unit by the SDK driver. *A plugin can be, and often is, made up of multiple assemblies*.
@@ -84,16 +84,16 @@ The diagram below demonstrates how these objects work together to acheive this h
 
 <img src=".attachments/plugin.svg" width="800">
 
-1) The `CustomDataSource` advertises to the SDK which data sources it supports and all the tables it can output. The `CustomDataSource` is 
+1) The `CustomDataSource` advertises to the SDK which data sources it supports and all the tables a driver can consume from it. The `CustomDataSource` is 
    primarily an interface definition, but it also implements creating a `CustomDataProcessor`
 2) The `CustomDataProcessor` contains implementation logic for processing the data sources provided by the SDK. The data sources 
    are given to the `CustomDataSource`, which typically passes them to the `CustomDataProcessor` it creates
-3) `Table` classes populate the tables ultimately returned by the plugin. The data inside these tables comes from the `CustomDataProcessor`,
-   either directly or indirectly through a [processing pipeline](./The-Data-Processing-Pipeline)
-4) `DataCooker` classes participate in the plugin's [processing pipeline](./The-Data-Processing-Pipeline) and
+3) `DataCooker` classes participate in the plugin's [processing pipeline](./The-Data-Processing-Pipeline) and
     1) Export `DataOutput`s that can be queried, via the SDK, by anyone who knows an output's *data path*
     2) Advertise to the SDK *data paths* that can be used by either outside sources (such as concurrently loaded plugins), or other parts 
        of that cooker's plugin, to query that cooker's `DataOutput`s
+4) `Table` classes populate the tables ultimately returned by the plugin. The data inside these tables comes from the `CustomDataProcessor`,
+   either directly or indirectly through a [processing pipeline](./The-Data-Processing-Pipeline)
 
 For implementation details on how to create a simple plugin containing one `CustomDataSource` and its associated `CustomDataProcessor` and
 `Table`s, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).

@@ -24,10 +24,10 @@ For help with getting started and developing SDK plugins, refer to the [document
 * `src`: the source code for the SDK
 
 ## Projects in the SDK Solution
-* `Microsoft.Performance.SDK`: *description coming soon*
-* `Microsoft.Performance.SDK.Runtime`: *description coming soon*
-* `Microsoft.Performance.SDK.Runtime.NetCoreApp`: *description coming soon*
-* `Microsoft.Performance.SDK.Toolkit.Engine`: *description coming soon*
+* `Microsoft.Performance.SDK`: Software library for building SDK plugins
+* `Microsoft.Performance.SDK.Runtime`: Runtime for loading and processing data from plugins
+* `Microsoft.Performance.SDK.Runtime.NetCoreApp`: .NET Core version of `Microsoft.Performance.SDK.Runtime`
+* `Microsoft.Performance.SDK.Toolkit.Engine`: Interface for programmatically manipulating, cooking, and accessing data from SDK plugins
 * `Microsoft.Performance.SDK.Tests`: Tests for `Microsoft.Performance.SDK`
 * `Microsoft.Performance.SDK.Runtime.Tests`: Tests for `Microsoft.Performance.SDK.Runtime`
 * `Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests`: Tests for `Microsoft.Performance.SDK.Runtime.NetCoreApp`
