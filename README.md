@@ -18,27 +18,27 @@ data processing pipeline when creating tables for a given data source.
 For help with getting started and developing SDK plugins, refer to the [documentation folder](./documentation).
 
 ## In this Repository
-* `devel-template`: TODO
+* `devel-template`: a work-in-progress .NET template for creating SDK plugins
 * `documentation`: instructions for how to utilize the SDK and create SDK plugins
 * `samples`: example SDK plugins' source code
 * `src`: the source code for the SDK
 
 ## Projects in the SDK Solution
-* `Microsoft.Performance.SDK`: TODO
-* `Microsoft.Performance.SDK.Runtime`: TODO
-* `Microsoft.Performance.SDK.Runtime.NetCoreApp`: TODO
-* `Microsoft.Performance.SDK.Toolkit.Engine`: TODO
+* `Microsoft.Performance.SDK`: Software library for building SDK plugins
+* `Microsoft.Performance.SDK.Runtime`: Runtime for loading and processing data from plugins
+* `Microsoft.Performance.SDK.Runtime.NetCoreApp`: .NET Core version of `Microsoft.Performance.SDK.Runtime`
+* `Microsoft.Performance.SDK.Toolkit.Engine`: Interface for programmatically manipulating, cooking, and accessing data from SDK plugins
 * `Microsoft.Performance.SDK.Tests`: Tests for `Microsoft.Performance.SDK`
 * `Microsoft.Performance.SDK.Runtime.Tests`: Tests for `Microsoft.Performance.SDK.Runtime`
 * `Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests`: Tests for `Microsoft.Performance.SDK.Runtime.NetCoreApp`
 * `Microsoft.Performance.SDK.Toolkit.Engine.Tests`: Tests for `Microsoft.Performance.SDK.Toolkit.Engine`
-* `Microsoft.Performance.SDK.Testing`: TODO
-* `Microsoft.Performance.SDK.Testing.SDK`: TODO
-* `PluginConfigurationEditor`: TODO
+* `Microsoft.Performance.SDK.Testing`: *description coming soon*
+* `Microsoft.Performance.SDK.Testing.SDK`: *description coming soon*
+* `PluginConfigurationEditor`: *description coming soon*
 
 ## Coming Soon
 
-Team is actively working to providing samples, tutorials, and a NuGet package release.
+Team is actively working to provide better documentation, more samples, and several in-depth tutorials.
 
 ## How to Engage, Contribute, and Provide Feedback
 
