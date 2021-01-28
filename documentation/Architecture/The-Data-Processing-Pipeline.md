@@ -128,4 +128,4 @@ and do whatever it wishes with it.
 # Next Steps
 
 Now that we understand at a high level how a data processing pipeline works, we can now begin creating our own 
-SDK plugins. To get started, view [Using the SDK/Creating an SDK Plugin C# Project](Using-the-SDK/Creating-your-project.md).
+SDK plugins. To get started, view [Using the SDK/Creating an SDK Plugin C# Project](../Using-the-SDK/Creating-your-project.md).
