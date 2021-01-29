@@ -41,13 +41,22 @@ namespace SqlPluginWithProcessingPipeline
         {
             // Peek inside the XML and make sure our XML namespace is declared and used
 
-            var lines = File.ReadLines(path);
-            if (lines.Count() < 2)
+            using (var reader = new StreamReader(path))
             {
-                return false;
-            }
+                // Skip first line since namespace should be on second
+                reader.ReadLine();
 
-            return lines.ElementAt(1).Contains(SqlPluginConstants.SqlXmlNamespace);
+                var line = reader.ReadLine();
+
+                if (line != null)
+                {
+                    return line.Contains(SqlPluginConstants.SqlXmlNamespace);
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
         protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
