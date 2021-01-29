@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace SqlPluginWithProcessingPipeline
 {
     [Table]
-    public class SqlTableFromDataCooker
+    public static class SqlTableFromDataCooker
     {
         public static TableDescriptor TableDescriptor => new TableDescriptor(
             Guid.Parse("{9DA1A713-D34B-49F6-AE32-A4D1B8738004}"),

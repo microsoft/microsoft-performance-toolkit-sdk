@@ -17,7 +17,8 @@ namespace SqlPluginWithProcessingPipeline
         // Backing field for this cooker's DataOutput
         private readonly List<SqlEventWithRelativeTimestamp> sqlEventsWithRelativeTimestamps;
 
-        public SqlDataCooker() : base(SqlPluginConstants.CookerPath)
+        public SqlDataCooker()
+            : base(SqlPluginConstants.CookerPath)
         {
             this.sqlEventsWithRelativeTimestamps = new List<SqlEventWithRelativeTimestamp>();
             this.SqlEventsWithRelativeTimestamps = 
