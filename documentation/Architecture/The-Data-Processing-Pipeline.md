@@ -1,15 +1,15 @@
 # The Data Processing Pipeline
 
 Within a plugin, a `CustomDataSource` delegates the task of processing data sources to a `CustomDataProcessor`. 
-Because data sources are typically files on disk that need to be both read and parsed, we want to ensure that these 
-processors are efficient and that access to the physical disk occurs as infrequently as possible. Furthermore, it would be 
-nice if the SDK provided a way to
+In order to minimize the overhead of accessing persistent data storage, a well-designed plugin aims to have its 
+`CustomDataProcessor`s directly access data sources as infrequently as possible. Additionally, it would be nice 
+if the SDK provided a way to
 1) Allow plugins to systematically transform raw data points into an arbitrary data type
 2) Containerize these transformations into specific modules that exist outisde of the `CustomDataProcessor`
 3) Use the output of these transformations in mulitple locations within these modules' plugin (e.g. *share* the output)
 4) Allow external binaries, such as other plugins, access to the output of these transformations (as in *extend* the plugin defining the transformation)
 
-The SDK allows a plugin to achieve these goals, while minimizing the number of times data sources need to be read, 
+The SDK allows a plugin to achieve these goals, while minimizing the number of times data sources need to be directly accessed, 
 by facilitating and allowing the creation of a __data processing pipeline__.
 
 # Pipeline Components
@@ -19,8 +19,8 @@ components: __source parsers__ and __data cookers__.
 
 ## Source Parsers
 
-A `SourceParser` is a class whose sole purpose is to process (parse) the raw data inside the data sources a 
-`CustomDataProcessor` must process. Conceptually, a `CustomDataProcessor` further *delegates* the task of 
+A `SourceParser` is a class that is responsible for parsing data sources on behalf of a `CustomDataProcessor`. 
+Conceptually, a `CustomDataProcessor` *delegates* the task of 
 processing its data sources to a `SourceParser`.
 
 > :question: This delegation raises the question: if a data processor can just further delegate work, 
@@ -46,13 +46,14 @@ encountered.__
 
 ## Data Cookers
 
-A `DataCooker` is a class whose purpose is to implement the data transformations outlined at the beginning of this document. 
+A `DataCooker` is a class that is responsible for implementing the data transformations whose 
+outputs are accessible by both other plugin modules and external binaries. 
 From an interface perspective, a `DataCooker` has the following properties:
 * A `DataCooker` has a `DataCookerPath` that can 
     1) be recreated by other modules (or external assemblies) and 
     2) be used to reference that `DataCooker` (even without access to that `DataCooker`'s source code)
 * A `DataCooker` consumes data from from either a *single source parser* or *one or more data cookers*
-* A `DataCooker` processes (cooks) this data in some way
+* A `DataCooker` processes (cooks) this data
 * A `DataCooker` exposes zero or more __data output__ properties
 
 `DataOutput`s are the key component of data cookers, and are what achieve the last two goals outlined at the beginning of this document. 
@@ -110,11 +111,11 @@ modularize and promote the extensibility of three tables:
 
 <img src=".attachments/complex_pipeline.svg" width="100%">
 
-In this example, `DC1` and `DC2` are `SourceDataCooker`s which are concurrently consuming events emitted from the 
-`SourceParser`. `T1` queries `DC1`'s `DataOutput1` property to construct its table. `DC3` and `DC4` are 
-`CompositeDataCooker`s, each querying the same `DataOutput2` property of `DC2`. Finally, tables `T2` and 
-`T3` query the composite cookers during their table construction. Note that `DC4` is exposing two `DataOutput`s, 
-`DataOutput4` (used by `T2`) and `DataOutput5` (used by `T3`).
+In this example, `DC1` and `DC2` are `SourceDataCooker`s that are concurrently consuming events emitted from the 
+`SourceParser`. Table `T1` queries `DC1`'s `DataOutput1` for the data it needs to populate its rows. `DC3` and 
+`DC4` are `CompositeDataCooker`s, each querying the same `DataOutput2` property of `DC2`. Finally, tables `T2` and 
+`T3` query these composite cookers to receive the data they require. Note that `DC4` 
+is exposing two `DataOutput`s, `DataOutput4` (used by `T2`) and `DataOutput5` (used by `T3`). 
 
 All `DataOutput`s shown in this example are, of course, queryable by other assemblies - including, but not limited to, 
 other plugins loaded into the SDK.
