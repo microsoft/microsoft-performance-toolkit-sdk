@@ -58,9 +58,12 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="directoryPath">
         ///     Directory to process.
         /// </param>
-        public void ProcessAssemblies(string directoryPath)
+        /// <returns>
+        ///     Whether or not all assemblies in the given directory were processed successfully.
+        /// </returns>
+        public bool ProcessAssemblies(string directoryPath)
         {
-            this.ProcessAssemblies(new[] { directoryPath, });
+            return this.ProcessAssemblies(new[] { directoryPath, });
         }
 
         /// <summary>
@@ -70,9 +73,12 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="directoryPaths">
         ///     Directories to process.
         /// </param>
-        public void ProcessAssemblies(IEnumerable<string> directoryPaths)
+        /// <returns>
+        ///     Whether or not all assemblies in the given directories were processed successfully.
+        /// </returns>
+        public bool ProcessAssemblies(IEnumerable<string> directoryPaths)
         {
-            this.ProcessAssemblies(directoryPaths, true, null, null, false);
+            return this.ProcessAssemblies(directoryPaths, true, null, null, false);
         }
 
         /// <summary>
@@ -94,14 +100,17 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="exclusionsAreCaseSensitive">
         ///     Indicates whether files names should be treated as case sensitive.
         /// </param>
-        public void ProcessAssemblies(
+        /// <returns>
+        ///     Whether or not all assemblies in the given directory were processed successfully.
+        /// </returns>
+        public bool ProcessAssemblies(
             string directoryPath,
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns,
             IEnumerable<string> exclusionFileNames,
             bool exclusionsAreCaseSensitive)
         {
-            this.ProcessAssemblies(
+            return this.ProcessAssemblies(
                 new[] { directoryPath, },
                 includeSubdirectories,
                 searchPatterns,
@@ -128,7 +137,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="exclusionsAreCaseSensitive">
         ///     Indicates whether files names should be treated as case sensitive.
         /// </param>
-        public void ProcessAssemblies(
+        /// <returns>
+        ///     Whether or not all assemblies in the given directories were processed successfully.
+        /// </returns>
+        public bool ProcessAssemblies(
             IEnumerable<string> directoryPaths,
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns,
@@ -137,6 +149,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         {
             Guard.NotNull(directoryPaths, nameof(directoryPaths));
             directoryPaths.ForEach(x => Guard.NotNullOrWhiteSpace(x, nameof(directoryPaths)));
+
+            Parallel.ForEach(this.observers, (observer) => observer.DiscoveryStarted());
 
             var watch = Stopwatch.StartNew();
 
@@ -153,16 +167,24 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             var loaded = new List<Assembly>();
 
+            bool allLoaded = true;
+
             lock (this.observers)
             {
                 if (!this.observers.Any())
                 {
                     // If a tree falls in a forest and no one is around to hear it, does it make a sound?
-                    return;
+                    return false;
                 }
 
                 foreach (var directoryPath in directoryPaths)
                 {
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        allLoaded = false;
+                        continue;
+                    }
+
                     foreach (var searchPattern in searchPatterns)
                     {
                         var filePaths = this.FindFiles.EnumerateFiles(directoryPath, searchPattern, searchOption)
@@ -181,7 +203,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             var assembly = this.assemblyLoader.LoadAssembly(filePath);
                             if (!(assembly is null))
                             {
-                                ProcessAssembly(assembly);
+                                allLoaded = allLoaded && ProcessAssembly(assembly);
+                            } else
+                            {
+                                allLoaded = false;
                             }
                         }
                     }
@@ -191,14 +216,16 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
 
             watch.Stop();
-            Console.Error.WriteLine("Loaded all in {0}", watch.Elapsed);
+            Console.Error.WriteLine("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
+            return allLoaded;
         }
 
-        private void ProcessAssembly(Assembly assembly)
+        private bool ProcessAssembly(Assembly assembly)
         {
             Guard.NotNull(assembly, nameof(assembly));
 
             var assemblyName = assembly.GetName().FullName;
+            bool success = false;
 
             try
             {
@@ -209,6 +236,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                         observer.ProcessType(type, assemblyName);
                     });
                 }
+
+                success = true;
             }
             catch (ReflectionTypeLoadException e)
             {
@@ -236,6 +265,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 Console.Error.WriteLine("Unable to examine `{0}`: ", assembly.GetName());
                 Console.Error.WriteLine("--> {0}", e.Message);
             }
+
+            return success;
         }
 
         /// <summary>
