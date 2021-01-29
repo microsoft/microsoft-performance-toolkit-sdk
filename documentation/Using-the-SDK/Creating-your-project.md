@@ -47,7 +47,7 @@ If you installed Visual Studio 2019 based on the above instructions, then you ar
 1) Launch Visual Studio 2019
 2) Click "Create new project"  
  ![VS2019_Create_New_Project.PNG](./.attachments/VS2019_CreateProject_Markup.png)
-3) Select .NET Standard on the left, and choose "Class Library (.NET Standard)." Make sure that you are using .NET Standard 2.1  
+3) Select .NET Standard on the left, and choose "Class Library (.NET Standard)." Make sure that you are using .NET Standard 2.0 
  ![VS2017_New_DotNetStandard_20_Project.PNG](./.attachments/VS2019_CreateProject_ClassLibrary_Markup.png)
 4) Give your project whatever name you want
 5) Click "Create"

@@ -272,6 +272,10 @@ The `TableConfiguration` passed into `ITableBuilder.AddTableConfiguration` and `
 Each call to `ITableBuilderWithRowCount.AddColumn` establishes a column on the table. Each column requires a `ColumnConfiguration` 
 to describe the column, and an `IProjection<int, T>` which map a given row index for that column to a piece of data.
 
+# Video Walkthrough
+
+A video tutorial of making a simple SDK plugin can be found in the [SQL plugin sample](../../samples/SqlPlugin).
+
 # Next Steps
 
 Now that we've seen how to create a simple SDK plugin, let us learn how to create a data processing pipeline

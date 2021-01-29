@@ -78,6 +78,10 @@ are loaded into the SDK runtime, then your Table will be available for use.
 For some real-world examples of extended tables, see the 
 [tables exposed by our LTTng tools](https://github.com/microsoft/Microsoft-Performance-Tools-Linux/tree/develop/LTTngDataExtensions/Tables).
 
+# Video Walkthrough
+
+A video tutorial of making a data processing pipeline and extended table can be found in the [SQL plugin sample](../../samples/SqlPlugin).
+
 # Next Steps
 
 This documentation marks the end of all necessary information to begin creating extensible, well-strucutred 
