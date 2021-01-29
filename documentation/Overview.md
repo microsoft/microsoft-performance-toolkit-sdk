@@ -26,7 +26,7 @@ To best understand how the SDK works and how to develop SDK plugins, it is recom
 2) [Architecture/The Data Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
 can be used by tables
 3) [Using the SDK/Creating an SDK Plugin C# Project](Using-the-SDK/Creating-your-project.md) to get your developer environment ready to create an SDK plugin
-4) [Using the SDK/Creating a Simple Custom Data Source](Using-the-SDK/Creating-a-simple-custom-data-source.md) to see how to create a basic plugin that can 
+4) [Using the SDK/Creating a Simple SDK Plugin](Using-the-SDK/Creating-a-simple-sdk-plugin.md) to see how to create a basic plugin that can 
 take in a specific data source and output structured tables
 5) [Using the SDK/Creating a Data Processing Pipeline](Using-the-SDK/Creating-a-pipeline.md) to see how to create a data processing pipeline that 
 exposes data that can be consumed by your tables and other plugins
