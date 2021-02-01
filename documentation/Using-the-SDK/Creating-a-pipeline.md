@@ -7,7 +7,7 @@ map data between inputs and outputs. A DPP is comprised of the following:
 1) one __source parser__
 2) one or more `DataCooker`s (cookers)
 
-For a real world example of a pipeline, see the LTTng Plugin for WPA, found on GitHub [here](https://github.com/microsoft/Microsoft-Performance-Tools-Linux)
+For a real world example of a pipeline, see the LTTng SDK plugin, found on GitHub [here](https://github.com/microsoft/Microsoft-Performance-Tools-Linux)
 
 Cookers can be further broken down into: 
 1) `SourceCooker`s
