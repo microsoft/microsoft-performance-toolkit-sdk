@@ -200,7 +200,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         public void AddDataSource(IDataSource dataSource)
         {
             Guard.NotNull(dataSource, nameof(dataSource));
-
             this.ThrowIfProcessed();
 
             if (!this.TryAddDataSource(dataSource))
@@ -330,7 +329,16 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         public void AddDataSources(IEnumerable<IDataSource> dataSources, Type customDataSourceType)
         {
-            if (!AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs, out var e))
+            Guard.NotNull(dataSources, nameof(dataSources));
+            Guard.NotNull(customDataSourceType, nameof(customDataSourceType));
+            if (dataSources.Any(x=>x is null))
+            {
+                throw new ArgumentNullException(nameof(dataSources));
+            }
+
+            this.ThrowIfProcessed();
+
+            if (!this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs, out var e))
             {
                 Debug.Assert(e != null);
                 e.Throw();
@@ -352,7 +360,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         public bool TryAddDataSources(IEnumerable<IDataSource> dataSources, Type customDataSourceType)
         {
-            return AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs, out _);
+            if (dataSources is null ||
+                dataSources.Any(x => x is null) ||
+                customDataSourceType is null ||
+                this.IsProcessed)
+            {
+                return false;
+            }
+
+            return this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs, out _);
         }
 
         /// <summary>
@@ -442,8 +458,9 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(extensionDirectory != null);
 
             var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
+            var versionChecker = createInfo.Versioning ?? VersionChecker.Create();
 
-            var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader);
+            var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, versionChecker);
 
             var catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
 
@@ -453,7 +470,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 assemblyDiscovery,
                 repoBuilder);
 
-            assemblyDiscovery.ProcessAssemblies(extensionDirectory);
+            assemblyDiscovery.ProcessAssemblies(extensionDirectory, out _);
 
             repoBuilder.FinalizeDataExtensions();
 
@@ -522,7 +539,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             return instance;
         }
 
-        private static bool AddDataSourcesCore(
+        private bool AddDataSourcesCore(
             IEnumerable<IDataSource> dataSources,
             Type customDataSourceType,
             List<CustomDataSourceReference> customDataSourceReferences,
@@ -536,6 +553,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(dataSourcesToProcess != null);
             Debug.Assert(typeIs != null);
 
+            Debug.Assert(!this.IsProcessed);
+
             var cdsr = customDataSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), customDataSourceType));
             if (cdsr is null)
             {
@@ -546,7 +565,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             var atLeastOneDataSourceProvided = false;
             foreach (var dataSource in dataSources)
             {
-                Guard.NotNull(dataSource, nameof(dataSources));
+                Debug.Assert(dataSource != null);
 
                 atLeastOneDataSourceProvided = true;
                 if (!cdsr.Supports(dataSource))

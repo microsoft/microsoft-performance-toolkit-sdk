@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-//  Copyright (c) Microsoft Corporation.  All Rights Reserved.
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
@@ -72,6 +71,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
     {
         private TestAssemblyLoader Loader { get; set; }
 
+        private FakeVersionChecker VersionChecker { get; set; }
+
         private AssemblyExtensionDiscovery Discovery { get; set; }
 
         private TestFindFiles FindFiles { get; set; }
@@ -93,7 +94,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             this.Loader = new TestAssemblyLoader();
 
-            this.Discovery = new AssemblyExtensionDiscovery(this.Loader);
+            this.VersionChecker = new FakeVersionChecker();
+
+            this.Discovery = new AssemblyExtensionDiscovery(this.Loader, this.VersionChecker);
 
             this.FindFiles = new TestFindFiles();
 
@@ -109,7 +112,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         [UnitTest]
         public void ProcessAssemblies_NullDirectoryPath()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Discovery.ProcessAssemblies((string)null));
+            Assert.ThrowsException<ArgumentNullException>(() => this.Discovery.ProcessAssemblies((string)null, out _));
         }
 
         [TestMethod]
@@ -122,7 +125,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     false,
                     null,
                     null,
-                    false));
+                    false,
+                    out _));
         }
 
         [TestMethod]
@@ -135,7 +139,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     false,
                     null,
                     null,
-                    false));
+                    false,
+                    out _));
         }
 
         [TestMethod]
@@ -151,7 +156,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             var testAssembly = this.GetType().Assembly;
             var testAssemblyDirectory = Path.GetDirectoryName(testAssembly.GetCodeBaseAsLocalPath());
 
-            this.Discovery.ProcessAssemblies(testAssemblyDirectory);
+            this.Discovery.ProcessAssemblies(testAssemblyDirectory, out _);
         }
 
         [TestMethod]
@@ -173,7 +178,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
             RegisterObservers();
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, false);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, false, out _);
 
             Assert.AreEqual(searchPatterns.Length, patternsSearched.Count);
             foreach (var pattern in searchPatterns)
@@ -201,7 +206,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     return null;
                 };
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, false);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, false, out _);
         }
 
         [TestMethod]
@@ -223,7 +228,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                 return this.GetType().Assembly;
             };
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true, out _);
 
             Assert.IsTrue(assemblyLoaded);
         }

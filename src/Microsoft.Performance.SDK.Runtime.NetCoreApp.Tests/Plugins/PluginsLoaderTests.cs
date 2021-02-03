@@ -3,8 +3,10 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -375,7 +377,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             var dirs = new string[] { "foo", "bar" };
             var success = loader.TryLoadPlugins(dirs, out var failed);
             Assert.IsFalse(success);
-            CollectionAssert.AreEquivalent(dirs, failed.ToArray());
+            CollectionAssert.AreEquivalent(dirs, failed.Keys.ToArray());
 
             var expectedCDSs = new Type[] { };
             AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
@@ -392,7 +394,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             var success = loader.TryLoadPlugins(dirs, out var failed);
             Assert.IsFalse(success);
             Assert.AreEqual(1, failed.Count);
-            CollectionAssert.Contains(failed.ToArray(), "foo");
+            CollectionAssert.Contains(failed.Keys.ToArray(), "foo");
 
             var expectedCDSs = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
             AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
@@ -580,7 +582,10 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         /// </summary>
         private static (PluginsLoader, MockPluginsConsumer) Setup(bool subscribe)
         {
-            var loader = new PluginsLoader();
+            var assemblyLoader = new IsolationAssemblyLoader();
+            var versionChecker = new FakeVersionChecker();
+
+            var loader = new PluginsLoader(assemblyLoader, versionChecker);
             var consumer = new MockPluginsConsumer();
             if (subscribe)
             {

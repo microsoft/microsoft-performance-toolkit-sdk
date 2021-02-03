@@ -7,7 +7,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
+using System.Text;
 using System.Threading.Tasks;
+using NuGet.Versioning;
 
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
@@ -19,6 +23,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         : IExtensionTypeProvider
     {
         private readonly IAssemblyLoader assemblyLoader;
+        private readonly VersionChecker versionChecker;
         private readonly List<IExtensionTypeObserver> observers = new List<IExtensionTypeObserver>();
 
         /// <summary>
@@ -27,9 +32,12 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="assemblyLoader">
         ///     This is used to load individual assemblies.
         /// </param>
-        public AssemblyExtensionDiscovery(IAssemblyLoader assemblyLoader)
+        public AssemblyExtensionDiscovery(
+            IAssemblyLoader assemblyLoader,
+            VersionChecker versionChecker)
         {
             this.assemblyLoader = assemblyLoader;
+            this.versionChecker = versionChecker;
         }
 
         /// <summary>
@@ -58,12 +66,16 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="directoryPath">
         ///     Directory to process.
         /// </param>
+        /// <param name="error">
+        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     information about the error(s) that occurred.
+        /// </param>
         /// <returns>
         ///     Whether or not all assemblies in the given directory were processed successfully.
         /// </returns>
-        public bool ProcessAssemblies(string directoryPath)
+        public bool ProcessAssemblies(string directoryPath, out ErrorInfo error)
         {
-            return this.ProcessAssemblies(new[] { directoryPath, });
+            return this.ProcessAssemblies(new[] { directoryPath, }, out error);
         }
 
         /// <summary>
@@ -73,12 +85,16 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="directoryPaths">
         ///     Directories to process.
         /// </param>
+        /// <param name="error">
+        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     information about the error(s) that occurred.
+        /// </param>
         /// <returns>
         ///     Whether or not all assemblies in the given directories were processed successfully.
         /// </returns>
-        public bool ProcessAssemblies(IEnumerable<string> directoryPaths)
+        public bool ProcessAssemblies(IEnumerable<string> directoryPaths, out ErrorInfo error)
         {
-            return this.ProcessAssemblies(directoryPaths, true, null, null, false);
+            return this.ProcessAssemblies(directoryPaths, true, null, null, false, out error);
         }
 
         /// <summary>
@@ -100,6 +116,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="exclusionsAreCaseSensitive">
         ///     Indicates whether files names should be treated as case sensitive.
         /// </param>
+        /// <param name="error">
+        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     information about the error(s) that occurred.
+        /// </param>
         /// <returns>
         ///     Whether or not all assemblies in the given directory were processed successfully.
         /// </returns>
@@ -108,14 +128,16 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns,
             IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive)
+            bool exclusionsAreCaseSensitive,
+            out ErrorInfo error)
         {
             return this.ProcessAssemblies(
                 new[] { directoryPath, },
                 includeSubdirectories,
                 searchPatterns,
                 exclusionFileNames,
-                exclusionsAreCaseSensitive);
+                exclusionsAreCaseSensitive,
+                out error);
         }
 
         /// <summary>
@@ -137,6 +159,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="exclusionsAreCaseSensitive">
         ///     Indicates whether files names should be treated as case sensitive.
         /// </param>
+        /// <param name="error">
+        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     information about the error(s) that occurred.
+        /// </param>
         /// <returns>
         ///     Whether or not all assemblies in the given directories were processed successfully.
         /// </returns>
@@ -145,7 +171,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns,
             IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive)
+            bool exclusionsAreCaseSensitive,
+            out ErrorInfo error)
         {
             Guard.NotNull(directoryPaths, nameof(directoryPaths));
             directoryPaths.ForEach(x => Guard.NotNullOrWhiteSpace(x, nameof(directoryPaths)));
@@ -169,18 +196,26 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             bool allLoaded = true;
 
+            var directoryErrors = new List<ErrorInfo>();
             lock (this.observers)
             {
                 if (!this.observers.Any())
                 {
                     // If a tree falls in a forest and no one is around to hear it, does it make a sound?
+                    error = new ErrorInfo(ErrorCodes.NoObserversRegistered, "No observers are registered.");
                     return false;
                 }
 
                 foreach (var directoryPath in directoryPaths)
                 {
+                    var assemblyErrors = new List<ErrorInfo>();
                     if (!Directory.Exists(directoryPath))
                     {
+                        directoryErrors.Add(
+                            new ErrorInfo(ErrorCodes.DirectoryNotFound, "The given directory does not exist.")
+                            {
+                                Target = directoryPath,
+                            });
                         allLoaded = false;
                         continue;
                     }
@@ -203,12 +238,33 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             var assembly = this.assemblyLoader.LoadAssembly(filePath);
                             if (!(assembly is null))
                             {
-                                allLoaded = allLoaded && ProcessAssembly(assembly);
-                            } else
+                                if (!ProcessAssembly(assembly, out var assemblyError))
+                                {
+                                    allLoaded = false;
+                                    Debug.Assert(assemblyError != null);
+                                    assemblyErrors.Add(assemblyError);
+                                }
+                            }
+                            else
                             {
+                                assemblyErrors.Add(
+                                    new ErrorInfo(ErrorCodes.AssemblyLoadFailed, "The assembly failed to load.")
+                                    {
+                                        Target = filePath,
+                                    });
                                 allLoaded = false;
                             }
                         }
+                    }
+
+                    if (assemblyErrors.Count > 0)
+                    {
+                        directoryErrors.Add(
+                            new ErrorInfo(ErrorCodes.PluginRegistrationFailed, "Unable to load the plugin.")
+                            {
+                                Target = directoryPath,
+                                Details = assemblyErrors.ToArray(),
+                            });
                     }
                 }
 
@@ -217,56 +273,142 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             watch.Stop();
             Console.Error.WriteLine("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
+            
+            if (directoryErrors.Count > 0)
+            {
+                Debug.Assert(!allLoaded);
+                error = new ErrorInfo(ErrorCodes.DiscoveryFailed, "One or more directories failed during the Plugin Discovery phase.")
+                {
+                    Target = string.Empty,
+                    Details = directoryErrors.ToArray(),
+                    Inner = new DiscoveryInnerError(
+                        directoryPaths,
+                        includeSubdirectories,
+                        searchPatterns,
+                        exclusionFileNames,
+                        exclusionsAreCaseSensitive),
+                };
+            }
+            else
+            {
+                Debug.Assert(allLoaded);
+                error = null;
+            }
+            
             return allLoaded;
         }
 
-        private bool ProcessAssembly(Assembly assembly)
+        private bool ProcessAssembly(
+            Assembly assembly,
+            out ErrorInfo error)
         {
             Guard.NotNull(assembly, nameof(assembly));
 
             var assemblyName = assembly.GetName().FullName;
-            bool success = false;
 
+            var referencedSdk = this.versionChecker.FindReferencedSdkVersion(assembly);
+            if (referencedSdk != null &&
+                !this.versionChecker.IsVersionSupported(referencedSdk))
+            {
+                error = new ErrorInfo(
+                    ErrorCodes.SdkVersionIncompatible,
+                    "The assembly references a version of the SDK which is incompatible " +
+                    "with the hosting SDK. Please contact the author of the plugin.")
+                {
+                    Target = assemblyName,
+                    Inner = new SdkMismatchInnerError(referencedSdk, this.versionChecker.Sdk)
+                };
+
+                return false;
+            }
+
+            if (referencedSdk is null)
+            {
+                //
+                // If the assembly does not reference the SDK, then
+                // there is no way that there is Plugin collateral
+                // contained within, and so we can just short-circuit
+                // and bail early. By definition, if there is nothing
+                // to process, then nothing can fail.
+                //
+
+                error = null;
+                return true;
+            }
+
+            Type[] assemblyTypes = null;
             try
             {
-                foreach (var type in assembly.GetTypes())
-                {
-                    Parallel.ForEach(observers, (observer) =>
-                    {
-                        observer.ProcessType(type, assemblyName);
-                    });
-                }
-
-                success = true;
+                assemblyTypes = assembly.GetTypes();
             }
             catch (ReflectionTypeLoadException e)
             {
-                Console.Error.WriteLine("Unable to examine `{0}`: ", assembly.GetName());
-                Console.Error.WriteLine("--> {0}", e.Message);
-                foreach (var loaderException in e.LoaderExceptions)
+                error = new ErrorInfo(
+                    ErrorCodes.UnableToReflectAssemblyTypes,
+                    "Unable to enumerate the types in the assembly.")
                 {
-                    Console.Error.WriteLine("----> {0}", loaderException.Message);
-                    if (loaderException is FileNotFoundException fnfe)
-                    {
-                        Console.Error.WriteLine("------> {0}", fnfe.FusionLog);
-                    }
+                    Target = assembly.FullName,
+                    Details = e.LoaderExceptions
+                        .Select(
+                            x => new ErrorInfo(ErrorCodes.LoaderException, e.Message)
+                            {
+                                Target = assembly.FullName,
+                                Inner = FusionInnerError.TryCreate(x),
+                            })
+                        .ToArray(),
+                };
 
-                    Console.Error.WriteLine(loaderException.InnerException);
+                return false;
+            }
+
+            Debug.Assert(assemblyTypes != null);
+
+            var processingErrors = new List<ErrorInfo>();
+            foreach (var type in assemblyTypes)
+            {
+                var observerErrors = new List<(IExtensionTypeObserver, Exception)>();
+                Parallel.ForEach(observers, (observer) =>
+                {
+                    try
+                    {
+                        observer.ProcessType(type, assemblyName);
+                    }
+                    catch (Exception e)
+                    {
+                        observerErrors.Add((observer, e));
+                    }
+                });
+
+                if (observerErrors.Count > 0)
+                {
+                    foreach (var oe in observerErrors)
+                    {
+                        processingErrors.Add(
+                            new ErrorInfo(ErrorCodes.TypeInspectionFailure, oe.Item2.Message)
+                            {
+                                Target = type.FullName,
+                            });
+                    }
                 }
             }
-            catch (TargetInvocationException e)
-            {
-                Console.Error.WriteLine("Unable to examine `{0}`: ", assembly.GetName());
-                Console.Error.WriteLine("--> {0}", e.Message);
-                Console.Error.WriteLine("----> {0}", e.InnerException?.Message ?? "<inner exception was null>");
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine("Unable to examine `{0}`: ", assembly.GetName());
-                Console.Error.WriteLine("--> {0}", e.Message);
-            }
 
-            return success;
+            if (processingErrors.Count > 0)
+            {
+                error = new ErrorInfo(
+                    ErrorCodes.PluginRegistrationFailed,
+                    "The assembly for the plugin failed to be inspected.")
+                {
+                    Target = assembly.FullName,
+                    Details = processingErrors.ToArray(),
+                };
+
+                return false;
+            }
+            else
+            {
+                error = null;
+                return true;
+            }
         }
 
         /// <summary>
@@ -285,6 +427,192 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption)
             {
                 return Directory.EnumerateFiles(directoryPath, searchPattern, searchOption);
+            }
+        }
+
+        [Serializable]
+        private class SdkMismatchInnerError
+            : InnerError,
+              ISerializable
+        {
+            public SdkMismatchInnerError(
+                SemanticVersion referencedSdkVersion,
+                SemanticVersion hostedSdkVersion)
+                : base(ErrorCodes.SdkVersionIncompatible)
+            {
+                this.ReferencedSdkVersion = referencedSdkVersion;
+                this.HostedSdkVersion = hostedSdkVersion;
+            }
+
+            protected SdkMismatchInnerError(
+                SerializationInfo info,
+                StreamingContext context)
+                : base(info, context)
+            {
+                this.ReferencedSdkVersion = SemanticVersion.Parse(info.GetString(nameof(this.ReferencedSdkVersion)));
+                this.HostedSdkVersion = SemanticVersion.Parse(info.GetString(nameof(this.HostedSdkVersion)));
+            }
+
+            public SemanticVersion ReferencedSdkVersion { get; }
+
+            public SemanticVersion HostedSdkVersion { get; }
+
+            [SecurityPermission(
+                SecurityAction.LinkDemand,
+                Flags = SecurityPermissionFlag.SerializationFormatter)]
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                base.GetObjectData(info, context);
+                info.AddValue(nameof(this.ReferencedSdkVersion), this.ReferencedSdkVersion.ToString());
+                info.AddValue(nameof(this.HostedSdkVersion), this.HostedSdkVersion.ToString());
+            }
+
+            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                this.GetObjectData(info, context);
+            }
+
+            public override string ToString()
+            {
+                return new StringBuilder()
+                    .AppendFormat("Referenced SDK Version: {0}", this.ReferencedSdkVersion).AppendLine()
+                    .AppendFormat("Hosted SDK Version:     {1}", this.HostedSdkVersion)
+                    .ToString();
+            }
+        }
+
+        [Serializable]
+        private class FusionInnerError
+            : InnerError,
+              ISerializable
+        {
+            public FusionInnerError(
+                FileNotFoundException e)
+                : base(ErrorCodes.AssemblyLoadFailed)
+            {
+                this.Exception = e;
+            }
+
+            protected FusionInnerError(
+                SerializationInfo info,
+                StreamingContext context)
+                : base(info, context)
+            {
+                this.Exception = (FileNotFoundException)info.GetValue(
+                    nameof(this.Exception),
+                    typeof(FileNotFoundException));
+            }
+
+            public FileNotFoundException Exception { get; }
+
+            public string FileName => this.Exception.FileName;
+
+            public string FusionLog => this.Exception.FusionLog;
+
+            public static InnerError TryCreate(Exception loaderException)
+            {
+                if (loaderException is FileNotFoundException fnfe)
+                {
+                    return new FusionInnerError(fnfe);
+                }
+
+                return null;
+            }
+
+            [SecurityPermission(
+                SecurityAction.LinkDemand,
+                Flags = SecurityPermissionFlag.SerializationFormatter)]
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                base.GetObjectData(info, context);
+                info.AddValue(nameof(this.Exception), this.Exception);
+            }
+
+            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                this.GetObjectData(info, context);
+            }
+
+            public override string ToString()
+            {
+                return new StringBuilder()
+                    .AppendFormat("File not found: {0}", this.FileName).AppendLine()
+                    .AppendFormat("Fusion Log: {0}", this.FusionLog)
+                    .ToString();
+            }
+        }
+
+        [Serializable]
+        private class DiscoveryInnerError
+            : InnerError,
+              ISerializable
+        {
+            public DiscoveryInnerError(
+                IEnumerable<string> directoryPaths,
+                bool includeSubdirectories,
+                IEnumerable<string> searchPatterns,
+                IEnumerable<string> exclusionFileNames,
+                bool exclusionsAreCaseSensitive)
+                : base(ErrorCodes.DiscoveryFailed)
+            {
+                this.DirectoryPaths = directoryPaths?.ToList() ?? new List<string>();
+                this.IncludeSubDirectories = includeSubdirectories;
+                this.SearchPatterns = searchPatterns?.ToList() ?? new List<string>();
+                this.ExclusionFileNames = exclusionFileNames?.ToList() ?? new List<string>();
+                this.ExclusionsAreCaseSensitive = exclusionsAreCaseSensitive;
+            }
+            protected DiscoveryInnerError(
+               SerializationInfo info,
+               StreamingContext context)
+               : base(info, context)
+            {
+                this.DirectoryPaths = (List<string>)info.GetValue(nameof(this.DirectoryPaths), typeof(List<string>));
+                this.IncludeSubDirectories = info.GetBoolean(nameof(this.IncludeSubDirectories));
+                this.SearchPatterns = (List<string>)info.GetValue(nameof(this.SearchPatterns), typeof(List<string>));
+                this.ExclusionFileNames = (List<string>)info.GetValue(nameof(this.ExclusionFileNames), typeof(List<string>));
+                this.ExclusionsAreCaseSensitive = info.GetBoolean(nameof(this.ExclusionsAreCaseSensitive));
+            }
+
+            public List<string> DirectoryPaths { get; }
+
+            public bool IncludeSubDirectories { get; }
+
+            public List<string> SearchPatterns { get; }
+
+            public List<string> ExclusionFileNames { get; }
+
+            public bool ExclusionsAreCaseSensitive { get; }
+
+            [SecurityPermission(
+                SecurityAction.LinkDemand,
+                Flags = SecurityPermissionFlag.SerializationFormatter)]
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                base.GetObjectData(info, context);
+                info.AddValue(nameof(this.DirectoryPaths), this.DirectoryPaths);
+                info.AddValue(nameof(this.IncludeSubDirectories), this.IncludeSubDirectories);
+                info.AddValue(nameof(this.SearchPatterns), this.SearchPatterns);
+                info.AddValue(nameof(this.ExclusionFileNames), this.ExclusionFileNames);
+                info.AddValue(nameof(this.ExclusionsAreCaseSensitive), this.ExclusionsAreCaseSensitive);
+            }
+
+            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                this.GetObjectData(info, context);
+            }
+
+            public override string ToString()
+            {
+                return new StringBuilder()
+                    .AppendLine("DirectoryPaths:")
+                    .Append(string.Join(Environment.NewLine + "    ", this.DirectoryPaths)).AppendLine()
+                    .AppendFormat("IncludeSubDirectories: {0}", this.IncludeSubDirectories).AppendLine()
+                    .AppendLine("SearchPatterns:")
+                    .Append(string.Join(Environment.NewLine + "    ", this.SearchPatterns)).AppendLine()
+                    .AppendLine("ExclusionFileNames:")
+                    .Append(string.Join(Environment.NewLine + "    ", this.ExclusionFileNames)).AppendLine()
+                    .AppendFormat("ExclusionsAreCaseSensitive: {0}", this.ExclusionsAreCaseSensitive)
+                    .ToString();
             }
         }
     }

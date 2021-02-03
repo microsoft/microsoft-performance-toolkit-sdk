@@ -12,6 +12,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestData;
@@ -78,7 +79,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_NoParameters_UsesCurrentDirectory()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.AreEqual(Environment.CurrentDirectory, sut.ExtensionDirectory);
         }
@@ -95,7 +96,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_IsProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.IsFalse(sut.IsProcessed);
         }
@@ -157,6 +158,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     new EngineCreateInfo
                     {
                         ExtensionDirectory = tempDir,
+                        Versioning = new FakeVersionChecker(),
                     });
                 Assert.IsTrue(engine.CustomDataSources.Any());
                 Assert.IsTrue(engine.CustomDataSources.Any(x => x.GetType().Name == typeof(Source123DataSource).Name));
@@ -183,7 +185,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_NullFile_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSource(null, typeof(Source123DataSource)));
         }
@@ -192,7 +194,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_NullType_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
             Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSource(file, null));
@@ -202,7 +204,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_NoInstancesOfDataSourceLoaded_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var typeAssembly = typeof(Source123DataSource).Assembly;
             var engineAssemblies = System.Runtime.Loader.AssemblyLoadContext.Default.Assemblies.Where(x =>
                 x.GetName().Name.StartsWith("Microsoft.Performance.Toolkit.Engine"));
@@ -218,7 +220,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_DataSourceDoesNotSupportFile_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(".380298502");
@@ -231,7 +233,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_FileSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -249,7 +251,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparaetly()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
@@ -270,7 +272,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSourceOnly_Null_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSource(null));
         }
@@ -286,6 +288,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new EngineCreateInfo
                 {
                     ExtensionDirectory = tempDir,
+                    Versioning = new FakeVersionChecker(),
                 });
 
             var file = AnyFile(".380298502");
@@ -298,7 +301,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSourceOnly_AtLeastOnSourceSupports_Adds()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(Source123DataSource.Extension);
             sut.AddDataSource(file);
@@ -311,7 +314,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.AddDataSource(AnyDataSource()));
@@ -326,7 +329,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSourceOnly_Null_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.IsFalse(sut.TryAddDataSource(null));
         }
@@ -342,6 +345,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new EngineCreateInfo
                 {
                     ExtensionDirectory = tempDir,
+                    Versioning = new FakeVersionChecker(),
                 });
 
             var file = AnyFile(".380298502");
@@ -352,7 +356,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSourceOnly_AtLeastOnSourceSupports_Adds()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(Source123DataSource.Extension);
             sut.TryAddDataSource(file);
@@ -365,7 +369,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSourceOnly_AtLeastOnSourceSupports_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(Source123DataSource.Extension);
 
@@ -376,7 +380,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSourceOnly_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -388,7 +392,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_NullFile_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.IsFalse(sut.TryAddDataSource(null, typeof(Source123DataSource)));
         }
@@ -397,7 +401,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_NullType_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
             Assert.IsFalse(sut.TryAddDataSource(file, null));
@@ -407,7 +411,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_NoInstancesOfDataSourceLoaded_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -418,7 +422,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_DataSourceDoesNotSupportFile_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(".380298502");
@@ -429,7 +433,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_FileSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -448,7 +452,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_FileSupportedByAtLeastOneDataSource_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -460,7 +464,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparaetly()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
@@ -481,7 +485,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSource_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -497,7 +501,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_NullFiles_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSources(null, typeof(Source123DataSource)));
         }
@@ -507,7 +511,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_EmptyFiles_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.ThrowsException<ArgumentException>(() => sut.AddDataSources(new IDataSource[0], typeof(Source123DataSource)));
         }
@@ -516,7 +520,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_ContainsNullFiles_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSources(new[] { (IDataSource)null, }, typeof(Source123DataSource)));
         }
@@ -525,7 +529,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_NullType_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
             Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSources(new[] { file, }, null));
@@ -535,7 +539,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_NoInstancesOfDataSourceLoaded_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -547,7 +551,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_DataSourceDoesNotSupportFile_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source4DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
@@ -562,7 +566,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_FilesSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files = new[]
@@ -590,7 +594,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_FilesSupportedBySameDataSource_AddedAsSeparateCollection()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files1 = new[]
@@ -632,7 +636,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -648,7 +652,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_NullFiles_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.IsFalse(sut.TryAddDataSources(null, typeof(Source123DataSource)));
         }
@@ -657,7 +661,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_NoFiles_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.IsFalse(sut.TryAddDataSources(new IDataSource[0], typeof(Source123DataSource)));
         }
@@ -666,7 +670,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_ContainsNullFiles_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.IsFalse(sut.TryAddDataSources(new[] { (IDataSource)null, }, typeof(Source123DataSource)));
         }
@@ -675,7 +679,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_NullType_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
             Assert.IsFalse(sut.TryAddDataSources(new[] { file, }, null));
@@ -685,7 +689,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_NoInstancesOfDataSourceLoaded_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -696,7 +700,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_DataSourceDoesNotSupportFile_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
@@ -708,7 +712,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_FilesSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files = new[]
@@ -736,7 +740,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_FileSupportedByAtLeastOneDataSource_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files = new[]
@@ -753,7 +757,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_FilesSupportedBySameDataSource_AddedAsSeparateCollection()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files1 = new[]
@@ -795,7 +799,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryAddDataSources_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
@@ -811,7 +815,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_Known_Enables()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = sut.AllCookers.FirstOrDefault();
 
             sut.EnableCooker(cooker);
@@ -824,7 +828,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_NotKnown_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = new DataCookerPath("not-there-id");
 
             var e = Assert.ThrowsException<CookerNotFoundException>(() => sut.EnableCooker(cooker));
@@ -835,7 +839,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableCooker(sut.AllCookers.First()));
@@ -849,7 +853,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_Known_Enables()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = sut.AllCookers.FirstOrDefault();
 
             sut.TryEnableCooker(cooker);
@@ -862,7 +866,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_Known_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = sut.AllCookers.FirstOrDefault();
 
             Assert.IsTrue(sut.TryEnableCooker(cooker));
@@ -875,7 +879,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_NotKnown_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = new DataCookerPath("not-there-id");
 
             Assert.IsFalse(sut.TryEnableCooker(cooker));
@@ -885,7 +889,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             Assert.IsFalse(sut.TryEnableCooker(sut.AllCookers.First()));
@@ -899,7 +903,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_WhenComplete_IsProcessedSetToTrue()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             sut.Process();
 
@@ -910,7 +914,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_NothingEnabled_DoesNothing()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var results = sut.Process();
 
@@ -922,7 +926,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             sut.Process();
 
@@ -944,7 +948,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 System.Diagnostics.Debugger.Break();
             }
 
-            var runtime = Engine.Create();
+            var runtime = CreateEngine();
 
             foreach (var cooker in testCase.CookersToEnable)
             {
@@ -1056,6 +1060,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new EngineCreateInfo
                 {
                     AssemblyLoader = new IsolationAssemblyLoader(),
+                    Versioning = new FakeVersionChecker(),
                 });
 
             foreach (var cooker in testCase.CookersToEnable)
@@ -1137,6 +1142,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         }
 
         #endregion
+
+        private static Engine CreateEngine()
+        {
+            return Engine.Create(
+                new EngineCreateInfo
+                {
+                    Versioning = new FakeVersionChecker(),
+                });
+        }
 
         private static void CopyAssemblyContainingType(Type type, string destDir)
         {

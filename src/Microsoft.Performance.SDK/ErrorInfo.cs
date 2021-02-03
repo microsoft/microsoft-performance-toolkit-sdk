@@ -9,10 +9,11 @@ using System.Security.Permissions;
 namespace Microsoft.Performance.SDK
 {
     /// <summary>
-    ///     Represents an error related to processing specific 
-    ///     data sources.  For example, when processing and ETW
-    ///     trace, there could be time inversion, and so you would
-    ///     need to surface that to the user. 
+    ///     Encapsulates information around an error condition.
+    ///     <para/>
+    ///     Plugin authors may use this in conjuction with
+    ///     <see cref="ExtensionException"/> to report errors
+    ///     from their Plugins.
     /// </summary>
     [Serializable]
     public sealed class ErrorInfo
@@ -91,7 +92,7 @@ namespace Microsoft.Performance.SDK
 
         /// <summary>
         ///     Gets or sets an object containing more specific information
-        ///     that the current object about the error. This property may
+        ///     than the current object about the error. This property may
         ///     be <c>null</c>.
         /// </summary>
         public InnerError Inner { get; set; }
