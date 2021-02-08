@@ -14,6 +14,10 @@ namespace Microsoft.Performance.Testing.SDK
         public FakeCustomDataSourceReference(Type type) 
             : base(type)
         {
+            this.GuidSetter = Guid.NewGuid();
+            this.NameSetter = "fake";
+            this.DescriptionSetter = "fake";
+            this.DataSourcesSetter = new List<DataSourceAttribute>().AsReadOnly();
             this.SupportedDataSources = new HashSet<IDataSource>();
         }
 

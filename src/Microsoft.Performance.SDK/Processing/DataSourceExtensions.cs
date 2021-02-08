@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Processing;
-
-namespace Microsoft.Performance.SDK.Runtime
+namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
     ///     Contains static (Shared in Visual Basic) methods for interacting

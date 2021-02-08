@@ -43,9 +43,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public void TryCreateReferenceForMissingDataSourceAttributeSucceeds()
+        public void TryCreateReferenceForMissingDataSourceAttributeFails()
         {
-            RunCreateSuccessTest(typeof(CdsWithoutDataSourceAttribute));
+            RunCreateFailTest(typeof(CdsWithoutDataSourceAttribute));
         }
 
         [TestMethod]

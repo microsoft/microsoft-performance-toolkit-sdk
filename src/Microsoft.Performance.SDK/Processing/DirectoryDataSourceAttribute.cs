@@ -38,7 +38,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="description"/> is null.
         /// </exception>
         public DirectoryDataSourceAttribute(string description)
-            : base(description)
+            : base(typeof(DirectoryDataSource), description)
         {
         }
 

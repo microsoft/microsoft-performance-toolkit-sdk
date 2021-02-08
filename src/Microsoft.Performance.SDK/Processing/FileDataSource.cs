@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace Microsoft.Performance.SDK.Runtime
+namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
     ///     Represents a file backed data source for process.

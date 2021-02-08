@@ -91,7 +91,8 @@ namespace Microsoft.Performance.SDK.Runtime
                     if (metadataAttribute != null)
                     {
                         var dataSourceAttributes = candidateType.GetCustomAttributes<DataSourceAttribute>()?.ToList();
-                        if (dataSourceAttributes != null)
+                        if (dataSourceAttributes != null &&
+                            dataSourceAttributes.Count > 0)
                         {
                             reference = new CustomDataSourceReferenceImpl(
                                 candidateType,

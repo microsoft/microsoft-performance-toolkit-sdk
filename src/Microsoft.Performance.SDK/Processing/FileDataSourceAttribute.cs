@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Text;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -55,7 +56,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="description"/> is whitespace.
         /// </exception>
         public FileDataSourceAttribute(string fileExtension, string description)
-            : base(description)
+            : base(typeof(FileDataSource), description)
         {
             Guard.NotNullOrWhiteSpace(fileExtension, nameof(fileExtension));
 
@@ -63,9 +64,27 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Gets the file extension supported by the decorated class.
+        ///     Gets the file extension supported by the decorated class,
+        ///     not including the leading period (".")
         /// </summary>
         public string FileExtension { get; }
+
+        /// <inheritdoc />
+        public override bool Accepts(IDataSource dataSource)
+        {
+            Guard.NotNull(dataSource, nameof(dataSource));
+
+            if (!(dataSource is FileDataSource fds))
+            {
+                return false;
+            }
+
+            var ext = '.' + this.FileExtension;
+
+            return StringComparer.OrdinalIgnoreCase.Equals(
+                ext,
+                Path.GetExtension(fds.FullPath));
+        }
 
         /// <inheritdoc />
         public bool Equals(FileDataSourceAttribute other)
@@ -109,7 +128,7 @@ namespace Microsoft.Performance.SDK.Processing
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class ExtensionlessFileDataSourceAttribute
         : DataSourceAttribute,
-          IEquatable<FileDataSourceAttribute>
+          IEquatable<ExtensionlessFileDataSourceAttribute>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="FileDataSourceAttribute"/>
@@ -134,12 +153,25 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="description"/> is null.
         /// </exception>
         public ExtensionlessFileDataSourceAttribute(string description)
-            : base(description)
+            : base(typeof(FileDataSource), description)
         {
         }
 
         /// <inheritdoc />
-        public bool Equals(FileDataSourceAttribute other)
+        public override bool Accepts(IDataSource dataSource)
+        {
+            Guard.NotNull(dataSource, nameof(dataSource));
+
+            if (!(dataSource is FileDataSource fds))
+            {
+                return false;
+            }
+
+            return Path.GetExtension(fds.FullPath) == string.Empty;
+        }
+
+        /// <inheritdoc />
+        public bool Equals(ExtensionlessFileDataSourceAttribute other)
         {
             return base.Equals(other);
         }
@@ -147,7 +179,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as FileDataSourceAttribute);
+            return this.Equals(obj as ExtensionlessFileDataSourceAttribute);
         }
 
         /// <inheritdoc />

@@ -4,13 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DataSourceAttribute = Microsoft.Performance.SDK.Processing.DataSourceAttribute;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
@@ -34,6 +34,109 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             Assert.ThrowsException<ArgumentNullException>(
                 () => DataSourceResolver.Assign(Array.Empty<IDataSource>(), null));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Assign_UnsupportedTypesNotAssignedToCds()
+        {
+            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
+            {
+                DataSourcesSetter = new[]
+                {
+                    new FileDataSourceAttribute(".abc"),
+                },
+            };
+
+            var fakeDs = new FakeDataSource("fake");
+
+            var assignment = DataSourceResolver.Assign(
+                new[] { fakeDs, },
+                new[] { fakeCds, });
+
+            Assert.IsTrue(assignment.ContainsKey(fakeCds));
+            Assert.IsTrue(assignment[fakeCds].Count() == 0);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Assign_FailedPreliminaryCheckNotAssignedToCds()
+        {
+            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
+            {
+                DataSourcesSetter = new DataSourceAttribute[]
+                {
+                    new FileDataSourceAttribute(".abc"),
+                    new FakeDataSourceAttribute()
+                    {
+                        PreliminaryCheckResult = false,
+                    },
+                },
+            };
+
+            var fakeDs = new FakeDataSource("fake");
+
+            var assignment = DataSourceResolver.Assign(
+                new[] { fakeDs, },
+                new[] { fakeCds, });
+
+            Assert.IsTrue(assignment.ContainsKey(fakeCds));
+            Assert.IsTrue(assignment[fakeCds].Count() == 0);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Assign_SucceededPreliminaryCheckFailedSupportsCheckNotAssignedToCds()
+        {
+            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
+            {
+                DataSourcesSetter = new DataSourceAttribute[]
+                {
+                    new FileDataSourceAttribute(".abc"),
+                    new FakeDataSourceAttribute()
+                    {
+                        PreliminaryCheckResult = true,
+                    },
+                },
+            };
+
+            var fakeDs = new FakeDataSource("fake");
+
+            var assignment = DataSourceResolver.Assign(
+                new[] { fakeDs, },
+                new[] { fakeCds, });
+
+            Assert.IsTrue(assignment.ContainsKey(fakeCds));
+            Assert.IsTrue(assignment[fakeCds].Count() == 0);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Assign_SucceededPreliminaryCheckSucceededSupportsCheckAssignedToCds()
+        {
+            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
+            {
+                DataSourcesSetter = new DataSourceAttribute[]
+                {
+                    new FileDataSourceAttribute(".abc"),
+                    new FakeDataSourceAttribute()
+                    {
+                        PreliminaryCheckResult = true,
+                    },
+                },
+            };
+
+            var fakeDs = new FakeDataSource("fake");
+
+            fakeCds.SupportedDataSources.Add(fakeDs);
+
+            var assignment = DataSourceResolver.Assign(
+                new[] { fakeDs, },
+                new[] { fakeCds, });
+
+            Assert.IsTrue(assignment.ContainsKey(fakeCds));
+            Assert.IsTrue(assignment[fakeCds].Count() == 1);
+            Assert.AreEqual(fakeDs, assignment[fakeCds].Single());
         }
 
         [TestMethod]
@@ -204,6 +307,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
                             fakeReference.SupportedDataSources.Add(ds);
                         }
+
+                        fakeReference.DataSourcesSetter = new[]
+                        {
+                            new FakeDataSourceAttribute(),
+                        };
                     }
 
                     testCaseToHydrate.CustomDataSources.Add(fakeReference);
@@ -284,6 +392,22 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             public override int GetHashCode()
             {
                 return this.Name.GetHashCode();
+            }
+        }
+
+        private sealed class FakeDataSourceAttribute
+            : DataSourceAttribute
+        {
+            public FakeDataSourceAttribute()
+                : base(typeof(FakeDataSource))
+            {
+            }
+
+            public bool PreliminaryCheckResult { get; set; } = true;
+
+            public override bool Accepts(IDataSource dataSource)
+            {
+                return this.PreliminaryCheckResult;
             }
         }
     }

@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.SDK.Runtime
+namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
     ///     Base of all Data Source implementations.
