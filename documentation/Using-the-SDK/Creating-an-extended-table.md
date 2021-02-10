@@ -1,7 +1,7 @@
 # Creating an Extended Table
 
 An __extended table__ is a `Table` that leverages data from one or more `DataCooker`s, 
-including cookers that may not neccesarilly be shipped with said `Table`. If a plugin 
+including cookers that may not necessarily be shipped with said `Table`. If a plugin 
 exposes data through cookers, then you can author an extended table to leverage said data.
 
 At a bare minimum, you must create a new class for your extended table.
@@ -63,15 +63,16 @@ This class must have the following items:
     }
 ````
 
-There is no restriction on the cookers on which your `Table` may depend. You
-may author your own cookers leveraging cookers from many different plugins,
-and have your `Table` depend on that. As long as you have cooked data, you
+There are no restrictions on the cookers which your `Table` may depend upon. For 
+example, your `Table` can depend solely on cookers defined in the `Table`'s assembly. Or, 
+your `Table` can depend on cookers from multiple plugins. As long as you have cooked data, you
 can create an extended table.
 
-As long as the DLLs that contain
-* Your extended table and
-* All of the data cookers (and their dependencies) your table requires
-are loaded into the SDK runtime, then your Table will be available for use.
+In short, as long as long as the SDK runtime has loaded
+1) Your extended table and
+2) All of the data cookers (and their dependencies) your table requires
+
+then your table will be available to use.
 
 # Examples
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Data Processing Pipelines (DPPs) allow you to compose components together that 
+A Data Processing Pipeline (DPP) allows you to compose components together that 
 map data between inputs and outputs. A DPP is comprised of the following:
 1) one __source parser__
 2) one or more `DataCooker`s (cookers)
@@ -29,14 +29,14 @@ can be consumed by users of the DPP or other cookers in the DPP.
 
 __Source parsers__ parse data from a data source into data that can be 
 manipulated by your application. For example, a source parser may parse an ETW 
-ETL file into a stream of `Event` objects.  The following are required in order to implement a 
+`.etl` file into a stream of `Event` objects.  The following are required in order to implement a 
 source parser:
 1) A `CustomDataSource`
 2) A class implementing `SourceParserBase`
 3) A `CustomDataProcessor` implementing `CustomDataProcessorBaseWithSourceParser`
 
 A `CustomDataSource` is required in order to expose your data, whether 
-you are using DPPs or not. The `CustomDataSource` is used as the entry point for 
+you are using a DPP or not. The `CustomDataSource` is used as the entry point for 
 creating `CustomDataProcessor`s for processing your data. Please see 
 [here](/Creating-a-simple-sdk-plugin) for more on `CustomDataSource`s. 
 

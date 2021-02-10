@@ -1,12 +1,12 @@
 # Creating a Simple SDK Plugin
 
-An SDK uses the SDK to create a mapping between arbitrary data sources (e.g. files with 
+An SDK plugin uses the SDK to create a mapping between arbitrary data sources (e.g. files with 
 specific formats) and 
 * zero or more __tables__
 * zero or more __data outputs__
 
 
-A `CustomDatasource` (CDS) acts as the entry point for the SDK runtime to discover and utilizes these mappings. 
+A `CustomDatasource` (CDS) acts as the entry point for the SDK runtime to discover and create these mappings. 
 An SDK plugin may contain more than one CDS, but it is __highly recommended__ to only include one CDS per 
 assembly inside a plugin.
 
@@ -210,7 +210,7 @@ in the given table, it may return immediately.
 ## Create Tables
 
 Simple custom data sources provide tables as output. A table is set of columns and rows grouped together to provide output for related data. 
-Tables must be created (built) to be outputted by the plugin.
+Tables must be created (built) to be a plugin output.
 
 Here are the requirements for a table to be discovered by the SDK runtime:
    - Be public and concrete
