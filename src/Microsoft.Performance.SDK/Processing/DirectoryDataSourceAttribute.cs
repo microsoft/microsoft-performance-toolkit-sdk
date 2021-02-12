@@ -9,7 +9,6 @@ namespace Microsoft.Performance.SDK.Processing
     ///     Attribute to mark a Custom Data Source implementation as processing
     ///     directories.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
     public sealed class DirectoryDataSourceAttribute
         : DataSourceAttribute,
           IEquatable<DirectoryDataSourceAttribute>

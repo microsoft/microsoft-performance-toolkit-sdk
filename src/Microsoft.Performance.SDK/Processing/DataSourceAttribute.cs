@@ -40,6 +40,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     processing.
     ///     </example>
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public abstract class DataSourceAttribute
         : Attribute
     {

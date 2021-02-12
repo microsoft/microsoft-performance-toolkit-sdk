@@ -98,9 +98,8 @@ example, only ever see `.txt` files. You should still implement
 `IsDataSourceSupportedCore` in your `CustomDataSource` to do the final determination.
 
 ````cs
-// we are decorating Custom `DataSource` classes, so we must have the correct
-// attribute targets
-[AttributeUsage(AttributeTargets.Class)]
+// `DataSourceAttribute` has `AttributeUsage`, so you do not need to add that
+// attribute youself unless you need to override `AllowMultiple` or 'Inherited.`
 public sealed class WebServiceDataSourceAttribute
     : DataSourceAttribute
 {

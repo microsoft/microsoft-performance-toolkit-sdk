@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     files of a specific type. This is used to instruct callers to route files
     ///     with a given extension to the decorated Custom Data Source for processing.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class FileDataSourceAttribute
         : DataSourceAttribute,
           IEquatable<FileDataSourceAttribute>
@@ -125,7 +125,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     Attribute to mark a custom data source implementation as processing
     ///     files that do not have extensions.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class ExtensionlessFileDataSourceAttribute
         : DataSourceAttribute,
           IEquatable<ExtensionlessFileDataSourceAttribute>
