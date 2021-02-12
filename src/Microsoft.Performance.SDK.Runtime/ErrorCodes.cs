@@ -60,26 +60,11 @@ namespace Microsoft.Performance.SDK.Runtime
             this.code = code;
         }
 
-        public static explicit operator ErrorCodes(string code)
-        {
-            return FromString(code);
-        }
+        public string Code => this.code;
 
         public static implicit operator string(ErrorCodes code)
         {
             return ToString(code);
-        }
-
-        public static ErrorCodes FromString(string code)
-        {
-            if (code is null ||
-                !CodeMap.TryGetValue(code, out var c))
-            {
-                throw new InvalidCastException();
-            }
-
-            Debug.Assert(c != null);
-            return c;
         }
 
         public static string ToString(ErrorCodes code)

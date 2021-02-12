@@ -17,12 +17,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             foreach (var code in ErrorCodes.All)
             {
                 string str = code;
-                var back = (ErrorCodes)str;
-                Assert.AreEqual(code, back);
+                Assert.AreEqual(code.Code, str);
             }
-
-            Assert.ThrowsException<InvalidCastException>(
-                () => (ErrorCodes)"Not a code");
         }
     }
 }
