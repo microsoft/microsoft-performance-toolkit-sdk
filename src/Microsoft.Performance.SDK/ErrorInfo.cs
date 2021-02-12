@@ -24,6 +24,11 @@ namespace Microsoft.Performance.SDK
         private const string HasInnerFieldName = "__HasInner";
 
         /// <summary>
+        ///     The <see cref="ErrorInfo"/> instance representing no errors.
+        /// </summary>
+        public static readonly ErrorInfo None = new ErrorInfo("NO_ERROR", "No error has occurred.");
+
+        /// <summary>
         ///     Initializes a new instance of the <see cref="ErrorInfo"/>
         ///     class.
         /// </summary>

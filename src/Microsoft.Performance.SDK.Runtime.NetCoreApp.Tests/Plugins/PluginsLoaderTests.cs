@@ -133,8 +133,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         {
             (var loader, var consumer) = Setup(true);
 
-            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             AssertNoPluginNames(consumer);
 
@@ -168,11 +169,13 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             (var loader, var consumer) = Setup(true);
 
             // Load same plugin twice
-            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
-            success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+            success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"), out error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             AssertNoPluginNames(consumer);
 
@@ -189,8 +192,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         {
             (var loader, var consumer) = Setup(true);
 
-            var success = loader.TryLoadPlugin(Path.Combine(compilePath, Invalid));
+            var success = loader.TryLoadPlugin(Path.Combine(compilePath, Invalid), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             AssertNoPluginNames(consumer);
 
@@ -211,8 +215,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             (var loader, var consumer) = Setup(true);
 
             var version = Version.Parse("1.0.0");
-            var success = loader.TryLoadPlugin(GetValidPath("ValidA", version));
+            var success = loader.TryLoadPlugin(GetValidPath("ValidA", version), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             var expectedPlugins = new List<Tuple<string, Version>>
             {
@@ -259,12 +264,14 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             var version = Version.Parse("1.0.0");
 
             // Load plugin
-            var success = loader.TryLoadPlugin(GetValidPath("ValidA", version));
+            var success = loader.TryLoadPlugin(GetValidPath("ValidA", version), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             // Load same plugin again
-            success = loader.TryLoadPlugin(GetValidPath("ValidA", version));
+            success = loader.TryLoadPlugin(GetValidPath("ValidA", version), out error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             // Assert loaded only has one copy
             var expectedPlugins = new List<Tuple<string, Version>>
@@ -337,8 +344,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public void LegacyPluginTest()
         {
             (var loader, var consumer) = Setup(true);
-            var success = loader.TryLoadPlugin(GetLegacyPath("LegacyA"));
+            var success = loader.TryLoadPlugin(GetLegacyPath("LegacyA"), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             var expectedPlugins = new List<Tuple<string, Version>>
             {
@@ -360,8 +368,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public void FakeDirectoryTest()
         {
             (var loader, var consumer) = Setup(true);
-            var success = loader.TryLoadPlugin("foo");
+            var success = loader.TryLoadPlugin("foo", out var error);
             Assert.IsFalse(success);
+            Assert.AreNotEqual(ErrorInfo.None, error);
 
             var expectedCDSs = new Type[] { };
             AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
@@ -414,8 +423,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             (var loader, var consumer1) = Setup(false);
 
             // Load first plugin
-            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             // Check loader processed plugin
             var expected = new Type[] { typeof(InvalidSchemaA) };
@@ -438,8 +448,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertObservedCDSs(expected, consumer2);
 
             // Load second plugin
-            success = loader.TryLoadPlugin(GetInvalidPath("InvalidB"));
+            success = loader.TryLoadPlugin(GetInvalidPath("InvalidB"), out error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             AssertNoPluginNames(consumer1);
 
@@ -457,8 +468,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             (var loader, var consumer) = Setup(true);
 
             // Load first plugin
-            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+            var success = loader.TryLoadPlugin(GetInvalidPath("InvalidA"), out var error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             // Assert first plugin processed correctly
             var expected1 = new Type[] { typeof(InvalidSchemaA) };
@@ -470,8 +482,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             loader.Unsubscribe(consumer);
 
             // Load second plugin
-            success = loader.TryLoadPlugin(GetInvalidPath("InvalidB"));
+            success = loader.TryLoadPlugin(GetInvalidPath("InvalidB"), out error);
             Assert.IsTrue(success);
+            Assert.AreEqual(ErrorInfo.None, error);
 
             AssertNoPluginNames(consumer);
 
@@ -489,7 +502,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public void DoubleSubscribeTest()
         {
             (var loader, var consumer) = Setup(true);
-            loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+            loader.TryLoadPlugin(GetInvalidPath("InvalidA"), out var error);
 
             // Assert consumer sees first plugin
             // Assert consumer sees InvalidA
@@ -531,7 +544,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             var blockingConsumer = new BlockingPluginsConsumer();
 
             // Load one initial plugin
-            loader.TryLoadPlugin(GetInvalidPath("InvalidA"));
+            loader.TryLoadPlugin(GetInvalidPath("InvalidA"), out _);
 
             // Assert consumer sees InvalidA
             var expected0 = new Type[] { typeof(InvalidSchemaA) };
@@ -546,7 +559,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             Assert.AreEqual(0, blockingConsumer.ObservedDataSources.Count, "Blocking consumer observed a CDS early");
 
             // Concurrently load a new plugin
-            var taskConcurrentLoad = Task.Run(() => loader.TryLoadPlugin(GetInvalidPath("InvalidB")));
+            var taskConcurrentLoad = Task.Run(() => loader.TryLoadPlugin(GetInvalidPath("InvalidB"), out _));
 
             // Assert that neither consumers has seen InvalidB yet
             Assert.AreEqual(0, blockingConsumer.ObservedDataSources.Count, "Blocking consumer observed a CDS early");
