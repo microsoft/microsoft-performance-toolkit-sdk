@@ -73,3 +73,9 @@ Engine, then your Table will be available for use.
 
 For some real-world examples of Extended Tables, see the [Tables](https://github.com/microsoft/Microsoft-Performance-Tools-Linux/tree/develop/LTTngDataExtensions/Tables)
 exposed by our LTTng tools.
+
+# Next Steps
+
+For more advanced usage of the SDK, please see the following:
+
+- [Overview of Advanced Topics](Advanced/Overview.md)

@@ -1,46 +1,51 @@
 # Abstract
 
-This document outlines a scenario where you want to implement a Data Source
-beyond the FileDataSource and DirectoryDataSource provided by the SDK.
+This document outlines a scenario where you want to implement a `DataSource`
+beyond the `FileDataSource` and `DirectoryDataSource` provided by the SDK.
 
 # Motivation
 
-For users that have data stored somewhere other than Files or Directories, the
-ability to have their Data Source treated the same as a first class Data Source
-by the SDK is desireable. For example, let's suppose that you are writing many
-Custom Data Sources that get their data from a SQL database, or from a web
-service. Rather than having a file with a URI in it, it would be nice to say
-that your Custom Data Source uses a SqlServerDataSource, or a 
-WebServiceDataSource.
+For users that have data stored somewhere other than files or directories, it is
+desirable for the SDK to treat their `DataSource` as a first class `DataSource`.
+For example, suppose that you are writing many `CustomDataSource`s that get
+their data from a SQL database or from a web service. Rather than having a file
+with a URI in it, it would be nice to say that your `Custom DataSource` uses a 
+`SqlServerDataSource` or a `WebServiceDataSource`.
 
 # Requirements
 
-In order to have your new Data Source recognized by the SDK, you must do the
+In order to have your new `DataSource` recognized by the SDK, you must do the
 following:
 
-- Create a new class inheriting from  _DataSource_ (or implementing _IDataSource_)
-- Create a new Attribute inheriting from _DataSourceAttribute_ specifying the
-  Type of the class you created
-- Optionally implement the _Accepts_ method on your new attribute.
+- Create a new class inheriting from `DataSource`.
+    - You may also implment `IDataSource` directly.
+- Create a new Attribute inheriting from `DataSourceAttribute`, and specify the
+  type of the class you created in the call to the base constructor.
+- Optionally implement the `Accepts` method on your new attribute.
+
+Once you have implemented these three items, the SDK will recognize your new
+`DataSource` and route it to `CustomDataSource`s as appropriate.
 
 # Implementation
 
-This section is going to outline implementing a new Data Source Type to be
-consumed by Custom Data Sources. For the purposes of this Walkthrough, we will
-be implementing a Data Source backed by a WebService. This example is being
-implemented such that all three aspects are represented; there are multiple way
-to implement this.
+This section outlines implementing a new `DataSource` type to be
+consumed by `CustomDataSource`s. For the purposes of this walkthrough, we will
+be implementing a `DataSource` backed by data from a web service. This example will
+- Create a new `WebServiceDataSource` class derived from `DataSource`.
+- Create a new `WebServiceDataSourceAttribute` so that `CustomDataSource`s
+  can consume `WebServiceDataSource`s
+- Implement `Accepts` on the `WebServiceDataSourceAttribute`
 
 ## DataSource class
 
-We first create our Data Source class. This is how users tell us where the
+We first create our `WebServiceDataSource` class. This is how users tell us where the
 Web Service is located.
 
 ````cs
 public class WebServiceDataSource
     : DataSource
 {
-    public SqlDataSource(Uri serviceUri)
+    public WebServiceDataSource(Uri serviceUri)
         : base(serviceUri)
     {
         this.ServiceUri = serviceUri;
@@ -52,20 +57,19 @@ public class WebServiceDataSource
 
 ## DataSourceAttribute
 
-We need some way for our Custom Data Sources to denote that they accept our
-WebServiceDataSource. So we will create a new DataSourceAttribute:
+We need some way for our `CustomDataSource`s to denote that they accept our
+`WebServiceDataSource`. So we will create a new `WebServiceDataSourceAttribute`:
 
 ````cs
 
-// we are decorating Custom Data Source classes, so we must have the correct
+// we are decorating Custom `DataSource` classes, so we must have the correct
 // attribute targets
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class WebServiceDataSourceAttribute
     : DataSourceAttribute
 {
     // our constructor will pass the DataSource Type to the base class. We
-    // can take any other parameters that we like to help denote our data. In
-    // this case, we simply say that data from the given service is supported.
+    // can take any other parameters that we like to help denote data.
     public WebServiceDataSourceAttribute(
         string serviceUri)
         : base(typeof(WebServiceDataSource))
@@ -79,22 +83,22 @@ public sealed class WebServiceDataSourceAttribute
 
 ## Accepts
 
-Finally, by default, all Data Sources of a given type will be routed to 
-Custom Data Sources that are decorated with the corresponding attribute. In
-this case, _ANY_ instance of a WebServiceDataSource will be routed to our Custom
-Data Source, and the IsDataSourceSupported method would have to do interrogation
-of said Data Source to determine if it is supported. Wouldn't it be nice if
-there was a way to say "I only care about certain servces; don't even bother
-with others?" Yes, through the _Accepts_ method. This method allows for you
-to filter incoming DataSource objects before they ever reach your Custom Data
-Source so that your logic is simpler. For example, the FileDataSourceAttribute
+Finally, by default, all `DataSource`s of a given type will be routed to 
+`CustomDataSource`s that are decorated with the corresponding attribute. Currently,
+_ANY_ instance of a `WebServiceDataSource` will be routed to our `CustomDataSource`
+decorated with the `WebServiceDataSourceAttribute`, and the `IsDataSourceSupportedCore`
+method would have to do interrogation of said `DataSource` to determine if it is supported.
+It would be nice if to say "I only care about certain servces; don't even bother
+with others." This is what the `Accepts` method allows. The `Accepts` method is used
+to filter incoming `DataSource` objects before they ever reach your `CustomDataSource`
+so that your `IsDataSourceSupportedCore` logic is simpler. For example, the `FileDataSourceAttribute`
 in the SDK uses this method to reject anything that does not match the given
-file extension, so Custom Data Sources have _FileDataSource(".txt")_, for
-example, and only ever see .txt files. You should still implement
-IsDataSourceSupported in your CustomDataSource to do the final determination.
+file extension, so `CustomDataSource`s decorated with `FileDataSource(".txt")`, for
+example, only ever see `.txt` files. You should still implement
+`IsDataSourceSupportedCore` in your `CustomDataSource` to do the final determination.
 
 ````cs
-// we are decorating Custom Data Source classes, so we must have the correct
+// we are decorating Custom `DataSource` classes, so we must have the correct
 // attribute targets
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class WebServiceDataSourceAttribute
@@ -113,7 +117,7 @@ public sealed class WebServiceDataSourceAttribute
     public Uri ServiceUri { get; }
 
     // implement this method to eagerly filter out data sources that are not
-    // accepted by the decorated Custom Data Source.
+    // accepted by the decorated Custom `DataSource`.
     public override bool Accepts(IDataSource dataSource)
     {
         // IDataSource will always be of the Type based to the base
@@ -133,9 +137,9 @@ public sealed class WebServiceDataSourceAttribute
 }
 ````
 
-# Using Your Data Source 
+# Using Your `DataSource` 
 
-Now that we have our new Data Source, we will see how to use our new Data Source
+Now that we have our new `DataSource`, we will see how to use our new `DataSource`
 with the Engine.
 
 ````cs
@@ -146,11 +150,18 @@ namespace Sample
         /* Guid here */,
         /* Name here */,
         /* Description here */)]
-    [WebServiceDataSource("https://www.contoso.com")]
+    [WebServiceDataSource("http://www.contoso.com")]
     public class ContosoDataSource
         : CustomDataSourceBase
     {
-        // implementation elided
+        protected override bool IsDataSourceSupportedCore(
+            IDataSource dataSource
+        )
+        {
+            // ...
+        }
+
+        // ...
     }
 
     public class Program
@@ -200,5 +211,7 @@ namespace Sample
 
 # Conclusion
 
-We have seen how to create a new kind of Data Source an how to seamlessly
-allow Custom Data Sources to leverage our new Data Source.
+We have seen how to create a new kind of `DataSource` an how to seamlessly
+allow Custom `DataSource`s to leverage our new `DataSource`.
+
+[Back to Advanced Topics](Overview.md)
