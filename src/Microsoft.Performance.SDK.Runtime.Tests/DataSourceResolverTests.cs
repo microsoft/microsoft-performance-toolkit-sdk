@@ -367,10 +367,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public string Name { get; }
 
-            public Uri GetUri()
-            {
-                return new Uri("https://" + this.Name);
-            }
+            public Uri Uri => new Uri("https://" + this.Name);
 
             public override bool Equals(object obj)
             {

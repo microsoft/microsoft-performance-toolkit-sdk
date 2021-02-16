@@ -7,7 +7,7 @@ using System.IO;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Represents a file backed data source for process.
+    ///     Represents a file backed data source for processing.
     /// </summary>
     public class FileDataSource
         : DataSource
@@ -29,7 +29,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             Guard.NotNullOrWhiteSpace(path, nameof(path));
 
-            this.FullPath = this.GetUri().LocalPath;
+            this.FullPath = this.Uri.LocalPath;
         }
 
         /// <summary>

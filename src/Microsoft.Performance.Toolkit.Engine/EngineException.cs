@@ -218,7 +218,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public UnsupportedDataSourceException(IDataSource dataSource)
             : this($"Data Source '{dataSource}' cannot be processed by any known Custom Data Sources.")
         {
-            this.DataSource = dataSource.GetUri().ToString();
+            this.DataSource = dataSource.Uri.ToString();
             this.RequestedCustomDataSource = null;
         }
 
@@ -254,7 +254,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public UnsupportedDataSourceException(IDataSource dataSource, Type requestedCustomDataSource, Exception inner)
             : base($"Data Source '{dataSource}' cannot be processed by '{requestedCustomDataSource}'", inner)
         {
-            this.DataSource = dataSource.GetUri().ToString();
+            this.DataSource = dataSource.Uri.ToString();
             this.RequestedCustomDataSource = requestedCustomDataSource?.FullName ?? string.Empty;
         }
 

@@ -225,7 +225,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var file = AnyFile(".380298502");
             var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddDataSource(file, typeof(Source123DataSource)));
-            Assert.AreEqual(file.GetUri().ToString(), e.DataSource);
+            Assert.AreEqual(file.Uri.ToString(), e.DataSource);
             Assert.AreEqual(typeof(Source123DataSource).FullName, e.RequestedCustomDataSource);
         }
 
@@ -293,7 +293,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var file = AnyFile(".380298502");
             var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddDataSource(file));
-            Assert.AreEqual(file.GetUri().ToString(), e.DataSource);
+            Assert.AreEqual(file.Uri.ToString(), e.DataSource);
             Assert.IsNull(e.RequestedCustomDataSource);
         }
 
@@ -558,7 +558,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var file2 = AnyFile(Source123DataSource.Extension);
             var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddDataSources(new[] { file1, file2, }, typeof(Source4DataSource)));
 
-            Assert.AreEqual(file1.GetUri().ToString(), e.DataSource);
+            Assert.AreEqual(file1.Uri.ToString(), e.DataSource);
             Assert.AreEqual(typeof(Source4DataSource).FullName, e.RequestedCustomDataSource);
         }
 
@@ -1247,7 +1247,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             {
                 return StringComparer.OrdinalIgnoreCase.Equals(
                     Extension,
-                    Path.GetExtension(dataSource.GetUri().LocalPath));
+                    Path.GetExtension(dataSource.Uri.LocalPath));
             }
 
             protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)

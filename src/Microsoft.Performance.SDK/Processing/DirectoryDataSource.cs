@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Processing
         public DirectoryDataSource(string path)
             : base(new Uri(Path.GetFullPath(path)))
         {
-            this.FullPath = this.GetUri().LocalPath;
+            this.FullPath = this.Uri.LocalPath;
         }
 
         /// <summary>

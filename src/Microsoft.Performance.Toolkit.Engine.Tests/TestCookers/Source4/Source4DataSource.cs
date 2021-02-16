@@ -38,7 +38,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
         {
             return StringComparer.OrdinalIgnoreCase.Equals(
                 Extension,
-                Path.GetExtension(dataSource.GetUri().LocalPath));
+                Path.GetExtension(dataSource.Uri.LocalPath));
         }
 
         protected override void SetApplicationEnvironmentCore(

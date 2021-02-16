@@ -11,8 +11,6 @@ namespace Microsoft.Performance.SDK.Processing
     public abstract class DataSource
         : IDataSource
     {
-        private readonly Uri uri;
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataSource"/>
         ///     class with the given <see cref="Uri"/>.
@@ -27,19 +25,16 @@ namespace Microsoft.Performance.SDK.Processing
         {
             Guard.NotNull(uri, nameof(uri));
 
-            this.uri = uri;
+            this.Uri = uri;
         }
 
         /// <summary>
-        ///     Returns the <see cref="Uri" /> of the data.
+        ///     Gets the <see cref="Uri" /> of the data.
         /// </summary>
         /// <returns>
         ///     The URI of the data.
         /// </returns>
-        public Uri GetUri()
-        {
-            return this.uri;
-        }
+        public Uri Uri { get; }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
@@ -51,19 +46,19 @@ namespace Microsoft.Performance.SDK.Processing
 
             var other = obj as DataSource;
             return other != null &&
-                this.uri.Equals(other.uri);
+                this.Uri.Equals(other.Uri);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return this.uri.GetHashCode();
+            return this.Uri.GetHashCode();
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.uri.ToString();
+            return this.Uri.ToString();
         }
     }
 }
