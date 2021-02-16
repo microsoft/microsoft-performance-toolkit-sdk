@@ -86,6 +86,22 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
+        ///     Gets the description, if it exists, of extensionless file support for the referenced
+        ///     Custom Data Source 
+        /// </summary>
+        /// <returns>
+        ///     The description of extensionless files supported by the referenced Custom Data Source,
+        ///     if any are supported; <c>null</c> otherwise.
+        /// </returns>
+        public static string TryGetExtensionlessFileDescription(this CustomDataSourceReference self)
+        {
+            return self.DataSources
+                .OfType<ExtensionlessFileDataSourceAttribute>()
+                .SingleOrDefault()
+                ?.Description;
+        }
+
+        /// <summary>
         ///     Gets a value indicating whether the referenced Custom Data Source
         ///     can process directories.
         /// </summary>

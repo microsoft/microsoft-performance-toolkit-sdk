@@ -194,7 +194,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(testDescription, actual);
         }
 
-
         [TestMethod]
         [UnitTest]
         public void TryGetDirectoryDescription_NotFound_ReturnsNull()
@@ -244,6 +243,59 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             };
 
             var actual = fakeReference.TryGetDirectoryDescription();
+
+            Assert.AreEqual(testDescription, actual);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryGetExtensionlessFileDescription_NotFound_ReturnsNull()
+        {
+            var fileAttr1 = new FileDataSourceAttribute(".txt");
+            var fileAttr2 = new FileDataSourceAttribute(".docx");
+            var fileAttr3 = new FileDataSourceAttribute(".xlsx");
+
+            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
+            {
+                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
+                    new List<DataSourceAttribute>
+                    {
+                        fileAttr1,
+                        fileAttr2,
+                        fileAttr3,
+                    }),
+            };
+
+            var actual = fakeReference.TryGetDirectoryDescription();
+
+            Assert.IsNull(actual);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryGetExtensionlessFileDescription_Found_ReturnsDescription()
+        {
+            var testDescription = "Test Description";
+            var directoryAttr = new ExtensionlessFileDataSourceAttribute(testDescription);
+
+            var fileAttr1 = new FileDataSourceAttribute(".txt");
+            var fileAttr2 = new FileDataSourceAttribute(".docx");
+            var fileAttr3 = new FileDataSourceAttribute(".xlsx");
+
+
+            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
+            {
+                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
+                    new List<DataSourceAttribute>
+                    {
+                        fileAttr1,
+                        fileAttr2,
+                        directoryAttr,
+                        fileAttr3,
+                    }),
+            };
+
+            var actual = fakeReference.TryGetExtensionlessFileDescription();
 
             Assert.AreEqual(testDescription, actual);
         }
