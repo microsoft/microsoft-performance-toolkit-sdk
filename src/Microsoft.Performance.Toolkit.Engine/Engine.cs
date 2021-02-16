@@ -331,7 +331,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Guard.NotNull(dataSources, nameof(dataSources));
             Guard.NotNull(customDataSourceType, nameof(customDataSourceType));
-            if (dataSources.Any(x=>x is null))
+            if (dataSources.Any(x => x is null))
             {
                 throw new ArgumentNullException(nameof(dataSources));
             }
@@ -458,9 +458,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(extensionDirectory != null);
 
             var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
-            var versionChecker = createInfo.Versioning ?? VersionChecker.Create();
 
-            var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, versionChecker);
+            var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, _ => new NullValidator());
 
             var catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
 
@@ -859,6 +858,16 @@ namespace Microsoft.Performance.Toolkit.Engine
                 // todo: how do we want to handle this?
                 // User prompts? Default?
                 return ButtonResult.None;
+            }
+        }
+
+        private sealed class NullValidator
+            : IPreloadValidator
+        {
+            public bool IsAssemblyAcceptable(string fullPath, out ErrorInfo error)
+            {
+                error = ErrorInfo.None;
+                return true;
             }
         }
     }

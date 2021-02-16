@@ -87,8 +87,10 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
         }
 
         /// <inheritdoc cref=""/>
-        public Assembly LoadAssembly(string assemblyPath)
+        public Assembly LoadAssembly(string assemblyPath, out ErrorInfo error)
         {
+            error = ErrorInfo.None;
+
             if (!CliUtils.IsCliAssembly(assemblyPath))
             {
                 return null;

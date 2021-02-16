@@ -57,17 +57,16 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         private readonly HashSet<IPluginsConsumer> subscribers;
 
         public PluginsLoader()
-            : this(new IsolationAssemblyLoader(), VersionChecker.Create())
+            : this(new IsolationAssemblyLoader(), x => new SandboxPreloadValidator(x, VersionChecker.Create()))
         {
         }
 
         public PluginsLoader(
             IAssemblyLoader assemblyLoader,
-            VersionChecker versionChecker)
+            Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
         {
-
             this.subscribers = new HashSet<IPluginsConsumer>();
-            this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, versionChecker);
+            this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
             this.catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
             this.extensionRepository = new DataExtensionFactory().SingletonDataExtensionRepository;
 

@@ -22,27 +22,37 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="assemblyPath">
         ///     Path to an assembly.
         /// </param>
-        public Assembly LoadAssembly(string assemblyPath)
+        public Assembly LoadAssembly(string assemblyPath, out ErrorInfo error)
         {
             if (!CliUtils.IsCliAssembly(assemblyPath))
             {
+                error = new ErrorInfo(
+                    ErrorCodes.AssemblyLoadFailed,
+                    "The given file is not a managed assembly.")
+                {
+                    Target = assemblyPath,
+                };
+
                 return null;
             }
 
             Assembly loadedAssembly;
-
             try
             {
                 loadedAssembly = Assembly.LoadFrom(assemblyPath);
+                error = ErrorInfo.None;
+                return loadedAssembly;
             }
             catch (BadImageFormatException)
             {
-                //
-                // this means it is native code or otherwise
-                // not readable by the CLR.
-                //
+                error = new ErrorInfo(
+                    ErrorCodes.AssemblyLoadFailed,
+                    "The given file is not readable by the CLR.")
+                {
+                    Target = assemblyPath,
+                };
 
-                loadedAssembly = null;
+                return null;
             }
             catch (FileLoadException e)
             {
@@ -50,14 +60,27 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                     "[warn]: managed assembly `{0}` cannot be loaded - {1}.",
                     assemblyPath,
                     e.FusionLog);
-                loadedAssembly = null;
+
+                error = new ErrorInfo(
+                    ErrorCodes.AssemblyLoadFailed,
+                    "An error occurred while loading the assembly")
+                {
+                    Target = assemblyPath,
+                };
+
+                return null;
             }
             catch (FileNotFoundException)
             {
-                loadedAssembly = null;
-            }
+                error = new ErrorInfo(
+                    ErrorCodes.FileNotFound,
+                    "The file could not be found.")
+                {
+                    Target = assemblyPath,
+                };
 
-            return loadedAssembly;
+                return null;
+            }
         }
     }
 }

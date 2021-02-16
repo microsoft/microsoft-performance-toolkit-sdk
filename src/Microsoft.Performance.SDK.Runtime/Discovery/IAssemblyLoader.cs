@@ -22,10 +22,19 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="assemblyPath">
         ///     The path of the assembly to load.
         /// </param>
+        /// <param name="error">
+        ///     Contains the error(s) that occurred, if any, while
+        ///     loading the assembly. If the assembly loads,
+        ///     then this parameter is set to <see cref="ErrorInfo.None"/>.
+        /// </param>
         /// <returns>
         ///     The loaded assembly, if possible; null otherwise.
+        ///     If this method returns <c>null</c>, then the
+        ///     <paramref name="error"/> parameter will contain
+        ///     details as to the failure.
         /// </returns>
         Assembly LoadAssembly(
-            string assemblyPath);
+            string assemblyPath,
+            out ErrorInfo error);
     }
 }

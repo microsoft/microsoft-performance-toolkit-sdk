@@ -11,7 +11,6 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
-using NuGet.Versioning;
 
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
@@ -23,7 +22,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         : IExtensionTypeProvider
     {
         private readonly IAssemblyLoader assemblyLoader;
-        private readonly VersionChecker versionChecker;
+        private readonly Func<IEnumerable<string>, IPreloadValidator> validatorFactory;
         private readonly List<IExtensionTypeObserver> observers = new List<IExtensionTypeObserver>();
 
         /// <summary>
@@ -34,10 +33,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </param>
         public AssemblyExtensionDiscovery(
             IAssemblyLoader assemblyLoader,
-            VersionChecker versionChecker)
+            Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
         {
             this.assemblyLoader = assemblyLoader;
-            this.versionChecker = versionChecker;
+            this.validatorFactory = validatorFactory;
         }
 
         /// <summary>
@@ -212,7 +211,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                     if (!Directory.Exists(directoryPath))
                     {
                         directoryErrors.Add(
-                            new ErrorInfo(ErrorCodes.DirectoryNotFound, "The given directory does not exist.")
+                            new ErrorInfo(ErrorCodes.DirectoryNotFound, ErrorCodes.DirectoryNotFound.Description)
                             {
                                 Target = directoryPath,
                             });
@@ -231,28 +230,38 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             continue;
                         }
 
+                        var validator = this.validatorFactory(filePaths);
+
                         loaded.EnsureCapacity(loaded.Capacity + filePaths.Length);
 
                         foreach (var filePath in filePaths)
                         {
-                            var assembly = this.assemblyLoader.LoadAssembly(filePath);
-                            if (!(assembly is null))
+                            if (validator.IsAssemblyAcceptable(filePath, out var validationError))
                             {
-                                if (!ProcessAssembly(assembly, out var assemblyError))
+                                var assembly = this.assemblyLoader.LoadAssembly(filePath, out _);
+                                if (!(assembly is null))
                                 {
+                                    if (!ProcessAssembly(assembly, out var assemblyError))
+                                    {
+                                        allLoaded = false;
+                                        Debug.Assert(assemblyError != null);
+                                        assemblyErrors.Add(assemblyError);
+                                    }
+                                }
+                                else
+                                {
+                                    assemblyErrors.Add(
+                                        new ErrorInfo(ErrorCodes.AssemblyLoadFailed, ErrorCodes.AssemblyLoadFailed.Description)
+                                        {
+                                            Target = filePath,
+                                        });
                                     allLoaded = false;
-                                    Debug.Assert(assemblyError != null);
-                                    assemblyErrors.Add(assemblyError);
                                 }
                             }
                             else
                             {
-                                assemblyErrors.Add(
-                                    new ErrorInfo(ErrorCodes.AssemblyLoadFailed, "The assembly failed to load.")
-                                    {
-                                        Target = filePath,
-                                    });
                                 allLoaded = false;
+                                assemblyErrors.Add(validationError);
                             }
                         }
                     }
@@ -260,7 +269,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                     if (assemblyErrors.Count > 0)
                     {
                         directoryErrors.Add(
-                            new ErrorInfo(ErrorCodes.PluginRegistrationFailed, "Unable to load the plugin.")
+                            new ErrorInfo(ErrorCodes.AssemblyLoadFailed, ErrorCodes.AssemblyLoadFailed.Description)
                             {
                                 Target = directoryPath,
                                 Details = assemblyErrors.ToArray(),
@@ -277,16 +286,15 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             if (directoryErrors.Count > 0)
             {
                 Debug.Assert(!allLoaded);
-                error = new ErrorInfo(ErrorCodes.DiscoveryFailed, "One or more directories failed during the Plugin Discovery phase.")
+                error = new DiscoveryError(
+                            directoryPaths,
+                            includeSubdirectories,
+                            searchPatterns,
+                            exclusionFileNames,
+                            exclusionsAreCaseSensitive)
                 {
                     Target = string.Empty,
                     Details = directoryErrors.ToArray(),
-                    Inner = new DiscoveryInnerError(
-                        directoryPaths,
-                        includeSubdirectories,
-                        searchPatterns,
-                        exclusionFileNames,
-                        exclusionsAreCaseSensitive),
                 };
             }
             else
@@ -306,36 +314,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             var assemblyName = assembly.GetName().FullName;
 
-            var referencedSdk = this.versionChecker.FindReferencedSdkVersion(assembly);
-            if (referencedSdk != null &&
-                !this.versionChecker.IsVersionSupported(referencedSdk))
-            {
-                error = new ErrorInfo(
-                    ErrorCodes.SdkVersionIncompatible,
-                    "The assembly references a version of the SDK which is incompatible " +
-                    "with the hosting SDK. Please contact the author of the plugin.")
-                {
-                    Target = assemblyName,
-                    Inner = new SdkMismatchInnerError(referencedSdk, this.versionChecker.Sdk)
-                };
-
-                return false;
-            }
-
-            if (referencedSdk is null)
-            {
-                //
-                // If the assembly does not reference the SDK, then
-                // there is no way that there is Plugin collateral
-                // contained within, and so we can just short-circuit
-                // and bail early. By definition, if there is nothing
-                // to process, then nothing can fail.
-                //
-
-                error = null;
-                return true;
-            }
-
             Type[] assemblyTypes = null;
             try
             {
@@ -353,7 +331,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             x => new ErrorInfo(ErrorCodes.LoaderException, e.Message)
                             {
                                 Target = assembly.FullName,
-                                Inner = FusionInnerError.TryCreate(x),
+                                Details = new[] { FusionError.TryCreate(assembly.FullName, x), },
                             })
                         .ToArray(),
                 };
@@ -395,7 +373,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             if (processingErrors.Count > 0)
             {
                 error = new ErrorInfo(
-                    ErrorCodes.PluginRegistrationFailed,
+                    ErrorCodes.AssemblyLoadFailed,
                     "The assembly for the plugin failed to be inspected.")
                 {
                     Target = assembly.FullName,
@@ -431,69 +409,18 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         }
 
         [Serializable]
-        private class SdkMismatchInnerError
-            : InnerError,
+        private class FusionError
+            : ErrorInfo,
               ISerializable
         {
-            public SdkMismatchInnerError(
-                SemanticVersion referencedSdkVersion,
-                SemanticVersion hostedSdkVersion)
-                : base(ErrorCodes.SdkVersionIncompatible)
-            {
-                this.ReferencedSdkVersion = referencedSdkVersion;
-                this.HostedSdkVersion = hostedSdkVersion;
-            }
-
-            protected SdkMismatchInnerError(
-                SerializationInfo info,
-                StreamingContext context)
-                : base(info, context)
-            {
-                this.ReferencedSdkVersion = SemanticVersion.Parse(info.GetString(nameof(this.ReferencedSdkVersion)));
-                this.HostedSdkVersion = SemanticVersion.Parse(info.GetString(nameof(this.HostedSdkVersion)));
-            }
-
-            public SemanticVersion ReferencedSdkVersion { get; }
-
-            public SemanticVersion HostedSdkVersion { get; }
-
-            [SecurityPermission(
-                SecurityAction.LinkDemand,
-                Flags = SecurityPermissionFlag.SerializationFormatter)]
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                base.GetObjectData(info, context);
-                info.AddValue(nameof(this.ReferencedSdkVersion), this.ReferencedSdkVersion.ToString());
-                info.AddValue(nameof(this.HostedSdkVersion), this.HostedSdkVersion.ToString());
-            }
-
-            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                this.GetObjectData(info, context);
-            }
-
-            public override string ToString()
-            {
-                return new StringBuilder()
-                    .AppendFormat("Referenced SDK Version: {0}", this.ReferencedSdkVersion).AppendLine()
-                    .AppendFormat("Hosted SDK Version:     {1}", this.HostedSdkVersion)
-                    .ToString();
-            }
-        }
-
-        [Serializable]
-        private class FusionInnerError
-            : InnerError,
-              ISerializable
-        {
-            public FusionInnerError(
+            public FusionError(
                 FileNotFoundException e)
-                : base(ErrorCodes.AssemblyLoadFailed)
+                : base(ErrorCodes.AssemblyLoadFailed, ErrorCodes.AssemblyLoadFailed.Description)
             {
                 this.Exception = e;
             }
 
-            protected FusionInnerError(
+            protected FusionError(
                 SerializationInfo info,
                 StreamingContext context)
                 : base(info, context)
@@ -509,11 +436,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             public string FusionLog => this.Exception.FusionLog;
 
-            public static InnerError TryCreate(Exception loaderException)
+            public static ErrorInfo TryCreate(string target, Exception loaderException)
             {
                 if (loaderException is FileNotFoundException fnfe)
                 {
-                    return new FusionInnerError(fnfe);
+                    return new FusionError(fnfe);
                 }
 
                 return null;
@@ -532,28 +459,20 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             {
                 this.GetObjectData(info, context);
             }
-
-            public override string ToString()
-            {
-                return new StringBuilder()
-                    .AppendFormat("File not found: {0}", this.FileName).AppendLine()
-                    .AppendFormat("Fusion Log: {0}", this.FusionLog)
-                    .ToString();
-            }
         }
 
         [Serializable]
-        private class DiscoveryInnerError
-            : InnerError,
+        private class DiscoveryError
+            : ErrorInfo,
               ISerializable
         {
-            public DiscoveryInnerError(
+            public DiscoveryError(
                 IEnumerable<string> directoryPaths,
                 bool includeSubdirectories,
                 IEnumerable<string> searchPatterns,
                 IEnumerable<string> exclusionFileNames,
                 bool exclusionsAreCaseSensitive)
-                : base(ErrorCodes.DiscoveryFailed)
+                : base(ErrorCodes.DiscoveryFailed, ErrorCodes.DiscoveryFailed.Description)
             {
                 this.DirectoryPaths = directoryPaths?.ToList() ?? new List<string>();
                 this.IncludeSubDirectories = includeSubdirectories;
@@ -561,7 +480,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 this.ExclusionFileNames = exclusionFileNames?.ToList() ?? new List<string>();
                 this.ExclusionsAreCaseSensitive = exclusionsAreCaseSensitive;
             }
-            protected DiscoveryInnerError(
+
+            protected DiscoveryError(
                SerializationInfo info,
                StreamingContext context)
                : base(info, context)
@@ -589,6 +509,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
                 base.GetObjectData(info, context);
+
                 info.AddValue(nameof(this.DirectoryPaths), this.DirectoryPaths);
                 info.AddValue(nameof(this.IncludeSubDirectories), this.IncludeSubDirectories);
                 info.AddValue(nameof(this.SearchPatterns), this.SearchPatterns);

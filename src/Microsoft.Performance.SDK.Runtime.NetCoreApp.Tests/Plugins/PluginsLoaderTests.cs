@@ -596,9 +596,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         private static (PluginsLoader, MockPluginsConsumer) Setup(bool subscribe)
         {
             var assemblyLoader = new IsolationAssemblyLoader();
-            var versionChecker = new FakeVersionChecker();
 
-            var loader = new PluginsLoader(assemblyLoader, versionChecker);
+            var loader = new PluginsLoader(assemblyLoader, _ => new FakePreloadValidator());
             var consumer = new MockPluginsConsumer();
             if (subscribe)
             {

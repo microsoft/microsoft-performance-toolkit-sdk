@@ -33,11 +33,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
     {
         public bool SupportsIsolation { get; set; }
 
-        public Func<string, Assembly> loadAssembly;
+        public ErrorInfo LoadAssemblyErrorInfo { get; set; } = ErrorInfo.None;
 
-        public Assembly LoadAssembly(string assemblyPath)
+        public Func<string, Assembly> LoadAssemblyFunc { get; set; }
+
+        public Assembly LoadAssembly(string assemblyPath, out ErrorInfo error)
         {
-            return loadAssembly?.Invoke(assemblyPath);
+            error = this.LoadAssemblyErrorInfo;
+            return this.LoadAssemblyFunc?.Invoke(assemblyPath) ?? null;
         }
     }
 
@@ -96,7 +99,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
             this.VersionChecker = new FakeVersionChecker();
 
-            this.Discovery = new AssemblyExtensionDiscovery(this.Loader, this.VersionChecker);
+            this.Discovery = new AssemblyExtensionDiscovery(this.Loader, _ => new FakePreloadValidator());
 
             this.FindFiles = new TestFindFiles();
 
@@ -199,7 +202,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             this.Observers.Add(new TestExtensionObserver());
 
             RegisterObservers();
-            this.Loader.loadAssembly =
+            this.Loader.LoadAssemblyFunc =
                 s =>
                 {
                     Assert.Fail("LoadAssembly should not be called, the file should be excluded.");
@@ -222,7 +225,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             RegisterObservers();
 
             bool assemblyLoaded = false;
-            this.Loader.loadAssembly = s =>
+            this.Loader.LoadAssemblyFunc = s =>
             {
                 assemblyLoaded = true;
                 return this.GetType().Assembly;

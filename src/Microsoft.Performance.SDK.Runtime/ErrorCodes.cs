@@ -9,67 +9,167 @@ using System.Reflection;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
+    /// <summary>
+    ///     This class represents all of the error codes that can be
+    ///     emitted by the runtime. This class acts as a "type-safe"
+    ///     enumeration. All new explicit error conditions should be
+    ///     added to this class.
+    /// </summary>
     public sealed class ErrorCodes
     {
-        public static readonly ErrorCodes SdkVersionIncompatible;
-        public static readonly ErrorCodes UnableToReflectAssemblyTypes;
-        public static readonly ErrorCodes PluginRegistrationFailed;
-        public static readonly ErrorCodes LoaderException;
-        public static readonly ErrorCodes AssemblyLoadFailed;
-        public static readonly ErrorCodes TypeInspectionFailure;
-        public static readonly ErrorCodes NoObserversRegistered;
-        public static readonly ErrorCodes DiscoveryFailed;
-        public static readonly ErrorCodes DirectoryNotFound;
-        public static readonly ErrorCodes Unexpected;
+        public static readonly ErrorCodes NoError = new ErrorCodes(
+            0,
+            "NO_ERROR",
+            "No error occurred.");
 
-        public static readonly IReadOnlyCollection<ErrorCodes> All;
+        //
+        // General Errors
+        //
 
-        private static readonly Dictionary<string, ErrorCodes> CodeMap;
+        public static readonly ErrorCodes InvalidArgument = new ErrorCodes(
+            1,
+            "INVALID_ARGUMENT",
+            "The specified argument is invalid.");
 
-        private readonly string code;
+        public static readonly ErrorCodes FileNotFound = new ErrorCodes(
+            2,
+            "FILE_NOT_FOUND",
+            "The given file cannot be found.");
 
-        static ErrorCodes()
-        {
-            SdkVersionIncompatible = new ErrorCodes("SDK_VERSION_INCOMPATIBLE");
-            UnableToReflectAssemblyTypes = new ErrorCodes("UNABLE_TO_REFLECT_ASSEMBLY_TYPES");
-            PluginRegistrationFailed = new ErrorCodes("PLUGIN_REGISTRATION_FAILED");
-            LoaderException = new ErrorCodes("LOADER_EXCEPTION");
-            AssemblyLoadFailed = new ErrorCodes("ASSEMBLY_LOAD_FAILED");
-            TypeInspectionFailure = new ErrorCodes("TYPE_INSPECTION_FAILED");
-            NoObserversRegistered = new ErrorCodes("NO_OBSERVERS_REGISTERED");
-            DiscoveryFailed = new ErrorCodes("DISCOVERY_FAILED");
-            DirectoryNotFound = new ErrorCodes("DIRECTORY_NOT_FOUND");
-            Unexpected = new ErrorCodes("UNEXPECTED_ERROR");
+        public static readonly ErrorCodes DirectoryNotFound = new ErrorCodes(
+            3,
+            "DIRECTORY_NOT_FOUND",
+            "The given directory cannot be found.");
 
-            CodeMap = typeof(ErrorCodes)
+        //
+        // Compatability Errors
+        //
+
+        public static readonly ErrorCodes SdkVersionIncompatible = new ErrorCodes(
+            10000,
+            "SDK_VERSION_INCOMPATIBLE",
+            "The assembly references a version of the SDK that is not compatible with the host's version of the SDK.");
+
+        //
+        // Loading Errors
+        //
+
+        public static readonly ErrorCodes AssemblyLoadFailed = new ErrorCodes(
+            20000,
+            "ASSEMBLY_LOAD_FAILED",
+            "The assembly failed to load.");
+
+        public static readonly ErrorCodes LoaderException = new ErrorCodes(
+            20001,
+            "LOADER_EXCEPTION",
+            "The loader encountered an error while loading the assembly.");
+
+        public static readonly ErrorCodes UnableToReflectAssemblyTypes = new ErrorCodes(
+            20002,
+            "ASEEMBLY_TYPE_REFLECTION_FAILED",
+            "The Types in the given Assembly cannot be enumerated.");
+
+        public static readonly ErrorCodes TypeInspectionFailure = new ErrorCodes(
+            20003,
+            "TYPE_INSPECTION_FAILED",
+            "The given type cannot be inspected.");
+
+        public static readonly ErrorCodes FileLoadFailure = new ErrorCodes(
+            20004,
+            "FILE_LOAD_FAILURE",
+            "The assembly was found, but could not be loaded.");
+
+        //
+        // Discovery Errors
+        //
+
+        public static readonly ErrorCodes DiscoveryFailed = new ErrorCodes(
+            30000,
+            "DISCOVERY_FAILED",
+            "Extension discovery could not complete due to one or more errors.");
+
+        public static readonly ErrorCodes NoObserversRegistered = new ErrorCodes(
+            30001,
+            "NO_OBSERVERS_REGISTERED",
+            "No observers are registered.");
+
+        //
+        // Unexpected errors
+        //
+
+        public static readonly ErrorCodes Unexpected = new ErrorCodes(
+            int.MinValue,
+            "UNEXPECTED_ERROR",
+            "An unexpected error occurred.");
+
+        /// <summary>
+        ///     Gets all of the <see cref="ErrorCodes"/> in the system.
+        /// </summary>
+
+        //
+        // We do duplicate checking on the numeric and string codes
+        // as part of construction of this collection. If there are
+        // any duplicates, then the ToDictionary calls will fail,
+        // signalling a developer error.
+        //
+        public static readonly IReadOnlyCollection<ErrorCodes> All = typeof(ErrorCodes)
                 .GetFields(BindingFlags.Static | BindingFlags.Public)
                 .Where(x => x.FieldType == typeof(ErrorCodes))
                 .Select(x => x.GetValue(null))
                 .Cast<ErrorCodes>()
-                .ToDictionary(
-                    x => x.ToString(),
-                    x => x);
+                .ToDictionary(x => x.numericCode, x => x)
+                .Values
+                .ToDictionary(x => x.code, x => x)
+                .Values
+                .ToList()
+                .AsReadOnly();
 
-            All = CodeMap.Values;
-        }
+        private readonly int numericCode;
+        private readonly string code;
+        private readonly string description;
 
-        private ErrorCodes(string code)
+        private ErrorCodes(
+            int numericCode,
+            string code,
+            string description)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(code));
+            Debug.Assert(!string.IsNullOrWhiteSpace(description));
 
-            this.code = code;
+            this.numericCode = numericCode;
+            this.code = code.ToUpperInvariant();
+            this.description = description;
         }
 
+        public int Number => this.numericCode;
+
         public string Code => this.code;
+
+        public string Description => this.description;
 
         public static implicit operator string(ErrorCodes code)
         {
             return ToString(code);
         }
 
+        public static implicit operator int(ErrorCodes code)
+        {
+            return ToInt(code);
+        }
+
         public static string ToString(ErrorCodes code)
         {
-            return code?.ToString() ?? string.Empty; 
+            return code?.ToString() ?? string.Empty;
+        }
+
+        public static int ToInt(ErrorCodes code)
+        {
+            return code?.numericCode ?? 0;
+        }
+
+        public ErrorInfo ToErrorInfo()
+        {
+            return new ErrorInfo(this.code, this.description);
         }
 
         public override string ToString()
@@ -79,7 +179,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals (obj, this))
+            if (ReferenceEquals(obj, this))
             {
                 return true;
             }
