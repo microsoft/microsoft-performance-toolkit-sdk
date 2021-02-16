@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Reflection;
 using Microsoft.Performance.SDK.Runtime;
 using NuGet.Versioning;
 
@@ -65,16 +64,6 @@ namespace Microsoft.Performance.Testing.SDK
 
                 return base.LowestSupportedSdk;
             }
-        }
-
-        public override SemanticVersion FindReferencedSdkVersion(Assembly candidate)
-        {
-            return base.FindReferencedSdkVersion(candidate);
-        }
-
-        public override bool IsVersionSupported(SemanticVersion candidateVersion)
-        {
-            return base.IsVersionSupported(candidateVersion);
         }
     }
 }

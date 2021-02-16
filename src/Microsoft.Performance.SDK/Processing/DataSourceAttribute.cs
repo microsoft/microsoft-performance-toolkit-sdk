@@ -17,7 +17,6 @@ namespace Microsoft.Performance.SDK.Processing
     ///     <example>
     ///     This example shows a sample implementation:
     ///     <code>
-    ///         [AttributeUsage(AttributeTargets.Class, /* properties elided */)]
     ///         public sealed class SqlServerDataSourceAttribute
     ///             : DataSourceAttribute
     ///         {
@@ -35,7 +34,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///             // implementation elided
     ///         }
     ///     </code>
-    ///     Any instanced of the SqlServerDataSource Data Source will be
+    ///     Any instances of the SqlServerDataSource Data Source will be
     ///     routed to this Custom Data Source for further analysis during
     ///     processing.
     ///     </example>
