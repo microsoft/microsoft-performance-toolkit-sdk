@@ -11,7 +11,7 @@ namespace Microsoft.Performance.Testing.SDK
         : VersionChecker
     {
         private SemanticVersion sdkOverride;
-        private SemanticVersion baselineOverride;
+        private SemanticVersion lowestSupportedSdkOverride;
 
         public ConfigurableVersionChecker()
         {
@@ -42,15 +42,15 @@ namespace Microsoft.Performance.Testing.SDK
             }
         }
 
-        public SemanticVersion BaselineSetter
+        public SemanticVersion LowestSupportedSdkSetter
         {
             get
             {
-                return this.baselineOverride;
+                return this.lowestSupportedSdkOverride;
             }
             set
             {
-                this.baselineOverride = value;
+                this.lowestSupportedSdkOverride = value;
             }
         }
 
@@ -58,9 +58,9 @@ namespace Microsoft.Performance.Testing.SDK
         {
             get
             {
-                if (this.baselineOverride != null)
+                if (this.lowestSupportedSdkOverride != null)
                 {
-                    return this.baselineOverride;
+                    return this.lowestSupportedSdkOverride;
                 }
 
                 return base.LowestSupportedSdk;

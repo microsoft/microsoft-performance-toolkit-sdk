@@ -84,7 +84,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             return new ConfigurableVersionChecker
             {
                 SdkSetter = sdkVersion,
-                BaselineSetter = baseline,
+                LowestSupportedSdkSetter = baseline,
             };
         }
     }
