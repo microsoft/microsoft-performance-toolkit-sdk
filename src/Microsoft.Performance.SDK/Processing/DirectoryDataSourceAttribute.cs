@@ -15,15 +15,6 @@ namespace Microsoft.Performance.SDK.Processing
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="DirectoryDataSourceAttribute"/>
-        ///     class.
-        /// </summary>
-        public DirectoryDataSourceAttribute()
-            : this("No description.")
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="DirectoryDataSourceAttribute"/>
         ///     class, with a description of directories that would be acceptable.
         /// </summary>
         /// <param name="description">

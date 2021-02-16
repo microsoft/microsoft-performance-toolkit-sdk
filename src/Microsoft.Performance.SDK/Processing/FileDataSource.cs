@@ -18,6 +18,12 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="path">
         ///     The path to the file.
         /// </param>
+        /// <exception cref="System.ArgumentException">
+        ///     <paramref name="path"/> is whitespace.
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="path"/> is <c>null</c>.
+        /// </exception>
         public FileDataSource(string path)
             : base(new Uri(Path.GetFullPath(path)))
         {

@@ -144,7 +144,7 @@ namespace Microsoft.Performance.SDK.Tests
         public void AcceptsFailsIfHasExtension()
         {
             var dataSource = new FileDataSource(@"c:\test\bad.ext");
-            var sut = new ExtensionlessFileDataSourceAttribute();
+            var sut = new ExtensionlessFileDataSourceAttribute("Empty");
 
             Assert.IsFalse(sut.Accepts(dataSource));
         }
@@ -154,7 +154,7 @@ namespace Microsoft.Performance.SDK.Tests
         public void AcceptsSucceedsIfDoesNotHaveExtension()
         {
             var dataSource = new FileDataSource(@"c:\test\good");
-            var sut = new ExtensionlessFileDataSourceAttribute();
+            var sut = new ExtensionlessFileDataSourceAttribute("Empty");
 
             Assert.IsTrue(sut.Accepts(dataSource));
         }

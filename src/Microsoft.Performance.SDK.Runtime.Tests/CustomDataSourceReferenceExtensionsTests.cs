@@ -310,7 +310,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             Assert.IsFalse(fake.AreDirectoriesSupported());
 
-            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute> { new DirectoryDataSourceAttribute(), });
+            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute> { new DirectoryDataSourceAttribute("Empty"), });
 
             Assert.IsTrue(fake.AreDirectoriesSupported());
         }
@@ -325,7 +325,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             Assert.IsFalse(fake.AreExtensionlessFilesSupported());
 
-            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute> { new ExtensionlessFileDataSourceAttribute(), });
+            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute> { new ExtensionlessFileDataSourceAttribute("Empty"), });
 
             Assert.IsTrue(fake.AreExtensionlessFilesSupported());
         }

@@ -326,8 +326,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
         [FileDataSource("ext")]
-        [ExtensionlessFileDataSource]
-        [DirectoryDataSource]
+        [ExtensionlessFileDataSource("No description")]
+        [DirectoryDataSource("No description")]
         public class MultiDataSourceCds
             : ICustomDataSource
         {
