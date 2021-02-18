@@ -9,20 +9,20 @@ map data between inputs and outputs. A DPP is comprised of the following:
 
 For a real world example of a pipeline, see the LTTng SDK plugin, found on GitHub [here](https://github.com/microsoft/Microsoft-Performance-Tools-Linux)
 
-Cookers can be further broken down into: 
-1) `SourceCooker`s
-2) `CompositeCooker`s
+A cooker is either: 
+1) A `SourceCooker`
+2) A `CompositeCooker`
 
-`SourceCooker`s take data directly from a source parser and produce 
-`DataOutput`s. `CompositeCooker`s take data from other cookers to produce 
-`DataOutput`s. A `CompositeCooker` may depend on both __source__ *and* 
+A `SourceCooker` takes data directly from a `SourceParser` to produce 
+`DataOutput`s, whereas a `CompositeCooker` takes data from other cookers to produce 
+`DataOutput`s. A `CompositeCooker` may depend on both __source__ *and/or* 
  __composite__ cookers.
 
 The following illustrates these concepts:
 
 <img src=".attachments/dpp.svg" width="500">
 
-All cookers expose zero or more __data outputs__. `DataOutput`s expose data that 
+All cookers expose zero or more __data outputs__. A `DataOutput` exposes data that 
 can be consumed by users of the DPP or other cookers in the DPP. 
 
 ## Source Parsers
@@ -37,7 +37,7 @@ source parser:
 
 A `CustomDataSource` is required in order to expose your data, whether 
 you are using a DPP or not. The `CustomDataSource` is used as the entry point for 
-creating `CustomDataProcessor`s for processing your data. Please see 
+creating the `CustomDataProcessor` that processes your data. Please see 
 [here](/Creating-a-simple-sdk-plugin) for more on `CustomDataSource`s. 
 
 The source parser implements the actual logic of parsing the raw data 
@@ -150,25 +150,25 @@ what is required:
 ## Cookers
 
 __Cookers__ transform data from one type to another. A cooker will transform the 
-output from one or more sources, optionally producing new `DataOutput`s for other Cookers 
+output from one or more sources, optionally producing new `DataOutput`s for other cookers 
 or end user applications to consume.
 
 __Source cookers__ take data directly from a __source parser__ to produce `DataOutput`s.
 
-__Composite cookers__ take data from one or more cookers (Source or Composite) 
-to create `DataOutputs`.
+__Composite cookers__ take data from one or more cookers (source or composite) 
+to create `DataOutput`s.
 
 We use the term _cooked_ to denote Data that has been transformed via a cooker.
 
-Cooked data is exposed via `DataOutput`s. These `DataOutput`s 
-may be consumed directly by the user, or by other cookers. `DataOutput`s must 
+Cooked data is exposed via a `DataOutput`. These outputs  
+may be consumed directly by the user, or by other cookers. A `DataOutput` must 
 implement the following interface:
 ````cs
 IKeyedDataItem<T>
 ````
 
-Data Outputs are identified by `DataOutputPath`s, 
-which uniquely identify the `DataOutput`. A `DataOutputPath` has the following format:
+A `DataOutput` is uniquely identified by a `DataOutputPath`. 
+A `DataOutputPath` has the following format:
 ````cs
     CookerPath/DataOutputPropertyName
 ````
@@ -186,8 +186,8 @@ where
 - `SourceParserId` is the ID of the `SourceParser`.
 - `CookerId` is the ID of the cooker.
 
-`CompositeCooker`s will have an empty (`""`) `SourceParserID` as they are not
-tied to any particular source parser, and thus their paths have the following
+A `CompositeCooker` will have an empty (`""`) `SourceParserID` as is not
+tied to any particular `SourceParser`, and thus its path has the following
 form:
 ````cs
     /CookerId

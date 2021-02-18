@@ -30,7 +30,7 @@ To create a simple plugin, you must:
    (CDS)
 2. Create a public class that implements the abstract class `CustomDataProcessorBase`. This your Custom Data Processor 
    (CDP)
-3. Create or more data table classes. These classes must:
+3. Create one or more data table classes. These classes must:
    - Be public
    - Be decorated with `TableAttribute`
    - Expose a static public field or property named "TableDescriptor" of type `TableDescriptor` which provides information
