@@ -1,23 +1,23 @@
 # Creating an Extended Table
 
-An Extended Table is a Table that leverages data from a Plugin 
-that may not neccesarilly be shipped with said Plugin. Extended tables are
-only able to leverage data from Cookers. If a Plugin exposes data through Cookers,
-then you can author an Extended table to leverage said Data.
+An __extended table__ is a `Table` that leverages data from one or more `DataCooker`s, 
+including cookers that may not necessarily be shipped with said `Table`. If a plugin 
+exposes data through cookers, then you can author an extended table to leverage said data.
 
-At a bare minimum, you must create a new class for your Extended Table.
-This class __MUST__ have the following items:
-1) The Table attribute
-2) A static Table Descriptor property
-3) A static BuildTable method.
-4) Declarations for the Cooker(s) that provide the data that the Table is using.
-    - May be either **RequiresCookerAttribute**s or declared in the TableDescriptor (2).
+At a bare minimum, you must create a new class for your extended table.
+This class must have the following items:
+1) The `Table` attribute
+2) A static `TableDescriptor` property
+3) A static `BuildTable` method.
+4) Declarations for the cooker(s) that provide the data that the `Table` is using.
+    - These may be either `RequiresCookerAttribute`s or be declared in the `TableDescriptor`.
 
 ````cs
 
     // Denotes that this class exposes a Table
-    //
     [Table]
+
+    //
     // One or more RequiresCooker attributes specifying the
     // Cookers that this Table uses for data. Alternatively,
     // you may use the 'requiredDataCookers' parameter of the
@@ -26,6 +26,7 @@ This class __MUST__ have the following items:
     [RequiresCooker("Cooker/Path")]
     public class SampleExtendedTable
     {
+        //
         // This property is required to define your Table. This
         // tells the runtime that a Table is available, and that
         // any Cookers needed by the Table are to be scheduled for
@@ -42,34 +43,49 @@ This class __MUST__ have the following items:
                     // Paths to the Cookers that are needed for
                     // this table. This is not needed if you are
                     // using the RequiresCooker attributes.
-                    //
                 });
             );
 
-        // This method is required so that the runtime can build your
-        // table.
+        //
+        // This method, with this exact signature, is required so that the runtime can 
+        // build your table once all cookers have processed their data.
         //
         public static void BuildTable(
             ITableBuilder tableBuilder,
-            IDataExtensionRetrieval tableData
+            IDataExtensionRetrieval requiredData
         )
         {
-            // Query cooked data from dataRetrieval, and use the
+            //
+            // Query cooked data from requiredData, and use the
             // tableBuilder to build the table.
             //
         }
     }
 ````
 
-There is no restriction on the Cookers on which your Table may depend. You
-may author your own Cookers leveraging Cookers from many different plugins,
-and have your Table depend on that. As long as you have Cooked Data, you
-can create an Extended Table.
+There are no restrictions on the cookers which your `Table` may depend upon. For 
+example, your `Table` can depend solely on cookers defined in the `Table`'s assembly. Or, 
+your `Table` can depend on cookers from multiple plugins. As long as you have cooked data, you
+can create an extended table.
 
-As long as the DLL with your Extended Tables is available to WPA or the
-Engine, then your Table will be available for use.
+In short, as long as long as the SDK runtime has loaded
+1) Your extended table and
+2) All of the data cookers (and their dependencies) your table requires
+
+then your table will be available to use.
 
 # Examples
 
-For some real-world examples of Extended Tables, see the [Tables](https://github.com/microsoft/Microsoft-Performance-Tools-Linux/tree/develop/LTTngDataExtensions/Tables)
-exposed by our LTTng tools.
+For some real-world examples of extended tables, see the 
+[tables exposed by our LTTng tools](https://github.com/microsoft/Microsoft-Performance-Tools-Linux/tree/develop/LTTngDataExtensions/Tables).
+
+# Video Walkthrough
+
+A video tutorial of making a data processing pipeline and extended table can be found in the [SQL plugin sample](../../samples/SqlPlugin).
+
+# Next Steps
+
+This documentation marks the end of all necessary information to begin creating extensible, well-strucutred 
+SDK plugins. For additional resources, you may browse our [samples folder](../../samples).
+
+Our team is working on creating additional documentation and samples for more advanced features of the SDK.
