@@ -35,7 +35,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
         public ErrorInfo LoadAssemblyErrorInfo { get; set; } = ErrorInfo.None;
 
+        public Func<string, bool> IsAssemblyFunc { get; set; }
+
         public Func<string, Assembly> LoadAssemblyFunc { get; set; }
+
+        public bool IsAssembly(string path)
+        {
+            return this.IsAssemblyFunc?.Invoke(path) ?? true;
+        }
 
         public Assembly LoadAssembly(string assemblyPath, out ErrorInfo error)
         {

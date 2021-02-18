@@ -234,7 +234,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
                         loaded.EnsureCapacity(loaded.Capacity + filePaths.Length);
 
-                        foreach (var filePath in filePaths)
+                        foreach (var filePath in filePaths.Where(this.assemblyLoader.IsAssembly))
                         {
                             if (validator.IsAssemblyAcceptable(filePath, out var validationError))
                             {

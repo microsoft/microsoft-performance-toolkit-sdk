@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -78,6 +77,11 @@ namespace Microsoft.Performance.SDK.Runtime
             20004,
             "FILE_LOAD_FAILURE",
             "The assembly was found, but could not be loaded.");
+
+        public static readonly ErrorCodes InvalidCliAssembly = new ErrorCodes(
+            20005,
+            "INVALID_CLI_ASSEMBLY",
+            "The file is not a valid CLI assembly.");
 
         //
         // Discovery Errors
@@ -165,11 +169,6 @@ namespace Microsoft.Performance.SDK.Runtime
         public static int ToInt(ErrorCodes code)
         {
             return code?.numericCode ?? 0;
-        }
-
-        public ErrorInfo ToErrorInfo()
-        {
-            return new ErrorInfo(this.code, this.description);
         }
 
         public override string ToString()

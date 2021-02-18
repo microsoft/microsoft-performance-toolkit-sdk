@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -20,11 +21,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
     ///     boundary guarantees. For more information, refer to <see cref="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.1"/>
     /// </summary>
     public sealed class IsolationAssemblyLoader
-        : IAssemblyLoader
+        : AssemblyLoaderBase
     {
-        /// <inheritdoc />
-        public bool SupportsIsolation => true;
-
         // filename, name
         private static readonly IReadOnlyDictionary<string, string> AlwaysSharedAssembliesFileNameToName
             = new Dictionary<string, string>
@@ -38,8 +36,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
             () => Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
             System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
 
-        private static readonly Dictionary<string, AssemblyLoadContext> loadContexts =
-            new Dictionary<string, AssemblyLoadContext>();
+        private static readonly ConcurrentDictionary<string, AssemblyLoadContext> loadContexts =
+            new ConcurrentDictionary<string, AssemblyLoadContext>();
 
         // This is  used for testing purposes only
         internal static readonly IReadOnlyDictionary<string, AssemblyLoadContext> LoadContexts =
@@ -86,66 +84,29 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                 x => x.Key);
         }
 
-        /// <inheritdoc cref=""/>
-        public Assembly LoadAssembly(string assemblyPath, out ErrorInfo error)
+        /// <inheritdoc />
+        public override bool SupportsIsolation => true;
+
+        /// <inheritdoc />
+        protected override Assembly LoadFromPath(string assemblyPath)
         {
-            error = ErrorInfo.None;
-
-            if (!CliUtils.IsCliAssembly(assemblyPath))
-            {
-                return null;
-            }
-
             var directory = Path.GetDirectoryName(assemblyPath);
             var fileName = Path.GetFileName(assemblyPath);
 
-            Assembly loadedAssembly = SpeciallyLoadedByAssemblyFileName(fileName);
-
-            if (loadedAssembly == null)
+            var loadedAssembly = this.SpeciallyLoadedByAssemblyFileName(fileName);
+            if (loadedAssembly != null)
             {
-                if (!loadContexts.TryGetValue(directory, out var loadContext))
-                {
-                    loadContext = new PluginAssemblyLoadContext(directory, this.SpeciallyLoadedByAssemblyName);
-                    if (!loadContexts.TryAdd(directory, loadContext))
-                    {
-                        if (!loadContexts.TryGetValue(directory, out loadContext))
-                        {
-                            Console.Error.WriteLine($"Unable to load assembly {assemblyPath}.");
-                        }
-                    }
-                }
-
-                if (loadContext != null)
-                {
-                    try
-                    {
-                        loadedAssembly = loadContext.LoadFromAssemblyPath(assemblyPath);
-                    }
-                    catch (BadImageFormatException)
-                    {
-                        //
-                        // this means it is native code or otherwise
-                        // not readable by the CLR.
-                        //
-
-                        loadedAssembly = null;
-                    }
-                    catch (FileLoadException e)
-                    {
-                        Console.Error.WriteLine(
-                            "[warn]: managed assembly `{0}` cannot be loaded - {1}.",
-                            assemblyPath,
-                            e.FusionLog);
-                        loadedAssembly = null;
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        loadedAssembly = null;
-                    }
-                }
+                return loadedAssembly;
             }
 
-            return loadedAssembly;
+            if (!loadContexts.TryGetValue(directory, out var loadContext))
+            {
+                loadContext = loadContexts.GetOrAdd(directory, x => new PluginAssemblyLoadContext(x, this.SpeciallyLoadedByAssemblyName));
+            }
+
+            Debug.Assert(loadContext != null);
+
+            return loadContext.LoadFromAssemblyPath(assemblyPath);
         }
 
         // This is  used for testing purposes only
@@ -158,7 +119,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                     kvp.Value.Unload();
                 }
                 catch (Exception)
-                { }
+                { 
+                }
             }
 
             loadContexts.Clear();

@@ -47,13 +47,17 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                 }
                 catch (FileNotFoundException e)
                 {
-                    error = ErrorCodes.AssemblyLoadFailed.ToErrorInfo();
-                    error.Target = fullPath;
-                    error.Details = new[]
+                    error = new ErrorInfo(
+                        ErrorCodes.AssemblyLoadFailed,
+                        ErrorCodes.AssemblyLoadFailed.Description)
                     {
-                        new ErrorInfo(ErrorCodes.FileNotFound, e.Message)
+                        Target = fullPath,
+                        Details = new[]
                         {
-                            Target = fullPath,
+                            new ErrorInfo(ErrorCodes.FileNotFound, e.Message)
+                            {
+                                Target = fullPath,
+                            },
                         },
                     };
 
@@ -61,18 +65,22 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                 }
                 catch (FileLoadException e)
                 {
-                    error = ErrorCodes.AssemblyLoadFailed.ToErrorInfo();
-                    error.Target = fullPath;
-                    error.Details = new[]
+                    error = new ErrorInfo(
+                        ErrorCodes.AssemblyLoadFailed,
+                        ErrorCodes.AssemblyLoadFailed.Description)
                     {
-                        new ErrorInfo(ErrorCodes.FileLoadFailure, ErrorCodes.FileLoadFailure.Description)
+                        Target = fullPath,
+                        Details = new[]
                         {
-                            Target = fullPath,
-                            Details = new[]
+                            new ErrorInfo(ErrorCodes.FileLoadFailure, ErrorCodes.FileLoadFailure.Description)
                             {
-                                new ErrorInfo(ErrorCodes.FileLoadFailure, e.Message)
+                                Target = fullPath,
+                                Details = new[]
                                 {
-                                    Target = fullPath,
+                                    new ErrorInfo(ErrorCodes.FileLoadFailure, e.Message)
+                                    {
+                                        Target = fullPath,
+                                    },
                                 },
                             },
                         },
@@ -82,13 +90,17 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                 }
                 catch (Exception e)
                 {
-                    error = ErrorCodes.Unexpected.ToErrorInfo();
-                    error.Target = fullPath;
-                    error.Details = new[]
+                    error = new ErrorInfo(
+                        ErrorCodes.Unexpected,
+                        ErrorCodes.Unexpected.Description)
                     {
-                        new ErrorInfo(ErrorCodes.Unexpected, e.Message)
+                        Target = fullPath,
+                        Details = new[]
                         {
-                            Target = fullPath,
+                            new ErrorInfo(ErrorCodes.Unexpected, e.Message)
+                            {
+                                Target = fullPath,
+                            },
                         },
                     };
                 }

@@ -17,6 +17,19 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         bool SupportsIsolation { get; }
 
         /// <summary>
+        ///     Determines whether the given path is a valid
+        ///     assembly.
+        /// </summary>
+        /// <param name="path">
+        ///     The path to check.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the path is to an assembly;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        bool IsAssembly(string path);
+
+        /// <summary>
         ///     Loads the given assembly from the given path.
         /// </summary>
         /// <param name="assemblyPath">
