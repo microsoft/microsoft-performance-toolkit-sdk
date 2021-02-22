@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK
     ///     you may derive from this class and add your own
     ///     properties.
     ///     <para/>
-    ///     Plugin authors may use this in conjuction with
+    ///     Plugin authors may use this in conjunction with
     ///     <see cref="ExtensionException"/> to report errors
     ///     from their Plugins.
     /// </summary>
