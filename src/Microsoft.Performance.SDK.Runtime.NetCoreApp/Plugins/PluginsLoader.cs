@@ -56,15 +56,42 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         private readonly HashSet<IPluginsConsumer> subscribers;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PluginsLoader"/>
+        ///     class.
+        /// </summary>
         public PluginsLoader()
             : this(new IsolationAssemblyLoader(), x => new SandboxPreloadValidator(x, VersionChecker.Create()))
         {
         }
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PluginsLoader"/>
+        ///     class with the given <see cref="IAssemblyLoader"/> and
+        ///     <see cref="IPreloadValidator"/> factory.
+        /// </summary>
+        /// <param name="assemblyLoader">
+        ///     Loads assemblies.
+        /// </param>
+        /// <param name="validatorFactory">
+        ///     Creates <see cref="IPreloadValidator"/> instances to make
+        ///     sure candidate assemblies are valid to even try to load.
+        ///     The function takes a collection of file names and returns
+        ///     a new <see cref="IPreloadValidator"/> instance. This function
+        ///     should never return <c>null</c>.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="assemblyLoader"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="validatorFactory"/> is <c>null</c>.
+        /// </exception>
         public PluginsLoader(
             IAssemblyLoader assemblyLoader,
             Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
         {
+            Guard.NotNull(assemblyLoader, nameof(assemblyLoader));
+            Guard.NotNull(validatorFactory, nameof(validatorFactory));
+
             this.subscribers = new HashSet<IPluginsConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
             this.catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);

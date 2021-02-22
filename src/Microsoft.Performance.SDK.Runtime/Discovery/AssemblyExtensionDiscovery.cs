@@ -31,6 +31,13 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="assemblyLoader">
         ///     This is used to load individual assemblies.
         /// </param>
+        /// <param name="validatorFactory">
+        ///     Creates <see cref="IPreloadValidator"/> instances to make
+        ///     sure candidate assemblies are valid to even try to load.
+        ///     The function takes a collection of file names and returns
+        ///     a new <see cref="IPreloadValidator"/> instance. This function
+        ///     should never return <c>null</c>.
+        /// </param>
         public AssemblyExtensionDiscovery(
             IAssemblyLoader assemblyLoader,
             Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
@@ -66,7 +73,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     Directory to process.
         /// </param>
         /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     If this method returns <c>false</c>, then this parameter receives
         ///     information about the error(s) that occurred.
         /// </param>
         /// <returns>
@@ -85,7 +92,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     Directories to process.
         /// </param>
         /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     If this method returns <c>false</c>, then this parameter receives
         ///     information about the error(s) that occurred.
         /// </param>
         /// <returns>
@@ -116,7 +123,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     Indicates whether files names should be treated as case sensitive.
         /// </param>
         /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     If this method returns <c>false</c>, then this parameter receives
         ///     information about the error(s) that occurred.
         /// </param>
         /// <returns>
@@ -159,7 +166,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     Indicates whether files names should be treated as case sensitive.
         /// </param>
         /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter recieves
+        ///     If this method returns <c>false</c>, then this parameter receives
         ///     information about the error(s) that occurred.
         /// </param>
         /// <returns>
@@ -231,6 +238,15 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                         }
 
                         var validator = this.validatorFactory(filePaths);
+                        if (validator is null)
+                        {
+                            Debug.Fail("Validator factory should never return null");
+                            allLoaded = false;
+                            assemblyErrors.Add(
+                                new ErrorInfo(
+                                    ErrorCodes.InvalidArgument,
+                                    "The preload validator factory returned null, which is not valid."));
+                        }
 
                         loaded.EnsureCapacity(loaded.Capacity + filePaths.Length);
 
