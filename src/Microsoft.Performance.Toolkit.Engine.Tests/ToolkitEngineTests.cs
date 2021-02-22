@@ -249,7 +249,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         [TestMethod]
         [IntegrationTest]
-        public void AddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparaetly()
+        public void AddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparately()
         {
             var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
@@ -462,7 +462,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparaetly()
+        public void TryAddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparately()
         {
             var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Versioning;
@@ -11,6 +12,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
     public class VersionCheckerTests
     {
         [TestMethod]
+        [UnitTest]
         public void BaseLineIs109()
         {
             var sut = CreateSut();
@@ -19,6 +21,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         public void VersionLessThanBaselineRejected()
         {
             var baseline = new SemanticVersion(1, 2, 3);
@@ -30,6 +33,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         [TestMethod]
+        [UnitTest]
         [DataRow("0.109.0", "0.109.0", "0.109.0", true)]
 
         // major being zero (0), anything between lowest version
@@ -43,7 +47,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         // major being non-zero, must have matching major
         // and minor being <=.
         // Patches do not change the interface, so are
-        // irrelevent to the checks.
+        // irrelevant to the checks.
         [DataRow("1.0.0", "0.109.0", "0.109.0", false)]
         [DataRow("1.0.0", "0.109.0", "0.201.0", false)]
         [DataRow("1.0.0", "0.109.0", "1.0.0", true)]

@@ -20,6 +20,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
     {
         private readonly MetadataAssemblyResolver resolver;
         private readonly VersionChecker versionChecker;
+        private readonly MetadataLoadContext loadContext;
+
+        private bool isDisposed;
 
         public SandboxPreloadValidator(
             IEnumerable<string> assemblyPaths,
@@ -34,44 +37,48 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
 
             this.resolver = new PathAssemblyResolver(allDlls);
             this.versionChecker = versionChecker;
+            this.loadContext = new MetadataLoadContext(this.resolver);
+        }
+
+        ~SandboxPreloadValidator()
+        {
+            this.Dispose(false);
         }
 
         public bool IsAssemblyAcceptable(string fullPath, out ErrorInfo error)
         {
-            using (var context = new MetadataLoadContext(this.resolver))
+            Assembly loaded;
+            try
             {
-                Assembly loaded = null;
-                try
+                loaded = this.loadContext.LoadFromAssemblyPath(fullPath);
+            }
+            catch (FileNotFoundException e)
+            {
+                error = new ErrorInfo(
+                    ErrorCodes.AssemblyLoadFailed,
+                    ErrorCodes.AssemblyLoadFailed.Description)
                 {
-                    loaded = context.LoadFromAssemblyPath(fullPath);
-                }
-                catch (FileNotFoundException e)
-                {
-                    error = new ErrorInfo(
-                        ErrorCodes.AssemblyLoadFailed,
-                        ErrorCodes.AssemblyLoadFailed.Description)
+                    Target = fullPath,
+                    Details = new[]
                     {
-                        Target = fullPath,
-                        Details = new[]
-                        {
                             new ErrorInfo(ErrorCodes.FileNotFound, e.Message)
                             {
                                 Target = fullPath,
                             },
                         },
-                    };
+                };
 
-                    return false;
-                }
-                catch (FileLoadException e)
+                return false;
+            }
+            catch (FileLoadException e)
+            {
+                error = new ErrorInfo(
+                    ErrorCodes.AssemblyLoadFailed,
+                    ErrorCodes.AssemblyLoadFailed.Description)
                 {
-                    error = new ErrorInfo(
-                        ErrorCodes.AssemblyLoadFailed,
-                        ErrorCodes.AssemblyLoadFailed.Description)
+                    Target = fullPath,
+                    Details = new[]
                     {
-                        Target = fullPath,
-                        Details = new[]
-                        {
                             new ErrorInfo(ErrorCodes.FileLoadFailure, ErrorCodes.FileLoadFailure.Description)
                             {
                                 Target = fullPath,
@@ -84,41 +91,64 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                                 },
                             },
                         },
-                    };
+                };
 
-                    return false;
-                }
-                catch (Exception e)
+                return false;
+            }
+            catch (Exception e)
+            {
+                error = new ErrorInfo(
+                    ErrorCodes.Unexpected,
+                    ErrorCodes.Unexpected.Description)
                 {
-                    error = new ErrorInfo(
-                        ErrorCodes.Unexpected,
-                        ErrorCodes.Unexpected.Description)
+                    Target = fullPath,
+                    Details = new[]
                     {
-                        Target = fullPath,
-                        Details = new[]
-                        {
                             new ErrorInfo(ErrorCodes.Unexpected, e.Message)
                             {
                                 Target = fullPath,
                             },
                         },
-                    };
-                }
+                };
 
-                Debug.Assert(loaded != null);
-
-                if (!this.IsSdkValid(loaded, out error))
-                {
-                    return false;
-                }
-
-                //
-                // Add any other checks here
-                //
-
-                error = ErrorInfo.None;
-                return true;
+                return false;
             }
+
+            Debug.Assert(loaded != null);
+
+            if (!this.IsSdkValid(loaded, out error))
+            {
+                return false;
+            }
+
+            //
+            // Add any other checks here
+            //
+
+            error = ErrorInfo.None;
+            return true;
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                this.loadContext.Dispose();
+            }
+
+            this.isDisposed = true;
         }
 
         private bool IsSdkValid(Assembly assembly, out ErrorInfo error)

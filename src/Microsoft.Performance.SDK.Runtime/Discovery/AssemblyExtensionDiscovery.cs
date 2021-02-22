@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -237,47 +238,49 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             continue;
                         }
 
-                        var validator = this.validatorFactory(filePaths);
-                        if (validator is null)
+                        using (var validator = this.validatorFactory(filePaths))
                         {
-                            Debug.Fail("Validator factory should never return null");
-                            allLoaded = false;
-                            assemblyErrors.Add(
-                                new ErrorInfo(
-                                    ErrorCodes.InvalidArgument,
-                                    "The preload validator factory returned null, which is not valid."));
-                        }
-
-                        loaded.EnsureCapacity(loaded.Capacity + filePaths.Length);
-
-                        foreach (var filePath in filePaths.Where(this.assemblyLoader.IsAssembly))
-                        {
-                            if (validator.IsAssemblyAcceptable(filePath, out var validationError))
+                            if (validator is null)
                             {
-                                var assembly = this.assemblyLoader.LoadAssembly(filePath, out _);
-                                if (!(assembly is null))
+                                Debug.Fail("Validator factory should never return null");
+                                allLoaded = false;
+                                assemblyErrors.Add(
+                                    new ErrorInfo(
+                                        ErrorCodes.InvalidArgument,
+                                        "The preload validator factory returned null, which is not valid."));
+                            }
+
+                            loaded.EnsureCapacity(loaded.Capacity + filePaths.Length);
+
+                            foreach (var filePath in filePaths.Where(this.assemblyLoader.IsAssembly))
+                            {
+                                if (validator.IsAssemblyAcceptable(filePath, out var validationError))
                                 {
-                                    if (!ProcessAssembly(assembly, out var assemblyError))
+                                    var assembly = this.assemblyLoader.LoadAssembly(filePath, out _);
+                                    if (!(assembly is null))
                                     {
+                                        if (!ProcessAssembly(assembly, out var assemblyError))
+                                        {
+                                            allLoaded = false;
+                                            Debug.Assert(assemblyError != null);
+                                            assemblyErrors.Add(assemblyError);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        assemblyErrors.Add(
+                                            new ErrorInfo(ErrorCodes.AssemblyLoadFailed, ErrorCodes.AssemblyLoadFailed.Description)
+                                            {
+                                                Target = filePath,
+                                            });
                                         allLoaded = false;
-                                        Debug.Assert(assemblyError != null);
-                                        assemblyErrors.Add(assemblyError);
                                     }
                                 }
                                 else
                                 {
-                                    assemblyErrors.Add(
-                                        new ErrorInfo(ErrorCodes.AssemblyLoadFailed, ErrorCodes.AssemblyLoadFailed.Description)
-                                        {
-                                            Target = filePath,
-                                        });
                                     allLoaded = false;
+                                    assemblyErrors.Add(validationError);
                                 }
-                            }
-                            else
-                            {
-                                allLoaded = false;
-                                assemblyErrors.Add(validationError);
                             }
                         }
                     }
@@ -360,7 +363,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             var processingErrors = new List<ErrorInfo>();
             foreach (var type in assemblyTypes)
             {
-                var observerErrors = new List<(IExtensionTypeObserver, Exception)>();
+                var observerErrors = new ConcurrentBag<(IExtensionTypeObserver, Exception)>();
                 Parallel.ForEach(observers, (observer) =>
                 {
                     try
@@ -398,11 +401,9 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
                 return false;
             }
-            else
-            {
-                error = null;
-                return true;
-            }
+
+            error = null;
+            return true;
         }
 
         /// <summary>

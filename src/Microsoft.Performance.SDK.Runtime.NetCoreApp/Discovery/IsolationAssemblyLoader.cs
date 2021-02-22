@@ -99,10 +99,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                 return loadedAssembly;
             }
 
-            if (!loadContexts.TryGetValue(directory, out var loadContext))
-            {
-                loadContext = loadContexts.GetOrAdd(directory, x => new PluginAssemblyLoadContext(x, this.SpeciallyLoadedByAssemblyName));
-            }
+            var loadContext = loadContexts.GetOrAdd(directory, x => new PluginAssemblyLoadContext(x, this.SpeciallyLoadedByAssemblyName));
 
             Debug.Assert(loadContext != null);
 

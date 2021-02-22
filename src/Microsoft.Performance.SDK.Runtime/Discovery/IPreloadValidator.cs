@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
     /// <summary>
@@ -8,6 +10,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     ///     their eligibility as part of an extension.
     /// </summary>
     public interface IPreloadValidator
+        : IDisposable
     {
         /// <summary>
         ///     Determines if the given path represents an assembly

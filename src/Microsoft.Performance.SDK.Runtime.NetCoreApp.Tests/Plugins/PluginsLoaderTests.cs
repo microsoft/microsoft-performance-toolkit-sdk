@@ -532,7 +532,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         //
-        // Concurrency sests
+        // Concurrency tests
         //
 
         [TestMethod]
@@ -730,7 +730,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         ///         1) <see cref="MockPluginsConsumer.ObservedDataSourcesByPluginName"/> only has one
         ///            entry for the empty string
         ///         2) <see cref="MockPluginsConsumer.ObservedPluginVersionsByPluginName"/> is empty, since
-        ///            versions are only observed alongisde plugin names
+        ///            versions are only observed alongside plugin names
         /// </summary>
         private void AssertNoPluginNames(MockPluginsConsumer consumer)
         {

@@ -43,11 +43,11 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     Extension method to get the description for a <see cref="CustomDataSourceReference"/>.
         /// </summary>
         /// <param name="extension">
-        ///     The extension of the file whose description is to be retreived. Specify
+        ///     The extension of the file whose description is to be retrieved. Specify
         ///     <c>null</c> or whitespace to retrieve the description of extensionless files.
         /// </param>
         /// <returns>
-        ///     The description of the file specified by the given exteions; <c>null</c> if not found.
+        ///     The description of the file specified by the given extension; <c>null</c> if not found.
         /// </returns>
         public static string TryGetFileDescription(this CustomDataSourceReference self, string extension)
         {

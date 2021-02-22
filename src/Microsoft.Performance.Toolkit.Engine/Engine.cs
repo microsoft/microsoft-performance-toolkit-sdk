@@ -300,7 +300,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Adds the given Data Sources to this instance for processing by
+        ///     Adds the given data sources to this instance for processing by
         ///     the specific Custom Data Source. All of the files will be processed
         ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
         ///     to ensure each Data Source is processed by a different instance, or
@@ -346,7 +346,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Attempts to add the given Data Sources to this instance for processing by
+        ///     Attempts to add the given data sources to this instance for processing by
         ///     the specific Custom Data Source. All of the files will be processed
         ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
         ///     to ensure each Data Source is processed by a different instance, or
@@ -868,6 +868,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 error = ErrorInfo.None;
                 return true;
+            }
+
+            public void Dispose()
+            {
             }
         }
     }

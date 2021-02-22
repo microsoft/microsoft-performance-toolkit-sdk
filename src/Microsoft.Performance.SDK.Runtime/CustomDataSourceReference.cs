@@ -107,7 +107,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Dtermines whether the given <see cref="IDataSource"/>
+        ///     Determines whether the given <see cref="IDataSource"/>
         ///     is supported by the <see cref="ICustomDataSource>"/> referenced by
         ///     this <see cref="CustomDataSourceReference"/>.
         /// </summary>

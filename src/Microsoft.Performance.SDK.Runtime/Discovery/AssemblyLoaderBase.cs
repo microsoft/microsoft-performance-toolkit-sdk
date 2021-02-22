@@ -13,14 +13,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     public abstract class AssemblyLoaderBase
         : IAssemblyLoader
     {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="AssemblyLoaderBase"/>
-        ///     class.
-        /// </summary>
-        protected AssemblyLoaderBase()
-        {
-        }
-
         /// <inheritdoc />
         public abstract bool SupportsIsolation { get; }
 
@@ -124,8 +116,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         }
 
         /// <summary>
-        ///     When overridden in a derived class, physically loads the
-        ///     assembly from the given path.
+        ///     When overridden in a derived class, performs the actual
+        ///     load of the assembly from the specified path.
         /// </summary>
         /// <param name="assemblyPath">
         ///     Path to an assembly.

@@ -14,5 +14,9 @@ namespace Microsoft.Performance.Testing.SDK
             error = ErrorInfo.None;
             return true;
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

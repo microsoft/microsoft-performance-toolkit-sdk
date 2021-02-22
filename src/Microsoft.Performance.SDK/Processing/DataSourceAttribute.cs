@@ -72,7 +72,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             if (!type.Is<IDataSource>())
             {
-                throw new ArgumentException($"'{type}' must implement IDataSoure.", nameof(type));
+                throw new ArgumentException($"'{type}' must implement IDataSource.", nameof(type));
             }
 
             this.Type = type;
@@ -104,7 +104,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <para/>
         ///     For example, The <see cref="FileDataSourceAttribute" /> uses this method to
         ///     reject any <see cref="FileDataSource"/>s that do not have the prescribed extension.
-        ///     This way, only files with the relevent extension get passed to the Custom Data Source
+        ///     This way, only files with the relevant extension get passed to the Custom Data Source
         ///     for further inspection. See the <see cref="FileDataSourceAttribute"/> class for
         ///     the implementation.
         ///     <para />
