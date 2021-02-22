@@ -229,7 +229,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="dataSource">
         ///     The unsupported Data Source.
         /// </param>
-        /// <param name="requestedDataSource">
+        /// <param name="requestedCustomDataSource">
         ///     The Custom Data Source that was requested for the file.
         /// </param>
         public UnsupportedDataSourceException(IDataSource dataSource, Type requestedCustomDataSource)

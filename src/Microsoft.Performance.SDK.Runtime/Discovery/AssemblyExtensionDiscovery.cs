@@ -256,7 +256,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             {
                                 if (validator.IsAssemblyAcceptable(filePath, out var validationError))
                                 {
-                                    var assembly = this.assemblyLoader.LoadAssembly(filePath, out _);
+                                    var assembly = this.assemblyLoader.LoadAssembly(filePath, out var loadError);
                                     if (!(assembly is null))
                                     {
                                         if (!ProcessAssembly(assembly, out var assemblyError))
@@ -268,12 +268,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                                     }
                                     else
                                     {
-                                        assemblyErrors.Add(
-                                            new ErrorInfo(ErrorCodes.AssemblyLoadFailed, ErrorCodes.AssemblyLoadFailed.Description)
-                                            {
-                                                Target = filePath,
-                                            });
                                         allLoaded = false;
+                                        assemblyErrors.Add(loadError);
                                     }
                                 }
                                 else

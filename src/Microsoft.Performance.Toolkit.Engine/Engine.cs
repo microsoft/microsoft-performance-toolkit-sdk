@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
@@ -136,13 +135,20 @@ namespace Microsoft.Performance.Toolkit.Engine
         public IEnumerable<DataCookerPath> EnabledCookers => this.enabledCookersRO;
 
         /// <summary>
+        ///     Gets any non-fatal errors that occured during engine
+        ///     creation. Because these errors are not fatal, they are
+        ///     reported here rather than raising an exception.
+        /// </summary>
+        public IEnumerable<ErrorInfo> CreationErrors { get; private set; }
+
+        /// <summary>
         ///     Creates a new instance of the <see cref="Engine" /> class.
         /// </summary>
         /// <returns>
         ///     The created engine environment.
         /// </returns>
         /// <exception cref="EngineException">
-        ///     An error occurred while creating the engine.
+        ///     An fatal error occurred while creating the engine.
         /// </exception>
         public static Engine Create()
         {
@@ -162,7 +168,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="createInfo"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="EngineException">
-        ///     An error occurred while creating the engine.
+        ///     An fatal error occurred while creating the engine.
         /// </exception>
         public static Engine Create(
             EngineCreateInfo createInfo)
@@ -338,11 +344,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.ThrowIfProcessed();
 
-            if (!this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs, out var e))
-            {
-                Debug.Assert(e != null);
-                e.Throw();
-            }
+            this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs);
         }
 
         /// <summary>
@@ -368,7 +370,15 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            return this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs, out _);
+            try
+            {
+                this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -469,7 +479,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 assemblyDiscovery,
                 repoBuilder);
 
-            assemblyDiscovery.ProcessAssemblies(extensionDirectory, out _);
+            assemblyDiscovery.ProcessAssemblies(extensionDirectory, out var discoveryError);
 
             repoBuilder.FinalizeDataExtensions();
 
@@ -480,6 +490,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             var instance = new EngineImpl();
 
             instance.ExtensionDirectory = extensionDirectory;
+            instance.CreationErrors = new[] { discoveryError, };
             instance.customDataSourceReferences.AddRange(catalog.PlugIns);
             instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
             instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
@@ -538,13 +549,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             return instance;
         }
 
-        private bool AddDataSourcesCore(
+        private void AddDataSourcesCore(
             IEnumerable<IDataSource> dataSources,
             Type customDataSourceType,
             List<CustomDataSourceReference> customDataSourceReferences,
             Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
-            Func<Type, Type, bool> typeIs,
-            out ExceptionDispatchInfo error)
+            Func<Type, Type, bool> typeIs)
         {
             Debug.Assert(dataSources != null);
             Debug.Assert(customDataSourceType != null);
@@ -557,8 +567,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             var cdsr = customDataSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), customDataSourceType));
             if (cdsr is null)
             {
-                error = ExceptionDispatchInfo.Capture(new UnsupportedCustomDataSourceException(customDataSourceType));
-                return false;
+                throw new UnsupportedCustomDataSourceException(customDataSourceType);
             }
 
             var atLeastOneDataSourceProvided = false;
@@ -569,15 +578,13 @@ namespace Microsoft.Performance.Toolkit.Engine
                 atLeastOneDataSourceProvided = true;
                 if (!cdsr.Supports(dataSource))
                 {
-                    error = ExceptionDispatchInfo.Capture(new UnsupportedDataSourceException(dataSource, customDataSourceType));
-                    return false;
+                    throw new UnsupportedDataSourceException(dataSource, customDataSourceType);
                 }
             }
 
             if (!atLeastOneDataSourceProvided)
             {
-                error = ExceptionDispatchInfo.Capture(new ArgumentException("The Data Source collection cannot be empty.", nameof(dataSources)));
-                return false;
+                throw new ArgumentException("The Data Source collection cannot be empty.", nameof(dataSources));
             }
 
             if (!dataSourcesToProcess.TryGetValue(cdsr, out var list))
@@ -587,9 +594,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             list.Add(dataSources.ToList());
-
-            error = null;
-            return true;
         }
 
         private RuntimeExecutionResults ProcessCore()
