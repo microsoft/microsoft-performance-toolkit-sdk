@@ -34,19 +34,6 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
-        public override bool Accepts(IDataSource dataSource)
-        {
-            Guard.NotNull(dataSource, nameof(dataSource));
-
-            if (!(dataSource is FileDataSource fds))
-            {
-                return false;
-            }
-
-            return Path.GetExtension(fds.FullPath) == string.Empty;
-        }
-
-        /// <inheritdoc />
         public bool Equals(ExtensionlessFileDataSourceAttribute other)
         {
             return base.Equals(other);
@@ -68,6 +55,19 @@ namespace Microsoft.Performance.SDK.Processing
         public override string ToString()
         {
             return this.Description;
+        }
+
+        /// <inheritdoc />
+        protected override bool AcceptsCore(IDataSource dataSource)
+        {
+            Guard.NotNull(dataSource, nameof(dataSource));
+
+            if (!(dataSource is FileDataSource fds))
+            {
+                return false;
+            }
+
+            return Path.GetExtension(fds.FullPath) == string.Empty;
         }
     }
 }

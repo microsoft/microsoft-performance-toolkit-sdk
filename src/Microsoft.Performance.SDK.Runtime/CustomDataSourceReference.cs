@@ -44,24 +44,24 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
-        public virtual Guid Guid { get; }
+        public abstract Guid Guid { get; }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Name"/>
-        public virtual string Name { get; }
+        public abstract string Name { get; }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Description"/>
-        public virtual string Description { get; }
+        public abstract string Description { get; }
 
         /// <summary>
         ///     Gets the <see cref="DataSourceAttribute"/>s for the custom data source.
         /// </summary>
-        public virtual IReadOnlyCollection<DataSourceAttribute> DataSources { get; }
+        public abstract IReadOnlyCollection<DataSourceAttribute> DataSources { get; }
 
         /// <inheritdoc cref="ICustomDataSource.DataTables"/>
-        public virtual IEnumerable<TableDescriptor> AvailableTables { get; }
+        public abstract IEnumerable<TableDescriptor> AvailableTables { get; }
 
         /// <inheritdoc cref="ICustomDataSource.CommandLineOptions"/>
-        public virtual IEnumerable<Option> CommandLineOptions { get; }
+        public abstract IEnumerable<Option> CommandLineOptions { get; }
 
         /// <summary>
         ///     Tries to create a instance of the <see cref="CustomDataSourceReference"/> based on the <paramref name="candidateType"/>

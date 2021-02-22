@@ -402,7 +402,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public bool PreliminaryCheckResult { get; set; } = true;
 
-            public override bool Accepts(IDataSource dataSource)
+            protected override bool AcceptsCore(IDataSource dataSource)
             {
                 return this.PreliminaryCheckResult;
             }

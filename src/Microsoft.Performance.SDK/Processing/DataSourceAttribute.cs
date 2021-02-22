@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -80,7 +81,7 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Gets the <see cref="Type"/> of Data Source denoted by
+        ///     Gets the <see cref="System.Type"/> of Data Source denoted by
         ///     this <see cref="DataSourceAttribute"/>.
         /// </summary>
         public Type Type { get; }
@@ -89,6 +90,39 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets the description of the Data Source.
         /// </summary>
         public string Description { get; }
+
+        /// <summary>
+        ///     This method is used to filter anyincoming Data Sources so that only
+        ///     Data Sources that could conceivably be processed by the decorated
+        ///     Custom Data Source are passed to the Custom Data Source for evaluation.
+        /// </summary>
+        /// <param name="dataSource">
+        ///     The Data Source to check.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if it is feasible for this Data Source to be supported;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="dataSource"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        ///     <paramref name="dataSource"/> is not assignable to the <see cref="System.Type"/>
+        ///     specified by this instance. See <see cref="DataSourceAttribute.Type"/>.
+        /// </exception>
+        public bool Accepts(IDataSource dataSource)
+        {
+            Guard.NotNull(dataSource, nameof(dataSource));
+
+            if (!dataSource.GetType().Is(this.Type))
+            {
+                Debug.Fail("The runtime should never pass an incompatible type to this method.");
+                throw new InvalidOperationException(
+                    $"The runtime should never pass an incompatible type to this method. Expected '{this.Type}', got '{dataSource.GetType()}'");
+            }
+
+            return this.AcceptsCore(dataSource);
+        }
 
         /// <summary>
         ///     When overridden in a derived class, this method is used to filter any
@@ -110,6 +144,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <para />
         ///     It is guaranteed that the runtime will only pass instances of <paramref name="dataSource"/> that
         ///     are of the <see cref="Type"/> specified by <see cref="DataSourceAttribute.Type"/>.
+        ///     It is guaranteed that the runtime will not pass <c>null</c> to this method.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to check.
@@ -118,7 +153,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <c>true</c> if it is feasible for this Data Source to be supported;
         ///     <c>false</c> otherwise.
         /// </returns>
-        public virtual bool Accepts(IDataSource dataSource)
+        protected virtual bool AcceptsCore(IDataSource dataSource)
         {
             return true;
         }

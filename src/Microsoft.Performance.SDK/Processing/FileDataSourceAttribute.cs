@@ -70,23 +70,6 @@ namespace Microsoft.Performance.SDK.Processing
         public string FileExtension { get; }
 
         /// <inheritdoc />
-        public override bool Accepts(IDataSource dataSource)
-        {
-            Guard.NotNull(dataSource, nameof(dataSource));
-
-            if (!(dataSource is FileDataSource fds))
-            {
-                return false;
-            }
-
-            var ext = '.' + this.FileExtension;
-
-            return StringComparer.OrdinalIgnoreCase.Equals(
-                ext,
-                Path.GetExtension(fds.FullPath));
-        }
-
-        /// <inheritdoc />
         public bool Equals(FileDataSourceAttribute other)
         {
             return base.Equals(other) &&
@@ -118,6 +101,23 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             return toString.ToString();
+        }
+
+        /// <inheritdoc />
+        protected override bool AcceptsCore(IDataSource dataSource)
+        {
+            Guard.NotNull(dataSource, nameof(dataSource));
+
+            if (!(dataSource is FileDataSource fds))
+            {
+                return false;
+            }
+
+            var ext = '.' + this.FileExtension;
+
+            return StringComparer.OrdinalIgnoreCase.Equals(
+                ext,
+                Path.GetExtension(fds.FullPath));
         }
     }
 }
