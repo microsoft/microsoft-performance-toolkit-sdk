@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomD
             throw new System.NotImplementedException();
         }
 
-        protected override bool IsFileSupportedCore(string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
         {
             return true;
         }

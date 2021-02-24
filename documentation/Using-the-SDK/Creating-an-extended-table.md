@@ -88,4 +88,6 @@ A video tutorial of making a data processing pipeline and extended table can be 
 This documentation marks the end of all necessary information to begin creating extensible, well-strucutred 
 SDK plugins. For additional resources, you may browse our [samples folder](../../samples).
 
-Our team is working on creating additional documentation and samples for more advanced features of the SDK.
+For more advanced usage of the SDK, please see the following:
+
+- [Overview of Advanced Topics](Advanced/Overview.md)

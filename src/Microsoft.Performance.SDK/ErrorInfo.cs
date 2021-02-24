@@ -9,18 +9,24 @@ using System.Security.Permissions;
 namespace Microsoft.Performance.SDK
 {
     /// <summary>
-    ///     Represents an error related to processing specific 
-    ///     data sources.  For example, when processing and ETW
-    ///     trace, there could be time inversion, and so you would
-    ///     need to surface that to the user. 
+    ///     Encapsulates information around an error condition.
+    ///     In order to expose more specific error information,
+    ///     you may derive from this class and add your own
+    ///     properties.
+    ///     <para/>
+    ///     Plugin authors may use this in conjunction with
+    ///     <see cref="ExtensionException"/> to report errors
+    ///     from their Plugins.
     /// </summary>
     [Serializable]
-    public sealed class ErrorInfo
+    public class ErrorInfo
         : IFormattable,
           ISerializable
     {
-        private const string TypeNameFieldName = "__ConcreteType";
-        private const string HasInnerFieldName = "__HasInner";
+        /// <summary>
+        ///     The <see cref="ErrorInfo"/> instance representing no errors.
+        /// </summary>
+        public static readonly ErrorInfo None = new ErrorInfo("NO_ERROR", "No error has occurred.");
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ErrorInfo"/>
@@ -46,7 +52,19 @@ namespace Microsoft.Performance.SDK
             this.Message = message;
         }
 
-        private ErrorInfo(SerializationInfo info, StreamingContext context)
+        /// <summary>
+        ///     Serialization constructor.
+        /// </summary>
+        /// <param name="info">
+        ///     The data to be deserialized.
+        /// </param>
+        /// <param name="context">
+        ///     The context of the serialization.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="info"/> is <c>null</c>.
+        /// </exception>
+        protected ErrorInfo(SerializationInfo info, StreamingContext context)
         {
             Guard.NotNull(info, nameof(info));
 
@@ -54,16 +72,6 @@ namespace Microsoft.Performance.SDK
             this.Message = info.GetString(nameof(Message));
             this.Target = info.GetString(nameof(Target));
             this.Details = (ErrorInfo[])info.GetValue(nameof(Details), typeof(ErrorInfo[]));
-            if (info.GetBoolean(HasInnerFieldName))
-            {
-                var typeName = info.GetString(TypeNameFieldName);
-                var innerErrorType = Type.GetType(typeName);
-                this.Inner = (InnerError)info.GetValue(nameof(Inner), innerErrorType);
-            }
-            else
-            {
-                this.Inner = null;
-            }
         }
 
         /// <summary>
@@ -88,13 +96,6 @@ namespace Microsoft.Performance.SDK
         ///     or empty.
         /// </summary>
         public ErrorInfo[] Details { get; set; }
-
-        /// <summary>
-        ///     Gets or sets an object containing more specific information
-        ///     that the current object about the error. This property may
-        ///     be <c>null</c>.
-        /// </summary>
-        public InnerError Inner { get; set; }
 
         /// <summary>
         ///     Gets the string representation of this error object.
@@ -145,7 +146,7 @@ namespace Microsoft.Performance.SDK
         [SecurityPermission(
             SecurityAction.LinkDemand,
             Flags = SecurityPermissionFlag.SerializationFormatter)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             Guard.NotNull(info, nameof(info));
 
@@ -153,113 +154,6 @@ namespace Microsoft.Performance.SDK
             info.AddValue(nameof(Message), this.Message);
             info.AddValue(nameof(Target), this.Target);
             info.AddValue(nameof(Details), this.Details);
-
-            if (this.Inner != null)
-            {
-                info.AddValue(HasInnerFieldName, true);
-                info.AddValue(TypeNameFieldName, this.Inner.GetType().AssemblyQualifiedName);
-                info.AddValue(nameof(Inner), this.Inner, this.Inner.GetType());
-            }
-            else
-            {
-                info.AddValue(HasInnerFieldName, false);
-            }
-        }
-
-        /// <inheritdoc />
-        void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            this.GetObjectData(info, context);
-        }
-    }
-
-    /// <summary>
-    ///     Represents additional information about an <see cref="ErrorInfo"/>
-    ///     instance.
-    /// </summary>
-    [Serializable]
-    public class InnerError
-        : ISerializable
-    {
-        private const string TypeNameFieldName = "__ConcreteType";
-        private const string HasInnerFieldName = "__HasInner";
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="InnerError"/>
-        ///     class.
-        /// </summary>
-        /// <param name="code">
-        ///     A processor specific error code.
-        /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="code"/> is <c>null</c>.
-        /// </exception>
-        protected InnerError(string code)
-        {
-            Guard.NotNull(code, nameof(code));
-
-            this.Code = code;
-        }
-
-        /// <summary>
-        ///     Creates a new instance of <see cref="InnerError"/>
-        ///     from serialized data.
-        /// </summary>
-        /// <param name="info">
-        ///     The serialization info.
-        /// </param>
-        /// <param name="context">
-        ///     The streaming context.
-        /// </param>
-        protected InnerError(SerializationInfo info, StreamingContext context)
-        {
-            Guard.NotNull(info, nameof(info));
-
-            this.Code = info.GetString(nameof(Code));
-
-            if (info.GetBoolean(HasInnerFieldName))
-            {
-                var typeName = info.GetString(TypeNameFieldName);
-                var innerErrorType = Type.GetType(typeName);
-                this.Inner = (InnerError)info.GetValue(nameof(Inner), innerErrorType);
-            }
-            else
-            {
-                this.Inner = null;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the processor specific code for this error.
-        /// </summary>
-        public string Code { get; }
-
-        /// <summary>
-        ///     Gets or sets an object containing more specific information
-        ///     that the current object about the error. This property may
-        ///     be <c>null</c>.
-        /// </summary>
-        public InnerError Inner { get; set; }
-
-        /// <inheritdoc />
-        [SecurityPermission(
-            SecurityAction.LinkDemand,
-            Flags = SecurityPermissionFlag.SerializationFormatter)]
-        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            Guard.NotNull(info, nameof(info));
-
-            info.AddValue(nameof(Code), this.Code);
-            if (this.Inner != null)
-            {
-                info.AddValue(HasInnerFieldName, true);
-                info.AddValue(TypeNameFieldName, this.Inner.GetType().AssemblyQualifiedName);
-                info.AddValue(nameof(Inner), this.Inner, this.Inner.GetType());
-            }
-            else
-            {
-                info.AddValue(HasInnerFieldName, false);
-            }
         }
 
         /// <inheritdoc />

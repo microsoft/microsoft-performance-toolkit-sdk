@@ -18,8 +18,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
     ///     <see cref="IPluginsConsumer"/> listeners of all custom data sources loaded
     ///     by plugins.
     ///     <para/>
-    ///     Plugins are loaded by supplying either <see cref="TryLoadPlugin(string)"/> or
-    ///     <see cref="TryLoadPlugins(IEnumerable{string}, out IList{string})"/> directories
+    ///     Plugins are loaded by supplying either <see cref="TryLoadPlugin(string, out ErrorInfo)"/> or
+    ///     <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string, ErrorInfo})"/> directories
     ///     that contain all binaries necessary for the plugins to run. The filesystem structure
     ///     of plugins is expected to be 
     ///         InstalledPlugins\<manager_version>\<plugin_name>\<plugin_version>
@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
     ///         C:\SDK\InstalledPlugins\1.2.3\foo\1.0.0\<files>
     ///         C:\SDK\InstalledPlugins\1.2.3\foo\2.0.0\<files>
     ///     In this example, a specific version of "foo" can be loaded by passing in the full path of
-    ///     the "1.0.0" or "2.0.0" folder to <see cref="TryLoadPlugin(string)"/> or <see cref="TryLoadPlugins(IEnumerable{string}, out IList{string})"/>.
+    ///     the "1.0.0" or "2.0.0" folder to <see cref="TryLoadPlugin(string, out ErrorInfo)"/> or <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string, ErrorInfo})"/>.
     ///     Note that passing in the full path to "foo" or any of its parents will result in both
     ///     versions of the plugin "foo" being loaded.
     ///     <para/>
@@ -56,10 +56,44 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         private readonly HashSet<IPluginsConsumer> subscribers;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PluginsLoader"/>
+        ///     class.
+        /// </summary>
         public PluginsLoader()
+            : this(new IsolationAssemblyLoader(), x => new SandboxPreloadValidator(x, VersionChecker.Create()))
         {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PluginsLoader"/>
+        ///     class with the given <see cref="IAssemblyLoader"/> and
+        ///     <see cref="IPreloadValidator"/> factory.
+        /// </summary>
+        /// <param name="assemblyLoader">
+        ///     Loads assemblies.
+        /// </param>
+        /// <param name="validatorFactory">
+        ///     Creates <see cref="IPreloadValidator"/> instances to make
+        ///     sure candidate assemblies are valid to even try to load.
+        ///     The function takes a collection of file names and returns
+        ///     a new <see cref="IPreloadValidator"/> instance. This function
+        ///     should never return <c>null</c>.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="assemblyLoader"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="validatorFactory"/> is <c>null</c>.
+        /// </exception>
+        public PluginsLoader(
+            IAssemblyLoader assemblyLoader,
+            Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
+        {
+            Guard.NotNull(assemblyLoader, nameof(assemblyLoader));
+            Guard.NotNull(validatorFactory, nameof(validatorFactory));
+
             this.subscribers = new HashSet<IPluginsConsumer>();
-            this.extensionDiscovery = new AssemblyExtensionDiscovery(new IsolationAssemblyLoader());
+            this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
             this.catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
             this.extensionRepository = new DataExtensionFactory().SingletonDataExtensionRepository;
 
@@ -91,6 +125,11 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <param name="directory">
         ///     The root directory containing the plugin(s) to attempt to load.
         /// </param>
+        /// <param name="error">
+        ///     If an error occurs during loading, this parameter will be populated with
+        ///     the details of the error(s) that occurred. If no errors occurred, then
+        ///     this will be set to <see cref="ErrorInfo.None"/>.
+        /// </param>
         /// <returns>
         ///     <c>true</c> if all plugins within the given directory were loaded, <c>false</c> otherwise.
         /// </returns>
@@ -104,23 +143,31 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///             pluginB
         ///                 ...files for pluginB...
         ///     TryLoadPlugin(rootFolder) will fail if either or both of pluginA or pluginB fail to load.
-        ///     If the caller must know which plugin(s) failed, it must use <see cref="TryLoadPlugins(IEnumerable{string}, out IList{string})"/>.
         ///     <para/>
-        ///     This method does not report an error if a different version of one of the custom data
-        ///     sources being loaded has already been loaded by either the current or a previous call to <see cref="TryLoadPlugin(string)"/>
-        ///     or <see cref="TryLoadPlugins(IEnumerable{string}, out IList{string})"/>.
         /// </remarks>
-        public bool TryLoadPlugin(string directory)
+        public bool TryLoadPlugin(string directory, out ErrorInfo error)
         {
-            return this.TryLoadPlugins(new List<string> { directory }, out _);
+            if (this.TryLoadPlugins(new List<string> { directory }, out var errors))
+            {
+                error = ErrorInfo.None;
+                return true;
+            }
+            else
+            {
+                error = errors[directory];
+                return false;
+            }
         }
 
         /// <summary>
         ///     Asynchronous version of <see cref="TryLoadPlugin(string)"/>
         /// </summary>
-        public Task<bool> TryLoadPluginAsync(IEnumerable<string> directories)
+        public async Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginAsync(IEnumerable<string> directories)
         {
-            return Task.Run(() => TryLoadPlugins(directories, out _));
+            IDictionary<string, ErrorInfo> taskErrors = null;
+            var task = Task.Run(() => this.TryLoadPlugins(directories, out taskErrors));
+            var result = await task;
+            return (result, taskErrors);
         }
 
         /// <summary>
@@ -130,9 +177,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     The directories to attempt to load plugins from.
         /// </param>
         /// <param name="failed">
-        ///     The directories from <paramref name="directories"/> which contained at least
-        ///     one plugin that failed to load. If this method returns <c>true</c>, this
-        ///     will be empty.
+        ///     The directories from <paramref name="directories"/>, along with their
+        ///     corresponding error, which contained at least one plugin that failed to load. 
+        ///     If this method returns <c>true</c>, this will be empty.
         /// </param>
         /// <returns>
         ///     <c>true</c> if all plugins within the given directories were loaded, <c>false</c> otherwise.
@@ -144,20 +191,19 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     <para/>
         ///     This method does not report an error if a different version of one of the custom data
         ///     sources being loaded has already been loaded by either the current or a previous call to <see cref="TryLoadPlugin(string)"/>
-        ///     or <see cref="TryLoadPlugins(IEnumerable{string}, out IList{string})"/>.
+        ///     or <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string,ErrorInfo})"/>.
         /// </remarks>
-        public bool TryLoadPlugins(IEnumerable<string> directories, out IList<string> failed)
+        public bool TryLoadPlugins(IEnumerable<string> directories, out IDictionary<string, ErrorInfo> failed)
         {
             lock (this.mutex)
             {
-                failed = new List<string>();
+                failed = new Dictionary<string, ErrorInfo>();
                 var oldPlugins = new HashSet<CustomDataSourceReference>(this.catalog.PlugIns);
                 foreach (var dir in directories)
                 {
-
-                    if (!this.extensionDiscovery.ProcessAssemblies(dir))
+                    if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
                     {
-                        failed.Add(dir);
+                        failed.Add(dir, error);
                         continue;
                     }
                 }
@@ -178,9 +224,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         }
 
         /// <summary>
-        ///     Asynchronous version of <see cref="TryLoadPlugins(IEnumerable{string}, out IList{string})"/>
+        ///     Asynchronous version of <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string,ErrorInfo})"/>
         /// </summary>
-        public Task<(bool, IList<string>)> TryLoadPluginsAsync(IEnumerable<string> directories)
+        public Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginsAsync(IEnumerable<string> directories)
         {
             return Task.Run(() =>
             {

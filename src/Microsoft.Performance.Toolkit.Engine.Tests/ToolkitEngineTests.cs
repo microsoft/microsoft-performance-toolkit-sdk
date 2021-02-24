@@ -12,6 +12,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestData;
@@ -78,7 +79,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_NoParameters_UsesCurrentDirectory()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.AreEqual(Environment.CurrentDirectory, sut.ExtensionDirectory);
         }
@@ -95,7 +96,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_IsProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             Assert.IsFalse(sut.IsProcessed);
         }
@@ -157,6 +158,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     new EngineCreateInfo
                     {
                         ExtensionDirectory = tempDir,
+                        Versioning = new FakeVersionChecker(),
                     });
                 Assert.IsTrue(engine.CustomDataSources.Any());
                 Assert.IsTrue(engine.CustomDataSources.Any(x => x.GetType().Name == typeof(Source123DataSource).Name));
@@ -177,43 +179,32 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         #endregion Create
 
-        #region AddFile
+        #region AddDataSource
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFile_NullFile_Throws()
+        public void AddDataSource_NullFile_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.ThrowsException<ArgumentNullException>(() => sut.AddFile(null, typeof(Source123DataSource)));
+            Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSource(null, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFile_WhitespaceFile_Throws()
+        public void AddDataSource_NullType_Throws()
         {
-            var sut = Engine.Create();
-
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFile(string.Empty, typeof(Source123DataSource)));
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFile(" ", typeof(Source123DataSource)));
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFile("\t", typeof(Source123DataSource)));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void AddFile_NullType_Throws()
-        {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
-            Assert.ThrowsException<ArgumentNullException>(() => sut.AddFile(file, null));
+            Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSource(file, null));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFile_NoInstancesOfDataSourceLoaded_Throws()
+        public void AddDataSource_NoInstancesOfDataSourceLoaded_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var typeAssembly = typeof(Source123DataSource).Assembly;
             var engineAssemblies = System.Runtime.Loader.AssemblyLoadContext.Default.Assemblies.Where(x =>
                 x.GetName().Name.StartsWith("Microsoft.Performance.Toolkit.Engine"));
@@ -221,404 +212,361 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddFile(file, typeof(ToolkitEngineTests)));
-            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedDataSource);
+            var e = Assert.ThrowsException<UnsupportedCustomDataSourceException>(() => sut.AddDataSource(file, typeof(ToolkitEngineTests)));
+            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedCustomDataSource);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFile_DataSourceDoesNotSupportFile_Throws()
+        public void AddDataSource_DataSourceDoesNotSupportFile_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(".380298502");
-            var e = Assert.ThrowsException<UnsupportedFileException>(() => sut.AddFile(file, typeof(Source123DataSource)));
-            Assert.AreEqual(file, e.FilePath);
-            Assert.AreEqual(typeof(Source123DataSource).FullName, e.RequestedDataSource);
+            var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddDataSource(file, typeof(Source123DataSource)));
+            Assert.AreEqual(file.Uri.ToString(), e.DataSource);
+            Assert.AreEqual(typeof(Source123DataSource).FullName, e.RequestedCustomDataSource);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFile_FileSupportedByAtLeastOneDataSource_Added()
+        public void AddDataSource_FileSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            sut.AddFile(file, typeof(Source123DataSource));
+            sut.AddDataSource(file, typeof(Source123DataSource));
 
-            var expectedFile = file;
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(expectedFile, sut.FilesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(file, sut.DataSourcesToProcess[expectedDataSource][0][0]);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFile_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparaetly()
+        public void AddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparately()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
             var file2 = AnyFile(Source123DataSource.Extension);
 
-            sut.AddFile(file1, typeof(Source123DataSource));
-            sut.AddFile(file2, typeof(Source123DataSource));
+            sut.AddDataSource(file1, typeof(Source123DataSource));
+            sut.AddDataSource(file2, typeof(Source123DataSource));
 
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(file1, sut.FilesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(file2, sut.FilesToProcess[expectedDataSource][1][0]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(file1, sut.DataSourcesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(file2, sut.DataSourcesToProcess[expectedDataSource][1][0]);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFileOnly_Null_Throws()
+        public void AddDataSourceOnly_Null_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.ThrowsException<ArgumentNullException>(() => sut.AddFile(null));
+            Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSource(null));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFileOnly_Whitespace_Throws()
+        public void AddDataSourceOnly_NoCookersOrDataSourcesSupport_Throws()
         {
-            var sut = Engine.Create();
-
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFile(string.Empty));
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFile(" "));
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFile("\t"));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void AddFileOnly_NoCookersOrDataSourcesSupport_Throws()
-        {
-            var tempDir = Path.Combine(ScratchDirectory, "Serializable_AddFileOnly_NoCookersOrDataSourcesSupport_Throws");
+            var tempDir = Path.Combine(ScratchDirectory, "Serializable_AddDataSourceOnly_NoCookersOrDataSourcesSupport_Throws");
             Directory.CreateDirectory(tempDir);
             CopyAssemblyContainingType(typeof(Source123DataSource), tempDir);
             var sut = Engine.Create(
                 new EngineCreateInfo
                 {
                     ExtensionDirectory = tempDir,
+                    Versioning = new FakeVersionChecker(),
                 });
 
             var file = AnyFile(".380298502");
-            var e = Assert.ThrowsException<UnsupportedFileException>(() => sut.AddFile(file));
-            Assert.AreEqual(file, e.FilePath);
-            Assert.IsNull(e.RequestedDataSource);
+            var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddDataSource(file));
+            Assert.AreEqual(file.Uri.ToString(), e.DataSource);
+            Assert.IsNull(e.RequestedCustomDataSource);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFileOnly_AtLeastOnSourceSupports_Adds()
+        public void AddDataSourceOnly_AtLeastOnSourceSupports_Adds()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(Source123DataSource.Extension);
-            sut.AddFile(file);
+            sut.AddDataSource(file);
 
-            Assert.AreEqual(1, sut.FreeFilesToProcess.Count());
-            Assert.AreEqual(file, sut.FreeFilesToProcess.ElementAt(0));
+            Assert.AreEqual(1, sut.FreeDataSourcesToProcess.Count());
+            Assert.AreEqual(file, sut.FreeDataSourcesToProcess.ElementAt(0));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFile_AlreadyProcessed_Throws()
+        public void AddDataSource_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
-            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.AddFile("any file"));
-            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.AddFile("any file", sut.CustomDataSources.First().GetType()));
+            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.AddDataSource(AnyDataSource()));
+            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.AddDataSource(AnyDataSource(), sut.CustomDataSources.First().GetType()));
         }
 
         #endregion
 
-        #region TryAddFile
+        #region TryAddDataSource
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFileOnly_Null_False()
+        public void TryAddDataSourceOnly_Null_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.IsFalse(sut.TryAddFile(null));
+            Assert.IsFalse(sut.TryAddDataSource(null));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFileOnly_Whitespace_False()
+        public void TryAddDataSourceOnly_NoCookersOrDataSourcesSupport_False()
         {
-            var sut = Engine.Create();
-
-            Assert.IsFalse(sut.TryAddFile(string.Empty));
-            Assert.IsFalse(sut.TryAddFile(" "));
-            Assert.IsFalse(sut.TryAddFile(" \r  \r\n \t "));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void TryAddFileOnly_NoCookersOrDataSourcesSupport_False()
-        {
-            var tempDir = Path.Combine(ScratchDirectory, "TryAddFileOnly_NoCookersOrDataSourcesSupport_False");
+            var tempDir = Path.Combine(ScratchDirectory, "TryAddDataSourceOnly_NoCookersOrDataSourcesSupport_False");
             Directory.CreateDirectory(tempDir);
             CopyAssemblyContainingType(typeof(Source123DataSource), tempDir);
             var sut = Engine.Create(
                 new EngineCreateInfo
                 {
                     ExtensionDirectory = tempDir,
+                    Versioning = new FakeVersionChecker(),
                 });
 
             var file = AnyFile(".380298502");
-            Assert.IsFalse(sut.TryAddFile(file));
+            Assert.IsFalse(sut.TryAddDataSource(file));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFileOnly_AtLeastOnSourceSupports_Adds()
+        public void TryAddDataSourceOnly_AtLeastOnSourceSupports_Adds()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(Source123DataSource.Extension);
-            sut.TryAddFile(file);
+            sut.TryAddDataSource(file);
 
-            Assert.AreEqual(1, sut.FreeFilesToProcess.Count());
-            Assert.AreEqual(file, sut.FreeFilesToProcess.ElementAt(0));
+            Assert.AreEqual(1, sut.FreeDataSourcesToProcess.Count());
+            Assert.AreEqual(file, sut.FreeDataSourcesToProcess.ElementAt(0));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFileOnly_AtLeastOnSourceSupports_True()
+        public void TryAddDataSourceOnly_AtLeastOnSourceSupports_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            Assert.IsTrue(sut.TryAddFile(file));
+            Assert.IsTrue(sut.TryAddDataSource(file));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFileOnly_AlreadyProcessed_False()
+        public void TryAddDataSourceOnly_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            Assert.IsFalse(sut.TryAddFile(file));
+            Assert.IsFalse(sut.TryAddDataSource(file));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_NullFile_False()
+        public void TryAddDataSource_NullFile_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.IsFalse(sut.TryAddFile(null, typeof(Source123DataSource)));
+            Assert.IsFalse(sut.TryAddDataSource(null, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_WhitespaceFile_False()
+        public void TryAddDataSource_NullType_False()
         {
-            var sut = Engine.Create();
-
-            Assert.IsFalse(sut.TryAddFile(string.Empty, typeof(Source123DataSource)));
-            Assert.IsFalse(sut.TryAddFile(" ", typeof(Source123DataSource)));
-            Assert.IsFalse(sut.TryAddFile("\t", typeof(Source123DataSource)));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void TryAddFile_NullType_False()
-        {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
-            Assert.IsFalse(sut.TryAddFile(file, null));
+            Assert.IsFalse(sut.TryAddDataSource(file, null));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_NoInstancesOfDataSourceLoaded_False()
+        public void TryAddDataSource_NoInstancesOfDataSourceLoaded_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
-            Assert.IsFalse(sut.TryAddFile(file, typeof(ToolkitEngineTests)));
+            Assert.IsFalse(sut.TryAddDataSource(file, typeof(ToolkitEngineTests)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_DataSourceDoesNotSupportFile_False()
+        public void TryAddDataSource_DataSourceDoesNotSupportFile_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(".380298502");
-            Assert.IsFalse(sut.TryAddFile(file, typeof(Source123DataSource)));
+            Assert.IsFalse(sut.TryAddDataSource(file, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_FileSupportedByAtLeastOneDataSource_Added()
+        public void TryAddDataSource_FileSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            sut.AddFile(file, typeof(Source123DataSource));
+            sut.AddDataSource(file, typeof(Source123DataSource));
 
             var expectedFile = file;
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(expectedFile, sut.FilesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(expectedFile, sut.DataSourcesToProcess[expectedDataSource][0][0]);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_FileSupportedByAtLeastOneDataSource_True()
+        public void TryAddDataSource_FileSupportedByAtLeastOneDataSource_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            Assert.IsTrue(sut.TryAddFile(file, typeof(Source123DataSource)));
+            Assert.IsTrue(sut.TryAddDataSource(file, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparaetly()
+        public void TryAddDataSource_FileSupportedByAtLeastOneDataSourceManyTimes_AddedSeparately()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
             var file2 = AnyFile(Source123DataSource.Extension);
 
-            sut.TryAddFile(file1, typeof(Source123DataSource));
-            sut.TryAddFile(file2, typeof(Source123DataSource));
+            sut.TryAddDataSource(file1, typeof(Source123DataSource));
+            sut.TryAddDataSource(file2, typeof(Source123DataSource));
 
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(file1, sut.FilesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(file2, sut.FilesToProcess[expectedDataSource][1][0]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(file1, sut.DataSourcesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(file2, sut.DataSourcesToProcess[expectedDataSource][1][0]);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFile_AlreadyProcessed_False()
+        public void TryAddDataSource_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            Assert.IsFalse(sut.TryAddFile(file, typeof(Source123DataSource)));
+            Assert.IsFalse(sut.TryAddDataSource(file, typeof(Source123DataSource)));
         }
 
         #endregion
 
-        #region AddFiles
+        #region AddDataSources
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_NullFiles_Throws()
+        public void AddDataSources_NullFiles_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.ThrowsException<ArgumentNullException>(() => sut.AddFiles(null, typeof(Source123DataSource)));
+            Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSources(null, typeof(Source123DataSource)));
         }
 
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_EmptyFiles_Throws()
+        public void AddDataSources_EmptyFiles_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFiles(new string[0], typeof(Source123DataSource)));
+            Assert.ThrowsException<ArgumentException>(() => sut.AddDataSources(new IDataSource[0], typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_ContainsNullFiles_Throws()
+        public void AddDataSources_ContainsNullFiles_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.ThrowsException<ArgumentNullException>(() => sut.AddFiles(new[] { (string)null, }, typeof(Source123DataSource)));
+            Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSources(new[] { (IDataSource)null, }, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_WhitespaceFile_Throws()
+        public void AddDataSources_NullType_Throws()
         {
-            var sut = Engine.Create();
-
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFiles(new[] { string.Empty, }, typeof(Source123DataSource)));
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFiles(new[] { " ", }, typeof(Source123DataSource)));
-            Assert.ThrowsException<ArgumentException>(() => sut.AddFiles(new[] { "\t", }, typeof(Source123DataSource)));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void AddFiles_NullType_Throws()
-        {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
-            Assert.ThrowsException<ArgumentNullException>(() => sut.AddFiles(new[] { file, }, null));
+            Assert.ThrowsException<ArgumentNullException>(() => sut.AddDataSources(new[] { file, }, null));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_NoInstancesOfDataSourceLoaded_Throws()
+        public void AddDataSources_NoInstancesOfDataSourceLoaded_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddFiles(new[] { file, }, typeof(ToolkitEngineTests)));
-            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedDataSource);
+            var e = Assert.ThrowsException<UnsupportedCustomDataSourceException>(() => sut.AddDataSources(new[] { file, }, typeof(ToolkitEngineTests)));
+            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedCustomDataSource);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_DataSourceDoesNotSupportFile_Throws()
+        public void AddDataSources_DataSourceDoesNotSupportFile_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source4DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
             var file2 = AnyFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedFileException>(() => sut.AddFiles(new[] { file1, file2, }, typeof(Source4DataSource)));
+            var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => sut.AddDataSources(new[] { file1, file2, }, typeof(Source4DataSource)));
 
-            Assert.AreEqual(file1, e.FilePath);
-            Assert.AreEqual(typeof(Source4DataSource).FullName, e.RequestedDataSource);
+            Assert.AreEqual(file1.Uri.ToString(), e.DataSource);
+            Assert.AreEqual(typeof(Source4DataSource).FullName, e.RequestedCustomDataSource);
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_FilesSupportedByAtLeastOneDataSource_Added()
+        public void AddDataSources_FilesSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files = new[]
@@ -628,23 +576,25 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 AnyFile(Source123DataSource.Extension),
             };
 
-            sut.AddFiles(files, typeof(Source123DataSource));
+            sut.AddDataSources(files, typeof(Source123DataSource));
 
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(files.Length, sut.FilesToProcess[expectedDataSource][0].Count);
-            Assert.AreEqual(files[0], sut.FilesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(files[1], sut.FilesToProcess[expectedDataSource][0][1]);
-            Assert.AreEqual(files[2], sut.FilesToProcess[expectedDataSource][0][2]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(files.Length, sut.DataSourcesToProcess[expectedDataSource][0].Count);
+
+            for (var i = 0; i < files.Length; ++i)
+            {
+                Assert.AreEqual(files[i], sut.DataSourcesToProcess[expectedDataSource][0][i]);
+            }
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_FilesSupportedBySameDataSource_AddedAsSeparateCollection()
+        public void AddDataSources_FilesSupportedBySameDataSource_AddedAsSeparateCollection()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files1 = new[]
@@ -661,115 +611,108 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 AnyFile(Source123DataSource.Extension),
             };
 
-            sut.AddFiles(files1, typeof(Source123DataSource));
-            sut.AddFiles(files2, typeof(Source123DataSource));
+            sut.AddDataSources(files1, typeof(Source123DataSource));
+            sut.AddDataSources(files2, typeof(Source123DataSource));
 
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(2, sut.FilesToProcess[expectedDataSource].Count);
-            Assert.AreEqual(files1.Length, sut.FilesToProcess[expectedDataSource][0].Count);
-            Assert.AreEqual(files1[0], sut.FilesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(files1[1], sut.FilesToProcess[expectedDataSource][0][1]);
-            Assert.AreEqual(files1[2], sut.FilesToProcess[expectedDataSource][0][2]);
-            Assert.AreEqual(files2.Length, sut.FilesToProcess[expectedDataSource][1].Count);
-            Assert.AreEqual(files2[0], sut.FilesToProcess[expectedDataSource][1][0]);
-            Assert.AreEqual(files2[1], sut.FilesToProcess[expectedDataSource][1][1]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(2, sut.DataSourcesToProcess[expectedDataSource].Count);
+            Assert.AreEqual(files1.Length, sut.DataSourcesToProcess[expectedDataSource][0].Count);
+            for (var i = 0; i < files1.Length; ++i)
+            {
+                Assert.AreEqual(files1[i], sut.DataSourcesToProcess[expectedDataSource][0][i]);
+            }
+
+            Assert.AreEqual(files2.Length, sut.DataSourcesToProcess[expectedDataSource][1].Count);
+            for (var i = 0; i < files2.Length; ++i)
+            {
+                Assert.AreEqual(files2[i], sut.DataSourcesToProcess[expectedDataSource][1][i]);
+            }
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void AddFiles_AlreadyProcessed_Throws()
+        public void AddDataSources_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.AddFiles(new[] { file, }, typeof(Source123DataSource)));
+            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.AddDataSources(new[] { file, }, typeof(Source123DataSource)));
         }
 
         #endregion
 
-        #region TryAddFiles
+        #region TryAddDataSources
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_NullFiles_False()
+        public void TryAddDataSources_NullFiles_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.IsFalse(sut.TryAddFiles(null, typeof(Source123DataSource)));
+            Assert.IsFalse(sut.TryAddDataSources(null, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_NoFiles_False()
+        public void TryAddDataSources_NoFiles_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.IsFalse(sut.TryAddFiles(new string[0], typeof(Source123DataSource)));
+            Assert.IsFalse(sut.TryAddDataSources(new IDataSource[0], typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_ContainsNullFiles_False()
+        public void TryAddDataSources_ContainsNullFiles_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
-            Assert.IsFalse(sut.TryAddFiles(new[] { (string)null, }, typeof(Source123DataSource)));
+            Assert.IsFalse(sut.TryAddDataSources(new[] { (IDataSource)null, }, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_WhitespaceFile_False()
+        public void TryAddDataSources_NullType_False()
         {
-            var sut = Engine.Create();
-
-            Assert.IsFalse(sut.TryAddFiles(new[] { string.Empty, }, typeof(Source123DataSource)));
-            Assert.IsFalse(sut.TryAddFiles(new[] { " ", }, typeof(Source123DataSource)));
-            Assert.IsFalse(sut.TryAddFiles(new[] { "\t", }, typeof(Source123DataSource)));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void TryAddFiles_NullType_False()
-        {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var file = AnyFile(".txt");
-            Assert.IsFalse(sut.TryAddFiles(new[] { file, }, null));
+            Assert.IsFalse(sut.TryAddDataSources(new[] { file, }, null));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_NoInstancesOfDataSourceLoaded_False()
+        public void TryAddDataSources_NoInstancesOfDataSourceLoaded_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file = AnyFile(Source123DataSource.Extension);
-            Assert.IsFalse(sut.TryAddFiles(new[] { file, }, typeof(ToolkitEngineTests)));
+            Assert.IsFalse(sut.TryAddDataSources(new[] { file, }, typeof(ToolkitEngineTests)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_DataSourceDoesNotSupportFile_False()
+        public void TryAddDataSources_DataSourceDoesNotSupportFile_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var file1 = AnyFile(Source123DataSource.Extension);
             var file2 = AnyFile(Source123DataSource.Extension);
-            Assert.IsFalse(sut.TryAddFiles(new[] { file1, file2, }, typeof(Source4DataSource)));
+            Assert.IsFalse(sut.TryAddDataSources(new[] { file1, file2, }, typeof(Source4DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_FilesSupportedByAtLeastOneDataSource_Added()
+        public void TryAddDataSources_FilesSupportedByAtLeastOneDataSource_Added()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files = new[]
@@ -779,24 +722,25 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 AnyFile(Source123DataSource.Extension),
             };
 
-            sut.TryAddFiles(files, typeof(Source123DataSource));
+            sut.TryAddDataSources(files, typeof(Source123DataSource));
 
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(1, sut.FilesToProcess[expectedDataSource].Count);
-            Assert.AreEqual(files.Length, sut.FilesToProcess[expectedDataSource][0].Count);
-            Assert.AreEqual(files[0], sut.FilesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(files[1], sut.FilesToProcess[expectedDataSource][0][1]);
-            Assert.AreEqual(files[2], sut.FilesToProcess[expectedDataSource][0][2]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(1, sut.DataSourcesToProcess[expectedDataSource].Count);
+            Assert.AreEqual(files.Length, sut.DataSourcesToProcess[expectedDataSource][0].Count); 
+            for (var i = 0; i < files.Length; ++i)
+            {
+                Assert.AreEqual(files[i], sut.DataSourcesToProcess[expectedDataSource][0][i]);
+            }
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_FileSupportedByAtLeastOneDataSource_True()
+        public void TryAddDataSources_FileSupportedByAtLeastOneDataSource_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files = new[]
@@ -806,14 +750,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 AnyFile(Source123DataSource.Extension),
             };
 
-            Assert.IsTrue(sut.TryAddFiles(files, typeof(Source123DataSource)));
+            Assert.IsTrue(sut.TryAddDataSources(files, typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_FilesSupportedBySameDataSource_AddedAsSeparateCollection()
+        public void TryAddDataSources_FilesSupportedBySameDataSource_AddedAsSeparateCollection()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             Assert.IsTrue(sut.CustomDataSources.Any(x => x is Source123DataSource));
 
             var files1 = new[]
@@ -830,33 +774,37 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 AnyFile(Source123DataSource.Extension),
             };
 
-            sut.TryAddFiles(files1, typeof(Source123DataSource));
-            sut.TryAddFiles(files2, typeof(Source123DataSource));
+            sut.TryAddDataSources(files1, typeof(Source123DataSource));
+            sut.TryAddDataSources(files2, typeof(Source123DataSource));
 
             var expectedDataSource = sut.CustomDataSources.Single(x => x is Source123DataSource);
 
-            Assert.AreEqual(1, sut.FilesToProcess.Count);
-            Assert.IsTrue(sut.FilesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(2, sut.FilesToProcess[expectedDataSource].Count);
-            Assert.AreEqual(files1.Length, sut.FilesToProcess[expectedDataSource][0].Count);
-            Assert.AreEqual(files1[0], sut.FilesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(files1[1], sut.FilesToProcess[expectedDataSource][0][1]);
-            Assert.AreEqual(files1[2], sut.FilesToProcess[expectedDataSource][0][2]);
-            Assert.AreEqual(files2.Length, sut.FilesToProcess[expectedDataSource][1].Count);
-            Assert.AreEqual(files2[0], sut.FilesToProcess[expectedDataSource][1][0]);
-            Assert.AreEqual(files2[1], sut.FilesToProcess[expectedDataSource][1][1]);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.Count);
+            Assert.IsTrue(sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(2, sut.DataSourcesToProcess[expectedDataSource].Count);
+            Assert.AreEqual(files1.Length, sut.DataSourcesToProcess[expectedDataSource][0].Count);
+            for (var i = 0; i < files1.Length; ++i)
+            {
+                Assert.AreEqual(files1[i], sut.DataSourcesToProcess[expectedDataSource][0][i]);
+            }
+
+            Assert.AreEqual(files2.Length, sut.DataSourcesToProcess[expectedDataSource][1].Count);
+            for (var i = 0; i < files2.Length; ++i)
+            {
+                Assert.AreEqual(files2[i], sut.DataSourcesToProcess[expectedDataSource][1][i]);
+            }
         }
 
         [TestMethod]
         [IntegrationTest]
-        public void TryAddFiles_AlreadyProcessed_False()
+        public void TryAddDataSources_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             var file = AnyFile(Source123DataSource.Extension);
 
-            Assert.IsFalse(sut.TryAddFiles(new[] { file, }, typeof(Source123DataSource)));
+            Assert.IsFalse(sut.TryAddDataSources(new[] { file, }, typeof(Source123DataSource)));
         }
 
         #endregion
@@ -867,7 +815,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_Known_Enables()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = sut.AllCookers.FirstOrDefault();
 
             sut.EnableCooker(cooker);
@@ -880,7 +828,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_NotKnown_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = new DataCookerPath("not-there-id");
 
             var e = Assert.ThrowsException<CookerNotFoundException>(() => sut.EnableCooker(cooker));
@@ -891,7 +839,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableCooker(sut.AllCookers.First()));
@@ -905,7 +853,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_Known_Enables()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = sut.AllCookers.FirstOrDefault();
 
             sut.TryEnableCooker(cooker);
@@ -918,7 +866,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_Known_True()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = sut.AllCookers.FirstOrDefault();
 
             Assert.IsTrue(sut.TryEnableCooker(cooker));
@@ -931,7 +879,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_NotKnown_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             var cooker = new DataCookerPath("not-there-id");
 
             Assert.IsFalse(sut.TryEnableCooker(cooker));
@@ -941,7 +889,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_AlreadyProcessed_False()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
             sut.Process();
 
             Assert.IsFalse(sut.TryEnableCooker(sut.AllCookers.First()));
@@ -955,7 +903,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_WhenComplete_IsProcessedSetToTrue()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             sut.Process();
 
@@ -966,7 +914,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_NothingEnabled_DoesNothing()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             var results = sut.Process();
 
@@ -978,7 +926,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_AlreadyProcessed_Throws()
         {
-            var sut = Engine.Create();
+            var sut = CreateEngine();
 
             sut.Process();
 
@@ -1000,7 +948,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 System.Diagnostics.Debugger.Break();
             }
 
-            var runtime = Engine.Create();
+            var runtime = CreateEngine();
 
             foreach (var cooker in testCase.CookersToEnable)
             {
@@ -1010,7 +958,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var file in testCase.FilePaths)
             {
-                runtime.AddFile(file);
+                runtime.AddDataSource(new FileDataSource(file));
             }
 
             var results = runtime.Process();
@@ -1112,6 +1060,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new EngineCreateInfo
                 {
                     AssemblyLoader = new IsolationAssemblyLoader(),
+                    Versioning = new FakeVersionChecker(),
                 });
 
             foreach (var cooker in testCase.CookersToEnable)
@@ -1122,7 +1071,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var file in testCase.FilePaths)
             {
-                runtime.AddFile(file);
+                runtime.AddDataSource(new FileDataSource(file));
             }
 
             var results = runtime.Process();
@@ -1194,6 +1143,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         #endregion
 
+        private static Engine CreateEngine()
+        {
+            return Engine.Create(
+                new EngineCreateInfo
+                {
+                    Versioning = new FakeVersionChecker(),
+                });
+        }
+
         private static void CopyAssemblyContainingType(Type type, string destDir)
         {
             Assert.IsNotNull(type);
@@ -1212,11 +1170,16 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             return instance;
         }
 
-        private static string AnyFile(string extension)
+        private static IDataSource AnyDataSource()
+        {
+            return AnyFile(".txt");
+        }
+
+        private static IDataSource AnyFile(string extension)
         {
             var file = Path.Combine(ScratchDirectory, Path.GetRandomFileName()) + extension;
             File.WriteAllText(file, "THIS IS A TEST FILE");
-            return file;
+            return new FileDataSource(file);
         }
 
         private static void RunTestInDomain<TestType>()
@@ -1280,11 +1243,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 throw new NotImplementedException();
             }
 
-            protected override bool IsFileSupportedCore(string path)
+            protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return StringComparer.OrdinalIgnoreCase.Equals(
-                    FileExtensionUtils.GetCanonicalExtension(path),
-                    FileExtensionUtils.GetCanonicalExtension(Extension));
+                    Extension,
+                    Path.GetExtension(dataSource.Uri.LocalPath));
             }
 
             protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)

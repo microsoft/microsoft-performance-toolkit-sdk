@@ -11,12 +11,11 @@ namespace Microsoft.Performance.SDK.Processing
     public interface IDataSource
     {
         /// <summary>
-        ///     Gets the <see cref="Uri"/> that contains the location
-        ///     of the data.
+        ///     Gets the <see cref="Uri" /> of the data.
         /// </summary>
         /// <returns>
-        ///     The <see cref="Uri"/> of the data.
+        ///     The URI of the data.
         /// </returns>
-        Uri GetUri();
+        Uri Uri { get; }
     }
 }
