@@ -45,6 +45,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
     ///     with their <see cref="Subscribe(IPluginsConsumer)"/> call.
     /// </summary>
     public class PluginsLoader
+        : IDisposable
     {
         private readonly object mutex = new object();
 
@@ -55,6 +56,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         private readonly IDataExtensionRepositoryBuilder extensionRepository;
 
         private readonly HashSet<IPluginsConsumer> subscribers;
+
+        private bool isDisposed;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PluginsLoader"/>
@@ -95,21 +98,36 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             this.subscribers = new HashSet<IPluginsConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
             this.catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
-            this.extensionRepository = new DataExtensionFactory().SingletonDataExtensionRepository;
+            this.extensionRepository = new DataExtensionFactory().CreateDataExtensionRepository();
 
             // The constructor for this object hooks up the repository to the extension provider
             // (the ExtensionDiscovery in this case). We do not need to hold onto this object
             // explicitly, only call its constructor.
             new DataExtensionReflector(this.extensionDiscovery, this.extensionRepository);
+
+            this.isDisposed = false;
+        }
+        
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="PluginsLoader"/>
+        ///     class.
+        /// </summary>
+        ~PluginsLoader()
+        {
+            this.Dispose(false);
         }
 
         /// <summary>
         ///     All of the custom data sources that have been loaded by plugins.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public IEnumerable<CustomDataSourceReference> LoadedCustomDataSources
         {
             get
             {
+                this.ThrowIfDisposed();
                 IEnumerable<CustomDataSourceReference> copy;
                 lock (this.mutex)
                 {
@@ -145,8 +163,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     TryLoadPlugin(rootFolder) will fail if either or both of pluginA or pluginB fail to load.
         ///     <para/>
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryLoadPlugin(string directory, out ErrorInfo error)
         {
+            this.ThrowIfDisposed();
             if (this.TryLoadPlugins(new List<string> { directory }, out var errors))
             {
                 error = ErrorInfo.None;
@@ -162,8 +184,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="TryLoadPlugin(string)"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public async Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginAsync(IEnumerable<string> directories)
         {
+            this.ThrowIfDisposed();
             IDictionary<string, ErrorInfo> taskErrors = null;
             var task = Task.Run(() => this.TryLoadPlugins(directories, out taskErrors));
             var result = await task;
@@ -193,8 +219,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     sources being loaded has already been loaded by either the current or a previous call to <see cref="TryLoadPlugin(string)"/>
         ///     or <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string,ErrorInfo})"/>.
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryLoadPlugins(IEnumerable<string> directories, out IDictionary<string, ErrorInfo> failed)
         {
+            this.ThrowIfDisposed();
             lock (this.mutex)
             {
                 failed = new Dictionary<string, ErrorInfo>();
@@ -226,8 +256,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string,ErrorInfo})"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginsAsync(IEnumerable<string> directories)
         {
+            this.ThrowIfDisposed();
             return Task.Run(() =>
             {
                 var result = TryLoadPlugins(directories, out var failed);
@@ -251,8 +285,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     Whether or not the <paramref name="consumer"/> is successfully subscribed. This will only
         ///     be <c>false</c> if it is already subscribed.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool Subscribe(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             lock (this.mutex)
             {
                 if (this.subscribers.Contains(consumer))
@@ -277,8 +315,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="Subscribe(IPluginsConsumer)"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Task<bool> SubscribeAsync(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             return Task.Run(() => Subscribe(consumer));
         }
 
@@ -292,8 +334,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     Whether or not the <paramref name="consumer"/> is successfully unsubscribed.
         ///     This will only be <c>false</c> if it is not currently subscribed.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool Unsubscribe(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             lock (this.mutex)
             {
                 return this.subscribers.Remove(consumer);
@@ -303,9 +349,33 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="Unsubscribe(IPluginsConsumer)"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Task<bool> UnsubscribeAsync(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             return Task.Run(() => Unsubscribe(consumer));
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            this.isDisposed = true;
         }
 
         private (string, Version) GetPluginNameAndVersion(CustomDataSourceReference cds)
@@ -356,6 +426,14 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             foreach (var consumer in this.subscribers)
             {
                 consumer.OnCustomDataSourceLoaded(pluginName, pluginVersion, customDataSource);
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(PluginsLoader));
             }
         }
     }
