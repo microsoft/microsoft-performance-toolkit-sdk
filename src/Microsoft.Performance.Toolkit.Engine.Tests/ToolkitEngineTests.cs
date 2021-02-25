@@ -1143,6 +1143,59 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         #endregion
 
+        #region Dispose
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenDisposed_EverythingThrows()
+        {
+            using (var engine = CreateEngine())
+            {
+                engine.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.SourceDataCookers);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.AllCookers);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.CompositeDataCookers);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.CreationErrors);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.CustomDataSources);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.DataSourcesToProcess);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.ExtensionDirectory);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.FreeDataSourcesToProcess);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.IsProcessed);
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.SourceDataCookers);
+
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.AddDataSource(Any.DataSource()));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.AddDataSource(Any.DataSource(), typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.AddDataSources(new[] { Any.DataSource(), }, typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.AddFile(Any.FilePath()));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.AddFile(Any.FilePath(), typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.AddFiles(new[] { Any.FilePath(), }, typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.EnableCooker(Any.DataCookerPath()));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.Process());
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.TryAddDataSource(Any.DataSource()));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.TryAddDataSource(Any.DataSource(), typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.TryAddDataSources(new[] { Any.DataSource(), }, typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.TryAddFile(Any.FilePath()));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.TryAddFile(Any.FilePath(), typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.TryAddFiles(new[] { Any.FilePath(), }, typeof(FakeCustomDataSource)));
+                Assert.ThrowsException<ObjectDisposedException>(() => engine.TryEnableCooker(Any.DataCookerPath()));
+            }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void CanDisposeMultipleTimes()
+        {
+            using (var engine = CreateEngine())
+            {
+                engine.Dispose();
+                engine.Dispose();
+                engine.Dispose();
+            }
+        }
+
+        #endregion
+
         private static Engine CreateEngine()
         {
             return Engine.Create(

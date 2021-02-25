@@ -24,6 +24,7 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     and accessing data.
     /// </summary>
     public abstract class Engine
+        : IDisposable
     {
         private readonly List<CustomDataSourceReference> customDataSourceReferences;
         private readonly ReadOnlyCollection<CustomDataSourceReference> customDataSourceReferencesRO;
@@ -50,8 +51,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         private IDataExtensionRepositoryBuilder repository;
         private DataExtensionFactory factory;
 
+        private string extensionDirectory;
+        private bool isProcessed;
+        private IEnumerable<ErrorInfo> creationErrors;
+
         private IApplicationEnvironment applicationEnvironment;
         private IAssemblyLoader loader;
+        private bool isDisposed;
 
         internal Engine()
         {
@@ -76,6 +82,17 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.enabledCookers = new List<DataCookerPath>();
             this.enabledCookersRO = new ReadOnlyCollection<DataCookerPath>(this.enabledCookers);
+
+            this.isDisposed = false;
+        }
+
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="Engine"/>
+        ///     class.
+        /// </summary>
+        ~Engine()
+        {
+            this.Dispose(false);
         }
 
         /// <summary>
@@ -84,62 +101,182 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     creating an instance of the engine. See <see cref="SetExtensionDirectory(string)"/>
         ///     and <see cref="ResetExtensionDirectory"/> for manipulating this property.
         /// </summary>
-        public string ExtensionDirectory { get; private set; }
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public string ExtensionDirectory
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.extensionDirectory;
+            }
+            private set
+            {
+                Debug.Assert(!this.isDisposed);
+                this.ThrowIfDisposed();
+                this.extensionDirectory = value;
+            }
+        }
 
         /// <summary>
         ///     Gets a value indicating whether this instance has completed processing.
         /// </summary>
-        public bool IsProcessed { get; private set; }
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public bool IsProcessed
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isProcessed;
+            }
+            private set
+            {
+                Debug.Assert(!this.isDisposed);
+                this.ThrowIfDisposed();
+                this.isProcessed = value;
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of source parsers that the engine will use to 
         ///     cook data.
         /// </summary>
-        public IEnumerable<ICustomDataSource> CustomDataSources => this.customDataSourceReferencesRO.Select(x => x.Instance);
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<ICustomDataSource> CustomDataSources
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.customDataSourceReferencesRO.Select(x => x.Instance);
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of paths to all source cookers that the engine
         ///     has discovered.
         /// </summary>
-        public IEnumerable<DataCookerPath> SourceDataCookers => this.sourceDataCookersRO;
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<DataCookerPath> SourceDataCookers
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.sourceDataCookersRO;
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of paths to all composite cookers that the engine
         ///     has discovered.
         /// </summary>
-        public IEnumerable<DataCookerPath> CompositeDataCookers => this.compositeDataCookersRO;
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<DataCookerPath> CompositeDataCookers
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.compositeDataCookersRO;
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of all cookers that the engine has discovered. This is the union
         ///     of <see cref="this.SourceDataCookers"/> and <see cref="this.CompositeDataCookers"/>.
         /// </summary>
-        public IEnumerable<DataCookerPath> AllCookers => this.SourceDataCookers.Concat(this.CompositeDataCookers);
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<DataCookerPath> AllCookers
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.SourceDataCookers.Concat(this.CompositeDataCookers);
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of Data Sources to process. These Data Sources will be processed in whatever
         ///     <see cref="ICustomDataProcessorWithSourceParser"/> are able to handle the Data Source.
         /// </summary>
-        public IEnumerable<IDataSource> FreeDataSourcesToProcess => this.freeDataSourcesRO;
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<IDataSource> FreeDataSourcesToProcess
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.freeDataSourcesRO;
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of Data Sources that are to be processed by a specific Custom Data Source.
         /// </summary>
-        public IReadOnlyDictionary<ICustomDataSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess =>
-            this.dataSourcesToProcess.ToDictionary(
-                x => x.Key.Instance,
-                x => (IReadOnlyList<IReadOnlyList<IDataSource>>)x.Value.Select(v => (IReadOnlyList<IDataSource>)v.AsReadOnly()).ToList().AsReadOnly());
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IReadOnlyDictionary<ICustomDataSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.dataSourcesToProcess.ToDictionary(
+                    x => x.Key.Instance,
+                    x => (IReadOnlyList<IReadOnlyList<IDataSource>>)x.Value
+                        .Select(v => (IReadOnlyList<IDataSource>)v.AsReadOnly())
+                        .ToList()
+                        .AsReadOnly());
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of all enabled cookers.
         /// </summary>
-        public IEnumerable<DataCookerPath> EnabledCookers => this.enabledCookersRO;
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<DataCookerPath> EnabledCookers
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.enabledCookersRO;
+            }
+        }
 
         /// <summary>
         ///     Gets any non-fatal errors that occured during engine
         ///     creation. Because these errors are not fatal, they are
         ///     reported here rather than raising an exception.
         /// </summary>
-        public IEnumerable<ErrorInfo> CreationErrors { get; private set; }
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<ErrorInfo> CreationErrors
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.creationErrors;
+            }
+            private set
+            {
+                Debug.Assert(!this.isDisposed);
+                this.ThrowIfDisposed();
+                this.creationErrors = value;
+            }
+        }
 
         /// <summary>
         ///     Creates a new instance of the <see cref="Engine" /> class.
@@ -149,6 +286,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </returns>
         /// <exception cref="EngineException">
         ///     An fatal error occurred while creating the engine.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
         /// </exception>
         public static Engine Create()
         {
@@ -169,6 +309,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         /// <exception cref="EngineException">
         ///     An fatal error occurred while creating the engine.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
         /// </exception>
         public static Engine Create(
             EngineCreateInfo createInfo)
@@ -199,13 +342,17 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     <paramref name="dataSource"/> cannot be processed by any
         ///     discovered extensions.
-        /// </exception>
+        /// </exception>=
         public void AddDataSource(IDataSource dataSource)
         {
             Guard.NotNull(dataSource, nameof(dataSource));
+            this.ThrowIfDisposed();
             this.ThrowIfProcessed();
 
             if (!this.TryAddDataSource(dataSource))
@@ -226,8 +373,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     or the instance has already been processed. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryAddDataSource(IDataSource dataSource)
         {
+            this.ThrowIfDisposed();
             if (dataSource is null)
             {
                 return false;
@@ -273,6 +424,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     The specified <paramref name="customDataSourceType"/> cannot handle
         ///     the given Data Source.
@@ -300,6 +454,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <c>false</c> otherwise. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryAddDataSource(IDataSource dataSource, Type customDataSourceType)
         {
             return this.TryAddDataSources(new[] { dataSource, }, customDataSourceType);
@@ -326,6 +483,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     The specified <paramref name="customDataSourceType"/> cannot handle
         ///     the given Data Source.
@@ -342,6 +502,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 throw new ArgumentNullException(nameof(dataSources));
             }
 
+            this.ThrowIfDisposed();
             this.ThrowIfProcessed();
 
             this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs);
@@ -360,8 +521,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="customDataSourceType">
         ///     The Custom Data Source to use to process the <paramref name="dataSources"/>.
         /// </param>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryAddDataSources(IEnumerable<IDataSource> dataSources, Type customDataSourceType)
         {
+            this.ThrowIfDisposed();
+
             if (dataSources is null ||
                 dataSources.Any(x => x is null) ||
                 customDataSourceType is null ||
@@ -395,8 +561,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public void EnableCooker(DataCookerPath dataCookerPath)
         {
+            this.ThrowIfDisposed();
             this.ThrowIfProcessed();
 
             if (!this.TryEnableCooker(dataCookerPath))
@@ -417,8 +587,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <c>false</c> otherwise. Note that <c>false</c> is
         ///     always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryEnableCooker(DataCookerPath dataCookerPath)
         {
+            this.ThrowIfDisposed();
             if (this.IsProcessed)
             {
                 return false;
@@ -446,8 +620,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="EngineException">
         ///     An unexpected error occurred.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public RuntimeExecutionResults Process()
         {
+            this.ThrowIfDisposed();
             this.ThrowIfProcessed();
             try
             {
@@ -457,6 +635,26 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 throw new EngineException("An unexpected error occurred.", e);
             }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            this.isDisposed = true;
         }
 
         private static Engine CreateCore(
@@ -747,6 +945,14 @@ namespace Microsoft.Performance.Toolkit.Engine
             else
             {
                 return first.Is(second);
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(Engine));
             }
         }
 

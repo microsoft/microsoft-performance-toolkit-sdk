@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
+using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Testing.SDK
@@ -47,6 +49,16 @@ namespace Microsoft.Performance.Testing.SDK
         public static IProcessorEnvironment ProcessorEnvironment()
         {
             return new FakeProcessorEnvironment();
+        }
+
+        public static string FilePath()
+        {
+            return Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
+        }
+
+        public static DataCookerPath DataCookerPath()
+        {
+            return new DataCookerPath();
         }
 
         private sealed class FakeDataSource

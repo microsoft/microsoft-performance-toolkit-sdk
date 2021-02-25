@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -36,6 +35,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     <paramref name="filePath"/> cannot be processed by any
@@ -73,6 +75,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     The specified <paramref name="dataSourceType"/> cannot handle
         ///     the given file.
@@ -100,17 +105,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     or the instance has already been processed. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public static bool TryAddFile(this Engine self, string filePath)
         {
-            try
-            {
-                self.AddDataSource(CreateFSDataSource(filePath));
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return self.TryAddDataSource(CreateFSDataSource(filePath));
         }
 
         /// <summary>
@@ -131,17 +131,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <c>false</c> otherwise. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public static bool TryAddFile(this Engine self, string filePath, Type customDataSourceType)
         {
-            try
-            {
-                self.AddDataSource(CreateFSDataSource(filePath), customDataSourceType);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return self.TryAddDataSource(CreateFSDataSource(filePath), customDataSourceType);
         }
 
         /// <summary>
@@ -174,6 +169,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     The specified <paramref name="customDataSourceType"/> cannot handle
         ///     the given file.
@@ -202,17 +200,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <c>true</c> if the files are added;
         ///     <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public static bool TryAddFiles(this Engine self, IEnumerable<string> filePaths, Type customDataSourceType)
         {
-            try
-            {
-                self.AddDataSources(filePaths.Select(CreateFSDataSource), customDataSourceType);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return self.TryAddDataSources(filePaths.Select(CreateFSDataSource), customDataSourceType);
         }
 
         private static IDataSource CreateFSDataSource(string path)
