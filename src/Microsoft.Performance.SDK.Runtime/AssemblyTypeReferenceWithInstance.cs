@@ -18,9 +18,13 @@ namespace Microsoft.Performance.SDK.Runtime
     ///     The class that derives from this class.
     /// </typeparam>
     public abstract class AssemblyTypeReferenceWithInstance<T, Derived>
-        : AssemblyTypeReference<Derived>
+        : AssemblyTypeReference<Derived>,
+          IDisposable
           where Derived : AssemblyTypeReferenceWithInstance<T, Derived>
     {
+        private T instance;
+        private bool isDisposed;
+
         /// <summary>
         ///     Initializes an instance of <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> with a new instance of <see cref="T"/>.
         /// </summary>
@@ -45,10 +49,33 @@ namespace Microsoft.Performance.SDK.Runtime
             this.Instance = other.Instance;
         }
 
+        ~AssemblyTypeReferenceWithInstance()
+        {
+            this.Dispose(false);
+        }
+
         /// <summary>
         ///     Gets an instance of <see cref="T"/>
         /// </summary>
-        public T Instance { get; }
+        public T Instance
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.instance;
+            }
+            private set
+            {
+                this.ThrowIfDisposed();
+                this.instance = value;
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         ///     <inheritdoc cref="AssemblyTypeReference{Derived}.IsValidType(Type, Type)"/>
@@ -60,6 +87,30 @@ namespace Microsoft.Performance.SDK.Runtime
             Guard.NotNull(candidateType, nameof(candidateType));
 
             return IsValidType(candidateType, typeof(T));
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                this.instance?.TryDispose();
+                this.instance = default(T);
+            }
+
+            this.isDisposed = true;
+        }
+
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
         }
     }
 }

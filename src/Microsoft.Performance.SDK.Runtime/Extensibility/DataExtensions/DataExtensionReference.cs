@@ -25,12 +25,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         where TDerived : DataExtensionReference<TDerived>
     {
         private readonly List<string> errors;
+        private readonly ReadOnlyCollection<string> errorsRO;
 
         // used for IDataExtensionDependencyTarget
         private readonly HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
         private readonly HashSet<DataProcessorId> requiredDataProcessors = new HashSet<DataProcessorId>();
 
         private DataExtensionDependencyState extensionDependencyState;
+        private DataExtensionAvailability initializeAvailability;
+
+        private bool isDisposed = false;
 
         /// <summary>
         ///     Constructor
@@ -60,29 +64,66 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             }
 
             this.errors = new List<string>(other.errors);
-            this.Errors = new ReadOnlyCollection<string>(this.errors);
+            this.errorsRO = new ReadOnlyCollection<string>(this.errors);
+        }
+
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="DataExtensionReference{TDerived}"/>
+        ///     class.
+        /// </summary>
+        ~DataExtensionReference()
+        {
+            this.Dispose(false);
         }
 
         /// <summary>
         ///     A mechanism to identify the data extension when referencing it in messages.
         ///     Defaults to the full name of the Type.
         /// </summary>
-        public virtual string Name => this.Type.FullName;
+        public virtual string Name
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.Type.FullName;
+            }
+        }
 
         /// <summary>
         ///     Errors associated with the data extension.
         /// </summary>
-        public ReadOnlyCollection<string> Errors { get; }
+        public ReadOnlyCollection<string> Errors
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.errorsRO;
+            }
+        }
 
         /// <summary>
         ///     All of the data cookers that must be available for this extension to be available.
         /// </summary>
-        public IReadOnlyCollection<DataCookerPath> RequiredDataCookers => this.requiredDataCookers;
+        public IReadOnlyCollection<DataCookerPath> RequiredDataCookers
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.requiredDataCookers;
+            }
+        }
 
         /// <summary>
         ///     All of the data processors that must be available for this extension to be available.
         /// </summary>
-        public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors => this.requiredDataProcessors;
+        public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.requiredDataProcessors;
+            }
+        }
 
         /// <summary>
         ///     The data extension references required by this data extension.
@@ -90,39 +131,87 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         ///     by source and composite cookers.
         ///     This data only becomes valid after calling <see cref="ProcessDependencies"/>.
         /// </summary>
-        public IDataExtensionDependencies DependencyReferences =>
-            this.extensionDependencyState?.DependencyReferences ?? null;
+        public IDataExtensionDependencies DependencyReferences
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.extensionDependencyState?.DependencyReferences ?? null;
+            }
+        }
 
         /// <summary>
         ///     This is determined when initializing the data extension from its type. If any errors are encountered, this
         ///     value should be set to Error. Otherwise it should be Available.
         /// </summary>
-        public DataExtensionAvailability InitialAvailability { get; protected set; }
+        public DataExtensionAvailability InitialAvailability
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.initializeAvailability;
+            }
+            protected set
+            {
+                this.ThrowIfDisposed();
+                this.initializeAvailability = value;
+            }
+        }
 
         /// <summary>
         ///     If the dependency of this extension has been established, then use that value. Otherwise, falls back to
         ///     <see cref="InitialAvailability"/>.
         /// </summary>
-        public DataExtensionAvailability Availability => this.extensionDependencyState?.Availability ?? this.InitialAvailability;
+        public DataExtensionAvailability Availability
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.extensionDependencyState?.Availability ?? this.InitialAvailability;
+            }
+        }
 
         /// <inheritdoc/>
         public virtual void PerformAdditionalDataExtensionValidation(
             IDataExtensionDependencyStateSupport dependencyStateSupport,
             IDataExtensionReference requiredDataCooker)
         {
+            this.ThrowIfDisposed();
         }
 
         /// <inheritdoc />
         public void ProcessDependencies(IDataExtensionRepository availableDataExtensions)
         {
             Guard.NotNull(availableDataExtensions, nameof(availableDataExtensions));
-
+            this.ThrowIfDisposed();
+            
             if (this.extensionDependencyState == null)
             {
                 this.extensionDependencyState = new DataExtensionDependencyState(this);
             }
 
             this.extensionDependencyState.ProcessDependencies(availableDataExtensions);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            this.isDisposed = true;
         }
 
         /// <summary>
@@ -134,6 +223,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// </param>
         protected void AddRequiredDataCooker(DataCookerPath cookerPath)
         {
+            this.ThrowIfDisposed();
             this.requiredDataCookers.Add(cookerPath);
         }
 
@@ -146,6 +236,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// </param>
         protected void AddRequiredDataProcessor(DataProcessorId processorId)
         {
+            this.ThrowIfDisposed();
             this.requiredDataProcessors.Add(processorId);
         }
 
@@ -161,7 +252,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(error));
 
+            this.ThrowIfDisposed();
             this.errors.Add(error);
+        }
+
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
         }
     }
 }

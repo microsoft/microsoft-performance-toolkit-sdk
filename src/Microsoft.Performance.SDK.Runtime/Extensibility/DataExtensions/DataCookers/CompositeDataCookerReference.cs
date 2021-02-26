@@ -14,6 +14,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     {
         protected readonly object instanceLock = new object();
 
+        private bool initialized = false;
+        private ICompositeDataCookerDescriptor instance = null;
+
+        private bool isDisposed = false;
+
+        ~CompositeDataCookerReference()
+        {
+            this.Dispose(false);
+        }
+
         internal static bool TryCreateReference(
             Type candidateType,
             out ICompositeDataCookerReference reference)
@@ -68,13 +78,38 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
-        protected ICompositeDataCookerDescriptor Instance { get; set; }
+        protected ICompositeDataCookerDescriptor Instance
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.instance;
+            }
+            set
+            {
+                this.ThrowIfDisposed();
+                this.instance = value;
+            }
+        }
 
-        private bool InstanceInitialized { get; set; }
+        private bool InstanceInitialized
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.initialized;
+            }
+            set
+            {
+                this.ThrowIfDisposed();
+                this.initialized = value;
+            }
+        }
 
         public IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData)
         {
             Guard.NotNull(requiredData, nameof(requiredData));
+            this.ThrowIfDisposed();
 
             if (this.Instance == null)
             {
@@ -98,11 +133,29 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
         public override CompositeDataCookerReference CloneT()
         {
+            this.ThrowIfDisposed();
             return new CompositeDataCookerReference(this);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                this.Instance?.TryDispose();
+            }
+
+            this.isDisposed = true;
         }
 
         protected override void ValidateInstance(IDataCookerDescriptor instance)
         {
+            this.ThrowIfDisposed();
             base.ValidateInstance(instance);
 
             if (!StringComparer.Ordinal.Equals(instance.Path.SourceParserId, DataCookerPath.EmptySourceParserId))

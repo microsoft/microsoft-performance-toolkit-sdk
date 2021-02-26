@@ -15,6 +15,54 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
     {
         private static ISerializer tableConfigSerializer = new TableConfigurationsSerializer();
 
+        private readonly TableDescriptor tableDescriptor;
+        private readonly Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction;
+        private readonly Func<IDataExtensionRetrieval, bool> isDataAvailableFunc;
+        private readonly bool isInternalTable;
+
+        private bool isDisposed;
+
+        public TableExtensionReference(TableExtensionReference other)
+            : base(other)
+        {
+            this.tableDescriptor = other.tableDescriptor;
+            this.buildTableAction = other.buildTableAction;
+            this.isDataAvailableFunc = other.isDataAvailableFunc;
+            this.isInternalTable = other.isInternalTable;
+        }
+
+        private TableExtensionReference(
+            Type type,
+            TableDescriptor tableDescriptor,
+            Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
+            Func<IDataExtensionRetrieval, bool> isDataAvailableFunc,
+            bool isInternalTable)
+            : base(type)
+        {
+            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
+
+            this.tableDescriptor = tableDescriptor;
+            this.buildTableAction = buildTableAction;
+            this.isDataAvailableFunc = isDataAvailableFunc;
+            this.isInternalTable = isInternalTable;
+
+            foreach (var dataCookerPath in tableDescriptor.RequiredDataCookers)
+            {
+                this.AddRequiredDataCooker(dataCookerPath);
+            }
+
+            foreach (var dataProcessorId in tableDescriptor.RequiredDataProcessors)
+            {
+                this.AddRequiredDataProcessor(dataProcessorId);
+            }
+
+            this.isDisposed = false;
+        }
+
+        ~TableExtensionReference()
+        {
+        }
+
         internal static bool TryCreateReference(
             Type candidateType,
             out ITableExtensionReference reference)
@@ -53,9 +101,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
                     candidateType,
                     tableDescriptor,
                     tableBuildAction,
-                    tableIsDataAvailableFunc);
-
-                tableReference.IsInternalTable = isInternalTable;
+                    tableIsDataAvailableFunc,
+                    isInternalTable);
 
                 reference = tableReference;
             }
@@ -63,48 +110,45 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             return reference != null;
         }
 
-        private TableExtensionReference(
-            Type type,
-            TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
-            Func<IDataExtensionRetrieval, bool> isDataAvailableFunc) 
-            : base(type)
+        public TableDescriptor TableDescriptor
         {
-            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
-
-            this.TableDescriptor = tableDescriptor;
-            this.BuildTableAction = buildTableAction;
-            this.IsDataAvailableFunc = isDataAvailableFunc;
-
-            foreach (var dataCookerPath in tableDescriptor.RequiredDataCookers)
+            get
             {
-                AddRequiredDataCooker(dataCookerPath);
-            }
-
-            foreach (var dataProcessorId in tableDescriptor.RequiredDataProcessors)
-            {
-                AddRequiredDataProcessor(dataProcessorId);
+                this.ThrowIfDisposed();
+                return this.tableDescriptor;
             }
         }
 
-        public TableExtensionReference(TableExtensionReference other) 
-            : base(other)
+        public Action<ITableBuilder, IDataExtensionRetrieval> BuildTableAction
         {
-            this.TableDescriptor = other.TableDescriptor;
-            this.BuildTableAction = other.BuildTableAction;
-            this.IsDataAvailableFunc = other.IsDataAvailableFunc;
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.buildTableAction;
+            }
         }
 
-        public TableDescriptor TableDescriptor { get; }
+        public Func<IDataExtensionRetrieval, bool> IsDataAvailableFunc
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isDataAvailableFunc;
+            }
+        }
 
-        public Action<ITableBuilder, IDataExtensionRetrieval> BuildTableAction { get; }
-
-        public Func<IDataExtensionRetrieval, bool> IsDataAvailableFunc { get; }
-
-        internal bool IsInternalTable { get; private set; }
+        internal bool IsInternalTable
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isInternalTable;
+            }
+        }
 
         public override TableExtensionReference CloneT()
         {
+            this.ThrowIfDisposed();
             return new TableExtensionReference(this);
         }
 
@@ -112,6 +156,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         {
             return base.Equals(other) &&
                    (this.TableDescriptor.Guid == other.TableDescriptor.Guid);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            this.isDisposed = true;
         }
     }
 }

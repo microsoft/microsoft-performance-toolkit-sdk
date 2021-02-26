@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
@@ -10,7 +11,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
     /// </summary>
     public interface IDataExtensionReference
         : IDataExtensionDependencyTarget,
-          IDataExtensionDependency
+          IDataExtensionDependency,
+          IDisposable
     {
     }
 }

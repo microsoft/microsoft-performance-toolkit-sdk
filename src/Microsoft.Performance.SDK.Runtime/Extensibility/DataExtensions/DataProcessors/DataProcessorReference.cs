@@ -21,6 +21,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
     {
         private readonly object instanceLock = new object();
 
+        private string id;
+        private string description;
+
+        private bool isDisposed = false;
+
+        ~DataProcessorReference()
+        {
+            this.Dispose(false);
+        }
+
         internal static bool TryCreateReference(
             Type candidateType,
             out IDataProcessorReference reference)
@@ -87,9 +97,33 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
             }
         }
 
-        public string Id { get; private set; }
+        public string Id
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.id;
+            }
+            private set
+            {
+                this.ThrowIfDisposed();
+                this.id = value;
+            }
+        }
 
-        public string Description { get; private set; }
+        public string Description
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.description;
+            }
+            private set
+            {
+                this.ThrowIfDisposed();
+                this.description = value;
+            }
+        }
 
         private IDataProcessor Instance { get; set; }
 
@@ -97,12 +131,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
 
         public override DataProcessorReference CloneT()
         {
+            this.ThrowIfDisposed();
             return new DataProcessorReference(this);
         }
 
         public IDataProcessor GetOrCreateInstance(IDataExtensionRetrieval requiredData)
         {
             Guard.NotNull(requiredData, nameof(requiredData));
+            this.ThrowIfDisposed();
 
             if (this.Instance == null)
             {
@@ -122,6 +158,25 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
             }
 
             return this.Instance;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (this.isDisposed)
+            {
+                return;
+            }
+            if (disposing)
+            {
+                lock (this.instanceLock)
+                {
+                    this.Instance?.TryDispose();
+                }
+            }
+
+            this.isDisposed = true;
         }
 
         private void InitializeDescriptorData(IDataProcessorDescriptor descriptor)

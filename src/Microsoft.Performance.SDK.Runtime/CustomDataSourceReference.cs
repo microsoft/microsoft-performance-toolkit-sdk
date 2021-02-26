@@ -4,6 +4,7 @@
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -121,10 +122,22 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </returns>
         public abstract bool Supports(IDataSource dataSource);
 
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
+
         private sealed class CustomDataSourceReferenceImpl
             : CustomDataSourceReference
         {
             private readonly ReadOnlyHashSet<DataSourceAttribute> dataSourceAttributes;
+
+            private readonly Guid guid;
+            private readonly string name;
+            private readonly string description;
+            private readonly ReadOnlyCollection<Option> commandLineOptionsRO;
+
+            private bool isDisposed;
 
             internal CustomDataSourceReferenceImpl(
                 Type type,
@@ -139,10 +152,10 @@ namespace Microsoft.Performance.SDK.Runtime
 
                 this.dataSourceAttributes = new ReadOnlyHashSet<DataSourceAttribute>(dataSourceAttributes);
 
-                this.Guid = metadata.Guid;
-                this.Name = metadata.Name;
-                this.Description = metadata.Description;
-                this.CommandLineOptions = this.Instance.CommandLineOptions.ToList().AsReadOnly();
+                this.guid = metadata.Guid;
+                this.name = metadata.Name;
+                this.description = metadata.Description;
+                this.commandLineOptionsRO = this.Instance.CommandLineOptions.ToList().AsReadOnly();
             }
 
             internal CustomDataSourceReferenceImpl(
@@ -151,26 +164,69 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 this.dataSourceAttributes = other.dataSourceAttributes;
 
-                this.Guid = other.Guid;
-                this.Name = other.Name;
-                this.Description = other.Description;
-                this.CommandLineOptions = other.CommandLineOptions;
+                this.guid = other.guid;
+                this.name = other.name;
+                this.description = other.description;
+                this.commandLineOptionsRO = other.commandLineOptionsRO;
             }
 
-            public override Guid Guid { get; }
+            public override Guid Guid
+            {
+                get
+                {
+                    this.ThrowIfDisposed();
+                    return this.guid;
+                }
+            }
 
-            public override string Name { get; }
+            public override string Name
+            {
+                get
+                {
+                    this.ThrowIfDisposed();
+                    return this.Name;
+                }
+            }
 
-            public override string Description { get; }
+            public override string Description
+            {
+                get
+                {
+                    this.ThrowIfDisposed();
+                    return this.description;
+                }
+            }
 
-            public override IReadOnlyCollection<DataSourceAttribute> DataSources => this.dataSourceAttributes;
+            public override IReadOnlyCollection<DataSourceAttribute> DataSources
+            {
+                get
+                {
+                    this.ThrowIfDisposed();
+                    return this.dataSourceAttributes;
+                }
+            }
 
-            public override IEnumerable<TableDescriptor> AvailableTables => this.Instance.DataTables.ToList().AsReadOnly();
+            public override IEnumerable<TableDescriptor> AvailableTables
+            {
+                get
+                {
+                    this.ThrowIfDisposed();
+                    return this.Instance.DataTables.ToList().AsReadOnly();
+                }
+            }
 
-            public override IEnumerable<Option> CommandLineOptions { get; }
+            public override IEnumerable<Option> CommandLineOptions
+            {
+                get
+                {
+                    this.ThrowIfDisposed();
+                    return this.commandLineOptionsRO;
+                }
+            }
 
             public override bool Supports(IDataSource dataSource)
             {
+                this.ThrowIfDisposed();
                 if (dataSource is null)
                 {
                     return false;
@@ -188,6 +244,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
             public override CustomDataSourceReference CloneT()
             {
+                this.ThrowIfDisposed();
                 return new CustomDataSourceReferenceImpl(this);
             }
 
@@ -231,6 +288,21 @@ namespace Microsoft.Performance.SDK.Runtime
             public override string ToString()
             {
                 return $"{this.Name} - {this.Guid} ({this.AssemblyPath})";
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+                if (this.isDisposed)
+                {
+                    return;
+                }
+
+                if (disposing)
+                {
+                }
+
+                this.isDisposed = true;
             }
         }
     }

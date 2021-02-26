@@ -87,5 +87,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         }
 
         public DataExtensionDependencyState DependencyState { get; set; }
+
+        public void Dispose()
+        {
+        }
     }
 }

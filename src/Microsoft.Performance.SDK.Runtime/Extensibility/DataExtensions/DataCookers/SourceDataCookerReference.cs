@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
@@ -18,7 +19,25 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         : BaseDataCookerReference<SourceDataCookerReference>,
           ISourceDataCookerReference
     {
-        public DataProductionStrategy ProductionStrategy { get; }
+        private readonly List<IDataCookerDescriptor> instances = new List<IDataCookerDescriptor>();
+
+        private DataProductionStrategy productionStrategy;
+
+        private bool isDisposed = false;
+
+        ~SourceDataCookerReference()
+        {
+            this.Dispose(false);
+        }
+
+        public DataProductionStrategy ProductionStrategy
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.productionStrategy;
+            }
+        }
 
         internal static bool TryCreateReference(
             Type candidateType,
@@ -91,7 +110,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 throw new ArgumentException("The type is not a recognized source data cooker.", nameof(type));
             }
 
-            this.ProductionStrategy = sourceCookerDescriptor.DataProductionStrategy;
+            this.productionStrategy = sourceCookerDescriptor.DataProductionStrategy;
 
             if (sourceCookerDescriptor.DataProductionStrategy == DataProductionStrategy.AsRequired)
             {
@@ -137,15 +156,32 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
         public override SourceDataCookerReference CloneT()
         {
+            this.ThrowIfDisposed();
             return new SourceDataCookerReference(this);
         }
 
         public IDataCookerDescriptor CreateInstance()
         {
-            var value = Activator.CreateInstance(this.Type) as IDataCookerDescriptor;
-            Debug.Assert(value != null);
+            this.ThrowIfDisposed();
 
-            return value;
+            IDataCookerDescriptor value = null;
+            try
+            {
+                value = Activator.CreateInstance(this.Type) as IDataCookerDescriptor;
+                Debug.Assert(value != null);
+
+                lock (this.instances)
+                {
+                    this.instances.Add(value);
+                }
+
+                return value;
+            }
+            catch
+            {
+                value.TryDispose();
+                throw;
+            }
         }
 
         public override void PerformAdditionalDataExtensionValidation(
@@ -155,6 +191,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             Guard.NotNull(dependencyStateSupport, nameof(dependencyStateSupport));
             Guard.NotNull(requiredDataExtension, nameof(requiredDataExtension));
             Debug.Assert(!string.IsNullOrWhiteSpace(this.Path.SourceParserId));
+            this.ThrowIfDisposed();
 
             // a source data cooker may not rely on any other source
             // a source data cooker may not rely on a non-source data cooker
@@ -197,6 +234,40 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                     $"A requested dependency on an unknown data extension type is not supported: {requiredDataExtension.Name}");
                 dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                List<IDataCookerDescriptor> toRelease;
+                lock (this.instances)
+                {
+                    toRelease = new List<IDataCookerDescriptor>(this.instances);
+                    this.instances.Clear();
+                }
+
+                foreach (var v in toRelease)
+                {
+                    try
+                    {
+                        Debug.Assert(v != null);
+                        v.TryDispose();
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            this.isDisposed = true;
         }
     }
 }
