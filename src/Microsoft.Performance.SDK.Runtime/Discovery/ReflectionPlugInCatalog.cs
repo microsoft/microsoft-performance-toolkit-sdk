@@ -23,6 +23,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
         private readonly Dictionary<Type, CustomDataSourceReference> loadedDataSources;
 
+        private bool isLoaded;
+
+        private bool isDisposed;
+
         public ReflectionPlugInCatalog(IExtensionTypeProvider extensionDiscovery)
             : this(
                   extensionDiscovery,
@@ -38,16 +42,41 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             Guard.NotNull(referenceFactory, nameof(referenceFactory));
 
             this.referenceFactory = referenceFactory;
+            this.isDisposed = false;
 
             this.loadedDataSources = new Dictionary<Type, CustomDataSourceReference>();
-            this.IsLoaded = false;
+            this.isLoaded = false;
 
             extensionDiscovery.RegisterTypeConsumer(this);
         }
 
-        public IEnumerable<CustomDataSourceReference> PlugIns => this.loadedDataSources.Values;
+        ~ReflectionPlugInCatalog()
+        {
+            this.Dispose(false);
+        }
 
-        public bool IsLoaded { get; private set; }
+        public IEnumerable<CustomDataSourceReference> PlugIns
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.loadedDataSources.Values;
+            }
+        }
+
+        public bool IsLoaded
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isLoaded;
+            }
+            private set
+            {
+                this.ThrowIfDisposed();
+                this.isLoaded = value;
+            }
+        }
 
         public void ProcessType(Type type, string sourceName)
         {
@@ -70,6 +99,44 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         public void DiscoveryComplete()
         {
             this.IsLoaded = true;
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                foreach (var cds in this.PlugIns)
+                {
+                    try
+                    {
+                        cds.Dispose();
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+
+            this.isDisposed = true;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(ReflectionPlugInCatalog));
+            }
         }
     }
 }

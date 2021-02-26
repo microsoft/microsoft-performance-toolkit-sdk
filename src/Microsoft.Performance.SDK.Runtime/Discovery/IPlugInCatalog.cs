@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.Discovery
@@ -9,6 +10,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     ///     Exposes SDK plug-ins.
     /// </summary>
     public interface IPlugInCatalog
+        : IDisposable
     {
         /// <summary>
         ///     Gets a value indicating whether the catalog is loaded.
