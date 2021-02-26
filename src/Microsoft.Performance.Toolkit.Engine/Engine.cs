@@ -50,6 +50,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private IDataExtensionRepositoryBuilder repository;
         private DataExtensionFactory factory;
+        private IPlugInCatalog catalog;
 
         private string extensionDirectory;
         private bool isProcessed;
@@ -652,6 +653,17 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
+                try
+                {
+                    this.repository?.Dispose();
+                }
+                finally
+                {
+                    this.catalog?.Dispose();
+                }
+
+                this.repository = null;
+                this.catalog = null;
             }
 
             this.isDisposed = true;
@@ -662,89 +674,104 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Debug.Assert(createInfo != null);
 
-            var extensionDirectory = createInfo.ExtensionDirectory;
-            Debug.Assert(extensionDirectory != null);
-
-            var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
-
-            var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, _ => new NullValidator());
-
-            var catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
-
-            var factory = new DataExtensionFactory();
-            var repoBuilder = factory.CreateDataExtensionRepository();
-            var reflector = new DataExtensionReflector(
-                assemblyDiscovery,
-                repoBuilder);
-
-            assemblyDiscovery.ProcessAssemblies(extensionDirectory, out var discoveryError);
-
-            repoBuilder.FinalizeDataExtensions();
-
-            var repoTuple = Tuple.Create(factory, repoBuilder);
-
-            Debug.Assert(repoTuple != null);
-
-            var instance = new EngineImpl();
-
-            instance.ExtensionDirectory = extensionDirectory;
-            instance.CreationErrors = new[] { discoveryError, };
-            instance.customDataSourceReferences.AddRange(catalog.PlugIns);
-            instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
-            instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-
-            var allTables = new HashSet<Guid>();
-            foreach (var tableId in repoTuple.Item2.TablesById)
+            IPlugInCatalog catalog = null;
+            IDataExtensionRepositoryBuilder repo = null;
+            Engine instance = null;
+            try
             {
-                allTables.Add(tableId.Key);
-            }
 
-            foreach (var descriptor in catalog.PlugIns.SelectMany(x => x.AvailableTables))
-            {
-                allTables.Add(descriptor.Guid);
-                instance.tableGuidToDescriptor[descriptor.Guid] = descriptor;
-            }
+                var extensionDirectory = createInfo.ExtensionDirectory;
+                Debug.Assert(extensionDirectory != null);
 
-            instance.allTables.AddRange(allTables);
+                var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
 
-            instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
+                var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, _ => new NullValidator());
 
-            instance.repository = repoTuple.Item2;
-            instance.factory = repoTuple.Item1;
+                catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
 
-            instance.applicationEnvironment = new ApplicationEnvironment(
-                applicationName: string.Empty,
-                runtimeName: "Microsoft.Performance.Toolkit.Engine",
-                new RuntimeTableSynchronizer(),
-                new TableConfigurationsSerializer(),
-                instance.repository,
-                instance.factory.CreateSourceSessionFactory(),
-                new RuntimeMessageBox());
+                var factory = new DataExtensionFactory();
+                repo = factory.CreateDataExtensionRepository();
+                var reflector = new DataExtensionReflector(
+                    assemblyDiscovery,
+                    repo);
 
-            instance.loader = assemblyLoader;
+                assemblyDiscovery.ProcessAssemblies(extensionDirectory, out var discoveryError);
 
-            foreach (var cds in instance.customDataSourceReferences)
-            {
-                try
+                repo.FinalizeDataExtensions();
+
+                var repoTuple = Tuple.Create(factory, repo);
+
+                Debug.Assert(repoTuple != null);
+
+                instance = new EngineImpl();
+
+                instance.ExtensionDirectory = extensionDirectory;
+                instance.CreationErrors = new[] { discoveryError, };
+                instance.customDataSourceReferences.AddRange(catalog.PlugIns);
+                instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
+                instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
+                instance.catalog = catalog;
+
+                var allTables = new HashSet<Guid>();
+                foreach (var tableId in repoTuple.Item2.TablesById)
                 {
-                    cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
-
-                    // todo: CreateLogger func should be passed in from the EngineCreateInfo
-                    cds.Instance.SetLogger(Logger.Create(cds.Instance.GetType()));
+                    allTables.Add(tableId.Key);
                 }
-                catch (Exception e)
+
+                foreach (var descriptor in catalog.PlugIns.SelectMany(x => x.AvailableTables))
                 {
-                    //
-                    // todo: log
-                    //
-
-                    Console.Error.WriteLine(e);
+                    allTables.Add(descriptor.Guid);
+                    instance.tableGuidToDescriptor[descriptor.Guid] = descriptor;
                 }
+
+                instance.allTables.AddRange(allTables);
+
+                instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
+
+                instance.repository = repoTuple.Item2;
+                instance.factory = repoTuple.Item1;
+
+                instance.applicationEnvironment = new ApplicationEnvironment(
+                    applicationName: string.Empty,
+                    runtimeName: "Microsoft.Performance.Toolkit.Engine",
+                    new RuntimeTableSynchronizer(),
+                    new TableConfigurationsSerializer(),
+                    instance.repository,
+                    instance.factory.CreateSourceSessionFactory(),
+                    new RuntimeMessageBox());
+
+                instance.loader = assemblyLoader;
+
+                foreach (var cds in instance.customDataSourceReferences)
+                {
+                    try
+                    {
+                        cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
+
+                        // todo: CreateLogger func should be passed in from the EngineCreateInfo
+                        cds.Instance.SetLogger(Logger.Create(cds.Instance.GetType()));
+                    }
+                    catch (Exception e)
+                    {
+                        //
+                        // todo: log
+                        //
+
+                        Console.Error.WriteLine(e);
+                    }
+                }
+
+                instance.IsProcessed = false;
+
+                return instance;
             }
-
-            instance.IsProcessed = false;
-
-            return instance;
+            catch
+            {
+                instance?.Dispose();
+                repo?.Dispose();
+                catalog?.Dispose();
+                throw;
+            }
         }
 
         private void AddDataSourcesCore(
