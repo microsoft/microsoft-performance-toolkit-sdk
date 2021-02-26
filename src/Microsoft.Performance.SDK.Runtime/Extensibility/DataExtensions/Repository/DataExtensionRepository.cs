@@ -231,6 +231,27 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
 
             if (disposing)
             {
+                foreach (var c in this.compositeDataCookerReferences)
+                {
+                    c.TryDispose();
+                }
+
+                foreach (var s in this.sourceDataCookerReferencesByPath.Values)
+                {
+                    s.TryDispose();
+                }
+
+                foreach (var d in this.dataProcessors)
+                {
+                    d.TryDispose();
+                }
+
+                this.compositeDataCookerReferences.Clear();
+                this.compositeDataCookerReferencesByPath.Clear();
+                this.sourceDataCookerReferencesByPath.Clear();
+                this.dataCookerReferencesBySource.Clear();
+                this.dataProcessors.Clear();
+                this.tablesById.Clear();
             }
 
             this.isDisposed = true;
