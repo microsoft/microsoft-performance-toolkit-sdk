@@ -147,7 +147,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
             if (disposing)
             {
-                this.instance?.TryDispose();
+                this.instance.TryDispose();
                 this.instance = null;
             }
 

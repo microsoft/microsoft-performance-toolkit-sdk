@@ -656,8 +656,22 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.repository.SafeDispose();
                 this.catalog.SafeDispose();
 
-                this.repository = null;
+                this.allTables.Clear();
+                this.applicationEnvironment = null;
                 this.catalog = null;
+                this.compositeDataCookers.Clear();
+                this.creationErrors = null;
+                this.customDataSourceReferences.Clear();
+                this.dataProcessors.Clear();
+                this.dataSourcesToProcess.Clear();
+                this.enabledCookers.Clear();
+                this.extensionDirectory = null;
+                this.factory = null;
+                this.freeDataSources.Clear();
+                this.loader = null;
+                this.repository = null;
+                this.sourceDataCookers.Clear();
+                this.tableGuidToDescriptor.Clear();
             }
 
             this.isDisposed = true;

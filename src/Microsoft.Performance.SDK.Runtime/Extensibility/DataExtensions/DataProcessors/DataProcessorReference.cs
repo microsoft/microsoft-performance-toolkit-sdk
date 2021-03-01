@@ -172,7 +172,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
             {
                 lock (this.instanceLock)
                 {
-                    this.Instance?.TryDispose();
+                    this.Instance.TryDispose();
+                    this.Instance = null;
                 }
             }
 

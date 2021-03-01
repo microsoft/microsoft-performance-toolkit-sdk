@@ -256,14 +256,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
                 foreach (var v in toRelease)
                 {
-                    try
-                    {
-                        Debug.Assert(v != null);
-                        v.TryDispose();
-                    }
-                    catch
-                    {
-                    }
+                    v.TryDispose();
                 }
             }
 

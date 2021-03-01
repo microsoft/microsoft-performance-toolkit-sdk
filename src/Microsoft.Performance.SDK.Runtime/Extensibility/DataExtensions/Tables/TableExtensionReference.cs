@@ -15,10 +15,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
     {
         private static ISerializer tableConfigSerializer = new TableConfigurationsSerializer();
 
-        private readonly TableDescriptor tableDescriptor;
-        private readonly Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction;
-        private readonly Func<IDataExtensionRetrieval, bool> isDataAvailableFunc;
-        private readonly bool isInternalTable;
+        private TableDescriptor tableDescriptor;
+        private Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction;
+        private Func<IDataExtensionRetrieval, bool> isDataAvailableFunc;
+        private bool isInternalTable;
 
         private bool isDisposed;
 
@@ -169,6 +169,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 
             if (disposing)
             {
+                this.tableDescriptor = null;
+                this.buildTableAction = null;
+                this.isDataAvailableFunc = null;
             }
 
             this.isDisposed = true;
