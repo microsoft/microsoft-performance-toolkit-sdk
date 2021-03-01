@@ -184,7 +184,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 get
                 {
                     this.ThrowIfDisposed();
-                    return this.Name;
+                    return this.name;
                 }
             }
 
