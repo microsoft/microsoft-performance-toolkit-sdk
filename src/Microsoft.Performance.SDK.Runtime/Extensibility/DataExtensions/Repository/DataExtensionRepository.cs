@@ -233,17 +233,22 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             {
                 foreach (var c in this.compositeDataCookerReferences)
                 {
-                    c.TryDispose();
+                    c.SafeDispose();
                 }
 
                 foreach (var s in this.sourceDataCookerReferencesByPath.Values)
                 {
-                    s.TryDispose();
+                    s.SafeDispose();
                 }
 
                 foreach (var d in this.dataProcessors)
                 {
-                    d.TryDispose();
+                    d.SafeDispose();
+                }
+
+                foreach (var t in this.tablesById.Values)
+                {
+                    t.SafeDispose();
                 }
 
                 this.compositeDataCookerReferences.Clear();

@@ -26,6 +26,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             }
         }
 
+        ~TestDataExtensionReference()
+        {
+        }
+
         public HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
         public virtual IReadOnlyCollection<DataCookerPath> RequiredDataCookers => this.requiredDataCookers;
 
@@ -88,8 +92,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public DataExtensionDependencyState DependencyState { get; set; }
 
+        public int DisposeCalls { get; set; }
+
         public void Dispose()
         {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            ++this.DisposeCalls;
         }
     }
 }

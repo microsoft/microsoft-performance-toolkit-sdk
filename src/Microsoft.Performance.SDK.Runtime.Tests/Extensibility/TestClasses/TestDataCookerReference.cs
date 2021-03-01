@@ -19,6 +19,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         protected TestDataCookerReference()
             : base()
         {
+            this.Path = new DataCookerPath(
+                string.Concat(
+                    this.GetType().Name,
+                    " ",
+                    Guid.NewGuid().ToString()));
         }
 
         protected TestDataCookerReference(bool useDataExtensionDependencyState)
@@ -31,6 +36,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public DataCookerPath Path { get; set; }
 
         public override string Name => this.Path.CookerPath;
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
     }
 
     internal class TestSourceDataCookerReference
@@ -43,7 +53,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         }
 
         public TestSourceDataCookerReference(bool useDataExtensionDependencyState)
-            :base(useDataExtensionDependencyState)
+            : base(useDataExtensionDependencyState)
         {
         }
 
@@ -99,6 +109,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
                 dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
             }
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
     }
 
     internal class TestCompositeDataCookerReference
@@ -118,6 +133,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData)
         {
             throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
         }
     }
 }
