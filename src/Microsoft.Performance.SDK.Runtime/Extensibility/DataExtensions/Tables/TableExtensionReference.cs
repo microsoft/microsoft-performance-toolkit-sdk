@@ -61,6 +61,43 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 
         ~TableExtensionReference()
         {
+            this.Dispose(false);
+        }
+
+        public TableDescriptor TableDescriptor
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.tableDescriptor;
+            }
+        }
+
+        public Action<ITableBuilder, IDataExtensionRetrieval> BuildTableAction
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.buildTableAction;
+            }
+        }
+
+        public Func<IDataExtensionRetrieval, bool> IsDataAvailableFunc
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isDataAvailableFunc;
+            }
+        }
+
+        internal bool IsInternalTable
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isInternalTable;
+            }
         }
 
         internal static bool TryCreateReference(
@@ -108,42 +145,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             }
 
             return reference != null;
-        }
-
-        public TableDescriptor TableDescriptor
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.tableDescriptor;
-            }
-        }
-
-        public Action<ITableBuilder, IDataExtensionRetrieval> BuildTableAction
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.buildTableAction;
-            }
-        }
-
-        public Func<IDataExtensionRetrieval, bool> IsDataAvailableFunc
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.isDataAvailableFunc;
-            }
-        }
-
-        internal bool IsInternalTable
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.isInternalTable;
-            }
         }
 
         public override TableExtensionReference CloneT()
