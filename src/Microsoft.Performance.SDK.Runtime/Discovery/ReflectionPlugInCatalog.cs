@@ -118,13 +118,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             {
                 foreach (var cds in this.PlugIns)
                 {
-                    try
-                    {
-                        cds.Dispose();
-                    }
-                    catch
-                    {
-                    }
+                    cds.SafeDispose();
                 }
             }
 

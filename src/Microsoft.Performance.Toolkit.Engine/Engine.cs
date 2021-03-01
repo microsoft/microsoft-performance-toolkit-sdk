@@ -653,14 +653,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
-                try
-                {
-                    this.repository?.Dispose();
-                }
-                finally
-                {
-                    this.catalog?.Dispose();
-                }
+                this.repository.SafeDispose();
+                this.catalog.SafeDispose();
 
                 this.repository = null;
                 this.catalog = null;
@@ -767,9 +761,9 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
             catch
             {
-                instance?.Dispose();
-                repo?.Dispose();
-                catalog?.Dispose();
+                instance.SafeDispose();
+                repo.SafeDispose();
+                catalog.SafeDispose();
                 throw;
             }
         }

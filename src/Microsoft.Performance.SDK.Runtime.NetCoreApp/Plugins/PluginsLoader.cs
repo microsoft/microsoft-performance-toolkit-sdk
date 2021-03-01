@@ -373,14 +373,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             if (disposing)
             {
-                try
-                {
-                    this.extensionRepository.Dispose();
-                }
-                finally
-                {
-                    this.catalog.Dispose();
-                }
+                this.extensionRepository.SafeDispose();
+                this.catalog.SafeDispose();
             }
 
             this.isDisposed = true;
