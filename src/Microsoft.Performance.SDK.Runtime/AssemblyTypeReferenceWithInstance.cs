@@ -18,8 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime
     ///     The class that derives from this class.
     /// </typeparam>
     public abstract class AssemblyTypeReferenceWithInstance<T, Derived>
-        : AssemblyTypeReference<Derived>,
-          IDisposable
+        : AssemblyTypeReference<Derived>
           where Derived : AssemblyTypeReferenceWithInstance<T, Derived>
     {
         private T instance;
@@ -71,12 +70,6 @@ namespace Microsoft.Performance.SDK.Runtime
             }
         }
 
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         /// <summary>
         ///     <inheritdoc cref="AssemblyTypeReference{Derived}.IsValidType(Type, Type)"/>
         /// </summary>
@@ -89,8 +82,9 @@ namespace Microsoft.Performance.SDK.Runtime
             return IsValidType(candidateType, typeof(T));
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
+            base.Dispose(disposing);
             if (this.isDisposed)
             {
                 return;
@@ -103,14 +97,6 @@ namespace Microsoft.Performance.SDK.Runtime
             }
 
             this.isDisposed = true;
-        }
-
-        protected void ThrowIfDisposed()
-        {
-            if (this.isDisposed)
-            {
-                throw new ObjectDisposedException(this.GetType().Name);
-            }
         }
     }
 }

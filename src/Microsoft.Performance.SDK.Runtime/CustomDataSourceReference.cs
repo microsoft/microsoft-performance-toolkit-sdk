@@ -17,6 +17,8 @@ namespace Microsoft.Performance.SDK.Runtime
     public abstract class CustomDataSourceReference
         : AssemblyTypeReferenceWithInstance<ICustomDataSource, CustomDataSourceReference>
     {
+        private bool isDisposed;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
         ///     class.
@@ -30,6 +32,7 @@ namespace Microsoft.Performance.SDK.Runtime
         protected CustomDataSourceReference(Type type)
             : base(type)
         {
+            this.isDisposed = false;
         }
 
         /// <summary>
@@ -42,6 +45,15 @@ namespace Microsoft.Performance.SDK.Runtime
         protected CustomDataSourceReference(CustomDataSourceReference other)
             : base(other.Type)
         {
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="CustomDataSourceReference"/>
+        /// class.
+        /// </summary>
+        ~CustomDataSourceReference()
+        {
+            this.Dispose(false);
         }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
@@ -125,6 +137,16 @@ namespace Microsoft.Performance.SDK.Runtime
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            this.isDisposed = true;
         }
 
         private sealed class CustomDataSourceReferenceImpl
@@ -136,8 +158,6 @@ namespace Microsoft.Performance.SDK.Runtime
             private readonly string name;
             private readonly string description;
             private readonly ReadOnlyCollection<Option> commandLineOptionsRO;
-
-            private bool isDisposed;
 
             internal CustomDataSourceReferenceImpl(
                 Type type,
@@ -156,6 +176,8 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.name = metadata.Name;
                 this.description = metadata.Description;
                 this.commandLineOptionsRO = this.Instance.CommandLineOptions.ToList().AsReadOnly();
+
+                this.isDisposed = false;
             }
 
             internal CustomDataSourceReferenceImpl(
@@ -168,6 +190,13 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.name = other.name;
                 this.description = other.description;
                 this.commandLineOptionsRO = other.commandLineOptionsRO;
+
+                this.isDisposed = other.isDisposed;
+            }
+
+            ~CustomDataSourceReferenceImpl()
+            {
+                this.Dispose(false);
             }
 
             public override Guid Guid

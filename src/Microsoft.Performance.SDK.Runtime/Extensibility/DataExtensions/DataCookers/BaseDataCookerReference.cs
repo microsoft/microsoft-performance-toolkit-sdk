@@ -17,11 +17,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     /// </typeparam>
     internal abstract class BaseDataCookerReference<TDerived>
         : DataExtensionReference<TDerived>
-        where TDerived : BaseDataCookerReference<TDerived>
+          where TDerived : BaseDataCookerReference<TDerived>
     {
+        private DataCookerPath path;
+        private string description;
+        private bool isSourceDataCooker;
+
+        private bool isDisposed;
+
         protected BaseDataCookerReference(Type type)
             : base(type)
         {
+            this.isDisposed = false;
         }
 
         protected BaseDataCookerReference(DataExtensionReference<TDerived> other)
@@ -29,13 +36,61 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
         }
 
-        public DataCookerPath Path { get; private set; }
+        ~BaseDataCookerReference()
+        {
+            this.Dispose(false);
+        }
 
-        public string Description { get; protected set; }
+        public DataCookerPath Path
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.path;
+            }
+            private set
+            {
+                this.ThrowIfDisposed();
+                this.path = value;
+            }
+        }
 
-        public override string Name => this.Path.ToString();
+        public string Description
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.description;
+            }
+            protected set
+            {
+                this.ThrowIfDisposed();
+                this.description = value;
+            }
+        }
 
-        protected bool IsSourceDataCooker { get; set; }
+        public override string Name
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.Path.ToString();
+            }
+        }
+
+        protected bool IsSourceDataCooker
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isSourceDataCooker;
+            }
+            set
+            {
+                this.ThrowIfDisposed();
+                this.isSourceDataCooker = value;
+            }
+        }
 
         public override bool Equals(TDerived other)
         {
@@ -46,6 +101,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
         protected virtual void ValidateInstance(IDataCookerDescriptor instance)
         {
+            this.ThrowIfDisposed();
+
             // Create an instance just to pull out the descriptor without saving any references to it.
             if (instance is null)
             {
@@ -64,6 +121,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         protected void InitializeDescriptorData(IDataCookerDescriptor descriptor)
         {
             Guard.NotNull(descriptor, nameof(descriptor));
+            this.ThrowIfDisposed();
 
             this.Path = descriptor.Path;
             this.Description = descriptor.Description;
@@ -100,6 +158,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                     this.AddRequiredDataProcessor(dataProcessorId);
                 }
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            this.isDisposed = true;
         }
     }
 }

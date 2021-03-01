@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
@@ -26,7 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             try
             {
                 var result = CompositeDataCookerReference.TryCreateReference(
-                    typeof(TestCompositeDataCookerReference),
+                    typeof(TestCompositeDataCooker),
                     out sut);
 
                 Assert.IsTrue(result);
@@ -60,7 +59,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             try
             {
                 var result = CompositeDataCookerReference.TryCreateReference(
-                    typeof(TestCompositeDataCookerReference),
+                    typeof(TestCompositeDataCooker),
                     out sut);
 
                 Assert.IsTrue(result);
@@ -83,13 +82,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             try
             {
                 var result = CompositeDataCookerReference.TryCreateReference(
-                    typeof(DisposableCooker),
+                    typeof(DisposableCompositeDataCooker),
                     out sut);
 
                 Assert.IsTrue(result);
 
-                var instance = sut.GetOrCreateInstance(new FakeRetrieval()) as DisposableCooker;
+                var instance = sut.GetOrCreateInstance(new FakeRetrieval()) as DisposableCompositeDataCooker;
                 Assert.IsNotNull(instance);
+                Assert.AreEqual(0, instance.DisposeCalls);
 
                 sut.Dispose();
 
@@ -159,36 +159,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             }
 
             public void ProcessDependencies(IDataExtensionRepository availableDataExtensions)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private sealed class DisposableCooker
-            : IDataCooker,
-              IDisposable
-        {
-            public string Description => throw new NotImplementedException();
-
-            public DataCookerPath Path => throw new NotImplementedException();
-
-            public IReadOnlyCollection<DataOutputPath> OutputIdentifiers => throw new NotImplementedException();
-
-            public IReadOnlyCollection<DataCookerPath> RequiredDataCookers => throw new NotImplementedException();
-
-            public int DisposeCalls { get; set; }
-
-            public void Dispose()
-            {
-                ++this.DisposeCalls;
-            }
-
-            public T QueryOutput<T>(DataOutputPath identifier)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object QueryOutput(DataOutputPath identifier)
             {
                 throw new NotImplementedException();
             }

@@ -193,15 +193,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             this.extensionDependencyState.ProcessDependencies(availableDataExtensions);
         }
 
-        /// <inheritdoc />
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
+            base.Dispose(disposing);
             if (this.isDisposed)
             {
                 return;
@@ -254,14 +248,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 
             this.ThrowIfDisposed();
             this.errors.Add(error);
-        }
-
-        protected void ThrowIfDisposed()
-        {
-            if (this.isDisposed)
-            {
-                throw new ObjectDisposedException(this.GetType().Name);
-            }
         }
     }
 }

@@ -206,14 +206,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 var result =
                     SourceDataCookerReference.TryCreateReference(
-                        typeof(DisposableCooker),
+                        typeof(DisposableSourceDataCooker),
                         out sut);
 
                 Assert.IsTrue(result);
 
                 var instances = Enumerable.Range(0, 3)
                     .Select(_ => sut.CreateInstance())
-                    .Cast<DisposableCooker>()
+                    .Cast<DisposableSourceDataCooker>()
                     .ToList();
 
                 sut.Dispose();
@@ -271,22 +271,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             public void ProcessDependencies(IDataExtensionRepository availableDataExtensions)
             {
                 throw new NotImplementedException();
-            }
-        }
-
-        private sealed class DisposableCooker
-            : IDataCookerDescriptor,
-              IDisposable
-        {
-            public string Description => throw new NotImplementedException();
-
-            public DataCookerPath Path => throw new NotImplementedException();
-
-            public int DisposeCalls { get; set; }
-
-            public void Dispose()
-            {
-                ++this.DisposeCalls;
             }
         }
     }

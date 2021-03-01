@@ -15,9 +15,16 @@ namespace Microsoft.Performance.SDK.Runtime
     /// </typeparam>
     public abstract class AssemblyTypeReference<TDerived>
         : IEquatable<TDerived>,
-          ICloneable<TDerived>
+          ICloneable<TDerived>,
+          IDisposable
         where TDerived : AssemblyTypeReference<TDerived>
     {
+        private readonly Type type;
+        private readonly string assemblyPath;
+        private readonly string version;
+
+        private bool isDisposed;
+
         /// <summary>
         ///     Initializes a new instance of <see cref="AssemblyTypeReference{TDerived}"/>.
         /// </summary>
@@ -28,18 +35,29 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             Debug.Assert(type != null);
 
-            this.Type = type;
+            this.type = type;
 
             if (!this.Type.Assembly.IsDynamic)
             {
-                this.AssemblyPath = this.Type.Assembly.Location;
-                this.Version = FileVersionInfo.GetVersionInfo(this.AssemblyPath).FileVersion;
+                this.assemblyPath = this.Type.Assembly.Location;
+                this.version = FileVersionInfo.GetVersionInfo(this.AssemblyPath).FileVersion;
             }
             else
             {
-                this.AssemblyPath = this.Type.FullName;
-                this.Version = this.Type.FullName;
+                this.assemblyPath = this.Type.FullName;
+                this.version = this.Type.FullName;
             }
+
+            this.isDisposed = false;
+        }
+
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="AssemblyTypeReference{TDerived}"/>
+        ///     class.
+        /// </summary>
+        ~AssemblyTypeReference()
+        {
+            this.Dispose(false);
         }
 
         /// <summary>
@@ -55,25 +73,46 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             Debug.Assert(other != null);
 
-            this.Type = other.Type;
-            this.AssemblyPath = other.AssemblyPath;
-            this.Version = other.Version;
+            this.type = other.Type;
+            this.assemblyPath = other.AssemblyPath;
+            this.version = other.Version;
         }
 
         /// <summary>
         ///     Gets the assembly <see cref="Type"/> referenced.
         /// </summary>
-        public Type Type { get; }
+        public Type Type
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.type;
+            }
+        }
 
         /// <summary>
         ///     Gets the file path location of the assembly the <see cref="AssemblyTypeReference{TDerived}.Type"/> is located.
         /// </summary>
-        public string AssemblyPath { get; }
+        public string AssemblyPath
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.assemblyPath;
+            }
+        }
 
         /// <summary>
         ///     Gets the <see cref="FileVersionInfo.FileVersion"/> of the assembly the <see cref="AssemblyTypeReference{TDerived}.Type"/>.
         /// </summary>
-        public string Version { get; }
+        public string Version
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.version;
+            }
+        }
 
         /// <summary>
         ///     Checks to see if the <paramref name="candidateType"/> is <see cref="Type.IsPublic"/> and
@@ -127,6 +166,15 @@ namespace Microsoft.Performance.SDK.Runtime
                    this.Version.Equals(toCompare.Version, StringComparison.InvariantCulture);
         }
 
+        /// <summary>
+        ///     Releases all resources referenced by this instance.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         /// <inheritdoc cref="object.Equals(object)"/>
         public override bool Equals(object obj)
         {
@@ -159,6 +207,28 @@ namespace Microsoft.Performance.SDK.Runtime
                 hash = ((hash << 5) + hash) ^ this.Version.GetHashCode();
 
                 return hash;
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+            }
+
+            this.isDisposed = true;
+        }
+
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
             }
         }
     }

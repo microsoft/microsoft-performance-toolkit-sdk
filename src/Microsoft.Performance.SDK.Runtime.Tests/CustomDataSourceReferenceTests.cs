@@ -480,11 +480,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             : ICustomDataSource,
               IDisposable
         {
-            public IEnumerable<TableDescriptor> DataTables => throw new NotImplementedException();
+            public DisposableCustomDataSource()
+            {
+                this.DataTables = Enumerable.Empty<TableDescriptor>();
+                this.MetadataTables = Enumerable.Empty<TableDescriptor>();
+                this.CommandLineOptions = Enumerable.Empty<Option>();
+            }
 
-            public IEnumerable<TableDescriptor> MetadataTables => throw new NotImplementedException();
+            public IEnumerable<TableDescriptor> DataTables { get; set; }
 
-            public IEnumerable<Option> CommandLineOptions => throw new NotImplementedException();
+            public IEnumerable<TableDescriptor> MetadataTables { get; set; }
+
+            public IEnumerable<Option> CommandLineOptions { get; set; }
 
             public ICustomDataProcessor CreateProcessor(IDataSource dataSource, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
             {
