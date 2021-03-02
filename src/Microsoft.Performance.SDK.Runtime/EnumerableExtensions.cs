@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -29,6 +30,21 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 action(item);
             }
+        }
+
+        internal static HashSet<T> ToSet<T>(this IEnumerable<T> items)
+        {
+            return new HashSet<T>(items);
+        }
+
+        internal static HashSet<T> ToSet<T>(this IEnumerable<T> items, IEqualityComparer<T> cmp)
+        {
+            return new HashSet<T>(items, cmp);
+        }
+
+        internal static IEnumerable<T> Except<T>(this IEnumerable<T> items, T e)
+        {
+            return items.Except(new[] { e, });
         }
     }
 }

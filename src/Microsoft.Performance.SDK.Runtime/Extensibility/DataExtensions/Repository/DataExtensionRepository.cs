@@ -184,7 +184,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             this.ThrowIfDisposed();
 
             return this.dataProcessors.FirstOrDefault(reference =>
-                StringComparer.Ordinal.Equals(reference.Id, dataProcessorId));
+                StringComparer.Ordinal.Equals(reference.Id, dataProcessorId.Id));
         }
 
         /// <summary>

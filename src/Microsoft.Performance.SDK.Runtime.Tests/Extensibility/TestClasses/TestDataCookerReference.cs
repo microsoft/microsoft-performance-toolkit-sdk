@@ -17,18 +17,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
           IDataCookerReference
     {
         protected TestDataCookerReference()
-            : base()
+            : this(true)
+        {
+        }
+
+        protected TestDataCookerReference(bool useDataExtensionDependencyState)
+            : base(useDataExtensionDependencyState)
         {
             this.Path = new DataCookerPath(
                 string.Concat(
                     this.GetType().Name,
                     " ",
                     Guid.NewGuid().ToString()));
-        }
-
-        protected TestDataCookerReference(bool useDataExtensionDependencyState)
-            : base(useDataExtensionDependencyState)
-        {
         }
 
         public string Description { get; set; }
