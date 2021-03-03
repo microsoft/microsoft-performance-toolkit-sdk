@@ -21,10 +21,5 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomD
         {
             return true;
         }
-
-        protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
-        {
-            return;
-        }
     }
 }
