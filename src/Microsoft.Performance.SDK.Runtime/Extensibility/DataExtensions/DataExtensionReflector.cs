@@ -69,6 +69,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <inheritdoc />
+        public void DiscoveryStarted()
+        {
+            // nothing needed here
+        }
+
+        /// <inheritdoc />
         public void DiscoveryComplete()
         {
             // nothing needed here

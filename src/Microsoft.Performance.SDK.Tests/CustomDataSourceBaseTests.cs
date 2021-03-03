@@ -453,7 +453,7 @@ namespace Microsoft.Performance.SDK.Tests
                 return this.ProcessorToReturn;
             }
 
-            protected override bool IsFileSupportedCore(string path)
+            protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return true;
             }

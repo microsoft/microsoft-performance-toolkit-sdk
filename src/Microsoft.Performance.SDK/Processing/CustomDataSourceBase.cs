@@ -245,22 +245,17 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
-        public bool IsFileSupported(string path)
+        public bool IsDataSourceSupported(IDataSource dataSource)
         {
-            if (string.IsNullOrWhiteSpace(path))
+            if (dataSource is null)
             {
-                //
-                // Empty file paths can never be supported, as they are
-                // not valid paths in the first place.
-                //
-
                 return false;
             }
 
             bool isSupported;
             try
             {
-                isSupported = this.IsFileSupportedCore(path);
+                isSupported = this.IsDataSourceSupportedCore(dataSource);
             }
             catch
             {
@@ -296,18 +291,17 @@ namespace Microsoft.Performance.SDK.Processing
             ProcessorOptions options);
 
         /// <summary>
-        ///     When overridden in a derived class, determines whether the given
-        ///     path to a specific source of data can in fact be processed by this
-        ///     instance.
+        ///     When overridden in a derived class, returns a value indicating whether the
+        ///     given Data Source can be opened by this instance.
         /// </summary>
-        /// <param name="path">
-        ///     The path to check.
+        /// <param name="dataSource">
+        ///     The Data Source of interest.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the path represents a source of data that can be processed
-        ///     by this instance; <c>false</c> otherwise.
+        ///     <c>true</c> if this instance can actually process the given Data Source;
+        ///     <c>false</c> otherwise.
         /// </returns>
-        protected abstract bool IsFileSupportedCore(string path);
+        protected abstract bool IsDataSourceSupportedCore(IDataSource dataSource);
 
         /// <summary>
         ///     When overridden in a derived class, gives environment into this instance.

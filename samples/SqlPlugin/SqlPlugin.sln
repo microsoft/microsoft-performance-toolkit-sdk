@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlPlugin", "SqlPlugin\SqlPlugin.csproj", "{5799E6F9-425A-4CD8-A5D1-81950458A484}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlPluginWithProcessingPipeline", "SqlPluginWithProcessingPipeline\SqlPluginWithProcessingPipeline.csproj", "{671940A2-C63E-4F5D-9618-9C8FE7DEFE2D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5799E6F9-425A-4CD8-A5D1-81950458A484}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5799E6F9-425A-4CD8-A5D1-81950458A484}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5799E6F9-425A-4CD8-A5D1-81950458A484}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5799E6F9-425A-4CD8-A5D1-81950458A484}.Release|Any CPU.Build.0 = Release|Any CPU
+		{671940A2-C63E-4F5D-9618-9C8FE7DEFE2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{671940A2-C63E-4F5D-9618-9C8FE7DEFE2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{671940A2-C63E-4F5D-9618-9C8FE7DEFE2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{671940A2-C63E-4F5D-9618-9C8FE7DEFE2D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88D41C49-EBBB-4E3C-A3A4-C886FD0165A0}
+	EndGlobalSection
+EndGlobal

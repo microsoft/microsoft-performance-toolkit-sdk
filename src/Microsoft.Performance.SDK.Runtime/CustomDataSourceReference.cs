@@ -13,60 +13,55 @@ namespace Microsoft.Performance.SDK.Runtime
     /// <summary>
     ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> where T is <see cref="ICustomDataSource"/> and Derived is <see cref="CustomDataSourceReference"/>.
     /// </summary>
-    public sealed class CustomDataSourceReference
+    public abstract class CustomDataSourceReference
         : AssemblyTypeReferenceWithInstance<ICustomDataSource, CustomDataSourceReference>
     {
-        private static CustomDataSourceReferenceComparer equalityComparer;
-
-        private CustomDataSourceReference(
-            Type type,
-            CustomDataSourceAttribute metadata,
-            DataSourceAttribute dataSource)
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     class.
+        /// </summary>
+        /// <param name="type">
+        ///     The <see cref="Type"/> of instance being referenced by this instance.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="type"/> is <c>null</c>.
+        /// </exception>
+        protected CustomDataSourceReference(Type type)
             : base(type)
         {
-            Debug.Assert(metadata != null);
-            Debug.Assert(dataSource != null);
-
-            Debug.Assert(metadata.Equals(type.GetCustomAttribute<CustomDataSourceAttribute>()));
-            Debug.Assert(dataSource.Equals(type.GetCustomAttribute<DataSourceAttribute>()));
-
-            this.Guid = metadata.Guid;
-            this.Name = metadata.Name;
-            this.Description = metadata.Description;
-            this.DataSource = dataSource;
-            this.CommandLineOptions = this.Instance.CommandLineOptions.ToList().AsReadOnly();
         }
 
-        private CustomDataSourceReference(
-            CustomDataSourceReference other)
-            : base(other)
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     class as a copy of the given instance.
+        /// </summary>
+        /// <param name="other">
+        ///     The instance from which to make a copy.
+        /// </param>
+        protected CustomDataSourceReference(CustomDataSourceReference other)
+            : base(other.Type)
         {
-            this.Guid = other.Guid;
-            this.Name = other.Name;
-            this.Description = other.Description;
-            this.DataSource = other.DataSource;
-            this.CommandLineOptions = other.CommandLineOptions;
         }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
-        public Guid Guid { get; }
+        public abstract Guid Guid { get; }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Name"/>
-        public string Name { get; }
+        public abstract string Name { get; }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Description"/>
-        public string Description { get; }
+        public abstract string Description { get; }
 
         /// <summary>
-        ///     Gets the <see cref="DataSourceAttribute"/> for the custom data source.
+        ///     Gets the <see cref="DataSourceAttribute"/>s for the custom data source.
         /// </summary>
-        public DataSourceAttribute DataSource { get; }
+        public abstract IReadOnlyCollection<DataSourceAttribute> DataSources { get; }
 
         /// <inheritdoc cref="ICustomDataSource.DataTables"/>
-        public IEnumerable<TableDescriptor> AvailableTables => this.Instance.DataTables.ToList().AsReadOnly();
+        public abstract IEnumerable<TableDescriptor> AvailableTables { get; }
 
         /// <inheritdoc cref="ICustomDataSource.CommandLineOptions"/>
-        public IEnumerable<Option> CommandLineOptions { get; }
+        public abstract IEnumerable<Option> CommandLineOptions { get; }
 
         /// <summary>
         ///     Tries to create a instance of the <see cref="CustomDataSourceReference"/> based on the <paramref name="candidateType"/>
@@ -95,13 +90,14 @@ namespace Microsoft.Performance.SDK.Runtime
                     var metadataAttribute = candidateType.GetCustomAttribute<CustomDataSourceAttribute>();
                     if (metadataAttribute != null)
                     {
-                        var dataSourceAttribute = candidateType.GetCustomAttribute<DataSourceAttribute>();
-                        if (dataSourceAttribute != null)
+                        var dataSourceAttributes = candidateType.GetCustomAttributes<DataSourceAttribute>()?.ToList();
+                        if (dataSourceAttributes != null &&
+                            dataSourceAttributes.Count > 0)
                         {
-                            reference = new CustomDataSourceReference(
+                            reference = new CustomDataSourceReferenceImpl(
                                 candidateType,
                                 metadataAttribute,
-                                dataSourceAttribute);
+                                new HashSet<DataSourceAttribute>(dataSourceAttributes));
                         }
                     }
                 }
@@ -110,67 +106,131 @@ namespace Microsoft.Performance.SDK.Runtime
             return reference != null;
         }
 
-        public override string ToString()
-        {
-            return $"{this.Name} - {this.Guid} ({this.AssemblyPath})";
-        }
-
-        public override bool Equals(CustomDataSourceReference other)
-        {
-            return base.Equals(other) &&
-                this.Name.Equals(other.Name) &&
-                this.Guid.Equals(other.Guid) &&
-                this.Description.Equals(other.Description) &&
-                this.DataSource.Equals(other.DataSource);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hash = base.GetHashCode();
-
-                hash = ((hash << 5) + hash) ^ this.Name.GetHashCode();
-                hash = ((hash << 5) + hash) ^ this.Guid.GetHashCode();
-                hash = ((hash << 5) + hash) ^ this.Description.GetHashCode();
-                hash = ((hash << 5) + hash) ^ this.DataSource.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        public override CustomDataSourceReference CloneT()
-        {
-            return new CustomDataSourceReference(this);
-        }
-
         /// <summary>
-        ///     Gets the default <see cref="IEqualityComparer{T}"/> for <see cref="CustomDataSourceReference"/>.
+        ///     Determines whether the given <see cref="IDataSource"/>
+        ///     is supported by the <see cref="ICustomDataSource>"/> referenced by
+        ///     this <see cref="CustomDataSourceReference"/>.
         /// </summary>
-        public static IEqualityComparer<CustomDataSourceReference> EqualityComparer
+        /// <param name="dataSource">
+        ///     The <see cref="IDataSource"/> to check.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="dataSource"/> is supported by 
+        ///     the Custom Data Source referenced by this instance; <c>false</c>
+        ///     otherwise.
+        /// </returns>
+        public abstract bool Supports(IDataSource dataSource);
+
+        private sealed class CustomDataSourceReferenceImpl
+            : CustomDataSourceReference
         {
-            get
+            private readonly ReadOnlyHashSet<DataSourceAttribute> dataSourceAttributes;
+
+            internal CustomDataSourceReferenceImpl(
+                Type type,
+                CustomDataSourceAttribute metadata,
+                HashSet<DataSourceAttribute> dataSourceAttributes)
+                : base(type)
             {
-                if (equalityComparer == null)
+                Debug.Assert(metadata != null);
+                Debug.Assert(dataSourceAttributes != null);
+
+                Debug.Assert(metadata.Equals(type.GetCustomAttribute<CustomDataSourceAttribute>()));
+
+                this.dataSourceAttributes = new ReadOnlyHashSet<DataSourceAttribute>(dataSourceAttributes);
+
+                this.Guid = metadata.Guid;
+                this.Name = metadata.Name;
+                this.Description = metadata.Description;
+                this.CommandLineOptions = this.Instance.CommandLineOptions.ToList().AsReadOnly();
+            }
+
+            internal CustomDataSourceReferenceImpl(
+                CustomDataSourceReferenceImpl other)
+                : base(other)
+            {
+                this.dataSourceAttributes = other.dataSourceAttributes;
+
+                this.Guid = other.Guid;
+                this.Name = other.Name;
+                this.Description = other.Description;
+                this.CommandLineOptions = other.CommandLineOptions;
+            }
+
+            public override Guid Guid { get; }
+
+            public override string Name { get; }
+
+            public override string Description { get; }
+
+            public override IReadOnlyCollection<DataSourceAttribute> DataSources => this.dataSourceAttributes;
+
+            public override IEnumerable<TableDescriptor> AvailableTables => this.Instance.DataTables.ToList().AsReadOnly();
+
+            public override IEnumerable<Option> CommandLineOptions { get; }
+
+            public override bool Supports(IDataSource dataSource)
+            {
+                if (dataSource is null)
                 {
-                    equalityComparer = new CustomDataSourceReferenceComparer();
+                    return false;
                 }
 
-                return equalityComparer;
-            }
-        }
-
-        private sealed class CustomDataSourceReferenceComparer
-            : IEqualityComparer<CustomDataSourceReference>
-        {
-            public bool Equals(CustomDataSourceReference c1, CustomDataSourceReference c2)
-            {
-                return c1.Equals(c2);
+                try
+                {
+                    return this.Instance.IsDataSourceSupported(dataSource);
+                }
+                catch
+                {
+                    return false;
+                }
             }
 
-            public int GetHashCode(CustomDataSourceReference c)
+            public override CustomDataSourceReference CloneT()
             {
-                return (c != null) ? c.GetHashCode() : 0;
+                return new CustomDataSourceReferenceImpl(this);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is null)
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
+                var other = obj as CustomDataSourceReferenceImpl;
+
+                return other != null &&
+                    this.Name.Equals(other.Name) &&
+                    this.Guid.Equals(other.Guid) &&
+                    this.Description.Equals(other.Description) &&
+                    (this.dataSourceAttributes.IsSubsetOf(other.dataSourceAttributes) &&
+                     other.dataSourceAttributes.IsSubsetOf(this.dataSourceAttributes));
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    var hash = base.GetHashCode();
+
+                    hash = ((hash << 5) + hash) ^ this.Name.GetHashCode();
+                    hash = ((hash << 5) + hash) ^ this.Guid.GetHashCode();
+                    hash = ((hash << 5) + hash) ^ this.Description.GetHashCode();
+                    hash = ((hash << 5) + hash) ^ this.DataSources.GetHashCode();
+
+                    return hash;
+                }
+            }
+
+            public override string ToString()
+            {
+                return $"{this.Name} - {this.Guid} ({this.AssemblyPath})";
             }
         }
     }

@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-//  Copyright (c) Microsoft Corporation.  All Rights Reserved.
-
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
@@ -34,11 +33,21 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
     {
         public bool SupportsIsolation { get; set; }
 
-        public Func<string, Assembly> loadAssembly;
+        public ErrorInfo LoadAssemblyErrorInfo { get; set; } = ErrorInfo.None;
 
-        public Assembly LoadAssembly(string assemblyPath)
+        public Func<string, bool> IsAssemblyFunc { get; set; }
+
+        public Func<string, Assembly> LoadAssemblyFunc { get; set; }
+
+        public bool IsAssembly(string path)
         {
-            return loadAssembly?.Invoke(assemblyPath);
+            return this.IsAssemblyFunc?.Invoke(path) ?? true;
+        }
+
+        public Assembly LoadAssembly(string assemblyPath, out ErrorInfo error)
+        {
+            error = this.LoadAssemblyErrorInfo;
+            return this.LoadAssemblyFunc?.Invoke(assemblyPath) ?? null;
         }
     }
 
@@ -54,6 +63,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         }
 
         internal bool Completed { get; set; }
+
+        public void DiscoveryStarted()
+        {
+            this.Completed = false;
+        }
+
         public void DiscoveryComplete()
         {
             Assert.IsFalse(this.Completed);
@@ -65,6 +80,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
     public class AssemblyExtensionDiscoveryTests
     {
         private TestAssemblyLoader Loader { get; set; }
+
+        private FakeVersionChecker VersionChecker { get; set; }
 
         private AssemblyExtensionDiscovery Discovery { get; set; }
 
@@ -87,7 +104,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             this.Loader = new TestAssemblyLoader();
 
-            this.Discovery = new AssemblyExtensionDiscovery(this.Loader);
+            this.VersionChecker = new FakeVersionChecker();
+
+            this.Discovery = new AssemblyExtensionDiscovery(this.Loader, _ => new FakePreloadValidator());
 
             this.FindFiles = new TestFindFiles();
 
@@ -103,7 +122,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         [UnitTest]
         public void ProcessAssemblies_NullDirectoryPath()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Discovery.ProcessAssemblies((string)null));
+            Assert.ThrowsException<ArgumentNullException>(() => this.Discovery.ProcessAssemblies((string)null, out _));
         }
 
         [TestMethod]
@@ -116,7 +135,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     false,
                     null,
                     null,
-                    false));
+                    false,
+                    out _));
         }
 
         [TestMethod]
@@ -129,7 +149,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     false,
                     null,
                     null,
-                    false));
+                    false,
+                    out _));
         }
 
         [TestMethod]
@@ -145,7 +166,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             var testAssembly = this.GetType().Assembly;
             var testAssemblyDirectory = Path.GetDirectoryName(testAssembly.GetCodeBaseAsLocalPath());
 
-            this.Discovery.ProcessAssemblies(testAssemblyDirectory);
+            this.Discovery.ProcessAssemblies(testAssemblyDirectory, out _);
         }
 
         [TestMethod]
@@ -167,7 +188,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
             RegisterObservers();
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, false);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, false, out _);
 
             Assert.AreEqual(searchPatterns.Length, patternsSearched.Count);
             foreach (var pattern in searchPatterns)
@@ -188,14 +209,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             this.Observers.Add(new TestExtensionObserver());
 
             RegisterObservers();
-            this.Loader.loadAssembly =
+            this.Loader.LoadAssemblyFunc =
                 s =>
                 {
                     Assert.Fail("LoadAssembly should not be called, the file should be excluded.");
                     return null;
                 };
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, false);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, false, out _);
         }
 
         [TestMethod]
@@ -211,13 +232,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             RegisterObservers();
 
             bool assemblyLoaded = false;
-            this.Loader.loadAssembly = s =>
+            this.Loader.LoadAssemblyFunc = s =>
             {
                 assemblyLoaded = true;
                 return this.GetType().Assembly;
             };
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true, out _);
 
             Assert.IsTrue(assemblyLoaded);
         }

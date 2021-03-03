@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void TestSerialization()
         {
-            var info = new ErrorInfo("test_case_error", "This is an error")
+            var info = new TestError("test_case_error")
             {
                 Target = "ToString_Default",
                 Details = new[]
@@ -29,21 +29,10 @@ namespace Microsoft.Performance.SDK.Tests
                             new ErrorInfo("nested_datail", "nesting"),
                         },
                         Target = "First",
-                        Inner = new TestInnerError("inner_code")
-                        {
-                            Data = "data item",
-                        },
                     },
                     new ErrorInfo("another_detail", "yet again"),
                 },
-                Inner = new TestInnerError("inner_code_2")
-                {
-                    Data = "data item",
-                    Inner = new TestInnerError("inner_code_3")
-                    {
-                        Data = "data item",
-                    },
-                },
+                Data = "test data",
             };
 
             var exception = new ExtensionException(info, "An error", null);
@@ -76,15 +65,15 @@ namespace Microsoft.Performance.SDK.Tests
         }
 
         [Serializable]
-        private sealed class TestInnerError
-            : InnerError
+        private sealed class TestError
+            : ErrorInfo
         {
-            public TestInnerError(string code)
-                : base(code)
+            public TestError(string code)
+                : base(code, code)
             {
             }
 
-            private TestInnerError(SerializationInfo info, StreamingContext context)
+            private TestError(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
                 this.Data = info.GetString(nameof(Data));

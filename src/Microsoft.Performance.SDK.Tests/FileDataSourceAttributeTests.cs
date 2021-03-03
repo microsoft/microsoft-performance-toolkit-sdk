@@ -87,5 +87,25 @@ namespace Microsoft.Performance.SDK.Tests
 
             Assert.AreEqual(extension, sut.FileExtension);
         }
+
+        [TestMethod]
+        [UnitTest]
+        public void AcceptsFailsIfExtensionDoesNotMatch()
+        {
+            var dataSource = new FileDataSource(@"c:\test\bad.ext");
+            var sut = new FileDataSourceAttribute(@".txt");
+
+            Assert.IsFalse(sut.Accepts(dataSource));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AcceptsSucceedsIfExtensionMatches()
+        {
+            var dataSource = new FileDataSource(@"c:\test\good.txt");
+            var sut = new FileDataSourceAttribute(@".txt");
+
+            Assert.IsTrue(sut.Accepts(dataSource));
+        }
     }
 }

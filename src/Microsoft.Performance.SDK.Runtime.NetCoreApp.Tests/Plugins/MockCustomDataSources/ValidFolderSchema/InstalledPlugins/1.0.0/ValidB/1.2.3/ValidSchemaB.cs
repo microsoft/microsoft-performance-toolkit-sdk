@@ -1,0 +1,30 @@
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using Microsoft.Performance.SDK.Processing;
+using System.Collections.Generic;
+
+namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources
+{
+    [CustomDataSource(
+    "{BD25B1C8-E608-49A7-8521-3711BA125DBE}", "Mock CDS - Valid B v1.2.3", "A mock valid data source B.")]
+    [FileDataSource(".sdk")]
+    public class ValidSchemaB
+    : CustomDataSourceBase
+    {
+        protected override ICustomDataProcessor CreateProcessorCore(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
+        {
+            return true;
+        }
+
+        protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
+        {
+            return;
+        }
+    }
+}
