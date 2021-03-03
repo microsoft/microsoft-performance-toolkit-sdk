@@ -62,7 +62,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 return new DependencyDag(Enumerable.Empty<Node>());
             }
 
-            var allNodes = catalog
+            var allNodes = catalog.PlugIns
                 .Select(x => new Node(x))
                 .Concat(repository.GetAllReferences().Select(x => new Node(x)))
                 .ToSet();

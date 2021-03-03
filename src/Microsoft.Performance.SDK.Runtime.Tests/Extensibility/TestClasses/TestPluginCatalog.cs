@@ -24,16 +24,5 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
             this.PlugIns?.ForEach(x => x.SafeDispose());
         }
-
-        public IEnumerator<CustomDataSourceReference> GetEnumerator()
-        {
-            return this.PlugIns?.GetEnumerator() ?? 
-                Enumerable.Empty<CustomDataSourceReference>().GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
-        }
     }
 }

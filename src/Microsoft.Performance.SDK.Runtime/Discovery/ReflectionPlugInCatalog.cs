@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -106,16 +105,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        public IEnumerator<CustomDataSourceReference> GetEnumerator()
-        {
-            return this.PlugIns.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return this.GetEnumerator();
         }
 
         private void Dispose(bool disposing)

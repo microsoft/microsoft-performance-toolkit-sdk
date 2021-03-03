@@ -10,8 +10,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     ///     Exposes SDK plug-ins.
     /// </summary>
     public interface IPlugInCatalog
-        : IDisposable,
-          IEnumerable<CustomDataSourceReference>
+        : IDisposable
     {
         /// <summary>
         ///     Gets a value indicating whether the catalog is loaded.

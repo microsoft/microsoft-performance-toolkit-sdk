@@ -48,9 +48,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly List<DataCookerPath> enabledCookers;
         private readonly ReadOnlyCollection<DataCookerPath> enabledCookersRO;
 
-        private IDataExtensionRepositoryBuilder repository;
         private DataExtensionFactory factory;
-        private IPlugInCatalog catalog;
+        private ExtensionRoot extensionRoot;
 
         private string extensionDirectory;
         private bool isProcessed;
@@ -653,12 +652,10 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
-                this.repository.SafeDispose();
-                this.catalog.SafeDispose();
+                this.extensionRoot.SafeDispose();
 
                 this.allTables.Clear();
                 this.applicationEnvironment = null;
-                this.catalog = null;
                 this.compositeDataCookers.Clear();
                 this.creationErrors = null;
                 this.customDataSourceReferences.Clear();
@@ -666,10 +663,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.dataSourcesToProcess.Clear();
                 this.enabledCookers.Clear();
                 this.extensionDirectory = null;
+                this.extensionRoot = null;
                 this.factory = null;
                 this.freeDataSources.Clear();
                 this.loader = null;
-                this.repository = null;
                 this.sourceDataCookers.Clear();
                 this.tableGuidToDescriptor.Clear();
             }
@@ -718,7 +715,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.customDataSourceReferences.AddRange(catalog.PlugIns);
                 instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
                 instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-                instance.catalog = catalog;
+                instance.extensionRoot = new ExtensionRoot(catalog, repo);
 
                 var allTables = new HashSet<Guid>();
                 foreach (var tableId in repoTuple.Item2.TablesById)
@@ -736,7 +733,6 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
 
-                instance.repository = repoTuple.Item2;
                 instance.factory = repoTuple.Item1;
 
                 instance.applicationEnvironment = new ApplicationEnvironment(
@@ -744,7 +740,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     runtimeName: "Microsoft.Performance.Toolkit.Engine",
                     new RuntimeTableSynchronizer(),
                     new TableConfigurationsSerializer(),
-                    instance.repository,
+                    instance.extensionRoot,
                     instance.factory.CreateSourceSessionFactory(),
                     new RuntimeMessageBox());
 
@@ -839,7 +835,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.dataSourcesToProcess);
 
             var executors = CreateExecutors(allDataSourceAssociations);
-            var processors = this.repository.EnableDataCookers(
+            var processors = this.extensionRoot.EnableDataCookers(
                 executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 new HashSet<DataCookerPath>(this.enabledCookers));
 
@@ -865,12 +861,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             var retrieval = this.factory.CreateCrossParserSourceDataCookerRetrieval(processors);
-            var retrievalFactory = new DataExtensionRetrievalFactory(retrieval, this.repository);
+            var retrievalFactory = new DataExtensionRetrievalFactory(retrieval, this.extensionRoot);
 
             var results = new RuntimeExecutionResults(
                 retrieval,
                 retrievalFactory,
-                this.repository);
+                this.extensionRoot);
 
             return results;
         }
@@ -894,7 +890,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             cds,
                             dataSources,
                             cds.DataTables.Concat(cds.MetadataTables),
-                            new RuntimeProcessorEnvironment(this.repository),
+                            new RuntimeProcessorEnvironment(this.extensionRoot),
                             ProcessorOptions.Default);
 
                         var executor = new CustomDataSourceExecutor();

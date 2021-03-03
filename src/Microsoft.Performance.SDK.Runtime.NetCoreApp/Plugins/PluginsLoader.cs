@@ -1,15 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Runtime.Discovery;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
-using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Runtime.Discovery;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
+using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 {
@@ -51,11 +50,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         private readonly AssemblyExtensionDiscovery extensionDiscovery;
 
-        private readonly IPlugInCatalog catalog;
-
-        private readonly IDataExtensionRepositoryBuilder extensionRepository;
-
         private readonly HashSet<IPluginsConsumer> subscribers;
+
+        private readonly ExtensionRoot extensionRoot;
 
         private bool isDisposed;
 
@@ -97,13 +94,14 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             this.subscribers = new HashSet<IPluginsConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
-            this.catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
-            this.extensionRepository = new DataExtensionFactory().CreateDataExtensionRepository();
+            var catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
+            var extensionRepository = new DataExtensionFactory().CreateDataExtensionRepository();
+            this.extensionRoot = new ExtensionRoot(catalog, extensionRepository);
 
             // The constructor for this object hooks up the repository to the extension provider
             // (the ExtensionDiscovery in this case). We do not need to hold onto this object
             // explicitly, only call its constructor.
-            new DataExtensionReflector(this.extensionDiscovery, this.extensionRepository);
+            new DataExtensionReflector(this.extensionDiscovery, extensionRepository);
 
             this.isDisposed = false;
         }
@@ -131,7 +129,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 IEnumerable<CustomDataSourceReference> copy;
                 lock (this.mutex)
                 {
-                    copy = new HashSet<CustomDataSourceReference>(this.catalog.PlugIns);
+                    copy = new HashSet<CustomDataSourceReference>(this.extensionRoot.PlugIns);
                 }
                 return copy;
             }
@@ -228,7 +226,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             lock (this.mutex)
             {
                 failed = new Dictionary<string, ErrorInfo>();
-                var oldPlugins = new HashSet<CustomDataSourceReference>(this.catalog.PlugIns);
+                var oldPlugins = new HashSet<CustomDataSourceReference>(this.extensionRoot.PlugIns);
                 foreach (var dir in directories)
                 {
                     if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
@@ -241,9 +239,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 // TODO: this does redundant work re-finalizing custom data sources
                 // loaded by previous calls to this method. The extension repository
                 // should get refactored to avoid this redundant work.
-                this.extensionRepository.FinalizeDataExtensions();
+                this.extensionRoot.FinalizeDataExtensions();
 
-                foreach (var source in this.catalog.PlugIns.Except(oldPlugins))
+                foreach (var source in this.extensionRoot.PlugIns.Except(oldPlugins))
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     this.NotifyCustomDataSourceLoaded(name, version, source);
@@ -299,7 +297,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 }
 
                 // Manually send all the already loaded plugins to this consumer
-                foreach (var source in this.catalog.PlugIns)
+                foreach (var source in this.extensionRoot.PlugIns)
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     consumer.OnCustomDataSourceLoaded(name, version, source);
@@ -373,8 +371,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             if (disposing)
             {
-                this.extensionRepository.SafeDispose();
-                this.catalog.SafeDispose();
+                this.extensionRoot.SafeDispose();
             }
 
             this.isDisposed = true;
@@ -419,8 +416,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         private void NotifyCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
         {
-            Guard.NotNull(this.catalog, nameof(this.catalog));
-            if (!this.catalog.IsLoaded)
+            Guard.NotNull(this.extensionRoot, nameof(this.extensionRoot));
+            if (!this.extensionRoot.IsLoaded)
             {
                 throw new InvalidOperationException("All plugins must be loaded before this point");
             }
