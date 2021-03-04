@@ -9,6 +9,9 @@ using System.Diagnostics;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 {
+    /// <summary>
+    ///     References a table extension.
+    /// </summary>
     internal class TableExtensionReference
         : DataExtensionReference<TableExtensionReference>,
           ITableExtensionReference
@@ -22,6 +25,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 
         private bool isDisposed;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableExtensionReference"/>
+        ///     class as a copy of the given instance.
+        /// </summary>
+        /// <param name="other">
+        ///     The instance from which to initialize this instance.
+        /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     <paramref name="other"/> is disposed.
+        /// </exception>
         public TableExtensionReference(TableExtensionReference other)
             : base(other)
         {
@@ -59,11 +72,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             this.isDisposed = false;
         }
 
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="TableExtensionReference"/>
+        ///     class.
+        /// </summary>
         ~TableExtensionReference()
         {
             this.Dispose(false);
         }
 
+        /// <summary>
+        ///     Gets the descriptor of the referenced table.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public TableDescriptor TableDescriptor
         {
             get
@@ -73,6 +96,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             }
         }
 
+        /// <summary>
+        ///     Gets the action to use to build the referenced table.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Action<ITableBuilder, IDataExtensionRetrieval> BuildTableAction
         {
             get
@@ -82,6 +111,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             }
         }
 
+        /// <summary>
+        ///     Gets the function that determines whether the referenced
+        ///     table has data.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Func<IDataExtensionRetrieval, bool> IsDataAvailableFunc
         {
             get
@@ -91,6 +127,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             }
         }
 
+        /// <summary>
+        ///     Gets a value indicating whether this table is
+        ///     an internal table.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         internal bool IsInternalTable
         {
             get
@@ -100,6 +143,24 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             }
         }
 
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     See <see cref="TryCreateReference(Type, bool, out ITableExtensionReference)"/>
+        ///     for additional details about the requirements <paramref name="candidateType"/> must
+        ///     satisfy in order to be considered eligibile as a reference.
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ISourceDataCookerReference"/>
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ISourceDataCookerReference"/>
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
         internal static bool TryCreateReference(
             Type candidateType,
             out ITableExtensionReference reference)
@@ -107,6 +168,30 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             return TryCreateReference(candidateType, false, out reference);
         }
 
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ITableExtensionReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             must expose a valid <see cref="TableDescriptor"/>.
+        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ISerializer, out TableDescriptor)"/>
+        ///             for details on how a table is to expose a descriptor.
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ITableExtensionReference"/>
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ITableExtensionReference"/>
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
         internal static bool TryCreateReference(
             Type candidateType,
             bool allowInternalTables,
@@ -147,18 +232,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             return reference != null;
         }
 
+        /// <inheritdoc />
         public override TableExtensionReference CloneT()
         {
             this.ThrowIfDisposed();
             return new TableExtensionReference(this);
         }
 
+        /// <inheritdoc />
         public override bool Equals(TableExtensionReference other)
         {
             return base.Equals(other) &&
                    (this.TableDescriptor.Guid == other.TableDescriptor.Guid);
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

@@ -19,17 +19,96 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         : BaseDataCookerReference<SourceDataCookerReference>,
           ISourceDataCookerReference
     {
-        private readonly List<IDataCookerDescriptor> instances = new List<IDataCookerDescriptor>();
+        private List<IDataCookerDescriptor> instances = new List<IDataCookerDescriptor>();
 
         private DataProductionStrategy productionStrategy;
 
         private bool isDisposed = false;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="SourceDataCookerReference"/>
+        ///     class as a copy of the given instance.
+        /// </summary>
+        /// <param name="other">
+        ///     The instance from which to initialize this instance.
+        /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     <paramref name="other"/> is disposed.
+        /// </exception>
+        public SourceDataCookerReference(SourceDataCookerReference other)
+            : base(other)
+        {
+            this.InitializeDescriptorData(other);
+        }
+
+        private SourceDataCookerReference(Type type)
+            : base(type)
+        {
+            Guard.NotNull(type, nameof(type));
+
+            // Create an instance just to pull out the descriptor without saving any references to it.
+
+            var instance = this.CreateInstance();
+
+            if (!(instance is ISourceDataCookerDescriptor sourceCookerDescriptor))
+            {
+                throw new ArgumentException("The type is not a recognized source data cooker.", nameof(type));
+            }
+
+            this.productionStrategy = sourceCookerDescriptor.DataProductionStrategy;
+
+            if (sourceCookerDescriptor.DataProductionStrategy == DataProductionStrategy.AsRequired)
+            {
+                // _CDS_
+                // I don't think this should be an issue, because PerfCore event sinks will use
+                // EventSinkType.Context rather than going through this, but checking just in case.
+                //
+
+                if (StringComparer.Ordinal.Equals(this.Path.SourceParserId, "Microsoft.XPerf"))
+                {
+                    if (RequiredDataCookers.Any())
+                    {
+                        // _CDS_ todo: consider loosening this restriction to allow AsRequired source cookers to require other AsRequired source cookers
+                        // if we do this, we'll need to decide how to handle this in PerfCore, which currently doesn't allow Context event sinks to have
+                        // any dependencies. See "IsCompatibleDependency" in Session.cpp.
+                        //
+
+                        // An AsRequired SourceDataCooker must be able to run in every stage, and before source cookers
+                        // that require it. XPerf doesn't allow a context data cooker to have any dependencies
+                        throw new InvalidOperationException(
+                            $"A SourceCooker whose {nameof(DataProductionStrategy)} is " +
+                            $"{nameof(DataProductionStrategy.AsRequired)} can only consume SourceCookers whose " +
+                            $"{nameof(DataProductionStrategy)} is also {nameof(DataProductionStrategy.AsRequired)}.");
+                    }
+                }
+            }
+
+            this.ValidateInstance(instance);
+
+            this.IsSourceDataCooker = true;
+
+            if (instance != null)
+            {
+                this.InitializeDescriptorData(instance);
+            }
+        }
+
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="SourceDataCookerReference"/>
+        ///     class.
+        /// </summary>
         ~SourceDataCookerReference()
         {
             this.Dispose(false);
         }
 
+        /// <summary>
+        ///     Gets the strategy used by the referenced cooker for
+        ///     producing data.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public DataProductionStrategy ProductionStrategy
         {
             get
@@ -39,6 +118,30 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ISourceDataCookerReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>must be public.</item>
+        ///         <item>must be concrete.</item>
+        ///         <item>must implement IDataCooker somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must implement ISourceDataCooker<,,> somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must have a public parameterless constructor.</item>
+        ///     </list>
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ISourceDataCookerReference"/>
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ISourceDataCookerReference"/>
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
         internal static bool TryCreateReference(
             Type candidateType,
             out ISourceDataCookerReference reference)
@@ -96,70 +199,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             return true;
         }
 
-        private SourceDataCookerReference(Type type)
-            : base(type)
-        {
-            Guard.NotNull(type, nameof(type));
-
-            // Create an instance just to pull out the descriptor without saving any references to it.
-
-            var instance = this.CreateInstance();
-
-            if (!(instance is ISourceDataCookerDescriptor sourceCookerDescriptor))
-            {
-                throw new ArgumentException("The type is not a recognized source data cooker.", nameof(type));
-            }
-
-            this.productionStrategy = sourceCookerDescriptor.DataProductionStrategy;
-
-            if (sourceCookerDescriptor.DataProductionStrategy == DataProductionStrategy.AsRequired)
-            {
-                // _CDS_
-                // I don't think this should be an issue, because PerfCore event sinks will use
-                // EventSinkType.Context rather than going through this, but checking just in case.
-                //
-
-                if(StringComparer.Ordinal.Equals(this.Path.SourceParserId, "Microsoft.XPerf"))
-                {
-                    if (RequiredDataCookers.Any())
-                    {
-                        // _CDS_ todo: consider loosening this restriction to allow AsRequired source cookers to require other AsRequired source cookers
-                        // if we do this, we'll need to decide how to handle this in PerfCore, which currently doesn't allow Context event sinks to have
-                        // any dependencies. See "IsCompatibleDependency" in Session.cpp.
-                        //
-
-                        // An AsRequired SourceDataCooker must be able to run in every stage, and before source cookers
-                        // that require it. XPerf doesn't allow a context data cooker to have any dependencies
-                        throw new InvalidOperationException(
-                            $"A SourceCooker whose {nameof(DataProductionStrategy)} is " +
-                            $"{nameof(DataProductionStrategy.AsRequired)} can only consume SourceCookers whose " +
-                            $"{nameof(DataProductionStrategy)} is also {nameof(DataProductionStrategy.AsRequired)}.");
-                    }
-                }
-            }
-
-            this.ValidateInstance(instance);
-
-            this.IsSourceDataCooker = true;
-
-            if (instance != null)
-            {
-                this.InitializeDescriptorData(instance);
-            }
-        }
-
-        public SourceDataCookerReference(SourceDataCookerReference other)
-            : base(other)
-        {
-            this.InitializeDescriptorData(other);
-        }
-
+        /// <inheritdoc />
         public override SourceDataCookerReference CloneT()
         {
             this.ThrowIfDisposed();
             return new SourceDataCookerReference(this);
         }
 
+        /// <inheritdoc />
         public IDataCookerDescriptor CreateInstance()
         {
             this.ThrowIfDisposed();
@@ -184,6 +231,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <inheritdoc />
         public override void PerformAdditionalDataExtensionValidation(
             IDataExtensionDependencyStateSupport dependencyStateSupport,
             IDataExtensionReference requiredDataExtension)
@@ -236,6 +284,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -258,6 +307,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 {
                     v.TryDispose();
                 }
+
+                this.instances = null;
             }
 
             this.isDisposed = true;

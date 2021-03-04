@@ -25,10 +25,28 @@ namespace Microsoft.Performance.SDK.Runtime
 
         private bool isDisposed;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ExtensionException"/>
+        ///     class, encapsulating the given catalog and repository.
+        /// </summary>
+        /// <param name="catalog">
+        ///     The catalog to use to manage plugins.
+        /// </param>
+        /// <param name="repository">
+        ///     The repository to use to manage data extensions.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="catalog"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="repository"/> is <c>null</c>.
+        /// </exception>
         public ExtensionRoot(
             IPlugInCatalog catalog,
             IDataExtensionRepositoryBuilder repository)
         {
+            Guard.NotNull(catalog, nameof(catalog));
+            Guard.NotNull(repository, nameof(repository));
+
             this.dependencyGraph = null;
 
             this.Catalog = catalog;
@@ -37,89 +55,106 @@ namespace Microsoft.Performance.SDK.Runtime
             this.isDisposed = false;
         }
 
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="ExtensionRoot"/>
+        ///     class.
+        /// </summary>
         ~ExtensionRoot()
         {
             this.Dispose(false);
         }
 
+        /// <summary>
+        ///     Gets the catalog exposing plugins.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public IPlugInCatalog Catalog { get; }
 
+        /// <summary>
+        ///     Gets the repository exposing data extensions.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public IDataExtensionRepositoryBuilder Repository { get; }
 
-        public DependencyDag Graph
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                if (this.dependencyGraph is null)
-                {
-                    throw new InvalidOperationException(nameof(FinalizeDataExtensions) +
-                        " must have been called before the DAG can be inspected.");
-                }
-
-                return this.dependencyGraph;
-            }
-        }
-
+        /// <inheritdoc />
         public bool IsLoaded => this.Catalog.IsLoaded;
 
+        /// <inheritdoc />
         public IEnumerable<CustomDataSourceReference> PlugIns => this.Catalog.PlugIns;
 
+        /// <inheritdoc />
         public IEnumerable<DataCookerPath> SourceDataCookers => this.Repository.SourceDataCookers;
 
+        /// <inheritdoc />
         public IEnumerable<DataCookerPath> CompositeDataCookers => this.Repository.CompositeDataCookers;
 
+        /// <inheritdoc />
         public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById => this.Repository.TablesById;
 
+        /// <inheritdoc />
         public IEnumerable<DataProcessorId> DataProcessors => this.Repository.DataProcessors;
 
+        /// <inheritdoc />
         public bool AddCompositeDataCookerReference(ICompositeDataCookerReference dataCooker)
         {
             return this.Repository.AddCompositeDataCookerReference(dataCooker);
         }
 
+        /// <inheritdoc />
         public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
         {
             return this.Repository.AddDataProcessorReference(dataProcessorReference);
         }
 
+        /// <inheritdoc />
         public bool AddSourceDataCookerReference(ISourceDataCookerReference dataCooker)
         {
             return this.Repository.AddSourceDataCookerReference(dataCooker);
         }
 
+        /// <inheritdoc />
         public bool AddTableExtensionReference(ITableExtensionReference tableExtensionReference)
         {
             return this.Repository.AddTableExtensionReference(tableExtensionReference);
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <inheritdoc />
         public void FinalizeDataExtensions()
         {
             this.Repository.FinalizeDataExtensions();
             this.dependencyGraph = DependencyDag.Create(this.Catalog, this.Repository);
         }
 
+        /// <inheritdoc />
         public ICompositeDataCookerReference GetCompositeDataCookerReference(DataCookerPath dataCookerPath)
         {
             return this.Repository.GetCompositeDataCookerReference(dataCookerPath);
         }
 
+        /// <inheritdoc />
         public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
         {
             return this.Repository.GetDataProcessorReference(dataProcessorId);
         }
 
+        /// <inheritdoc />
         public ISourceDataCookerFactory GetSourceDataCookerFactory(DataCookerPath dataCookerPath)
         {
             return this.Repository.GetSourceDataCookerFactory(dataCookerPath);
         }
 
+        /// <inheritdoc />
         public ISourceDataCookerReference GetSourceDataCookerReference(DataCookerPath dataCookerPath)
         {
             return this.Repository.GetSourceDataCookerReference(dataCookerPath);
@@ -134,11 +169,16 @@ namespace Microsoft.Performance.SDK.Runtime
 
             if (disposing)
             {
-                var dag = DependencyDag.Create(this.Catalog, this.Repository);
-                dag.DependentWalk(x => x.Target.Match(r => r.SafeDispose(), r => r.SafeDispose()));
-
-                this.Catalog.SafeDispose();
-                this.Repository.SafeDispose();
+                try
+                {
+                    var dag = DependencyDag.Create(this.Catalog, this.Repository);
+                    dag.DependentWalk(x => x.Target.Match(r => r.SafeDispose(), r => r.SafeDispose()));
+                }
+                finally
+                {
+                    this.Catalog.SafeDispose();
+                    this.Repository.SafeDispose();
+                }
             }
 
             this.isDisposed = true;

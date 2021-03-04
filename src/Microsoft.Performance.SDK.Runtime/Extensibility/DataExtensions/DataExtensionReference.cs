@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 {
@@ -24,12 +24,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
           IDataExtensionReference
         where TDerived : DataExtensionReference<TDerived>
     {
-        private readonly List<string> errors;
-        private readonly ReadOnlyCollection<string> errorsRO;
+        private List<string> errors;
+        private ReadOnlyCollection<string> errorsRO;
 
         // used for IDataExtensionDependencyTarget
-        private readonly HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
-        private readonly HashSet<DataProcessorId> requiredDataProcessors = new HashSet<DataProcessorId>();
+        private HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
+        private HashSet<DataProcessorId> requiredDataProcessors = new HashSet<DataProcessorId>();
 
         private DataExtensionDependencyState extensionDependencyState;
         private DataExtensionAvailability initializeAvailability;
@@ -54,6 +54,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <param name="other">
         ///     An existing data extension reference.
         /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     <paramref name="other"/> is disposed.
+        /// </exception>
         protected DataExtensionReference(DataExtensionReference<TDerived> other) 
             : base(other)
         {
@@ -63,7 +66,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.extensionDependencyState = new DataExtensionDependencyState(other.extensionDependencyState);
             }
 
-            this.errors = new List<string>(other.errors);
+            this.errors = new List<string>(other.Errors);
             this.errorsRO = new ReadOnlyCollection<string>(this.errors);
         }
 
@@ -77,9 +80,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <summary>
-        ///     A mechanism to identify the data extension when referencing it in messages.
-        ///     Defaults to the full name of the Type.
+        ///     Gets the name of this extension.
+        ///     <para />
+        ///     The name is a mechanism to identify the data extension when referencing it 
+        ///     in messages. This property defaults to the full name of the Type.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public virtual string Name
         {
             get
@@ -90,8 +98,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <summary>
-        ///     Errors associated with the data extension.
+        ///     Gets a collection of errors associated with the data extension.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public ReadOnlyCollection<string> Errors
         {
             get
@@ -102,8 +113,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <summary>
-        ///     All of the data cookers that must be available for this extension to be available.
+        ///     Gets all of the data cookers that must be available for this extension to be available.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public IReadOnlyCollection<DataCookerPath> RequiredDataCookers
         {
             get
@@ -114,8 +128,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <summary>
-        ///     All of the data processors that must be available for this extension to be available.
+        ///     Gets all of the data processors that must be available for this extension to be available.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors
         {
             get
@@ -126,11 +143,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <summary>
-        ///     The data extension references required by this data extension.
+        ///     Gets the data extension references required by this data extension.
         ///     This is slightly more granular than the <see cref="RequiredDataCookers"/> as it breaks down the cookers
         ///     by source and composite cookers.
         ///     This data only becomes valid after calling <see cref="ProcessDependencies"/>.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public IDataExtensionDependencies DependencyReferences
         {
             get
@@ -141,9 +161,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <summary>
+        ///     Gets the value indicating when the referenced instance is available.
+        ///     <para />
         ///     This is determined when initializing the data extension from its type. If any errors are encountered, this
         ///     value should be set to Error. Otherwise it should be Available.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public DataExtensionAvailability InitialAvailability
         {
             get
@@ -159,9 +184,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <summary>
+        ///     Gets the current availability of the referened instance.
+        ///     <para />
         ///     If the dependency of this extension has been established, then use that value. Otherwise, falls back to
         ///     <see cref="InitialAvailability"/>.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public DataExtensionAvailability Availability
         {
             get
@@ -172,10 +202,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <inheritdoc/>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public virtual void PerformAdditionalDataExtensionValidation(
             IDataExtensionDependencyStateSupport dependencyStateSupport,
             IDataExtensionReference requiredDataCooker)
         {
+            Guard.NotNull(dependencyStateSupport, nameof(dependencyStateSupport));
+            Guard.NotNull(requiredDataCooker, nameof(requiredDataCooker));
             this.ThrowIfDisposed();
         }
 
@@ -193,6 +228,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             this.extensionDependencyState.ProcessDependencies(availableDataExtensions);
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -203,6 +239,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 
             if (disposing)
             {
+                this.errors = null;
+                this.errorsRO = null;
+                this.requiredDataCookers = null;
+                this.requiredDataProcessors = null;
+                this.extensionDependencyState = null;
             }
 
             this.isDisposed = true;
@@ -215,6 +256,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <param name="cookerPath">
         ///     The cooker path.
         /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         protected void AddRequiredDataCooker(DataCookerPath cookerPath)
         {
             this.ThrowIfDisposed();
@@ -228,6 +272,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <param name="cookerPath">
         ///     The cooker path.
         /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         protected void AddRequiredDataProcessor(DataProcessorId processorId)
         {
             this.ThrowIfDisposed();
@@ -242,6 +289,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <param name="error">
         ///     The error that occurred.
         /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         protected void AddError(string error)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(error));

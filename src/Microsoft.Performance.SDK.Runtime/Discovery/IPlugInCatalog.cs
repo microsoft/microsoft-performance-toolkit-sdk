@@ -15,11 +15,17 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <summary>
         ///     Gets a value indicating whether the catalog is loaded.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         bool IsLoaded { get; }
 
         /// <summary>
         ///     Gets an enumeration of plug-ins.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception> 
         IEnumerable<CustomDataSourceReference> PlugIns { get; }
     }
 }

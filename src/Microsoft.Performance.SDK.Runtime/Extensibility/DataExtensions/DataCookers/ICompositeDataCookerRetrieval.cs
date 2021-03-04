@@ -21,6 +21,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// <returns>
         ///     A data cooker.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="requiredData"/> is <c>null</c>.
+        /// </exception>
         IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData);
     }
 }

@@ -235,7 +235,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 foreach (var dep in depsToEnumerate)
                 {
                     Debug.Assert(dep != null);
-                    if (n.Dependencies.Except(dep).Any(x => ContainsDependency(x, dep)))
+                    if (n.Dependencies.Without(dep).Any(x => ContainsDependency(x, dep)))
                     {
                         //
                         // dep was found in the dependency chain of one of this

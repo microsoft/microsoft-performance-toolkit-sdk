@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -42,14 +42,17 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="other">
         ///     The instance from which to make a copy.
         /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     <paramref name="other"/> is disposed.
+        /// </exception>
         protected CustomDataSourceReference(CustomDataSourceReference other)
             : base(other.Type)
         {
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="CustomDataSourceReference"/>
-        /// class.
+        ///     Finalizes an instance of the <see cref="CustomDataSourceReference"/>
+        ///     class.
         /// </summary>
         ~CustomDataSourceReference()
         {
@@ -57,27 +60,57 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract Guid Guid { get; }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Name"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract string Name { get; }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Description"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract string Description { get; }
 
         /// <summary>
         ///     Gets the <see cref="DataSourceAttribute"/>s for the custom data source.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract IReadOnlyCollection<DataSourceAttribute> DataSources { get; }
 
         /// <inheritdoc cref="ICustomDataSource.DataTables"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract IEnumerable<TableDescriptor> AvailableTables { get; }
 
         /// <inheritdoc cref="ICustomDataSource.CommandLineOptions"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract IEnumerable<Option> CommandLineOptions { get; }
 
         /// <summary>
-        ///     Tries to create a instance of the <see cref="CustomDataSourceReference"/> based on the <paramref name="candidateType"/>
+        ///     Tries to create an instance of <see cref="CustomDataSourceReference"/> 
+        ///     based on the <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>must be public.</item>
+        ///         <item>must be concrete.</item>
+        ///         <item>must implement ICustomDataSource somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must have a public parameterless constructor.</item>
+        ///         <item>must be decorated with the <see cref="CustomDataSourceAttribute"/>.</item>
+        ///         <item>must be decorated with one (1) or more <see cref="DataSourceAttribute"/>s.</item>
+        ///     </list>
         /// </summary>
         /// <param name="candidateType">
         ///     Candidate <see cref="Type"/> for the <see cref="CustomDataSourceReference"/>
@@ -132,8 +165,12 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     the Custom Data Source referenced by this instance; <c>false</c>
         ///     otherwise.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract bool Supports(IDataSource dataSource);
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -149,16 +186,33 @@ namespace Microsoft.Performance.SDK.Runtime
             this.isDisposed = true;
         }
 
+        /// <summary>
+        ///     Provides the implementation of a <see cref="CustomDataSourceReference"/>.
+        /// </summary>
         private sealed class CustomDataSourceReferenceImpl
             : CustomDataSourceReference
         {
-            private readonly ReadOnlyHashSet<DataSourceAttribute> dataSourceAttributes;
+            private ReadOnlyHashSet<DataSourceAttribute> dataSourceAttributes;
 
-            private readonly Guid guid;
-            private readonly string name;
-            private readonly string description;
-            private readonly ReadOnlyCollection<Option> commandLineOptionsRO;
+            private Guid guid;
+            private string name;
+            private string description;
+            private ReadOnlyCollection<Option> commandLineOptionsRO;
 
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="CustomDataSourceReferenceImpl"/>
+            ///     class.
+            /// </summary>
+            /// <param name="dataSourceAttributes">
+            ///     The data source attributes that declare what
+            ///     data is accepted by the custom data source.
+            /// </param>
+            /// <param name="metadata">
+            ///     The metadata about the custom data source.
+            /// </param>
+            /// <param name="type">
+            ///     The concrete <see cref="Type"/> of the custom data source.
+            /// </param>
             internal CustomDataSourceReferenceImpl(
                 Type type,
                 CustomDataSourceAttribute metadata,
@@ -180,6 +234,13 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.isDisposed = false;
             }
 
+            /// <summary>
+            ///     Initializes a new instance of the <see cref="CustomDataSourceReferenceImpl"/>
+            ///     class as a copy of the given instance.
+            /// </summary>
+            /// <param name="other">
+            ///     The instance from which to create this instance.
+            /// </param>
             internal CustomDataSourceReferenceImpl(
                 CustomDataSourceReferenceImpl other)
                 : base(other)
@@ -194,11 +255,16 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.isDisposed = other.isDisposed;
             }
 
+            /// <summary>
+            ///     Finalizes an instance of the <see cref="CustomDataSourceReferenceImpl"/>
+            ///     class.
+            /// </summary>
             ~CustomDataSourceReferenceImpl()
             {
                 this.Dispose(false);
             }
 
+            /// <inheritdoc />
             public override Guid Guid
             {
                 get
@@ -208,6 +274,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override string Name
             {
                 get
@@ -217,6 +284,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override string Description
             {
                 get
@@ -226,6 +294,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override IReadOnlyCollection<DataSourceAttribute> DataSources
             {
                 get
@@ -235,6 +304,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override IEnumerable<TableDescriptor> AvailableTables
             {
                 get
@@ -244,6 +314,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override IEnumerable<Option> CommandLineOptions
             {
                 get
@@ -253,6 +324,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override bool Supports(IDataSource dataSource)
             {
                 this.ThrowIfDisposed();
@@ -271,14 +343,17 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override CustomDataSourceReference CloneT()
             {
                 this.ThrowIfDisposed();
                 return new CustomDataSourceReferenceImpl(this);
             }
 
+            /// <inheritdoc />
             public override bool Equals(object obj)
             {
+                this.ThrowIfDisposed();
                 if (obj is null)
                 {
                     return false;
@@ -299,8 +374,10 @@ namespace Microsoft.Performance.SDK.Runtime
                      other.dataSourceAttributes.IsSubsetOf(this.dataSourceAttributes));
             }
 
+            /// <inheritdoc />
             public override int GetHashCode()
             {
+                this.ThrowIfDisposed();
                 unchecked
                 {
                     var hash = base.GetHashCode();
@@ -314,11 +391,14 @@ namespace Microsoft.Performance.SDK.Runtime
                 }
             }
 
+            /// <inheritdoc />
             public override string ToString()
             {
+                this.ThrowIfDisposed();
                 return $"{this.Name} - {this.Guid} ({this.AssemblyPath})";
             }
 
+            /// <inheritdoc />
             protected override void Dispose(bool disposing)
             {
                 base.Dispose(disposing);
@@ -329,6 +409,11 @@ namespace Microsoft.Performance.SDK.Runtime
 
                 if (disposing)
                 {
+                    this.commandLineOptionsRO = null;
+                    this.dataSourceAttributes = null;
+                    this.description = null;
+                    this.guid = default;
+                    this.name = null;
                 }
 
                 this.isDisposed = true;

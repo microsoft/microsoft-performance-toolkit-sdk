@@ -356,12 +356,23 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             return Task.Run(() => Unsubscribe(consumer));
         }
 
+        /// <summary>
+        ///     Disoses all resources held by this class.
+        /// </summary>
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        ///     Disoses all resources held by this class.
+        /// </summary>
+        /// <param name="disposing">
+        ///     <c>true</c> to dispose both managed and unmanaged
+        ///     resources; <c>false</c> to dispose only unmanaged
+        ///     resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (this.isDisposed)
@@ -375,6 +386,20 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             }
 
             this.isDisposed = true;
+        }
+
+        /// <summary>
+        ///     Throws an exception if this instance has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(PluginsLoader));
+            }
         }
 
         private (string, Version) GetPluginNameAndVersion(CustomDataSourceReference cds)
@@ -425,14 +450,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             foreach (var consumer in this.subscribers)
             {
                 consumer.OnCustomDataSourceLoaded(pluginName, pluginVersion, customDataSource);
-            }
-        }
-
-        private void ThrowIfDisposed()
-        {
-            if (this.isDisposed)
-            {
-                throw new ObjectDisposedException(nameof(PluginsLoader));
             }
         }
     }

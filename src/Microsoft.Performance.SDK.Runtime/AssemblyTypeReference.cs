@@ -19,9 +19,9 @@ namespace Microsoft.Performance.SDK.Runtime
           IDisposable
         where TDerived : AssemblyTypeReference<TDerived>
     {
-        private readonly Type type;
-        private readonly string assemblyPath;
-        private readonly string version;
+        private Type type;
+        private string assemblyPath;
+        private string version;
 
         private bool isDisposed;
 
@@ -52,15 +52,6 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="AssemblyTypeReference{TDerived}"/>
-        ///     class.
-        /// </summary>
-        ~AssemblyTypeReference()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Initializes a new instance of <see cref="AssemblyTypeReference{TDerived}"/> using
         ///     <paramref name="other"/>'s <see cref="AssemblyTypeReference{TDerived}.Type"/>, 
         ///     <see cref="AssemblyTypeReference{TDerived}.AssemblyPath"/>, and
@@ -79,8 +70,20 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
+        ///     Finalizes an instance of the <see cref="AssemblyTypeReference{TDerived}"/>
+        ///     class.
+        /// </summary>
+        ~AssemblyTypeReference()
+        {
+            this.Dispose(false);
+        }
+
+        /// <summary>
         ///     Gets the assembly <see cref="Type"/> referenced.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Type Type
         {
             get
@@ -93,6 +96,9 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <summary>
         ///     Gets the file path location of the assembly the <see cref="AssemblyTypeReference{TDerived}.Type"/> is located.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public string AssemblyPath
         {
             get
@@ -105,6 +111,9 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <summary>
         ///     Gets the <see cref="FileVersionInfo.FileVersion"/> of the assembly the <see cref="AssemblyTypeReference{TDerived}.Type"/>.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public string Version
         {
             get
@@ -156,8 +165,13 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <returns>
         ///     <inheritdoc cref="object.Equals(object)"/>
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public virtual bool Equals(TDerived other)
         {
+            this.ThrowIfDisposed();
+
             var toCompare = other as AssemblyTypeReference<TDerived>;
 
             return !ReferenceEquals(toCompare, null) &&
@@ -176,6 +190,9 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <inheritdoc cref="object.Equals(object)"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public override bool Equals(object obj)
         {
             return this.Equals(obj as TDerived);
@@ -187,17 +204,28 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <returns>
         ///     A clone of the derived object.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public abstract TDerived CloneT();
 
         /// <inheritdoc cref="ICloneable.Clone()"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         object ICloneable.Clone()
         {
             return this.CloneT();
         }
 
         /// <inheritdoc cref="object.GetHashCode()"/>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public override int GetHashCode()
         {
+            this.ThrowIfDisposed();
+
             unchecked
             {
                 var hash = 17;
@@ -210,6 +238,14 @@ namespace Microsoft.Performance.SDK.Runtime
             }
         }
 
+        /// <summary>
+        ///     Disoses all resources held by this class.
+        /// </summary>
+        /// <param name="disposing">
+        ///     <c>true</c> to dispose both managed and unmanaged
+        ///     resources; <c>false</c> to dispose only unmanaged
+        ///     resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (this.isDisposed)
@@ -219,11 +255,20 @@ namespace Microsoft.Performance.SDK.Runtime
 
             if (disposing)
             {
+                this.type = null;
+                this.assemblyPath = null;
+                this.version = null;
             }
 
             this.isDisposed = true;
         }
 
+        /// <summary>
+        ///     Throws an exception if this instance has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         protected void ThrowIfDisposed()
         {
             if (this.isDisposed)

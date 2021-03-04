@@ -25,22 +25,51 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
         private bool isDisposed;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="BaseDataCookerReference{TDerived}"/>
+        ///     class for the given <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type">
+        ///     The <see cref="Type"/> of cooker referenced by this instance.
+        ///     It is expected that <see cref="Type"/>is a calid cooker <see cref="Type"/>.
+        /// </param>
         protected BaseDataCookerReference(Type type)
             : base(type)
         {
             this.isDisposed = false;
         }
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="BaseDataCookerReference{TDerived}"/>
+        ///     class as a copy of the given reference.
+        /// </summary>
+        /// <param name="other">
+        ///     The reference from which to create this instance.
+        /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     <paramref name="other"/> is disposed.
+        /// </exception>
         protected BaseDataCookerReference(DataExtensionReference<TDerived> other)
             : base(other)
         {
         }
 
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="BaseDataCookerReference{TDerived}"/>
+        ///     class.
+        /// </summary>
         ~BaseDataCookerReference()
         {
             this.Dispose(false);
         }
 
+        /// <summary>
+        ///     Gets the <see cref="DataCookerPath"/> of the referenced
+        ///     cooker.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public DataCookerPath Path
         {
             get
@@ -55,6 +84,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <summary>
+        ///     Gets or sets the description of the referenced cooker.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public string Description
         {
             get
@@ -69,6 +104,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public override string Name
         {
             get
@@ -78,6 +117,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <summary>
+        ///     Gets or sets a value indicating whether the referenced
+        ///     cooker is a Source Data Cooker.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         protected bool IsSourceDataCooker
         {
             get
@@ -92,6 +138,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <inheritdoc/>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public override bool Equals(TDerived other)
         {
             return base.Equals(other) &&
@@ -99,6 +149,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                    StringComparer.Ordinal.Equals(this.Description, other.Description);
         }
 
+        /// <summary>
+        ///     When overridden in a derived class, ensures that the
+        ///     given instance is considered to describe a valid cooker.
+        /// </summary>
+        /// <param name="instance">
+        ///     The descriptor of the cooker to check.
+        /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         protected virtual void ValidateInstance(IDataCookerDescriptor instance)
         {
             this.ThrowIfDisposed();
@@ -118,6 +178,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <summary>
+        ///     Initializes the given descriptor with information from the
+        ///     cooker reference by this instance.
+        /// </summary>
+        /// <param name="descriptor">
+        ///     The descriptor to initialize.
+        /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         protected void InitializeDescriptorData(IDataCookerDescriptor descriptor)
         {
             Guard.NotNull(descriptor, nameof(descriptor));
@@ -160,6 +230,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -170,6 +241,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
             if (disposing)
             {
+                this.description = null;
+                this.path = default;
             }
 
             this.isDisposed = true;

@@ -26,27 +26,27 @@ namespace Microsoft.Performance.Toolkit.Engine
     public abstract class Engine
         : IDisposable
     {
-        private readonly List<CustomDataSourceReference> customDataSourceReferences;
-        private readonly ReadOnlyCollection<CustomDataSourceReference> customDataSourceReferencesRO;
+        private List<CustomDataSourceReference> customDataSourceReferences;
+        private ReadOnlyCollection<CustomDataSourceReference> customDataSourceReferencesRO;
 
-        private readonly List<DataCookerPath> sourceDataCookers;
-        private readonly ReadOnlyCollection<DataCookerPath> sourceDataCookersRO;
+        private List<DataCookerPath> sourceDataCookers;
+        private ReadOnlyCollection<DataCookerPath> sourceDataCookersRO;
 
-        private readonly List<DataCookerPath> compositeDataCookers;
-        private readonly ReadOnlyCollection<DataCookerPath> compositeDataCookersRO;
+        private List<DataCookerPath> compositeDataCookers;
+        private ReadOnlyCollection<DataCookerPath> compositeDataCookersRO;
 
-        private readonly Dictionary<Guid, TableDescriptor> tableGuidToDescriptor;
-        private readonly List<Guid> allTables;
+        private Dictionary<Guid, TableDescriptor> tableGuidToDescriptor;
+        private List<Guid> allTables;
 
-        private readonly List<DataProcessorId> dataProcessors;
+        private List<DataProcessorId> dataProcessors;
 
-        private readonly Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
+        private Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
 
-        private readonly List<IDataSource> freeDataSources;
-        private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
+        private List<IDataSource> freeDataSources;
+        private ReadOnlyCollection<IDataSource> freeDataSourcesRO;
 
-        private readonly List<DataCookerPath> enabledCookers;
-        private readonly ReadOnlyCollection<DataCookerPath> enabledCookersRO;
+        private List<DataCookerPath> enabledCookers;
+        private ReadOnlyCollection<DataCookerPath> enabledCookersRO;
 
         private DataExtensionFactory factory;
         private ExtensionRoot extensionRoot;
@@ -637,12 +637,21 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        ///     Disoses all resources held by this class.
+        /// </summary>
+        /// <param name="disposing">
+        ///     <c>true</c> to dispose both managed and unmanaged
+        ///     resources; <c>false</c> to dispose only unmanaged
+        ///     resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (this.isDisposed)
@@ -654,24 +663,52 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 this.extensionRoot.SafeDispose();
 
-                this.allTables.Clear();
+                this.allTables = null;
                 this.applicationEnvironment = null;
-                this.compositeDataCookers.Clear();
+                this.compositeDataCookers = null;
                 this.creationErrors = null;
-                this.customDataSourceReferences.Clear();
-                this.dataProcessors.Clear();
-                this.dataSourcesToProcess.Clear();
-                this.enabledCookers.Clear();
+                this.customDataSourceReferences = null;
+                this.dataProcessors = null;
+                this.dataSourcesToProcess = null;
+                this.enabledCookers = null;
                 this.extensionDirectory = null;
                 this.extensionRoot = null;
                 this.factory = null;
-                this.freeDataSources.Clear();
+                this.freeDataSources = null;
                 this.loader = null;
-                this.sourceDataCookers.Clear();
-                this.tableGuidToDescriptor.Clear();
+                this.sourceDataCookers = null;
+                this.tableGuidToDescriptor = null;
             }
 
             this.isDisposed = true;
+        }
+
+        /// <summary>
+        ///     Throws an exception if this instance has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(Engine));
+            }
+        }
+
+        /// <summary>
+        ///     Throws an exception if this instance has already processed.
+        /// </summary>
+        /// <exception cref="InstanceAlreadyProcessedException">
+        ///     This instance has already processed.
+        /// </exception>
+        protected void ThrowIfProcessed()
+        {
+            if (this.IsProcessed)
+            {
+                throw new InstanceAlreadyProcessedException();
+            }
         }
 
         private static Engine CreateCore(
@@ -976,22 +1013,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             else
             {
                 return first.Is(second);
-            }
-        }
-
-        private void ThrowIfDisposed()
-        {
-            if (this.isDisposed)
-            {
-                throw new ObjectDisposedException(nameof(Engine));
-            }
-        }
-
-        private void ThrowIfProcessed()
-        {
-            if (this.IsProcessed)
-            {
-                throw new InstanceAlreadyProcessedException();
             }
         }
 

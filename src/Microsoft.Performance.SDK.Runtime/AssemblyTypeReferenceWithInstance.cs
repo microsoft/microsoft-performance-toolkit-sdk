@@ -48,6 +48,10 @@ namespace Microsoft.Performance.SDK.Runtime
             this.Instance = other.Instance;
         }
 
+        /// <summary>
+        ///     Finalizes an instance of the <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/>
+        ///     class.
+        /// </summary>
         ~AssemblyTypeReferenceWithInstance()
         {
             this.Dispose(false);
@@ -56,6 +60,9 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <summary>
         ///     Gets an instance of <see cref="T"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public T Instance
         {
             get
@@ -82,6 +89,7 @@ namespace Microsoft.Performance.SDK.Runtime
             return IsValidType(candidateType, typeof(T));
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
