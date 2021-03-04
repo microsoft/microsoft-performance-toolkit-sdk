@@ -44,6 +44,32 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         /// </summary>
         public IReadOnlyCollection<Node> Roots { get; }
 
+        /// <summary>
+        ///     Creates a new instance of the <see cref="DependencyDag"/>
+        ///     class from all of the loaded plugins / extensions.
+        /// </summary>
+        /// <param name="catalog">
+        ///     The catalog containing all of the loaded plugins.
+        /// </param>
+        /// <param name="repository">
+        ///     The repository containing all of the loaded extensions.
+        /// </param>
+        /// <returns>
+        ///     A new <see cref="DependencyDag"/> that is a graph of all
+        ///     of the dependencies between components.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        ///     The <paramref name="catalog"/> is not loaded.
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="catalog"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="repository"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        ///     A dependency cycle exists between two or more
+        ///     componenets in the graph.
+        /// </exception>
         public static DependencyDag Create(
             IPlugInCatalog catalog,
             IDataExtensionRepository repository)
@@ -51,9 +77,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             Guard.NotNull(catalog, nameof(catalog));
             Guard.NotNull(repository, nameof(repository));
 
+
             if (!catalog.IsLoaded)
             {
-                throw new InvalidOperationException();
+                throw new ArgumentException();
             }
 
             if (!catalog.PlugIns.Any() &&
@@ -61,6 +88,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             {
                 return new DependencyDag(Enumerable.Empty<Node>());
             }
+            
+            //
+            // We construct the graph by creating a node for each
+            // reference. Then, we simply walk each reference's dependency
+            // chain and link the nodes to eachother as appropriate.
+            //
 
             var allNodes = catalog.PlugIns
                 .Select(x => new Node(x))
@@ -76,9 +109,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 node.Target.Match(
                     (CustomDataSourceReference x) =>
                     {
+                        //
                         // nothing to do; these must always
                         // be roots as source parsers, etc. are
                         // created by Custom Data Sources.
+                        //
+                        // we are placing the custom data sources
+                        // in the dag in case more explicit
+                        // references / dependencies between
+                        // them are added in the future.
+                        //
                     },
                     (IDataExtensionReference x) =>
                     {
@@ -91,14 +131,35 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                     });
             }
 
+            //
+            // If every node is a depended upon by at least one other
+            // node, then there must be a cycle somewhere.
+            //
+
             if (!allNodes.Any(x => x.Dependents.Count == 0))
             {
                 throw new InvalidOperationException("The graph contains a cycle.");
             }
 
-            foreach (var node in allNodes.Where(x => x.Dependents.Count == 0))
+            //
+            // Walk the entire DAG, and remove any dependencies that are also
+            // transitive dependencies. The walk starts from the roots.
+            // For example:
+            //
+            //     n                              n
+            //    / \                             |
+            //   d   |  will be simplified to     d
+            //    \  |                            |
+            //      d2                            d2
+            //
+            // This is because n needs d and d2, but d also needs d2, so
+            // fundamentally n only needs d.
+            //
+
+            var roots = allNodes.Where(x => x.Dependents.Count == 0).ToSet();
+            foreach (var node in roots)
             {
-                RemoveTransitiveDependencies(node);
+                SimplifyTransitiveDependencies(node);
             }
 
             return new DependencyDag(allNodes);
@@ -108,9 +169,20 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             IDataExtensionRepository reps,
             IDataExtensionReference der)
         {
+            //
+            // return ALL dependencies of the given IDataExtensionReference,
+            // regardless of type.
+            //
+
             var state = new DataExtensionDependencyState(der);
             state.ProcessDependencies(reps);
             var deps = state.DependencyReferences;
+
+            //
+            // we are concatenating all of the dependencies found
+            // by the dependency state, as well as those explicitly
+            // declared on the references themselves.
+            //
 
             return der.DependencyReferences.RequiredSourceDataCookerPaths
                 .Select(reps.GetSourceDataCookerReference)
@@ -140,9 +212,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 .ToSet();
         }
 
-        private static void RemoveTransitiveDependencies(Node node)
+        private static void SimplifyTransitiveDependencies(Node node)
         {
             Debug.Assert(node != null);
+
+            //
+            // Starting with the given node, find any dependencies
+            // that are a dependency of a dependency, and remove them
+            // from this node.
+            //
+            // This method recursively performs this operation against
+            // every node in the graph rooted at the passed in node.
+            //
 
             var stack = new Stack<Node>();
             stack.Push(node);
@@ -156,18 +237,60 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                     Debug.Assert(dep != null);
                     if (n.Dependencies.Except(dep).Any(x => ContainsDependency(x, dep)))
                     {
+                        //
+                        // dep was found in the dependency chain of one of this
+                        // nodes other dependencies, so it does not need to be
+                        // listed as an immediate dependency, as it is transitive.
+                        // Remove the node as a direct dependency.
+                        //
+
                         n.RemoveDependency(dep);
                     }
+
+                    //
+                    // Perform the same pruning operation on the dependency
+                    // we just examined.
+                    //
 
                     stack.Push(dep);
                 }
             }
         }
 
+        /// <summary>
+        ///     Determines whether the given dependency node
+        ///     <paramref name="dep"/> is found in any of the dependecy
+        ///     chains of the given node <see cref="node"/>.
+        ///     <paramref name="dep"/> is considered to be a dependency
+        ///     of <paramref name="node"/> if and only if <paramref name="dep"/>
+        ///     if found in <paramref name="node"/>'s <see cref="Node.Dependencies"/>
+        ///     or is a dependency of one of <paramref name="node"/>'s
+        ///     dependencies.
+        /// </summary>
+        /// <param name="node">
+        ///     The <see cref="Node"/> whose dependencies are to be checked.
+        /// </param>
+        /// <param name="dep">
+        ///     The dependency to search for in <paramref name="node"/>'s
+        ///     dependencies.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if <paramref name="dep"/> appears anywhere in
+        ///     <paramref name="node"/>'s dependency chains; <c>false</c>
+        ///     otherwise.
+        /// </returns>
         private static bool ContainsDependency(Node node, Node dep)
         {
             Debug.Assert(node != null);
             Debug.Assert(dep != null);
+
+            //
+            // recursively check if dep is a dependency of
+            // node, or a dependency of one of the dependencies.
+            // This method stops when either the dependency is
+            // found, or all nodes in the dependency chains have
+            // been searched.
+            //
 
             var stack = new Stack<Node>();
             stack.Push(node);
@@ -260,13 +383,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             public ReadOnlyHashSet<Node> Dependents { get; }
 
             /// <summary>
-            ///     Gets or sets user-specified data for this instance.
+            ///     Gets user-specified data for this instance.
             /// </summary>
             public IDictionary<string, object> ExtensionData { get; }
 
             /// <summary>
             ///     Adds the given <see cref="Node"/> as a dependency
-            ///     of this instance.
+            ///     of this instance. This has the side effect of
+            ///     making the current node a dependent of the
+            ///     dependency.
             /// </summary>
             /// <param name="dependency">
             ///     The dependency to add.
@@ -286,7 +411,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             /// <summary>
             ///     Adds the given <see cref="Node"/> as a dependent
-            ///     of this instance.
+            ///     of this instance. This has the side effect of
+            ///     making the current node a dependency of the
+            ///     dependent.
             /// </summary>
             /// <param name="dependent">
             ///     The dependent to add.
@@ -305,11 +432,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             }
 
             /// <summary>
-            ///     Adds the given <see cref="Node"/> as a dependency
-            ///     of this instance.
+            ///     Removes the given <see cref="Node"/> as a dependency
+            ///     of this instance. This has the side effect of removing
+            ///     this node as a dependent of the dependency.
             /// </summary>
             /// <param name="dependency">
-            ///     The dependency to add.
+            ///     The dependency to remove.
             /// </param>
             /// <exception cref="System.ArgumentNullException">
             ///     <paramref name="dependency"/> is <c>null</c>.
@@ -325,11 +453,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             }
 
             /// <summary>
-            ///     Adds the given <see cref="Node"/> as a dependent
-            ///     of this instance.
+            ///     Removes the given <see cref="Node"/> as a dependent
+            ///     of this instance. This has the side effect of removing
+            ///     this node as a depency of the dependent.
             /// </summary>
             /// <param name="dependent">
-            ///     The dependent to add.
+            ///     The dependent to remove.
             /// </param>
             /// <exception cref="System.ArgumentNullException">
             ///     <paramref name="dependent"/> is <c>null</c>.
@@ -344,6 +473,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 }
             }
 
+            /// <summary>
+            ///     Two <see cref="Node"/>s are considered to be equal
+            ///     if an only if their <see cref="Node.Target"/>s are
+            ///     considered to be equal.
+            /// </summary>
             private sealed class NodesEqualByTargetComparer
                 : IEqualityComparer<Node>
             {
@@ -387,7 +521,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     The value.
             /// </param>
             /// <returns>
-            ///     A new discriminated union.
+            ///     A new discriminated union whose value represents
+            ///     a <see cref="CustomDataSourceReference"/>.
             /// </returns>            
             /// <exception cref="System.ArgumentNullException">
             ///     <paramref name="value"/> is <c>null</c>.
@@ -407,7 +542,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     The value.
             /// </param>
             /// <returns>
-            ///     A new discriminated union.
+            ///     A new discriminated union whose value represents
+            ///     an <see cref="IDataExtensionReference"/>.
             /// </returns>
             /// <exception cref="System.ArgumentNullException">
             ///     <paramref name="value"/> is <c>null</c>.
@@ -423,6 +559,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     Determines whether the given <see cref="Reference"/>s
             ///     are considered to be equal.
             /// </summary>
+            /// <param name="x">
+            ///     The first <see cref="Reference"/> to compare.
+            /// </param>
+            /// <param name="y">
+            ///     The second <see cref="Reference"/> to compare.
+            /// </param>
+            /// <returns>
+            ///     <c>true</c> if the given instances are considered to
+            ///     be equal; <c>false</c> otherwise.
+            /// </returns>
             public static bool operator ==(Reference x, Reference y)
             {
                 if (x is null)
@@ -437,19 +583,29 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     Determines whether the given <see cref="Reference"/>s
             ///     are not considered to be equal.
             /// </summary>
+            /// <param name="x">
+            ///     The first <see cref="Reference"/> to compare.
+            /// </param>
+            /// <param name="y">
+            ///     The second <see cref="Reference"/> to compare.
+            /// </param>
+            /// <returns>
+            ///     <c>true</c> if the given instances are not considered to
+            ///     be equal; <c>false</c> otherwise.
+            /// </returns>
             public static bool operator !=(Reference x, Reference y)
             {
                 return !(x == y);
             }
 
-            /// <summary>
-            ///     Force each case to implement <see cref="object.Equals(object)"/>
-            /// </summary>
+            //
+            // force each case to implement Equals and GetHashCode.
+            //
+
+            /// <inheritdoc />
             public abstract override bool Equals(object obj);
 
-            /// <summary>
-            ///     Force each case to implement <see cref="object.GetHashCode()"/>
-            /// </summary>
+            /// <inheritdoc />
             public abstract override int GetHashCode();
 
             /// <summary>
@@ -502,70 +658,100 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             /// </exception>
             public abstract T Match<T>(Func<CustomDataSourceReference, T> a, Func<IDataExtensionReference, T> b);
 
+            /// <summary>
+            ///     Represents the case when the <see cref="Reference"/> is
+            ///     to be interpreted as a <see cref="CustomDataSourceReference"/>.
+            /// </summary>
             private sealed class Cdsr
                 : Reference
             {
                 private readonly CustomDataSourceReference value;
 
+                /// <summary>
+                ///     Initializes a new instance of the <see cref="Cdsr"/>
+                ///     class.
+                /// </summary>
+                /// <param name="value">
+                ///     The <see cref="IDataExtensionReference"/>.
+                /// </param>
                 internal Cdsr(CustomDataSourceReference value)
                 {
                     Debug.Assert(value != null);
                     this.value = value;
                 }
 
+                /// <inheritdoc />
                 public override void Match(Action<CustomDataSourceReference> a, Action<IDataExtensionReference> b)
                 {
                     Debug.Assert(a != null);
                     a(this.value);
                 }
 
+                /// <inheritdoc />
                 public override T Match<T>(Func<CustomDataSourceReference, T> a, Func<IDataExtensionReference, T> b)
                 {
                     Debug.Assert(a != null);
                     return a(this.value);
                 }
 
+                /// <inheritdoc />
                 public override bool Equals(object obj)
                 {
                     return ReferenceEquals(this, obj) ||
                         (obj is Cdsr t && this.value.Equals(t.value));
                 }
 
+                /// <inheritdoc />
                 public override int GetHashCode()
                 {
                     return this.value.GetHashCode();
                 }
             }
 
+            /// <summary>
+            ///     Represents the case when the <see cref="Reference"/> is
+            ///     to be interpreted as an <see cref="IDataExtensionReference"/>.
+            /// </summary>
             private sealed class Der
                 : Reference
             {
                 private readonly IDataExtensionReference value;
 
+                /// <summary>
+                ///     Initializes a new instance of the <see cref="Der"/>
+                ///     class.
+                /// </summary>
+                /// <param name="value">
+                ///     The <see cref="IDataExtensionReference"/>.
+                /// </param>
                 internal Der(IDataExtensionReference value)
                 {
                     Debug.Assert(value != null);
                     this.value = value;
                 }
 
+                /// <inheritdoc />
                 public override void Match(Action<CustomDataSourceReference> a, Action<IDataExtensionReference> b)
                 {
                     Debug.Assert(b != null);
                     b(this.value);
                 }
 
+                /// <inheritdoc />
                 public override T Match<T>(Func<CustomDataSourceReference, T> a, Func<IDataExtensionReference, T> b)
                 {
                     Debug.Assert(b != null);
                     return b(this.value);
                 }
 
+                /// <inheritdoc />
                 public override bool Equals(object obj)
                 {
                     return ReferenceEquals(this, obj) ||
                         (obj is Der t && this.value.Equals(t.value));
                 }
 
+                /// <inheritdoc />
                 public override int GetHashCode()
                 {
                     return this.value.GetHashCode();

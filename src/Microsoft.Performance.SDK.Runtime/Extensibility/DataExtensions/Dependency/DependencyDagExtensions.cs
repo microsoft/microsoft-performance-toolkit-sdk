@@ -41,8 +41,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(visitor, nameof(visitor));
 
+            //
+            // The following token is used to mark a node as having been
+            // visited. This key will be removed when the method has
+            // completed.
+            //
+
             var visitMarker = "VISIT_" + Guid.NewGuid().ToString();
             var visitToken = new object();
+
             try
             {
                 self.All.ForEach(x => x.ExtensionData[visitMarker] = null);
@@ -50,6 +57,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 var visitQueue = new Queue<DependencyDag.Node>();
                 foreach (var root in self.Roots)
                 {
+                    //
+                    // Always start at the root, as they have no dependents,
+                    // and thus are eligible to be visited immediately.
+                    //
+
                     visitQueue.Enqueue(root);
                 }
 
@@ -58,6 +70,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                     var n = visitQueue.Dequeue();
                     if (n.Dependents.All(x => x.ExtensionData[visitMarker] == visitToken))
                     {
+                        //
+                        // All of the dependents of the current node have been
+                        // visited, so we can now visit this node. After this node
+                        // is visited, we can mark it as having been visited, and 
+                        // then schedule all of the dependencies for visitation.
+                        //
+
                         visitor(n);
                         n.ExtensionData[visitMarker] = visitToken;
 
@@ -68,12 +87,24 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                     }
                     else
                     {
+                        //
+                        // One or more dependents still has not been visited,
+                        // so simply reschedule this node to be visited again
+                        // later.
+                        //
+
                         visitQueue.Enqueue(n);
                     }
                 }
             }
             finally
             {
+                //
+                // So as not to pollute the extension data on the node
+                // unnecessarily, we will always remove the visitation
+                // tokens from each node.
+                //
+
                 self.All.ForEach(
                     x =>
                     {

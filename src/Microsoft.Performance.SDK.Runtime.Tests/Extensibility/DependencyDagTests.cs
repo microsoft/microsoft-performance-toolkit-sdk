@@ -27,6 +27,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
         [TestMethod]
         [UnitTest]
+        public void Create_UnloadedCatalog_Throws()
+        {
+            var catalog = new TestPluginCatalog { IsLoaded = false, };
+            var repo = new DataExtensionRepository();
+            repo.FinalizeDataExtensions();
+
+            Assert.ThrowsException<ArgumentException>(() => DependencyDag.Create(catalog, repo));
+        }
+
+        [TestMethod]
+        [UnitTest]
         public void Create_NoDependencies_EverythingIsRoot()
         {
             var sourceCooker1 = new TestSourceDataCookerReference();
