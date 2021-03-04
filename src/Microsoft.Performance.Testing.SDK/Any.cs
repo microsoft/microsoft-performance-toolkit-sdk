@@ -52,10 +52,7 @@ namespace Microsoft.Performance.Testing.SDK
         private sealed class FakeDataSource
             : IDataSource
         {
-            public Uri GetUri()
-            {
-                return new Uri("C:/test.txt");
-            }
+            public Uri Uri => new Uri("C:/test.txt");
         }
     }
 }

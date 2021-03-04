@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK;
@@ -40,10 +39,10 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly List<DataProcessorId> dataProcessors;
 
-        private readonly Dictionary<CustomDataSourceReference, List<List<string>>> filesToProcess;
+        private readonly Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
 
-        private readonly List<string> freeFilesToProcess;
-        private readonly ReadOnlyCollection<string> freeFilesToProcessRO;
+        private readonly List<IDataSource> freeDataSources;
+        private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
 
         private readonly List<DataCookerPath> enabledCookers;
         private readonly ReadOnlyCollection<DataCookerPath> enabledCookersRO;
@@ -70,19 +69,19 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.dataProcessors = new List<DataProcessorId>();
 
-            this.filesToProcess = new Dictionary<CustomDataSourceReference, List<List<string>>>();
+            this.dataSourcesToProcess = new Dictionary<CustomDataSourceReference, List<List<IDataSource>>>();
 
-            this.freeFilesToProcess = new List<string>();
-            this.freeFilesToProcessRO = new ReadOnlyCollection<string>(this.freeFilesToProcess);
+            this.freeDataSources = new List<IDataSource>();
+            this.freeDataSourcesRO = new ReadOnlyCollection<IDataSource>(this.freeDataSources);
 
             this.enabledCookers = new List<DataCookerPath>();
             this.enabledCookersRO = new ReadOnlyCollection<DataCookerPath>(this.enabledCookers);
         }
 
         /// <summary>
-        ///     Gets the directory that the runtime will scan for extensions.
+        ///     Gets the directory that the engine will scan for extensions.
         ///     This directory is scanned during <see cref="Create"/> when
-        ///     creating an instance of the runtime. See <see cref="SetExtensionDirectory(string)"/>
+        ///     creating an instance of the engine. See <see cref="SetExtensionDirectory(string)"/>
         ///     and <see cref="ResetExtensionDirectory"/> for manipulating this property.
         /// </summary>
         public string ExtensionDirectory { get; private set; }
@@ -93,56 +92,63 @@ namespace Microsoft.Performance.Toolkit.Engine
         public bool IsProcessed { get; private set; }
 
         /// <summary>
-        ///     Gets the collection of source parsers that the runtime will use to 
+        ///     Gets the collection of source parsers that the engine will use to 
         ///     cook data.
         /// </summary>
         public IEnumerable<ICustomDataSource> CustomDataSources => this.customDataSourceReferencesRO.Select(x => x.Instance);
 
         /// <summary>
-        ///     Gets the collection of paths to all source cookers that the runtime
+        ///     Gets the collection of paths to all source cookers that the engine
         ///     has discovered.
         /// </summary>
         public IEnumerable<DataCookerPath> SourceDataCookers => this.sourceDataCookersRO;
 
         /// <summary>
-        ///     Gets the collection of paths to all composite cookers that the runtime
+        ///     Gets the collection of paths to all composite cookers that the engine
         ///     has discovered.
         /// </summary>
         public IEnumerable<DataCookerPath> CompositeDataCookers => this.compositeDataCookersRO;
 
         /// <summary>
-        ///     Gets the collection of all cookers that the runtime has discovered. This is the union
+        ///     Gets the collection of all cookers that the engine has discovered. This is the union
         ///     of <see cref="this.SourceDataCookers"/> and <see cref="this.CompositeDataCookers"/>.
         /// </summary>
         public IEnumerable<DataCookerPath> AllCookers => this.SourceDataCookers.Concat(this.CompositeDataCookers);
 
         /// <summary>
-        ///     Gets the collection of files to process. These files will be processed in whatever
-        ///     <see cref="ICustomDataProcessorWithSourceParser"/> are able to handle the file.
+        ///     Gets the collection of Data Sources to process. These Data Sources will be processed in whatever
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/> are able to handle the Data Source.
         /// </summary>
-        public IEnumerable<string> FreeFilesToProcess => this.freeFilesToProcessRO;
+        public IEnumerable<IDataSource> FreeDataSourcesToProcess => this.freeDataSourcesRO;
 
         /// <summary>
-        ///     Gets the collection of files that are to be processed by a specific data source.
+        ///     Gets the collection of Data Sources that are to be processed by a specific Custom Data Source.
         /// </summary>
-        public IReadOnlyDictionary<ICustomDataSource, IReadOnlyList<IReadOnlyList<string>>> FilesToProcess =>
-            this.filesToProcess.ToDictionary(
+        public IReadOnlyDictionary<ICustomDataSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess =>
+            this.dataSourcesToProcess.ToDictionary(
                 x => x.Key.Instance,
-                x => (IReadOnlyList<IReadOnlyList<string>>)x.Value.Select(v => (IReadOnlyList<string>)v.AsReadOnly()).ToList().AsReadOnly());
+                x => (IReadOnlyList<IReadOnlyList<IDataSource>>)x.Value.Select(v => (IReadOnlyList<IDataSource>)v.AsReadOnly()).ToList().AsReadOnly());
 
         /// <summary>
-        ///     Gets the collection of all cookers
+        ///     Gets the collection of all enabled cookers.
         /// </summary>
         public IEnumerable<DataCookerPath> EnabledCookers => this.enabledCookersRO;
+
+        /// <summary>
+        ///     Gets any non-fatal errors that occured during engine
+        ///     creation. Because these errors are not fatal, they are
+        ///     reported here rather than raising an exception.
+        /// </summary>
+        public IEnumerable<ErrorInfo> CreationErrors { get; private set; }
 
         /// <summary>
         ///     Creates a new instance of the <see cref="Engine" /> class.
         /// </summary>
         /// <returns>
-        ///     The created runtime environment.
+        ///     The created engine environment.
         /// </returns>
         /// <exception cref="EngineException">
-        ///     An error occurred while creating the runtime.
+        ///     An fatal error occurred while creating the engine.
         /// </exception>
         public static Engine Create()
         {
@@ -153,16 +159,16 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Creates a new instance of the <see cref="Engine" /> class.
         /// </summary>
         /// <param name="createInfo">
-        ///     The parameters to use for creating a new runtime instance.
+        ///     The parameters to use for creating a new engine instance.
         /// </param>
         /// <returns>
-        ///     The created runtime environment.
+        ///     The created engine environment.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="createInfo"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="EngineException">
-        ///     An error occurred while creating the runtime.
+        ///     An fatal error occurred while creating the engine.
         /// </exception>
         public static Engine Create(
             EngineCreateInfo createInfo)
@@ -176,7 +182,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             catch (Exception e)
             {
                 throw new EngineException(
-                    "Unable to create the runtime. See the inner exception for details.",
+                    "Unable to create the engine. See the inner exception for details.",
                     e);
             }
         }
@@ -184,49 +190,45 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Adds the given file to this instance for processing.
         /// </summary>
-        /// <param name="filePath">
-        ///     The path to the file to process.
+        /// <param name="dataSource">
+        ///     The Data Source to process.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="filePath"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="filePath"/> is whitespace.
+        ///     <paramref name="dataSource"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
-        /// <exception cref="UnsupportedFileException">
-        ///     <paramref name="filePath"/> cannot be processed by any
+        /// <exception cref="UnsupportedDataSourceException">
+        ///     <paramref name="dataSource"/> cannot be processed by any
         ///     discovered extensions.
         /// </exception>
-        public void AddFile(string filePath)
+        public void AddDataSource(IDataSource dataSource)
         {
-            Guard.NotNullOrWhiteSpace(filePath, nameof(filePath));
-
+            Guard.NotNull(dataSource, nameof(dataSource));
             this.ThrowIfProcessed();
 
-            if (!this.TryAddFile(filePath))
+            if (!this.TryAddDataSource(dataSource))
             {
-                throw new UnsupportedFileException(filePath);
+                throw new UnsupportedDataSourceException(dataSource);
             }
         }
 
         /// <summary>
-        ///     Attempts to add the given file to this instance for processing.
+        ///     Attempts to add the given Data Source to this instance for processing.
         /// </summary>
         /// <param name="filePath">
-        ///     The path to the file to process.
+        ///     The Data Source to process.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the file has been added for processing;
-        ///     <c>false</c> if the file is not valid, cannot be processed,
+        ///     <c>true</c> if the Data Source has been added for processing;
+        ///     <c>false</c> if the Data Source is not valid, cannot be processed,
         ///     or the instance has already been processed. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
-        public bool TryAddFile(string filePath)
+        public bool TryAddDataSource(IDataSource dataSource)
         {
-            if (string.IsNullOrWhiteSpace(filePath))
+            if (dataSource is null)
             {
                 return false;
             }
@@ -236,14 +238,14 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            if (!this.DoesAnyDataSourceSupport(filePath))
+            if (!this.customDataSourceReferences.Any(x => x.Supports(dataSource)))
             {
                 return false;
             }
 
             try
             {
-                this.freeFilesToProcess.Add(Path.GetFullPath(filePath));
+                this.freeDataSources.Add(dataSource);
             }
             catch
             {
@@ -254,207 +256,123 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Adds the given file to this instance for processing by
-        ///     the specific source.
+        ///     Adds the given Data Source to this instance for processing by
+        ///     the specific Custom Data Source.
         /// </summary>
-        /// <param name="filePath">
-        ///     The path to the file to process.
+        /// <param name="dataSource">
+        ///     The Data Source to process.
         /// </param>
-        /// <param name="dataSourceType">
-        ///     The data source to use to process the file.
+        /// <param name="customDataSourceType">
+        ///     The Custom Data Source to use to process the file.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="filePath"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="filePath"/> is whitespace.
+        ///     <paramref name="dataSource"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="customDataSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
-        /// <exception cref="UnsupportedFileException">
-        ///     The specified <paramref name="dataSourceType"/> cannot handle
-        ///     the given file.
-        /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
-        ///     The specified <paramref name="dataSourceType"/> is unknown.
+        ///     The specified <paramref name="customDataSourceType"/> cannot handle
+        ///     the given Data Source.
         /// </exception>
-        public void AddFile(string filePath, Type dataSourceType)
+        /// <exception cref="UnsupportedCustomDataSourceException">
+        ///     The specified <paramref name="customDataSourceType"/> is unknown.
+        /// </exception>
+        public void AddDataSource(IDataSource dataSource, Type customDataSourceType)
         {
-            Guard.NotNullOrWhiteSpace(filePath, nameof(filePath));
-            Guard.NotNull(dataSourceType, nameof(dataSourceType));
-
-            this.ThrowIfProcessed();
-
-            foreach (var s in this.customDataSourceReferences)
-            {
-                if (TypeIs(s.Instance.GetType(), dataSourceType))
-                {
-                    if (DoesDataSourceSupport(filePath, s))
-                    {
-                        if (!this.filesToProcess.TryGetValue(s, out var list))
-                        {
-                            list = new List<List<string>>();
-                            this.filesToProcess[s] = list;
-                        }
-
-                        list.Add(new List<string> { filePath, });
-                        return;
-                    }
-
-                    throw new UnsupportedFileException(filePath, dataSourceType);
-                }
-            }
-
-            throw new UnsupportedDataSourceException(dataSourceType);
+            this.AddDataSources(new[] { dataSource, }, customDataSourceType);
         }
 
         /// <summary>
-        ///     Attempts to add the given file to this instance for processing by
-        ///     the specific source.
+        ///     Attempts to add the given Data Source to this instance for processing by
+        ///     the specific Custom Data Source.
         /// </summary>
-        /// <param name="filePath">
-        ///     The path to the file to process.
+        /// <param name="dataSource">
+        ///     The Data Source to process.
         /// </param>
-        /// <param name="dataSourceType">
-        ///     The data source to use to process the file.
+        /// <param name="customDataSourceType">
+        ///     The Custom Data Source to use to process <paramref name="dataSource"/>.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the file has been added for processing by this data source;
+        ///     <c>true</c> if the Data Source has been added for processing by the Custom Data Source;
         ///     <c>false</c> otherwise. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
-        public bool TryAddFile(string filePath, Type dataSourceType)
+        public bool TryAddDataSource(IDataSource dataSource, Type customDataSourceType)
         {
-            try
-            {
-                this.AddFile(filePath, dataSourceType);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            return this.TryAddDataSources(new[] { dataSource, }, customDataSourceType);
         }
 
         /// <summary>
-        ///     Adds the given files to this instance for processing by
-        ///     the specific source. All of the files will be processed
-        ///     by the same instance of data processor. Use <see cref="AddFile(string, Type)"/>
-        ///     to ensure each file is processed by a different instance, or
-        ///     use multiple calls to <see cref="AddFiles(IEnumerable{string}, Type)"/>.
+        ///     Adds the given data sources to this instance for processing by
+        ///     the specific Custom Data Source. All of the files will be processed
+        ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
+        ///     to ensure each Data Source is processed by a different instance, or
+        ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
         /// </summary>
-        /// <param name="filePaths">
-        ///     The path to the files to process.
+        /// <param name="dataSources">
+        ///     The Data Sources to process.
         /// </param>
-        /// <param name="dataSourceType">
-        ///     The data source to use to process the file.
+        /// <param name="customDataSourceType">
+        ///     The Custom Data Source to use to process the <paramref name="dataSources"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="filePath"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="filePath"/> is whitespace.
+        ///     <paramref name="dataSources"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="customDataSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
-        /// <exception cref="UnsupportedFileException">
-        ///     The specified <paramref name="dataSourceType"/> cannot handle
-        ///     the given file.
-        /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
-        ///     The specified <paramref name="dataSourceType"/> is unknown.
+        ///     The specified <paramref name="customDataSourceType"/> cannot handle
+        ///     the given Data Source.
         /// </exception>
-        public void AddFiles(IEnumerable<string> filePaths, Type dataSourceType)
+        /// <exception cref="UnsupportedCustomDataSourceException">
+        ///     The specified <paramref name="customDataSourceType"/> is unknown.
+        /// </exception>
+        public void AddDataSources(IEnumerable<IDataSource> dataSources, Type customDataSourceType)
         {
-            Guard.NotNull(filePaths, nameof(filePaths));
-            Guard.NotNull(dataSourceType, nameof(dataSourceType));
-            this.ThrowIfProcessed();
-
-            foreach (var s in this.customDataSourceReferences)
+            Guard.NotNull(dataSources, nameof(dataSources));
+            Guard.NotNull(customDataSourceType, nameof(customDataSourceType));
+            if (dataSources.Any(x => x is null))
             {
-                if (TypeIs(s.Instance.GetType(), dataSourceType))
-                {
-                    var atLeastOnefileSupported = false;
-                    string firstUnsupportedFile = null;
-                    foreach (var file in filePaths)
-                    {
-                        Guard.NotNullOrWhiteSpace(file, nameof(filePaths));
-
-                        if (!DoesDataSourceSupport(file, s))
-                        {
-                            if (firstUnsupportedFile is null)
-                            {
-                                firstUnsupportedFile = file;
-                            }
-                            else if (atLeastOnefileSupported)
-                            {
-                                throw new UnsupportedFileException(file, dataSourceType);
-                            }
-                        }
-                        else
-                        {
-                            if (firstUnsupportedFile != null)
-                            {
-                                throw new UnsupportedFileException(file, dataSourceType);
-                            }
-
-                            atLeastOnefileSupported = true;
-                        }
-                    }
-
-                    if (!atLeastOnefileSupported &&
-                        firstUnsupportedFile is null)
-                    {
-                        //
-                        // the file collection was empty
-                        //
-
-                        throw new ArgumentException("The file path collection cannot be empty", nameof(filePaths));
-                    }
-
-                    if (firstUnsupportedFile != null)
-                    {
-                        throw new UnsupportedFileException(firstUnsupportedFile, dataSourceType);
-                    }
-
-                    if (atLeastOnefileSupported)
-                    {
-                        Debug.Assert(firstUnsupportedFile is null);
-                        if (!this.filesToProcess.TryGetValue(s, out var list))
-                        {
-                            list = new List<List<string>>();
-                            this.filesToProcess[s] = list;
-                        }
-
-                        list.Add(filePaths.ToList());
-                        return;
-                    }
-                }
+                throw new ArgumentNullException(nameof(dataSources));
             }
 
-            throw new UnsupportedDataSourceException(dataSourceType);
+            this.ThrowIfProcessed();
+
+            this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs);
         }
 
         /// <summary>
-        ///     Attempts to add the given files to this instance. All of
-        ///     the files will be processed by the same instance of 
-        ///     data processor. Use <see cref="AddFile"/> to ensure
-        ///     each file is processed by a different instance.
+        ///     Attempts to add the given data sources to this instance for processing by
+        ///     the specific Custom Data Source. All of the files will be processed
+        ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
+        ///     to ensure each Data Source is processed by a different instance, or
+        ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
         /// </summary>
-        /// <param name="filePaths">
-        ///     The paths to the files to add.
+        /// <param name="dataSources">
+        ///     The Data Sources to process.
         /// </param>
-        /// <returns>
-        ///     <c>true</c> if the files are added;
-        ///     <c>false</c> otherwise.
-        /// </returns>
-        public bool TryAddFiles(IEnumerable<string> filePaths, Type dataSourceType)
+        /// <param name="customDataSourceType">
+        ///     The Custom Data Source to use to process the <paramref name="dataSources"/>.
+        /// </param>
+        public bool TryAddDataSources(IEnumerable<IDataSource> dataSources, Type customDataSourceType)
         {
+            if (dataSources is null ||
+                dataSources.Any(x => x is null) ||
+                customDataSourceType is null ||
+                this.IsProcessed)
+            {
+                return false;
+            }
+
             try
             {
-                this.AddFiles(filePaths, dataSourceType);
+                this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs);
                 return true;
             }
             catch
@@ -551,7 +469,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
 
-            var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader);
+            var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, _ => new NullValidator());
 
             var catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
 
@@ -561,7 +479,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 assemblyDiscovery,
                 repoBuilder);
 
-            assemblyDiscovery.ProcessAssemblies(extensionDirectory);
+            assemblyDiscovery.ProcessAssemblies(extensionDirectory, out var discoveryError);
 
             repoBuilder.FinalizeDataExtensions();
 
@@ -572,6 +490,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             var instance = new EngineImpl();
 
             instance.ExtensionDirectory = extensionDirectory;
+            instance.CreationErrors = new[] { discoveryError, };
             instance.customDataSourceReferences.AddRange(catalog.PlugIns);
             instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
             instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
@@ -630,16 +549,63 @@ namespace Microsoft.Performance.Toolkit.Engine
             return instance;
         }
 
+        private void AddDataSourcesCore(
+            IEnumerable<IDataSource> dataSources,
+            Type customDataSourceType,
+            List<CustomDataSourceReference> customDataSourceReferences,
+            Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
+            Func<Type, Type, bool> typeIs)
+        {
+            Debug.Assert(dataSources != null);
+            Debug.Assert(customDataSourceType != null);
+            Debug.Assert(customDataSourceReferences != null);
+            Debug.Assert(dataSourcesToProcess != null);
+            Debug.Assert(typeIs != null);
+
+            Debug.Assert(!this.IsProcessed);
+
+            var cdsr = customDataSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), customDataSourceType));
+            if (cdsr is null)
+            {
+                throw new UnsupportedCustomDataSourceException(customDataSourceType);
+            }
+
+            var atLeastOneDataSourceProvided = false;
+            foreach (var dataSource in dataSources)
+            {
+                Debug.Assert(dataSource != null);
+
+                atLeastOneDataSourceProvided = true;
+                if (!cdsr.Supports(dataSource))
+                {
+                    throw new UnsupportedDataSourceException(dataSource, customDataSourceType);
+                }
+            }
+
+            if (!atLeastOneDataSourceProvided)
+            {
+                throw new ArgumentException("The Data Source collection cannot be empty.", nameof(dataSources));
+            }
+
+            if (!dataSourcesToProcess.TryGetValue(cdsr, out var list))
+            {
+                list = new List<List<IDataSource>>();
+                dataSourcesToProcess[cdsr] = list;
+            }
+
+            list.Add(dataSources.ToList());
+        }
+
         private RuntimeExecutionResults ProcessCore()
         {
             this.IsProcessed = true;
 
-            var allFileAssociations = GroupAllFilesToDataSources(
-                this.CustomDataSources,
-                this.FreeFilesToProcess,
-                this.FilesToProcess);
+            var allDataSourceAssociations = GroupAllDataSourcesToCustomDataSources(
+                this.customDataSourceReferences,
+                this.freeDataSources,
+                this.dataSourcesToProcess);
 
-            var executors = CreateExecutors(allFileAssociations);
+            var executors = CreateExecutors(allDataSourceAssociations);
             var processors = this.repository.EnableDataCookers(
                 executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 new HashSet<DataCookerPath>(this.enabledCookers));
@@ -677,23 +643,23 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         private List<CustomDataSourceExecutor> CreateExecutors(
-            Dictionary<ICustomDataSource, List<List<string>>> allFileAssociations)
+            Dictionary<CustomDataSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
         {
             var executors = new List<CustomDataSourceExecutor>();
-            foreach (var kvp in allFileAssociations)
+            foreach (var kvp in allDataSourceAssociations)
             {
                 try
                 {
-                    var cds = kvp.Key;
-                    var fileLists = kvp.Value;
+                    var cds = kvp.Key.Instance;
+                    var dataSourceLists = kvp.Value;
 
-                    foreach (var files in fileLists)
+                    foreach (var dataSources in dataSourceLists)
                     {
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
                             x => ConsoleLogger.Create(x.GetType()),
                             cds,
-                            files.Select(x => new FileDataSource(x)),
+                            dataSources,
                             cds.DataTables.Concat(cds.MetadataTables),
                             new RuntimeProcessorEnvironment(this.repository),
                             ProcessorOptions.Default);
@@ -717,69 +683,55 @@ namespace Microsoft.Performance.Toolkit.Engine
             return executors;
         }
 
-        private static Dictionary<ICustomDataSource, List<List<string>>> GroupAllFilesToDataSources(
-            IEnumerable<ICustomDataSource> customDataSources,
-            IEnumerable<string> freeFilesToProcess,
-            IReadOnlyDictionary<ICustomDataSource, IReadOnlyList<IReadOnlyList<string>>> filesToProcess)
+        private static Dictionary<CustomDataSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToCustomDataSources(
+            IEnumerable<CustomDataSourceReference> customDataSources,
+            IEnumerable<IDataSource> freeDataSourcesToProcess,
+            IReadOnlyDictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess)
         {
-            var allFileAssociations = new Dictionary<ICustomDataSource, List<List<string>>>();
+            var allDataSourceAssociations = new Dictionary<CustomDataSourceReference, List<List<IDataSource>>>();
 
-            var freeFileAssociations = AllocateFiles(customDataSources, freeFilesToProcess);
+            var freeDataSourceAssociations = DataSourceResolver.Assign(freeDataSourcesToProcess, customDataSources);
 
-            foreach (var kvp in filesToProcess)
+            foreach (var kvp in dataSourcesToProcess)
             {
                 var cds = kvp.Key;
-                var fileLists = kvp.Value;
+                var dataSourceLists = kvp.Value;
 
-                if (!allFileAssociations.TryGetValue(cds, out List<List<string>> existingFileLists))
+                if (!allDataSourceAssociations.TryGetValue(cds, out List<List<IDataSource>> existingDataSourceLists))
                 {
-                    existingFileLists = new List<List<string>>();
-                    allFileAssociations[cds] = existingFileLists;
+                    existingDataSourceLists = new List<List<IDataSource>>();
+                    allDataSourceAssociations[cds] = existingDataSourceLists;
                 }
 
-                foreach (var list in fileLists)
+                foreach (var list in dataSourceLists)
                 {
-                    existingFileLists.Add(list.ToList());
+                    existingDataSourceLists.Add(list.ToList());
                 }
             }
 
-            foreach (var kvp in freeFileAssociations)
+            foreach (var kvp in freeDataSourceAssociations)
             {
-                if (!allFileAssociations.TryGetValue(kvp.Key, out List<List<string>> existingFileLists))
+                if (!allDataSourceAssociations.TryGetValue(kvp.Key, out List<List<IDataSource>> existingDataSourceLists))
                 {
-                    existingFileLists = new List<List<string>>();
-                    allFileAssociations[kvp.Key] = existingFileLists;
+                    existingDataSourceLists = new List<List<IDataSource>>();
+                    allDataSourceAssociations[kvp.Key] = existingDataSourceLists;
                 }
 
                 foreach (var file in kvp.Value)
                 {
-                    existingFileLists.Add(new List<string> { file, });
+                    existingDataSourceLists.Add(new List<IDataSource> { file, });
                 }
             }
 
-            foreach (var kvp in allFileAssociations.ToArray())
+            foreach (var kvp in allDataSourceAssociations.ToArray())
             {
                 if (kvp.Value.Count == 0)
                 {
-                    allFileAssociations.Remove(kvp.Key);
+                    allDataSourceAssociations.Remove(kvp.Key);
                 }
             }
 
-            return allFileAssociations;
-        }
-
-        private static Dictionary<ICustomDataSource, List<string>> AllocateFiles(
-            IEnumerable<ICustomDataSource> allDataSources,
-            IEnumerable<string> files)
-        {
-            var cdsToFiles = new Dictionary<ICustomDataSource, List<string>>();
-
-            foreach (var cds in allDataSources)
-            {
-                cdsToFiles[cds] = files.Where(cds.Supports).ToList();
-            }
-
-            return cdsToFiles;
+            return allDataSourceAssociations;
         }
 
         private bool TypeIs(Type first, Type second)
@@ -804,37 +756,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 throw new InstanceAlreadyProcessedException();
             }
-        }
-
-        private bool DoesAnyDataSourceSupport(string file)
-        {
-            foreach (var s in this.customDataSourceReferences)
-            {
-                if (DoesDataSourceSupport(file, s))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private bool DoesDataSourceSupport(string file, CustomDataSourceReference cds)
-        {
-            try
-            {
-                if (cds.Instance.IsFileSupported(file))
-                {
-                    return true;
-                }
-            }
-            catch
-            {
-                // obviously can't support the file if it can't
-                // make a decision
-            }
-
-            return false;
         }
 
         private sealed class EngineImpl
@@ -941,6 +862,20 @@ namespace Microsoft.Performance.Toolkit.Engine
                 // todo: how do we want to handle this?
                 // User prompts? Default?
                 return ButtonResult.None;
+            }
+        }
+
+        private sealed class NullValidator
+            : IPreloadValidator
+        {
+            public bool IsAssemblyAcceptable(string fullPath, out ErrorInfo error)
+            {
+                error = ErrorInfo.None;
+                return true;
+            }
+
+            public void Dispose()
+            {
             }
         }
     }

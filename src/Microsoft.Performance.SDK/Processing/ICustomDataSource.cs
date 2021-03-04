@@ -121,21 +121,16 @@ namespace Microsoft.Performance.SDK.Processing
         Stream GetSerializationStream(SerializationSource source);
 
         /// <summary>
-        ///     Returns a value indicating whether the given file path can be
-        ///     opened by this instance.
-        ///     <para />
-        ///     This method is useful to implement when your custom data source
-        ///     handles an extension with broad implementation, such as '.txt'. This
-        ///     allows you to make sure that the file passed is really valid to your
-        ///     scenario.
+        ///     Returns a value indicating whether the given Data Source can
+        ///     be opened by this instance.
         /// </summary>
-        /// <param name="path">
-        ///     The path to the file of interest.
+        /// <param name="dataSource">
+        ///     The Data Source of interest.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if this instance can actually process the given file;
+        ///     <c>true</c> if this instance can actually process the given Data Source;
         ///     <c>false</c> otherwise.
         /// </returns>
-        bool IsFileSupported(string path);
+        bool IsDataSourceSupported(IDataSource dataSource);
     }
 }

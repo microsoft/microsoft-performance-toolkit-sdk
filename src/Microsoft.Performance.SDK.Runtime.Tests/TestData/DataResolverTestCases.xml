@@ -1,0 +1,395 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<DataResolverTestCases>
+  <Assign>
+    <!--
+    The following outlines a Test Case for the DataSourceResolver.Assign method.
+    <TestCase Debug="True|False"
+              Description="The description of the test case. This value appears in the test result window."
+              Id="1">
+        Debug (boolean): When set to true and the Test is run under a debugger, then the Test method
+                         will break before executing the test defined in this element.
+        Description (string): A human readable description of the test case. This description will appear in the
+                              test results window as a row in the results.
+        Id (string): A unique Identifier for the test case. This makes finding failed tests easier.
+      <Parameters>
+        This element contains the parameters to pass to the Resolver.
+        <CustomDataSources>
+          This element contains a collection of zero (0) or more Custom Data Sources
+          to pass to the Assign method. Duplicates are allowed.
+          <CustomDataSource>
+            <Name>
+              The name to use to reference this custom data source in 
+              the Expected section.
+            </Name>
+            <Supports>
+              This element contains a collection of zero (0) or more Data Sources
+              that are supported by the Custom Data Source.
+              <DataSource>
+                Place the name of the data source here.
+              </DataSource>
+            </Supports>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources>
+          This element contains a collection of zero (0) or more Data Sources
+          to pass to the Assign method. Duplicates are allowed. It is not required
+          that Data Sources referenced by Custom Data Sources appear here.
+          <DataSource>
+            Place the name of the Data Source here.
+          </DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected>
+        This element contains the expected results of a call to the Assign
+        method with the given parameters.
+        <CustomDataSourceAssignments>
+          This element contains a collection of zero (0) or more Assignments
+          that are expected as a result of running the Assign method. There
+          should be an entry for each Custom Data Source in the Parameters
+          section. See the specification of the Assign Method.
+          <Assignment>
+            <CustomDataSource>
+              The name of the Custom Data Source.
+            </CustomDataSource>
+            <DataSources>
+              This element contains a collection of zero (0) or more Data Sources
+              that are expected to be assigned to this Custom Data Source. The
+              Data Sources here MUST be present in the Data Sources element in the 
+              parameters section. Duplicates are not allowed.
+              <DataSource>
+                The name of the Data Source.
+              </DataSource>
+            </DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+    </TestCase>
+    
+    -->
+    <TestCase Debug="False"
+              Description="Empty Parameters does nothing."
+              Id="1">
+      <Parameters>
+        <CustomDataSources></CustomDataSources>
+        <DataSources></DataSources>
+      </Parameters>
+      <Expected></Expected>
+    </TestCase>
+
+    <TestCase Debug="False"
+              Description="Empty Custom Data Sources does nothing."
+              Id="2">
+      <Parameters>
+        <CustomDataSources></CustomDataSources>
+        <DataSources>
+          <DataSource>1</DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected></Expected>
+    </TestCase>
+
+    <TestCase Debug="False"
+              Description="Empty Data Sources has all Custom Data Sources assigned."
+              Id="3">
+      <Parameters>
+        <CustomDataSources>
+          <CustomDataSource>
+            <Name>1</Name>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources></DataSources>
+      </Parameters>
+      <Expected>
+        <CustomDataSourceAssignments>
+          <Assignment>
+            <CustomDataSource>1</CustomDataSource>
+            <DataSources></DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+    </TestCase>
+
+    <TestCase Debug="False"
+              Description="One Data Source Supported By One Custom Data Source."
+              Id="4">
+      <Parameters>
+        <CustomDataSources>
+          <CustomDataSource>
+            <Name>1</Name>
+            <Supports>
+              <DataSource>1</DataSource>
+            </Supports>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources>
+          <DataSource>1</DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected>
+        <CustomDataSourceAssignments>
+          <Assignment>
+            <CustomDataSource>1</CustomDataSource>
+            <DataSources>
+              <DataSource>1</DataSource>
+            </DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+    </TestCase>
+
+    <TestCase Debug="False"
+              Description="One Data Source Not Supported By Any Custom Data Source."
+              Id="5">
+      <Parameters>
+        <CustomDataSources>
+          <CustomDataSource>
+            <Name>1</Name>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>2</Name>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>3</Name>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources>
+          <DataSource>1</DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected>
+        <CustomDataSourceAssignments>
+          <Assignment>
+            <CustomDataSource>1</CustomDataSource>
+            <DataSources></DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>2</CustomDataSource>
+            <DataSources></DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>3</CustomDataSource>
+            <DataSources></DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+    </TestCase>
+
+    <TestCase Debug="True"
+              Description="Multiple Custom Data Sources each supporting a Data Source."
+              Id="6">
+      <Parameters>
+        <CustomDataSources>
+          <CustomDataSource>
+            <Name>1</Name>
+            <Supports>
+              <DataSource>1</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>2</Name>
+            <Supports>
+              <DataSource>2</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>3</Name>
+            <Supports>
+              <DataSource>3</DataSource>
+            </Supports>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources>
+          <DataSource>1</DataSource>
+          <DataSource>2</DataSource>
+          <DataSource>3</DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected>
+        <CustomDataSourceAssignments>
+          <Assignment>
+            <CustomDataSource>1</CustomDataSource>
+            <DataSources>
+              <DataSource>1</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>2</CustomDataSource>
+            <DataSources>
+              <DataSource>2</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>3</CustomDataSource>
+            <DataSources>
+              <DataSource>3</DataSource>
+            </DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+
+    </TestCase>
+
+    <TestCase Debug="False"
+              Description="Unsupported Data Sources do not appear in assignment."
+              Id="7">
+      <Parameters>
+        <CustomDataSources>
+          <CustomDataSource>
+            <Name>1</Name>
+            <Supports>
+              <DataSource>1</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>2</Name>
+            <Supports>
+              <DataSource>2</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>3</Name>
+            <Supports>
+              <DataSource>3</DataSource>
+            </Supports>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources>
+          <DataSource>1</DataSource>
+          <DataSource>2</DataSource>
+          <DataSource>3</DataSource>
+          <DataSource>4</DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected>
+        <CustomDataSourceAssignments>
+          <Assignment>
+            <CustomDataSource>1</CustomDataSource>
+            <DataSources>
+              <DataSource>1</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>2</CustomDataSource>
+            <DataSources>
+              <DataSource>2</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>3</CustomDataSource>
+            <DataSources>
+              <DataSource>3</DataSource>
+            </DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+    </TestCase>
+
+    <TestCase Debug="False"
+              Description="Data Source supported by multiple Custom Data Sources appears in each list."
+              Id="8">
+      <Parameters>
+        <CustomDataSources>
+          <CustomDataSource>
+            <Name>1</Name>
+            <Supports>
+              <DataSource>1</DataSource>
+              <DataSource>2</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>2</Name>
+            <Supports>
+              <DataSource>2</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>3</Name>
+            <Supports>
+              <DataSource>3</DataSource>
+            </Supports>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources>
+          <DataSource>1</DataSource>
+          <DataSource>2</DataSource>
+          <DataSource>3</DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected>
+        <CustomDataSourceAssignments>
+          <Assignment>
+            <CustomDataSource>1</CustomDataSource>
+            <DataSources>
+              <DataSource>1</DataSource>
+              <DataSource>2</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>2</CustomDataSource>
+            <DataSources>
+              <DataSource>2</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>3</CustomDataSource>
+            <DataSources>
+              <DataSource>3</DataSource>
+            </DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+    </TestCase>
+
+    <TestCase Debug="False"
+              Description="Supported Data Source that is not supplied is okay."
+              Id="9">
+      <Parameters>
+        <CustomDataSources>
+          <CustomDataSource>
+            <Name>1</Name>
+            <Supports>
+              <DataSource>1</DataSource>
+              <DataSource>2</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>2</Name>
+            <Supports>
+              <DataSource>2</DataSource>
+            </Supports>
+          </CustomDataSource>
+          <CustomDataSource>
+            <Name>3</Name>
+            <Supports>
+              <DataSource>3</DataSource>
+            </Supports>
+          </CustomDataSource>
+        </CustomDataSources>
+        <DataSources>
+          <DataSource>2</DataSource>
+        </DataSources>
+      </Parameters>
+      <Expected>
+        <CustomDataSourceAssignments>
+          <Assignment>
+            <CustomDataSource>1</CustomDataSource>
+            <DataSources>
+              <DataSource>2</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>2</CustomDataSource>
+            <DataSources>
+              <DataSource>2</DataSource>
+            </DataSources>
+          </Assignment>
+          <Assignment>
+            <CustomDataSource>3</CustomDataSource>
+            <DataSources></DataSources>
+          </Assignment>
+        </CustomDataSourceAssignments>
+      </Expected>
+    </TestCase>
+
+  </Assign>
+</DataResolverTestCases>

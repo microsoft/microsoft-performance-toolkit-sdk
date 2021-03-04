@@ -188,7 +188,7 @@ namespace SampleCustomDataSource
 
         protected override void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> tableType,
+            Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             ITableBuilder tableBuilder)
         {
             //

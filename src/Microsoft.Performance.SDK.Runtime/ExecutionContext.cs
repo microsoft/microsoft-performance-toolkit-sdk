@@ -121,7 +121,7 @@ namespace Microsoft.Performance.SDK.Runtime
             switch (format)
             {
                 case "F":
-                    return string.Join(",", this.DataSources.Select(x => x.GetUri()));
+                    return string.Join(",", this.DataSources.Select(x => x.Uri));
 
                 case "G":
                 case "g":
