@@ -24,8 +24,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
           IDataExtensionReference
         where TDerived : DataExtensionReference<TDerived>
     {
-        private List<string> errors;
-        private ReadOnlyCollection<string> errorsRO;
+        private List<ErrorInfo> errors;
+        private ReadOnlyCollection<ErrorInfo> errorsRO;
 
         // used for IDataExtensionDependencyTarget
         private HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
@@ -42,10 +42,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <param name="type">
         ///     The data extension type.
         /// </param>
-        protected DataExtensionReference(Type type) 
+        protected DataExtensionReference(Type type)
             : base(type)
         {
-            this.errors = new List<string>();
+            this.errors = new List<ErrorInfo>();
+            this.errorsRO = new ReadOnlyCollection<ErrorInfo>(this.errors);
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
-        protected DataExtensionReference(DataExtensionReference<TDerived> other) 
+        protected DataExtensionReference(DataExtensionReference<TDerived> other)
             : base(other)
         {
             this.extensionDependencyState = null;
@@ -66,8 +67,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.extensionDependencyState = new DataExtensionDependencyState(other.extensionDependencyState);
             }
 
-            this.errors = new List<string>(other.Errors);
-            this.errorsRO = new ReadOnlyCollection<string>(this.errors);
+            this.errors = new List<ErrorInfo>(other.errors);
+            this.errorsRO = new ReadOnlyCollection<ErrorInfo>(this.errors);
         }
 
         /// <summary>
@@ -77,6 +78,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         ~DataExtensionReference()
         {
             this.Dispose(false);
+        }
+
+        /// <inheritdoc />
+        public IDataExtensionDependencyState DependencyState
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.extensionDependencyState;
+            }
         }
 
         /// <summary>
@@ -94,21 +105,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             {
                 this.ThrowIfDisposed();
                 return this.Type.FullName;
-            }
-        }
-
-        /// <summary>
-        ///     Gets a collection of errors associated with the data extension.
-        /// </summary>
-        /// <exception cref="System.ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public ReadOnlyCollection<string> Errors
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.errorsRO;
             }
         }
 
@@ -219,7 +215,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         {
             Guard.NotNull(availableDataExtensions, nameof(availableDataExtensions));
             this.ThrowIfDisposed();
-            
+
             if (this.extensionDependencyState == null)
             {
                 this.extensionDependencyState = new DataExtensionDependencyState(this);
@@ -294,7 +290,33 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// </exception>
         protected void AddError(string error)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(error));
+            this.AddError(
+                new ErrorInfo(
+                    ErrorCodes.EXTENSION_Error,
+                    ErrorCodes.EXTENSION_Error.Description)
+                {
+                    Target = this.Name,
+                    Details = new[]
+                    {
+                        new ErrorInfo(ErrorCodes.EXTENSION_Error,  error),
+                    },
+                });
+        }
+
+        /// <summary>
+        ///     Adds an error to this instance. This is used to keep
+        ///     track of all errors seen during processing so that they
+        ///     can be meaningfully presented to the user.
+        /// </summary>
+        /// <param name="error">
+        ///     The error that occurred.
+        /// </param>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        protected void AddError(ErrorInfo error)
+        {
+            Debug.Assert(error != null);
 
             this.ThrowIfDisposed();
             this.errors.Add(error);

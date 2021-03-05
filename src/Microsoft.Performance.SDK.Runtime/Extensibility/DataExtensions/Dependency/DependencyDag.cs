@@ -174,9 +174,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             // regardless of type.
             //
 
-            var state = new DataExtensionDependencyState(der);
-            state.ProcessDependencies(reps);
-            var deps = state.DependencyReferences;
+            var cycleErrors = der.DependencyState.Errors.Where(x => x.Code == ErrorCodes.EXTENSION_DependencyCycle);
+            if (cycleErrors.Any())
+            {
+                var cycleMessage = cycleErrors.First().ToString();
+                throw new InvalidOperationException(cycleMessage);
+            }
+
+            var deps = der.DependencyReferences;
 
             //
             // we are concatenating all of the dependencies found
@@ -471,6 +476,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 {
                     dependent.RemoveDependency(this);
                 }
+            }
+
+            /// <inheritdoc />
+            public override string ToString()
+            {
+                return this.Target.ToString();
             }
 
             /// <summary>

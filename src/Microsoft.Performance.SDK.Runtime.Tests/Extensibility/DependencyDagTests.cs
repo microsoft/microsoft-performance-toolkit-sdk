@@ -531,7 +531,58 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             repo.TryAddReference(r0d3);
             repo.FinalizeDataExtensions();
 
-            Assert.ThrowsException<InvalidOperationException>(() => DependencyDag.Create(catalog, repo));
+            var e = Assert.ThrowsException<InvalidOperationException>(() => DependencyDag.Create(catalog, repo));
+
+            var expectedCycleString = string.Format(
+                "Cycle: {0} -> {1} -> {2} -> {0}",
+                r0.Path,
+                r0d1.Path,
+                r0d3.Path);
+
+            StringAssert.Contains(e.Message, expectedCycleString);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void DeeperCyclesNotAllowed()
+        {
+            // 
+            //  r0 
+            //  |
+            //  d1 <-<-<
+            //  |  \   |
+            //  d2 d3 ->
+            //
+
+            var r0 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0"), };
+            var r0d1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0d1"), };
+            var r0d2 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0d2"), };
+            var r0d3 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0d3"), };
+
+            r0.requiredDataCookers.Add(r0d1.Path);
+            r0d1.requiredDataCookers.Add(r0d2.Path);
+            r0d1.requiredDataCookers.Add(r0d3.Path);
+            r0d3.requiredDataCookers.Add(r0d1.Path);
+
+            var catalog = new TestPluginCatalog();
+            catalog.IsLoaded = true;
+
+            var repo = new DataExtensionRepository();
+            repo.TryAddReference(r0);
+            repo.TryAddReference(r0d1);
+            repo.TryAddReference(r0d2);
+            repo.TryAddReference(r0d3);
+            repo.FinalizeDataExtensions();
+
+            var e = Assert.ThrowsException<InvalidOperationException>(() => DependencyDag.Create(catalog, repo));
+
+            var expectedCycleString = string.Format(
+                "Cycle: {0} -> {1} -> {2} -> {0}",
+                r0.Path,
+                r0d1.Path,
+                r0d3.Path);
+
+            StringAssert.Contains(e.Message, expectedCycleString);
         }
     }
 }

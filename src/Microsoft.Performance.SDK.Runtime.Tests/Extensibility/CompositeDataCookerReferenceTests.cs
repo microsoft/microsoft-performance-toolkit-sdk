@@ -122,7 +122,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         private sealed class FakeSupport
         : IDataExtensionDependencyStateSupport
         {
-            public void AddError(string error)
+            public void AddError(ErrorInfo error)
             {
                 throw new NotImplementedException();
             }
@@ -147,6 +147,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             public DataExtensionAvailability Availability => throw new NotImplementedException();
 
             public IDataExtensionDependencies DependencyReferences => throw new NotImplementedException();
+
+            public IDataExtensionDependencyState DependencyState => throw new NotImplementedException();
 
             public void Dispose()
             {

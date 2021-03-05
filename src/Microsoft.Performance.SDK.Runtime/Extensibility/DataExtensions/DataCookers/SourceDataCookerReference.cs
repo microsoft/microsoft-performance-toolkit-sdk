@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
@@ -249,14 +251,22 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             {
                 if (!StringComparer.Ordinal.Equals(this.Path.SourceParserId, dataCookerReference.Path.SourceParserId))
                 {
-                    dependencyStateSupport.AddError("A source data cooker may not depend on data cookers from " +
-                                                    $"other sources: {this.Type}");
+                    dependencyStateSupport.AddError(
+                        new ErrorInfo(
+                            ErrorCodes.EXTENSION_CrossSourceDependency,
+                            ErrorCodes.EXTENSION_CrossSourceDependency.Description)
+                        {
+                            Target = this.Type.FullName,
+                        });
                     dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
                 }
                 else if (!(requiredDataExtension is SourceDataCookerReference))
                 {
                     dependencyStateSupport.AddError(
-                        $"Data cooker {dataCookerReference.Path} referenced by {this.Path} is unrecognized.");
+                        new CrossSourceError(dataCookerReference.Path.ToString(), this.Path.ToString())
+                        {
+                            Target = dataCookerReference.Path.ToString(),
+                        });
                 }
 
                 if(ProductionStrategy == DataProductionStrategy.AsRequired)
@@ -273,13 +283,23 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             else if (requiredDataExtension is IDataProcessorReference dataProcessorReference)
             {
                 dependencyStateSupport.AddError(
-                    $"A source data cooker may not depend on a data processor: {dataProcessorReference.Id}");
+                    new ErrorInfo(
+                        ErrorCodes.EXTENSION_DisallowedDataProcessorDependency,
+                        ErrorCodes.EXTENSION_DisallowedDataProcessorDependency.Description)
+                    {
+                        Target = dataProcessorReference.Id,
+                    });
                 dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
             }
             else
             {
                 dependencyStateSupport.AddError(
-                    $"A requested dependency on an unknown data extension type is not supported: {requiredDataExtension.Name}");
+                    new ErrorInfo(
+                        ErrorCodes.EXTENSION_UnknownDependencyType,
+                        ErrorCodes.EXTENSION_UnknownDependencyType)
+                    {
+                        Target = requiredDataExtension.Name,
+                    });
                 dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
             }
         }
@@ -312,6 +332,40 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
 
             this.isDisposed = true;
+        }
+
+        [Serializable]
+        private sealed class CrossSourceError
+            : ErrorInfo
+        {
+            internal CrossSourceError(string dataReferencePath, string thisPath)
+                : base(ErrorCodes.EXTENSION_UnrecognizedDataCookerPath, ErrorCodes.EXTENSION_UnrecognizedDataCookerPath)
+            {
+                this.DataReferencePath = dataReferencePath;
+                this.ThisPath = thisPath;
+            }
+
+            private CrossSourceError(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+                this.DataReferencePath = info.GetString(nameof(this.DataReferencePath));
+                this.ThisPath = info.GetString(nameof(this.ThisPath));
+            }
+
+            public string DataReferencePath { get; }
+
+            public string ThisPath { get; }
+
+            [SecurityPermission(
+                SecurityAction.LinkDemand,
+                Flags = SecurityPermissionFlag.SerializationFormatter)]
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                Guard.NotNull(info, nameof(info));
+
+                info.AddValue(nameof(this.DataReferencePath), this.DataReferencePath);
+                info.AddValue(nameof(this.ThisPath), this.ThisPath);
+            }
         }
     }
 }

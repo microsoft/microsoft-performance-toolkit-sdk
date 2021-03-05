@@ -137,6 +137,82 @@ namespace Microsoft.Performance.SDK.Runtime
             "No observers are registered.");
 
         //
+        // Extension Errors
+        //
+
+        /// <summary>
+        ///     A dependency cycle has been detected between extensions.
+        /// </summary>
+        public static ErrorCodes EXTENSION_DependencyCycle = new ErrorCodes(
+            40001,
+            "EXTENSION_DEPENDENCY_CYCLE",
+            "A dependency cycle has been detected between extensions.");
+
+        /// <summary>
+        ///     A dependency cycle has been detected between extensions.
+        /// </summary>
+        public static ErrorCodes EXTENSION_MissingRequirement = new ErrorCodes(
+            40002,
+            "EXTENSION_MISSING_REQUIREMENT",
+            "One or more dependencies of the extension is missing.");
+
+        /// <summary>
+        ///     One or more dependencies in the extension's dependency chain is missing.
+        /// </summary>
+        public static ErrorCodes EXTENSION_MissingIndirectRequirement = new ErrorCodes(
+            40003,
+            "EXTENSION_MISSING_INDIRECT_REQUIREMENT",
+            "One or more dependencies in the extension's dependency chain is missing.");
+
+        /// <summary>
+        ///     An error occurred when processing the dependencies of this extension.
+        /// </summary>
+        public static ErrorCodes EXTENSION_Error = new ErrorCodes(
+            40004,
+            "EXTENSION_ERROR",
+            "An error occurred when processing the dependencies of this extension.");
+
+        /// <summary>
+        ///     One or more dependencies in the extension's dependency chain has an error.
+        /// </summary>
+        public static ErrorCodes EXTENSION_IndirectError = new ErrorCodes(
+            40005,
+            "EXTENSION_INDIRECT_ERROR",
+            "One or more dependencies in the extension's dependency chain has an error.");
+
+        /// <summary>
+        ///     The Data cooker {0} referenced by {1} is unrecognized.
+        /// </summary>
+        public static ErrorCodes EXTENSION_UnrecognizedDataCookerPath = new ErrorCodes(
+            40006,
+            "EXTENSION_UNRECOGNIZED_PATH",
+            "The referenced data cooker is unrecognized.");
+
+        /// <summary>
+        ///     A source data cooker may not depend on data cookers from other sources.
+        /// </summary>
+        public static ErrorCodes EXTENSION_CrossSourceDependency = new ErrorCodes(
+            40007,
+            "EXTENSION_CROSS_SOURCE_DEPENDENCY",
+            "A source data cooker may not depend on data cookers from other sources.");
+
+        /// <summary>
+        ///     A source data cooker may not depend on a data processor.
+        /// </summary>
+        public static ErrorCodes EXTENSION_DisallowedDataProcessorDependency = new ErrorCodes(
+            40008,
+            "EXTENSION_DISALLOWED_DATA_PROCESSOR_DEPENDENCY",
+            "A source data cooker may not depend on a data processor.");
+
+        /// <summary>
+        ///     A requested dependency on an unknown data extension type is not supported.
+        /// </summary>
+        public static ErrorCodes EXTENSION_UnknownDependencyType = new ErrorCodes(
+            40009,
+            "EXTENSION_UNKNOWN_DEPENDENCY_TYPE",
+            "A requested dependency on an unknown data extension type is not supported.");
+
+        //
         // Unexpected errors
         //
 

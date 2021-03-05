@@ -14,5 +14,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
           IDataExtensionDependency,
           IDisposable
     {
+        /// <summary>
+        ///     Gets the state of the dependencies of this
+        ///     instance. This property is not valid until
+        ///     <see cref="IDataExtensionDependency.ProcessDependencies(Repository.IDataExtensionRepository)"/>
+        ///     has been called.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        IDataExtensionDependencyState DependencyState { get; }
     }
 }
