@@ -114,6 +114,15 @@ namespace Microsoft.Performance.SDK.Runtime
         public abstract IEnumerable<Option> CommandLineOptions { get; }
 
         /// <summary>
+        ///     Gets a collection of all processors that have been created
+        ///     by this reference.
+        /// </summary>        
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public abstract IEnumerable<ICustomDataProcessor> TrackedProcessors { get; }
+
+        /// <summary>
         ///     Tries to create an instance of <see cref="CustomDataSourceReference"/> 
         ///     based on the <paramref name="candidateType"/>.
         ///     <para/>
@@ -236,6 +245,7 @@ namespace Microsoft.Performance.SDK.Runtime
             private ReadOnlyCollection<Option> commandLineOptionsRO;
 
             private List<ICustomDataProcessor> createdProcessors;
+            private ReadOnlyCollection<ICustomDataProcessor> createdProcessorsRO;
 
             // this class is nested; isDisposed in the outer class
             // is visible, and we do not want conflicts.
@@ -273,6 +283,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.description = metadata.Description;
                 this.commandLineOptionsRO = this.Instance.CommandLineOptions.ToList().AsReadOnly();
                 this.createdProcessors = new List<ICustomDataProcessor>();
+                this.createdProcessorsRO = new ReadOnlyCollection<ICustomDataProcessor>(this.createdProcessors);
 
                 this.isImplDisposed = false;
             }
@@ -364,6 +375,16 @@ namespace Microsoft.Performance.SDK.Runtime
                 {
                     this.ThrowIfDisposed();
                     return this.commandLineOptionsRO;
+                }
+            }
+
+            /// <inheritdoc />
+            public override IEnumerable<ICustomDataProcessor> TrackedProcessors
+            {
+                get
+                {
+                    this.ThrowIfDisposed();
+                    return this.createdProcessorsRO;
                 }
             }
 

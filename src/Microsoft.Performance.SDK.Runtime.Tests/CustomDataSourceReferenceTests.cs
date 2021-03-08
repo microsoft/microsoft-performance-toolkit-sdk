@@ -138,6 +138,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.AssemblyPath);
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.AvailableTables);
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.CommandLineOptions);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TrackedProcessors);
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.DataSources);
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Description);
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Guid);
@@ -150,6 +151,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.AreExtensionlessFilesSupported());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Clone());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.CloneT());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateProcessor(null, null, null));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Supports(Any.DataSource()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetCanonicalFileExtensions());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetDirectoryDescription());
@@ -255,6 +257,30 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             {
                 sut?.Dispose();
             }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void CreateProcessor_CreatedProcessorTracked()
+        {
+            var fakeProcessor = new FakeCustomDataProcessor();
+
+            var result = CustomDataSourceReference.TryCreateReference(
+                typeof(DisposableCustomDataSource),
+                out var sut);
+
+            Assert.IsTrue(result);
+            Assert.IsNotNull(sut);
+            Assert.IsFalse(sut.TrackedProcessors.Any());
+
+            var instance = sut.Instance as DisposableCustomDataSource;
+            Assert.IsNotNull(instance);
+            instance.ProcessorCreateFactory = () => fakeProcessor;
+
+            var p = sut.CreateProcessor(null, null, null);
+
+            Assert.AreEqual(fakeProcessor, p);
+            Assert.AreEqual(fakeProcessor, sut.TrackedProcessors.Single());
         }
 
         private static void RunCreateSuccessTest(Type type)

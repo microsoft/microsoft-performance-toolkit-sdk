@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 
@@ -54,6 +55,10 @@ namespace Microsoft.Performance.Testing.SDK
         public override IEnumerable<Option> CommandLineOptions => this.CommandLineOptionsSetter;
 
         public HashSet<IDataSource> SupportedDataSources { get; private set; }
+
+        public IEnumerable<ICustomDataProcessor> CreatedProcessorsSetter { get; set; }
+        public override IEnumerable<ICustomDataProcessor> TrackedProcessors => this.CreatedProcessorsSetter;
+
         public override bool Supports(IDataSource dataSource)
         {
             return this.SupportedDataSources.Contains(dataSource);
@@ -113,6 +118,7 @@ namespace Microsoft.Performance.Testing.SDK
             this.DescriptionSetter = this.Instance.TryGetDescription() ?? "fake";
             this.DataSourcesSetter = new List<DataSourceAttribute>().AsReadOnly();
             this.SupportedDataSources = new HashSet<IDataSource>();
+            this.CreatedProcessorsSetter = Enumerable.Empty<ICustomDataProcessor>();
         }
     }
 }
