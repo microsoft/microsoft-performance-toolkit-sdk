@@ -19,13 +19,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
         : DataExtensionReference<DataProcessorReference>,
           IDataProcessorReference
     {
-        private readonly object instanceLock = new object();
+        private object instanceLock = new object();
 
         private string id;
         private string description;
         private IDataProcessor instance;
         private bool isInitialized;
 
+        private bool isDisposing = false;
         private bool isDisposed = false;
 
         /// <summary>
@@ -57,22 +58,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
 
             Debug.Assert(type != null, nameof(type));
 
-            this.CreateInstance();
-            if (this.Instance == null)
-            {
-                this.AddError($"Unable to create an instance of {this.Type}");
-                this.InitialAvailability = DataExtensionAvailability.Error;
-            }
-            else if (string.IsNullOrWhiteSpace(this.Instance.Id))
-            {
-                this.AddError("A data processor Id may not be empty.");
-                this.InitialAvailability = DataExtensionAvailability.Error;
-            }
-
-            if (this.InitialAvailability != DataExtensionAvailability.Error)
-            {
-                this.InitializeDescriptorData(this.Instance);
-            }
+            this.InitializeThis();
         }
 
         /// <summary>
@@ -256,6 +242,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
                 return;
             }
 
+            this.isDisposing = true;
+
             if (disposing)
             {
                 this.Release();
@@ -271,7 +259,24 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
             }
 
             this.isDisposed = true;
+            this.isDisposing = false;
             base.Dispose(disposing);
+        }
+
+        protected override void ReleaseCore()
+        {
+            lock (this.instanceLock)
+            {
+                this.instance.TryDispose();
+                this.instance = null;
+
+                if (this.isDisposing || this.isDisposed)
+                {
+                    return;
+                }
+
+                this.InitializeThis();
+            }
         }
 
         private void InitializeDescriptorData(IDataProcessorDescriptor descriptor)
@@ -302,6 +307,29 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
         {
             this.Instance = Activator.CreateInstance(this.Type) as IDataProcessor;
             Debug.Assert(this.Instance != null);
+        }
+
+        private void InitializeThis()
+        {
+            lock (this.instanceLock)
+            {
+                this.CreateInstance();
+                if (this.Instance == null)
+                {
+                    this.AddError($"Unable to create an instance of {this.Type}");
+                    this.InitialAvailability = DataExtensionAvailability.Error;
+                }
+                else if (string.IsNullOrWhiteSpace(this.Instance.Id))
+                {
+                    this.AddError("A data processor Id may not be empty.");
+                    this.InitialAvailability = DataExtensionAvailability.Error;
+                }
+
+                if (this.InitialAvailability != DataExtensionAvailability.Error)
+                {
+                    this.InitializeDescriptorData(this.Instance);
+                }
+            }
         }
     }
 }

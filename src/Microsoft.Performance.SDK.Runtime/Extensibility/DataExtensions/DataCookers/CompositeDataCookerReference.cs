@@ -19,11 +19,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     This object is used to create synchronized regions
         ///     within the instance.
         /// </summary>
-        protected readonly object instanceLock = new object();
+        protected object instanceLock = new object();
 
         private bool initialized = false;
         private ICompositeDataCookerDescriptor instance = null;
 
+        private bool isDisposing = false;
         private bool isDisposed = false;
 
         /// <summary>
@@ -51,14 +52,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         private CompositeDataCookerReference(Type type)
             : base(type)
         {
-            this.CreateInstance();
-
-            this.ValidateInstance(this.Instance);
-
-            if (this.Instance != null)
-            {
-                this.InitializeDescriptorData(this.Instance);
-            }
+            this.InitializeThis();
         }
 
         /// <summary>
@@ -210,19 +204,34 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 return;
             }
 
+            this.isDisposing = true;
+
             if (disposing)
             {
                 this.Release();
 
-                lock (this.instanceLock)
-                {
-                    this.instance.TryDispose();
-                    this.instance = null;
-                }
+                this.instanceLock = null;
             }
 
             this.isDisposed = true;
+            this.isDisposing = false;
             base.Dispose(disposing);
+        }
+
+        protected override void ReleaseCore()
+        {
+            lock (this.instanceLock)
+            {
+                this.instance.TryDispose();
+                this.instance = null;
+
+                if (this.isDisposing || this.isDisposed)
+                {
+                    return;
+                }
+
+                this.InitializeThis();
+            }
         }
 
         /// <inheritdoc />
@@ -242,6 +251,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             this.Instance = Activator.CreateInstance(this.Type) as ICompositeDataCookerDescriptor;
             Debug.Assert(this.Instance != null);
+        }
+
+        private void InitializeThis()
+        {
+            lock (this.instanceLock)
+            {
+                this.initialized = false;
+
+                this.CreateInstance();
+                this.ValidateInstance(this.Instance);
+                if (this.Instance != null)
+                {
+                    this.InitializeDescriptorData(this.instance);
+                }
+            }
         }
     }
 }
