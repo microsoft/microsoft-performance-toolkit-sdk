@@ -121,12 +121,15 @@ namespace SqlPluginWithProcessingPipeline
                                             traceStartTime = startTime;
                                             this.StartWallClockUtc = startTime.Value;
                                         }
+
+                                        if (!traceEndTime.HasValue || traceEndTime.Value <= startTime)
+                                        {
+                                            traceEndTime = startTime;
+                                        }
                                         break;
                                     case "EndTime":
                                         endTime = reader.ReadElementContentAsDateTime().ToUniversalTime();
-                                        traceEndTime = endTime;
                                         break;
-
                                 }
                             }
 
