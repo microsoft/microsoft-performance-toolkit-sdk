@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Discovery;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency
@@ -80,7 +82,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             if (!catalog.IsLoaded)
             {
-                throw new ArgumentException();
+                throw new ArgumentException("The catalog must be loaded.", nameof(catalog));
             }
 
             if (!catalog.PlugIns.Any() &&
@@ -88,7 +90,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             {
                 return new DependencyDag(Enumerable.Empty<Node>());
             }
-            
+
             //
             // We construct the graph by creating a node for each
             // reference. Then, we simply walk each reference's dependency
@@ -109,16 +111,26 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 node.Target.Match(
                     (CustomDataSourceReference x) =>
                     {
-                        //
-                        // nothing to do; these must always
-                        // be roots as source parsers, etc. are
-                        // created by Custom Data Sources.
-                        //
-                        // we are placing the custom data sources
-                        // in the dag in case more explicit
-                        // references / dependencies between
-                        // them are added in the future.
-                        //
+                        foreach (var p in x.TrackedProcessors.OfType<ICustomDataProcessorWithSourceParser>())
+                        {
+                            var deps = allNodes.Where(
+                                n => n.Target.Match(
+                                    r => false,
+                                    r => r is ISourceDataCookerReference sdcr &&
+                                            sdcr.Path.SourceParserId == p.SourceParserId))
+                                .Select(n => n.Target);
+                            foreach (var dep in deps)
+                            {
+                                //
+                                // The source cooker depends on the custom data processor,
+                                // as the custom data processor is providing the source
+                                // parser.
+                                //
+
+                                var depNode = depToNode[dep];
+                                depNode.AddDependency(node);
+                            }
+                        }
                     },
                     (IDataExtensionReference x) =>
                     {
@@ -129,16 +141,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                             node.AddDependency(depNode);
                         }
                     });
-            }
-
-            //
-            // If every node is a depended upon by at least one other
-            // node, then there must be a cycle somewhere.
-            //
-
-            if (!allNodes.Any(x => x.Dependents.Count == 0))
-            {
-                throw new InvalidOperationException("The graph contains a cycle.");
             }
 
             //
@@ -642,7 +644,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     - or -
             ///     <paramref name="b"/> is <c>null</c>.
             /// </exception>
-            public abstract void Match(Action<CustomDataSourceReference> a, Action<IDataExtensionReference> b);
+            public abstract void Match(
+                Action<CustomDataSourceReference> a,
+                Action<IDataExtensionReference> b);
 
             /// <summary>
             ///     Performs the correct action depending on the target
@@ -667,7 +671,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     - or -
             ///     <paramref name="b"/> is <c>null</c>.
             /// </exception>
-            public abstract T Match<T>(Func<CustomDataSourceReference, T> a, Func<IDataExtensionReference, T> b);
+            public abstract T Match<T>(
+                Func<CustomDataSourceReference, T> a, 
+                Func<IDataExtensionReference, T> b);
 
             /// <summary>
             ///     Represents the case when the <see cref="Reference"/> is
@@ -692,14 +698,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 }
 
                 /// <inheritdoc />
-                public override void Match(Action<CustomDataSourceReference> a, Action<IDataExtensionReference> b)
+                public override void Match(
+                    Action<CustomDataSourceReference> a,
+                    Action<IDataExtensionReference> b)
                 {
                     Debug.Assert(a != null);
                     a(this.value);
                 }
 
                 /// <inheritdoc />
-                public override T Match<T>(Func<CustomDataSourceReference, T> a, Func<IDataExtensionReference, T> b)
+                public override T Match<T>(
+                    Func<CustomDataSourceReference, T> a, 
+                    Func<IDataExtensionReference, T> b)
                 {
                     Debug.Assert(a != null);
                     return a(this.value);
@@ -716,6 +726,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 public override int GetHashCode()
                 {
                     return this.value.GetHashCode();
+                }
+
+                /// <inheritdoc />
+                public override string ToString()
+                {
+                    return this.value.ToString();
                 }
             }
 
@@ -749,7 +765,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 }
 
                 /// <inheritdoc />
-                public override T Match<T>(Func<CustomDataSourceReference, T> a, Func<IDataExtensionReference, T> b)
+                public override T Match<T>(
+                    Func<CustomDataSourceReference, T> a,
+                    Func<IDataExtensionReference, T> b)
                 {
                     Debug.Assert(b != null);
                     return b(this.value);
@@ -766,6 +784,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 public override int GetHashCode()
                 {
                     return this.value.GetHashCode();
+                }
+
+                /// <inheritdoc />
+                public override string ToString()
+                {
+                    return this.value.ToString();
                 }
             }
         }

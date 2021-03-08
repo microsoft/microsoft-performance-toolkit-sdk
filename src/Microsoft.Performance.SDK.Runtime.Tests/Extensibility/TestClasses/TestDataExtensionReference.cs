@@ -102,6 +102,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             GC.SuppressFinalize(this);
         }
 
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             ++this.DisposeCalls;

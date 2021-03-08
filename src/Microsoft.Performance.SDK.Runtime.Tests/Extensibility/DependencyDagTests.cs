@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -583,6 +585,114 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 r0d3.Path);
 
             StringAssert.Contains(e.Message, expectedCycleString);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Create_WhenProcessorsWithParsersPresent_SourcesDependOnCds()
+        {
+            //
+            //     cc1
+            //    /   \
+            //  sc1    sc2  sc3
+            //    \   /     |
+            //      r ------/      sc4
+
+
+            var sp = new TestSourceParser { Id = "sp", };
+            var p = new TestCustomDataProcessor(
+                sp,
+                ProcessorOptions.Default,
+                new TestApplicationEnvironment { SourceSessionFactory = new TestSourceSessionFactory(), },
+                new TestProcessorEnvironment(),
+                new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(),
+                Array.Empty<TableDescriptor>());
+
+            var cds = new FakeCustomDataSource();
+            var r = new FakeCustomDataSourceReference(cds)
+            {
+                CreatedProcessorsSetter = new[] { p, }
+            };
+
+            var sc1 = new TestSourceDataCookerReference { Path = new DataCookerPath(p.SourceParserId, "sc1"), };
+            var sc2 = new TestSourceDataCookerReference { Path = new DataCookerPath(p.SourceParserId, "sc2"), };
+            var sc3 = new TestSourceDataCookerReference { Path = new DataCookerPath(p.SourceParserId, "sc3"), };
+            var sc4 = new TestSourceDataCookerReference { Path = new DataCookerPath("not-there", "sc4"), };
+            var cc1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("cc1"), };
+
+            cc1.requiredDataCookers.Add(sc1.Path);
+            cc1.requiredDataCookers.Add(sc2.Path);
+
+            var catalog = new TestPluginCatalog
+            {
+                PlugIns = new[] { r, },
+                IsLoaded = true,
+            };
+
+            var repo = new DataExtensionRepository();
+            repo.TryAddReference(sc1);
+            repo.TryAddReference(sc2);
+            repo.TryAddReference(sc3);
+            repo.TryAddReference(sc4);
+            repo.TryAddReference(cc1);
+            repo.FinalizeDataExtensions();
+
+            var allRoots = new[]
+            {
+                DependencyDag.Reference.Create(cc1),
+                DependencyDag.Reference.Create(sc3),
+                DependencyDag.Reference.Create(sc4),
+            }.ToSet();
+
+            var allReferences = new[]
+            {
+                DependencyDag.Reference.Create(sc2),
+                DependencyDag.Reference.Create(sc3),
+            }
+            .Concat(allRoots)
+            .ToSet();
+
+            var sut = DependencyDag.Create(catalog, repo);
+
+            sut.DependentWalk(Console.WriteLine);
+
+            Assert.AreEqual(allRoots.Count, sut.Roots.Count);
+            CollectionAssert.AreEquivalent(allRoots.ToList(), sut.Roots.Select(x => x.Target).ToList());
+
+            var rn = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r));
+            var sc1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(sc1));
+            var sc2n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(sc2));
+            var sc3n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(sc3));
+            var sc4n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(sc4));
+            var cc1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(cc1));
+
+            Assert.AreEqual(0, rn.Dependencies.Count);
+            Assert.AreEqual(3, rn.Dependents.Count);
+            Assert.IsTrue(rn.Dependents.Contains(sc1n));
+            Assert.IsTrue(rn.Dependents.Contains(sc2n));
+            Assert.IsTrue(rn.Dependents.Contains(sc3n));
+
+            Assert.AreEqual(1, sc1n.Dependencies.Count);
+            Assert.IsTrue(sc1n.Dependencies.Contains(rn));
+            Assert.AreEqual(1, sc1n.Dependents.Count);
+            Assert.IsTrue(sc1n.Dependents.Contains(cc1n));
+
+            Assert.AreEqual(1, sc2n.Dependencies.Count);
+            Assert.IsTrue(sc2n.Dependencies.Contains(rn));
+            Assert.AreEqual(1, sc2n.Dependents.Count);
+            Assert.IsTrue(sc2n.Dependents.Contains(cc1n));
+
+            Assert.AreEqual(1, sc3n.Dependencies.Count);
+            Assert.IsTrue(sc3n.Dependencies.Contains(rn));
+            Assert.AreEqual(0, sc3n.Dependents.Count);
+
+            Assert.AreEqual(0, sc4n.Dependencies.Count);
+            Assert.AreEqual(0, sc4n.Dependents.Count);
+
+            Assert.AreEqual(2, cc1n.Dependencies.Count);
+            Assert.IsTrue(cc1n.Dependencies.Contains(sc1n));
+            Assert.IsTrue(cc1n.Dependencies.Contains(sc2n));
+            Assert.AreEqual(0, cc1n.Dependents.Count);
         }
     }
 }
