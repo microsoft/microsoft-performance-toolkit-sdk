@@ -239,7 +239,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Disoses all resources held by this class.
+        ///     Disposes all resources held by this class.
         /// </summary>
         /// <param name="disposing">
         ///     <c>true</c> to dispose both managed and unmanaged

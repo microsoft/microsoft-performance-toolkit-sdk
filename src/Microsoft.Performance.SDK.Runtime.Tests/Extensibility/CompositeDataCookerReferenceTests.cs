@@ -44,6 +44,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.GetOrCreateInstance(new FakeRetrieval()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.PerformAdditionalDataExtensionValidation(new FakeSupport(), new FakeReference()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Release());
             }
             finally
             {
@@ -161,6 +162,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             }
 
             public void ProcessDependencies(IDataExtensionRepository availableDataExtensions)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Release()
             {
                 throw new NotImplementedException();
             }

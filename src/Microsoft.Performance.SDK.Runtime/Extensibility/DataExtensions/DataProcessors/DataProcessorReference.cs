@@ -258,6 +258,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
 
             if (disposing)
             {
+                this.Release();
+
                 lock (this.instanceLock)
                 {
                     this.instance.TryDispose();

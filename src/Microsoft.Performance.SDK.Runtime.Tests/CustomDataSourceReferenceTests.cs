@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -152,6 +155,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Clone());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.CloneT());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateProcessor(null, null, null));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Release());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Supports(Any.DataSource()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetCanonicalFileExtensions());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetDirectoryDescription());
@@ -229,11 +233,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(0, instance.DisposeCalls);
 
-                var processors = new[]
+                var processors = new ICustomDataProcessor[]
                 {
                     new FakeCustomDataProcessor(),
                     new FakeCustomDataProcessor(),
-                    new FakeCustomDataProcessor(),
+                    new DisposableCustomDataProcessor(),
                 };
 
                 var processorIndex = 0;
@@ -252,6 +256,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 CollectionAssert.AreEquivalent(
                     processors,
                     instance.ProcessorsDisposed);
+
+                Assert.IsTrue(processors.OfType<DisposableCustomDataProcessor>().All(x => x.DisposeCalls > 0));
             }
             finally
             {
@@ -281,6 +287,54 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             Assert.AreEqual(fakeProcessor, p);
             Assert.AreEqual(fakeProcessor, sut.TrackedProcessors.Single());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Release_CreatedProcessors_Disposed()
+        {
+            CustomDataSourceReference sut = null;
+            try
+            {
+                var result = CustomDataSourceReference.TryCreateReference(
+                    typeof(DisposableCustomDataSource),
+                    out sut);
+                Assert.IsTrue(result);
+
+                var instance = sut.Instance as DisposableCustomDataSource;
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(0, instance.DisposeCalls);
+
+                var processors = new ICustomDataProcessor[]
+                {
+                    new FakeCustomDataProcessor(),
+                    new FakeCustomDataProcessor(),
+                    new DisposableCustomDataProcessor(),
+                };
+
+                var processorIndex = 0;
+                instance.ProcessorCreateFactory = () =>
+                {
+                    return processors[processorIndex++];
+                };
+
+                for (var i = 0; i < processors.Length; ++i)
+                {
+                    sut.CreateProcessor(null, null, null);
+                }
+
+                sut.Release();
+
+                CollectionAssert.AreEquivalent(
+                    processors,
+                    instance.ProcessorsDisposed);
+                Assert.IsTrue(processors.OfType<DisposableCustomDataProcessor>().All(x => x.DisposeCalls > 0));
+                Assert.AreEqual(0, sut.TrackedProcessors.Count());
+            }
+            finally
+            {
+                sut?.Dispose();
+            }
         }
 
         private static void RunCreateSuccessTest(Type type)
@@ -642,6 +696,52 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 {
                     this.ProcessorsDisposed.Add(processor);
                 }
+            }
+        }
+
+        public sealed class DisposableCustomDataProcessor
+            : ICustomDataProcessor,
+              IDisposable
+        {
+            public void BuildMetadataTables(IMetadataTableBuilderFactory metadataTableBuilderFactory)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void BuildTable(TableDescriptor table, ITableBuilder tableBuilder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ITableService CreateTableService(TableDescriptor table)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int DisposeCalls { get; set; }
+            public void Dispose()
+            {
+                ++this.DisposeCalls;
+            }
+
+            public bool DoesTableHaveData(TableDescriptor table)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void EnableTable(TableDescriptor tableDescriptor)
+            {
+                throw new NotImplementedException();
+            }
+
+            public DataSourceInfo GetDataSourceInfo()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task ProcessAsync(IProgress<int> progress, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
             }
         }
     }

@@ -24,5 +24,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         ///     This instance is disposed.
         /// </exception>
         IDataExtensionDependencyState DependencyState { get; }
+
+        /// <summary>
+        ///     Provides a mechanism for this reference to
+        ///     cleanup any instance that may have been created
+        ///     from this reference. Note that this not the
+        ///     same as <see cref="IDisposable"/>. This method
+        ///     is used to "reset" the reference, not dispose
+        ///     it.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        void Release();
     }
 }

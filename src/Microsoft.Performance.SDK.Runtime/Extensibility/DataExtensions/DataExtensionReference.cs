@@ -225,6 +225,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <inheritdoc />
+        public void Release()
+        {
+            this.ThrowIfDisposed();
+            this.ReleaseCore();
+        }
+
+        /// <summary>
+        ///     When overridden in a derived class, releases
+        ///     any instances tracked by this reference.
+        /// </summary>
+        protected virtual void ReleaseCore()
+        {
+        }
+
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (this.isDisposed)

@@ -198,6 +198,19 @@ namespace Microsoft.Performance.SDK.Runtime
             ProcessorOptions commandLineOptions);
 
         /// <summary>
+        ///     Disposes any <see cref="ICustomDataProcessor"/>s
+        ///     that have been created by this instance. Each
+        ///     processor will be passed to <see cref="ICustomDataSource.DisposeProcessor(ICustomDataProcessor)"/>
+        ///     before being disposed. If the processor is not
+        ///     disposable, then nothing will occur after the call to
+        ///     <see cref="ICustomDataSource.DisposeProcessor(ICustomDataProcessor)"/>.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public abstract void Release();
+
+        /// <summary>
         ///     Determines whether the given <see cref="IDataSource"/>
         ///     is supported by the <see cref="ICustomDataSource>"/> referenced by
         ///     this <see cref="CustomDataSourceReference"/>.
@@ -389,32 +402,6 @@ namespace Microsoft.Performance.SDK.Runtime
             }
 
             /// <inheritdoc />
-            public override bool Supports(IDataSource dataSource)
-            {
-                this.ThrowIfDisposed();
-                if (dataSource is null)
-                {
-                    return false;
-                }
-
-                try
-                {
-                    return this.Instance.IsDataSourceSupported(dataSource);
-                }
-                catch
-                {
-                    return false;
-                }
-            }
-
-            /// <inheritdoc />
-            public override CustomDataSourceReference CloneT()
-            {
-                this.ThrowIfDisposed();
-                return new CustomDataSourceReferenceImpl(this);
-            }
-
-            /// <inheritdoc />
             public override ICustomDataProcessor CreateProcessor(
                 IEnumerable<IDataSource> dataSources,
                 IProcessorEnvironment processorEnvironment,
@@ -445,6 +432,52 @@ namespace Microsoft.Performance.SDK.Runtime
 
                     throw;
                 }
+            }
+
+            /// <inheritdoc />
+            public override void Release()
+            {
+                this.ThrowIfDisposed();
+                foreach (var p in this.createdProcessors)
+                {
+                    try
+                    {
+                        this.Instance.DisposeProcessor(p);
+                    }
+                    catch
+                    {
+                    }
+
+                    p.TryDispose();
+                }
+
+                this.createdProcessors.Clear();
+            }
+
+            /// <inheritdoc />
+            public override bool Supports(IDataSource dataSource)
+            {
+                this.ThrowIfDisposed();
+                if (dataSource is null)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    return this.Instance.IsDataSourceSupported(dataSource);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            /// <inheritdoc />
+            public override CustomDataSourceReference CloneT()
+            {
+                this.ThrowIfDisposed();
+                return new CustomDataSourceReferenceImpl(this);
             }
 
             /// <inheritdoc />
@@ -505,18 +538,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
                 if (disposing)
                 {
-                    foreach (var p in this.createdProcessors)
-                    {
-                        try
-                        {
-                            this.Instance.DisposeProcessor(p);
-                        }
-                        catch
-                        {
-                        }
-
-                        p.TryDispose();
-                    }
+                    this.Release();
 
                     this.createdProcessors = null;
                     this.commandLineOptionsRO = null;

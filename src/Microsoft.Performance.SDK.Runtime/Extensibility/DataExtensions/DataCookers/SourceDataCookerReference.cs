@@ -314,23 +314,24 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
             if (disposing)
             {
-                List<IDataCookerDescriptor> toRelease;
-                lock (this.instances)
-                {
-                    toRelease = new List<IDataCookerDescriptor>(this.instances);
-                    this.instances.Clear();
-                }
-
-                foreach (var v in toRelease)
-                {
-                    v.TryDispose();
-                }
+                this.Release();
 
                 this.instances = null;
             }
 
             this.isDisposed = true;
             base.Dispose(disposing);
+        }
+
+        /// <inheritdoc />
+        protected override void ReleaseCore()
+        {
+            foreach (var v in this.instances)
+            {
+                v.TryDispose();
+            }
+
+            this.instances.Clear();
         }
 
         [Serializable]

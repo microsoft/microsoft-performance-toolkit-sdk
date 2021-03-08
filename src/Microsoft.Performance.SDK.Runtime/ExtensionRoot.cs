@@ -160,6 +160,21 @@ namespace Microsoft.Performance.SDK.Runtime
             return this.Repository.GetSourceDataCookerReference(dataCookerPath);
         }
 
+        /// <summary>
+        ///     Releases all instances of Custom Data Processors and Data
+        ///     Extensions, without tearing down the repositories.
+        /// </summary>
+        public void Release()
+        {
+            this.ThrowIfDisposed();
+
+            var dag = DependencyDag.Create(this.Catalog, this.Repository);
+            dag.DependentWalk(
+                x => x.Target.Match(
+                    r => r.Release(),
+                    r => r.Release()));
+        }
+
         private void Dispose(bool disposing)
         {
             if (this.isDisposed)
@@ -171,8 +186,7 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 try
                 {
-                    var dag = DependencyDag.Create(this.Catalog, this.Repository);
-                    dag.DependentWalk(x => x.Target.Match(r => r.SafeDispose(), r => r.SafeDispose()));
+                    this.Release();
                 }
                 finally
                 {

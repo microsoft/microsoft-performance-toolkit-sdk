@@ -123,7 +123,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         }
 
         /// <summary>
-        ///     Gets or sets the instance of the cooker referneced
+        ///     Gets or sets the instance of the cooker referenced
         ///     by this instance. Please use <see cref="InstanceInitialized"/>
         ///     to determine whether the instance reference by this property
         ///     has been initialized, even if the value is not <c>null</c>.
@@ -212,8 +212,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
             if (disposing)
             {
-                this.instance.TryDispose();
-                this.instance = null;
+                this.Release();
+
+                lock (this.instanceLock)
+                {
+                    this.instance.TryDispose();
+                    this.instance = null;
+                }
             }
 
             this.isDisposed = true;
