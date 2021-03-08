@@ -307,8 +307,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-
             if (this.isDisposed)
             {
                 return;
@@ -332,6 +330,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
 
             this.isDisposed = true;
+            base.Dispose(disposing);
         }
 
         [Serializable]

@@ -106,7 +106,6 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
             if (this.isDisposed)
             {
                 return;
@@ -119,6 +118,7 @@ namespace Microsoft.Performance.SDK.Runtime
             }
 
             this.isDisposed = true;
+            base.Dispose(disposing);
         }
     }
 }

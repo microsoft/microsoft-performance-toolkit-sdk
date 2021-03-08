@@ -249,7 +249,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
             if (this.isDisposed)
             {
                 return;
@@ -263,6 +262,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             }
 
             this.isDisposed = true;
+            base.Dispose(disposing);
         }
     }
 }
