@@ -14,11 +14,13 @@ namespace Microsoft.Performance.Testing.SDK
         public FakeCustomDataSourceReference(Type type) 
             : base(type)
         {
-            this.GuidSetter = Guid.NewGuid();
-            this.NameSetter = "fake";
-            this.DescriptionSetter = "fake";
-            this.DataSourcesSetter = new List<DataSourceAttribute>().AsReadOnly();
-            this.SupportedDataSources = new HashSet<IDataSource>();
+            this.InitializeThis();
+        }
+
+        public FakeCustomDataSourceReference(ICustomDataSource wrapped)
+            : base(wrapped.GetType(), () => wrapped)
+        {
+            this.InitializeThis();
         }
 
         public FakeCustomDataSourceReference(FakeCustomDataSourceReference other) 
@@ -51,7 +53,7 @@ namespace Microsoft.Performance.Testing.SDK
         public IEnumerable<Option> CommandLineOptionsSetter { get; set; }
         public override IEnumerable<Option> CommandLineOptions => this.CommandLineOptionsSetter;
 
-        public HashSet<IDataSource> SupportedDataSources { get; }
+        public HashSet<IDataSource> SupportedDataSources { get; private set; }
         public override bool Supports(IDataSource dataSource)
         {
             return this.SupportedDataSources.Contains(dataSource);
@@ -92,6 +94,25 @@ namespace Microsoft.Performance.Testing.SDK
         public override string ToString()
         {
             return this.Name;
+        }
+
+        public override ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions commandLineOptions)
+        {
+            return this.Instance.CreateProcessor(dataSources, processorEnvironment, commandLineOptions);
+        }
+
+        private void InitializeThis()
+        {
+            this.GuidSetter = this.Instance.TryGetGuid();
+            if (this.GuidSetter == default(Guid))
+            {
+                this.GuidSetter = Guid.NewGuid();
+            }
+
+            this.NameSetter = this.Instance.TryGetName() ?? "fake";
+            this.DescriptionSetter = this.Instance.TryGetDescription() ?? "fake";
+            this.DataSourcesSetter = new List<DataSourceAttribute>().AsReadOnly();
+            this.SupportedDataSources = new HashSet<IDataSource>();
         }
     }
 }

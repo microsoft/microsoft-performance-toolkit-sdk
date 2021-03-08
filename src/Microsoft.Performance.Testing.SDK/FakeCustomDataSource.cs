@@ -27,6 +27,11 @@ namespace Microsoft.Performance.Testing.SDK
             throw new NotImplementedException();
         }
 
+        public void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            throw new NotImplementedException();
+        }
+
         public CustomDataSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();

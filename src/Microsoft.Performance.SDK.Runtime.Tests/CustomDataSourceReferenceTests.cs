@@ -211,6 +211,52 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
         }
 
+        [TestMethod]
+        [UnitTest]
+        public void WhenDisposed_CreatedProcessorsPassedToCdsForCleanup()
+        {
+            CustomDataSourceReference sut = null;
+            try
+            {
+                var result = CustomDataSourceReference.TryCreateReference(
+                    typeof(DisposableCustomDataSource),
+                    out sut);
+                Assert.IsTrue(result);
+
+                var instance = sut.Instance as DisposableCustomDataSource;
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(0, instance.DisposeCalls);
+
+                var processors = new[]
+                {
+                    new FakeCustomDataProcessor(),
+                    new FakeCustomDataProcessor(),
+                    new FakeCustomDataProcessor(),
+                };
+
+                var processorIndex = 0;
+                instance.ProcessorCreateFactory = () =>
+                {
+                    return processors[processorIndex++];
+                };
+
+                for (var i = 0; i < processors.Length; ++i)
+                {
+                    sut.CreateProcessor(null, null, null);
+                }
+
+                sut.Dispose();
+
+                CollectionAssert.AreEquivalent(
+                    processors,
+                    instance.ProcessorsDisposed);
+            }
+            finally
+            {
+                sut?.Dispose();
+            }
+        }
+
         private static void RunCreateSuccessTest(Type type)
         {
             var result = CustomDataSourceReference.TryCreateReference(
@@ -297,6 +343,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             {
                 throw new NotImplementedException();
             }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [CustomDataSource("{29EF5347-53FD-49A0-8A03-C0262DE07BD4}", "What", "Test")]
@@ -346,6 +397,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
 
             public bool IsDataSourceSupported(IDataSource dataSource)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
             {
                 throw new NotImplementedException();
             }
@@ -412,6 +468,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             {
                 throw new NotImplementedException();
             }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
@@ -444,6 +505,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
 
             public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
             {
                 throw new NotImplementedException();
             }
@@ -495,12 +561,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public ICustomDataProcessor CreateProcessor(IDataSource dataSource, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
             {
-                throw new NotImplementedException();
+                return this.CreateProcessor(new[] { dataSource, }, processorEnvironment, options);
             }
 
+            public Func<ICustomDataProcessor> ProcessorCreateFactory { get; set; }
             public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
             {
-                throw new NotImplementedException();
+                return this.ProcessorCreateFactory();
             }
 
             public int DisposeCalls { get; private set; }
@@ -533,6 +600,22 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             public void SetLogger(ILogger logger)
             {
                 throw new NotImplementedException();
+            }
+
+            public List<ICustomDataProcessor> ProcessorsDisposed { get; set; }
+            public void DisposeProcessor(ICustomDataProcessor processor)
+            {
+                if (this.ProcessorsDisposed is null)
+                {
+                    this.ProcessorsDisposed = new List<ICustomDataProcessor>
+                    {
+                        processor,
+                    };
+                }
+                else
+                {
+                    this.ProcessorsDisposed.Add(processor);
+                }
             }
         }
     }

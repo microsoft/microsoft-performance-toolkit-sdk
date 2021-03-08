@@ -916,7 +916,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 try
                 {
-                    var cds = kvp.Key.Instance;
+                    var cds = kvp.Key;
                     var dataSourceLists = kvp.Value;
 
                     foreach (var dataSources in dataSourceLists)
@@ -926,7 +926,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             x => ConsoleLogger.Create(x.GetType()),
                             cds,
                             dataSources,
-                            cds.DataTables.Concat(cds.MetadataTables),
+                            cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
                             new RuntimeProcessorEnvironment(this.extensionRoot),
                             ProcessorOptions.Default);
 

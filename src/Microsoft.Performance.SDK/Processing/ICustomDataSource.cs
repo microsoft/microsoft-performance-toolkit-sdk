@@ -132,5 +132,22 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <c>false</c> otherwise.
         /// </returns>
         bool IsDataSourceSupported(IDataSource dataSource);
+
+        /// <summary>
+        ///     Provides a method for this Custom Data Source to do any
+        ///     special cleanup operations for processors created by
+        ///     this instance, if applicable.
+        ///     <para />
+        ///     It is guaranteed that the instance passed to this method
+        ///     was created by this instance via call to one of the following:
+        ///     <list type="bullet">
+        ///         <item><see cref="CreateProcessor(IDataSource, IProcessorEnvironment, ProcessorOptions)"/></item>
+        ///         <item><see cref="CreateProcessor(IEnumerable{IDataSource}, IProcessorEnvironment, ProcessorOptions)"/></item>
+        ///     </list>
+        /// </summary>
+        /// <param name="processor">
+        ///     The processor to dispose.
+        /// </param>
+        void DisposeProcessor(ICustomDataProcessor processor);
     }
 }

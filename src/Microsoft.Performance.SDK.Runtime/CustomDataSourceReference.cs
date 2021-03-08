@@ -37,6 +37,22 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     class.
+        /// </summary>
+        /// <param name="type">
+        ///     The <see cref="Type"/> of instance being referenced by this instance.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="type"/> is <c>null</c>.
+        /// </exception>
+        protected CustomDataSourceReference(Type type, Func<ICustomDataSource> instanceFactory)
+            : base(type, instanceFactory)
+        {
+            this.isDisposed = false;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
         ///     class as a copy of the given instance.
         /// </summary>
         /// <param name="other">
@@ -153,6 +169,26 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
+        ///     Creates a new processor for processing the specified data sources.
+        /// </summary>
+        /// <param name="dataSources">
+        ///     The data sources to process.
+        /// </param>
+        /// <param name="processorEnvironment">
+        ///     The environment for this specific processor instance.
+        /// </param>
+        /// <param name="options">
+        ///     The command line options to pass to the processor.
+        /// </param>
+        /// <returns>
+        ///     The created <see cref="ICustomDataProcessor"/>.
+        /// </returns>
+        public abstract ICustomDataProcessor CreateProcessor(
+            IEnumerable<IDataSource> dataSources,
+            IProcessorEnvironment processorEnvironment,
+            ProcessorOptions commandLineOptions);
+
+        /// <summary>
         ///     Determines whether the given <see cref="IDataSource"/>
         ///     is supported by the <see cref="ICustomDataSource>"/> referenced by
         ///     this <see cref="CustomDataSourceReference"/>.
@@ -199,6 +235,12 @@ namespace Microsoft.Performance.SDK.Runtime
             private string description;
             private ReadOnlyCollection<Option> commandLineOptionsRO;
 
+            private List<ICustomDataProcessor> createdProcessors;
+
+            // this class is nested; isDisposed in the outer class
+            // is visible, and we do not want conflicts.
+            private bool isImplDisposed;
+
             /// <summary>
             ///     Initializes a new instance of the <see cref="CustomDataSourceReferenceImpl"/>
             ///     class.
@@ -230,8 +272,9 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.name = metadata.Name;
                 this.description = metadata.Description;
                 this.commandLineOptionsRO = this.Instance.CommandLineOptions.ToList().AsReadOnly();
+                this.createdProcessors = new List<ICustomDataProcessor>();
 
-                this.isDisposed = false;
+                this.isImplDisposed = false;
             }
 
             /// <summary>
@@ -252,7 +295,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.description = other.description;
                 this.commandLineOptionsRO = other.commandLineOptionsRO;
 
-                this.isDisposed = other.isDisposed;
+                this.isImplDisposed = other.isImplDisposed;
             }
 
             /// <summary>
@@ -351,6 +394,39 @@ namespace Microsoft.Performance.SDK.Runtime
             }
 
             /// <inheritdoc />
+            public override ICustomDataProcessor CreateProcessor(
+                IEnumerable<IDataSource> dataSources,
+                IProcessorEnvironment processorEnvironment,
+                ProcessorOptions commandLineOptions)
+            {
+                this.ThrowIfDisposed();
+
+                ICustomDataProcessor processor = null;
+                try
+                {
+                    processor = this.Instance.CreateProcessor(
+                        dataSources,
+                        processorEnvironment,
+                        commandLineOptions);
+                    this.createdProcessors.Add(processor);
+                    return processor;
+                }
+                catch
+                {
+                    try
+                    {
+                        this.Instance.DisposeProcessor(processor);
+                    }
+                    finally
+                    {
+                        processor.TryDispose();
+                    }
+
+                    throw;
+                }
+            }
+
+            /// <inheritdoc />
             public override bool Equals(object obj)
             {
                 this.ThrowIfDisposed();
@@ -401,14 +477,27 @@ namespace Microsoft.Performance.SDK.Runtime
             /// <inheritdoc />
             protected override void Dispose(bool disposing)
             {
-                base.Dispose(disposing);
-                if (this.isDisposed)
+                if (this.isImplDisposed)
                 {
                     return;
                 }
 
                 if (disposing)
                 {
+                    foreach (var p in this.createdProcessors)
+                    {
+                        try
+                        {
+                            this.Instance.DisposeProcessor(p);
+                        }
+                        catch
+                        {
+                        }
+
+                        p.TryDispose();
+                    }
+
+                    this.createdProcessors = null;
                     this.commandLineOptionsRO = null;
                     this.dataSourceAttributes = null;
                     this.description = null;
@@ -416,7 +505,9 @@ namespace Microsoft.Performance.SDK.Runtime
                     this.name = null;
                 }
 
-                this.isDisposed = true;
+                this.isImplDisposed = true;
+
+                base.Dispose(disposing);
             }
         }
     }

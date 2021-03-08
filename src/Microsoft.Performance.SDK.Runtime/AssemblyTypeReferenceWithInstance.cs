@@ -31,9 +31,23 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <see cref="Type"/> of <see cref="T"/>
         /// </param>
         protected AssemblyTypeReferenceWithInstance(Type type)
+            : this(type, () => (T)Activator.CreateInstance(type))
+        {
+        }
+
+        /// <summary>
+        ///     Initializes an instance of <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> with a new instance of <see cref="T"/>.
+        /// </summary>
+        /// <param name="type">
+        ///     <see cref="Type"/> of <see cref="T"/>
+        /// </param>
+        /// <param name="instanceFactory">
+        ///     The function that creates the instance.
+        /// </param>
+        protected AssemblyTypeReferenceWithInstance(Type type, Func<T> instanceFactory)
             : base(type)
         {
-            this.Instance = (T)Activator.CreateInstance(type);
+            this.Instance = instanceFactory();
             Debug.Assert(this.Instance != null);
         }
 

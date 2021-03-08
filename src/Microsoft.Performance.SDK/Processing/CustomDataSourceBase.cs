@@ -265,6 +265,12 @@ namespace Microsoft.Performance.SDK.Processing
             return isSupported;
         }
 
+        /// <inheritdoc />
+        public virtual void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            // do nothing by default.
+        }
+
         /// <summary>
         ///     When implemented in a derived class, creates a new
         ///     instance implementing <see cref="ICustomDataProcessor"/>

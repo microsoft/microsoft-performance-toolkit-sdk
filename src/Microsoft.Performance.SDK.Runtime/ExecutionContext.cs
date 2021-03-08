@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public ExecutionContext(
             IProgress<int> progress,
             Func<ICustomDataProcessor, ILogger> loggerFactory,
-            ICustomDataSource customDataSource,
+            CustomDataSourceReference customDataSource,
             IEnumerable<IDataSource> dataSources,
             IEnumerable<TableDescriptor> tablesToEnable,
             IProcessorEnvironment processorEnvironment,
@@ -60,10 +60,10 @@ namespace Microsoft.Performance.SDK.Runtime
         public Func<ICustomDataProcessor, ILogger> LoggerFactory { get; }
 
         /// <summary>
-        ///     Gets the <see cref="ICustomDataSource"/> associated
+        ///     Gets the <see cref="CustomDataSourceReference"/> associated
         ///     with the given data items.
         /// </summary>
-        public ICustomDataSource CustomDataSource { get; }
+        public CustomDataSourceReference CustomDataSource { get; }
 
         /// <summary>
         ///     Gets the <see cref="IDataSource"/>s that can be
@@ -126,7 +126,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 case "G":
                 case "g":
                 case null:
-                    return this.CustomDataSource.TryGetName();
+                    return this.CustomDataSource.Name;
 
                 default:
                     throw new FormatException($"Unsupported format specified: '{format}'");
