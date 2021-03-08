@@ -977,7 +977,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 retrieval,
                 retrievalFactory,
                 this.extensionRoot,
-                executors);
+                processorTables);
 
             return results;
         }
