@@ -619,14 +619,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             return true;
         }
 
-        public void EnableCooker(TableDescriptor descriptor)
+        public void EnableTable(TableDescriptor descriptor)
         {
             this.ThrowIfProcessed();
 
             if (!this.TryEnableTable(descriptor))
             {
-                // TRGIBEAU: Create better exception
-                throw new Exception($"Table not found: {descriptor}");
+                throw new TableNotFoundException(descriptor);
             }
         }
 
@@ -920,19 +919,20 @@ namespace Microsoft.Performance.Toolkit.Engine
             var executors = CreateExecutors(allDataSourceAssociations);
 
             var extendedTables = new HashSet<ITableExtensionReference>();
+            var processorTables = new Dictionary<TableDescriptor, ICustomDataProcessor>();
 
             foreach (var table in this.enabledTables)
             {
                 foreach (var executor in executors.Where(x => x.Context.CustomDataSource.DataTables.Contains(table)))
                 {
                     executor.Processor.EnableTable(table);
+                    processorTables.Add(table, executor.Processor);
                 }
 
                 if (this.repository.TablesById.TryGetValue(table.Guid, out ITableExtensionReference reference))
                 {
                     extendedTables.Add(reference);
                 }
-
             }
 
             var processors = this.extensionRoot.EnableDataCookers(
@@ -940,11 +940,14 @@ namespace Microsoft.Performance.Toolkit.Engine
                 new HashSet<DataCookerPath>(this.enabledCookers));
 
 
-            var processorForTable = this.repository.EnableSourceDataCookersForTables(
+            if (extendedTables.Any())
+            {
+                var processorForTable = this.repository.EnableSourceDataCookersForTables(
                 executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 extendedTables);
 
-            processors.UnionWith(processorForTable);
+                processors.UnionWith(processorForTable);
+            }            
 
             var executionResults = new List<ExecutionResult>(executors.Count);
             foreach (var executor in executors)

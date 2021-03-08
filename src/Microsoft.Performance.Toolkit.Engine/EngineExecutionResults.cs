@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
@@ -23,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly IDataExtensionRetrievalFactory retrievalFactory;
         private readonly IDataExtensionRepository repository;
         private readonly IEnumerable<DataCookerPath> sourceCookers;
-        private readonly IList<CustomDataSourceExecutor> executors;
+        private readonly IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RuntimeExecutionResults"/>
@@ -45,11 +46,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     - or -
         ///     <paramref name="repository"/> is <c>null</c>.
         /// </exception>
+        /// TODO: Going to move RuntimeExecutionResults to internal and expose calls via new interface
         public RuntimeExecutionResults(
             ICookedDataRetrieval cookedDataRetrieval,
             IDataExtensionRetrievalFactory retrievalFactory,
             IDataExtensionRepository repository,
-            IList<CustomDataSourceExecutor> executors) // TRGIBEAU: Currently using the executors directly, probably want to use a map or repository
+            IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap)
         {
             Guard.NotNull(cookedDataRetrieval, nameof(cookedDataRetrieval));
             Guard.NotNull(retrievalFactory, nameof(retrievalFactory));
@@ -59,7 +61,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.retrievalFactory = retrievalFactory;
             this.repository = repository;
             this.sourceCookers = new HashSet<DataCookerPath>(this.repository.SourceDataCookers);
-            this.executors = executors;
+            this.tableToProcessorMap = tableToProcessorMap;
         }
 
         /// <summary>
@@ -222,22 +224,21 @@ namespace Microsoft.Performance.Toolkit.Engine
             return false;
         }
 
-        // TRGIBEAU: Maybe we have them pass in a factory instead?
-        public TBuilder BuildTable<TBuilder>(TableDescriptor tableDescriptor, TBuilder tableBuilder)
-            where TBuilder : class, ITableBuilder, ITableBuilderWithRowCount
+        public ITableBuilderWithRowCount BuildTable(TableDescriptor tableDescriptor)
         {
-            if(TryBuildTable(tableDescriptor, tableBuilder, out TBuilder builder))
+            if(TryBuildTable(tableDescriptor, out ITableBuilderWithRowCount filledTableBuilder))
             {
-                return builder;
+                return filledTableBuilder;
             }
 
-            throw new Exception($"Unable to Build Table ${tableBuilder}");
+            throw new Exception($"Unable to Build Table ${tableDescriptor}");
         }
 
-        public bool TryBuildTable<TBuilder>(TableDescriptor tableDescriptor, TBuilder tableBuilder, out TBuilder filledTableBulder)
-            where TBuilder : class, ITableBuilder, ITableBuilderWithRowCount
+        public bool TryBuildTable(TableDescriptor tableDescriptor, out ITableBuilderWithRowCount filledTableBulder)
         {
             filledTableBulder = null;
+
+            var tableBuilder = new TableBuilder();
 
             if (this.repository.TablesById.TryGetValue(tableDescriptor.Guid, out ITableExtensionReference reference))
             {
@@ -254,33 +255,118 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                     filledTableBulder = tableBuilder;
                 }
-                catch (Exception ex)
+                catch
                 {
-
+                    return false;
                 }
 
                 return filledTableBulder != null;
             }
 
-
-            foreach (var executor in this.executors)
+            if (this.tableToProcessorMap.TryGetValue(tableDescriptor, out ICustomDataProcessor processor))
             {
-                if (!executor.Processor.DoesTableHaveData(tableDescriptor))
+                if (!processor.DoesTableHaveData(tableDescriptor))
                 {
-                    continue;
+                    return false;
                 }
                 try
                 {
-                    executor.Processor.BuildTable(tableDescriptor, tableBuilder);
+                    processor.BuildTable(tableDescriptor, tableBuilder);
                     filledTableBulder = tableBuilder;
                 }
-                catch (Exception ex) 
+                catch
                 {
-
-                }                
+                    return false;
+                }
             }
 
             return filledTableBulder != null;
+        }
+
+        private class TableBuilder
+            : ITableBuilder,
+              ITableBuilderWithRowCount,
+              ITableResult
+        {
+            private readonly List<TableConfiguration> builtInTableConfigurations;
+            private readonly ReadOnlyCollection<TableConfiguration> builtInTableConfigurationsRO;
+
+            private readonly List<IDataColumn> columns;
+            private readonly ReadOnlyCollection<IDataColumn> columnsRO;
+
+            private readonly Dictionary<string, TableCommandCallback> tableCommands;
+            private readonly ReadOnlyDictionary<string, TableCommandCallback> tableCommandsRO;
+
+            internal TableBuilder()
+            {
+                this.columns = new List<IDataColumn>();
+                this.columnsRO = new ReadOnlyCollection<IDataColumn>(this.columns);
+
+                this.builtInTableConfigurations = new List<TableConfiguration>();
+                this.builtInTableConfigurationsRO = new ReadOnlyCollection<TableConfiguration>(this.builtInTableConfigurations);
+
+                this.tableCommands = new Dictionary<string, TableCommandCallback>();
+                this.tableCommandsRO = new ReadOnlyDictionary<string, TableCommandCallback>(this.tableCommands);
+            }
+
+            //
+            // ITableBuilder
+            //
+
+            public IEnumerable<TableConfiguration> BuiltInTableConfigurations => this.builtInTableConfigurationsRO;
+
+            public TableConfiguration DefaultConfiguration { get; private set; }
+
+            public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
+
+            public Func<int, IEnumerable<TableRowDetailEntry>> TableRowDetailsGenerator { get; private set; }
+
+            public ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback)
+            {
+                this.tableCommands.TryAdd(commandName, callback);
+                return this;
+            }
+
+            public ITableBuilder AddTableConfiguration(TableConfiguration configuration)
+            {
+                this.builtInTableConfigurations.Add(configuration);
+                return this;
+            }
+
+            public ITableBuilder SetDefaultTableConfiguration(TableConfiguration configuration)
+            {
+                this.DefaultConfiguration = configuration;
+                return this;
+            }
+
+            public ITableBuilderWithRowCount SetRowCount(int numberOfRows)
+            {
+                this.RowCount = numberOfRows;
+                return this;
+            }           
+
+            public int RowCount { get; private set; }
+
+            public IReadOnlyCollection<IDataColumn> Columns => this.columnsRO;
+
+            public ITableBuilderWithRowCount AddColumn(IDataColumn column)
+            {
+                this.columns.Add(column);
+                return this;
+            }
+
+            public ITableBuilderWithRowCount ReplaceColumn(IDataColumn oldColumn, IDataColumn newColumn)
+            {
+                this.columns.Remove(oldColumn);
+                this.columns.Add(newColumn);
+                return this;
+            }
+
+            public ITableBuilderWithRowCount SetTableRowDetailsGenerator(Func<int, IEnumerable<TableRowDetailEntry>> generator)
+            {
+                this.TableRowDetailsGenerator = generator;
+                return this;
+            }
         }
     }
 }
