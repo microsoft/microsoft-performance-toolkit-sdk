@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TraceData xmlns="http://tempuri.org/TracePersistence.xsd">
+  <Header>
+    <TraceProvider name="Microsoft SQL Server" MajorVersion="15" MinorVersion="0" BuildNumber="2000" />
+    <ServerInformation name="MY_MACHINE\SQLEXPRESS" />
+    <ProfilerUI>
+      <OrderedColumns>
+        <ID>27</ID>
+        <ID>1</ID>
+        <ID>10</ID>
+        <ID>6</ID>
+        <ID>11</ID>
+        <ID>18</ID>
+        <ID>16</ID>
+        <ID>17</ID>
+        <ID>13</ID>
+        <ID>9</ID>
+        <ID>12</ID>
+        <ID>14</ID>
+        <ID>15</ID>
+        <ID>2</ID>
+      </OrderedColumns>
+      <TracedEvents>
+        <Event id="14">
+          <EventColumn id="1" />
+          <EventColumn id="9" />
+          <EventColumn id="10" />
+          <EventColumn id="11" />
+          <EventColumn id="6" />
+          <EventColumn id="12" />
+          <EventColumn id="14" />
+        </Event>
+        <Event id="15">
+          <EventColumn id="11" />
+          <EventColumn id="6" />
+          <EventColumn id="9" />
+          <EventColumn id="10" />
+          <EventColumn id="12" />
+          <EventColumn id="13" />
+          <EventColumn id="14" />
+          <EventColumn id="15" />
+          <EventColumn id="16" />
+          <EventColumn id="17" />
+          <EventColumn id="18" />
+        </Event>
+        <Event id="17">
+          <EventColumn id="1" />
+          <EventColumn id="9" />
+          <EventColumn id="10" />
+          <EventColumn id="11" />
+          <EventColumn id="6" />
+          <EventColumn id="12" />
+          <EventColumn id="14" />
+        </Event>
+        <Event id="10">
+          <EventColumn id="9" />
+          <EventColumn id="2" />
+          <EventColumn id="10" />
+          <EventColumn id="6" />
+          <EventColumn id="11" />
+          <EventColumn id="12" />
+          <EventColumn id="13" />
+          <EventColumn id="14" />
+          <EventColumn id="15" />
+          <EventColumn id="16" />
+          <EventColumn id="17" />
+          <EventColumn id="18" />
+        </Event>
+        <Event id="12">
+          <EventColumn id="1" />
+          <EventColumn id="9" />
+          <EventColumn id="11" />
+          <EventColumn id="6" />
+          <EventColumn id="10" />
+          <EventColumn id="12" />
+          <EventColumn id="13" />
+          <EventColumn id="14" />
+          <EventColumn id="15" />
+          <EventColumn id="16" />
+          <EventColumn id="17" />
+          <EventColumn id="18" />
+        </Event>
+        <Event id="13">
+          <EventColumn id="1" />
+          <EventColumn id="9" />
+          <EventColumn id="11" />
+          <EventColumn id="6" />
+          <EventColumn id="10" />
+          <EventColumn id="12" />
+          <EventColumn id="14" />
+        </Event>
+      </TracedEvents>
+    </ProfilerUI>
+  </Header>
+  <Events>
+    <Event id="65534" name="Trace Start">
+      <Column id="14" name="StartTime">2021-01-07T08:56:26.7-08:00</Column>
+    </Event>
+    <Event id="17" name="ExistingConnection">
+      <Column id="1" name="TextData">-- network protocol: LPC
+set quoted_identifier on
+set arithabort on
+set numeric_roundabort off
+set ansi_warnings on
+set ansi_padding on
+set ansi_nulls on
+set concat_null_yields_null on
+set cursor_close_on_commit off
+set implicit_transactions off
+set language us_english
+set dateformat mdy
+set datefirst 7
+set transaction isolation level read committed
+</Column>
+      <Column id="9" name="ClientProcessID">15928</Column>
+      <Column id="6" name="NTUserName">myusername</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:50:30.41-08:00</Column>
+      <Column id="10" name="ApplicationName">Microsoft SQL Server Management Studio - Query</Column>
+      <Column id="11" name="LoginName">MY_DOMAIN\myusername</Column>
+      <Column id="12" name="SPID">54</Column>
+    </Event>
+    <Event id="17" name="ExistingConnection">
+      <Column id="1" name="TextData">-- network protocol: LPC
+set quoted_identifier on
+set arithabort off
+set numeric_roundabort off
+set ansi_warnings on
+set ansi_padding on
+set ansi_nulls on
+set concat_null_yields_null on
+set cursor_close_on_commit off
+set implicit_transactions off
+set language us_english
+set dateformat mdy
+set datefirst 7
+set transaction isolation level read committed
+</Column>
+      <Column id="9" name="ClientProcessID">15928</Column>
+      <Column id="6" name="NTUserName">myusername</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:44:19.457-08:00</Column>
+      <Column id="10" name="ApplicationName">Microsoft SQL Server Management Studio</Column>
+      <Column id="11" name="LoginName">MY_DOMAIN\myusername</Column>
+      <Column id="12" name="SPID">56</Column>
+    </Event>
+    <Event id="17" name="ExistingConnection">
+      <Column id="1" name="TextData">-- network protocol: LPC
+set quoted_identifier on
+set arithabort off
+set numeric_roundabort off
+set ansi_warnings on
+set ansi_padding on
+set ansi_nulls on
+set concat_null_yields_null on
+set cursor_close_on_commit off
+set implicit_transactions off
+set language us_english
+set dateformat mdy
+set datefirst 7
+set transaction isolation level read committed
+</Column>
+      <Column id="9" name="ClientProcessID">15928</Column>
+      <Column id="6" name="NTUserName">myusername</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:51:09.06-08:00</Column>
+      <Column id="10" name="ApplicationName">Microsoft SQL Server Management Studio</Column>
+      <Column id="11" name="LoginName">MY_DOMAIN\myusername</Column>
+      <Column id="12" name="SPID">61</Column>
+    </Event>
+    <Event id="17" name="ExistingConnection">
+      <Column id="1" name="TextData">-- network protocol: LPC
+set quoted_identifier on
+set arithabort off
+set numeric_roundabort off
+set ansi_warnings on
+set ansi_padding on
+set ansi_nulls on
+set concat_null_yields_null on
+set cursor_close_on_commit off
+set implicit_transactions off
+set language us_english
+set dateformat mdy
+set datefirst 7
+set transaction isolation level read committed
+</Column>
+      <Column id="9" name="ClientProcessID">17104</Column>
+      <Column id="6" name="NTUserName">SQLTELEMETRY$SQLEXPRESS</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:54:46.577-08:00</Column>
+      <Column id="10" name="ApplicationName">SQLServerCEIP</Column>
+      <Column id="11" name="LoginName">NT SERVICE\SQLTELEMETRY$SQLEXPRESS</Column>
+      <Column id="12" name="SPID">62</Column>
+    </Event>
+    <Event id="17" name="ExistingConnection">
+      <Column id="1" name="TextData">-- network protocol: LPC
+set quoted_identifier on
+set arithabort on
+set numeric_roundabort off
+set ansi_warnings on
+set ansi_padding on
+set ansi_nulls on
+set concat_null_yields_null on
+set cursor_close_on_commit off
+set implicit_transactions off
+set language us_english
+set dateformat mdy
+set datefirst 7
+set transaction isolation level read committed
+</Column>
+      <Column id="9" name="ClientProcessID">15928</Column>
+      <Column id="6" name="NTUserName">myusername</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:54:44.873-08:00</Column>
+      <Column id="10" name="ApplicationName">Microsoft SQL Server Management Studio - Query</Column>
+      <Column id="11" name="LoginName">MY_DOMAIN\myusername</Column>
+      <Column id="12" name="SPID">63</Column>
+    </Event>
+    <Event id="14" name="Audit Login">
+      <Column id="1" name="TextData">-- network protocol: LPC
+set quoted_identifier on
+set arithabort off
+set numeric_roundabort off
+set ansi_warnings on
+set ansi_padding on
+set ansi_nulls on
+set concat_null_yields_null on
+set cursor_close_on_commit off
+set implicit_transactions off
+set language us_english
+set dateformat mdy
+set datefirst 7
+set transaction isolation level read committed
+</Column>
+      <Column id="9" name="ClientProcessID">15928</Column>
+      <Column id="6" name="NTUserName">myusername</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:56:31.25-08:00</Column>
+      <Column id="10" name="ApplicationName">Microsoft SQL Server Management Studio</Column>
+      <Column id="11" name="LoginName">MY_DOMAIN\myusername</Column>
+      <Column id="12" name="SPID">65</Column>
+    </Event>
+    <Event id="13" name="SQL:BatchStarting">
+      <Column id="1" name="TextData">SET LOCK_TIMEOUT 10000</Column>
+      <Column id="9" name="ClientProcessID">15928</Column>
+      <Column id="6" name="NTUserName">myusername</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:56:31.247-08:00</Column>
+      <Column id="10" name="ApplicationName">Microsoft SQL Server Management Studio</Column>
+      <Column id="11" name="LoginName">MY_DOMAIN\myusername</Column>
+      <Column id="12" name="SPID">65</Column>
+    </Event>
+    <Event id="12" name="SQL:BatchCompleted">
+      <Column id="1" name="TextData">SET LOCK_TIMEOUT 10000</Column>
+      <Column id="9" name="ClientProcessID">15928</Column>
+      <Column id="6" name="NTUserName">myusername</Column>
+      <Column id="14" name="StartTime">2021-01-07T08:56:31.247-08:00</Column>
+      <Column id="10" name="ApplicationName">Microsoft SQL Server Management Studio</Column>
+      <Column id="11" name="LoginName">MY_DOMAIN\myusername</Column>
+      <Column id="12" name="SPID">65</Column>
+      <Column id="13" name="Duration">88</Column>
+      <Column id="15" name="EndTime">2021-01-07T08:56:31.247-08:00</Column>
+      <Column id="16" name="Reads">0</Column>
+      <Column id="17" name="Writes">0</Column>
+      <Column id="18" name="CPU">0</Column>
+    </Event>
+    <Event id="65533" name="Trace Stop">
+      <Column id="14" name="StartTime">2021-01-07T08:56:56.767-08:00</Column>
+    </Event>
+  </Events>
+</TraceData>

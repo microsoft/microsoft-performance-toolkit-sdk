@@ -310,15 +310,18 @@ namespace Microsoft.Performance.SDK.Processing
         protected abstract bool IsDataSourceSupportedCore(IDataSource dataSource);
 
         /// <summary>
-        ///     When overridden in a derived class, gives environment into this instance.
+        ///     A derived class may implement this to perform additional actions when an application
+        ///     environment is made available.
         /// </summary>
         /// <param name="applicationEnvironment">
         ///     The handle back to the application environment.
         /// </param>
-        protected abstract void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment);
+        protected virtual void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
+        {
+        }
 
         /// <summary>
-        /// A derived class may implement this to perform additional actions when a logger is made available.
+        ///     A derived class may implement this to perform additional actions when a logger is made available.
         /// </summary>
         /// <param name="logger">Use to log information. <seealso cref="ILogger"/></param>
         protected virtual void SetLoggerCore(ILogger logger)
@@ -326,8 +329,8 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        /// If a internal table does not provide a TableFactoryAttribute, this method may be implemented
-        /// to generate an Action to create the table.
+        ///     If a internal table does not provide a TableFactoryAttribute, this method may be implemented
+        ///     to generate an Action to create the table.
         /// </summary>
         /// <param name="type">Type associated with the table</param>
         /// <returns>An action to build the table, or null</returns>

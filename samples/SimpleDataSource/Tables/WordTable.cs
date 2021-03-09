@@ -123,6 +123,13 @@ namespace SampleCustomDataSource.Tables
             };
 
             //
+            // Column roles describe what columns should be used for various graphing properties. For
+            // this table, the only graphing column is the time column, which should be used as the
+            // start time of each row during graphing.
+            //
+            config.AddColumnRole(ColumnRole.StartTime, TimeColumn);
+
+            //
             //
             //  Use the table builder to build the table. 
             //  Add and set table configuration if applicable.
