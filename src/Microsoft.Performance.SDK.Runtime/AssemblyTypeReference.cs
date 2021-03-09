@@ -13,6 +13,13 @@ namespace Microsoft.Performance.SDK.Runtime
     /// <typeparam name="TDerived">
     ///     A type that extends this class.
     /// </typeparam>
+    /// <remarks>
+    ///     This type is disposable because the concrete
+    ///     implementations are disposable. This way, there is consistency
+    ///     about whether to dispose instances of this type,
+    ///     and there is consistency in how the object will behave
+    ///     after disposal.
+    /// </remarks>
     public abstract class AssemblyTypeReference<TDerived>
         : IEquatable<TDerived>,
           ICloneable<TDerived>,
@@ -31,7 +38,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="type">
         ///     Reference <see cref="Type"/>
         /// </param>
-        protected AssemblyTypeReference(Type type)
+        protected internal AssemblyTypeReference(Type type)
         {
             Debug.Assert(type != null);
 
