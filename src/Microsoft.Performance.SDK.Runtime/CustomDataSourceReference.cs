@@ -198,19 +198,6 @@ namespace Microsoft.Performance.SDK.Runtime
             ProcessorOptions commandLineOptions);
 
         /// <summary>
-        ///     Disposes any <see cref="ICustomDataProcessor"/>s
-        ///     that have been created by this instance. Each
-        ///     processor will be passed to <see cref="ICustomDataSource.DisposeProcessor(ICustomDataProcessor)"/>
-        ///     before being disposed. If the processor is not
-        ///     disposable, then nothing will occur after the call to
-        ///     <see cref="ICustomDataSource.DisposeProcessor(ICustomDataProcessor)"/>.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public abstract void Release();
-
-        /// <summary>
         ///     Determines whether the given <see cref="IDataSource"/>
         ///     is supported by the <see cref="ICustomDataSource>"/> referenced by
         ///     this <see cref="CustomDataSourceReference"/>.
@@ -435,26 +422,6 @@ namespace Microsoft.Performance.SDK.Runtime
             }
 
             /// <inheritdoc />
-            public override void Release()
-            {
-                this.ThrowIfDisposed();
-                foreach (var p in this.createdProcessors)
-                {
-                    try
-                    {
-                        this.Instance.DisposeProcessor(p);
-                    }
-                    catch
-                    {
-                    }
-
-                    p.TryDispose();
-                }
-
-                this.createdProcessors.Clear();
-            }
-
-            /// <inheritdoc />
             public override bool Supports(IDataSource dataSource)
             {
                 this.ThrowIfDisposed();
@@ -551,6 +518,30 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.isImplDisposed = true;
 
                 base.Dispose(disposing);
+            }
+
+            /// <inheritdoc />
+            protected override void OnInstanceDisposing()
+            {
+                if (this.isImplDisposed)
+                {
+                    return;
+                }
+
+                foreach (var p in this.createdProcessors)
+                {
+                    try
+                    {
+                        this.Instance.DisposeProcessor(p);
+                    }
+                    catch
+                    {
+                    }
+
+                    p.TryDispose();
+                }
+
+                this.createdProcessors.Clear();
             }
         }
     }

@@ -106,7 +106,7 @@ namespace Microsoft.Performance.Testing.SDK
             return this.Instance.CreateProcessor(dataSources, processorEnvironment, commandLineOptions);
         }
 
-        public override void Release()
+        protected override void OnInstanceDisposing()
         {
         }
 

@@ -21,7 +21,10 @@ namespace Microsoft.Performance.SDK.Runtime
         : AssemblyTypeReference<Derived>
           where Derived : AssemblyTypeReferenceWithInstance<T, Derived>
     {
+        private Func<T> instanceFactory;
         private T instance;
+
+        private bool isDisposing;
         private bool isDisposed;
 
         /// <summary>
@@ -47,8 +50,8 @@ namespace Microsoft.Performance.SDK.Runtime
         protected AssemblyTypeReferenceWithInstance(Type type, Func<T> instanceFactory)
             : base(type)
         {
-            this.Instance = instanceFactory();
-            Debug.Assert(this.Instance != null);
+            this.instanceFactory = instanceFactory;
+            this.InitializeThis();
         }
 
         /// <summary>
@@ -59,6 +62,7 @@ namespace Microsoft.Performance.SDK.Runtime
             AssemblyTypeReferenceWithInstance<T, Derived> other)
             : base(other)
         {
+            this.instanceFactory = other.instanceFactory;
             this.Instance = other.Instance;
         }
 
@@ -92,6 +96,30 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
+        ///     Disposes the <see cref="Instance"/> referenced by this instance 
+        ///     without disposing this instance. The <see cref="Instance"/> is
+        ///     then reinitialized.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public void Release()
+        {
+            this.ThrowIfDisposed();
+            
+            this.OnInstanceDisposing();
+            this.instance.TryDispose();
+            this.instance = default(T);
+
+            if (this.isDisposing || this.isDisposed)
+            {
+                return;
+            }
+
+            this.InitializeThis();
+        }
+
+        /// <summary>
         ///     <inheritdoc cref="AssemblyTypeReference{Derived}.IsValidType(Type, Type)"/>
         /// </summary>
         /// <param name="candidateType"><see cref="Type"/> to be checked.</param>
@@ -103,6 +131,13 @@ namespace Microsoft.Performance.SDK.Runtime
             return IsValidType(candidateType, typeof(T));
         }
 
+        /// <summary>
+        ///     When overridden in a derived class, allows for performing
+        ///     any operations against <see cref="Instance"/> before the
+        ///     <see cref="Instance"/> is disposed.
+        /// </summary>
+        protected abstract void OnInstanceDisposing();
+
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
@@ -111,14 +146,22 @@ namespace Microsoft.Performance.SDK.Runtime
                 return;
             }
 
+            this.isDisposing = true;
             if (disposing)
             {
-                this.instance?.TryDispose();
-                this.instance = default(T);
+                this.Release();
+                this.instanceFactory = null;
             }
 
             this.isDisposed = true;
+            this.isDisposing = false;            
             base.Dispose(disposing);
+        }
+
+        private void InitializeThis()
+        {
+            this.instance = this.instanceFactory();
+            Debug.Assert(this.instance != null);
         }
     }
 }

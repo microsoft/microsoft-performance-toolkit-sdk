@@ -293,48 +293,59 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Release_CreatedProcessors_Disposed()
         {
-            CustomDataSourceReference sut = null;
-            try
+            var result = CustomDataSourceReference.TryCreateReference(
+                typeof(DisposableCustomDataSource),
+                out var sut);
+            Assert.IsTrue(result);
+
+            var instance = sut.Instance as DisposableCustomDataSource;
+            Assert.IsNotNull(instance);
+            Assert.AreEqual(0, instance.DisposeCalls);
+
+            var processors = new ICustomDataProcessor[]
             {
-                var result = CustomDataSourceReference.TryCreateReference(
-                    typeof(DisposableCustomDataSource),
-                    out sut);
-                Assert.IsTrue(result);
-
-                var instance = sut.Instance as DisposableCustomDataSource;
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(0, instance.DisposeCalls);
-
-                var processors = new ICustomDataProcessor[]
-                {
                     new FakeCustomDataProcessor(),
                     new FakeCustomDataProcessor(),
                     new DisposableCustomDataProcessor(),
-                };
+            };
 
-                var processorIndex = 0;
-                instance.ProcessorCreateFactory = () =>
-                {
-                    return processors[processorIndex++];
-                };
-
-                for (var i = 0; i < processors.Length; ++i)
-                {
-                    sut.CreateProcessor(null, null, null);
-                }
-
-                sut.Release();
-
-                CollectionAssert.AreEquivalent(
-                    processors,
-                    instance.ProcessorsDisposed);
-                Assert.IsTrue(processors.OfType<DisposableCustomDataProcessor>().All(x => x.DisposeCalls > 0));
-                Assert.AreEqual(0, sut.TrackedProcessors.Count());
-            }
-            finally
+            var processorIndex = 0;
+            instance.ProcessorCreateFactory = () =>
             {
-                sut?.Dispose();
+                return processors[processorIndex++];
+            };
+
+            for (var i = 0; i < processors.Length; ++i)
+            {
+                sut.CreateProcessor(null, null, null);
             }
+
+            sut.Release();
+
+            CollectionAssert.AreEquivalent(
+                processors,
+                instance.ProcessorsDisposed);
+            Assert.IsTrue(processors.OfType<DisposableCustomDataProcessor>().All(x => x.DisposeCalls > 0));
+            Assert.AreEqual(0, sut.TrackedProcessors.Count());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Release_InstanceReinitialized()
+        {
+            var result = CustomDataSourceReference.TryCreateReference(
+                typeof(DisposableCustomDataSource),
+                out var sut);
+            Assert.IsTrue(result);
+
+            var instance = sut.Instance as DisposableCustomDataSource;
+            Assert.IsNotNull(instance);
+            Assert.AreEqual(0, instance.DisposeCalls);
+
+            sut.Release();
+
+            Assert.AreEqual(1, instance.DisposeCalls);
+            Assert.AreNotSame(instance, sut.Instance);
         }
 
         private static void RunCreateSuccessTest(Type type)
