@@ -113,10 +113,5 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             return this.useDataExtensionDependencyState &&
                 this.DependencyState != null;
         }
-
-        public void Release()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

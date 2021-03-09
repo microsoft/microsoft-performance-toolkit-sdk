@@ -106,10 +106,6 @@ namespace Microsoft.Performance.Testing.SDK
             return this.Instance.CreateProcessor(dataSources, processorEnvironment, commandLineOptions);
         }
 
-        protected override void OnInstanceDisposing()
-        {
-        }
-
         private void InitializeThis()
         {
             this.GuidSetter = this.Instance.TryGetGuid();

@@ -44,7 +44,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.GetOrCreateInstance(new FakeRetrieval()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.PerformAdditionalDataExtensionValidation(new FakeSupport(), new FakeReference()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Release());
             }
             finally
             {
@@ -100,27 +99,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 sut?.Dispose();
             }
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void WhenReleased_InstanceReset()
-        {
-            var result = CompositeDataCookerReference.TryCreateReference(
-                typeof(DisposableCompositeDataCooker),
-                out var sut);
-
-            Assert.IsTrue(result);
-
-            var instance = sut.GetOrCreateInstance(new FakeRetrieval()) as DisposableCompositeDataCooker;
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(0, instance.DisposeCalls);
-
-            sut.Release();
-
-            Assert.AreEqual(1, instance.DisposeCalls);
-            var newInstance = sut.GetOrCreateInstance(new FakeRetrieval());
-            Assert.AreNotSame(instance, newInstance);
         }
 
         private sealed class FakeRetrieval
@@ -183,11 +161,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             }
 
             public void ProcessDependencies(IDataExtensionRepository availableDataExtensions)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Release()
             {
                 throw new NotImplementedException();
             }

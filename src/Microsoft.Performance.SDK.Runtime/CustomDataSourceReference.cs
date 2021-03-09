@@ -487,7 +487,18 @@ namespace Microsoft.Performance.SDK.Runtime
 
                 if (disposing)
                 {
-                    this.Release();
+                    foreach (var p in this.createdProcessors)
+                    {
+                        try
+                        {
+                            this.Instance.DisposeProcessor(p);
+                        }
+                        catch
+                        {
+                        }
+
+                        p.TryDispose();
+                    }
 
                     this.createdProcessors = null;
                     this.commandLineOptionsRO = null;
@@ -500,30 +511,6 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.isImplDisposed = true;
 
                 base.Dispose(disposing);
-            }
-
-            /// <inheritdoc />
-            protected override void OnInstanceDisposing()
-            {
-                if (this.isImplDisposed)
-                {
-                    return;
-                }
-
-                foreach (var p in this.createdProcessors)
-                {
-                    try
-                    {
-                        this.Instance.DisposeProcessor(p);
-                    }
-                    catch
-                    {
-                    }
-
-                    p.TryDispose();
-                }
-
-                this.createdProcessors.Clear();
             }
         }
     }
