@@ -26,10 +26,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             this.DependencyState = new DataExtensionDependencyState(this);
         }
 
-        ~TestDataExtensionReference()
-        {
-        }
-
         public HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
         public virtual IReadOnlyCollection<DataCookerPath> RequiredDataCookers => this.requiredDataCookers;
 

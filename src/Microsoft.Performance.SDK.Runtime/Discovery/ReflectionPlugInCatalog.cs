@@ -99,15 +99,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             extensionDiscovery.RegisterTypeConsumer(this);
         }
 
-        /// <summary>
-        ///     Finalizes an instance of the <see cref="ReflectionPlugInCatalog"/>
-        ///     class.
-        /// </summary>
-        ~ReflectionPlugInCatalog()
-        {
-            this.Dispose(false);
-        }
-
         /// <inheritdoc />
         public IEnumerable<CustomDataSourceReference> PlugIns
         {

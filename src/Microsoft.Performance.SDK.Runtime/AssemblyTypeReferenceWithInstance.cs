@@ -67,15 +67,6 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/>
-        ///     class.
-        /// </summary>
-        ~AssemblyTypeReferenceWithInstance()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets an instance of <see cref="T"/>
         /// </summary>
         /// <exception cref="ObjectDisposedException">

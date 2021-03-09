@@ -55,15 +55,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="BaseDataCookerReference{TDerived}"/>
-        ///     class.
-        /// </summary>
-        ~BaseDataCookerReference()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets the <see cref="DataCookerPath"/> of the referenced
         ///     cooker.
         /// </summary>

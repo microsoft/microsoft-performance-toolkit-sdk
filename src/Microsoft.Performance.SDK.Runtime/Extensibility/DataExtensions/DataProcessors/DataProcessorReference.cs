@@ -62,15 +62,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="DataProcessorReference"/>
-        ///     class.
-        /// </summary>
-        ~DataProcessorReference()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets or sets the id of this instance.
         /// </summary>
         /// <exception cref="System.ObjectDisposedException">

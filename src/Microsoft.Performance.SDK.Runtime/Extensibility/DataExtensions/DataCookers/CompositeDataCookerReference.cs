@@ -56,15 +56,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="CompositeDataCookerReference"/>
-        ///     class.
-        /// </summary>
-        ~CompositeDataCookerReference()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
         ///     <paramref name="candidateType"/>.
         ///     <para/>

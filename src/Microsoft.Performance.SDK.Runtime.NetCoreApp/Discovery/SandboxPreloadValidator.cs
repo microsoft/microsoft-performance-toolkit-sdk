@@ -40,11 +40,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
             this.loadContext = new MetadataLoadContext(this.resolver);
         }
 
-        ~SandboxPreloadValidator()
-        {
-            this.Dispose(false);
-        }
-
         public bool IsAssemblyAcceptable(string fullPath, out ErrorInfo error)
         {
             Assembly loaded;

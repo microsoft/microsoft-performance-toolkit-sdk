@@ -70,15 +70,6 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="AssemblyTypeReference{TDerived}"/>
-        ///     class.
-        /// </summary>
-        ~AssemblyTypeReference()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets the assembly <see cref="Type"/> referenced.
         /// </summary>
         /// <exception cref="ObjectDisposedException">

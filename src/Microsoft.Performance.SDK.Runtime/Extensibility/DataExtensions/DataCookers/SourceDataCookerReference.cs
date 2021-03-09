@@ -96,15 +96,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="SourceDataCookerReference"/>
-        ///     class.
-        /// </summary>
-        ~SourceDataCookerReference()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets the strategy used by the referenced cooker for
         ///     producing data.
         /// </summary>

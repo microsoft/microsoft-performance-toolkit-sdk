@@ -73,15 +73,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="TableExtensionReference"/>
-        ///     class.
-        /// </summary>
-        ~TableExtensionReference()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets the descriptor of the referenced table.
         /// </summary>
         /// <exception cref="System.ObjectDisposedException">

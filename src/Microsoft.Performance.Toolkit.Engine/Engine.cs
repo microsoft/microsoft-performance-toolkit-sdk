@@ -87,15 +87,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="Engine"/>
-        ///     class.
-        /// </summary>
-        ~Engine()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets the directory that the engine will scan for extensions.
         ///     This directory is scanned during <see cref="Create"/> when
         ///     creating an instance of the engine. See <see cref="SetExtensionDirectory(string)"/>

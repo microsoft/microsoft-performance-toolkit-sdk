@@ -71,15 +71,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             this.errorsRO = new ReadOnlyCollection<ErrorInfo>(this.errors);
         }
 
-        /// <summary>
-        ///     Finalizes an instance of the <see cref="DataExtensionReference{TDerived}"/>
-        ///     class.
-        /// </summary>
-        ~DataExtensionReference()
-        {
-            this.Dispose(false);
-        }
-
         /// <inheritdoc />
         public IDataExtensionDependencyState DependencyState
         {

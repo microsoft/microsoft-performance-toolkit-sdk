@@ -56,15 +56,6 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Finalizes an instance of the <see cref="ExtensionRoot"/>
-        ///     class.
-        /// </summary>
-        ~ExtensionRoot()
-        {
-            this.Dispose(false);
-        }
-
-        /// <summary>
         ///     Gets the catalog exposing plugins.
         /// </summary>
         /// <exception cref="System.ObjectDisposedException">

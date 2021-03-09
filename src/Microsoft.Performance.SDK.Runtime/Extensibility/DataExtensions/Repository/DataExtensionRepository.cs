@@ -39,15 +39,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
 
         private bool isDisposed = false;
 
-        /// <summary>
-        ///     Finalizes an instance of the <see cref="DataExtensionRepository"/>
-        ///     class.
-        /// </summary>
-        ~DataExtensionRepository()
-        {
-            this.Dispose(false);
-        }
-
         /// <inheritdoc />
         public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById
         {

@@ -105,15 +105,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             this.isDisposed = false;
         }
-        
-        /// <summary>
-        ///     Finalizes an instance of the <see cref="PluginsLoader"/>
-        ///     class.
-        /// </summary>
-        ~PluginsLoader()
-        {
-            this.Dispose(false);
-        }
 
         /// <summary>
         ///     All of the custom data sources that have been loaded by plugins.

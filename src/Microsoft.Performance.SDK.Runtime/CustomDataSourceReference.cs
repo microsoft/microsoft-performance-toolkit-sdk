@@ -66,15 +66,6 @@ namespace Microsoft.Performance.SDK.Runtime
         {
         }
 
-        /// <summary>
-        ///     Finalizes an instance of the <see cref="CustomDataSourceReference"/>
-        ///     class.
-        /// </summary>
-        ~CustomDataSourceReference()
-        {
-            this.Dispose(false);
-        }
-
         /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -307,15 +298,6 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.commandLineOptionsRO = other.commandLineOptionsRO;
 
                 this.isImplDisposed = other.isImplDisposed;
-            }
-
-            /// <summary>
-            ///     Finalizes an instance of the <see cref="CustomDataSourceReferenceImpl"/>
-            ///     class.
-            /// </summary>
-            ~CustomDataSourceReferenceImpl()
-            {
-                this.Dispose(false);
             }
 
             /// <inheritdoc />
