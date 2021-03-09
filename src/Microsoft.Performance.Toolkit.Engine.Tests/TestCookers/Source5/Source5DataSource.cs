@@ -40,10 +40,5 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
                 Extension,
                 Path.GetExtension(dataSource.Uri.LocalPath));
         }
-
-        protected override void SetApplicationEnvironmentCore(
-            IApplicationEnvironment applicationEnvironment)
-        {
-        }
     }
 }

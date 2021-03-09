@@ -8,6 +8,7 @@ using SampleCustomDataSource.Tables;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,7 +38,9 @@ namespace SampleCustomDataSource
         private readonly string[] filePaths;
 
         // The "processed data": the contents of each file. We store this as a mapping of a filename
-        // to a collection of the (timestamp, text) tuples that make up its lines
+        // to a collection of the (timestamp, text) tuples that make up its lines. Each timestamp
+        // in these tuples are relative to the earliest datetime in the files' content. E.g. the first
+        // event across all files will have a timestamp of 0ns.
         private IReadOnlyDictionary<string, IReadOnlyList<Tuple<Timestamp, string>>> fileContent;
 
         // Used to tell the SDK the time range of the data (if applicable) and any other relevant data for rendering / synchronizing.
@@ -89,8 +92,11 @@ namespace SampleCustomDataSource
             // The time of the first event from all lines
             DateTime firstEvent = DateTime.MinValue;
 
-            // The processed data we are building
-            var contentDictionary = new Dictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>();
+            // An intermediate step of data we are building, with incorrect (not relative) Timestamp values
+            var unrelativeContentDictionary = new Dictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>();
+
+            // The final processed data we are building, with correct (relative) Timestamp values
+            var relativeContentDictionary = new Dictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>();
 
             // Used to help calculate progress
             int nFiles = this.filePaths.Length;
@@ -152,15 +158,29 @@ namespace SampleCustomDataSource
                     ++currentLine;
                 }
 
-                contentDictionary[path] = list.AsReadOnly();
+                unrelativeContentDictionary[path] = list.AsReadOnly();
 
                 progress.Report(CalculateProgress(currentLine, currentFile, nLines, nFiles));
                 ++currentFile;
             }
 
-            this.dataSourceInfo = new DataSourceInfo(startTime.ToNanoseconds, endTime.ToNanoseconds, firstEvent.ToUniversalTime());
+            //
+            // Each Timestamp inside unrelativeContentDictionary currently is calculated from the event's DateTime.
+            // These need to be re-recalculated to be relative to startTime
+            //
+            foreach (var kvp in unrelativeContentDictionary)
+            {
+                relativeContentDictionary[kvp.Key] = kvp.Value.Select(tuple =>
+                        new Tuple<Timestamp, string>(Timestamp.FromNanoseconds((tuple.Item1 - startTime).ToNanoseconds), tuple.Item2))
+                    .ToList()
+                    .AsReadOnly();
+            }
 
-            this.fileContent = new ReadOnlyDictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>(contentDictionary);
+            // startTime is calculated from firstEvent in the above for loop, so our first event timestamp
+            // will always be 0.
+            this.dataSourceInfo = new DataSourceInfo(0, (endTime - startTime).ToNanoseconds, firstEvent.ToUniversalTime());
+
+            this.fileContent = new ReadOnlyDictionary<string, IReadOnlyList<Tuple<Timestamp, string>>>(relativeContentDictionary);
 
             progress.Report(100);
             return Task.CompletedTask;

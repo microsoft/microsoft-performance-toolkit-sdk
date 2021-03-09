@@ -1199,11 +1199,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     Extension,
                     Path.GetExtension(dataSource.Uri.LocalPath));
             }
-
-            protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }
