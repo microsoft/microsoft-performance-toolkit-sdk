@@ -26,7 +26,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private bool isDisposed;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExtensionException"/>
+        ///     Initializes a new instance of the <see cref="ExtensionRoot"/>
         ///     class, encapsulating the given catalog and repository.
         /// </summary>
         /// <param name="catalog">

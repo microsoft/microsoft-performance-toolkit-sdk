@@ -149,7 +149,7 @@ namespace Microsoft.Performance.SDK.Runtime
             "A dependency cycle has been detected between extensions.");
 
         /// <summary>
-        ///     A dependency cycle has been detected between extensions.
+        ///     One or more dependencies of the extension is missing.
         /// </summary>
         public static ErrorCodes EXTENSION_MissingRequirement = new ErrorCodes(
             40002,
