@@ -1,22 +1,21 @@
 # Abstract
 
-This document outlines making your Custom Data Sources and Extensions
-disposable.
+This document outlines making how to make a `Custom Data Source` or SDK
+extension disposable.
 
 # Motiviation
 
-Your extension manages items that require cleanup, and you would like to be
-able to implement `IDisposable` and have the SDK's runtime (Runtime) make sure
-that your extension is disposed when executioin is complete.
+When your extension manages items that require cleanup, it would be useful to
+implement `IDisposable` and have the SDK's runtime make sure that your
+extension cleans up its resources.
 
 # Usage
 
-In order for the Runtime to invoke your `IDisposable` implementation, all you
-need to do is make sure your extension implmenets `IDisposable`.
+In order for the SDK runtime to invoke your `IDisposable` implementation, you
+only need to make sure your extension implmenets `IDisposable`.
 
 Users may add the `IDisposable` interface to types implementing the following
-interfaces, whether they are implemented directly or via one of the SDK 
-provided base classes:
+interfaces:
 - `ICustomDataSource`
 - `ICustomDataProcessor`
 - `ISourceDataCooker`
@@ -24,14 +23,19 @@ provided base classes:
 - `IDataProcessor`
 
 Example:
-````
+````cs
 public class MyDisposableCooker
     : ICompositeDataCookerDescriptor,
       IDisposable
 {
     // ...
 }
+````
 
+You can add `IDisposable` on types deriving any base classes that implement the
+above interfaces, too.
+
+````cs
 public class MyDisposableCustomDataSource
     : CustomDataSourceBase,
       IDisposable
@@ -40,11 +44,12 @@ public class MyDisposableCustomDataSource
 }
 ````
 
-When this interface is present, then the implementation will be disposed when
-the Runtime is disposing. This makes disposal 'opt-in' for users without forcing
-`IDisposable` onto implementations that may not need it.
+When this interface is present, the implementation will be disposed when
+the SDK runtime itself is disposed. Disposal is __opt-in__, so users need not
+implement `IDisposable` on classes that do not need it.
 
-Example:
+Here is an example of the SDK runtime being used in a way that would allow your
+types to be cleanly disposed:
 ````
 using (var engine = Engine.Create())
 {
@@ -59,19 +64,20 @@ using (var engine = Engine.Create())
 } // all cookers, data sources, etc. cleaned up here
 ````
 
-Upon disposal, the Runtime will walk the graph of all loaded extensions and
-clean them up in order based on their dependencies. For example, if you have
-a `Composite Cooker` that dependes on a `Source Cooker`, then the `Composite
-Cooker` will be disposed _before_ the `Source Cooker`. Extensions are disposed
-before any of their dependencies are disposed.
+Upon disposal, the SDK runtime will determine the relationship between all
+loaded modules and clean them up in order based on their dependencies. For
+example, if you have a `CompositeCooker` that dependes on a `SourceCooker`,
+then the `CompositeCooker` will be disposed of _before_ the `Source Cooker`.
+In short, all extensions are disposed of before any of their dependencies are
+disposed.
 
-Due to the relationship between CustomDataSources and CustomDataProcessors, an 
-additional method has been added to the `ICustomDataSource` interface:
-DisposeProcessor. This method is invoked on the Custom Data Source right before
-a Custom Data Processor is to be cleaned up. This gives the Custom Data Source
-an opportunity to clean up any state it might have related to the processor.
-`CustomDataSourceBase` provides a default implementation of this method that
-does nothing.
+Due to the relationship between a `CustomDataSource` and a
+`CustomDataProcessor`, an additional method has been added to the
+`ICustomDataSource` interface: DisposeProcessor. This method is invoked on the
+`CustomDataSource` right before a `CustomDataProcessor` is to be cleaned up.
+This gives the `CustomDataSource` an opportunity to clean up any state it might
+have related to its processor. `CustomDataSourceBase` provides a default
+implementation of this method that does nothing.
 
 # Additional Notes
 
@@ -82,6 +88,6 @@ that implementation.
 # Conclusion
 
 We have seen how to make our extensions disposable in order to allow for the
-Runtime to automatically dispose our extensions.
+SDK runtime to automatically dispose of objects created by our plugins.
 
 [Back to Advanced Topics](Overview.md)
