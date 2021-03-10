@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     /// <summary>
     ///     Represents a reference to a composite data cooker.
     /// </summary>
-    internal class CompositeDataCookerReference
+    internal sealed class CompositeDataCookerReference
         : BaseDataCookerReference<CompositeDataCookerReference>,
           ICompositeDataCookerReference
     {
@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     This object is used to create synchronized regions
         ///     within the instance.
         /// </summary>
-        protected object instanceLock = new object();
+        private object instanceLock = new object();
 
         private bool initialized = false;
         private ICompositeDataCookerDescriptor instance = null;

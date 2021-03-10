@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
     ///     instance of their target type. Instead, <see cref="GetOrCreateInstance"/>
     ///     should be called to create an instance based on input data.
     /// </summary>
-    internal class DataProcessorReference
+    internal sealed class DataProcessorReference
         : DataExtensionReference<DataProcessorReference>,
           IDataProcessorReference
     {
