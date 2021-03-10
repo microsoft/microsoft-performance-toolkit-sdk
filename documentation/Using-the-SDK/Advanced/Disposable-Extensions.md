@@ -1,6 +1,6 @@
 # Abstract
 
-This document outlines making how to make a `Custom Data Source` or SDK
+This document outlines how to make a `Custom Data Source` or SDK
 extension disposable.
 
 # Motiviation
