@@ -168,6 +168,10 @@ namespace Microsoft.Performance.SDK.Runtime
                             r => r.SafeDispose(),
                             r => r.SafeDispose()));
                 }
+                catch
+                {
+                    // do not emit an exception from Dispose.
+                }
                 finally
                 {
                     this.Catalog.SafeDispose();
