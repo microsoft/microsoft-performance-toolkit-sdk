@@ -72,6 +72,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         ///     A dependency cycle exists between two or more
         ///     componenets in the graph.
         /// </exception>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     <paramref name="catalog"/> is disposed.
+        ///     - or -
+        ///     <paramref name="repository"/> is disposed.
+        /// </exception>
         public static DependencyDag Create(
             IPlugInCatalog catalog,
             IDataExtensionRepository repository)
