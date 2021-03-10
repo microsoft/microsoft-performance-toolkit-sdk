@@ -1,7 +1,9 @@
-﻿using Microsoft.Performance.SDK.Processing;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
