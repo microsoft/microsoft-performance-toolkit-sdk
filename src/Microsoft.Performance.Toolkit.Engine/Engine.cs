@@ -50,7 +50,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         private List<DataCookerPath> enabledCookers;
         private ReadOnlyCollection<DataCookerPath> enabledCookersRO;
 
-        // TRGIBEAU: Maybe make this a hashset?
         private readonly List<TableDescriptor> enabledTables;
         private readonly ReadOnlyCollection<TableDescriptor> enabledTablesRO;
 
@@ -797,7 +796,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
                 instance.extensionRoot = new ExtensionRoot(catalog, repo);
 
-                // TRGIBEAU: Do we need anything else off of the Reference?
                 var allTables = new HashSet<TableDescriptor>();
                 foreach (var tableId in repoTuple.Item2.TablesById)
                 {
