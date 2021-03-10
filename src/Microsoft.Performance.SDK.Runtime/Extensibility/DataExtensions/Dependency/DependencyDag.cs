@@ -84,7 +84,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             Guard.NotNull(catalog, nameof(catalog));
             Guard.NotNull(repository, nameof(repository));
 
-
             if (!catalog.IsLoaded)
             {
                 throw new ArgumentException("The catalog must be loaded.", nameof(catalog));
