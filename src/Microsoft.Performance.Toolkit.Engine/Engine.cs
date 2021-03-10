@@ -618,6 +618,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             return true;
         }
 
+        /// <summary>
+        ///     Enables the given table for processing when <see cref="Process"/>
+        ///     is called.
+        /// </summary>
+        /// <param name="descriptor">
+        ///     The table to enable.
+        /// </param>
         public void EnableTable(TableDescriptor descriptor)
         {
             this.ThrowIfProcessed();
@@ -628,6 +635,18 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Attempts to enable the given cooker for processing when <see cref="Process"/>
+        ///     is called.
+        /// </summary>
+        /// <param name="descriptor">
+        ///     The table to enable.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the table exists and can be enabled;
+        ///     <c>false</c> otherwise. Note that <c>false</c> is
+        ///     always returned when <see cref="IsProcessed"/> is <c>true</c>.
+        /// </returns>
         public bool TryEnableTable(TableDescriptor descriptor)
         {
             if (this.IsProcessed)

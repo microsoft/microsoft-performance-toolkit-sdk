@@ -224,6 +224,18 @@ namespace Microsoft.Performance.Toolkit.Engine
             return false;
         }
 
+        /// <summary>
+        ///     Checks if the given <paramref name="tableDescriptor"/> has data available.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The table to check.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> the table has data available;
+        ///     <c>false</c> otherwise.
+        ///     <c>null</c> the table does not support checking if data is available, 
+        ///     recommend to call <see cref="BuildTable(TableDescriptor)"/>.
+        /// </returns>
         public bool? IsTableDataAvailable(TableDescriptor tableDescriptor)
         {
             if (TryOnRepository(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
@@ -239,6 +251,18 @@ namespace Microsoft.Performance.Toolkit.Engine
             return null;
         }
 
+        /// <summary>
+        ///     Builds a table with the given <paramref name="tableDescriptor"/>.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The table to build.
+        /// </param>
+        /// <returns>
+        ///     The built table.
+        /// </returns>
+        /// <exception cref="TableNotBuiltException">
+        ///     Table cannot be built for the given <paramref name="tableDescriptor"/>.
+        /// </exception>
         public ITableResult BuildTable(TableDescriptor tableDescriptor)
         {
             if(TryBuildTable(tableDescriptor, out ITableResult filledTableBuilder))
@@ -249,6 +273,19 @@ namespace Microsoft.Performance.Toolkit.Engine
             throw new TableNotBuiltException(tableDescriptor);
         }
 
+        /// <summary>
+        ///     Attempts to build a table with the given <paramref name="tableDescriptor"/>.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The table to build.
+        /// </param>
+        /// <param name="filledTableBulder">
+        ///     The built table, if any.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the table for the given <paramref name="tableDescriptor"/> was built;
+        ///     <c>false</c> otherwise.
+        /// </returns>
         public bool TryBuildTable(TableDescriptor tableDescriptor, out ITableResult filledTableBulder)
         {
             var tableBuilder = new TableBuilder();
