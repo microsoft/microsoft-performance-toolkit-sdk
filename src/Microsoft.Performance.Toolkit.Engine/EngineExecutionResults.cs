@@ -233,9 +233,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <returns>
         ///     <c>true</c> the table has data available;
         ///     <c>false</c> otherwise.
-        ///     <c>null</c> the table does not support checking if data is available, 
-        ///     recommend to call <see cref="BuildTable(TableDescriptor)"/>.
+        ///     <c>null</c> the table does not support checking if data is available.
         /// </returns>
+        /// <remarks>
+        ///     If this method returns <c>null</c> and you must check if the given 
+        ///     descriptor has data, you can check if the <see cref="ITableBuilder"/> 
+        ///     returned from <see cref="BuildTable(TableDescriptor)"/> 
+        ///     has a <see cref="ITableBuilder.RowCount"/> greater than 0."
+        /// </remarks>
         public bool? IsTableDataAvailable(TableDescriptor tableDescriptor)
         {
             if (TryOnRepository(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
@@ -261,11 +266,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The built table.
         /// </returns>
         /// <exception cref="TableNotBuiltException">
-        ///     Table cannot be built for the given <paramref name="tableDescriptor"/>.
+        ///     A table cannot be built for the given <paramref name="tableDescriptor"/>.
         /// </exception>
         public ITableResult BuildTable(TableDescriptor tableDescriptor)
         {
-            if(TryBuildTable(tableDescriptor, out ITableResult filledTableBuilder))
+            if (TryBuildTable(tableDescriptor, out ITableResult filledTableBuilder))
             {
                 return filledTableBuilder;
             }

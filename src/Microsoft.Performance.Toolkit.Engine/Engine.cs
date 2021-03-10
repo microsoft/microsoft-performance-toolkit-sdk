@@ -625,6 +625,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="descriptor">
         ///     The table to enable.
         /// </param>
+        /// <exception cref="TableNotFoundException">
+        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
+        /// </exception>
+        /// <exception cref="InstanceAlreadyProcessedException">
+        ///     This instance has already been processed.
+        /// </exception>
         public void EnableTable(TableDescriptor descriptor)
         {
             this.ThrowIfProcessed();
