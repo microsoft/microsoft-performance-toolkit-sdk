@@ -339,7 +339,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="UnsupportedDataSourceException">
         ///     <paramref name="dataSource"/> cannot be processed by any
         ///     discovered extensions.
-        /// </exception>=
+        /// </exception>
         public void AddDataSource(IDataSource dataSource)
         {
             Guard.NotNull(dataSource, nameof(dataSource));

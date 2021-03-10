@@ -43,7 +43,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
     ///     Listeners are guaranteed to not miss any loaded custom data sources that get loaded concurrently
     ///     with their <see cref="Subscribe(IPluginsConsumer)"/> call.
     /// </summary>
-    public class PluginsLoader
+    public sealed class PluginsLoader
         : IDisposable
     {
         private readonly object mutex = new object();
@@ -364,7 +364,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     resources; <c>false</c> to dispose only unmanaged
         ///     resources.
         /// </param>
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (this.isDisposed)
             {
