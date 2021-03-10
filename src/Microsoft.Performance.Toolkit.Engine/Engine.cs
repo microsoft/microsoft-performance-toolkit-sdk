@@ -36,9 +36,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         private List<DataCookerPath> compositeDataCookers;
         private ReadOnlyCollection<DataCookerPath> compositeDataCookersRO;
 
-        private readonly Dictionary<Guid, TableDescriptor> tableGuidToDescriptor;
-        private readonly List<TableDescriptor> allTables;
-        private readonly ReadOnlyCollection<TableDescriptor> allTablesRO;
+        private Dictionary<Guid, TableDescriptor> tableGuidToDescriptor;
+        private List<TableDescriptor> allTables;
+        private ReadOnlyCollection<TableDescriptor> allTablesRO;
 
         private List<DataProcessorId> dataProcessors;
 
@@ -53,7 +53,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly List<TableDescriptor> enabledTables;
         private readonly ReadOnlyCollection<TableDescriptor> enabledTablesRO;
 
-        private IDataExtensionRepositoryBuilder repository;
         private DataExtensionFactory factory;
         private ExtensionRoot extensionRoot;
 
@@ -278,16 +277,30 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.creationErrors = value;
             }
         }
-        
+
         /// <summary>
         ///     Gets the collection of all enabled tables
         /// </summary>
-        public IEnumerable<TableDescriptor> EnableTables => this.enabledTablesRO;
+        public IEnumerable<TableDescriptor> EnableTables
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.enabledTablesRO;
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of available tables
         /// </summary>
-        public IEnumerable<TableDescriptor> AllTables => this.allTablesRO;
+        public IEnumerable<TableDescriptor> AllTables
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.allTablesRO;
+            }
+        }
 
         /// <summary>
         ///     Creates a new instance of the <see cref="Engine" /> class.
@@ -633,6 +646,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         public void EnableTable(TableDescriptor descriptor)
         {
+            this.ThrowIfDisposed();
             this.ThrowIfProcessed();
 
             if (!this.TryEnableTable(descriptor))
@@ -655,6 +669,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </returns>
         public bool TryEnableTable(TableDescriptor descriptor)
         {
+            this.ThrowIfDisposed();
             if (this.IsProcessed)
             {
                 return false;
@@ -730,7 +745,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 this.extensionRoot.SafeDispose();
 
-                this.allTables = null;
+                this.allTablesRO = null;
+                this.allTables = null;                
                 this.applicationEnvironment = null;
                 this.compositeDataCookers = null;
                 this.creationErrors = null;
@@ -946,13 +962,13 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             foreach (var table in this.enabledTables)
             {
-                foreach (var executor in executors.Where(x => x.Context.CustomDataSource.DataTables.Contains(table)))
+                foreach (var executor in executors.Where(x => x.Context.CustomDataSource.AvailableTables.Contains(table)))
                 {
                     executor.Processor.EnableTable(table);
                     processorTables.Add(table, executor.Processor);
                 }
 
-                if (this.repository.TablesById.TryGetValue(table.Guid, out ITableExtensionReference reference))
+                if (this.extensionRoot.TablesById.TryGetValue(table.Guid, out ITableExtensionReference reference))
                 {
                     extendedTables.Add(reference);
                 }
@@ -965,7 +981,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (extendedTables.Any())
             {
-                var processorForTable = this.repository.EnableSourceDataCookersForTables(
+                var processorForTable = this.extensionRoot.EnableSourceDataCookersForTables(
                 executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 extendedTables);
 
