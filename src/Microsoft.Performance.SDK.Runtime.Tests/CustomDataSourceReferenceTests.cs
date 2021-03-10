@@ -6,7 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -121,6 +124,170 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsTrue(clone.AvailableTables.All(x => reference.AvailableTables.Contains(x)));
         }
 
+        [TestMethod]
+        [UnitTest]
+        public void WhenDisposed_EverythingThrows()
+        {
+            CustomDataSourceReference sut = null;
+            try
+            {
+                var result = CustomDataSourceReference.TryCreateReference(
+                    typeof(SampleCds),
+                    out sut);
+                Assert.IsTrue(result);
+
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.AssemblyPath);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.AvailableTables);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.CommandLineOptions);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TrackedProcessors);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.DataSources);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Description);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Guid);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Instance);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Name);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Type);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Version);
+
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.AreDirectoriesSupported());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.AreExtensionlessFilesSupported());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Clone());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.CloneT());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateProcessor(null, null, null));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Supports(Any.DataSource()));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetCanonicalFileExtensions());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetDirectoryDescription());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetExtensionlessFileDescription());
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetFileDescription(".txt"));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetFileExtensions());
+            }
+            finally
+            {
+                sut?.Dispose();
+            }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void CanDisposeMultipleTimes()
+        {
+            CustomDataSourceReference sut = null;
+            try
+            {
+                var result = CustomDataSourceReference.TryCreateReference(
+                    typeof(SampleCds),
+                    out sut);
+                Assert.IsTrue(result);
+
+                sut.Dispose();
+                sut.Dispose();
+                sut.Dispose();
+            }
+            finally
+            {
+                sut?.Dispose();
+            }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenDisposed_InstanceDisposed()
+        {
+            CustomDataSourceReference sut = null;
+            try
+            {
+                var result = CustomDataSourceReference.TryCreateReference(
+                    typeof(DisposableCustomDataSource),
+                    out sut);
+                Assert.IsTrue(result);
+
+                var instance = sut.Instance as DisposableCustomDataSource;
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(0, instance.DisposeCalls);
+
+                sut.Dispose();
+
+                Assert.AreEqual(1, instance.DisposeCalls);
+            }
+            finally
+            {
+                sut?.Dispose();
+            }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenDisposed_CreatedProcessorsPassedToCdsForCleanup()
+        {
+            CustomDataSourceReference sut = null;
+            try
+            {
+                var result = CustomDataSourceReference.TryCreateReference(
+                    typeof(DisposableCustomDataSource),
+                    out sut);
+                Assert.IsTrue(result);
+
+                var instance = sut.Instance as DisposableCustomDataSource;
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(0, instance.DisposeCalls);
+
+                var processors = new ICustomDataProcessor[]
+                {
+                    new FakeCustomDataProcessor(),
+                    new FakeCustomDataProcessor(),
+                    new DisposableCustomDataProcessor(),
+                };
+
+                var processorIndex = 0;
+                instance.ProcessorCreateFactory = () =>
+                {
+                    return processors[processorIndex++];
+                };
+
+                for (var i = 0; i < processors.Length; ++i)
+                {
+                    sut.CreateProcessor(null, null, null);
+                }
+
+                sut.Dispose();
+
+                CollectionAssert.AreEquivalent(
+                    processors,
+                    instance.ProcessorsDisposed);
+
+                Assert.IsTrue(processors.OfType<DisposableCustomDataProcessor>().All(x => x.DisposeCalls > 0));
+            }
+            finally
+            {
+                sut?.Dispose();
+            }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void CreateProcessor_CreatedProcessorTracked()
+        {
+            var fakeProcessor = new FakeCustomDataProcessor();
+
+            var result = CustomDataSourceReference.TryCreateReference(
+                typeof(DisposableCustomDataSource),
+                out var sut);
+
+            Assert.IsTrue(result);
+            Assert.IsNotNull(sut);
+            Assert.IsFalse(sut.TrackedProcessors.Any());
+
+            var instance = sut.Instance as DisposableCustomDataSource;
+            Assert.IsNotNull(instance);
+            instance.ProcessorCreateFactory = () => fakeProcessor;
+
+            var p = sut.CreateProcessor(null, null, null);
+
+            Assert.AreEqual(fakeProcessor, p);
+            Assert.AreEqual(fakeProcessor, sut.TrackedProcessors.Single());
+        }
+
         private static void RunCreateSuccessTest(Type type)
         {
             var result = CustomDataSourceReference.TryCreateReference(
@@ -207,6 +374,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             {
                 throw new NotImplementedException();
             }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [CustomDataSource("{29EF5347-53FD-49A0-8A03-C0262DE07BD4}", "What", "Test")]
@@ -256,6 +428,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
 
             public bool IsDataSourceSupported(IDataSource dataSource)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
             {
                 throw new NotImplementedException();
             }
@@ -322,6 +499,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             {
                 throw new NotImplementedException();
             }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
@@ -358,6 +540,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
+            public void DisposeProcessor(ICustomDataProcessor processor)
+            {
+                throw new NotImplementedException();
+            }
+
             public CustomDataSourceInfo GetAboutInfo()
             {
                 throw new NotImplementedException();
@@ -379,6 +566,131 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
 
             public void SetLogger(ILogger logger)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
+        [FileDataSource("ext")]
+        public class DisposableCustomDataSource
+            : ICustomDataSource,
+              IDisposable
+        {
+            public DisposableCustomDataSource()
+            {
+                this.DataTables = Enumerable.Empty<TableDescriptor>();
+                this.MetadataTables = Enumerable.Empty<TableDescriptor>();
+                this.CommandLineOptions = Enumerable.Empty<Option>();
+            }
+
+            public IEnumerable<TableDescriptor> DataTables { get; set; }
+
+            public IEnumerable<TableDescriptor> MetadataTables { get; set; }
+
+            public IEnumerable<Option> CommandLineOptions { get; set; }
+
+            public ICustomDataProcessor CreateProcessor(IDataSource dataSource, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+            {
+                return this.CreateProcessor(new[] { dataSource, }, processorEnvironment, options);
+            }
+
+            public Func<ICustomDataProcessor> ProcessorCreateFactory { get; set; }
+            public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+            {
+                return this.ProcessorCreateFactory();
+            }
+
+            public int DisposeCalls { get; private set; }
+
+            public void Dispose()
+            {
+                ++this.DisposeCalls;
+            }
+
+            public CustomDataSourceInfo GetAboutInfo()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Stream GetSerializationStream(SerializationSource source)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool IsDataSourceSupported(IDataSource dataSource)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetLogger(ILogger logger)
+            {
+                throw new NotImplementedException();
+            }
+
+            public List<ICustomDataProcessor> ProcessorsDisposed { get; set; }
+            public void DisposeProcessor(ICustomDataProcessor processor)
+            {
+                if (this.ProcessorsDisposed is null)
+                {
+                    this.ProcessorsDisposed = new List<ICustomDataProcessor>
+                    {
+                        processor,
+                    };
+                }
+                else
+                {
+                    this.ProcessorsDisposed.Add(processor);
+                }
+            }
+        }
+
+        public sealed class DisposableCustomDataProcessor
+            : ICustomDataProcessor,
+              IDisposable
+        {
+            public void BuildMetadataTables(IMetadataTableBuilderFactory metadataTableBuilderFactory)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void BuildTable(TableDescriptor table, ITableBuilder tableBuilder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ITableService CreateTableService(TableDescriptor table)
+            {
+                throw new NotImplementedException();
+            }
+
+            public int DisposeCalls { get; set; }
+            public void Dispose()
+            {
+                ++this.DisposeCalls;
+            }
+
+            public bool DoesTableHaveData(TableDescriptor table)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void EnableTable(TableDescriptor tableDescriptor)
+            {
+                throw new NotImplementedException();
+            }
+
+            public DataSourceInfo GetDataSourceInfo()
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task ProcessAsync(IProgress<int> progress, CancellationToken cancellationToken)
             {
                 throw new NotImplementedException();
             }

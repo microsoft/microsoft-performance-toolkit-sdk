@@ -57,6 +57,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [CustomDataSource("{CBA22346-53DB-44C7-9039-2CC5FADC07C1}", "Two", "Two")]
@@ -108,6 +113,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [CustomDataSource("{0E031D79-9760-42FA-9E20-B5A957006545}", "Three", "Three")]
@@ -156,6 +166,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -216,6 +231,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [CustomDataSource("{215A72DF-2FD6-4DA5-9F6E-5BD419EAC357}", "Five", "Five")]
@@ -266,6 +286,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public sealed class CdsWithNoAttributes
@@ -312,6 +337,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -367,6 +397,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -429,6 +464,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     [CustomDataSource("{797D49BC-D0EC-4C8D-B64E-CFABE0707CFF}", "Eight", "Eight")]
@@ -481,6 +521,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }

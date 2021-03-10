@@ -590,6 +590,39 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertObservedCDSs(expected1, consumer);
         }
 
+        [TestMethod]
+        [UnitTest]
+        public async Task WhenDisposed_EverythingThrows()
+        {
+            using (var sut = new PluginsLoader())
+            {
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.LoadedCustomDataSources);
+
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Subscribe(new MockPluginsConsumer()));
+                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.SubscribeAsync(new MockPluginsConsumer()));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugin(Any.FilePath(), out _));
+                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginAsync(new[] { Any.FilePath(), }));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugins(new[] { Any.FilePath(), }, out _));
+                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginsAsync(new[] { Any.FilePath(), }));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.Unsubscribe(new MockPluginsConsumer()));
+                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.UnsubscribeAsync(new MockPluginsConsumer()));
+            }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void CanDisposeMultipleTimes()
+        {
+            using (var sut = new PluginsLoader())
+            {
+                sut.Dispose();
+                sut.Dispose();
+                sut.Dispose();
+            }
+        }
+
         /// <summary>
         ///     Creates the loader and consumer, subscribing the consumer if requested
         /// </summary>

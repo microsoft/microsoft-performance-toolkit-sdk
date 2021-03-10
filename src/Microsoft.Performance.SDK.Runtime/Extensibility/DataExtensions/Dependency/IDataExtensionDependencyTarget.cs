@@ -36,7 +36,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         /// </param>
         /// <param name="requiredDataExtension">
         ///     The required data extension to be validated.
-        /// </param>
+        /// </param>        
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="dependencyStateSupport"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="requiredDataCooker"/> is <c>null</c>.
+        /// </exception>
         void PerformAdditionalDataExtensionValidation(
             IDataExtensionDependencyStateSupport dependencyStateSupport,
             IDataExtensionReference requiredDataExtension);

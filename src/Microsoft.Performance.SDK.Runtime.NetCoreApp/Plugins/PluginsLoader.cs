@@ -1,15 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Runtime.Discovery;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
-using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Runtime.Discovery;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
+using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 {
@@ -44,17 +43,18 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
     ///     Listeners are guaranteed to not miss any loaded custom data sources that get loaded concurrently
     ///     with their <see cref="Subscribe(IPluginsConsumer)"/> call.
     /// </summary>
-    public class PluginsLoader
+    public sealed class PluginsLoader
+        : IDisposable
     {
         private readonly object mutex = new object();
 
         private readonly AssemblyExtensionDiscovery extensionDiscovery;
 
-        private readonly IPlugInCatalog catalog;
-
-        private readonly IDataExtensionRepositoryBuilder extensionRepository;
-
         private readonly HashSet<IPluginsConsumer> subscribers;
+
+        private readonly ExtensionRoot extensionRoot;
+
+        private bool isDisposed;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="PluginsLoader"/>
@@ -94,26 +94,33 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             this.subscribers = new HashSet<IPluginsConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
-            this.catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
-            this.extensionRepository = new DataExtensionFactory().SingletonDataExtensionRepository;
+            var catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
+            var extensionRepository = new DataExtensionFactory().CreateDataExtensionRepository();
+            this.extensionRoot = new ExtensionRoot(catalog, extensionRepository);
 
             // The constructor for this object hooks up the repository to the extension provider
             // (the ExtensionDiscovery in this case). We do not need to hold onto this object
             // explicitly, only call its constructor.
-            new DataExtensionReflector(this.extensionDiscovery, this.extensionRepository);
+            new DataExtensionReflector(this.extensionDiscovery, extensionRepository);
+
+            this.isDisposed = false;
         }
 
         /// <summary>
         ///     All of the custom data sources that have been loaded by plugins.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public IEnumerable<CustomDataSourceReference> LoadedCustomDataSources
         {
             get
             {
+                this.ThrowIfDisposed();
                 IEnumerable<CustomDataSourceReference> copy;
                 lock (this.mutex)
                 {
-                    copy = new HashSet<CustomDataSourceReference>(this.catalog.PlugIns);
+                    copy = new HashSet<CustomDataSourceReference>(this.extensionRoot.PlugIns);
                 }
                 return copy;
             }
@@ -145,8 +152,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     TryLoadPlugin(rootFolder) will fail if either or both of pluginA or pluginB fail to load.
         ///     <para/>
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryLoadPlugin(string directory, out ErrorInfo error)
         {
+            this.ThrowIfDisposed();
             if (this.TryLoadPlugins(new List<string> { directory }, out var errors))
             {
                 error = ErrorInfo.None;
@@ -162,8 +173,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="TryLoadPlugin(string)"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public async Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginAsync(IEnumerable<string> directories)
         {
+            this.ThrowIfDisposed();
             IDictionary<string, ErrorInfo> taskErrors = null;
             var task = Task.Run(() => this.TryLoadPlugins(directories, out taskErrors));
             var result = await task;
@@ -193,12 +208,16 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     sources being loaded has already been loaded by either the current or a previous call to <see cref="TryLoadPlugin(string)"/>
         ///     or <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string,ErrorInfo})"/>.
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool TryLoadPlugins(IEnumerable<string> directories, out IDictionary<string, ErrorInfo> failed)
         {
+            this.ThrowIfDisposed();
             lock (this.mutex)
             {
                 failed = new Dictionary<string, ErrorInfo>();
-                var oldPlugins = new HashSet<CustomDataSourceReference>(this.catalog.PlugIns);
+                var oldPlugins = new HashSet<CustomDataSourceReference>(this.extensionRoot.PlugIns);
                 foreach (var dir in directories)
                 {
                     if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
@@ -211,9 +230,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 // TODO: this does redundant work re-finalizing custom data sources
                 // loaded by previous calls to this method. The extension repository
                 // should get refactored to avoid this redundant work.
-                this.extensionRepository.FinalizeDataExtensions();
+                this.extensionRoot.FinalizeDataExtensions();
 
-                foreach (var source in this.catalog.PlugIns.Except(oldPlugins))
+                foreach (var source in this.extensionRoot.PlugIns.Except(oldPlugins))
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     this.NotifyCustomDataSourceLoaded(name, version, source);
@@ -226,8 +245,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="TryLoadPlugins(IEnumerable{string}, out IDictionary{string,ErrorInfo})"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginsAsync(IEnumerable<string> directories)
         {
+            this.ThrowIfDisposed();
             return Task.Run(() =>
             {
                 var result = TryLoadPlugins(directories, out var failed);
@@ -251,8 +274,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     Whether or not the <paramref name="consumer"/> is successfully subscribed. This will only
         ///     be <c>false</c> if it is already subscribed.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool Subscribe(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             lock (this.mutex)
             {
                 if (this.subscribers.Contains(consumer))
@@ -261,7 +288,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 }
 
                 // Manually send all the already loaded plugins to this consumer
-                foreach (var source in this.catalog.PlugIns)
+                foreach (var source in this.extensionRoot.PlugIns)
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     consumer.OnCustomDataSourceLoaded(name, version, source);
@@ -277,8 +304,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="Subscribe(IPluginsConsumer)"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Task<bool> SubscribeAsync(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             return Task.Run(() => Subscribe(consumer));
         }
 
@@ -292,8 +323,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     Whether or not the <paramref name="consumer"/> is successfully unsubscribed.
         ///     This will only be <c>false</c> if it is not currently subscribed.
         /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool Unsubscribe(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             lock (this.mutex)
             {
                 return this.subscribers.Remove(consumer);
@@ -303,9 +338,59 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="Unsubscribe(IPluginsConsumer)"/>
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public Task<bool> UnsubscribeAsync(IPluginsConsumer consumer)
         {
+            this.ThrowIfDisposed();
             return Task.Run(() => Unsubscribe(consumer));
+        }
+
+        /// <summary>
+        ///     Disoses all resources held by this class.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        ///     Disoses all resources held by this class.
+        /// </summary>
+        /// <param name="disposing">
+        ///     <c>true</c> to dispose both managed and unmanaged
+        ///     resources; <c>false</c> to dispose only unmanaged
+        ///     resources.
+        /// </param>
+        private void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                this.extensionRoot.SafeDispose();
+            }
+
+            this.isDisposed = true;
+        }
+
+        /// <summary>
+        ///     Throws an exception if this instance has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(PluginsLoader));
+            }
         }
 
         private (string, Version) GetPluginNameAndVersion(CustomDataSourceReference cds)
@@ -347,8 +432,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         private void NotifyCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
         {
-            Guard.NotNull(this.catalog, nameof(this.catalog));
-            if (!this.catalog.IsLoaded)
+            Guard.NotNull(this.extensionRoot, nameof(this.extensionRoot));
+            if (!this.extensionRoot.IsLoaded)
             {
                 throw new InvalidOperationException("All plugins must be loaded before this point");
             }

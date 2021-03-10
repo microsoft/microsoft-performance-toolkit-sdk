@@ -13,6 +13,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
     internal abstract class TestDataExtensionReference
         : IDataExtensionReference
     {
+        private readonly bool useDataExtensionDependencyState;
+
         protected TestDataExtensionReference()
             : this(true)
         {
@@ -20,10 +22,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         protected TestDataExtensionReference(bool useDataExtensionDependencyState)
         {
-            if (useDataExtensionDependencyState)
-            {
-                this.DependencyState = new DataExtensionDependencyState(this);
-            }
+            this.useDataExtensionDependencyState = useDataExtensionDependencyState;
+            this.DependencyState = new DataExtensionDependencyState(this);
         }
 
         public HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
@@ -49,7 +49,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
             get
             {
-                if (this.DependencyState != null)
+                if (this.useDataExtensionDependencyState &&
+                    this.UseDependencyState())
                 {
                     return this.DependencyState.Availability;
                 }
@@ -63,7 +64,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
             get
             {
-                if (this.DependencyState != null)
+                if (this.UseDependencyState())
                 {
                     return this.DependencyState.DependencyReferences;
                 }
@@ -73,6 +74,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         }
 
         public Action<IDataExtensionRepository> processDependencies;
+
         public void ProcessDependencies(
             IDataExtensionRepository availableDataExtensions)
         {
@@ -80,12 +82,36 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             {
                 this.processDependencies.Invoke(availableDataExtensions);
             }
-            else if (this.DependencyState != null)
+            else if (this.UseDependencyState())
             {
                 this.DependencyState.ProcessDependencies(availableDataExtensions);
             }
         }
 
-        public DataExtensionDependencyState DependencyState { get; set; }
+        public IDataExtensionDependencyState DependencyState { get; set; }
+
+        public int DisposeCalls { get; set; }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public override string ToString()
+        {
+            return this.Name;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            ++this.DisposeCalls;
+        }
+
+        protected bool UseDependencyState()
+        {
+            return this.useDataExtensionDependencyState &&
+                this.DependencyState != null;
+        }
     }
 }

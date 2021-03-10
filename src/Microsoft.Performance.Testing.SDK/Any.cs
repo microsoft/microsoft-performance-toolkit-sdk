@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
+using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Testing.SDK
@@ -47,6 +49,29 @@ namespace Microsoft.Performance.Testing.SDK
         public static IProcessorEnvironment ProcessorEnvironment()
         {
             return new FakeProcessorEnvironment();
+        }
+
+        public static string FilePath()
+        {
+            return Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        }
+
+        public static DataCookerPath DataCookerPath()
+        {
+            return new DataCookerPath();
+        }
+
+        public static string FileOnDisk(string extension)
+        {
+            return FileOnDisk(extension, Path.GetTempPath());
+        }
+
+        public static string FileOnDisk(string extension, string folder)
+        {
+            var fileName = "MICROSOFT-PERFORMANCE-TESTING-SDK-" + Path.GetRandomFileName();
+            var file = Path.Combine(folder, fileName) + extension;
+            File.WriteAllText(file, "THIS IS A TEST FILE");
+            return file;
         }
 
         private sealed class FakeDataSource

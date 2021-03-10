@@ -15,6 +15,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public TestDataProcessorReference()
             : base()
         {
+            this.Id = Guid.NewGuid().ToString();
         }
 
         public TestDataProcessorReference(bool useDataExtensionDependencyState)
