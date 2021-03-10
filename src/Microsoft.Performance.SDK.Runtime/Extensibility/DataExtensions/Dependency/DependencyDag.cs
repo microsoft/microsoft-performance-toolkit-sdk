@@ -27,12 +27,20 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
     /// </summary>
     public sealed class DependencyDag
     {
-        private DependencyDag(IEnumerable<Node> allNodes)
+        private DependencyDag(
+            IEnumerable<Node> allNodes,
+            IEnumerable<Node> roots)
         {
             Debug.Assert(allNodes != null);
+            Debug.Assert(roots != null);
 
-            this.All = new ReadOnlyHashSet<Node>(allNodes.ToSet());
-            this.Roots = new ReadOnlyHashSet<Node>(allNodes.Where(x => x.Dependents.Count == 0).ToSet());
+            var nodeSet = allNodes.ToSet();
+            var rootSet = roots.ToSet();
+
+            Debug.Assert(rootSet.IsSubsetOf(nodeSet));
+
+            this.All = new ReadOnlyHashSet<Node>(nodeSet);
+            this.Roots = new ReadOnlyHashSet<Node>(rootSet);
         }
 
         /// <summary>
@@ -92,7 +100,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             if (!catalog.PlugIns.Any() &&
                 !repository.GetAllReferences().Any())
             {
-                return new DependencyDag(Enumerable.Empty<Node>());
+                return new DependencyDag(Enumerable.Empty<Node>(), Enumerable.Empty<Node>());
             }
 
             //
@@ -168,7 +176,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 SimplifyTransitiveDependencies(node);
             }
 
-            return new DependencyDag(allNodes);
+            return new DependencyDag(allNodes, roots);
         }
 
         private static HashSet<Reference> GetAllDependencyReferences(
