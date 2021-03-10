@@ -7,9 +7,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestData
 {
-    public static class EngineProcessTestsLoader
+    public static class EngineTestsLoader
     {
-        public static EngineProcessTestSuiteDto Load(
+        public static T Load<T>(
             string path)
         {
             var settings = new DataContractJsonSerializerSettings
@@ -17,12 +17,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestData
                 UseSimpleDictionaryFormat = true,
             };
 
-            var serializer = new DataContractJsonSerializer(typeof(EngineProcessTestSuiteDto), settings);
+            var serializer = new DataContractJsonSerializer(typeof(T), settings);
 
-            EngineProcessTestSuiteDto testSuite;
+            T testSuite;
             using (var stream = File.OpenRead(path))
             {
-                testSuite = (EngineProcessTestSuiteDto)serializer.ReadObject(stream);
+                testSuite = (T)serializer.ReadObject(stream);
             }
 
             Assert.IsNotNull(testSuite);

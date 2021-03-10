@@ -224,21 +224,54 @@ namespace Microsoft.Performance.Toolkit.Engine
             return false;
         }
 
-        public ITableBuilderWithRowCount BuildTable(TableDescriptor tableDescriptor)
+        public bool? IsTableDataAvailable(TableDescriptor tableDescriptor)
         {
-            if(TryBuildTable(tableDescriptor, out ITableBuilderWithRowCount filledTableBuilder))
+            if (TryOnRepository(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
+            {
+                return repoIsDataAvail;
+            }
+
+            if (TryOnProcessor(tableDescriptor, (processor) => processor.DoesTableHaveData(tableDescriptor), out bool processorIsDataAvail))
+            {
+                return processorIsDataAvail;
+            }
+
+            return null;
+        }
+
+        public ITableResult BuildTable(TableDescriptor tableDescriptor)
+        {
+            if(TryBuildTable(tableDescriptor, out ITableResult filledTableBuilder))
             {
                 return filledTableBuilder;
             }
 
-            throw new Exception($"Unable to Build Table ${tableDescriptor}");
+            throw new TableNotBuiltException(tableDescriptor);
         }
 
-        public bool TryBuildTable(TableDescriptor tableDescriptor, out ITableBuilderWithRowCount filledTableBulder)
+        public bool TryBuildTable(TableDescriptor tableDescriptor, out ITableResult filledTableBulder)
         {
-            filledTableBulder = null;
-
             var tableBuilder = new TableBuilder();
+
+            if (TryOnRepository(tableDescriptor, (reference, tableRetrieval) => { reference.BuildTableAction(tableBuilder, tableRetrieval); return tableBuilder; }, out ITableResult repoTableResult))
+            {
+                filledTableBulder = repoTableResult;
+                return true;
+            }
+
+            if (TryOnProcessor(tableDescriptor, (processor) => { processor.BuildTable(tableDescriptor, tableBuilder); return tableBuilder; }, out ITableResult processorTableResult))
+            {
+                filledTableBulder = processorTableResult;
+                return true;
+            }
+
+            filledTableBulder = null;
+            return false;
+        }
+
+        private bool TryOnRepository<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)
+        {
+            result = default;
 
             if (this.repository.TablesById.TryGetValue(tableDescriptor.Guid, out ITableExtensionReference reference))
             {
@@ -246,33 +279,30 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     var tableRetrieval = this.retrievalFactory.CreateDataRetrievalForTable(tableDescriptor.Guid);
 
-                    if (reference.IsDataAvailableFunc != null && !reference.IsDataAvailableFunc(tableRetrieval))
-                    {
-                        return false;
-                    }
+                    result = func(reference, tableRetrieval);                    
 
-                    reference.BuildTableAction(tableBuilder, tableRetrieval);
-
-                    filledTableBulder = tableBuilder;
+                    return true;
                 }
                 catch
                 {
                     return false;
                 }
-
-                return filledTableBulder != null;
             }
+
+            return false;
+        }
+
+        private bool TryOnProcessor<TResult>(TableDescriptor tableDescriptor, Func<ICustomDataProcessor, TResult> func, out TResult result)
+        {
+            result = default;
 
             if (this.tableToProcessorMap.TryGetValue(tableDescriptor, out ICustomDataProcessor processor))
             {
-                if (!processor.DoesTableHaveData(tableDescriptor))
-                {
-                    return false;
-                }
                 try
                 {
-                    processor.BuildTable(tableDescriptor, tableBuilder);
-                    filledTableBulder = tableBuilder;
+                    result = func(processor);                    
+
+                    return true;
                 }
                 catch
                 {
@@ -280,10 +310,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
             }
 
-            return filledTableBulder != null;
+            return false;
         }
 
-        private class TableBuilder
+        private sealed class TableBuilder
             : ITableBuilder,
               ITableBuilderWithRowCount,
               ITableResult
