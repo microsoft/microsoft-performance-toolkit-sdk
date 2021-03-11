@@ -49,9 +49,9 @@ namespace SqlPluginWithProcessingPipeline
         }
 
         public void ProcessSource(ISourceDataProcessor<SqlEvent, SqlSourceParser, string> dataProcessor,
-                                                       ILogger logger,
-                                                       IProgress<int> progress,
-                                                       CancellationToken cancellationToken)
+                                  ILogger logger,
+                                  IProgress<int> progress,
+                                  CancellationToken cancellationToken)
         {
             using (FileStream stream = File.OpenRead(this.filePath))
             using (XmlReader reader = XmlReader.Create(stream))
