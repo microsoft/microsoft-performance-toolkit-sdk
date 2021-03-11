@@ -262,7 +262,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
             catch (Exception inner)
             {
-                throw new TableException($"An excpetion was thrown while calling IsDataAvailable for the {tableDescriptor}.", tableDescriptor, inner);
+                throw new TableException($"An exception was thrown while calling IsDataAvailable for the {tableDescriptor}.", tableDescriptor, inner);
             }
 
             return null;
@@ -302,7 +302,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 innerException = inner;
             }
 
-            throw new TableException($"An excpetion was thrown while calling BuildTable for the {tableDescriptor}.", tableDescriptor, innerException);
+            throw new TableException($"An exception was thrown while calling BuildTable for the {tableDescriptor}.", tableDescriptor, innerException);
         }
 
         /// <summary>
