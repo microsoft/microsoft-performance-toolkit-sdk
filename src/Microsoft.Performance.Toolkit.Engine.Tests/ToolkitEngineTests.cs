@@ -847,12 +847,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void EnableTable_Known_Enables()
         {
             var sut = Engine.Create();
-            var table = sut.AllTables.FirstOrDefault();
+            var table = sut.AvailableTables.FirstOrDefault();
 
             sut.EnableTable(table);
 
-            Assert.AreEqual(1, sut.EnableTables.Count());
-            Assert.AreEqual(table, sut.EnableTables.ElementAt(0));
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(table, sut.EnabledTables.ElementAt(0));
         }
 
         [TestMethod]
@@ -863,8 +863,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             sut.EnableTable(EmptyTable.TableDescriptor);
 
-            Assert.AreEqual(1, sut.EnableTables.Count());
-            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnableTables.ElementAt(0));
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnabledTables.ElementAt(0));
         }
 
         [TestMethod]
@@ -885,7 +885,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var sut = Engine.Create();
             sut.Process();
 
-            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableTable(sut.AllTables.First()));
+            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableTable(sut.AvailableTables.First()));
         }
 
         #endregion EnableTable
@@ -897,12 +897,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void TryEnableTable_Known_Enables()
         {
             var sut = Engine.Create();
-            var table = sut.AllTables.FirstOrDefault();
+            var table = sut.AvailableTables.FirstOrDefault();
 
             sut.TryEnableTable(table);
 
-            Assert.AreEqual(1, sut.EnableTables.Count());
-            Assert.AreEqual(table, sut.EnableTables.ElementAt(0));
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(table, sut.EnabledTables.ElementAt(0));
         }
 
         [TestMethod]
@@ -910,12 +910,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void TryEnableTable_Known_Enables_True()
         {
             var sut = Engine.Create();
-            var table = sut.AllTables.FirstOrDefault();
+            var table = sut.AvailableTables.FirstOrDefault();
 
             Assert.IsTrue(sut.TryEnableTable(table));
 
-            Assert.AreEqual(1, sut.EnableTables.Count());
-            Assert.AreEqual(table, sut.EnableTables.ElementAt(0));
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(table, sut.EnabledTables.ElementAt(0));
         }
 
         [TestMethod]
@@ -926,8 +926,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             sut.TryEnableTable(EmptyTable.TableDescriptor);
 
-            Assert.AreEqual(1, sut.EnableTables.Count());
-            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnableTables.ElementAt(0));
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnabledTables.ElementAt(0));
         }
 
         [TestMethod]
@@ -938,8 +938,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             Assert.IsTrue(sut.TryEnableTable(EmptyTable.TableDescriptor));
 
-            Assert.AreEqual(1, sut.EnableTables.Count());
-            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnableTables.ElementAt(0));
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnabledTables.ElementAt(0));
         }
 
         [TestMethod]
@@ -959,7 +959,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var sut = Engine.Create();
             sut.Process();
 
-            Assert.IsFalse(sut.TryEnableTable(sut.AllTables.First()));
+            Assert.IsFalse(sut.TryEnableTable(sut.AvailableTables.First()));
         }
 
         #endregion TryEnableTable
@@ -1064,7 +1064,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var tableGuid in testCase.TablesToEnable)
             {
-                sut.EnableTable(sut.AllTables.Single(x => x.Guid == Guid.Parse(tableGuid)));
+                sut.EnableTable(sut.AvailableTables.Single(x => x.Guid == Guid.Parse(tableGuid)));
             }
 
             var result = sut.Process();
@@ -1074,7 +1074,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 var tableGuid = expectedData.Key;
                 var dataPoints = expectedData.Value;
 
-                var builtTable = result.BuildTable(sut.EnableTables.Single(x => x.Guid == Guid.Parse(tableGuid)));
+                var builtTable = result.BuildTable(sut.EnabledTables.Single(x => x.Guid == Guid.Parse(tableGuid)));
 
                 Assert.IsNotNull(builtTable);
 

@@ -277,32 +277,32 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     <see cref="ITableResult"/> that with a specified <see cref="TableDescriptor"/>.
     /// </summary>
     [Serializable]
-    public class TableNotBuiltException
+    public class TableException
         : EngineException
     {
         /// <inheritdoc />
-        public TableNotBuiltException() : base() { }
+        public TableException() : base() { }
 
         /// <inheritdoc />
-        public TableNotBuiltException(string message) : base(message) { }
+        public TableException(string message) : base(message) { }
 
         /// <inheritdoc />
-        public TableNotBuiltException(string message, Exception inner) : base(message, inner) { }
+        public TableException(string message, Exception inner) : base(message, inner) { }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="TableNotBuiltException"/>
+        ///     Initializes a new instance of the <see cref="TableException"/>
         ///     class with the given <see cref="TableDescriptor"/>.
         /// </summary>
         /// <param name="tableDescriptor">
         ///     The path to the data that was not found.
         /// </param>
-        public TableNotBuiltException(TableDescriptor tableDescriptor)
+        public TableException(TableDescriptor tableDescriptor)
             : this(tableDescriptor, null)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="TableNotBuiltException"/>
+        ///     Initializes a new instance of the <see cref="TableException"/>
         ///     class with the given <see cref="TableDescriptor"/>, and the error that is the cause of this error.
         /// </summary>
         /// <param name="tableDescriptor">
@@ -311,14 +311,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="inner">
         ///     The error that is the cause of this error.
         /// </param>
-        public TableNotBuiltException(TableDescriptor tableDescriptor, Exception inner)
+        public TableException(TableDescriptor tableDescriptor, Exception inner)
             : base($"The requested table '{tableDescriptor}' was not found", inner)
         {
             this.Descriptor = tableDescriptor;
         }
 
         /// <inheritdoc />
-        protected TableNotBuiltException(SerializationInfo info, StreamingContext context)
+        protected TableException(SerializationInfo info, StreamingContext context)
         {
             this.Descriptor = new TableDescriptor(
                                         (Guid)info.GetValue(nameof(TableGuid), typeof(Guid)),

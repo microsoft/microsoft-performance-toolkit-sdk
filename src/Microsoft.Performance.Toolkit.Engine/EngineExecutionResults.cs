@@ -47,6 +47,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="repository"/> is <c>null</c>.
         /// </exception>
         /// TODO: Going to move RuntimeExecutionResults to internal and expose calls via new interface
+        ///       1 - 1 with the Engine when calling Process
         public RuntimeExecutionResults(
             ICookedDataRetrieval cookedDataRetrieval,
             IDataExtensionRetrievalFactory retrievalFactory,
@@ -56,6 +57,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(cookedDataRetrieval, nameof(cookedDataRetrieval));
             Guard.NotNull(retrievalFactory, nameof(retrievalFactory));
             Guard.NotNull(repository, nameof(repository));
+            Guard.NotNull(tableToProcessorMap, nameof(tableToProcessorMap));
 
             this.cookedDataRetrieval = cookedDataRetrieval;
             this.retrievalFactory = retrievalFactory;
@@ -241,16 +243,26 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     returned from <see cref="BuildTable(TableDescriptor)"/> 
         ///     has a <see cref="ITableBuilder.RowCount"/> greater than 0."
         /// </remarks>
+        /// <exception cref="TableException">
+        ///     A exception occured when calling IsDataAvailable on the specified <paramref name="tableDescriptor"/>.
+        /// </exception>
         public bool? IsTableDataAvailable(TableDescriptor tableDescriptor)
         {
-            if (TryOnRepository(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
+            try
             {
-                return repoIsDataAvail;
-            }
+                if (FuncOnRepositoryIfContained(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
+                {
+                    return repoIsDataAvail;
+                }
 
-            if (TryOnProcessor(tableDescriptor, (processor) => processor.DoesTableHaveData(tableDescriptor), out bool processorIsDataAvail))
+                if (FuncOnProcessorIfContained(tableDescriptor, (processor) => processor.DoesTableHaveData(tableDescriptor), out bool processorIsDataAvail))
+                {
+                    return processorIsDataAvail;
+                }
+            }
+            catch (Exception inner)
             {
-                return processorIsDataAvail;
+                throw new TableException(tableDescriptor, inner);
             }
 
             return null;
@@ -265,17 +277,31 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <returns>
         ///     The built table.
         /// </returns>
-        /// <exception cref="TableNotBuiltException">
+        /// <exception cref="TableException">
         ///     A table cannot be built for the given <paramref name="tableDescriptor"/>.
         /// </exception>
         public ITableResult BuildTable(TableDescriptor tableDescriptor)
         {
-            if (TryBuildTable(tableDescriptor, out ITableResult filledTableBuilder))
+            var tableBuilder = new TableBuilder();
+
+            try
             {
-                return filledTableBuilder;
+                if (FuncOnRepositoryIfContained(tableDescriptor, (reference, tableRetrieval) => { reference.BuildTableAction(tableBuilder, tableRetrieval); return tableBuilder; }, out ITableResult repoTableResult))
+                {
+                    return repoTableResult;
+                }
+
+                if (FuncOnProcessorIfContained(tableDescriptor, (processor) => { processor.BuildTable(tableDescriptor, tableBuilder); return tableBuilder; }, out ITableResult processorTableResult))
+                {
+                    return processorTableResult;
+                }
+            }
+            catch (Exception inner)
+            {
+                throw new TableException(tableDescriptor, inner);
             }
 
-            throw new TableNotBuiltException(tableDescriptor);
+            throw new TableException(tableDescriptor);
         }
 
         /// <summary>
@@ -293,63 +319,45 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </returns>
         public bool TryBuildTable(TableDescriptor tableDescriptor, out ITableResult filledTableBulder)
         {
-            var tableBuilder = new TableBuilder();
-
-            if (TryOnRepository(tableDescriptor, (reference, tableRetrieval) => { reference.BuildTableAction(tableBuilder, tableRetrieval); return tableBuilder; }, out ITableResult repoTableResult))
+            try
             {
-                filledTableBulder = repoTableResult;
+                filledTableBulder = BuildTable(tableDescriptor);
                 return true;
             }
-
-            if (TryOnProcessor(tableDescriptor, (processor) => { processor.BuildTable(tableDescriptor, tableBuilder); return tableBuilder; }, out ITableResult processorTableResult))
+            catch (TableException)
             {
-                filledTableBulder = processorTableResult;
-                return true;
-            }
-
-            filledTableBulder = null;
-            return false;
+                filledTableBulder = null;
+                return false;
+            }            
         }
 
-        private bool TryOnRepository<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)
+        // Will perform the Func on the Repository if the table is contained, else false.
+        private bool FuncOnRepositoryIfContained<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)
         {
             result = default;
 
             if (this.repository.TablesById.TryGetValue(tableDescriptor.Guid, out ITableExtensionReference reference))
             {
-                try
-                {
-                    var tableRetrieval = this.retrievalFactory.CreateDataRetrievalForTable(tableDescriptor.Guid);
+                var tableRetrieval = this.retrievalFactory.CreateDataRetrievalForTable(tableDescriptor.Guid);
 
-                    result = func(reference, tableRetrieval);                    
+                result = func(reference, tableRetrieval);                    
 
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
+                return true;               
             }
 
             return false;
         }
 
-        private bool TryOnProcessor<TResult>(TableDescriptor tableDescriptor, Func<ICustomDataProcessor, TResult> func, out TResult result)
+        // Will perform the Func on the Processor if the table is contained, else false.
+        private bool FuncOnProcessorIfContained<TResult>(TableDescriptor tableDescriptor, Func<ICustomDataProcessor, TResult> func, out TResult result)
         {
             result = default;
 
             if (this.tableToProcessorMap.TryGetValue(tableDescriptor, out ICustomDataProcessor processor))
             {
-                try
-                {
-                    result = func(processor);                    
+                result = func(processor);                    
 
-                    return true;
-                }
-                catch
-                {
-                    return false;
-                }
+                return true;
             }
 
             return false;
