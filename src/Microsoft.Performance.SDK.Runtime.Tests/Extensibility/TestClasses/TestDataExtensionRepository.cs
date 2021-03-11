@@ -99,5 +99,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
                 tableReferenceBuilder.Value.ProcessDependencies(this);
             }
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

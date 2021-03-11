@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
-using Microsoft.Performance.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
+using Microsoft.Performance.Testing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 {
@@ -36,15 +35,15 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void AddError()
         {
-            string testMessage = "Test Error Message";
+            var error = new ErrorInfo("code", "message");
 
             var target = new TestDataExtensionDependencyTarget();
             var targetDependency = new DataExtensionDependencyState(target);
 
-            targetDependency.AddError(testMessage);
+            targetDependency.AddError(error);
 
             Assert.AreEqual(targetDependency.Errors.Count, 1);
-            Assert.IsTrue(targetDependency.Errors.First() == testMessage);
+            Assert.IsTrue(targetDependency.Errors.First() == error);
         }
 
         [TestMethod]
@@ -67,7 +66,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.AreEqual(targetDependency.Availability, DataExtensionAvailability.Error);
 
             // Error -> Undetermined
-            targetDependency.AddError("Should go away");
+            targetDependency.AddError(new ErrorInfo("should go away.", "i mean it"));
             targetDependency.UpdateAvailability(DataExtensionAvailability.Undetermined);
             Assert.AreEqual(targetDependency.Availability, DataExtensionAvailability.Undetermined);
             Assert.AreEqual(targetDependency.Errors.Count, 0);

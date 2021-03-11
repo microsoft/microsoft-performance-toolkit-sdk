@@ -67,7 +67,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -107,7 +107,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 env,
@@ -149,7 +149,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -189,7 +189,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -231,7 +231,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -276,7 +276,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -320,7 +320,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -365,7 +365,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -413,7 +413,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tablesToEnable,
                 Any.ProcessorEnvironment(),
@@ -466,7 +466,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tablesToEnable,
                 Any.ProcessorEnvironment(),
@@ -508,7 +508,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -549,7 +549,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -591,7 +591,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -629,7 +629,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -666,7 +666,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -706,7 +706,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => logger,
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -749,7 +749,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                fakeCustomDataSource,
+                CreateReference(fakeCustomDataSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -762,6 +762,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(DataSourceInfo.None, result.DataSourceInfo);
             Assert.AreEqual(mockProcessor.ProcessFailure, result.ProcessorFault);
             Assert.IsTrue(result.IsProcessorFaulted);
+        }
+
+        private static FakeCustomDataSourceReference CreateReference(ICustomDataSource source)
+        {
+            return new FakeCustomDataSourceReference(source);
         }
 
         [CustomDataSource("{D6E5DC8D-E19D-4E55-99D9-746813C55A97}", "Test", "Test")]
@@ -811,12 +816,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public bool IsFileSupported(string path)
+            public void SetLogger(ILogger logger)
             {
                 throw new NotImplementedException();
             }
 
-            public void SetLogger(ILogger logger)
+            public bool IsDataSourceSupported(IDataSource dataSource)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void DisposeProcessor(ICustomDataProcessor processor)
             {
                 throw new NotImplementedException();
             }

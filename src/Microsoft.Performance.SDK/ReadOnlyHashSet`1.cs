@@ -16,7 +16,8 @@ namespace Microsoft.Performance.SDK
     /// </typeparam>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     public sealed class ReadOnlyHashSet<T>
-        : ISet<T>
+        : ISet<T>,
+          IReadOnlyCollection<T>
     {
         private readonly HashSet<T> source;
 
