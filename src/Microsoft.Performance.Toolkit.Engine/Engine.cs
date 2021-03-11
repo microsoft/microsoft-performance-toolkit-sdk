@@ -979,11 +979,9 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
                 else
                 {
-                    foreach (var executor in executors.Where(x => x.Context.CustomDataSource.AvailableTables.Contains(table)))
-                    {
-                        executor.Processor.EnableTable(table);
-                        processorTables.Add(table, executor.Processor);
-                    }
+                    var executor = executors.Single(x => x.Context.CustomDataSource.AvailableTables.Contains(table));
+                    executor.Processor.EnableTable(table);
+                    processorTables.Add(table, executor.Processor);
                 }                                
             }
 

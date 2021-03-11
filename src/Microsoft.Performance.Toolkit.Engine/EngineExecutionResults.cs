@@ -250,19 +250,19 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             try
             {
-                if (FuncOnRepositoryIfContained(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
+                if (ExecuteOnRepositoryIfContained(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
                 {
                     return repoIsDataAvail;
                 }
 
-                if (FuncOnProcessorIfContained(tableDescriptor, (processor) => processor.DoesTableHaveData(tableDescriptor), out bool processorIsDataAvail))
+                if (ExecuteOnProcessorIfContained(tableDescriptor, (processor) => processor.DoesTableHaveData(tableDescriptor), out bool processorIsDataAvail))
                 {
                     return processorIsDataAvail;
                 }
             }
             catch (Exception inner)
             {
-                throw new TableException(tableDescriptor, inner);
+                throw new TableException($"An excpetion was thrown while calling IsDataAvailable for the {tableDescriptor}.", tableDescriptor, inner);
             }
 
             return null;
@@ -283,25 +283,26 @@ namespace Microsoft.Performance.Toolkit.Engine
         public ITableResult BuildTable(TableDescriptor tableDescriptor)
         {
             var tableBuilder = new TableBuilder();
+            Exception innerException = null;
 
             try
             {
-                if (FuncOnRepositoryIfContained(tableDescriptor, (reference, tableRetrieval) => { reference.BuildTableAction(tableBuilder, tableRetrieval); return tableBuilder; }, out ITableResult repoTableResult))
+                if (ExecuteOnRepositoryIfContained(tableDescriptor, (reference, tableRetrieval) => { reference.BuildTableAction(tableBuilder, tableRetrieval); return tableBuilder; }, out ITableResult repoTableResult))
                 {
                     return repoTableResult;
                 }
 
-                if (FuncOnProcessorIfContained(tableDescriptor, (processor) => { processor.BuildTable(tableDescriptor, tableBuilder); return tableBuilder; }, out ITableResult processorTableResult))
+                if (ExecuteOnProcessorIfContained(tableDescriptor, (processor) => { processor.BuildTable(tableDescriptor, tableBuilder); return tableBuilder; }, out ITableResult processorTableResult))
                 {
                     return processorTableResult;
                 }
             }
             catch (Exception inner)
             {
-                throw new TableException(tableDescriptor, inner);
+                innerException = inner;
             }
 
-            throw new TableException(tableDescriptor);
+            throw new TableException($"An excpetion was thrown while calling BuildTable for the {tableDescriptor}.", tableDescriptor, innerException);
         }
 
         /// <summary>
@@ -332,7 +333,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         // Will perform the Func on the Repository if the table is contained, else false.
-        private bool FuncOnRepositoryIfContained<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)
+        private bool ExecuteOnRepositoryIfContained<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)
         {
             result = default;
 
@@ -349,7 +350,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         // Will perform the Func on the Processor if the table is contained, else false.
-        private bool FuncOnProcessorIfContained<TResult>(TableDescriptor tableDescriptor, Func<ICustomDataProcessor, TResult> func, out TResult result)
+        private bool ExecuteOnProcessorIfContained<TResult>(TableDescriptor tableDescriptor, Func<ICustomDataProcessor, TResult> func, out TResult result)
         {
             result = default;
 

@@ -293,11 +293,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Initializes a new instance of the <see cref="TableException"/>
         ///     class with the given <see cref="TableDescriptor"/>.
         /// </summary>
+        /// <param name="message">
+        ///     The message that describes the error.
+        /// </param>
         /// <param name="tableDescriptor">
         ///     The path to the data that was not found.
         /// </param>
-        public TableException(TableDescriptor tableDescriptor)
-            : this(tableDescriptor, null)
+        public TableException(string message, TableDescriptor tableDescriptor)
+            : this(message, tableDescriptor, null)
         {
         }
 
@@ -305,14 +308,17 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Initializes a new instance of the <see cref="TableException"/>
         ///     class with the given <see cref="TableDescriptor"/>, and the error that is the cause of this error.
         /// </summary>
+        /// <param name="message">
+        ///     The message that describes the error.
+        /// </param>
         /// <param name="tableDescriptor">
         ///     The <see cref="TableDescriptor"/> that was not found.
         /// </param>
         /// <param name="inner">
         ///     The error that is the cause of this error.
         /// </param>
-        public TableException(TableDescriptor tableDescriptor, Exception inner)
-            : base($"The requested table '{tableDescriptor}' was not found", inner)
+        public TableException(string message, TableDescriptor tableDescriptor, Exception inner)
+            : base(message, inner)
         {
             this.Descriptor = tableDescriptor;
         }
