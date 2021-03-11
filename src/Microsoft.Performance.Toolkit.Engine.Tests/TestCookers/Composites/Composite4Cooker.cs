@@ -62,11 +62,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Composites
 
         public int Composite3Count { get; set; }
 
-        public int CompareTo(int other)
-        {
-            return this.Key.CompareTo(other);
-        }
-
         public int GetKey()
         {
             return this.Key;
