@@ -21,6 +21,11 @@ namespace Microsoft.Performance.SDK.Runtime
         : AssemblyTypeReference<Derived>
           where Derived : AssemblyTypeReferenceWithInstance<T, Derived>
     {
+        private Func<T> instanceFactory;
+        private T instance;
+
+        private bool isDisposed;
+
         /// <summary>
         ///     Initializes an instance of <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> with a new instance of <see cref="T"/>.
         /// </summary>
@@ -28,10 +33,25 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <see cref="Type"/> of <see cref="T"/>
         /// </param>
         protected AssemblyTypeReferenceWithInstance(Type type)
+            : this(type, () => (T)Activator.CreateInstance(type))
+        {
+        }
+
+        /// <summary>
+        ///     Initializes an instance of <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> with a new instance of <see cref="T"/>.
+        /// </summary>
+        /// <param name="type">
+        ///     <see cref="Type"/> of <see cref="T"/>
+        /// </param>
+        /// <param name="instanceFactory">
+        ///     The function that creates the instance.
+        /// </param>
+        protected AssemblyTypeReferenceWithInstance(Type type, Func<T> instanceFactory)
             : base(type)
         {
-            this.Instance = (T)Activator.CreateInstance(type);
-            Debug.Assert(this.Instance != null);
+            this.instanceFactory = instanceFactory;
+            this.instance = this.instanceFactory();
+            Debug.Assert(this.instance != null);
         }
 
         /// <summary>
@@ -42,13 +62,29 @@ namespace Microsoft.Performance.SDK.Runtime
             AssemblyTypeReferenceWithInstance<T, Derived> other)
             : base(other)
         {
+            this.instanceFactory = other.instanceFactory;
             this.Instance = other.Instance;
         }
 
         /// <summary>
         ///     Gets an instance of <see cref="T"/>
         /// </summary>
-        public T Instance { get; }
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public T Instance
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.instance;
+            }
+            private set
+            {
+                this.ThrowIfDisposed();
+                this.instance = value;
+            }
+        }
 
         /// <summary>
         ///     <inheritdoc cref="AssemblyTypeReference{Derived}.IsValidType(Type, Type)"/>
@@ -60,6 +96,25 @@ namespace Microsoft.Performance.SDK.Runtime
             Guard.NotNull(candidateType, nameof(candidateType));
 
             return IsValidType(candidateType, typeof(T));
+        }
+
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                this.instance.TryDispose();
+                this.instance = default;
+                this.instanceFactory = null;
+            }
+
+            this.isDisposed = true;      
+            base.Dispose(disposing);
         }
     }
 }

@@ -27,4 +27,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Reflection.MetadataLoadContext" Version="5.0.0" />
+  </ItemGroup>
+
 </Project>

@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 
 namespace Microsoft.Performance.Toolkit.Engine
@@ -71,5 +72,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     advanced scenarios.
         /// </summary>
         public IAssemblyLoader AssemblyLoader{ get; set;  }
+
+        /// <summary>
+        ///     Gets the <see cref="VersionChecker"/> to
+        ///     use for loading plugins. This property may be <c>null</c>.
+        ///     A <c>null</c> value indicates to use the default loading
+        ///     behavior.
+        /// </summary>
+        public VersionChecker Versioning { get; internal set; }
     }
 }

@@ -55,17 +55,21 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Initializes a new instance of the <see cref="DataSourceInfo"/>
         ///     class.
         ///     <para />
-        ///     The timestamps are relative to the data source, and are not actual
-        ///     times (e.g. UTC).
+        ///     The timestamps are relative to the beginning of the wallclock
+        ///     time spanned by this data source, and are not actual times (e.g. UTC).
+        ///     For more information, see remarks below.
         /// </summary>
         /// <param name="firstEventTimestampNanoseconds">
-        ///     The timestamp, in nanoseconds, at which data in the source begins.
+        ///     The timestamp, in nanoseconds, of the first data point, relative to
+        ///     the beginning of the wallclock time spanned by this data source.
         /// </param>
         /// <param name="lastEventTimestampNanoseconds">
-        ///     The timestamp, in nanoseconds, at which data in the source ends.
+        ///     The timestamp, in nanoseconds, of the last data point, relative to
+        ///     the beginning of the wallclock time spanned by this data source.
         /// </param>
         /// <param name="firstEventWallClockUtc">
-        ///     The start time of the data first data point, in real time.
+        ///     The UTC wallclock time of the first data point, i.e. the absolute time
+        ///     of the data point referred to in <paramref name="firstEventTimestampNanoseconds"/>.
         /// </param>
         /// <exception cref="System.ArgumentOutOfRangeException">
         ///     <paramref name="firstEventTimestampNanoseconds"/> is less than zero (0.)
@@ -73,6 +77,27 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="lastEventTimestampNanoseconds"/> is less than
         ///     <paramref name="firstEventTimestampNanoseconds"/>.
         /// </exception>
+        /// <remarks>
+        ///     Timestamps are relative to the beginning of the wallclock time spanned
+        ///     by this data source. "The beginning of the time spanned by this data
+        ///     source" is not explicitly passed to this class as a parameter since it
+        ///     can be inferred with <paramref name="firstEventTimestampNanoseconds"/> and
+        ///     <paramref name="firstEventWallClockUtc"/>.
+        ///     <para />
+        ///     For example, consider the following scenario:
+        ///         - A data source begins collecting information at 9:00:00.000 UTC
+        ///           (9am UTC)
+        ///         - The first even the data source observes occurs at 9:00:05.000 UTC
+        ///           (5 seconds later)
+        ///     In this scenario, <paramref name="firstEventWallClockUtc"/> should be
+        ///     9:00:05.000 UTC and <paramref name="firstEventTimestampNanoseconds"/>
+        ///     should be 5x10^9 (i.e. 5 seconds in nanoseconds). These two pieces of
+        ///     information encode that the first event happened at 9:00:05.000,
+        ///     5 seconds after the data source begins, which must be 9:00:00.000.
+        ///     <para />
+        ///     If a data source's first even coincides with the start of the data source,
+        ///     <paramref name="firstEventTimestampNanoseconds"/> will always be 0.
+        /// </remarks>
         public DataSourceInfo(
             long firstEventTimestampNanoseconds,
             long lastEventTimestampNanoseconds,
@@ -93,19 +118,19 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Gets the timestamp of the first event in nanoseconds, relative to the start
-        ///     of the data stream.
+        ///     Gets the timestamp of the first event in nanoseconds, relative to
+        ///     the beginning of the wallclock time spanned by this data source.
         /// </summary>
         public long FirstEventTimestampNanoseconds { get; }
 
         /// <summary>
-        ///     Gets the timestamp of the last event in nanoseconds, relative to the start
-        ///     of the data stream.
+        ///     Gets the timestamp of the last event in nanoseconds, relative to
+        ///     the beginning of the wallclock time spanned by this data source.
         /// </summary>
         public long EndTimestampNanoseconds { get; }
 
         /// <summary>
-        ///     Gets the real time of the first event in the data stream, in UTC.
+        ///     Gets the wallclock time of the first event in the data stream, in UTC.
         /// </summary>
         public DateTime FirstEventWallClockUtc { get; }
 
@@ -116,7 +141,8 @@ namespace Microsoft.Performance.SDK.Processing
         public IList<ErrorInfo> Errors { get; }
 
         /// <summary>
-        ///     Gets the real time of the start of the data stream, in UTC
+        ///     Gets the wallclock time of the beginning of the time spanned by
+        ///     this data source, in UTC.
         /// </summary>
         public DateTime StartWallClockUtc
         {
@@ -127,7 +153,8 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Gets the real time of the end of the data stream, in UTC
+        ///     Gets the wallclock time of the end of the time spanned by
+        ///     this data source, in UTC.
         /// </summary>
         public DateTime EndWallClockUtc
         {

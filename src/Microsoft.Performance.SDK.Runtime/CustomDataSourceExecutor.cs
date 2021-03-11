@@ -139,7 +139,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 Console.Error.WriteLine("Unable to get data source info for {0}: {1}", this.Processor, e);
             }
 
-            var metadataName = this.Context.CustomDataSource.TryGetName();
+            var metadataName = this.Context.CustomDataSource.Name;
 
             return new ExecutionResult(
                 this.Context,

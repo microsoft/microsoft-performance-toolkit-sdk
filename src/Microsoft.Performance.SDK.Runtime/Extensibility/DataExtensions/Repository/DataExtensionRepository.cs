@@ -19,35 +19,71 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
     internal class DataExtensionRepository
         : IDataExtensionRepositoryBuilder
     {
-        private readonly Dictionary<string, HashSet<ISourceDataCookerFactory>> dataCookerReferencesBySource 
+        private Dictionary<string, HashSet<ISourceDataCookerFactory>> dataCookerReferencesBySource 
             = new Dictionary<string, HashSet<ISourceDataCookerFactory>>(StringComparer.Ordinal);
 
-        private readonly HashSet<ICompositeDataCookerReference> compositeDataCookerReferences 
+        private HashSet<ICompositeDataCookerReference> compositeDataCookerReferences 
             = new HashSet<ICompositeDataCookerReference>();
 
-        private readonly Dictionary<DataCookerPath, ISourceDataCookerReference> sourceDataCookerReferencesByPath 
+        private Dictionary<DataCookerPath, ISourceDataCookerReference> sourceDataCookerReferencesByPath 
             = new Dictionary<DataCookerPath, ISourceDataCookerReference>();
 
-        private readonly Dictionary<DataCookerPath, ICompositeDataCookerReference> compositeDataCookerReferencesByPath
+        private Dictionary<DataCookerPath, ICompositeDataCookerReference> compositeDataCookerReferencesByPath
             = new Dictionary<DataCookerPath, ICompositeDataCookerReference>();
 
-        private readonly ConcurrentSet<IDataProcessorReference> dataProcessors
+        private ConcurrentSet<IDataProcessorReference> dataProcessors
             = new ConcurrentSet<IDataProcessorReference>();
 
-        private readonly ConcurrentDictionary<Guid, ITableExtensionReference> tablesById 
+        private ConcurrentDictionary<Guid, ITableExtensionReference> tablesById 
             =  new ConcurrentDictionary<Guid, ITableExtensionReference>();
 
-        public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById  => this.tablesById;
+        private bool isDisposed = false;
 
-        public IEnumerable<DataCookerPath> SourceDataCookers => this.sourceDataCookerReferencesByPath.Keys;
+        /// <inheritdoc />
+        public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.tablesById;
+            }
+        }
 
-        public IEnumerable<DataCookerPath> CompositeDataCookers => this.compositeDataCookerReferencesByPath.Keys;
+        /// <inheritdoc />
+        public IEnumerable<DataCookerPath> SourceDataCookers
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.sourceDataCookerReferencesByPath.Keys;
+            }
+        }
 
-        public IEnumerable<DataProcessorId> DataProcessors => this.dataProcessors.Select(x => new DataProcessorId(x.Id));
+        /// <inheritdoc />
+        public IEnumerable<DataCookerPath> CompositeDataCookers
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.compositeDataCookerReferencesByPath.Keys;
+            }
+        }
 
+        /// <inheritdoc />
+        public IEnumerable<DataProcessorId> DataProcessors
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.dataProcessors.Select(x => new DataProcessorId(x.Id));
+            }
+        }
+
+        /// <inheritdoc />
         public bool AddSourceDataCookerReference(ISourceDataCookerReference dataCooker)
         {
             Guard.NotNull(dataCooker, nameof(dataCooker));
+            this.ThrowIfDisposed();
 
             bool addedCooker;
 
@@ -68,9 +104,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             return addedCooker;
         }
 
+        /// <inheritdoc />
         public bool AddCompositeDataCookerReference(ICompositeDataCookerReference dataCooker)
         {
             Guard.NotNull(dataCooker, nameof(dataCooker));
+            this.ThrowIfDisposed();
 
             bool addedCooker = false;
 
@@ -86,13 +124,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             return addedCooker;
         }
 
+        /// <inheritdoc />
         public ISourceDataCookerFactory GetSourceDataCookerFactory(DataCookerPath dataCookerPath)
         {
+            this.ThrowIfDisposed();
+
             return this.GetSourceDataCookerReference(dataCookerPath);
         }
 
+        /// <inheritdoc />
         public ISourceDataCookerReference GetSourceDataCookerReference(DataCookerPath dataCookerPath)
         {
+            this.ThrowIfDisposed();
+
             if (!this.sourceDataCookerReferencesByPath.TryGetValue(dataCookerPath, out var reference))
             {
                 return null;
@@ -105,8 +149,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             return this.sourceDataCookerReferencesByPath[dataCookerPath];
         }
 
+        /// <inheritdoc />
         public ICompositeDataCookerReference GetCompositeDataCookerReference(DataCookerPath dataCookerPath)
         {
+            this.ThrowIfDisposed();
+
             if (!this.compositeDataCookerReferencesByPath.TryGetValue(dataCookerPath, out var reference))
             {
                 return null;
@@ -119,33 +166,45 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             return this.compositeDataCookerReferencesByPath[dataCookerPath];
         }
 
+        /// <inheritdoc />
         public bool AddTableExtensionReference(
             ITableExtensionReference tableExtensionReference)
         {
             Guard.NotNull(tableExtensionReference, nameof(tableExtensionReference));
+            this.ThrowIfDisposed();
 
             return this.tablesById.TryAdd(tableExtensionReference.TableDescriptor.Guid, tableExtensionReference);
         }
 
+        /// <inheritdoc />
         public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
         {
             Guard.NotNull(dataProcessorReference, nameof(dataProcessorReference));
+            this.ThrowIfDisposed();
 
             return this.dataProcessors.Add(dataProcessorReference);
         }
 
+        /// <inheritdoc />
         public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
         {
+            this.ThrowIfDisposed();
+
             return this.dataProcessors.FirstOrDefault(reference =>
-                StringComparer.Ordinal.Equals(reference.Id, dataProcessorId));
+                StringComparer.Ordinal.Equals(reference.Id, dataProcessorId.Id));
         }
 
         /// <summary>
-        /// After all data extensions have been added, this is called to process dependencies on each of the
-        /// data extensions.
+        ///     After all data extensions have been added, this is called to process
+        ///     dependencies on each of the data extensions.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public void FinalizeDataExtensions()
         {
+            this.ThrowIfDisposed();
+
             foreach (var kvp in this.sourceDataCookerReferencesByPath)
             {
                 kvp.Value.ProcessDependencies(this);
@@ -164,6 +223,75 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             foreach (var kvp in this.TablesById)
             {
                 kvp.Value.ProcessDependencies(this);
+            }
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        ///     Disoses all resources held by this class.
+        /// </summary>
+        /// <param name="disposing">
+        ///     <c>true</c> to dispose both managed and unmanaged
+        ///     resources; <c>false</c> to dispose only unmanaged
+        ///     resources.
+        /// </param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                foreach (var c in this.compositeDataCookerReferences)
+                {
+                    c.SafeDispose();
+                }
+
+                foreach (var s in this.sourceDataCookerReferencesByPath.Values)
+                {
+                    s.SafeDispose();
+                }
+
+                foreach (var d in this.dataProcessors)
+                {
+                    d.SafeDispose();
+                }
+
+                foreach (var t in this.tablesById.Values)
+                {
+                    t.SafeDispose();
+                }
+
+                this.compositeDataCookerReferences = null;
+                this.compositeDataCookerReferencesByPath = null;
+                this.sourceDataCookerReferencesByPath = null;
+                this.dataCookerReferencesBySource = null;
+                this.dataProcessors = null;
+                this.tablesById = null;
+            }
+
+            this.isDisposed = true;
+        }
+
+        /// <summary>
+        ///     Throws an exception if this instance has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(nameof(DataExtensionRepository));
             }
         }
     }

@@ -245,22 +245,17 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
-        public bool IsFileSupported(string path)
+        public bool IsDataSourceSupported(IDataSource dataSource)
         {
-            if (string.IsNullOrWhiteSpace(path))
+            if (dataSource is null)
             {
-                //
-                // Empty file paths can never be supported, as they are
-                // not valid paths in the first place.
-                //
-
                 return false;
             }
 
             bool isSupported;
             try
             {
-                isSupported = this.IsFileSupportedCore(path);
+                isSupported = this.IsDataSourceSupportedCore(dataSource);
             }
             catch
             {
@@ -268,6 +263,12 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             return isSupported;
+        }
+
+        /// <inheritdoc />
+        public virtual void DisposeProcessor(ICustomDataProcessor processor)
+        {
+            // do nothing by default.
         }
 
         /// <summary>
@@ -296,29 +297,31 @@ namespace Microsoft.Performance.SDK.Processing
             ProcessorOptions options);
 
         /// <summary>
-        ///     When overridden in a derived class, determines whether the given
-        ///     path to a specific source of data can in fact be processed by this
-        ///     instance.
+        ///     When overridden in a derived class, returns a value indicating whether the
+        ///     given Data Source can be opened by this instance.
         /// </summary>
-        /// <param name="path">
-        ///     The path to check.
+        /// <param name="dataSource">
+        ///     The Data Source of interest.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the path represents a source of data that can be processed
-        ///     by this instance; <c>false</c> otherwise.
+        ///     <c>true</c> if this instance can actually process the given Data Source;
+        ///     <c>false</c> otherwise.
         /// </returns>
-        protected abstract bool IsFileSupportedCore(string path);
+        protected abstract bool IsDataSourceSupportedCore(IDataSource dataSource);
 
         /// <summary>
-        ///     When overridden in a derived class, gives environment into this instance.
+        ///     A derived class may implement this to perform additional actions when an application
+        ///     environment is made available.
         /// </summary>
         /// <param name="applicationEnvironment">
         ///     The handle back to the application environment.
         /// </param>
-        protected abstract void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment);
+        protected virtual void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
+        {
+        }
 
         /// <summary>
-        /// A derived class may implement this to perform additional actions when a logger is made available.
+        ///     A derived class may implement this to perform additional actions when a logger is made available.
         /// </summary>
         /// <param name="logger">Use to log information. <seealso cref="ILogger"/></param>
         protected virtual void SetLoggerCore(ILogger logger)
@@ -326,8 +329,8 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        /// If a internal table does not provide a TableFactoryAttribute, this method may be implemented
-        /// to generate an Action to create the table.
+        ///     If a internal table does not provide a TableFactoryAttribute, this method may be implemented
+        ///     to generate an Action to create the table.
         /// </summary>
         /// <param name="type">Type associated with the table</param>
         /// <returns>An action to build the table, or null</returns>

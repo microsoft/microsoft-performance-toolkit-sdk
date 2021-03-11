@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -24,9 +27,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
     ///     references that make up the dependencies.
     /// </summary>
     internal class DataExtensionDependencyState
-        : IDataExtensionDependency,
-          IDataExtensionDependencyStateSupport,
-          ICloneable
+        : IDataExtensionDependencyState
     {
         private enum EstablishAvailabilityStatus
         {
@@ -35,7 +36,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             Complete
         }
 
-        private readonly List<string> errors;
+        private readonly List<ErrorInfo> errors;
         private readonly HashSet<DataProcessorId> missingDataProcessors;
         private readonly HashSet<DataCookerPath> missingDataCookers;
 
@@ -49,8 +50,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         {
             Guard.NotNull(dataDependencyTarget, nameof(dataDependencyTarget));
 
-            this.errors = new List<string>();
-            this.Errors = new ReadOnlyCollection<string>(this.errors);
+            this.errors = new List<ErrorInfo>();
+            this.Errors = new ReadOnlyCollection<ErrorInfo>(this.errors);
 
             this.missingDataCookers = new HashSet<DataCookerPath>();
 
@@ -67,8 +68,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             this.target = other.target;
 
-            this.errors = new List<string>(other.errors);
-            this.Errors = new ReadOnlyCollection<string>(this.errors);
+            this.errors = new List<ErrorInfo>(other.errors);
+            this.Errors = new ReadOnlyCollection<ErrorInfo>(this.errors);
 
             this.missingDataCookers = new HashSet<DataCookerPath>(other.missingDataCookers);
             this.missingDataProcessors = new HashSet<DataProcessorId>(other.missingDataProcessors);
@@ -87,7 +88,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         /// <summary>
         ///     Gets error messages reported while establishing dependencies.
         /// </summary>
-        public IReadOnlyCollection<string> Errors { get; }
+        public IReadOnlyCollection<ErrorInfo> Errors { get; }
 
         /// <summary>
         ///     Gets data cookers that are required but unavailable.
@@ -119,7 +120,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             if (this.establishAvailabilityStatus == EstablishAvailabilityStatus.InProgress)
             {
-                this.AddError($"There is a circular dependency between data extensions: {this.target.Name}.");
+                this.AddError(
+                    new CycleError()
+                    {
+                        Target = this.target.Name,
+                    });
                 this.UpdateAvailability(DataExtensionAvailability.Error);
                 return;
             }
@@ -131,7 +136,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             if (this.establishAvailabilityStatus == EstablishAvailabilityStatus.InProgress)
             {
-                this.errors.Add($"There is a circular dependency between data extensions involving {this.target.Name}");
+                this.AddError(
+                    new CycleError()
+                    {
+                        Target = this.target.Name,
+                    });
                 this.UpdateAvailability(DataExtensionAvailability.Error);
                 return;
             }
@@ -233,9 +242,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             }
         }
 
-        public void AddError(string error)
+        public void AddError(
+            ErrorInfo error)
         {
-            Guard.NotNullOrWhiteSpace(error, nameof(error));
+            Guard.NotNull(error, nameof(error));
 
             this.errors.Add(error);
         }
@@ -330,7 +340,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         }
 
         private void ProcessRequiredExtension(
-            IDataExtensionReference reference, 
+            IDataExtensionReference reference,
             string extensionId,
             IDataExtensionRepository availableDataExtensions)
         {
@@ -377,22 +387,133 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             switch (requiredDataExtension.Availability)
             {
                 case DataExtensionAvailability.Undetermined:
-                    this.errors.Add("Internal error encountered.");
+                    this.AddError(
+                        new ErrorInfo(ErrorCodes.EXTENSION_Error, ErrorCodes.EXTENSION_Error.Description)
+                        {
+                            Target = this.target.Name,
+                        });
                     this.UpdateAvailability(DataExtensionAvailability.Error);
                     break;
 
                 case DataExtensionAvailability.Error:
-                    this.UpdateAvailability(DataExtensionAvailability.IndirectError);
-                    this.errors.Add($"An error occurred in a required data cooker path: {extensionId}.");
+                    var cycleErrors = requiredDataExtension.DependencyState.Errors.Where(x => x.Code == ErrorCodes.EXTENSION_DependencyCycle);
+                    if (cycleErrors.Any())
+                    {
+                        this.ProcessCycleError(cycleErrors);
+                        this.UpdateAvailability(DataExtensionAvailability.Error);
+                    }
+                    else
+                    {
+                        this.AddError(
+                            new ErrorInfo(
+                                ErrorCodes.EXTENSION_Error, 
+                                ErrorCodes.EXTENSION_Error.Description)
+                            {
+                                Target = extensionId,
+                            });
+
+                        this.UpdateAvailability(DataExtensionAvailability.IndirectError);
+                    }
+
                     break;
 
                 case DataExtensionAvailability.MissingRequirement:
+                    this.AddError(new ErrorInfo(ErrorCodes.EXTENSION_MissingIndirectRequirement, ErrorCodes.EXTENSION_Error.Description)
+                    {
+                        Target = extensionId,
+                    });
                     this.UpdateAvailability(DataExtensionAvailability.MissingIndirectRequirement);
                     break;
 
                 case DataExtensionAvailability.MissingIndirectRequirement:
+                    this.AddError(new ErrorInfo(ErrorCodes.EXTENSION_MissingIndirectRequirement, ErrorCodes.EXTENSION_Error.Description)
+                    {
+                        Target = extensionId,
+                    });
                     this.UpdateAvailability(this.Availability = DataExtensionAvailability.MissingIndirectRequirement);
                     break;
+            }
+        }
+
+        private void ProcessCycleError(IEnumerable<ErrorInfo> cycleErrors)
+        {
+            Debug.Assert(cycleErrors != null);
+            Debug.Assert(cycleErrors.Any());
+
+            //
+            // When a cycle is first detected, an error is added to the dependency
+            // state. Eventually, as the recurse process dependencies calls unwind,
+            // we will end up back at the dependency state that is the 'start' of
+            // the cycle. Thus, if we find the required extension is reporting an
+            // error, and we see that the current instance has a cycle error, then
+            // we know we have unwound and should replace the current cycle error
+            // with the completed cycle error.
+            //
+
+            var cycleError = new CycleError()
+            {
+                Target = this.target.Name,
+                Details = cycleErrors.ToArray(),
+            };
+
+            var errorReplaced = false;
+            for (var i = 0; i < this.errors.Count; ++i)
+            {
+                if (this.errors[i].Code == ErrorCodes.EXTENSION_DependencyCycle)
+                {
+                    this.errors[i] = cycleError;
+                    errorReplaced = true;
+                    break;
+                }
+            }
+
+            if (!errorReplaced)
+            {
+                this.AddError(cycleError);
+            }
+        }
+
+        [Serializable]
+        private sealed class CycleError
+            : ErrorInfo
+        {
+            internal CycleError()
+                : base(ErrorCodes.EXTENSION_DependencyCycle, ErrorCodes.EXTENSION_DependencyCycle.Description)
+            {
+            }
+
+            private CycleError(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+            }
+
+            public override string ToString()
+            {
+                var sb = new StringBuilder();
+
+                sb.AppendFormat("Code: {0}", this.Code).AppendLine()
+                  .AppendFormat("Message: {0}", this.Message);
+                if (!string.IsNullOrWhiteSpace(this.Target))
+                {
+                    sb.AppendLine()
+                      .AppendFormat("Target: {0}", this.Target)
+                      .AppendLine();
+                }
+
+                sb.AppendFormat("Cycle: {0}", this.Target);
+
+                if (this.Details != null &&
+                    this.Details.Length > 0)
+                {
+                    var c = this.Details[0];
+                    while (c != null)
+                    {
+                        sb.AppendFormat(" -> {0}", c.Target);
+                        c = c.Details?.ElementAtOrDefault(0);
+                    }
+                }
+
+                return sb.ToString();
             }
         }
     }
