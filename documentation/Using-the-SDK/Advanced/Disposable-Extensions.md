@@ -1,7 +1,7 @@
 # Abstract
 
 This document outlines how to make a `CustomDataSource` or SDK
-extension - such as a `DataCooker` disposable.
+extension - such as a `DataCooker` - disposable.
 
 # Motiviation
 
