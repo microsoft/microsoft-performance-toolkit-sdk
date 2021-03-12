@@ -3,7 +3,7 @@
 This document outlines major code changes that might be needed when updating from 
 Preview Version 0.108.\* to Preview Version 0.109.\*
 
-# Updates for Breaking Changes
+# Breaking Changes
 
 There are a number of breaking changes in this version; please see the [CHANGELOG](../../CHANGELOG.md) for a list of these changes.
 
