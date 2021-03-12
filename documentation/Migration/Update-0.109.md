@@ -1,8 +1,9 @@
 # Abstract
 
-This document outlines major code changes that might be needed when updating from Preview Version 0.108.* to Preview Version 0.109.*
+This document outlines major code changes that might be needed when updating from 
+Preview Version 0.108.\* to Preview Version 0.109.\*
 
-# Code Updates
+# Updates for Breaking Changes
 
 There are a number of breaking changes in this version; please see the [CHANGELOG](../../CHANGELOG.md) for a list of these changes.
 
@@ -79,8 +80,16 @@ catch (UnsupportedDataSourceException)
 }
 ````
 
-# IDataSource
+## IDataSource
 
-## GetUri
+Anywhere you are calling `IDataSource.GetUri()` can be simply updated to `IDataSource.Uri`
 
-Anywhere you where calling `IDataSource.GetUri()` can be simply updated to `IDataSource.Uri`
+# Suggested Changes
+
+The following are changes that are not required, but may be useful to you.
+
+## CustomDataSourceBase
+
+The method `SetApplicationEnvironmentCore` is now virtual, so you no longer have
+to override it if you do not want to. An `ApplicationEnvironment` property is
+now available on the base class that you may reference in your `CustomDataSources.`
