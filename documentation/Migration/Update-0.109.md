@@ -1,7 +1,9 @@
 # Abstract
 
 This document outlines major code changes that might be needed when updating from 
-Preview Version 0.108.\* to Preview Version 0.109.\*
+Preview Version 0.108.\* to Preview Version 0.109.\* This document is divided
+into two sections: [Breaking Changes](#breaking-changes) and 
+[Suggested Changes](#suggested-changes).
 
 # Breaking Changes
 
