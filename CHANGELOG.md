@@ -33,6 +33,9 @@ document is in order from most recent to least recent.
 
 ## New Features
 
+- Users may now define their own `DataSource` types.
+  - [Extensible Data Sources](documentation/Using-the-SDK/Advanced/Creating-Your-Own-DataSource.md)
+  
 - Users may opt-in to making their extensions disposable.
     - [Disposable Extensions](documentation/Using-the-SDK/Advanced/Disposable-Extensions.md)
 
