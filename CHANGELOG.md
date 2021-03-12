@@ -25,6 +25,12 @@ document is in order from most recent to least recent.
   - Renamed Microsoft.Performance.Toolkit.EngineUnsupportedDataSourceException to UnsupportedCustomDataSourceException
   - Renamed Microsoft.Performance.Toolkit.EngineUnsupportedFileException to UnsupportedDataSourceException
 
+- Microsoft.Performance.SDK.Processing.DataSourceAttribute
+  - a new parameter of type `Type` has been added to the constructors
+
+- Microsoft.Performance.SDK.Processing.IDataSource
+  - Uri GetUri() converted to a property
+
 ## New Features
 
 - Users may opt-in to making their extensions disposable.
