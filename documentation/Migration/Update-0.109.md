@@ -84,7 +84,9 @@ catch (UnsupportedDataSourceException)
 
 ## IDataSource
 
-Anywhere you are calling `IDataSource.GetUri()` can be simply updated to `IDataSource.Uri`
+`IDataSource.GetUri()` has been changed to a read-only property: `IDataSource.Uri`.
+
+- Anywhere you are calling `IDataSource.GetUri()` can be simply updated to `IDataSource.Uri`
 
 # Suggested Changes
 
@@ -94,4 +96,4 @@ The following are changes that are not required, but may be useful to you.
 
 The method `SetApplicationEnvironmentCore` is now virtual, so you no longer have
 to override it if you do not want to. An `ApplicationEnvironment` property is
-now available on the base class that you may reference in your `CustomDataSources.`
+now available on the base class that you may reference in your `CustomDataSource.`
