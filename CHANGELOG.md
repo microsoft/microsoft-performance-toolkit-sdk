@@ -35,6 +35,7 @@ document is in order from most recent to least recent.
 
 - Users may opt-in to making their extensions disposable.
     - [Disposable Extensions](documentation/Using-the-SDK/Advanced/Disposable-Extensions.md)
+
 - Tables may now be queried using the Engine.
     - Documentation coming soon!
 
