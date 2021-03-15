@@ -190,6 +190,178 @@ namespace Microsoft.Performance.Toolkit.Engine
     }
 
     /// <summary>
+    ///     Represents the error that occurs when an attempt is made to access a
+    ///     <see cref="TableDescriptor"/> that is not known.
+    /// </summary>
+    [Serializable]
+    public class TableNotFoundException
+        : EngineException
+    {
+        /// <inheritdoc />
+        public TableNotFoundException() : base() { }
+
+        /// <inheritdoc />
+        public TableNotFoundException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public TableNotFoundException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableNotFoundException"/>
+        ///     class with the given <see cref="TableDescriptor"/>.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The path to the data that was not found.
+        /// </param>
+        public TableNotFoundException(TableDescriptor tableDescriptor)
+            : this(tableDescriptor, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableNotFoundException"/>
+        ///     class with the given <see cref="TableDescriptor"/>, and the error that is the cause of this error.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The <see cref="TableDescriptor"/> that was not found.
+        /// </param>
+        /// <param name="inner">
+        ///     The error that is the cause of this error.
+        /// </param>
+        public TableNotFoundException(TableDescriptor tableDescriptor, Exception inner)
+            : base($"The requested table '{tableDescriptor}' was not found", inner)
+        {
+            this.Descriptor = tableDescriptor;
+        }
+
+        /// <inheritdoc />
+        protected TableNotFoundException(SerializationInfo info, StreamingContext context)
+        {
+            this.Descriptor = new TableDescriptor(
+                                        (Guid)info.GetValue(nameof(TableGuid), typeof(Guid)),
+                                        info.GetString(nameof(Name)),
+                                        info.GetString(nameof(Description)));
+        }
+
+        /// <summary>
+        ///     Gets the requested <see cref="TableDescriptor"/> that is the cause of this error.
+        /// </summary>
+        public TableDescriptor Descriptor { get; }
+
+        private Guid TableGuid => this.Descriptor.Guid;
+
+        private string Name => this.Descriptor.Name;
+
+        private string Description => this.Descriptor.Description;
+
+        /// <inheritdoc />
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(TableGuid), this.TableGuid);
+            info.AddValue(nameof(Name), this.Name);
+            info.AddValue(nameof(Description), this.Description);
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return new StringBuilder(base.ToString()).AppendLine()
+                .AppendFormat("{0}: {1}", nameof(Descriptor), this.Descriptor)
+                .ToString();
+        }
+    }
+
+    /// <summary>
+    ///     Represents the error that occurs when an attempt is made to build a
+    ///     <see cref="ITableResult"/> that with a specified <see cref="TableDescriptor"/>.
+    /// </summary>
+    [Serializable]
+    public class TableException
+        : EngineException
+    {
+        /// <inheritdoc />
+        public TableException() : base() { }
+
+        /// <inheritdoc />
+        public TableException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public TableException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableException"/>
+        ///     class with the given <see cref="TableDescriptor"/>.
+        /// </summary>
+        /// <param name="message">
+        ///     The message that describes the error.
+        /// </param>
+        /// <param name="tableDescriptor">
+        ///     The path to the data that was not found.
+        /// </param>
+        public TableException(string message, TableDescriptor tableDescriptor)
+            : this(message, tableDescriptor, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableException"/>
+        ///     class with the given <see cref="TableDescriptor"/>, and the error that is the cause of this error.
+        /// </summary>
+        /// <param name="message">
+        ///     The message that describes the error.
+        /// </param>
+        /// <param name="tableDescriptor">
+        ///     The <see cref="TableDescriptor"/> that was not found.
+        /// </param>
+        /// <param name="inner">
+        ///     The error that is the cause of this error.
+        /// </param>
+        public TableException(string message, TableDescriptor tableDescriptor, Exception inner)
+            : base(message, inner)
+        {
+            this.Descriptor = tableDescriptor;
+        }
+
+        /// <inheritdoc />
+        protected TableException(SerializationInfo info, StreamingContext context)
+        {
+            this.Descriptor = new TableDescriptor(
+                                        (Guid)info.GetValue(nameof(TableGuid), typeof(Guid)),
+                                        info.GetString(nameof(Name)),
+                                        info.GetString(nameof(Description)));
+        }
+
+        /// <summary>
+        ///     Gets the requested <see cref="TableDescriptor"/> that is the cause of this error.
+        /// </summary>
+        public TableDescriptor Descriptor { get; }
+
+        private Guid TableGuid => this.Descriptor.Guid;
+
+        private string Name => this.Descriptor.Name;
+
+        private string Description => this.Descriptor.Description;
+
+        /// <inheritdoc />
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+            info.AddValue(nameof(TableGuid), this.TableGuid);
+            info.AddValue(nameof(Name), this.Name);
+            info.AddValue(nameof(Description), this.Description);
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return new StringBuilder(base.ToString()).AppendLine()
+                .AppendFormat("{0}: {1}", nameof(Descriptor), this.Descriptor)
+                .ToString();
+        }
+    }
+
+    /// <summary>
     ///     Represents the error that occurs when an attempt is made
     ///     to add a Data Source for processing that no processor can handle.
     ///     This can also happen if the user requests a processor to

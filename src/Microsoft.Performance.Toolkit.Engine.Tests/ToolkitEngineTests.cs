@@ -16,6 +16,7 @@ using Microsoft.Performance.Testing.SDK;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestData;
+using Microsoft.Performance.Toolkit.Engine.Tests.TestTables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests
@@ -839,6 +840,277 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         #endregion TryEnableCooker
 
+        #region EnableTable
+
+        [TestMethod]
+        [IntegrationTest]
+        public void EnableTable_Known_Enables()
+        {
+            var sut = Engine.Create();
+            var table = sut.AvailableTables.FirstOrDefault();
+
+            sut.EnableTable(table);
+
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(table, sut.EnabledTables.ElementAt(0));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void EnableTable_Known_EmptyTable()
+        {
+            var sut = Engine.Create();            
+
+            sut.EnableTable(EmptyTable.TableDescriptor);
+
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnabledTables.ElementAt(0));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void EnableTable_NotKnown_Throws()
+        {
+            var sut = Engine.Create();
+            var table = new TableDescriptor(Guid.NewGuid(), "Unknown Table", "Unknown Table");
+
+            var e = Assert.ThrowsException<TableNotFoundException>(() => sut.EnableTable(table));
+            Assert.AreEqual(table, e.Descriptor);
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void EnableTable_AlreadyProcessed_Throws()
+        {
+            var sut = Engine.Create();
+            sut.Process();
+
+            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableTable(sut.AvailableTables.First()));
+        }
+
+        #endregion EnableTable
+
+        #region TryEnableTable
+
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableTable_Known_Enables()
+        {
+            var sut = Engine.Create();
+            var table = sut.AvailableTables.FirstOrDefault();
+
+            sut.TryEnableTable(table);
+
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(table, sut.EnabledTables.ElementAt(0));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableTable_Known_Enables_True()
+        {
+            var sut = Engine.Create();
+            var table = sut.AvailableTables.FirstOrDefault();
+
+            Assert.IsTrue(sut.TryEnableTable(table));
+
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(table, sut.EnabledTables.ElementAt(0));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableTable_Known_EmptyTable()
+        {
+            var sut = Engine.Create();
+
+            sut.TryEnableTable(EmptyTable.TableDescriptor);
+
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnabledTables.ElementAt(0));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableTable_Known_EmptyTable_True()
+        {
+            var sut = Engine.Create();
+
+            Assert.IsTrue(sut.TryEnableTable(EmptyTable.TableDescriptor));
+
+            Assert.AreEqual(1, sut.EnabledTables.Count());
+            Assert.AreEqual(EmptyTable.TableDescriptor, sut.EnabledTables.ElementAt(0));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableTable_NotKnown_Throws()
+        {
+            var sut = Engine.Create();
+            var table = new TableDescriptor(Guid.NewGuid(), "Unknown Table", "Unknown Table");
+
+            Assert.IsFalse(sut.TryEnableTable(table));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableTable_AlreadyProcessed_Throws()
+        {
+            var sut = Engine.Create();
+            sut.Process();
+
+            Assert.IsFalse(sut.TryEnableTable(sut.AvailableTables.First()));
+        }
+
+        #endregion TryEnableTable
+
+        #region BuildTable
+
+        [TestMethod]
+        [IntegrationTest]
+        public void BuildTable_EmptyTable()
+        {
+            var sut = Engine.Create();
+
+            sut.EnableTable(EmptyTable.TableDescriptor);
+
+            var result = sut.Process();
+
+            var hasData = result.IsTableDataAvailable(EmptyTable.TableDescriptor);
+
+            Assert.IsFalse(hasData.HasValue);
+
+            var builtTable = result.BuildTable(EmptyTable.TableDescriptor);
+
+            Assert.AreEqual(0, builtTable.RowCount);
+            Assert.AreEqual(0, builtTable.Columns.Count());
+            Assert.AreEqual(0, builtTable.BuiltInTableConfigurations.Count());
+            Assert.AreEqual(0, builtTable.TableCommands.Count());
+            Assert.IsNull(builtTable.DefaultConfiguration);
+            Assert.IsNull(builtTable.TableRowDetailsGenerator);
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void BuildTable_EmptyTable_IsDataAvailable()
+        {
+            var sut = Engine.Create();
+
+            sut.EnableTable(EmptyTableWithIsData.TableDescriptor);
+
+            var result = sut.Process();
+
+            var hasData = result.IsTableDataAvailable(EmptyTableWithIsData.TableDescriptor);
+
+            Assert.IsTrue(hasData.HasValue);
+            Assert.IsFalse(hasData.Value);
+
+            var builtTable = result.BuildTable(EmptyTableWithIsData.TableDescriptor);
+
+            Assert.AreEqual(0, builtTable.RowCount);
+            Assert.AreEqual(0, builtTable.Columns.Count());
+            Assert.AreEqual(0, builtTable.BuiltInTableConfigurations.Count());
+            Assert.AreEqual(0, builtTable.TableCommands.Count());
+            Assert.IsNull(builtTable.DefaultConfiguration);
+            Assert.IsNull(builtTable.TableRowDetailsGenerator);
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void BuildTable_SingleRowTable()
+        {
+            var sut = Engine.Create();
+
+            sut.EnableTable(SingleRowTable.TableDescriptor);
+
+            var result = sut.Process();
+
+            var builtTable = result.BuildTable(SingleRowTable.TableDescriptor);
+
+            Assert.AreEqual(1, builtTable.RowCount);
+            Assert.AreEqual(3, builtTable.Columns.Count());
+            Assert.AreEqual(0, builtTable.BuiltInTableConfigurations.Count());
+            Assert.AreEqual(0, builtTable.TableCommands.Count());
+            Assert.IsNull(builtTable.DefaultConfiguration);
+            Assert.IsNull(builtTable.TableRowDetailsGenerator);
+
+            for (int i = 0; i < builtTable.Columns.Count; i++)
+            {
+                Assert.AreEqual(i + 1, builtTable.Columns.ElementAt(i).Project(0));
+            }
+        }
+
+        [TestMethod]
+        [FunctionalTest]
+        [DeploymentItem(@"TestData/source123_test_data.s123d")]
+        [DeploymentItem(@"TestData/source4_test_data.s4d")]
+        [DeploymentItem(@"TestData/source5_test_data.s5d")]
+        [DeploymentItem(@"TestData/BuildTableTestSuite.json")]
+        [DynamicData(nameof(BuildTableTestData), DynamicDataSourceType.Method)]
+        public void BuildTable_MultiRowFromCookerTable(
+            EngineBuildTableTestCaseDto testCase)
+        {
+            if (testCase.DebugBreak)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+
+            var sut = Engine.Create();
+
+            foreach (var file in testCase.FilePaths)
+            {
+                sut.AddFile(file);
+            }
+
+            foreach (var tableGuid in testCase.TablesToEnable)
+            {
+                sut.EnableTable(sut.AvailableTables.Single(x => x.Guid == Guid.Parse(tableGuid)));
+            }
+
+            var result = sut.Process();
+
+            foreach (var expectedData in testCase.ExpectedOutputs)
+            {
+                var tableGuid = expectedData.Key;
+                var dataPoints = expectedData.Value;
+
+                var builtTable = result.BuildTable(sut.EnabledTables.Single(x => x.Guid == Guid.Parse(tableGuid)));
+
+                Assert.IsNotNull(builtTable);
+
+                for (int i = 0; i < dataPoints.Length; ++i)
+                {
+                    var dataPoint = dataPoints[i];
+
+                    foreach (var data in dataPoint)
+                    {
+                        var column = builtTable.Columns.SingleOrDefault(x => x.Configuration.Metadata.Name == data.Key);
+
+                        Assert.IsNotNull(column);
+
+                        Assert.AreEqual(data.Value, column.Project(i).ToString());
+                    }
+                }
+            }
+            
+            foreach (var throwingTable in testCase.ThrowingTables)
+            {
+                // TODO: Re-enable when the following issue is fixed: https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/55
+                //Assert.ThrowsException<TableNotBuiltException>(() => result.BuildTable(sut.AllTables.Single(x => x.Guid == Guid.Parse(throwingTable))));
+            }
+        }
+
+        private static IEnumerable<object[]> BuildTableTestData()
+        {
+            var suite = EngineTestsLoader.Load<EngineBuildTableTestSuiteDto>("TestData/BuildTableTestSuite.json");
+            foreach (var testCase in suite.TestCases)
+            {
+                yield return new[] { testCase, };
+            }
+        }
+
+        #endregion BuildTable
+
         #region Process
 
         [TestMethod]
@@ -964,7 +1236,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         private static IEnumerable<object[]> ProcessTestData()
         {
-            var suite = EngineProcessTestsLoader.Load("TestData/ProcessTestSuite.json");
+            var suite = EngineTestsLoader.Load<EngineProcessTestSuiteDto>("TestData/ProcessTestSuite.json");
             foreach (var testCase in suite.TestCases)
             {
                 yield return new[] { testCase, };
