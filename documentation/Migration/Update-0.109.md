@@ -88,6 +88,60 @@ catch (UnsupportedDataSourceException)
 
 - Anywhere you are calling `IDataSource.GetUri()` can be simply updated to `IDataSource.Uri`
 
+## ErrorInfo
+
+The `InnerError` property has been removed from `ErrorInfo`. The `InnerError`
+type has also been removed.
+
+- Any classes inheriting from `InnerError` should now inherit from `ErrorInfo`
+directly.
+
+- Any errors that were using `InnerError` may either be replaced with your
+sub class, or make use of the `Details` property.
+
+Example:
+````cs
+public class MyInnerError
+    : InnerError
+{
+    public MyInnerError(int number)
+        : base("my_code")
+    {
+        this.Number = number;
+    }
+}
+````
+becomes
+````cs
+public class MyError
+    : ErrorInfo
+{
+    public MyError(int number)
+        : base("my_code", "my_message")
+    {
+        this.Number = number;
+    }
+}
+````
+and using it:
+````cs
+var error = new ErrorInfo("error", "message")
+{
+    Inner = new MyInnerError(23),
+};
+````
+becomes
+````cs
+var error = new MyError(23);
+````
+or
+````cs
+var error = new ErrorInfo("error", "message")
+{
+    Details = new[] { new MyError(23), },
+};
+````
+
 # Suggested Changes
 
 The following are changes that are not required, but may be useful to you.
