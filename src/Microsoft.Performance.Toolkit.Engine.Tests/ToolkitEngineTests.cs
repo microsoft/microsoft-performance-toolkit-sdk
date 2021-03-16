@@ -1043,6 +1043,40 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [TestMethod]
         [FunctionalTest]
         [DeploymentItem(@"TestData/source123_test_data.s123d")]
+        [DeploymentItem(@"TestData/BuildTableTestSuite.json")]
+        [DynamicData(nameof(BuildTableTestData), DynamicDataSourceType.Method)]
+        public void BuildTable_ProcessorSingleRowTable(
+            EngineBuildTableTestCaseDto testCase)
+        {
+            var sut = Engine.Create();
+
+            sut.EnableTable(Source123Table.TableDescriptor);
+
+            foreach (var file in testCase.FilePaths)
+            {
+                sut.AddFile(file);
+            }
+
+            var result = sut.Process();
+
+            var builtTable = result.BuildTable(Source123Table.TableDescriptor);
+
+            Assert.AreEqual(1, builtTable.RowCount);
+            Assert.AreEqual(3, builtTable.Columns.Count());
+            Assert.AreEqual(0, builtTable.BuiltInTableConfigurations.Count());
+            Assert.AreEqual(0, builtTable.TableCommands.Count());
+            Assert.IsNull(builtTable.DefaultConfiguration);
+            Assert.IsNull(builtTable.TableRowDetailsGenerator);
+
+            for (int i = 0; i < builtTable.Columns.Count; i++)
+            {
+                Assert.AreEqual(i + 1, builtTable.Columns.ElementAt(i).Project(0));
+            }
+        }
+
+        [TestMethod]
+        [FunctionalTest]
+        [DeploymentItem(@"TestData/source123_test_data.s123d")]
         [DeploymentItem(@"TestData/source4_test_data.s4d")]
         [DeploymentItem(@"TestData/source5_test_data.s5d")]
         [DeploymentItem(@"TestData/BuildTableTestSuite.json")]

@@ -299,7 +299,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var metadata = type.GetCustomAttribute<CustomDataSourceAttribute>();
             var dataSources = type.GetCustomAttributes<DataSourceAttribute>();
-            var tables = ((ICustomDataSource)Activator.CreateInstance(type)).DataTables;
+            var instance = ((ICustomDataSource)Activator.CreateInstance(type));
+            var tables = instance.DataTables.Union(instance.MetadataTables);
+
             Assert.IsNotNull(metadata);
             Assert.IsNotNull(dataSources);
             Assert.IsNotNull(tables);
@@ -388,7 +390,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
-            public IEnumerable<TableDescriptor> MetadataTables { get; }
+            public IEnumerable<TableDescriptor> MetadataTables => new TableDescriptor[0];
 
             public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
 
@@ -449,9 +451,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Any.TableDescriptor(),
             };
 
+            private static readonly TableDescriptor[] metadataTableDescriptors = new[]
+            {
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+            };
+
             public SampleCds()
             {
                 this.DataTables = tableDescriptors;
+                this.MetadataTables = metadataTableDescriptors;
             }
 
             public IEnumerable<TableDescriptor> DataTables { get; }
@@ -519,9 +528,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Any.TableDescriptor(),
             };
 
+            private static readonly TableDescriptor[] metadataTableDescriptors = new[]
+            {
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+            };
+
             public MultiDataSourceCds()
             {
                 this.DataTables = tableDescriptors;
+                this.MetadataTables = metadataTableDescriptors;
             }
 
             public IEnumerable<TableDescriptor> DataTables { get; }
