@@ -846,22 +846,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.customDataSourceReferences.AddRange(catalog.PlugIns);
                 instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
                 instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-                instance.extensionRoot = new ExtensionRoot(catalog, repo);
-
-                var allTables = new HashSet<TableDescriptor>();
-                foreach (var tableId in repoTuple.Item2.TablesById)
-                {
-                    allTables.Add(tableId.Value.TableDescriptor);
-                    instance.tableGuidToDescriptor[tableId.Key] = tableId.Value.TableDescriptor;
-                }
-
-                foreach (var descriptor in catalog.PlugIns.SelectMany(x => x.AvailableTables))
-                {
-                    allTables.Add(descriptor);
-                    instance.tableGuidToDescriptor[descriptor.Guid] = descriptor;
-                }
-
-                instance.allTables.AddRange(allTables);
+                instance.extensionRoot = new ExtensionRoot(catalog, repo);                
 
                 instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
 
@@ -896,6 +881,21 @@ namespace Microsoft.Performance.Toolkit.Engine
                         Console.Error.WriteLine(e);
                     }
                 }
+
+                var allTables = new HashSet<TableDescriptor>();
+                foreach (var tableId in repoTuple.Item2.TablesById)
+                {
+                    allTables.Add(tableId.Value.TableDescriptor);
+                    instance.tableGuidToDescriptor[tableId.Key] = tableId.Value.TableDescriptor;
+                }
+
+                foreach (var descriptor in catalog.PlugIns.SelectMany(x => x.AvailableTables))
+                {
+                    allTables.Add(descriptor);
+                    instance.tableGuidToDescriptor[descriptor.Guid] = descriptor;
+                }
+
+                instance.allTables.AddRange(allTables);
 
                 instance.IsProcessed = false;
 
