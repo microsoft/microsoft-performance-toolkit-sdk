@@ -7,7 +7,7 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 # Breaking Changes
 
-There are a number of breaking changes in this version; please see the [CHANGELOG](../../CHANGELOG.md) for a list of these changes.
+There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
 ## Custom Data Source
 
