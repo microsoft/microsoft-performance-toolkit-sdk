@@ -534,20 +534,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             {
                 this.GetObjectData(info, context);
             }
-
-            public override string ToString()
-            {
-                return new StringBuilder()
-                    .AppendLine("DirectoryPaths:")
-                    .Append(string.Join(Environment.NewLine + "    ", this.DirectoryPaths)).AppendLine()
-                    .AppendFormat("IncludeSubDirectories: {0}", this.IncludeSubDirectories).AppendLine()
-                    .AppendLine("SearchPatterns:")
-                    .Append(string.Join(Environment.NewLine + "    ", this.SearchPatterns)).AppendLine()
-                    .AppendLine("ExclusionFileNames:")
-                    .Append(string.Join(Environment.NewLine + "    ", this.ExclusionFileNames)).AppendLine()
-                    .AppendFormat("ExclusionsAreCaseSensitive: {0}", this.ExclusionsAreCaseSensitive)
-                    .ToString();
-            }
         }
     }
 }
