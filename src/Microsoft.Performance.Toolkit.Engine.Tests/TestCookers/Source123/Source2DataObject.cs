@@ -12,11 +12,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 
         public string Data { get; set; }
 
-        public int CompareTo(int other)
-        {
-            return this.Key.CompareTo(other);
-        }
-
         public int GetKey()
         {
             return this.Key;

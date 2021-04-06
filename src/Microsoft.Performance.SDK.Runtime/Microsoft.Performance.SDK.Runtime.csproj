@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Microsoft.Performance.SDK.Runtime</AssemblyName>
     <RootNamespace>Microsoft.Performance.SDK.Runtime</RootNamespace>
-    <Authors>Microsoft Corporation</Authors>
+    <Authors>Microsoft</Authors>
     <Company>Microsoft Corporation</Company>
     <Product>Performance ToolKit</Product>
     <Description>Contains the Performance Toolkit Runtime.</Description>
-    <Copyright>Copyright © 2020 Microsoft Corporation</Copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <RepositoryUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</RepositoryUrl>
     <PackageProjectUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</PackageProjectUrl>

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
 using System.Text;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -9,9 +10,9 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Attribute to mark a custom data source implementation as processing
     ///     files of a specific type. This is used to instruct callers to route files
-    ///     with a given extension to the decorated custom data source for processing.
+    ///     with a given extension to the decorated Custom Data Source for processing.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class FileDataSourceAttribute
         : DataSourceAttribute,
           IEquatable<FileDataSourceAttribute>
@@ -55,33 +56,24 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="description"/> is whitespace.
         /// </exception>
         public FileDataSourceAttribute(string fileExtension, string description)
+            : base(typeof(FileDataSource), description)
         {
-            // todo: do we want to support files that do not
-            // have file extensions? How would these be denoted?
             Guard.NotNullOrWhiteSpace(fileExtension, nameof(fileExtension));
-            Guard.NotNullOrWhiteSpace(description, nameof(description));
 
             this.FileExtension = fileExtension.TrimStart('.');
-            this.Description = description;
         }
 
         /// <summary>
-        ///     Gets the file extension supported by the decorated class.
+        ///     Gets the file extension supported by the decorated class,
+        ///     not including the leading period (".")
         /// </summary>
         public string FileExtension { get; }
-
-        /// <summary>
-        ///     Gets the description of the file type.
-        /// </summary>
-        public string Description { get; }
 
         /// <inheritdoc />
         public bool Equals(FileDataSourceAttribute other)
         {
-            return base.Equals(other ) &&
-                !ReferenceEquals(other, null) &&
-                this.FileExtension.Equals(other.FileExtension) &&
-                this.Description.Equals(other.Description);
+            return base.Equals(other) &&
+                this.FileExtension.Equals(other.FileExtension);
         }
 
         /// <inheritdoc />
@@ -95,8 +87,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             return HashCodeUtils.CombineHashCodeValues(
                 base.GetHashCode(),
-                this.FileExtension.GetHashCode(),
-                this.Description.GetHashCode());
+                this.FileExtension.GetHashCode());
         }
 
         /// <inheritdoc />
@@ -110,6 +101,23 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             return toString.ToString();
+        }
+
+        /// <inheritdoc />
+        protected override bool AcceptsCore(IDataSource dataSource)
+        {
+            Guard.NotNull(dataSource, nameof(dataSource));
+
+            if (!(dataSource is FileDataSource fds))
+            {
+                return false;
+            }
+
+            var ext = '.' + this.FileExtension;
+
+            return StringComparer.OrdinalIgnoreCase.Equals(
+                ext,
+                Path.GetExtension(fds.FullPath));
         }
     }
 }

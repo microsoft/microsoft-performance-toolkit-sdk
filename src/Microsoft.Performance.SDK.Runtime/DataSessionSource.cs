@@ -107,7 +107,7 @@ namespace Microsoft.Performance.SDK.Runtime
                     sb.Append(", ");
                 }
 
-                sb.Append(source.GetUri());
+                sb.Append(source.Uri);
             }
 
             sb.Append(")");

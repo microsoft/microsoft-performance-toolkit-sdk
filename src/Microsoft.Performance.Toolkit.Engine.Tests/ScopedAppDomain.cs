@@ -52,11 +52,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             return d;
         }
 
-        ~ScopedAppDomain()
-        {
-            this.Dispose(false);
-        }
-
         public void Dispose()
         {
             this.Dispose(true);
