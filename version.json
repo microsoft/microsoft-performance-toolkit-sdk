@@ -6,8 +6,7 @@
   },
   "publicReleaseRefSpec": [
     "^refs/heads/main$",
-    "^refs/heads/release/v?\\d+(?:\\.\\d+)?$",
-    "^refs/heads/servicing/v?\\d+(?:\\.\\d+)?$"
+    "^refs/heads/release/v?\\d+(?:\\.\\d+)?$"
   ],
   "cloudBuild": {
     "buildNumber": {
