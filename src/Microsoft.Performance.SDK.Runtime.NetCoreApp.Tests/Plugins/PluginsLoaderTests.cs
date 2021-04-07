@@ -47,10 +47,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
-            var rootDir = Path.Combine(context.DeploymentDirectory, "TestPluginsSourceCode");
+            var fixedDeploymentDirectory = Path.Combine(context.DeploymentDirectory.Split('\\', StringSplitOptions.RemoveEmptyEntries));
+
+            var rootDir = Path.Combine(fixedDeploymentDirectory, "TestPluginsSourceCode");
 
             // Folder to store generated DLLs
-            compilePath = Path.Combine(context.DeploymentDirectory, "TestPluginsBinaries");
+            compilePath = Path.Combine(fixedDeploymentDirectory, "TestPluginsBinaries");
             if (Directory.Exists(compilePath))
             {
                 Directory.Delete(compilePath, true);
