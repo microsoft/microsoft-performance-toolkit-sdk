@@ -22,5 +22,18 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
         {
         }
+
+        protected override void BuildTableCore(TableDescriptor tableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval> createTable, ITableBuilder tableBuilder)
+        {           
+            if (tableDescriptor.Equals(Source123Table.TableDescriptor) && createTable == null)
+            {
+                var table = new Source123Table();
+                table.Build(tableBuilder);
+            }
+            else
+            {
+                base.BuildTableCore(tableDescriptor, createTable, tableBuilder);
+            }            
+        }
     }
 }
