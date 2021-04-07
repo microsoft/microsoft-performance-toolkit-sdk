@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     ///     DLL, and can be individually loaded by passing in its parent directory.
     /// </summary>
     [TestClass]
-    [DeploymentItem(@"Plugins\MockCustomDataSources\", "TestPluginsSourceCode")]
+    [DeploymentItem(@"Plugins/MockCustomDataSources/", "TestPluginsSourceCode")]
     public class PluginsLoaderTests
     {
         private const string Invalid = "InvalidFolderSchema";
