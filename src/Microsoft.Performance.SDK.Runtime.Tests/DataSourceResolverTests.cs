@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
     [DeploymentItem(TestCaseDataFileName)]
     public class DataSourceResolverTests
     {
-        public const string TestCaseDataFileName = @"TestData\DataResolverTestCases.xml";
+        public const string TestCaseDataFileName = @"TestData/DataResolverTestCases.xml";
 
         [TestMethod]
         [UnitTest]
