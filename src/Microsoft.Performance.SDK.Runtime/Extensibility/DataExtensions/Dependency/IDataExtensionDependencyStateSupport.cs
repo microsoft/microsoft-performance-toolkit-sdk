@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         /// <param name="error">
         ///     Error message.
         /// </param>
-        void AddError(string error);
+        void AddError(ErrorInfo error);
 
         /// <summary>
         ///     Sets the data extension availability.

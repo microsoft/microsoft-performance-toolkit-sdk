@@ -242,5 +242,43 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
 
             return customProcessors;
         }
+
+        /// <summary>
+        ///     Gets all of the <see cref="IDataExtensionReference"/>s
+        ///     currently loaded into the <see cref="IDataExtensionRepository"/>.
+        /// </summary>
+        /// <param name="self">
+        ///     The repository from which to retrieve the references. 
+        /// </param>
+        /// <returns>
+        ///     All <see cref="IDataExtensionReference"/>s loaded into
+        ///     the repository.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="self"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     <paramref name="self"/> is disposed.
+        /// </exception>
+        public static IEnumerable<IDataExtensionReference> GetAllReferences(
+            this IDataExtensionRepository self)
+        {
+            Guard.NotNull(self, nameof(self));
+
+            return self.SourceDataCookers
+                       .Select(self.GetSourceDataCookerReference)
+                       .Cast<IDataExtensionReference>()
+                       .Concat(
+                            self.CompositeDataCookers
+                                .Select(x => self.GetCompositeDataCookerReference(x))
+                                .Cast<IDataExtensionReference>())
+                       .Concat(
+                            self.DataProcessors
+                                .Select(x => self.GetDataProcessorReference(x))
+                                .Cast<IDataExtensionReference>())
+                       .Concat(
+                            self.TablesById.Values
+                                .Cast<IDataExtensionReference>());
+        }
     }
 }

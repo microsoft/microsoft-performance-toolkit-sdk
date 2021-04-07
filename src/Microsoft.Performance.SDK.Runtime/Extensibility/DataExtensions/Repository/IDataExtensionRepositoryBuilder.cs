@@ -22,6 +22,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         /// <returns>
         ///     true if success.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="dataCooker"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         bool AddSourceDataCookerReference(ISourceDataCookerReference dataCooker);
 
         /// <summary>
@@ -33,6 +39,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         /// <returns>
         ///     true if success.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="dataCooker"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         bool AddCompositeDataCookerReference(ICompositeDataCookerReference dataCooker);
 
         /// <summary>
@@ -44,6 +56,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         /// <returns>
         ///     true if success.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="tableExtensionReference"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         bool AddTableExtensionReference(ITableExtensionReference tableExtensionReference);
 
         /// <summary>
@@ -55,11 +73,20 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         /// <returns>
         ///     true if success.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="dataProcessorReference"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference);
 
         /// <summary>
         ///     Called after all data extensions have been added to the repository to perform additional processing.
         /// </summary>
+        /// <exception cref="System.ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         void FinalizeDataExtensions();
     }
 }

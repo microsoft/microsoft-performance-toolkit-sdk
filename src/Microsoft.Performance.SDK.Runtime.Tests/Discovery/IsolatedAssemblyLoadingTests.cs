@@ -79,7 +79,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             // And then load said folder.
             //
 
-            var assembly = IsolationLoader.LoadAssembly(pluginDllFilePath);
+            var assembly = IsolationLoader.LoadAssembly(pluginDllFilePath, out _);
 
             //
             // Making sure that the shared DLL did not load into the child context.
@@ -114,7 +114,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             // And load without anything shared.
             //
 
-            var assembly = IsolationLoader.LoadAssembly(notSharedDllFilePath);
+            var assembly = IsolationLoader.LoadAssembly(notSharedDllFilePath, out _);
 
             //
             // Making sure that the DLL loaded into the specified context.
@@ -164,8 +164,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             // And then load said folder.
             //
 
-            var sharedAssembly = this.IsolationLoader.LoadAssembly(sharedPluginDllFileName);
-            var notSharedAssembly = this.IsolationLoader.LoadAssembly(notSharedPluginDllFilePath);
+            var sharedAssembly = this.IsolationLoader.LoadAssembly(sharedPluginDllFileName, out _);
+            var notSharedAssembly = this.IsolationLoader.LoadAssembly(notSharedPluginDllFilePath, out _);
 
             //
             // Making sure that the shared DLL did not load into the child context.

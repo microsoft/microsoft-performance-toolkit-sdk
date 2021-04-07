@@ -48,12 +48,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -99,12 +104,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -150,12 +160,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -207,12 +222,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -257,12 +277,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -306,12 +331,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -361,12 +391,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -420,12 +455,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }
@@ -475,12 +515,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public bool IsFileSupported(string path)
+        public void SetLogger(ILogger logger)
         {
             throw new NotImplementedException();
         }
 
-        public void SetLogger(ILogger logger)
+        public bool IsDataSourceSupported(IDataSource dataSource)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void DisposeProcessor(ICustomDataProcessor processor)
         {
             throw new NotImplementedException();
         }

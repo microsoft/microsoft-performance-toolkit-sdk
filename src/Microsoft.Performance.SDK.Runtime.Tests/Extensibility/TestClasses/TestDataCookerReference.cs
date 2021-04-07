@@ -17,13 +17,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
           IDataCookerReference
     {
         protected TestDataCookerReference()
-            : base()
+            : this(true)
         {
         }
 
         protected TestDataCookerReference(bool useDataExtensionDependencyState)
             : base(useDataExtensionDependencyState)
         {
+            this.Path = new DataCookerPath(
+                string.Concat(
+                    this.GetType().Name,
+                    " ",
+                    Guid.NewGuid().ToString()));
         }
 
         public string Description { get; set; }
@@ -31,6 +36,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public DataCookerPath Path { get; set; }
 
         public override string Name => this.Path.CookerPath;
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
     }
 
     internal class TestSourceDataCookerReference
@@ -43,7 +53,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         }
 
         public TestSourceDataCookerReference(bool useDataExtensionDependencyState)
-            :base(useDataExtensionDependencyState)
+            : base(useDataExtensionDependencyState)
         {
         }
 
@@ -82,22 +92,34 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             {
                 if (!StringComparer.Ordinal.Equals(dataCookerReference.Path.SourceParserId, this.Path.SourceParserId))
                 {
-                    dependencyStateSupport.AddError("Wrong source parser!");
+                    dependencyStateSupport.AddError(
+                        new ErrorInfo(
+                            ErrorCodes.EXTENSION_Error,
+                            "Wrong source parser!"));
                     dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
                 }
             }
             else if (reference is IDataProcessorReference dataProcessorReference)
             {
                 dependencyStateSupport.AddError(
-                    $"A source data cooker may not depend on a data processor: {dataProcessorReference.Id}");
+                    new ErrorInfo(
+                        ErrorCodes.EXTENSION_DisallowedDataProcessorDependency,
+                        $"A source data cooker may not depend on a data processor: {dataProcessorReference.Id}"));
                 dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
             }
             else
             {
                 dependencyStateSupport.AddError(
-                    $"A requested dependency on an unknown data extension type is not supported: {reference.Name}");
+                    new ErrorInfo(
+                        ErrorCodes.EXTENSION_UnknownDependencyType,
+                        $"A requested dependency on an unknown data extension type is not supported: {reference.Name}"));
                 dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
             }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
         }
     }
 
@@ -118,6 +140,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData)
         {
             throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
         }
     }
 }

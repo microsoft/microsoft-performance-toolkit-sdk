@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.Performance.SDK
@@ -51,7 +53,8 @@ namespace Microsoft.Performance.SDK
                 int level,
                 StringBuilder sb,
                 ErrorInfo info,
-                IFormatProvider formatProvider)
+                IFormatProvider formatProvider,
+                bool suppressInitialIndent = false)
             {
                 Debug.Assert(level > -1);
                 Debug.Assert(sb != null);
@@ -64,7 +67,10 @@ namespace Microsoft.Performance.SDK
                 var indent = level > 0
                     ? new string(' ', 4 * level)
                     : string.Empty;
-                sb.AppendFormat(formatProvider, "{0}Code: {1}", indent, info.Code).AppendLine()
+                var initialIndent = suppressInitialIndent
+                    ? string.Empty
+                    : indent;
+                sb.AppendFormat(formatProvider, "{0}Code: {1}", initialIndent, info.Code).AppendLine()
                   .AppendFormat(formatProvider, "{0}Message: {1}", indent, info.Message);
                 if (!string.IsNullOrWhiteSpace(info.Target))
                 {
@@ -72,61 +78,46 @@ namespace Microsoft.Performance.SDK
                       .AppendFormat(formatProvider, "{0}Target: {1}", indent, info.Target);
                 }
 
+                foreach (var property in info.GetType().GetProperties())
+                {
+                    if (property.Name == nameof(info.Code) ||
+                        property.Name == nameof(info.Message) ||
+                        property.Name == nameof(info.Target) ||
+                        property.Name == nameof(info.Details))
+                    {
+                        continue;
+                    }
+
+                    var propValue = property.GetValue(info);
+                    if (propValue is IEnumerable e)
+                    {
+                        sb.AppendLine()
+                          .AppendFormat(formatProvider, "{0}{1}: ", indent, property.Name);
+                        foreach (var o in e)
+                        {
+                            sb.AppendLine()
+                              .AppendFormat("{0}{1}", indent + "    ", o);
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine()
+                          .AppendFormat(formatProvider, "{0}{1}: {2}", indent, property.Name, propValue?.ToString() ?? string.Empty);
+                    }
+                }
+
                 if (info.Details != null && info.Details.Length > 0)
                 {
                     sb.AppendLine()
                       .AppendFormat(formatProvider, "{0}Details:", indent);
-                    foreach (var detail in info.Details)
+                   
+                    for (var i = 0; i < info.Details.Length; ++i)
                     {
-                        sb.AppendLine();
-                        FormatHelper(level + 1, sb, detail, formatProvider);
-                    }
-                }
-
-                if (info.Inner != null)
-                {
-                    sb.AppendLine()
-                      .AppendFormat(formatProvider, "{0}Inner:", indent)
-                      .AppendLine();
-                    FormatHelper(level + 1, sb, info.Inner, formatProvider);
-                }
-            }
-
-            private static void FormatHelper(
-                int level,
-                StringBuilder sb,
-                InnerError info,
-                IFormatProvider formatProvider)
-            {
-                Debug.Assert(level > -1);
-                Debug.Assert(sb != null);
-
-                if (info == null)
-                {
-                    return;
-                }
-
-                var indent = level > 0
-                    ? new string(' ', 4 * level)
-                    : string.Empty;
-                sb.AppendFormat(formatProvider, "{0}Code: {1}", indent, info.Code);
-                if (info.Inner != null)
-                {
-                    foreach (var property in info.Inner.GetType().GetProperties())
-                    {
-                        if (property.Name == nameof(InnerError.Code) ||
-                            property.Name == nameof(InnerError.Inner))
-                        {
-                            continue;
-                        }
-
+                        var detail = info.Details[i];
                         sb.AppendLine()
-                          .AppendFormat(formatProvider, "{0}{1}: {2}", indent, property.Name, property.GetValue(info.Inner));
+                          .AppendFormat("{0}  * ", indent, i + 1);
+                        FormatHelper(level + 1, sb, detail, formatProvider, true);
                     }
-
-                    sb.AppendLine()
-                      .AppendFormat("{0}Inner:", indent).AppendLine();
-                    FormatHelper(level + 1, sb, info.Inner, formatProvider);
                 }
             }
         }

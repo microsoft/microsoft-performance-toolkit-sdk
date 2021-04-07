@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
@@ -17,6 +18,18 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         : CustomDataSourceBase
     {
         public const string Extension = ".s123d";
+
+        public Source123DataSource()
+            : base(GetTable)
+        {
+        }
+
+        private static IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> GetTable()
+        {
+            var tables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(1);
+            tables.Add(Source123Table.TableDescriptor, null);
+            return tables;
+        }
 
         protected override ICustomDataProcessor CreateProcessorCore(
             IEnumerable<IDataSource> dataSources, 
@@ -34,17 +47,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                 this.MetadataTables);
         }
 
-        protected override bool IsFileSupportedCore(
-            string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
         {
             return StringComparer.OrdinalIgnoreCase.Equals(
-                Extension,
-                Path.GetExtension(path));
-        }
-
-        protected override void SetApplicationEnvironmentCore(
-            IApplicationEnvironment applicationEnvironment)
-        {
+                   Extension,
+                   Path.GetExtension(dataSource.Uri.LocalPath));
         }
     }
 }
