@@ -51,6 +51,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TestData\BuildTableTestSuite.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\ProcessTestSuite.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

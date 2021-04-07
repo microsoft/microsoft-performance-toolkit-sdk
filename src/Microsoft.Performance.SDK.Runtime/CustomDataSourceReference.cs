@@ -92,7 +92,10 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </exception>
         public abstract IReadOnlyCollection<DataSourceAttribute> DataSources { get; }
 
-        /// <inheritdoc cref="ICustomDataSource.DataTables"/>
+        /// <summary>
+        ///     Gets the collection of tables exposed by this data source.
+        ///     These are both metadata and data tables for exposing the processed data.
+        /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -346,7 +349,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 get
                 {
                     this.ThrowIfDisposed();
-                    return this.Instance.DataTables.ToList().AsReadOnly();
+                    return this.Instance.DataTables.Union(this.Instance.MetadataTables).ToList().AsReadOnly();
                 }
             }
 

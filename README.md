@@ -40,6 +40,10 @@ For help with getting started and developing SDK plugins, refer to the [document
 
 Team is actively working to provide better documentation, more samples, and several in-depth tutorials.
 
+## Coming Soon
+
+Team is actively working to providing samples, tutorials, and a Nuget package release.
+
 ## How to Engage, Contribute, and Provide Feedback
 
 The Performance ToolKit team encourages [contributions](CONTRIBUTING.md) through both issues and PRs.

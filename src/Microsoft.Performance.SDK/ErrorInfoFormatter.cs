@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Microsoft.Performance.SDK
@@ -86,8 +88,22 @@ namespace Microsoft.Performance.SDK
                         continue;
                     }
 
-                    sb.AppendLine()
-                      .AppendFormat(formatProvider, "{0}{1}: {2}", indent, property.Name, property.GetValue(info));
+                    var propValue = property.GetValue(info);
+                    if (propValue is IEnumerable e)
+                    {
+                        sb.AppendLine()
+                          .AppendFormat(formatProvider, "{0}{1}: ", indent, property.Name);
+                        foreach (var o in e)
+                        {
+                            sb.AppendLine()
+                              .AppendFormat("{0}{1}", indent + "    ", o);
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine()
+                          .AppendFormat(formatProvider, "{0}{1}: {2}", indent, property.Name, propValue?.ToString() ?? string.Empty);
+                    }
                 }
 
                 if (info.Details != null && info.Details.Length > 0)

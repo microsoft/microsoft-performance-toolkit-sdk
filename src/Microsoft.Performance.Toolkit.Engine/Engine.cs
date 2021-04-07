@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -16,6 +16,7 @@ using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -26,27 +27,31 @@ namespace Microsoft.Performance.Toolkit.Engine
     public abstract class Engine
         : IDisposable
     {
-        private List<CustomDataSourceReference> customDataSourceReferences;
-        private ReadOnlyCollection<CustomDataSourceReference> customDataSourceReferencesRO;
+        private readonly List<CustomDataSourceReference> customDataSourceReferences;
+        private readonly ReadOnlyCollection<CustomDataSourceReference> customDataSourceReferencesRO;
 
-        private List<DataCookerPath> sourceDataCookers;
-        private ReadOnlyCollection<DataCookerPath> sourceDataCookersRO;
+        private readonly List<DataCookerPath> sourceDataCookers;
+        private readonly ReadOnlyCollection<DataCookerPath> sourceDataCookersRO;
 
-        private List<DataCookerPath> compositeDataCookers;
-        private ReadOnlyCollection<DataCookerPath> compositeDataCookersRO;
+        private readonly List<DataCookerPath> compositeDataCookers;
+        private readonly ReadOnlyCollection<DataCookerPath> compositeDataCookersRO;
 
-        private Dictionary<Guid, TableDescriptor> tableGuidToDescriptor;
-        private List<Guid> allTables;
+        private readonly Dictionary<Guid, TableDescriptor> tableGuidToDescriptor;
+        private readonly List<TableDescriptor> allTables;
+        private readonly ReadOnlyCollection<TableDescriptor> allTablesRO;
 
-        private List<DataProcessorId> dataProcessors;
+        private readonly List<DataProcessorId> dataProcessors;
 
-        private Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
+        private readonly Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
 
-        private List<IDataSource> freeDataSources;
-        private ReadOnlyCollection<IDataSource> freeDataSourcesRO;
+        private readonly List<IDataSource> freeDataSources;
+        private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
 
-        private List<DataCookerPath> enabledCookers;
-        private ReadOnlyCollection<DataCookerPath> enabledCookersRO;
+        private readonly List<DataCookerPath> enabledCookers;
+        private readonly ReadOnlyCollection<DataCookerPath> enabledCookersRO;
+
+        private readonly List<TableDescriptor> enabledTables;
+        private readonly ReadOnlyCollection<TableDescriptor> enabledTablesRO;
 
         private DataExtensionFactory factory;
         private ExtensionRoot extensionRoot;
@@ -71,7 +76,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.compositeDataCookersRO = new ReadOnlyCollection<DataCookerPath>(this.compositeDataCookers);
 
             this.tableGuidToDescriptor = new Dictionary<Guid, TableDescriptor>();
-            this.allTables = new List<Guid>();
+            this.allTables = new List<TableDescriptor>();
+            this.allTablesRO = new ReadOnlyCollection<TableDescriptor>(this.allTables);
 
             this.dataProcessors = new List<DataProcessorId>();
 
@@ -82,6 +88,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.enabledCookers = new List<DataCookerPath>();
             this.enabledCookersRO = new ReadOnlyCollection<DataCookerPath>(this.enabledCookers);
+
+            this.enabledTables = new List<TableDescriptor>();
+            this.enabledTablesRO = new ReadOnlyCollection<TableDescriptor>(this.enabledTables);
 
             this.isDisposed = false;
         }
@@ -266,6 +275,36 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Debug.Assert(!this.isDisposed);
                 this.ThrowIfDisposed();
                 this.creationErrors = value;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the collection of all enabled tables
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception> 
+        public IEnumerable<TableDescriptor> EnabledTables
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.enabledTablesRO;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the collection of available tables
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<TableDescriptor> AvailableTables
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.allTablesRO;
             }
         }
 
@@ -599,6 +638,79 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
+        ///     Enables the given table for processing when <see cref="Process"/>
+        ///     is called.
+        /// </summary>
+        /// <param name="descriptor">
+        ///     The table to enable.
+        /// </param>
+        /// <exception cref="TableNotFoundException">
+        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
+        /// </exception>
+        /// <exception cref="InstanceAlreadyProcessedException">
+        ///     This instance has already been processed.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="descriptor"/> cannot be null.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public void EnableTable(TableDescriptor descriptor)
+        {
+            this.ThrowIfDisposed();
+            this.ThrowIfProcessed();
+            Guard.NotNull(descriptor, nameof(descriptor));
+
+            if (!this.TryEnableTable(descriptor))
+            {
+                throw new TableNotFoundException(descriptor);
+            }
+        }
+
+        /// <summary>
+        ///     Attempts to enable the given cooker for processing when <see cref="Process"/>
+        ///     is called.
+        /// </summary>
+        /// <param name="descriptor">
+        ///     The table to enable.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the table exists and can be enabled;
+        ///     <c>false</c> otherwise. Note that <c>false</c> is
+        ///     always returned when <see cref="IsProcessed"/> is <c>true</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="descriptor"/> cannot be null.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public bool TryEnableTable(TableDescriptor descriptor)
+        {
+            this.ThrowIfDisposed();
+            Guard.NotNull(descriptor, nameof(descriptor));
+
+            if (this.IsProcessed)
+            {
+                return false;
+            }
+
+            if (!this.allTables.Contains(descriptor))
+            {
+                return false;
+            }
+
+            if (this.enabledTables.Contains(descriptor))
+            {
+                return true;
+            }
+
+            this.enabledTables.Add(descriptor);
+            return true;
+        }
+
+        /// <summary>
         ///     Processes all of the files given to this instance using all
         ///     of the enabled cookers.
         /// </summary>
@@ -653,22 +765,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (disposing)
             {
                 this.extensionRoot.SafeDispose();
-
-                this.allTables = null;
+                
                 this.applicationEnvironment = null;
-                this.compositeDataCookers = null;
                 this.creationErrors = null;
-                this.customDataSourceReferences = null;
-                this.dataProcessors = null;
-                this.dataSourcesToProcess = null;
-                this.enabledCookers = null;
                 this.extensionDirectory = null;
                 this.extensionRoot = null;
                 this.factory = null;
-                this.freeDataSources = null;
                 this.loader = null;
-                this.sourceDataCookers = null;
-                this.tableGuidToDescriptor = null;
             }
 
             this.isDisposed = true;
@@ -743,21 +846,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.customDataSourceReferences.AddRange(catalog.PlugIns);
                 instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
                 instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-                instance.extensionRoot = new ExtensionRoot(catalog, repo);
-
-                var allTables = new HashSet<Guid>();
-                foreach (var tableId in repoTuple.Item2.TablesById)
-                {
-                    allTables.Add(tableId.Key);
-                }
-
-                foreach (var descriptor in catalog.PlugIns.SelectMany(x => x.AvailableTables))
-                {
-                    allTables.Add(descriptor.Guid);
-                    instance.tableGuidToDescriptor[descriptor.Guid] = descriptor;
-                }
-
-                instance.allTables.AddRange(allTables);
+                instance.extensionRoot = new ExtensionRoot(catalog, repo);                
 
                 instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
 
@@ -792,6 +881,21 @@ namespace Microsoft.Performance.Toolkit.Engine
                         Console.Error.WriteLine(e);
                     }
                 }
+
+                var allTables = new HashSet<TableDescriptor>();
+                foreach (var tableId in repoTuple.Item2.TablesById)
+                {
+                    allTables.Add(tableId.Value.TableDescriptor);
+                    instance.tableGuidToDescriptor[tableId.Key] = tableId.Value.TableDescriptor;
+                }
+
+                foreach (var descriptor in catalog.PlugIns.SelectMany(x => x.AvailableTables))
+                {
+                    allTables.Add(descriptor);
+                    instance.tableGuidToDescriptor[descriptor.Guid] = descriptor;
+                }
+
+                instance.allTables.AddRange(allTables);
 
                 instance.IsProcessed = false;
 
@@ -863,9 +967,37 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.dataSourcesToProcess);
 
             var executors = CreateExecutors(allDataSourceAssociations);
+
+            var extendedTables = new HashSet<ITableExtensionReference>();
+            var processorTables = new Dictionary<TableDescriptor, ICustomDataProcessor>();
+
+            foreach (var table in this.enabledTables)
+            {
+                if (this.extensionRoot.TablesById.TryGetValue(table.Guid, out ITableExtensionReference reference))
+                {
+                    extendedTables.Add(reference);
+                }
+                else
+                {
+                    var executor = executors.Single(x => x.Context.CustomDataSource.AvailableTables.Contains(table));
+                    executor.Processor.EnableTable(table);
+                    processorTables.Add(table, executor.Processor);
+                }                                
+            }
+
             var processors = this.extensionRoot.EnableDataCookers(
                 executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 new HashSet<DataCookerPath>(this.enabledCookers));
+
+
+            if (extendedTables.Any())
+            {
+                var processorForTable = this.extensionRoot.EnableSourceDataCookersForTables(
+                executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
+                extendedTables);
+
+                processors.UnionWith(processorForTable);
+            }            
 
             var executionResults = new List<ExecutionResult>(executors.Count);
             foreach (var executor in executors)
@@ -894,7 +1026,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             var results = new RuntimeExecutionResults(
                 retrieval,
                 retrievalFactory,
-                this.extensionRoot);
+                this.extensionRoot,
+                processorTables);
 
             return results;
         }
