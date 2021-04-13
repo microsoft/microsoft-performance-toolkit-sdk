@@ -288,6 +288,95 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(fakeProcessor, sut.TrackedProcessors.Single());
         }
 
+        [TestMethod]
+        [UnitTest]
+        public void Supports_AttributeSaysNo_ReturnsFalseWithoutDelegating()
+        {
+            var cds = new FakeCustomDataSource();
+            var dataSource = new FileDataSource("test.txt");
+
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                () => cds,
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    new FileDataSourceAttribute(".csv"),
+                    new FileDataSourceAttribute(".etl"),
+                });
+
+            Assert.IsFalse(cdsr.Supports(dataSource));
+            Assert.AreEqual(0, cds.IsDataSourceSupportedCalls.Count);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Supports_AtLeastOneAttributeSaysYes_Delegates()
+        {
+            var cds = new FakeCustomDataSource();
+
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                () => cds,
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    new FileDataSourceAttribute(".csv"),
+                    new FileDataSourceAttribute(".txt"),
+                    new FileDataSourceAttribute(".etl"),
+                });
+
+            var dataSource = new FileDataSource("test.txt");
+            cds.IsDataSourceSupportedReturnValue[dataSource] = true;
+
+            Assert.IsTrue(cdsr.Supports(dataSource));
+            Assert.AreEqual(1, cds.IsDataSourceSupportedCalls.Count);
+            Assert.AreEqual(dataSource, cds.IsDataSourceSupportedCalls[0]);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Supports_NoAttributes_ReturnsFalse()
+        {
+            var cds = new FakeCustomDataSource();
+
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                () => cds,
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>());
+
+            var dataSource = new FileDataSource("test.txt");
+
+            Assert.IsFalse(cdsr.Supports(dataSource));
+            Assert.AreEqual(0, cds.IsDataSourceSupportedCalls.Count);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Supports_Throws_ReturnsFalse()
+        {
+            var cds = new FakeCustomDataSource
+            {
+                IsDataSourceSupportedError = new ArithmeticException(),
+            };
+
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                () => cds,
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    new FileDataSourceAttribute(".csv"),
+                    new FileDataSourceAttribute(".txt"),
+                    new FileDataSourceAttribute(".etl"),
+                });
+
+            var dataSource = new FileDataSource("test.txt");
+
+            Assert.IsFalse(cdsr.Supports(dataSource));
+        }
+
         private static void RunCreateSuccessTest(Type type)
         {
             var result = CustomDataSourceReference.TryCreateReference(
@@ -441,10 +530,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
-        [FileDataSource("ext")]
+        [FileDataSource(Extension)]
         public class SampleCds
             : ICustomDataSource
         {
+            public const string Extension = "ext";
+
             private static readonly TableDescriptor[] tableDescriptors = new[]
             {
                 Any.TableDescriptor(),

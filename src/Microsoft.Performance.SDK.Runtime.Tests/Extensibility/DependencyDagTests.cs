@@ -47,7 +47,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataProcessor = new TestDataProcessorReference();
             var table = new TestTableExtensionReference();
 
-            var cds1 = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource));
+            var cds1 = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<Processing.DataSourceAttribute>());
 
             var repo = new DataExtensionRepository();
             repo.TryAddReference(sourceCooker1);
@@ -609,10 +612,20 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 Array.Empty<TableDescriptor>());
 
             var cds = new FakeCustomDataSource();
-            var r = new FakeCustomDataSourceReference(cds)
-            {
-                CreatedProcessorsSetter = new[] { p, }
-            };
+            var r = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource), 
+                () => cds, 
+                Any.CustomDataSourceAttribute(), 
+                new HashSet<Processing.DataSourceAttribute>());
+
+            cds.CreateProcessorReturnValue = p;
+            r.CreateProcessor(
+                new[]
+                {
+                    Any.DataSource(),
+                },
+                Any.ProcessorEnvironment(), 
+                ProcessorOptions.Default);
 
             var sc1 = new TestSourceDataCookerReference { Path = new DataCookerPath(p.SourceParserId, "sc1"), };
             var sc2 = new TestSourceDataCookerReference { Path = new DataCookerPath(p.SourceParserId, "sc2"), };

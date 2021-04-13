@@ -14,9 +14,19 @@ namespace Microsoft.Performance.SDK.Runtime
     /// <summary>
     ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> where T is <see cref="ICustomDataSource"/> and Derived is <see cref="CustomDataSourceReference"/>.
     /// </summary>
-    public abstract class CustomDataSourceReference
+    public sealed class CustomDataSourceReference
         : AssemblyTypeReferenceWithInstance<ICustomDataSource, CustomDataSourceReference>
     {
+        private ReadOnlyHashSet<DataSourceAttribute> dataSourceAttributes;
+
+        private Guid guid;
+        private string name;
+        private string description;
+        private ReadOnlyCollection<Option> commandLineOptionsRO;
+
+        private List<ICustomDataProcessor> createdProcessors;
+        private ReadOnlyCollection<ICustomDataProcessor> createdProcessorsRO;
+
         private bool isDisposed;
 
         /// <summary>
@@ -26,13 +36,22 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="type">
         ///     The <see cref="Type"/> of instance being referenced by this instance.
         /// </param>
+        /// <param name="metadata">
+        ///     The CustomDataSource metadata.
+        /// </param>
+        /// <param name="dataSourceAttributes">
+        ///     The declared data sources.
+        /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="type"/> is <c>null</c>.
         /// </exception>
-        protected CustomDataSourceReference(Type type)
+        public CustomDataSourceReference(
+            Type type,
+            CustomDataSourceAttribute metadata,
+            HashSet<DataSourceAttribute> dataSourceAttributes)
             : base(type)
         {
-            this.isDisposed = false;
+            this.InitializeThis(metadata, dataSourceAttributes);
         }
 
         /// <summary>
@@ -42,13 +61,46 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="type">
         ///     The <see cref="Type"/> of instance being referenced by this instance.
         /// </param>
+        /// <param name="instanceFactory">
+        ///     The factory function for creating the instance.
+        /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="type"/> is <c>null</c>.
         /// </exception>
-        protected CustomDataSourceReference(Type type, Func<ICustomDataSource> instanceFactory)
+        public CustomDataSourceReference(
+            Type type,
+            Func<ICustomDataSource> instanceFactory,
+            CustomDataSourceAttribute metadata,
+            HashSet<DataSourceAttribute> dataSourceAttributes)
             : base(type, instanceFactory)
         {
-            this.isDisposed = false;
+            this.InitializeThis(metadata, dataSourceAttributes);
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     class with the given instance.
+        /// </summary>
+        /// <param name="instance">
+        ///     The existing <see cref="ICustomDataSource"/>.
+        /// </param>
+        /// <exception cref="System.ArgumentException">
+        ///     <paramref name="instance"/> does not have a <see cref="CustomDataSourceAttribute"/>.
+        /// </exception>
+        public CustomDataSourceReference(ICustomDataSource instance)
+            : base(instance.GetType(), () => instance)
+        {
+            var metadata = instance.GetType().GetCustomAttribute<CustomDataSourceAttribute>();
+            if (metadata is null)
+            {
+                throw new ArgumentException($"{nameof(CustomDataSourceAttribute)} is missing from type {instance.GetType()}", nameof(instance));
+            }
+
+            var dataSourceAttributes = instance.GetType()
+                .GetCustomAttributes<DataSourceAttribute>()
+                .ToSet();
+
+            this.InitializeThis(metadata, dataSourceAttributes);
         }
 
         /// <summary>
@@ -61,28 +113,57 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
-        protected CustomDataSourceReference(CustomDataSourceReference other)
+        public CustomDataSourceReference(CustomDataSourceReference other)
             : base(other.Type)
         {
+            this.dataSourceAttributes = other.dataSourceAttributes;
+
+            this.guid = other.guid;
+            this.name = other.name;
+            this.description = other.description;
+            this.commandLineOptionsRO = other.commandLineOptionsRO;
+
+            this.isDisposed = other.isDisposed;
         }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract Guid Guid { get; }
+        public Guid Guid
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.guid;
+            }
+        }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Name"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract string Name { get; }
+        public string Name
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.name;
+            }
+        }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Description"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract string Description { get; }
+        public string Description
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.description;
+            }
+        }
 
         /// <summary>
         ///     Gets the <see cref="DataSourceAttribute"/>s for the custom data source.
@@ -90,7 +171,14 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract IReadOnlyCollection<DataSourceAttribute> DataSources { get; }
+        public IReadOnlyCollection<DataSourceAttribute> DataSources
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.dataSourceAttributes;
+            }
+        }
 
         /// <summary>
         ///     Gets the collection of tables exposed by this data source.
@@ -99,13 +187,27 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract IEnumerable<TableDescriptor> AvailableTables { get; }
+        public IEnumerable<TableDescriptor> AvailableTables
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.Instance.DataTables.Union(this.Instance.MetadataTables).ToList().AsReadOnly();
+            }
+        }
 
         /// <inheritdoc cref="ICustomDataSource.CommandLineOptions"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract IEnumerable<Option> CommandLineOptions { get; }
+        public IEnumerable<Option> CommandLineOptions
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.commandLineOptionsRO;
+            }
+        }
 
         /// <summary>
         ///     Gets a collection of all processors that have been created
@@ -114,7 +216,14 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract IEnumerable<ICustomDataProcessor> TrackedProcessors { get; }
+        public IEnumerable<ICustomDataProcessor> TrackedProcessors
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.createdProcessorsRO;
+            }
+        }
 
         /// <summary>
         ///     Tries to create an instance of <see cref="CustomDataSourceReference"/> 
@@ -159,7 +268,7 @@ namespace Microsoft.Performance.SDK.Runtime
                         if (dataSourceAttributes != null &&
                             dataSourceAttributes.Count > 0)
                         {
-                            reference = new CustomDataSourceReferenceImpl(
+                            reference = new CustomDataSourceReference(
                                 candidateType,
                                 metadataAttribute,
                                 new HashSet<DataSourceAttribute>(dataSourceAttributes));
@@ -186,10 +295,37 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <returns>
         ///     The created <see cref="ICustomDataProcessor"/>.
         /// </returns>
-        public abstract ICustomDataProcessor CreateProcessor(
+        public ICustomDataProcessor CreateProcessor(
             IEnumerable<IDataSource> dataSources,
             IProcessorEnvironment processorEnvironment,
-            ProcessorOptions commandLineOptions);
+            ProcessorOptions commandLineOptions)
+        {
+            this.ThrowIfDisposed();
+
+            ICustomDataProcessor processor = null;
+            try
+            {
+                processor = this.Instance.CreateProcessor(
+                    dataSources,
+                    processorEnvironment,
+                    commandLineOptions);
+                this.createdProcessors.Add(processor);
+                return processor;
+            }
+            catch
+            {
+                try
+                {
+                    this.Instance.DisposeProcessor(processor);
+                }
+                finally
+                {
+                    processor.TryDispose();
+                }
+
+                throw;
+            }
+        }
 
         /// <summary>
         ///     Determines whether the given <see cref="IDataSource"/>
@@ -207,7 +343,80 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public abstract bool Supports(IDataSource dataSource);
+        public bool Supports(IDataSource dataSource)
+        {
+            this.ThrowIfDisposed();
+            if (dataSource is null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return this.DataSources.Where(x => dataSource.GetType().Is(x.Type))
+                                       .Any(x => x.Accepts(dataSource)) &&
+                       this.Instance.IsDataSourceSupported(dataSource);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <inheritdoc />
+        public override CustomDataSourceReference CloneT()
+        {
+            this.ThrowIfDisposed();
+            return new CustomDataSourceReference(this);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            this.ThrowIfDisposed();
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            var other = obj as CustomDataSourceReference;
+
+            return other != null &&
+                this.Name.Equals(other.Name) &&
+                this.Guid.Equals(other.Guid) &&
+                this.Description.Equals(other.Description) &&
+                (this.dataSourceAttributes.IsSubsetOf(other.dataSourceAttributes) &&
+                 other.dataSourceAttributes.IsSubsetOf(this.dataSourceAttributes));
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            this.ThrowIfDisposed();
+            unchecked
+            {
+                var hash = base.GetHashCode();
+
+                hash = ((hash << 5) + hash) ^ this.Name.GetHashCode();
+                hash = ((hash << 5) + hash) ^ this.Guid.GetHashCode();
+                hash = ((hash << 5) + hash) ^ this.Description.GetHashCode();
+                hash = ((hash << 5) + hash) ^ this.DataSources.GetHashCode();
+
+                return hash;
+            }
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            this.ThrowIfDisposed();
+            return $"{this.Name} - {this.Guid} ({this.AssemblyPath})";
+        }
 
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
@@ -219,302 +428,48 @@ namespace Microsoft.Performance.SDK.Runtime
 
             if (disposing)
             {
-            }
-
-            this.isDisposed = true;
-            base.Dispose(disposing);
-        }
-
-        /// <summary>
-        ///     Provides the implementation of a <see cref="CustomDataSourceReference"/>.
-        /// </summary>
-        private sealed class CustomDataSourceReferenceImpl
-            : CustomDataSourceReference
-        {
-            private ReadOnlyHashSet<DataSourceAttribute> dataSourceAttributes;
-
-            private Guid guid;
-            private string name;
-            private string description;
-            private ReadOnlyCollection<Option> commandLineOptionsRO;
-
-            private List<ICustomDataProcessor> createdProcessors;
-            private ReadOnlyCollection<ICustomDataProcessor> createdProcessorsRO;
-
-            // this class is nested; isDisposed in the outer class
-            // is visible, and we do not want conflicts.
-            private bool isImplDisposed;
-
-            /// <summary>
-            ///     Initializes a new instance of the <see cref="CustomDataSourceReferenceImpl"/>
-            ///     class.
-            /// </summary>
-            /// <param name="dataSourceAttributes">
-            ///     The data source attributes that declare what
-            ///     data is accepted by the custom data source.
-            /// </param>
-            /// <param name="metadata">
-            ///     The metadata about the custom data source.
-            /// </param>
-            /// <param name="type">
-            ///     The concrete <see cref="Type"/> of the custom data source.
-            /// </param>
-            internal CustomDataSourceReferenceImpl(
-                Type type,
-                CustomDataSourceAttribute metadata,
-                HashSet<DataSourceAttribute> dataSourceAttributes)
-                : base(type)
-            {
-                Debug.Assert(metadata != null);
-                Debug.Assert(dataSourceAttributes != null);
-
-                Debug.Assert(metadata.Equals(type.GetCustomAttribute<CustomDataSourceAttribute>()));
-
-                this.dataSourceAttributes = new ReadOnlyHashSet<DataSourceAttribute>(dataSourceAttributes);
-
-                this.guid = metadata.Guid;
-                this.name = metadata.Name;
-                this.description = metadata.Description;
-                this.commandLineOptionsRO = this.Instance.CommandLineOptions.ToList().AsReadOnly();
-                this.createdProcessors = new List<ICustomDataProcessor>();
-                this.createdProcessorsRO = new ReadOnlyCollection<ICustomDataProcessor>(this.createdProcessors);
-
-                this.isImplDisposed = false;
-            }
-
-            /// <summary>
-            ///     Initializes a new instance of the <see cref="CustomDataSourceReferenceImpl"/>
-            ///     class as a copy of the given instance.
-            /// </summary>
-            /// <param name="other">
-            ///     The instance from which to create this instance.
-            /// </param>
-            internal CustomDataSourceReferenceImpl(
-                CustomDataSourceReferenceImpl other)
-                : base(other)
-            {
-                this.dataSourceAttributes = other.dataSourceAttributes;
-
-                this.guid = other.guid;
-                this.name = other.name;
-                this.description = other.description;
-                this.commandLineOptionsRO = other.commandLineOptionsRO;
-
-                this.isImplDisposed = other.isImplDisposed;
-            }
-
-            /// <inheritdoc />
-            public override Guid Guid
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    return this.guid;
-                }
-            }
-
-            /// <inheritdoc />
-            public override string Name
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    return this.name;
-                }
-            }
-
-            /// <inheritdoc />
-            public override string Description
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    return this.description;
-                }
-            }
-
-            /// <inheritdoc />
-            public override IReadOnlyCollection<DataSourceAttribute> DataSources
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    return this.dataSourceAttributes;
-                }
-            }
-
-            /// <inheritdoc />
-            public override IEnumerable<TableDescriptor> AvailableTables
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    return this.Instance.DataTables.Union(this.Instance.MetadataTables).ToList().AsReadOnly();
-                }
-            }
-
-            /// <inheritdoc />
-            public override IEnumerable<Option> CommandLineOptions
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    return this.commandLineOptionsRO;
-                }
-            }
-
-            /// <inheritdoc />
-            public override IEnumerable<ICustomDataProcessor> TrackedProcessors
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    return this.createdProcessorsRO;
-                }
-            }
-
-            /// <inheritdoc />
-            public override ICustomDataProcessor CreateProcessor(
-                IEnumerable<IDataSource> dataSources,
-                IProcessorEnvironment processorEnvironment,
-                ProcessorOptions commandLineOptions)
-            {
-                this.ThrowIfDisposed();
-
-                ICustomDataProcessor processor = null;
-                try
-                {
-                    processor = this.Instance.CreateProcessor(
-                        dataSources,
-                        processorEnvironment,
-                        commandLineOptions);
-                    this.createdProcessors.Add(processor);
-                    return processor;
-                }
-                catch
+                foreach (var p in this.createdProcessors)
                 {
                     try
                     {
-                        this.Instance.DisposeProcessor(processor);
+                        this.Instance.DisposeProcessor(p);
                     }
-                    finally
+                    catch
                     {
-                        processor.TryDispose();
                     }
 
-                    throw;
+                    p.TryDispose();
                 }
+
+                this.createdProcessors = null;
+                this.commandLineOptionsRO = null;
+                this.dataSourceAttributes = null;
+                this.description = null;
+                this.guid = default;
+                this.name = null;
             }
 
-            /// <inheritdoc />
-            public override bool Supports(IDataSource dataSource)
-            {
-                this.ThrowIfDisposed();
-                if (dataSource is null)
-                {
-                    return false;
-                }
+            base.Dispose(disposing);
+            this.isDisposed = true;
+        }
 
-                try
-                {
-                    return this.Instance.IsDataSourceSupported(dataSource);
-                }
-                catch
-                {
-                    return false;
-                }
-            }
+        private void InitializeThis(
+            CustomDataSourceAttribute metadata,
+            HashSet<DataSourceAttribute> dataSourceAttributes)
+        {
+            Debug.Assert(metadata != null);
+            Debug.Assert(dataSourceAttributes != null);
 
-            /// <inheritdoc />
-            public override CustomDataSourceReference CloneT()
-            {
-                this.ThrowIfDisposed();
-                return new CustomDataSourceReferenceImpl(this);
-            }
+            this.dataSourceAttributes = new ReadOnlyHashSet<DataSourceAttribute>(dataSourceAttributes);
 
-            /// <inheritdoc />
-            public override bool Equals(object obj)
-            {
-                this.ThrowIfDisposed();
-                if (obj is null)
-                {
-                    return false;
-                }
+            this.guid = metadata.Guid;
+            this.name = metadata.Name;
+            this.description = metadata.Description;
+            this.commandLineOptionsRO = this.Instance.CommandLineOptions.ToList().AsReadOnly();
+            this.createdProcessors = new List<ICustomDataProcessor>();
+            this.createdProcessorsRO = new ReadOnlyCollection<ICustomDataProcessor>(this.createdProcessors);
 
-                if (ReferenceEquals(this, obj))
-                {
-                    return true;
-                }
-
-                var other = obj as CustomDataSourceReferenceImpl;
-
-                return other != null &&
-                    this.Name.Equals(other.Name) &&
-                    this.Guid.Equals(other.Guid) &&
-                    this.Description.Equals(other.Description) &&
-                    (this.dataSourceAttributes.IsSubsetOf(other.dataSourceAttributes) &&
-                     other.dataSourceAttributes.IsSubsetOf(this.dataSourceAttributes));
-            }
-
-            /// <inheritdoc />
-            public override int GetHashCode()
-            {
-                this.ThrowIfDisposed();
-                unchecked
-                {
-                    var hash = base.GetHashCode();
-
-                    hash = ((hash << 5) + hash) ^ this.Name.GetHashCode();
-                    hash = ((hash << 5) + hash) ^ this.Guid.GetHashCode();
-                    hash = ((hash << 5) + hash) ^ this.Description.GetHashCode();
-                    hash = ((hash << 5) + hash) ^ this.DataSources.GetHashCode();
-
-                    return hash;
-                }
-            }
-
-            /// <inheritdoc />
-            public override string ToString()
-            {
-                this.ThrowIfDisposed();
-                return $"{this.Name} - {this.Guid} ({this.AssemblyPath})";
-            }
-
-            /// <inheritdoc />
-            protected override void Dispose(bool disposing)
-            {
-                if (this.isImplDisposed)
-                {
-                    return;
-                }
-
-                if (disposing)
-                {
-                    foreach (var p in this.createdProcessors)
-                    {
-                        try
-                        {
-                            this.Instance.DisposeProcessor(p);
-                        }
-                        catch
-                        {
-                        }
-
-                        p.TryDispose();
-                    }
-
-                    this.createdProcessors = null;
-                    this.commandLineOptionsRO = null;
-                    this.dataSourceAttributes = null;
-                    this.description = null;
-                    this.guid = default;
-                    this.name = null;
-                }
-
-                this.isImplDisposed = true;
-
-                base.Dispose(disposing);
-            }
+            this.isDisposed = false;
         }
     }
 }
