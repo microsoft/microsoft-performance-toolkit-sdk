@@ -27,6 +27,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private List<ICustomDataProcessor> createdProcessors;
         private ReadOnlyCollection<ICustomDataProcessor> createdProcessorsRO;
 
+        private bool isInitialized;
         private bool isDisposed;
 
         /// <summary>
@@ -44,6 +45,10 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="type"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="metadata"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="dataSourceAttributes"/> is <c>null</c>.
         /// </exception>
         public CustomDataSourceReference(
             Type type,
@@ -51,6 +56,9 @@ namespace Microsoft.Performance.SDK.Runtime
             HashSet<DataSourceAttribute> dataSourceAttributes)
             : base(type)
         {
+            Guard.NotNull(metadata, nameof(metadata));
+            Guard.NotNull(dataSourceAttributes, nameof(dataSourceAttributes));
+
             this.InitializeThis(metadata, dataSourceAttributes);
         }
 
@@ -64,8 +72,20 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="instanceFactory">
         ///     The factory function for creating the instance.
         /// </param>
+        /// <param name="metadata">
+        ///     The CustomDataSource metadata.
+        /// </param>
+        /// <param name="dataSourceAttributes">
+        ///     The declared data sources.
+        /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="type"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="instanceFactory"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="metadata"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="dataSourceAttributes"/> is <c>null</c>.
         /// </exception>
         public CustomDataSourceReference(
             Type type,
@@ -74,6 +94,9 @@ namespace Microsoft.Performance.SDK.Runtime
             HashSet<DataSourceAttribute> dataSourceAttributes)
             : base(type, instanceFactory)
         {
+            Guard.NotNull(metadata, nameof(metadata));
+            Guard.NotNull(dataSourceAttributes, nameof(dataSourceAttributes));
+
             this.InitializeThis(metadata, dataSourceAttributes);
         }
 
@@ -84,12 +107,17 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="instance">
         ///     The existing <see cref="ICustomDataSource"/>.
         /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="instance"/> is <c>null</c>.
+        /// </exception>
         /// <exception cref="System.ArgumentException">
         ///     <paramref name="instance"/> does not have a <see cref="CustomDataSourceAttribute"/>.
         /// </exception>
         public CustomDataSourceReference(ICustomDataSource instance)
             : base(instance.GetType(), () => instance)
         {
+            Guard.NotNull(instance, nameof(instance));
+
             var metadata = instance.GetType().GetCustomAttribute<CustomDataSourceAttribute>();
             if (metadata is null)
             {
@@ -110,20 +138,28 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="other">
         ///     The instance from which to make a copy.
         /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="other"/> is <c>null</c>.
+        /// </exception>
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
         public CustomDataSourceReference(CustomDataSourceReference other)
             : base(other.Type)
         {
+            other.ThrowIfDisposed();
+
             this.dataSourceAttributes = other.dataSourceAttributes;
 
             this.guid = other.guid;
             this.name = other.name;
             this.description = other.description;
             this.commandLineOptionsRO = other.commandLineOptionsRO;
+            this.createdProcessors = other.createdProcessors;
+            this.createdProcessorsRO = other.createdProcessorsRO;
 
-            this.isDisposed = other.isDisposed;
+            this.isInitialized = true;
+            this.isDisposed = false;
         }
 
         /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
@@ -134,7 +170,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             get
             {
-                this.ThrowIfDisposed();
+                this.EnsureUsable();
                 return this.guid;
             }
         }
@@ -147,7 +183,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             get
             {
-                this.ThrowIfDisposed();
+                this.EnsureUsable();
                 return this.name;
             }
         }
@@ -160,7 +196,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             get
             {
-                this.ThrowIfDisposed();
+                this.EnsureUsable();
                 return this.description;
             }
         }
@@ -175,7 +211,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             get
             {
-                this.ThrowIfDisposed();
+                this.EnsureUsable();
                 return this.dataSourceAttributes;
             }
         }
@@ -191,7 +227,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             get
             {
-                this.ThrowIfDisposed();
+                this.EnsureUsable();
                 return this.Instance.DataTables.Union(this.Instance.MetadataTables).ToList().AsReadOnly();
             }
         }
@@ -204,7 +240,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             get
             {
-                this.ThrowIfDisposed();
+                this.EnsureUsable();
                 return this.commandLineOptionsRO;
             }
         }
@@ -220,7 +256,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             get
             {
-                this.ThrowIfDisposed();
+                this.EnsureUsable();
                 return this.createdProcessorsRO;
             }
         }
@@ -300,7 +336,7 @@ namespace Microsoft.Performance.SDK.Runtime
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions commandLineOptions)
         {
-            this.ThrowIfDisposed();
+            this.EnsureUsable();
 
             ICustomDataProcessor processor = null;
             try
@@ -345,7 +381,8 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </exception>
         public bool Supports(IDataSource dataSource)
         {
-            this.ThrowIfDisposed();
+            this.EnsureUsable();
+
             if (dataSource is null)
             {
                 return false;
@@ -366,14 +403,16 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public override CustomDataSourceReference CloneT()
         {
-            this.ThrowIfDisposed();
+            this.EnsureUsable();
+
             return new CustomDataSourceReference(this);
         }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            this.ThrowIfDisposed();
+            this.EnsureUsable();
+
             if (obj is null)
             {
                 return false;
@@ -397,24 +436,21 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            this.ThrowIfDisposed();
-            unchecked
-            {
-                var hash = base.GetHashCode();
+            this.EnsureUsable();
 
-                hash = ((hash << 5) + hash) ^ this.Name.GetHashCode();
-                hash = ((hash << 5) + hash) ^ this.Guid.GetHashCode();
-                hash = ((hash << 5) + hash) ^ this.Description.GetHashCode();
-                hash = ((hash << 5) + hash) ^ this.DataSources.GetHashCode();
-
-                return hash;
-            }
+            return HashCodeUtils.CombineHashCodeValues(
+                base.GetHashCode(),
+                this.Name.GetHashCode(),
+                this.Guid.GetHashCode(),
+                this.Description.GetHashCode(),
+                this.DataSources.GetHashCode());
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            this.ThrowIfDisposed();
+            this.EnsureUsable();
+
             return $"{this.Name} - {this.Guid} ({this.AssemblyPath})";
         }
 
@@ -453,6 +489,18 @@ namespace Microsoft.Performance.SDK.Runtime
             this.isDisposed = true;
         }
 
+        [Conditional("DEBUG")]
+        private void AssertInitialized()
+        {
+            Debug.Assert(this.isInitialized);
+        }
+
+        private void EnsureUsable()
+        {
+            this.AssertInitialized();
+            this.ThrowIfDisposed();
+        }
+
         private void InitializeThis(
             CustomDataSourceAttribute metadata,
             HashSet<DataSourceAttribute> dataSourceAttributes)
@@ -469,6 +517,7 @@ namespace Microsoft.Performance.SDK.Runtime
             this.createdProcessors = new List<ICustomDataProcessor>();
             this.createdProcessorsRO = new ReadOnlyCollection<ICustomDataProcessor>(this.createdProcessors);
 
+            this.isInitialized = true;
             this.isDisposed = false;
         }
     }
