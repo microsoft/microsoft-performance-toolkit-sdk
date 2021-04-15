@@ -107,6 +107,21 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         }
 
         /// <summary>
+        ///     Gets all of the loaded extensions.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public ExtensionRoot Extensions
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.extensionRoot;
+            }
+        }
+
+        /// <summary>
         ///     All of the custom data sources that have been loaded by plugins.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
