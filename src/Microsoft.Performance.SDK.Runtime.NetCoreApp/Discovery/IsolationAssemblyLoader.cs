@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 
@@ -23,15 +24,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
     public sealed class IsolationAssemblyLoader
         : AssemblyLoaderBase
     {
-        // filename, name
-        private static readonly IReadOnlyDictionary<string, string> AlwaysSharedAssembliesFileNameToName
-            = new Dictionary<string, string>
-        {
-            { "Microsoft.Performance.SDK.dll", "Microsoft.Performance.SDK" },
-            { "Microsoft.Performance.SDK.Runtime.dll", "Microsoft.Performance.SDK.Runtime" },
-            { "Microsoft.Performance.SDK.Runtime.NetCoreApp.dll", "Microsoft.Performance.SDK.Runtime.NetCoreApp" },
-        };
-
         private static readonly Lazy<string> ApplicationBase = new Lazy<string>(
             () => Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName),
             System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
@@ -69,7 +61,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
         public IsolationAssemblyLoader(
             IDictionary<string, string> additionalSharedAssembliesFileNameToName)
         {
-            this.alwaysSharedAssembliesFileNameToName = new Dictionary<string, string>(AlwaysSharedAssembliesFileNameToName);
+            this.alwaysSharedAssembliesFileNameToName = GetAlwaysSharedAssemblies();
 
             if (!(additionalSharedAssembliesFileNameToName is null))
             {
@@ -116,11 +108,65 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                     kvp.Value.Unload();
                 }
                 catch (Exception)
-                { 
+                {
                 }
             }
 
             loadContexts.Clear();
+        }
+
+        internal static Dictionary<string, string> GetAlwaysSharedAssemblies()
+        {
+            var fileNamesToAssemblyNames = new Dictionary<string, string>();
+            var processedAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // get list of runtime assemblies so that they can be excluded
+            var runtimeAssemblyPaths = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll")
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            var assemblies = new Queue<Assembly>();
+            assemblies.Enqueue(Assembly.GetExecutingAssembly());
+
+            while (assemblies.Count > 0)
+            {
+                var assembly = assemblies.Dequeue();
+                string assemblyName = assembly.GetName().Name;
+                if (processedAssemblies.Contains(assemblyName))
+                {
+                    continue;
+                }
+
+                fileNamesToAssemblyNames.Add(Path.GetFileName(assembly.Location), assemblyName);
+                processedAssemblies.Add(assemblyName);
+
+                var referencedAssemblies = assembly.GetReferencedAssemblies();
+                foreach (var referencedAssemblyName in referencedAssemblies)
+                {
+                    var referencedAssembly = Assembly.Load(referencedAssemblyName.ToString());
+
+                    // skip dynamic assemblies
+                    if (referencedAssembly.IsDynamic)
+                    {
+                        continue;
+                    }
+
+                    // skip assemblies we've already processed
+                    if (processedAssemblies.Contains(referencedAssembly.GetName().Name))
+                    {
+                        continue;
+                    }
+
+                    // skip runtime assemblies
+                    if (runtimeAssemblyPaths.Contains(referencedAssembly.Location))
+                    {
+                        continue;
+                    }
+
+                    assemblies.Enqueue(referencedAssembly);
+                }
+            }
+
+            return fileNamesToAssemblyNames;
         }
 
         private Assembly SpeciallyLoadedByAssemblyName(string assemblyName)
