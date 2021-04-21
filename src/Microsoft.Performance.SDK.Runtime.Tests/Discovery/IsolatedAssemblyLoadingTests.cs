@@ -58,40 +58,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         }
 
         [TestMethod]
-        [UnitTest]
-        public void AlwaysSharedAssembliesContainSDKAssemblies()
-        {
-            var sharedAssemblies = IsolationAssemblyLoader.GetAlwaysSharedAssemblies();
-            var assemblyNames = sharedAssemblies.Values.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            Assert.IsTrue(assemblyNames.Contains("Microsoft.Performance.SDK.Runtime.NetCoreApp"));
-            Assert.IsTrue(assemblyNames.Contains("Microsoft.Performance.SDK.Runtime"));
-            Assert.IsTrue(assemblyNames.Contains("Microsoft.Performance.SDK"));
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void AlwaysSharedAssembliesContainReferencedAssemblies()
-        {
-            // Nuget.Versioning is currently referenced, so using it as a test case.
-
-            var sharedAssemblies = IsolationAssemblyLoader.GetAlwaysSharedAssemblies();
-            var assemblyNames = sharedAssemblies.Values.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            Assert.IsTrue(assemblyNames.Contains("NuGet.Versioning"));
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void AlwaysSharedAssembliesExcludesRuntime()
-        {
-            var sharedAssemblies = IsolationAssemblyLoader.GetAlwaysSharedAssemblies();
-            var assemblyNames = sharedAssemblies.Values.ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            Assert.IsFalse(assemblyNames.Contains("System.Runtime"));
-        }
-
-        [TestMethod]
         [IntegrationTest]
         public void SharedAssembliesLoadFromDefaultContext()
         {
