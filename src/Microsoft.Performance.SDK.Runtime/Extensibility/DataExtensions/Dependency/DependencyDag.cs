@@ -202,31 +202,39 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             // by the dependency state, as well as those explicitly
             // declared on the references themselves.
             //
+            // Note that the purpose of this class is to keep a graph
+            // of all LOADED extensions and their dependencies. Thus,
+            // while cycles are forbidden (as we could never construct
+            // the DAG), it is okay if a dependency is missing. If a
+            // dependency is missing, then obviously there is nothing
+            // to track, as it is already gone. Again, as outlined in
+            // the summary description of this class, this class shows
+            // the world as IT IS, not how it SHOULD BE.
+            //
 
             return der.DependencyReferences.RequiredSourceDataCookerPaths
                 .Select(reps.GetSourceDataCookerReference)
-                .Cast<IDataExtensionReference>()
+                .OfType<IDataExtensionReference>()
                 .Concat(
                     deps.RequiredCompositeDataCookerPaths.Select(reps.GetCompositeDataCookerReference)
-                        .Cast<IDataExtensionReference>())
+                        .OfType<IDataExtensionReference>())
                 .Concat(
                     deps.RequiredDataProcessorIds
                         .Select(reps.GetDataProcessorReference)
-                        .Cast<IDataExtensionReference>())
+                        .OfType<IDataExtensionReference>())
                 .Concat(
                     der.RequiredDataCookers
                         .Select(
                             x =>
                             {
                                 var r = reps.TryGetDataCookerReference(x, out var c);
-                                Debug.Assert(r);
-                                return c;
+                                return r ? c : null;
                             })
-                        .Cast<IDataExtensionReference>())
+                        .OfType<IDataExtensionReference>())
                 .Concat(
                     der.RequiredDataProcessors
                         .Select(reps.GetDataProcessorReference)
-                        .Cast<IDataExtensionReference>())
+                        .OfType<IDataExtensionReference>())
                 .Select(Reference.Create)
                 .ToSet();
         }
