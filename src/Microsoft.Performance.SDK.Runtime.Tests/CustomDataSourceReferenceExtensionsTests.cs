@@ -19,12 +19,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void TryGetFileExtensions_NoFileDataSources_ReturnsEmpty()
         {
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new List<DataSourceAttribute>().AsReadOnly(),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>());
 
-            var actual = fakeReference.TryGetFileExtensions();
+            var actual = cdsr.TryGetFileExtensions();
 
             Assert.IsFalse(actual.Any());
         }
@@ -40,13 +40,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 new FileDataSourceAttribute(".xlsx"),
             };
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    extensions.Cast<DataSourceAttribute>().ToList()),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>(extensions));
 
-            var actual = fakeReference.TryGetFileExtensions();
+            var actual = cdsr.TryGetFileExtensions();
 
             CollectionAssert.AreEquivalent(
                 extensions.Select(x => x.FileExtension).ToList(),
@@ -57,12 +56,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void TryGetCanonicalFileExtensions_NoFileDataSources_ReturnsEmpty()
         {
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new List<DataSourceAttribute>().AsReadOnly(),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>());
 
-            var actual = fakeReference.TryGetCanonicalFileExtensions();
+            var actual = cdsr.TryGetCanonicalFileExtensions();
 
             Assert.IsFalse(actual.Any());
         }
@@ -78,13 +77,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 new FileDataSourceAttribute(".xlsx"),
             };
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    extensions.Cast<DataSourceAttribute>().ToList()),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>(extensions));
 
-            var actual = fakeReference.TryGetCanonicalFileExtensions();
+            var actual = cdsr.TryGetCanonicalFileExtensions();
 
             CollectionAssert.AreEquivalent(
                 extensions.Select(x => FileExtensionUtils.CanonicalizeExtension(x.FileExtension)).ToList(),
@@ -98,19 +96,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr1 = new FileDataSourceAttribute(".txt");
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
-            
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        fileAttr3,
-                    }),
-            };
 
-            var actual = fakeReference.TryGetFileDescription(null);
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    fileAttr3,
+                });
+
+            var actual = cdsr.TryGetFileDescription(null);
 
             Assert.IsNull(actual);
         }
@@ -126,19 +123,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        extAttr,
-                        fileAttr3,
-                    }),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    extAttr,
+                    fileAttr3,
+                });
 
-            var actual = fakeReference.TryGetFileDescription(null);
+            var actual = cdsr.TryGetFileDescription(null);
 
             Assert.AreEqual(testDescription, actual);
         }
@@ -151,18 +147,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        fileAttr3,
-                    }),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    fileAttr3,
+                });
 
-            var actual = fakeReference.TryGetFileDescription(".etl");
+            var actual = cdsr.TryGetFileDescription(".etl");
 
             Assert.IsNull(actual);
         }
@@ -178,18 +173,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(ext, testDescription);
             var fileAttr3 = new FileDataSourceAttribute(".xlsx", "Excel");
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        fileAttr3,
-                    }),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    fileAttr3,
+                });
 
-            var actual = fakeReference.TryGetFileDescription(ext);
+            var actual = cdsr.TryGetFileDescription(ext);
 
             Assert.AreEqual(testDescription, actual);
         }
@@ -202,18 +196,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        fileAttr3,
-                    }),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    fileAttr3,
+                });
 
-            var actual = fakeReference.TryGetDirectoryDescription();
+            var actual = cdsr.TryGetDirectoryDescription();
 
             Assert.IsNull(actual);
         }
@@ -229,20 +222,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    directoryAttr,
+                    fileAttr3,
+                });
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        directoryAttr,
-                        fileAttr3,
-                    }),
-            };
-
-            var actual = fakeReference.TryGetDirectoryDescription();
+            var actual = cdsr.TryGetDirectoryDescription();
 
             Assert.AreEqual(testDescription, actual);
         }
@@ -255,18 +246,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        fileAttr3,
-                    }),
-            };
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    fileAttr3,
+                });
 
-            var actual = fakeReference.TryGetDirectoryDescription();
+            var actual = cdsr.TryGetDirectoryDescription();
 
             Assert.IsNull(actual);
         }
@@ -282,20 +272,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    fileAttr1,
+                    fileAttr2,
+                    directoryAttr,
+                    fileAttr3,
+                });
 
-            var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(
-                    new List<DataSourceAttribute>
-                    {
-                        fileAttr1,
-                        fileAttr2,
-                        directoryAttr,
-                        fileAttr3,
-                    }),
-            };
-
-            var actual = fakeReference.TryGetExtensionlessFileDescription();
+            var actual = cdsr.TryGetExtensionlessFileDescription();
 
             Assert.AreEqual(testDescription, actual);
         }
@@ -304,30 +292,44 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AreDirectoriesSupportedTests()
         {
-            var fake = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource));
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>());
 
-            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute>());
+            Assert.IsFalse(cdsr.AreDirectoriesSupported());
 
-            Assert.IsFalse(fake.AreDirectoriesSupported());
+            cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    new DirectoryDataSourceAttribute("Empty"),
+                });
 
-            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute> { new DirectoryDataSourceAttribute("Empty"), });
-
-            Assert.IsTrue(fake.AreDirectoriesSupported());
+            Assert.IsTrue(cdsr.AreDirectoriesSupported());
         }
 
         [TestMethod]
         [UnitTest]
         public void AreExtensionlessFilesSupportedTests()
         {
-            var fake = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource));
+            var cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>());
 
-            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute>());
+            Assert.IsFalse(cdsr.AreExtensionlessFilesSupported());
 
-            Assert.IsFalse(fake.AreExtensionlessFilesSupported());
+            cdsr = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
+                {
+                    new ExtensionlessFileDataSourceAttribute("Empty"),
+                });
 
-            fake.DataSourcesSetter = new ReadOnlyCollection<DataSourceAttribute>(new List<DataSourceAttribute> { new ExtensionlessFileDataSourceAttribute("Empty"), });
-
-            Assert.IsTrue(fake.AreExtensionlessFilesSupported());
+            Assert.IsTrue(cdsr.AreExtensionlessFilesSupported());
         }
     }
 }

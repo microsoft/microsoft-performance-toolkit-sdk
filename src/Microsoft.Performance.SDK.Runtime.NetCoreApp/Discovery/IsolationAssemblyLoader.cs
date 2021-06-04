@@ -30,6 +30,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
             { "Microsoft.Performance.SDK.dll", "Microsoft.Performance.SDK" },
             { "Microsoft.Performance.SDK.Runtime.dll", "Microsoft.Performance.SDK.Runtime" },
             { "Microsoft.Performance.SDK.Runtime.NetCoreApp.dll", "Microsoft.Performance.SDK.Runtime.NetCoreApp" },
+
+            // The type SemanticVersion is exposed publicly and so this assembly must be shared.
+            { "NuGet.Versioning.dll", "NuGet.Versioning" },
         };
 
         private static readonly Lazy<string> ApplicationBase = new Lazy<string>(
@@ -116,7 +119,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                     kvp.Value.Unload();
                 }
                 catch (Exception)
-                { 
+                {
                 }
             }
 
