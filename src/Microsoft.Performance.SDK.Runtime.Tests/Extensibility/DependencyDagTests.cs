@@ -694,5 +694,318 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.IsTrue(cc1n.Dependencies.Contains(sc2n));
             Assert.AreEqual(0, cc1n.Dependents.Count);
         }
+
+        [TestMethod]
+        [UnitTest]
+        public void Create_MissingDirect_CreatesCorrectly()
+        {
+            //
+            //    r0        r1    r2
+            //   /   \        \  /
+            //  d1   d2 (X)    d1
+            //  |
+            //  d3
+
+            var r0 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0"), };
+            var r1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r1"), };
+            var r2 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r2"), };
+
+            var r0d1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0d1"), };
+            var r0d2 = new TestSourceDataCookerReference { Path = new DataCookerPath("r0d2"), };
+            var r0d1d3 = new TestSourceDataCookerReference { Path = new DataCookerPath("r0d1d3"), };
+            var r1d1 = new TestSourceDataCookerReference { Path = new DataCookerPath("r1d1"), };
+            var r2d1 = r1d1;
+
+            r0.requiredDataCookers.Add(r0d1.Path);
+            r0.requiredDataCookers.Add(r0d2.Path);
+            r0d1.requiredDataCookers.Add(r0d1d3.Path);
+            r1.requiredDataCookers.Add(r1d1.Path);
+            r2.requiredDataCookers.Add(r2d1.Path);
+            var allRoots = new IDataExtensionReference[]
+            {
+                r0,
+                r1,
+                r2,
+            }.Select(DependencyDag.Reference.Create).ToSet();
+
+            var allReferences = allRoots.Concat(
+                new IDataExtensionReference[]
+                {
+                    r0d1,
+                    r0d1d3,
+                    r1d1,
+                    r2d1,
+                }.Select(DependencyDag.Reference.Create)).ToSet();
+
+            var catalog = new TestPluginCatalog();
+            catalog.IsLoaded = true;
+
+            var repo = new DataExtensionRepository();
+            repo.TryAddReference(r0);
+            repo.TryAddReference(r1);
+            repo.TryAddReference(r2);
+            repo.TryAddReference(r0d1);
+            repo.TryAddReference(r0d1d3);
+            repo.TryAddReference(r1d1);
+            repo.TryAddReference(r2d1);
+            repo.FinalizeDataExtensions();
+
+            var sut = DependencyDag.Create(catalog, repo);
+
+            Assert.AreEqual(allReferences.Count, sut.All.Count);
+            CollectionAssert.AreEquivalent(allReferences.ToList(), sut.All.Select(x => x.Target).ToList());
+
+            Assert.AreEqual(allRoots.Count, sut.Roots.Count);
+            CollectionAssert.AreEquivalent(allRoots.ToList(), sut.Roots.Select(x => x.Target).ToList());
+
+            foreach (var r in sut.Roots)
+            {
+                Assert.AreEqual(0, r.Dependents.Count, r.Target.Match(x => x.Name, x => x.Name));
+            }
+
+            var r0n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0));
+            var r1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r1));
+            var r2n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r2));
+            var r0d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0d1));
+            var r0d1d3n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0d1d3));
+            var r1d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r1d1));
+            var r2d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r2d1));
+
+            Assert.AreEqual(1, r0n.Dependencies.Count);
+            Assert.AreEqual(0, r0n.Dependents.Count);
+            Assert.IsTrue(r0n.Dependencies.Contains(r0d1n));
+
+            Assert.AreEqual(1, r1n.Dependencies.Count);
+            Assert.AreEqual(0, r1n.Dependents.Count);
+            Assert.IsTrue(r1n.Dependencies.Contains(r1d1n));
+
+            Assert.AreEqual(1, r2n.Dependencies.Count);
+            Assert.AreEqual(0, r2n.Dependents.Count);
+            Assert.IsTrue(r2n.Dependencies.Contains(r2d1n));
+
+            Assert.AreEqual(1, r0d1n.Dependencies.Count);
+            Assert.AreEqual(1, r0d1n.Dependents.Count);
+            Assert.IsTrue(r0d1n.Dependents.Contains(r0n));
+            Assert.IsTrue(r0d1n.Dependencies.Contains(r0d1d3n));
+
+            Assert.AreEqual(0, r0d1d3n.Dependencies.Count);
+            Assert.AreEqual(1, r0d1d3n.Dependents.Count);
+            Assert.IsTrue(r0d1d3n.Dependents.Contains(r0d1n));
+
+            Assert.AreEqual(r1d1n, r2d1n);
+            Assert.AreEqual(0, r1d1n.Dependencies.Count);
+            Assert.AreEqual(2, r1d1n.Dependents.Count);
+            Assert.IsTrue(r1d1n.Dependents.Contains(r1n));
+            Assert.IsTrue(r1d1n.Dependents.Contains(r2n));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Create_MissingIndirect_CreatesCorrectly()
+        {
+            //
+            //    r0     r1    r2
+            //   /   \     \  /
+            //  d1   d2    d1
+            //  |
+            //  d3 (X)
+
+            var r0 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0"), };
+            var r1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r1"), };
+            var r2 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r2"), };
+
+            var r0d1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0d1"), };
+            var r0d2 = new TestSourceDataCookerReference { Path = new DataCookerPath("r0d2"), };
+            var r0d1d3 = new TestSourceDataCookerReference { Path = new DataCookerPath("r0d1d3"), };
+            var r1d1 = new TestSourceDataCookerReference { Path = new DataCookerPath("r1d1"), };
+            var r2d1 = r1d1;
+
+            r0.requiredDataCookers.Add(r0d1.Path);
+            r0.requiredDataCookers.Add(r0d2.Path);
+            r0d1.requiredDataCookers.Add(r0d1d3.Path);
+            r1.requiredDataCookers.Add(r1d1.Path);
+            r2.requiredDataCookers.Add(r2d1.Path);
+
+            var allRoots = new IDataExtensionReference[]
+            {
+                r0,
+                r1,
+                r2,
+            }.Select(DependencyDag.Reference.Create).ToSet();
+
+            var allReferences = allRoots.Concat(
+                new IDataExtensionReference[]
+                {
+                    r0d1,
+                    r0d2,
+                    r1d1,
+                    r2d1,
+                }.Select(DependencyDag.Reference.Create)).ToSet();
+
+            var catalog = new TestPluginCatalog();
+            catalog.IsLoaded = true;
+
+            var repo = new DataExtensionRepository();
+            repo.TryAddReference(r0);
+            repo.TryAddReference(r1);
+            repo.TryAddReference(r2);
+            repo.TryAddReference(r0d1);
+            repo.TryAddReference(r0d2);
+            repo.TryAddReference(r1d1);
+            repo.TryAddReference(r2d1);
+            repo.FinalizeDataExtensions();
+
+            var sut = DependencyDag.Create(catalog, repo);
+
+            Assert.AreEqual(allReferences.Count, sut.All.Count);
+            CollectionAssert.AreEquivalent(allReferences.ToList(), sut.All.Select(x => x.Target).ToList());
+
+            Assert.AreEqual(allRoots.Count, sut.Roots.Count);
+            CollectionAssert.AreEquivalent(allRoots.ToList(), sut.Roots.Select(x => x.Target).ToList());
+
+            foreach (var r in sut.Roots)
+            {
+                Assert.AreEqual(0, r.Dependents.Count, r.Target.Match(x => x.Name, x => x.Name));
+            }
+
+            var r0n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0));
+            var r1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r1));
+            var r2n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r2));
+            var r0d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0d1));
+            var r0d2n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0d2));
+            var r1d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r1d1));
+            var r2d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r2d1));
+
+            Assert.AreEqual(2, r0n.Dependencies.Count);
+            Assert.AreEqual(0, r0n.Dependents.Count);
+            Assert.IsTrue(r0n.Dependencies.Contains(r0d1n));
+            Assert.IsTrue(r0n.Dependencies.Contains(r0d2n));
+
+            Assert.AreEqual(1, r1n.Dependencies.Count);
+            Assert.AreEqual(0, r1n.Dependents.Count);
+            Assert.IsTrue(r1n.Dependencies.Contains(r1d1n));
+
+            Assert.AreEqual(1, r2n.Dependencies.Count);
+            Assert.AreEqual(0, r2n.Dependents.Count);
+            Assert.IsTrue(r2n.Dependencies.Contains(r2d1n));
+
+            Assert.AreEqual(0, r0d1n.Dependencies.Count);
+            Assert.AreEqual(1, r0d1n.Dependents.Count);
+            Assert.IsTrue(r0d1n.Dependents.Contains(r0n));
+
+            Assert.AreEqual(0, r0d2n.Dependencies.Count);
+            Assert.AreEqual(1, r0d2n.Dependents.Count);
+            Assert.IsTrue(r0d2n.Dependents.Contains(r0n));
+
+            Assert.AreEqual(r1d1n, r2d1n);
+            Assert.AreEqual(0, r1d1n.Dependencies.Count);
+            Assert.AreEqual(2, r1d1n.Dependents.Count);
+            Assert.IsTrue(r1d1n.Dependents.Contains(r1n));
+            Assert.IsTrue(r1d1n.Dependents.Contains(r2n));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Create_MissingThatHasChildrenPresent_CreatesCorrectly()
+        {
+            //
+            //     r0      r1    r2         d3  r0  r1  r2
+            //   /    \      \  /     =>         |   \  /
+            //  d1 (X) d2     d1                d2    d1
+            //  |
+            //  d3
+            //
+
+            var r0 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0"), };
+            var r1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r1"), };
+            var r2 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r2"), };
+
+            var r0d1 = new TestCompositeDataCookerReference { Path = new DataCookerPath("r0d1"), };
+            var r0d2 = new TestSourceDataCookerReference { Path = new DataCookerPath("r0d2"), };
+            var r0d1d3 = new TestSourceDataCookerReference { Path = new DataCookerPath("r0d1d3"), };
+            var r1d1 = new TestSourceDataCookerReference { Path = new DataCookerPath("r1d1"), };
+            var r2d1 = r1d1;
+
+            r0.requiredDataCookers.Add(r0d1.Path);
+            r0.requiredDataCookers.Add(r0d2.Path);
+            r0d1.requiredDataCookers.Add(r0d1d3.Path);
+            r1.requiredDataCookers.Add(r1d1.Path);
+            r2.requiredDataCookers.Add(r2d1.Path);
+
+            var allRoots = new IDataExtensionReference[]
+            {
+                r0d1d3,
+                r0,
+                r1,
+                r2,
+            }.Select(DependencyDag.Reference.Create).ToSet();
+
+            var allReferences = allRoots.Concat(
+                new IDataExtensionReference[]
+                {
+                    r0d2,
+                    r1d1,
+                    r2d1,
+                }.Select(DependencyDag.Reference.Create)).ToSet();
+
+            var catalog = new TestPluginCatalog();
+            catalog.IsLoaded = true;
+
+            var repo = new DataExtensionRepository();
+            repo.TryAddReference(r0);
+            repo.TryAddReference(r1);
+            repo.TryAddReference(r2);
+            repo.TryAddReference(r0d2);
+            repo.TryAddReference(r0d1d3);
+            repo.TryAddReference(r1d1);
+            repo.TryAddReference(r2d1);
+            repo.FinalizeDataExtensions();
+
+            var sut = DependencyDag.Create(catalog, repo);
+
+            Assert.AreEqual(allReferences.Count, sut.All.Count);
+            CollectionAssert.AreEquivalent(allReferences.ToList(), sut.All.Select(x => x.Target).ToList());
+
+            Assert.AreEqual(allRoots.Count, sut.Roots.Count);
+            CollectionAssert.AreEquivalent(allRoots.ToList(), sut.Roots.Select(x => x.Target).ToList());
+
+            foreach (var r in sut.Roots)
+            {
+                Assert.AreEqual(0, r.Dependents.Count, r.Target.Match(x => x.Name, x => x.Name));
+            }
+
+            var r0n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0));
+            var r1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r1));
+            var r2n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r2));
+            var r0d2n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0d2));
+            var r0d1d3n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r0d1d3));
+            var r1d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r1d1));
+            var r2d1n = sut.All.Single(x => x.Target == DependencyDag.Reference.Create(r2d1));
+
+            Assert.AreEqual(1, r0n.Dependencies.Count);
+            Assert.AreEqual(0, r0n.Dependents.Count);
+            Assert.IsTrue(r0n.Dependencies.Contains(r0d2n));
+
+            Assert.AreEqual(1, r1n.Dependencies.Count);
+            Assert.AreEqual(0, r1n.Dependents.Count);
+            Assert.IsTrue(r1n.Dependencies.Contains(r1d1n));
+
+            Assert.AreEqual(1, r2n.Dependencies.Count);
+            Assert.AreEqual(0, r2n.Dependents.Count);
+            Assert.IsTrue(r2n.Dependencies.Contains(r2d1n));
+
+            Assert.AreEqual(0, r0d2n.Dependencies.Count);
+            Assert.AreEqual(1, r0d2n.Dependents.Count);
+            Assert.IsTrue(r0d2n.Dependents.Contains(r0n));
+
+            Assert.AreEqual(0, r0d1d3n.Dependencies.Count);
+            Assert.AreEqual(0, r0d1d3n.Dependents.Count);
+
+            Assert.AreEqual(r1d1n, r2d1n);
+            Assert.AreEqual(0, r1d1n.Dependencies.Count);
+            Assert.AreEqual(2, r1d1n.Dependents.Count);
+            Assert.IsTrue(r1d1n.Dependents.Contains(r1n));
+            Assert.IsTrue(r1d1n.Dependents.Contains(r2n));
+        }
     }
 }
