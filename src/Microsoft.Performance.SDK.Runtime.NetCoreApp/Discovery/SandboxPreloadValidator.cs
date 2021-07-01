@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -20,7 +21,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
     {
         private readonly MetadataAssemblyResolver resolver;
         private readonly VersionChecker versionChecker;
-        private readonly MetadataLoadContext loadContext;
+        private readonly ConcurrentDictionary<string, MetadataLoadContext> loadContextsByDirectory;
 
         private bool isDisposed;
 
@@ -37,15 +38,19 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
 
             this.resolver = new PathAssemblyResolver(allDlls);
             this.versionChecker = versionChecker;
-            this.loadContext = new MetadataLoadContext(this.resolver);
+            this.loadContextsByDirectory = new ConcurrentDictionary<string, MetadataLoadContext>();
         }
 
         public bool IsAssemblyAcceptable(string fullPath, out ErrorInfo error)
         {
+            var loadContext = this.loadContextsByDirectory.GetOrAdd(
+                Path.GetDirectoryName(fullPath),
+                _ => this.CreateLoadContext());
+
             Assembly loaded;
             try
             {
-                loaded = this.loadContext.LoadFromAssemblyPath(fullPath);
+                loaded = loadContext.LoadFromAssemblyPath(fullPath);
             }
             catch (FileNotFoundException e)
             {
@@ -130,9 +135,13 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
             GC.SuppressFinalize(this);
         }
 
+        private MetadataLoadContext CreateLoadContext()
+        {
+            return new MetadataLoadContext(this.resolver);
+        }
+
         private void Dispose(bool disposing)
         {
-
             if (this.isDisposed)
             {
                 return;
@@ -140,7 +149,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
 
             if (disposing)
             {
-                this.loadContext.Dispose();
+                foreach (var kvp in this.loadContextsByDirectory)
+                {
+                    kvp.Value.Dispose();
+                }
+
+                this.loadContextsByDirectory.Clear();
             }
 
             this.isDisposed = true;

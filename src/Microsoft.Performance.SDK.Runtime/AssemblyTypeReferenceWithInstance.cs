@@ -32,6 +32,9 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="type">
         ///     <see cref="Type"/> of <see cref="T"/>
         /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="type"/> is <c>null</c>.
+        /// </exception>
         protected AssemblyTypeReferenceWithInstance(Type type)
             : this(type, () => (T)Activator.CreateInstance(type))
         {
@@ -46,9 +49,16 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="instanceFactory">
         ///     The function that creates the instance.
         /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="type"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="instanceFactory"/> is <c>null</c>.
+        /// </exception>
         protected AssemblyTypeReferenceWithInstance(Type type, Func<T> instanceFactory)
             : base(type)
         {
+            Guard.NotNull(instanceFactory, nameof(instanceFactory));
+
             this.instanceFactory = instanceFactory;
             this.instance = this.instanceFactory();
             Debug.Assert(this.instance != null);
@@ -57,7 +67,10 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <summary>
         ///     Initializes an instance of <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> taking a reference to <see cref="AssemblyTypeReferenceWithInstance{T, Derived}.Instance"/> in <paramref name="other"/>.
         /// </summary>
-        /// <param name="other"><inheritdoc/></param>         
+        /// <param name="other"><inheritdoc/></param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="other"/> is <c>null</c>.
+        /// </exception>
         protected AssemblyTypeReferenceWithInstance(
             AssemblyTypeReferenceWithInstance<T, Derived> other)
             : base(other)

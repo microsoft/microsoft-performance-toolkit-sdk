@@ -89,7 +89,8 @@ namespace Microsoft.Performance.SDK
                     }
 
                     var propValue = property.GetValue(info);
-                    if (propValue is IEnumerable e)
+                    if ((propValue is IEnumerable e) &&
+                        !(propValue is string))
                     {
                         sb.AppendLine()
                           .AppendFormat(formatProvider, "{0}{1}: ", indent, property.Name);

@@ -38,9 +38,12 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="type">
         ///     Reference <see cref="Type"/>
         /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="type"/> is <c>null</c>.
+        /// </exception>
         protected internal AssemblyTypeReference(Type type)
         {
-            Debug.Assert(type != null);
+            Guard.NotNull(type, nameof(type));
 
             this.type = type;
 
@@ -67,9 +70,12 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="other">
         ///     Instance of <see cref="AssemblyTypeReferenceWithInstance{T, TDerived}"/> to take a reference(s).
         /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="other"/> is <c>null</c>.
+        /// </exception>
         protected AssemblyTypeReference(AssemblyTypeReference<TDerived> other)
         {
-            Debug.Assert(other != null);
+            Guard.NotNull(other, nameof(other));
 
             this.type = other.Type;
             this.assemblyPath = other.AssemblyPath;
