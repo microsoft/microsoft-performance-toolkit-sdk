@@ -2,7 +2,7 @@ name: 'PR CI'
 
 on:
   pull_request:
-    branches: [ develop, main ]
+    branches: [ main ]
 
 jobs:
   build-and-test:
