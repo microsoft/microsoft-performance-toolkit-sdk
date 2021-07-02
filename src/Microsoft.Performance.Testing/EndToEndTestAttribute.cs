@@ -21,6 +21,10 @@ namespace Microsoft.Performance.Testing
                     "EndToEndTest",
                 });
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="EndToEndTestAttribute" />
+        ///     class.
+        /// </summary>
         public EndToEndTestAttribute()
         {
         }
