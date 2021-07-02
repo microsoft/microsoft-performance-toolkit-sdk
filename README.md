@@ -1,5 +1,9 @@
 # Microsoft Performance Toolkit SDK
 
+[![main build status](https://github.com/microsoft/microsoft-performance-toolkit-sdk/actions/workflows/main_build_status.yml/badge.svg)](https://github.com/microsoft/microsoft-performance-toolkit-sdk/actions/workflows/main_build_status.yml)
+
+[![main tests status](https://github.com/microsoft/microsoft-performance-toolkit-sdk/actions/workflows/main_tests_status.yml/badge.svg)](https://github.com/microsoft/microsoft-performance-toolkit-sdk/actions/workflows/main_tests_status.yml)
+
 The Microsoft Performance Toolkit is a collection of cross-platform tools developers can use to create 
 and extend performance analysis applications. It serves as the runtime of the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer), 
 a Windows program included in the [Windows Performance Toolkit](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/). 
