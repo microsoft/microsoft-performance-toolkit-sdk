@@ -50,10 +50,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         public void AddsValidTypes()
         {
             var testType1 = typeof(CdsOne);
-            var testType1Guid = testType1.GetCustomAttribute<CustomDataSourceAttribute>().Guid;
+            var testType1Guid = testType1.GetCustomAttribute<ProcessingSourceAttribute>().Guid;
 
             var testType2 = typeof(CdsTwo);
-            var testType2Guid = testType2.GetCustomAttribute<CustomDataSourceAttribute>().Guid;
+            var testType2Guid = testType2.GetCustomAttribute<ProcessingSourceAttribute>().Guid;
 
             this.ReferenceFactory.SetupReference(testType1);
             this.ReferenceFactory.SetupReference(testType2);
@@ -72,14 +72,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             public FakeReferenceFactory()
             {
-                this.TypeToReference = new Dictionary<Type, CustomDataSourceReference>();
+                this.TypeToReference = new Dictionary<Type, ProcessingSourceReference>();
             }
 
-            public IDictionary<Type, CustomDataSourceReference> TypeToReference { get; }
+            public IDictionary<Type, ProcessingSourceReference> TypeToReference { get; }
 
             public bool TryCreateCustomDataSourceReference(
                 Type type,
-                out CustomDataSourceReference reference)
+                out ProcessingSourceReference reference)
             {
                 return this.TypeToReference.TryGetValue(type, out reference);
             }
@@ -88,9 +88,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             {
                 if (type != null)
                 {
-                    if (CustomDataSourceReference.TryCreateReference(
+                    if (ProcessingSourceReference.TryCreateReference(
                         type,
-                        out CustomDataSourceReference reference))
+                        out ProcessingSourceReference reference))
                     {
                         this.TypeToReference[type] = reference;
                     }

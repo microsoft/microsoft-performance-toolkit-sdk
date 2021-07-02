@@ -6,11 +6,11 @@ using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources
 {
-    [CustomDataSource(
+    [ProcessingSource(
     "{DE9D525C-3D4F-4498-B0BA-63CED1E4E14A}", "Mock CDS - Invalid A", "A mock invalid data source A.")]
     [FileDataSource(".sdk")]
     public class InvalidSchemaA
-    : CustomDataSourceBase
+    : ProcessingSource
     {
         protected override ICustomDataProcessor CreateProcessorCore(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
         {

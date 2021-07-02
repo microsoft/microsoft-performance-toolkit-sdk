@@ -156,7 +156,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 Directory.CreateDirectory(tempDir);
 
                 CopyAssemblyContainingType(typeof(Source123DataSource), tempDir);
-                CopyAssemblyContainingType(typeof(FakeCustomDataSource), tempDir);
+                CopyAssemblyContainingType(typeof(FakePlugin), tempDir);
 
                 // we loaded from an assembly in a different folder, so the type is 'technically' different, so do a name
                 // compare this time.
@@ -1403,19 +1403,19 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.SourceDataCookers);
 
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddDataSource(Any.DataSource()));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddDataSource(Any.DataSource(), typeof(FakeCustomDataSource)));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddDataSources(new[] { Any.DataSource(), }, typeof(FakeCustomDataSource)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddDataSource(Any.DataSource(), typeof(FakePlugin)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddDataSources(new[] { Any.DataSource(), }, typeof(FakePlugin)));
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddFile(Any.FilePath()));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddFile(Any.FilePath(), typeof(FakeCustomDataSource)));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddFiles(new[] { Any.FilePath(), }, typeof(FakeCustomDataSource)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddFile(Any.FilePath(), typeof(FakePlugin)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.AddFiles(new[] { Any.FilePath(), }, typeof(FakePlugin)));
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.EnableCooker(Any.DataCookerPath()));
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.Process());
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddDataSource(Any.DataSource()));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddDataSource(Any.DataSource(), typeof(FakeCustomDataSource)));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddDataSources(new[] { Any.DataSource(), }, typeof(FakeCustomDataSource)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddDataSource(Any.DataSource(), typeof(FakePlugin)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddDataSources(new[] { Any.DataSource(), }, typeof(FakePlugin)));
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddFile(Any.FilePath()));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddFile(Any.FilePath(), typeof(FakeCustomDataSource)));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddFiles(new[] { Any.FilePath(), }, typeof(FakeCustomDataSource)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddFile(Any.FilePath(), typeof(FakePlugin)));
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryAddFiles(new[] { Any.FilePath(), }, typeof(FakePlugin)));
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TryEnableCooker(Any.DataCookerPath()));
         }
 
@@ -1481,13 +1481,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             protected abstract void RunCore();
         }
 
-        [CustomDataSource(
+        [ProcessingSource(
             "{645AB037-A325-45EC-9DB0-B8086A83B528}",
-            nameof(FakeCustomDataSource),
+            nameof(FakePlugin),
             "Source for Tests")]
         [FileDataSource(Extension)]
-        private sealed class FakeCustomDataSource
-            : CustomDataSourceBase
+        private sealed class FakePlugin
+            : ProcessingSource
         {
             public const string Extension = ".txt";
 

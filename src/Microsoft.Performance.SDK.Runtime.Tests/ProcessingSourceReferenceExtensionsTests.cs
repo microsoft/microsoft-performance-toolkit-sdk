@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
@@ -13,14 +12,14 @@ using DataSourceAttribute = Microsoft.Performance.SDK.Processing.DataSourceAttri
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
     [TestClass]
-    public class CustomDataSourceReferenceExtensionsTests
+    public class ProcessingSourceReferenceExtensionsTests
     {
         [TestMethod]
         [UnitTest]
         public void TryGetFileExtensions_NoFileDataSources_ReturnsEmpty()
         {
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
@@ -40,8 +39,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 new FileDataSourceAttribute(".xlsx"),
             };
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>(extensions));
 
@@ -56,8 +55,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void TryGetCanonicalFileExtensions_NoFileDataSources_ReturnsEmpty()
         {
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
@@ -77,8 +76,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 new FileDataSourceAttribute(".xlsx"),
             };
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>(extensions));
 
@@ -97,8 +96,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -123,8 +122,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -147,8 +146,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -173,8 +172,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(ext, testDescription);
             var fileAttr3 = new FileDataSourceAttribute(".xlsx", "Excel");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -196,8 +195,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -222,8 +221,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -246,8 +245,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -272,8 +271,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fileAttr2 = new FileDataSourceAttribute(".docx");
             var fileAttr3 = new FileDataSourceAttribute(".xlsx");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -292,15 +291,15 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AreDirectoriesSupportedTests()
         {
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
             Assert.IsFalse(cdsr.AreDirectoriesSupported());
 
-            cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -314,15 +313,15 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AreExtensionlessFilesSupportedTests()
         {
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
             Assert.IsFalse(cdsr.AreExtensionlessFilesSupported());
 
-            cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {

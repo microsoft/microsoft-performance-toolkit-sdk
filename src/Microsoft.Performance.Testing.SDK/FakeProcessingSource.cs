@@ -9,9 +9,9 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Testing.SDK
 {
-    [CustomDataSource("{0B48CF41-45DB-42C1-8B23-E568EF5F560E}", "Fake", "This is a test class.")]
-    public sealed class FakeCustomDataSource
-        : ICustomDataSource
+    [ProcessingSource("{0B48CF41-45DB-42C1-8B23-E568EF5F560E}", "Fake", "This is a test class.")]
+    public sealed class FakeProcessingSource
+        : IProcessingSource
     {
         public IEnumerable<TableDescriptor> DataTables => Enumerable.Empty<TableDescriptor>();
 
@@ -35,7 +35,7 @@ namespace Microsoft.Performance.Testing.SDK
         {
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }

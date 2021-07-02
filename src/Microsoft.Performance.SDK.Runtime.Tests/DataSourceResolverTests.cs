@@ -25,7 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public void Assign_NullDataSourcesThrows()
         {
             Assert.ThrowsException<ArgumentNullException>(
-                () => DataSourceResolver.Assign(null, Array.Empty<CustomDataSourceReference>()));
+                () => DataSourceResolver.Assign(null, Array.Empty<ProcessingSourceReference>()));
         }
 
         [TestMethod]
@@ -40,8 +40,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_UnsupportedTypesNotAssignedToCds()
         {
-            var fakeCds = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var fakeCds = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -62,8 +62,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_FailedPreliminaryCheckNotAssignedToCds()
         {
-            var fakeCds = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var fakeCds = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -88,8 +88,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_SucceededPreliminaryCheckFailedSupportsCheckNotAssignedToCds()
         {
-            var fakeCds = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var fakeCds = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
@@ -114,9 +114,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_SucceededPreliminaryCheckSucceededSupportsCheckAssignedToCds()
         {
-            var cds = new FakeCustomDataSource();
-            var fakeCds = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cds = new FakeProcessingSource();
+            var fakeCds = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 () => cds,
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
@@ -183,9 +183,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             public AssignTestCase()
             {
-                this.CustomDataSources = new List<CustomDataSourceReference>();
+                this.CustomDataSources = new List<ProcessingSourceReference>();
                 this.DataSources = new List<IDataSource>();
-                this.Expected = new Dictionary<CustomDataSourceReference, IEnumerable<IDataSource>>();
+                this.Expected = new Dictionary<ProcessingSourceReference, IEnumerable<IDataSource>>();
             }
 
             public bool Debug { get; set; }
@@ -194,11 +194,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public string Id { get; set; }
 
-            public List<CustomDataSourceReference> CustomDataSources { get; }
+            public List<ProcessingSourceReference> CustomDataSources { get; }
 
             public List<IDataSource> DataSources { get; }
 
-            public Dictionary<CustomDataSourceReference, IEnumerable<IDataSource>> Expected { get; }
+            public Dictionary<ProcessingSourceReference, IEnumerable<IDataSource>> Expected { get; }
 
             public static AssignTestCase Parse(XElement testCaseElement)
             {
@@ -241,7 +241,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 XElement parametersElement,
                 AssignTestCase testCaseToHydrate,
                 out Dictionary<string, IDataSource> dataSourcesNameToImpl,
-                out Dictionary<string, CustomDataSourceReference> cdsNameToImpl)
+                out Dictionary<string, ProcessingSourceReference> cdsNameToImpl)
             {
                 dataSourcesNameToImpl = ParseDataSources(
                     parametersElement.GetChild("DataSources"),
@@ -276,7 +276,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 return dataSourcesNameToImpl;
             }
 
-            private static Dictionary<string, CustomDataSourceReference> ParseCustomDataSources(
+            private static Dictionary<string, ProcessingSourceReference> ParseCustomDataSources(
                 XElement customDataSourcesElement,
                 Dictionary<string, IDataSource> dataSourcesNameToImpl,
                 AssignTestCase testCaseToHydrate)
@@ -285,15 +285,15 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.IsNotNull(dataSourcesNameToImpl);
                 Assert.IsNotNull(testCaseToHydrate);
 
-                var cdsNameToImpl = new Dictionary<string, CustomDataSourceReference>();
+                var cdsNameToImpl = new Dictionary<string, ProcessingSourceReference>();
 
                 var cdsElements = customDataSourcesElement.GetChildren("CustomDataSource");
                 foreach (var cdsElement in cdsElements)
                 {
-                    var cds = new FakeCustomDataSource();
+                    var cds = new FakeProcessingSource();
 
                     var name = cdsElement.GetChild("Name").Value;
-                    var metadata = new CustomDataSourceAttribute(
+                    var metadata = new ProcessingSourceAttribute(
                         Guid.NewGuid().ToString(),
                         name,
                         "Description");
@@ -314,8 +314,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                         }
                     }
 
-                    var fakeReference = new CustomDataSourceReference(
-                        typeof(FakeCustomDataSource),
+                    var fakeReference = new ProcessingSourceReference(
+                        typeof(FakeProcessingSource),
                         () => cds,
                         metadata,
                         new HashSet<DataSourceAttribute>
@@ -336,7 +336,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             private static void ParseExpected(
                 XElement expectedElement,
                 Dictionary<string, IDataSource> dataSourcesNameToImpl,
-                Dictionary<string, CustomDataSourceReference> cdsNameToImpl,
+                Dictionary<string, ProcessingSourceReference> cdsNameToImpl,
                 AssignTestCase testCaseToHydrate)
             {
                 Assert.IsNotNull(expectedElement);

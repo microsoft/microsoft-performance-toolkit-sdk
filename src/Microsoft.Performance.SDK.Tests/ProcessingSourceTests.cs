@@ -14,7 +14,7 @@ using System.Reflection;
 namespace Microsoft.Performance.SDK.Tests
 {
     [TestClass]
-    public class CustomDataSourceBaseTests
+    public class ProcessingSourceTests
     {
         private ISerializer serializer = new FakeSerializer();
         private IApplicationEnvironment applicationEnvironment = new StubApplicationEnvironment() { Serializer = new FakeSerializer() };
@@ -398,10 +398,10 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.IsTrue(descriptor5BuildWasCalled);
         }
 
-        [CustomDataSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
+        [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
         [FileDataSource(".csv")]
         private sealed class StubDataSource
-            : CustomDataSourceBase
+            : ProcessingSource
         {
             static StubDataSource()
             {

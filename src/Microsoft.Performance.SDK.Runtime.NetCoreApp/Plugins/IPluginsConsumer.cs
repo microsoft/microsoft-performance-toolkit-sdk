@@ -27,6 +27,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <param name="customDataSource">
         ///     The custom data source loaded.
         /// </param>
-        void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource);
+        void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference customDataSource);
     }
 }

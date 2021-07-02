@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,16 +17,16 @@ using DataSourceAttribute = Microsoft.Performance.SDK.Processing.DataSourceAttri
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
     [TestClass]
-    public class CustomDataSourceReferenceTests
+    public class ProcessingSourceReferenceTests
     {
         [TestMethod]
         [UnitTest]
         public void TryCreateReferenceForNullTypeThrows()
         {
             Assert.ThrowsException<ArgumentNullException>(
-                () => CustomDataSourceReference.TryCreateReference(
+                () => ProcessingSourceReference.TryCreateReference(
                     null,
-                    out CustomDataSourceReference _));
+                    out ProcessingSourceReference _));
         }
 
         [TestMethod]
@@ -104,9 +103,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void CloneClones()
         {
-            var result = CustomDataSourceReference.TryCreateReference(
+            var result = ProcessingSourceReference.TryCreateReference(
                 typeof(SampleCds),
-                out CustomDataSourceReference reference);
+                out ProcessingSourceReference reference);
             Assert.IsTrue(result);
             Assert.IsNotNull(reference);
 
@@ -128,10 +127,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void WhenDisposed_EverythingThrows()
         {
-            CustomDataSourceReference sut = null;
+            ProcessingSourceReference sut = null;
             try
             {
-                var result = CustomDataSourceReference.TryCreateReference(
+                var result = ProcessingSourceReference.TryCreateReference(
                     typeof(SampleCds),
                     out sut);
                 Assert.IsTrue(result);
@@ -172,10 +171,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void CanDisposeMultipleTimes()
         {
-            CustomDataSourceReference sut = null;
+            ProcessingSourceReference sut = null;
             try
             {
-                var result = CustomDataSourceReference.TryCreateReference(
+                var result = ProcessingSourceReference.TryCreateReference(
                     typeof(SampleCds),
                     out sut);
                 Assert.IsTrue(result);
@@ -194,10 +193,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void WhenDisposed_InstanceDisposed()
         {
-            CustomDataSourceReference sut = null;
+            ProcessingSourceReference sut = null;
             try
             {
-                var result = CustomDataSourceReference.TryCreateReference(
+                var result = ProcessingSourceReference.TryCreateReference(
                     typeof(DisposableCustomDataSource),
                     out sut);
                 Assert.IsTrue(result);
@@ -220,10 +219,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void WhenDisposed_CreatedProcessorsPassedToCdsForCleanup()
         {
-            CustomDataSourceReference sut = null;
+            ProcessingSourceReference sut = null;
             try
             {
-                var result = CustomDataSourceReference.TryCreateReference(
+                var result = ProcessingSourceReference.TryCreateReference(
                     typeof(DisposableCustomDataSource),
                     out sut);
                 Assert.IsTrue(result);
@@ -270,7 +269,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var fakeProcessor = new FakeCustomDataProcessor();
 
-            var result = CustomDataSourceReference.TryCreateReference(
+            var result = ProcessingSourceReference.TryCreateReference(
                 typeof(DisposableCustomDataSource),
                 out var sut);
 
@@ -292,11 +291,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Supports_AttributeSaysNo_ReturnsFalseWithoutDelegating()
         {
-            var cds = new FakeCustomDataSource();
+            var cds = new FakeProcessingSource();
             var dataSource = new FileDataSource("test.txt");
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 () => cds,
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
@@ -313,10 +312,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Supports_AtLeastOneAttributeSaysYes_Delegates()
         {
-            var cds = new FakeCustomDataSource();
+            var cds = new FakeProcessingSource();
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 () => cds,
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
@@ -338,10 +337,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Supports_NoAttributes_ReturnsFalse()
         {
-            var cds = new FakeCustomDataSource();
+            var cds = new FakeProcessingSource();
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 () => cds,
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
@@ -356,13 +355,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Supports_Throws_ReturnsFalse()
         {
-            var cds = new FakeCustomDataSource
+            var cds = new FakeProcessingSource
             {
                 IsDataSourceSupportedError = new ArithmeticException(),
             };
 
-            var cdsr = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
+            var cdsr = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
                 () => cds,
                 Any.CustomDataSourceAttribute(),
                 new HashSet<DataSourceAttribute>
@@ -379,16 +378,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         private static void RunCreateSuccessTest(Type type)
         {
-            var result = CustomDataSourceReference.TryCreateReference(
+            var result = ProcessingSourceReference.TryCreateReference(
                 type,
-                out CustomDataSourceReference reference);
+                out ProcessingSourceReference reference);
 
             Assert.IsTrue(result);
             Assert.IsNotNull(reference);
 
-            var metadata = type.GetCustomAttribute<CustomDataSourceAttribute>();
+            var metadata = type.GetCustomAttribute<ProcessingSourceAttribute>();
             var dataSources = type.GetCustomAttributes<DataSourceAttribute>();
-            var instance = ((ICustomDataSource)Activator.CreateInstance(type));
+            var instance = ((IProcessingSource)Activator.CreateInstance(type));
             var tables = instance.DataTables.Union(instance.MetadataTables);
 
             Assert.IsNotNull(metadata);
@@ -407,18 +406,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         private static void RunCreateFailTest(Type type)
         {
-            var result = CustomDataSourceReference.TryCreateReference(
+            var result = ProcessingSourceReference.TryCreateReference(
                 type,
-                out CustomDataSourceReference reference);
+                out ProcessingSourceReference reference);
 
             Assert.IsFalse(result);
             Assert.IsNull(reference);
         }
 
-        [CustomDataSource("{8BAACFC9-CCBD-4856-A705-CA4C1CE28533}", "What", "Test")]
+        [ProcessingSource("{8BAACFC9-CCBD-4856-A705-CA4C1CE28533}", "What", "Test")]
         [FileDataSource("ext")]
         protected class ProtectedType
-            : ICustomDataSource
+            : IProcessingSource
         {
             public IEnumerable<TableDescriptor> DataTables => throw new NotImplementedException();
 
@@ -451,7 +450,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public CustomDataSourceInfo GetAboutInfo()
+            public ProcessingSourceInfo GetAboutInfo()
             {
                 throw new NotImplementedException();
             }
@@ -472,10 +471,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
         }
 
-        [CustomDataSource("{29EF5347-53FD-49A0-8A03-C0262DE07BD4}", "What", "Test")]
+        [ProcessingSource("{29EF5347-53FD-49A0-8A03-C0262DE07BD4}", "What", "Test")]
         [FileDataSource("ext")]
         public class NestedPublicType
-            : ICustomDataSource
+            : IProcessingSource
         {
             public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
@@ -508,7 +507,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public CustomDataSourceInfo GetAboutInfo()
+            public ProcessingSourceInfo GetAboutInfo()
             {
                 throw new NotImplementedException();
             }
@@ -529,10 +528,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
         }
 
-        [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
+        [ProcessingSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
         [FileDataSource(Extension)]
         public class SampleCds
-            : ICustomDataSource
+            : IProcessingSource
         {
             public const string Extension = "ext";
 
@@ -585,7 +584,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public CustomDataSourceInfo GetAboutInfo()
+            public ProcessingSourceInfo GetAboutInfo()
             {
                 throw new NotImplementedException();
             }
@@ -606,12 +605,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
         }
 
-        [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
+        [ProcessingSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
         [FileDataSource("ext")]
         [ExtensionlessFileDataSource("No description")]
         [DirectoryDataSource("No description")]
         public class MultiDataSourceCds
-            : ICustomDataSource
+            : IProcessingSource
         {
             private static readonly TableDescriptor[] tableDescriptors = new[]
             {
@@ -652,7 +651,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public CustomDataSourceInfo GetAboutInfo()
+            public ProcessingSourceInfo GetAboutInfo()
             {
                 throw new NotImplementedException();
             }
@@ -678,10 +677,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
         }
 
-        [CustomDataSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
+        [ProcessingSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
         [FileDataSource("ext")]
         public class DisposableCustomDataSource
-            : ICustomDataSource,
+            : IProcessingSource,
               IDisposable
         {
             public DisposableCustomDataSource()
@@ -715,7 +714,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 ++this.DisposeCalls;
             }
 
-            public CustomDataSourceInfo GetAboutInfo()
+            public ProcessingSourceInfo GetAboutInfo()
             {
                 throw new NotImplementedException();
             }

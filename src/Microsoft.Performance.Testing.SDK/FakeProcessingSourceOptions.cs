@@ -5,7 +5,7 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Testing.SDK
 {
-    public static class FakeCustomDataSourceOptions
+    public static class FakeProcessingSourceOptions
     {
         public static class Ids
         {

@@ -9,17 +9,17 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
-    ///     Extension methods for <see cref="CustomDataSourceReference"/>.
+    ///     Extension methods for <see cref="ProcessingSourceReference"/>.
     /// </summary>
-    public static class CustomDataSourceReferenceExtensions
+    public static class ProcessingSourceReferenceExtensions
     {
         /// <summary>
-        ///     Extension method to get the file extensions for a <see cref="CustomDataSourceReference"/>.
+        ///     Extension method to get the file extensions for a <see cref="ProcessingSourceReference"/>.
         /// </summary>
         /// <returns>
         ///     All file extensions supported by the referenced Custom Data Source.
         /// </returns>
-        public static IEnumerable<string> TryGetFileExtensions(this CustomDataSourceReference self)
+        public static IEnumerable<string> TryGetFileExtensions(this ProcessingSourceReference self)
         {
             return self.DataSources
                 .OfType<FileDataSourceAttribute>()
@@ -27,20 +27,20 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Extension method to get the canonical file extensions for a <see cref="CustomDataSourceReference"/>.
+        ///     Extension method to get the canonical file extensions for a <see cref="ProcessingSourceReference"/>.
         /// </summary>
         /// <returns>
         ///     The canonical forms of the file extensions supported by the referenced
         ///     Custom Data Source.
         /// </returns>
-        public static IEnumerable<string> TryGetCanonicalFileExtensions(this CustomDataSourceReference self)
+        public static IEnumerable<string> TryGetCanonicalFileExtensions(this ProcessingSourceReference self)
         {
             return self.TryGetFileExtensions()
                 .Select(FileExtensionUtils.CanonicalizeExtension);
         }
 
         /// <summary>
-        ///     Extension method to get the description for a <see cref="CustomDataSourceReference"/>.
+        ///     Extension method to get the description for a <see cref="ProcessingSourceReference"/>.
         /// </summary>
         /// <param name="extension">
         ///     The extension of the file whose description is to be retrieved. Specify
@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <returns>
         ///     The description of the file specified by the given extension; <c>null</c> if not found.
         /// </returns>
-        public static string TryGetFileDescription(this CustomDataSourceReference self, string extension)
+        public static string TryGetFileDescription(this ProcessingSourceReference self, string extension)
         {
             if (string.IsNullOrWhiteSpace(extension))
             {
@@ -77,7 +77,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     The description of directories supported by the referenced Custom Data Source,
         ///     if any are supported; <c>null</c> otherwise.
         /// </returns>
-        public static string TryGetDirectoryDescription(this CustomDataSourceReference self)
+        public static string TryGetDirectoryDescription(this ProcessingSourceReference self)
         {
             return self.DataSources
                 .OfType<DirectoryDataSourceAttribute>()
@@ -93,7 +93,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     The description of extensionless files supported by the referenced Custom Data Source,
         ///     if any are supported; <c>null</c> otherwise.
         /// </returns>
-        public static string TryGetExtensionlessFileDescription(this CustomDataSourceReference self)
+        public static string TryGetExtensionlessFileDescription(this ProcessingSourceReference self)
         {
             return self.DataSources
                 .OfType<ExtensionlessFileDataSourceAttribute>()
@@ -109,7 +109,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <c>true</c> if the referenced Custom Data Source can process directories;
         ///     <c>false</c> otherwise,
         /// </returns>
-        public static bool AreDirectoriesSupported(this CustomDataSourceReference self)
+        public static bool AreDirectoriesSupported(this ProcessingSourceReference self)
         {
             return self.DataSources.Any(x => x is DirectoryDataSourceAttribute);
         }
@@ -122,7 +122,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <c>true</c> if the referenced Custom Data Source can process files
         ///     without extensions; <c>false</c> otherwise,
         /// </returns>
-        public static bool AreExtensionlessFilesSupported(this CustomDataSourceReference self)
+        public static bool AreExtensionlessFilesSupported(this ProcessingSourceReference self)
         {
             return self.DataSources.Any(x => x is ExtensionlessFileDataSourceAttribute);
         }

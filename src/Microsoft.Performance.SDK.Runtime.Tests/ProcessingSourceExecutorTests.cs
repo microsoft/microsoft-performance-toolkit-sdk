@@ -15,16 +15,16 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
     [TestClass]
-    public class CustomDataSourceExecutorTests
+    public class ProcessingSourceExecutorTests
     {
         private CancellationTokenSource Cts { get; set; }
-        private CustomDataSourceExecutor Sut { get; set; }
+        private ProcessingSourceExecutor Sut { get; set; }
 
         [TestInitialize]
         public void Initialize()
         {
             this.Cts = new CancellationTokenSource();
-            this.Sut = new CustomDataSourceExecutor();
+            this.Sut = new ProcessingSourceExecutor();
         }
 
         [TestCleanup]
@@ -764,14 +764,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsTrue(result.IsProcessorFaulted);
         }
 
-        private static CustomDataSourceReference CreateReference(ICustomDataSource source)
+        private static ProcessingSourceReference CreateReference(IProcessingSource source)
         {
-            return new CustomDataSourceReference(source);
+            return new ProcessingSourceReference(source);
         }
 
-        [CustomDataSource("{D6E5DC8D-E19D-4E55-99D9-746813C55A97}", "Test", "Test")]
+        [ProcessingSource("{D6E5DC8D-E19D-4E55-99D9-746813C55A97}", "Test", "Test")]
         private sealed class MockCustomDataSource
-            : ICustomDataSource
+            : IProcessingSource
         {
             public MockCustomDataSource()
             {
@@ -811,7 +811,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
-            public CustomDataSourceInfo GetAboutInfo()
+            public ProcessingSourceInfo GetAboutInfo()
             {
                 throw new NotImplementedException();
             }

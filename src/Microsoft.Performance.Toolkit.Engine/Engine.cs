@@ -27,8 +27,8 @@ namespace Microsoft.Performance.Toolkit.Engine
     public abstract class Engine
         : IDisposable
     {
-        private readonly List<CustomDataSourceReference> customDataSourceReferences;
-        private readonly ReadOnlyCollection<CustomDataSourceReference> customDataSourceReferencesRO;
+        private readonly List<ProcessingSourceReference> customDataSourceReferences;
+        private readonly ReadOnlyCollection<ProcessingSourceReference> customDataSourceReferencesRO;
 
         private readonly List<DataCookerPath> sourceDataCookers;
         private readonly ReadOnlyCollection<DataCookerPath> sourceDataCookersRO;
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly List<DataProcessorId> dataProcessors;
 
-        private readonly Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
+        private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
 
         private readonly List<IDataSource> freeDataSources;
         private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
@@ -66,8 +66,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         internal Engine()
         {
-            this.customDataSourceReferences = new List<CustomDataSourceReference>();
-            this.customDataSourceReferencesRO = new ReadOnlyCollection<CustomDataSourceReference>(this.customDataSourceReferences);
+            this.customDataSourceReferences = new List<ProcessingSourceReference>();
+            this.customDataSourceReferencesRO = new ReadOnlyCollection<ProcessingSourceReference>(this.customDataSourceReferences);
 
             this.sourceDataCookers = new List<DataCookerPath>();
             this.sourceDataCookersRO = new ReadOnlyCollection<DataCookerPath>(this.sourceDataCookers);
@@ -81,7 +81,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.dataProcessors = new List<DataProcessorId>();
 
-            this.dataSourcesToProcess = new Dictionary<CustomDataSourceReference, List<List<IDataSource>>>();
+            this.dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
 
             this.freeDataSources = new List<IDataSource>();
             this.freeDataSourcesRO = new ReadOnlyCollection<IDataSource>(this.freeDataSources);
@@ -147,7 +147,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<ICustomDataSource> CustomDataSources
+        public IEnumerable<IProcessingSource> CustomDataSources
         {
             get
             {
@@ -226,7 +226,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IReadOnlyDictionary<ICustomDataSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
+        public IReadOnlyDictionary<IProcessingSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
         {
             get
             {
@@ -913,8 +913,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         private void AddDataSourcesCore(
             IEnumerable<IDataSource> dataSources,
             Type customDataSourceType,
-            List<CustomDataSourceReference> customDataSourceReferences,
-            Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
+            List<ProcessingSourceReference> customDataSourceReferences,
+            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
             Func<Type, Type, bool> typeIs)
         {
             Debug.Assert(dataSources != null);
@@ -1032,10 +1032,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             return results;
         }
 
-        private List<CustomDataSourceExecutor> CreateExecutors(
-            Dictionary<CustomDataSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
+        private List<ProcessingSourceExecutor> CreateExecutors(
+            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
         {
-            var executors = new List<CustomDataSourceExecutor>();
+            var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
             {
                 try
@@ -1054,7 +1054,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             new RuntimeProcessorEnvironment(this.extensionRoot),
                             ProcessorOptions.Default);
 
-                        var executor = new CustomDataSourceExecutor();
+                        var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
 
                         executors.Add(executor);
@@ -1073,12 +1073,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             return executors;
         }
 
-        private static Dictionary<CustomDataSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToCustomDataSources(
-            IEnumerable<CustomDataSourceReference> customDataSources,
+        private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToCustomDataSources(
+            IEnumerable<ProcessingSourceReference> customDataSources,
             IEnumerable<IDataSource> freeDataSourcesToProcess,
-            IReadOnlyDictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess)
+            IReadOnlyDictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess)
         {
-            var allDataSourceAssociations = new Dictionary<CustomDataSourceReference, List<List<IDataSource>>>();
+            var allDataSourceAssociations = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
 
             var freeDataSourceAssociations = DataSourceResolver.Assign(freeDataSourcesToProcess, customDataSources);
 

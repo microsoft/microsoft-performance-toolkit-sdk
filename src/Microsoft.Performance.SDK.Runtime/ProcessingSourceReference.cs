@@ -12,10 +12,10 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
-    ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> where T is <see cref="ICustomDataSource"/> and Derived is <see cref="CustomDataSourceReference"/>.
+    ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> where T is <see cref="IProcessingSource"/> and Derived is <see cref="ProcessingSourceReference"/>.
     /// </summary>
-    public sealed class CustomDataSourceReference
-        : AssemblyTypeReferenceWithInstance<ICustomDataSource, CustomDataSourceReference>
+    public sealed class ProcessingSourceReference
+        : AssemblyTypeReferenceWithInstance<IProcessingSource, ProcessingSourceReference>
     {
         private ReadOnlyHashSet<DataSourceAttribute> dataSourceAttributes;
 
@@ -31,7 +31,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private bool isDisposed;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     Initializes a new instance of the <see cref="ProcessingSourceReference"/>
         ///     class.
         /// </summary>
         /// <param name="type">
@@ -50,9 +50,9 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     - or -
         ///     <paramref name="dataSourceAttributes"/> is <c>null</c>.
         /// </exception>
-        public CustomDataSourceReference(
+        public ProcessingSourceReference(
             Type type,
-            CustomDataSourceAttribute metadata,
+            ProcessingSourceAttribute metadata,
             HashSet<DataSourceAttribute> dataSourceAttributes)
             : base(type)
         {
@@ -63,7 +63,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     Initializes a new instance of the <see cref="ProcessingSourceReference"/>
         ///     class.
         /// </summary>
         /// <param name="type">
@@ -87,10 +87,10 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     - or -
         ///     <paramref name="dataSourceAttributes"/> is <c>null</c>.
         /// </exception>
-        public CustomDataSourceReference(
+        public ProcessingSourceReference(
             Type type,
-            Func<ICustomDataSource> instanceFactory,
-            CustomDataSourceAttribute metadata,
+            Func<IProcessingSource> instanceFactory,
+            ProcessingSourceAttribute metadata,
             HashSet<DataSourceAttribute> dataSourceAttributes)
             : base(type, instanceFactory)
         {
@@ -101,27 +101,27 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     Initializes a new instance of the <see cref="ProcessingSourceReference"/>
         ///     class with the given instance.
         /// </summary>
         /// <param name="instance">
-        ///     The existing <see cref="ICustomDataSource"/>.
+        ///     The existing <see cref="IProcessingSource"/>.
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="instance"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="System.ArgumentException">
-        ///     <paramref name="instance"/> does not have a <see cref="CustomDataSourceAttribute"/>.
+        ///     <paramref name="instance"/> does not have a <see cref="ProcessingSourceAttribute"/>.
         /// </exception>
-        public CustomDataSourceReference(ICustomDataSource instance)
+        public ProcessingSourceReference(IProcessingSource instance)
             : base(instance.GetType(), () => instance)
         {
             Guard.NotNull(instance, nameof(instance));
 
-            var metadata = instance.GetType().GetCustomAttribute<CustomDataSourceAttribute>();
+            var metadata = instance.GetType().GetCustomAttribute<ProcessingSourceAttribute>();
             if (metadata is null)
             {
-                throw new ArgumentException($"{nameof(CustomDataSourceAttribute)} is missing from type {instance.GetType()}", nameof(instance));
+                throw new ArgumentException($"{nameof(ProcessingSourceAttribute)} is missing from type {instance.GetType()}", nameof(instance));
             }
 
             var dataSourceAttributes = instance.GetType()
@@ -132,7 +132,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CustomDataSourceReference"/>
+        ///     Initializes a new instance of the <see cref="ProcessingSourceReference"/>
         ///     class as a copy of the given instance.
         /// </summary>
         /// <param name="other">
@@ -144,7 +144,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
-        public CustomDataSourceReference(CustomDataSourceReference other)
+        public ProcessingSourceReference(ProcessingSourceReference other)
             : base(other.Type)
         {
             other.ThrowIfDisposed();
@@ -162,7 +162,7 @@ namespace Microsoft.Performance.SDK.Runtime
             this.isDisposed = false;
         }
 
-        /// <inheritdoc cref="CustomDataSourceAttribute.Guid"/>
+        /// <inheritdoc cref="ProcessingSourceAttribute.Guid"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -175,7 +175,7 @@ namespace Microsoft.Performance.SDK.Runtime
             }
         }
 
-        /// <inheritdoc cref="CustomDataSourceAttribute.Name"/>
+        /// <inheritdoc cref="ProcessingSourceAttribute.Name"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -188,7 +188,7 @@ namespace Microsoft.Performance.SDK.Runtime
             }
         }
 
-        /// <inheritdoc cref="CustomDataSourceAttribute.Description"/>
+        /// <inheritdoc cref="ProcessingSourceAttribute.Description"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -232,7 +232,7 @@ namespace Microsoft.Performance.SDK.Runtime
             }
         }
 
-        /// <inheritdoc cref="ICustomDataSource.CommandLineOptions"/>
+        /// <inheritdoc cref="IProcessingSource.CommandLineOptions"/>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -262,7 +262,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Tries to create an instance of <see cref="CustomDataSourceReference"/> 
+        ///     Tries to create an instance of <see cref="ProcessingSourceReference"/> 
         ///     based on the <paramref name="candidateType"/>.
         ///     <para/>
         ///     A <see cref="Type"/> must satisfy the following criteria in order to 
@@ -272,23 +272,23 @@ namespace Microsoft.Performance.SDK.Runtime
         ///         <item>must be concrete.</item>
         ///         <item>must implement ICustomDataSource somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
-        ///         <item>must be decorated with the <see cref="CustomDataSourceAttribute"/>.</item>
+        ///         <item>must be decorated with the <see cref="ProcessingSourceAttribute"/>.</item>
         ///         <item>must be decorated with one (1) or more <see cref="DataSourceAttribute"/>s.</item>
         ///     </list>
         /// </summary>
         /// <param name="candidateType">
-        ///     Candidate <see cref="Type"/> for the <see cref="CustomDataSourceReference"/>
+        ///     Candidate <see cref="Type"/> for the <see cref="ProcessingSourceReference"/>
         /// </param>
         /// <param name="reference">
-        ///     Out <see cref="CustomDataSourceReference"/>
+        ///     Out <see cref="ProcessingSourceReference"/>
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="CustomDataSourceReference"/>;
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ProcessingSourceReference"/>;
         ///     <c>false</c> otherwise.
         /// </returns>
         public static bool TryCreateReference(
             Type candidateType,
-            out CustomDataSourceReference reference)
+            out ProcessingSourceReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
 
@@ -297,14 +297,14 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 if (candidateType.TryGetEmptyPublicConstructor(out var constructor))
                 {
-                    var metadataAttribute = candidateType.GetCustomAttribute<CustomDataSourceAttribute>();
+                    var metadataAttribute = candidateType.GetCustomAttribute<ProcessingSourceAttribute>();
                     if (metadataAttribute != null)
                     {
                         var dataSourceAttributes = candidateType.GetCustomAttributes<DataSourceAttribute>()?.ToList();
                         if (dataSourceAttributes != null &&
                             dataSourceAttributes.Count > 0)
                         {
-                            reference = new CustomDataSourceReference(
+                            reference = new ProcessingSourceReference(
                                 candidateType,
                                 metadataAttribute,
                                 new HashSet<DataSourceAttribute>(dataSourceAttributes));
@@ -365,8 +365,8 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <summary>
         ///     Determines whether the given <see cref="IDataSource"/>
-        ///     is supported by the <see cref="ICustomDataSource>"/> referenced by
-        ///     this <see cref="CustomDataSourceReference"/>.
+        ///     is supported by the <see cref="IProcessingSource>"/> referenced by
+        ///     this <see cref="ProcessingSourceReference"/>.
         /// </summary>
         /// <param name="dataSource">
         ///     The <see cref="IDataSource"/> to check.
@@ -401,11 +401,11 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <inheritdoc />
-        public override CustomDataSourceReference CloneT()
+        public override ProcessingSourceReference CloneT()
         {
             this.EnsureUsable();
 
-            return new CustomDataSourceReference(this);
+            return new ProcessingSourceReference(this);
         }
 
         /// <inheritdoc />
@@ -423,7 +423,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 return true;
             }
 
-            var other = obj as CustomDataSourceReference;
+            var other = obj as ProcessingSourceReference;
 
             return other != null &&
                 this.Name.Equals(other.Name) &&
@@ -502,7 +502,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         private void InitializeThis(
-            CustomDataSourceAttribute metadata,
+            ProcessingSourceAttribute metadata,
             HashSet<DataSourceAttribute> dataSourceAttributes)
         {
             Debug.Assert(metadata != null);

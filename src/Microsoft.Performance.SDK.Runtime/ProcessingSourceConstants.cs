@@ -3,11 +3,11 @@
 
 namespace Microsoft.Performance.SDK.Runtime
 {
-    public static class CustomDataSourceConstants
+    public static class ProcessingSourceConstants
     {
         /// <summary>
         ///     Default Custom Data Source Root Folder for loading plugins.
         /// </summary>
-        public const string CustomDataSourceRootFolderName = "CustomDataSources";
+        public const string ProcessingSourceRootFolderName = "CustomDataSources";
     }
 }

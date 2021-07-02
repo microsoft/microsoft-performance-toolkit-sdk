@@ -8,10 +8,10 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
-    [CustomDataSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
+    [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
     [FileDataSource(".csv")]
     public sealed class CdsOne
-        : ICustomDataSource
+        : IProcessingSource
     {
         public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
@@ -43,7 +43,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -64,10 +64,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
     }
 
-    [CustomDataSource("{CBA22346-53DB-44C7-9039-2CC5FADC07C1}", "Two", "Two")]
+    [ProcessingSource("{CBA22346-53DB-44C7-9039-2CC5FADC07C1}", "Two", "Two")]
     [FileDataSource(".xml")]
     public sealed class CdsTwo
-        : ICustomDataSource
+        : IProcessingSource
     {
         public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
@@ -99,7 +99,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -120,10 +120,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
     }
 
-    [CustomDataSource("{0E031D79-9760-42FA-9E20-B5A957006545}", "Three", "Three")]
+    [ProcessingSource("{0E031D79-9760-42FA-9E20-B5A957006545}", "Three", "Three")]
     [FileDataSource(".json")]
     public sealed class CdsThree
-        : ICustomDataSource
+        : IProcessingSource
     {
         public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
@@ -155,7 +155,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -177,7 +177,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
     }
 
 
-    [CustomDataSource("{72028435-50C8-4045-AD46-2CD6304E5BF1}", "Four", "Four")]
+    [ProcessingSource("{72028435-50C8-4045-AD46-2CD6304E5BF1}", "Four", "Four")]
     [FileDataSource(".json")]
     public sealed class CdsWithoutInterface
     {
@@ -185,7 +185,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
     [FileDataSource(".json")]
     public sealed class CdsWithoutCdsAttribute
-        : ICustomDataSource
+        : IProcessingSource
     {
         public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
@@ -217,7 +217,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -238,9 +238,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
     }
 
-    [CustomDataSource("{215A72DF-2FD6-4DA5-9F6E-5BD419EAC357}", "Five", "Five")]
+    [ProcessingSource("{215A72DF-2FD6-4DA5-9F6E-5BD419EAC357}", "Five", "Five")]
     public sealed class CdsWithoutDataSourceAttribute
-        : ICustomDataSource
+        : IProcessingSource
     {
         public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
@@ -272,7 +272,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -294,7 +294,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
     }
 
     public sealed class CdsWithNoAttributes
-        : ICustomDataSource
+        : IProcessingSource
     {
         public IEnumerable<TableDescriptor> DataTables => new TableDescriptor[0];
 
@@ -326,7 +326,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -347,10 +347,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
     }
 
-    [CustomDataSource("{2F7B5A59-6792-48B1-822C-8D5D5F5C6198}", "Six", "Six")]
+    [ProcessingSource("{2F7B5A59-6792-48B1-822C-8D5D5F5C6198}", "Six", "Six")]
     [FileDataSource(".json")]
     public sealed class CdsWithParameterizedConstructor
-        : ICustomDataSource
+        : IProcessingSource
     {
         public CdsWithParameterizedConstructor(string parameter)
         {
@@ -386,7 +386,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -407,10 +407,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
     }
 
-    [CustomDataSource("{228F130B-CE96-4195-8EE5-54B9B5056F6B}", "Seven", "Seven")]
+    [ProcessingSource("{228F130B-CE96-4195-8EE5-54B9B5056F6B}", "Seven", "Seven")]
     [FileDataSource(".json")]
     public sealed class CdsWithParameterlessAndParameterizedConstructor
-        : ICustomDataSource
+        : IProcessingSource
     {
         public CdsWithParameterlessAndParameterizedConstructor()
         {
@@ -450,7 +450,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }
@@ -471,10 +471,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
     }
 
-    [CustomDataSource("{797D49BC-D0EC-4C8D-B64E-CFABE0707CFF}", "Eight", "Eight")]
+    [ProcessingSource("{797D49BC-D0EC-4C8D-B64E-CFABE0707CFF}", "Eight", "Eight")]
     [FileDataSource(".json")]
     public sealed class CdsWithInaccessibleConstructor
-        : ICustomDataSource
+        : IProcessingSource
     {
         internal CdsWithInaccessibleConstructor()
         {
@@ -510,7 +510,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
-        public CustomDataSourceInfo GetAboutInfo()
+        public ProcessingSourceInfo GetAboutInfo()
         {
             throw new NotImplementedException();
         }

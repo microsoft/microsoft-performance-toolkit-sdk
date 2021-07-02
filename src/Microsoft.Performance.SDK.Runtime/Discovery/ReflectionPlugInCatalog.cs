@@ -9,8 +9,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
     /// <summary>
     ///     A function that takes a <see cref="Type"/> and attempts to create
-    ///     a <see cref="CustomDataSourceReference"/> from the given <see cref="Type"/>.
-    ///     See <see cref="CustomDataSourceReference.TryCreateReference(Type, out CustomDataSourceReference)"/>
+    ///     a <see cref="ProcessingSourceReference"/> from the given <see cref="Type"/>.
+    ///     See <see cref="ProcessingSourceReference.TryCreateReference(Type, out ProcessingSourceReference)"/>
     ///     for details as to what requirements a <see cref="Type"/> must
     ///     fulfill in order to be eligible for creating a reference.
     /// </summary>
@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     ///     The <see cref="Type"/> from which to try to create the reference.
     /// </param>
     /// <param name="reference">
-    ///     If a <see cref="CustomDataSourceReference"/> is able to be created,
+    ///     If a <see cref="ProcessingSourceReference"/> is able to be created,
     ///     this parameter will receive the created reference. If a reference
     ///     is not able to be created, this parameter will be set to <c>null</c>.
     /// </param>
@@ -30,11 +30,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     /// </returns>
     public delegate bool TryCreateCustomDataSourceReferenceDelegate(
         Type type,
-        out CustomDataSourceReference reference);
+        out ProcessingSourceReference reference);
 
     /// <summary>
     ///     This class registers to with a provider to receive Types that might be custom data sources.
-    ///     The types are evaluated and stored as a <see cref="CustomDataSourceReference"/> when applicable.
+    ///     The types are evaluated and stored as a <see cref="ProcessingSourceReference"/> when applicable.
     /// </summary>
     public sealed class ReflectionPlugInCatalog
         : IPlugInCatalog,
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     {
         private TryCreateCustomDataSourceReferenceDelegate referenceFactory;
 
-        private Dictionary<Type, CustomDataSourceReference> loadedDataSources;
+        private Dictionary<Type, ProcessingSourceReference> loadedDataSources;
 
         private bool isLoaded;
 
@@ -62,7 +62,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         public ReflectionPlugInCatalog(IExtensionTypeProvider extensionDiscovery)
             : this(
                   extensionDiscovery,
-                  CustomDataSourceReference.TryCreateReference)
+                  ProcessingSourceReference.TryCreateReference)
         {
         }
 
@@ -93,14 +93,14 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             this.referenceFactory = referenceFactory;
             this.isDisposed = false;
 
-            this.loadedDataSources = new Dictionary<Type, CustomDataSourceReference>();
+            this.loadedDataSources = new Dictionary<Type, ProcessingSourceReference>();
             this.isLoaded = false;
 
             extensionDiscovery.RegisterTypeConsumer(this);
         }
 
         /// <inheritdoc />
-        public IEnumerable<CustomDataSourceReference> PlugIns
+        public IEnumerable<ProcessingSourceReference> PlugIns
         {
             get
             {
@@ -132,7 +132,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         public void ProcessType(Type type, string sourceName)
         {
             this.ThrowIfDisposed();
-            if (this.referenceFactory(type, out CustomDataSourceReference reference))
+            if (this.referenceFactory(type, out ProcessingSourceReference reference))
             {
                 Debug.Assert(reference != null);
                 try

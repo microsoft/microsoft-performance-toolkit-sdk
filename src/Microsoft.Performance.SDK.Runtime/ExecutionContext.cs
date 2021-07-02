@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public ExecutionContext(
             IProgress<int> progress,
             Func<ICustomDataProcessor, ILogger> loggerFactory,
-            CustomDataSourceReference customDataSource,
+            ProcessingSourceReference customDataSource,
             IEnumerable<IDataSource> dataSources,
             IEnumerable<TableDescriptor> tablesToEnable,
             IProcessorEnvironment processorEnvironment,
@@ -60,10 +60,10 @@ namespace Microsoft.Performance.SDK.Runtime
         public Func<ICustomDataProcessor, ILogger> LoggerFactory { get; }
 
         /// <summary>
-        ///     Gets the <see cref="CustomDataSourceReference"/> associated
+        ///     Gets the <see cref="ProcessingSourceReference"/> associated
         ///     with the given data items.
         /// </summary>
-        public CustomDataSourceReference CustomDataSource { get; }
+        public ProcessingSourceReference CustomDataSource { get; }
 
         /// <summary>
         ///     Gets the <see cref="IDataSource"/>s that can be

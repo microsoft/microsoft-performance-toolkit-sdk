@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -6,16 +6,16 @@ using System;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     This attribute is used to mark a concrete class as a custom data
-    ///     source.
+    ///     This attribute is used to mark a concrete class as an <see cref="IProcessingSource"/>
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public sealed class CustomDataSourceAttribute
+    [Obsolete("CustomDataSourceAttribute will be renamed to ProcessingSourceAttribute by SDK v1.0.0 release candidate 1.")]
+    public class CustomDataSourceAttribute
         : Attribute,
-          IEquatable<CustomDataSourceAttribute>
+          IEquatable<ProcessingSourceAttribute>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CustomDataSourceAttribute"/>
+        ///     Initializes a new instance of the <see cref="ProcessingSourceAttribute"/>
         ///     class.
         /// </summary>
         /// <param name="guid">
@@ -80,7 +80,7 @@ namespace Microsoft.Performance.SDK.Processing
         public string Description { get; }
 
         /// <inheritdoc />
-        public bool Equals(CustomDataSourceAttribute other)
+        public bool Equals(ProcessingSourceAttribute other)
         {
             return !(ReferenceEquals(other, null)) &&
                 this.Guid.Equals(other.Guid) &&
@@ -91,7 +91,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as CustomDataSourceAttribute);
+            return this.Equals(obj as ProcessingSourceAttribute);
         }
 
         /// <inheritdoc />

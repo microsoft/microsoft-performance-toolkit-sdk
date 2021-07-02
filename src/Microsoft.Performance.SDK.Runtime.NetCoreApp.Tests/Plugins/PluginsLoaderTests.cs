@@ -660,7 +660,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
         private static string GetLegacyPath(string pluginName)
         {
-            return Path.Combine(compilePath, Legacy, CustomDataSourceConstants.CustomDataSourceRootFolderName, pluginName);
+            return Path.Combine(compilePath, Legacy, ProcessingSourceConstants.ProcessingSourceRootFolderName, pluginName);
         }
 
         /// <summary>
@@ -725,9 +725,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         ///     Checks that every custom data source defined in <paramref name="types"/>
         ///     is present in <paramref name="actualCDSs"/>
         /// </summary>
-        private static void AssertCDSs(Type[] types, IEnumerable<CustomDataSourceReference> actualCDSs)
+        private static void AssertCDSs(Type[] types, IEnumerable<ProcessingSourceReference> actualCDSs)
         {
-            var expectedCDSs = types.Select(type => { CustomDataSourceReference.TryCreateReference(type, out var cds); return cds; });
+            var expectedCDSs = types.Select(type => { ProcessingSourceReference.TryCreateReference(type, out var cds); return cds; });
             var expectedSorted = expectedCDSs.OrderBy(cdsr => cdsr.Guid).ToList();
 
             var actualSorted = actualCDSs.OrderBy(cdsr => cdsr.Guid).ToList();
@@ -787,20 +787,20 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     internal class MockPluginsConsumer
         : IPluginsConsumer
     {
-        public Dictionary<string, List<CustomDataSourceReference>> ObservedDataSourcesByPluginName { get; }
+        public Dictionary<string, List<ProcessingSourceReference>> ObservedDataSourcesByPluginName { get; }
 
         public Dictionary<string, List<Version>> ObservedPluginVersionsByPluginName { get; }
 
-        public List<CustomDataSourceReference> ObservedDataSources { get; }
+        public List<ProcessingSourceReference> ObservedDataSources { get; }
 
         public MockPluginsConsumer()
         {
-            this.ObservedDataSourcesByPluginName = new Dictionary<string, List<CustomDataSourceReference>>();
+            this.ObservedDataSourcesByPluginName = new Dictionary<string, List<ProcessingSourceReference>>();
             this.ObservedPluginVersionsByPluginName = new Dictionary<string, List<Version>>();
-            this.ObservedDataSources = new List<CustomDataSourceReference>();
+            this.ObservedDataSources = new List<ProcessingSourceReference>();
         }
 
-        public virtual void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
+        public virtual void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference customDataSource)
         {
             var name = (pluginName != null) ? pluginName : "";
 
@@ -810,7 +810,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             // even the ones loaded without a name
             if (!this.ObservedDataSourcesByPluginName.TryGetValue(name, out var loaded))
             {
-                loaded = new List<CustomDataSourceReference>();
+                loaded = new List<ProcessingSourceReference>();
                 this.ObservedDataSourcesByPluginName.Add(name, loaded);
             }
             loaded.Add(customDataSource);
@@ -829,7 +829,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     }
 
     /// <summary>
-    ///     A <seealso cref="MockPluginsConsumer"/> that does not return from <see cref="OnCustomDataSourceLoaded(string, Version, CustomDataSourceReference)"/>
+    ///     A <seealso cref="MockPluginsConsumer"/> that does not return from <see cref="OnCustomDataSourceLoaded(string, Version, ProcessingSourceReference)"/>
     ///     until <see cref="ProcessOneCustomDataSource"/> is called.
     /// </summary>
     internal class BlockingPluginsConsumer
@@ -837,7 +837,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     {
         private AutoResetEvent handle = new AutoResetEvent(false);
 
-        public override void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
+        public override void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference customDataSource)
         {
             handle.WaitOne();
             base.OnCustomDataSourceLoaded(pluginName, pluginVersion, customDataSource);

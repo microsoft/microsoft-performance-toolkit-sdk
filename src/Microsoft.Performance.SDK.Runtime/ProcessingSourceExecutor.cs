@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Runtime
     /// <summary>
     ///     Executes the processor of a data source.
     /// </summary>
-    public sealed class CustomDataSourceExecutor
+    public sealed class ProcessingSourceExecutor
     {
         private List<TableDescriptor> enabledTables;
         private Dictionary<TableDescriptor, Exception> failedToEnableTables;
