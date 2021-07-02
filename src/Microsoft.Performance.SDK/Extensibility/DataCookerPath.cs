@@ -36,7 +36,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     <paramref name="dataCookerId"/> is null.
         /// </exception>
         private DataCookerPath(string dataCookerId)
-            : this(EmptySourceParserId, dataCookerId)
         {
             Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
 
@@ -117,7 +116,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </exception>
         public static DataCookerPath ForComposite(string dataCookerId)
         {
-            return DataCookerPath.ForComposite(dataCookerId);
+            return new DataCookerPath(dataCookerId);
         }
 
         /// <summary>
@@ -137,7 +136,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </exception>
         public static DataCookerPath ForSource(string sourceParserId, string dataCookerId)
         {
-            return DataCookerPath.ForSource(sourceParserId, dataCookerId);
+            return new DataCookerPath(sourceParserId, dataCookerId);
         }
 
         /// <summary>

@@ -84,19 +84,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 new TestCompositeDataCookerReference
                 {
-                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker1"),
+                    Path = DataCookerPath.ForComposite("CompositeCooker1"),
                 },
                 new TestCompositeDataCookerReference
                 {
-                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker2"),
+                    Path = DataCookerPath.ForComposite("CompositeCooker2"),
                 },
                 new TestCompositeDataCookerReference
                 {
-                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker3"),
+                    Path = DataCookerPath.ForComposite("CompositeCooker3"),
                 },
                 new TestCompositeDataCookerReference
                 {
-                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker33"),
+                    Path = DataCookerPath.ForComposite("CompositeCooker33"),
                 },
             };
 

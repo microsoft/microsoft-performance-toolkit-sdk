@@ -1191,13 +1191,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 System.Diagnostics.Debugger.Break();
             }
 
-            foreach (var cooker in testCase.SourceCookersToEnable)
+            foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForSource(cooker.SourceParserId, cooker.DataCookerId);
                 Assert.IsTrue(this.Sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
             }
 
-            foreach (var cooker in testCase.CompositeCookersToEnable)
+            foreach (var cooker in testCase.CompositeCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForComposite(cooker.DataCookerId);
                 Assert.IsTrue(this.Sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
@@ -1311,16 +1311,16 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     Versioning = new FakeVersionChecker(),
                 });
 
-            foreach (var cooker in testCase.SourceCookersToEnable)
+            foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForSource(cooker.SourceParserId, cooker.DataCookerId);
-                Assert.IsTrue(this.Sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+                Assert.IsTrue(runtime.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
             }
 
-            foreach (var cooker in testCase.CompositeCookersToEnable)
+            foreach (var cooker in testCase.CompositeCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForComposite(cooker.DataCookerId);
-                Assert.IsTrue(this.Sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+                Assert.IsTrue(runtime.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
             }
 
             foreach (var file in testCase.FilePaths)
