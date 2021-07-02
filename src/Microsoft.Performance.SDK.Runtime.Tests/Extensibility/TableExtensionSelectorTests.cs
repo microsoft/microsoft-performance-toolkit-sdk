@@ -30,7 +30,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         private static readonly IDictionary<DataCookerPath, TestCompositeDataCookerReference> CompositeCookersByPath
             = new Dictionary<DataCookerPath, TestCompositeDataCookerReference>();
 
-        private static readonly DataCookerPath Source1Cooker1Path = new DataCookerPath("Source1", "SourceCooker1");
+        private static readonly DataCookerPath Source1Cooker1Path = DataCookerPath.ForSource("Source1", "SourceCooker1");
 
         static TableExtensionSelectorTests()
         {
@@ -44,31 +44,31 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 new TestSourceDataCookerReference
                 {
-                    Path = new DataCookerPath("Source1", "SourceCooker1"),
+                    Path = DataCookerPath.ForSource("Source1", "SourceCooker1"),
                 },
                 new TestSourceDataCookerReference
                 {
-                    Path = new DataCookerPath("Source2", "SourceCooker0"),
+                    Path = DataCookerPath.ForSource("Source2", "SourceCooker0"),
                 },
                 new TestSourceDataCookerReference
                 {
-                    Path = new DataCookerPath("Source2", "SourceCooker10"),
+                    Path = DataCookerPath.ForSource("Source2", "SourceCooker10"),
                 },
                 new TestSourceDataCookerReference
                 {
-                    Path = new DataCookerPath("Source2", "SourceCooker13"),
+                    Path = DataCookerPath.ForSource("Source2", "SourceCooker13"),
                 },
                 new TestSourceDataCookerReference
                 {
-                    Path = new DataCookerPath("Source1", "SourceCooker41"),
+                    Path = DataCookerPath.ForSource("Source1", "SourceCooker41"),
                 },
                 new TestSourceDataCookerReference
                 {
-                    Path = new DataCookerPath("Source1", "SourceCooker356"),
+                    Path = DataCookerPath.ForSource("Source1", "SourceCooker356"),
                 },
                 new TestSourceDataCookerReference
                 {
-                    Path = new DataCookerPath("Source4", "SourceCooker_Woah!"),
+                    Path = DataCookerPath.ForSource("Source4", "SourceCooker_Woah!"),
                 },
             };
 
@@ -84,19 +84,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 new TestCompositeDataCookerReference
                 {
-                    Path = new DataCookerPath(string.Empty, "CompositeCooker1"),
+                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker1"),
                 },
                 new TestCompositeDataCookerReference
                 {
-                    Path = new DataCookerPath(string.Empty, "CompositeCooker2"),
+                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker2"),
                 },
                 new TestCompositeDataCookerReference
                 {
-                    Path = new DataCookerPath(string.Empty, "CompositeCooker3"),
+                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker3"),
                 },
                 new TestCompositeDataCookerReference
                 {
-                    Path = new DataCookerPath(string.Empty, "CompositeCooker33"),
+                    Path = DataCookerPath.ForSource(string.Empty, "CompositeCooker33"),
                 },
             };
 

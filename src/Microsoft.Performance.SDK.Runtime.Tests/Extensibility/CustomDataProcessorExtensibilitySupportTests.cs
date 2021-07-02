@@ -27,7 +27,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     "This table has required data extensions",
                     "Other",
                     true,
-                    requiredDataCookers: new List<DataCookerPath> { new DataCookerPath(SourceParserId, "CookerId1") })
+                    requiredDataCookers: new List<DataCookerPath> { DataCookerPath.ForSource(SourceParserId, "CookerId1") })
                 { Type = typeof(TestTable1) };
 
             public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
@@ -46,7 +46,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     "This table has required data extensions",
                     "Other",
                     true,
-                    requiredDataCookers: new List<DataCookerPath> { new DataCookerPath(SourceParserId, "CookerId1") })
+                    requiredDataCookers: new List<DataCookerPath> { DataCookerPath.ForSource(SourceParserId, "CookerId1") })
                 { Type = typeof(TestTable2) };
 
             public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
@@ -108,7 +108,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(TestTable1.SourceParserId);
 
-            var sourceCooker = new TestSourceDataCooker() { Path = new DataCookerPath(TestTable1.SourceParserId, "CookerId1") };
+            var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
                 { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
@@ -134,7 +134,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(TestTable1.SourceParserId);
 
-            var sourceCooker = new TestSourceDataCooker() { Path = new DataCookerPath(TestTable2.SourceParserId, "CookerId1") };
+            var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable2.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
                 { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
@@ -159,7 +159,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(TestTable1.SourceParserId);
 
-            var sourceCooker = new TestSourceDataCooker() { Path = new DataCookerPath(TestTable1.SourceParserId, "CookerId1") };
+            var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
                 { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
@@ -179,7 +179,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(TestTable1.SourceParserId);
 
-            var sourceCooker = new TestSourceDataCooker() { Path = new DataCookerPath(TestTable1.SourceParserId, "CookerId1") };
+            var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
                 { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
@@ -198,7 +198,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(TestTable1.SourceParserId);
 
-            var sourceCooker = new TestSourceDataCooker() { Path = new DataCookerPath(TestTable1.SourceParserId, "CookerId1") };
+            var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
                 { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
