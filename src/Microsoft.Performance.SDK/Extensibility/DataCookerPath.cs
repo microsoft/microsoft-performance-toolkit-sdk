@@ -13,15 +13,9 @@ namespace Microsoft.Performance.SDK.Extensibility
         : IEquatable<DataCookerPath>
     {
         /// <summary>
-        ///     Describes the format of a data cooker path.
-        /// </summary>
-        //[Obsolete("Fully qualified data cooker paths will no longer be supported in SDK v1.0.0 release candidate 1")]
-        //public static string Format => "SourceId/CookerId";
-
-        /// <summary>
         ///     If the data cooker is not a source data cooker, this is the source parser Id.
         /// </summary>
-        public const string EmptySourceParserId = "";
+        internal const string EmptySourceParserId = "";
 
         /// <summary>
         ///     Creates a new <see cref="DataCookerType.CompositeDataCooker"/> path.
@@ -162,7 +156,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///// <summary>
         ///// Gets the combination of the source parser Id and the data cooker Id.
         ///// </summary>
-        // This will eventually be made internal only
         internal string CookerPath
         {
             get;
@@ -234,33 +227,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         }
 
         /// <summary>
-        ///     Generates a data cooker path given a full cooker path.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     The full cooker path. See <see cref="Format"/> for details.
-        /// </param>
-        /// <returns>
-        ///     The parsed <see cref="DataCookerPath"/>.
-        /// </returns>
-        //public static DataCookerPath Parse(string cookerPath)
-        //{
-        //    Guard.NotNullOrWhiteSpace(cookerPath, nameof(cookerPath));
-
-        //    var split = cookerPath.Split('/');
-        //    if (split.Length == 1)
-        //    {
-        //        return DataCookerPath.ForComposite(split[0]);
-        //    }
-
-        //    if (split.Length == 2)
-        //    {
-        //        return DataCookerPath.ForSource(split[0], split[1]);
-        //    }
-
-        //    throw new FormatException();
-        //}
-
-        /// <summary>
         ///     Generates a data cooker path given a source parser Id and a data cooker Id.
         /// </summary>
         /// <param name="sourceParserId">
@@ -279,79 +245,5 @@ namespace Microsoft.Performance.SDK.Extensibility
 
             return sourceParserId + "/" + dataCookerId;
         }
-
-        /// <summary>
-        ///     Returns the source parser Id from a data cooker path.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     Data cooker path.
-        /// </param>
-        /// <returns>
-        ///     Source parser Id.
-        /// </returns>
-        //public static string GetSourceParserId(string cookerPath)
-        //{
-        //    Guard.NotNullOrWhiteSpace(cookerPath, nameof(cookerPath));
-
-        //    var tokens = SplitPath(cookerPath);
-        //    if (tokens != null)
-        //    {
-        //        return tokens[0];
-        //    }
-
-        //    return string.Empty;
-        //}
-
-        /// <summary>
-        ///     Returns the data cooker Id from a data cooker path.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     Data cooker path.
-        /// </param>
-        /// <returns>
-        ///     Data cooker Id.
-        /// </returns>
-        //public static string GetDataCookerId(string cookerPath)
-        //{
-        //    Guard.NotNullOrWhiteSpace(cookerPath, nameof(cookerPath));
-
-        //    var tokens = SplitPath(cookerPath);
-        //    if (tokens != null)
-        //    {
-        //        return tokens[1];
-        //    }
-
-        //    return string.Empty;
-        //}
-
-        /// <summary>
-        ///     Determines if a data cooker path has a proper form.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     Data cooker path.
-        /// </param>
-        /// <returns>
-        ///     True for a well formed path, false otherwise.
-        /// </returns>
-        //internal static bool IsWellFormed(string cookerPath)
-        //{
-        //    if (string.IsNullOrWhiteSpace(cookerPath))
-        //    {
-        //        return false;
-        //    }
-
-        //    return SplitPath(cookerPath) != null;
-        //}
-
-        //private static string[] SplitPath(string cookerPath)
-        //{
-        //    var tokens = cookerPath.Split('/');
-        //    if (tokens.Length == 2)
-        //    {
-        //        return tokens;
-        //    }
-
-        //    return null;
-        //}
     }
 }

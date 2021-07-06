@@ -122,7 +122,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        protected ICompositeDataCookerDescriptor Instance
+        private ICompositeDataCookerDescriptor Instance
         {
             get
             {
@@ -218,7 +218,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             this.ThrowIfDisposed();
             base.ValidateInstance(instance);
 
-            if (!StringComparer.Ordinal.Equals(instance.Path.SourceParserId, DataCookerPath.EmptySourceParserId))
+            if (!StringComparer.Ordinal.Equals(
+                instance.Path.SourceParserId,
+                DataCookerPathInternal.EmptySourceParserId))
             {
                 this.AddError($"Unable to create an instance of {this.Type}");
                 this.InitialAvailability = DataExtensionAvailability.Error;
