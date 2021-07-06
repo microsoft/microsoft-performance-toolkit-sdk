@@ -33,7 +33,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         out ProcessingSourceReference reference);
 
     /// <summary>
-    ///     This class registers to with a provider to receive Types that might be custom data sources.
+    ///     This class registers to with a provider to receive Types that might be <see cref="IProcessingSource"/>s.
     ///     The types are evaluated and stored as a <see cref="ProcessingSourceReference"/> when applicable.
     /// </summary>
     public sealed class ReflectionPlugInCatalog

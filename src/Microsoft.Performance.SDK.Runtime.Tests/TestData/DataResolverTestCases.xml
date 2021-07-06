@@ -14,16 +14,16 @@
       <Parameters>
         This element contains the parameters to pass to the Resolver.
         <ProcessingSources>
-          This element contains a collection of zero (0) or more Custom Data Sources
+          This element contains a collection of zero (0) or more Processing Sources
           to pass to the Assign method. Duplicates are allowed.
           <ProcessingSource>
             <Name>
-              The name to use to reference this custom data source in 
+              The name to use to reference this processing source in 
               the Expected section.
             </Name>
             <Supports>
               This element contains a collection of zero (0) or more Data Sources
-              that are supported by the Custom Data Source.
+              that are supported by the Processing Source.
               <DataSource>
                 Place the name of the data source here.
               </DataSource>
@@ -33,7 +33,7 @@
         <DataSources>
           This element contains a collection of zero (0) or more Data Sources
           to pass to the Assign method. Duplicates are allowed. It is not required
-          that Data Sources referenced by Custom Data Sources appear here.
+          that Data Sources referenced by Processing Sources appear here.
           <DataSource>
             Place the name of the Data Source here.
           </DataSource>
@@ -45,15 +45,15 @@
         <ProcessingSourceAssignments>
           This element contains a collection of zero (0) or more Assignments
           that are expected as a result of running the Assign method. There
-          should be an entry for each Custom Data Source in the Parameters
+          should be an entry for each Processing Source in the Parameters
           section. See the specification of the Assign Method.
           <Assignment>
             <ProcessingSource>
-              The name of the Custom Data Source.
+              The name of the Processing Source.
             </ProcessingSource>
             <DataSources>
               This element contains a collection of zero (0) or more Data Sources
-              that are expected to be assigned to this Custom Data Source. The
+              that are expected to be assigned to this Processing Source. The
               Data Sources here MUST be present in the Data Sources element in the 
               parameters section. Duplicates are not allowed.
               <DataSource>
@@ -77,7 +77,7 @@
     </TestCase>
 
     <TestCase Debug="False"
-              Description="Empty Custom Data Sources does nothing."
+              Description="Empty Processing Sources does nothing."
               Id="2">
       <Parameters>
         <ProcessingSources></ProcessingSources>
@@ -89,7 +89,7 @@
     </TestCase>
 
     <TestCase Debug="False"
-              Description="Empty Data Sources has all Custom Data Sources assigned."
+              Description="Empty Data Sources has all Processing Sources assigned."
               Id="3">
       <Parameters>
         <ProcessingSources>
@@ -110,7 +110,7 @@
     </TestCase>
 
     <TestCase Debug="False"
-              Description="One Data Source Supported By One Custom Data Source."
+              Description="One Data Source Supported By One Processing Source."
               Id="4">
       <Parameters>
         <ProcessingSources>
@@ -138,7 +138,7 @@
     </TestCase>
 
     <TestCase Debug="False"
-              Description="One Data Source Not Supported By Any Custom Data Source."
+              Description="One Data Source Not Supported By Any Processing Source."
               Id="5">
       <Parameters>
         <ProcessingSources>
@@ -175,7 +175,7 @@
     </TestCase>
 
     <TestCase Debug="True"
-              Description="Multiple Custom Data Sources each supporting a Data Source."
+              Description="Multiple Processing Sources each supporting a Data Source."
               Id="6">
       <Parameters>
         <ProcessingSources>
@@ -285,7 +285,7 @@
     </TestCase>
 
     <TestCase Debug="False"
-              Description="Data Source supported by multiple Custom Data Sources appears in each list."
+              Description="Data Source supported by multiple Processing Sources appears in each list."
               Id="8">
       <Parameters>
         <ProcessingSources>

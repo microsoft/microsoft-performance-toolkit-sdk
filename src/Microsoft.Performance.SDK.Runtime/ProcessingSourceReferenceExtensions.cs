@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     Extension method to get the file extensions for a <see cref="ProcessingSourceReference"/>.
         /// </summary>
         /// <returns>
-        ///     All file extensions supported by the referenced Custom Data Source.
+        ///     All file extensions supported by the referenced <see cref="IProcessingSource"/>.
         /// </returns>
         public static IEnumerable<string> TryGetFileExtensions(this ProcessingSourceReference self)
         {
@@ -31,7 +31,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </summary>
         /// <returns>
         ///     The canonical forms of the file extensions supported by the referenced
-        ///     Custom Data Source.
+        ///     <see cref="IProcessingSource"/>.
         /// </returns>
         public static IEnumerable<string> TryGetCanonicalFileExtensions(this ProcessingSourceReference self)
         {
@@ -71,10 +71,10 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <summary>
         ///     Gets the description, if it exists, of directory support for the referenced
-        ///     Custom Data Source 
+        ///     <see cref="IProcessingSource"/> 
         /// </summary>
         /// <returns>
-        ///     The description of directories supported by the referenced Custom Data Source,
+        ///     The description of directories supported by the referenced <see cref="IProcessingSource"/>,
         ///     if any are supported; <c>null</c> otherwise.
         /// </returns>
         public static string TryGetDirectoryDescription(this ProcessingSourceReference self)
@@ -87,10 +87,10 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <summary>
         ///     Gets the description, if it exists, of extensionless file support for the referenced
-        ///     Custom Data Source 
+        ///     <see cref="IProcessingSource"/> 
         /// </summary>
         /// <returns>
-        ///     The description of extensionless files supported by the referenced Custom Data Source,
+        ///     The description of extensionless files supported by the referenced <see cref="IProcessingSource"/>,
         ///     if any are supported; <c>null</c> otherwise.
         /// </returns>
         public static string TryGetExtensionlessFileDescription(this ProcessingSourceReference self)
@@ -102,11 +102,11 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Gets a value indicating whether the referenced Custom Data Source
+        ///     Gets a value indicating whether the referenced <see cref="IProcessingSource"/>
         ///     can process directories.
         /// </summary>
         /// <returns>
-        ///     <c>true</c> if the referenced Custom Data Source can process directories;
+        ///     <c>true</c> if the referenced <see cref="IProcessingSource"/> can process directories;
         ///     <c>false</c> otherwise,
         /// </returns>
         public static bool AreDirectoriesSupported(this ProcessingSourceReference self)
@@ -115,11 +115,11 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Gets a value indicating whether the referenced Custom Data Source
+        ///     Gets a value indicating whether the referenced <see cref="IProcessingSource"/>
         ///     can process files without extensions.
         /// </summary>
         /// <returns>
-        ///     <c>true</c> if the referenced Custom Data Source can process files
+        ///     <c>true</c> if the referenced <see cref="IProcessingSource"/> can process files
         ///     without extensions; <c>false</c> otherwise,
         /// </returns>
         public static bool AreExtensionlessFilesSupported(this ProcessingSourceReference self)

@@ -11,6 +11,11 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
+    <Content Remove="Plugins\MockProcessingSources\**\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Plugins\MockProcessingSources\ValidFolderSchema\InstalledPlugins\1.0.0\ValidA\3.0.0\ValidSchemaA2.cs" />
   </ItemGroup>
 
   <ItemGroup>

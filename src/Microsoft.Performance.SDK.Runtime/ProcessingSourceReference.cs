@@ -202,7 +202,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Gets the <see cref="DataSourceAttribute"/>s for the custom data source.
+        ///     Gets the <see cref="DataSourceAttribute"/>s for the <see cref="IProcessingSource"/>.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -373,7 +373,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </param>
         /// <returns>
         ///     <c>true</c> if the <paramref name="dataSource"/> is supported by 
-        ///     the Custom Data Source referenced by this instance; <c>false</c>
+        ///     the <see cref="IProcessingSource"/> referenced by this instance; <c>false</c>
         ///     otherwise.
         /// </returns>
         /// <exception cref="ObjectDisposedException">

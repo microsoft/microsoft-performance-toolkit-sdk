@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <see cref="ProcessingSourceReference"/>s, creates a mapping
         ///     that assigns each <see cref="IDataSource"/> to one or more
         ///     <see cref="ProcessingSourceReference"/>s on the basis of what 
-        ///     can be processed by each Custom Data Source.
+        ///     can be processed by each <see cref="IProcessingSource"/>.
         ///     <para />
         ///     Each <see cref="ProcessingSourceReference"/> in <paramref name="processingSources"/>
         ///     will be a key in the returned mapping. The value for any given key represents

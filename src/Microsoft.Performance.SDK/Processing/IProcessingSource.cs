@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Processing
         IEnumerable<Option> CommandLineOptions { get; }
 
         /// <summary>
-        ///     Gets information about this Custom Data Source. This information
+        ///     Gets information about this <see cref="IProcessingSource"/>. This information
         ///     is displayed in the About Box for this data source.
         /// </summary>
         /// <returns>
@@ -134,7 +134,7 @@ namespace Microsoft.Performance.SDK.Processing
         bool IsDataSourceSupported(IDataSource dataSource);
 
         /// <summary>
-        ///     Provides a method for this Custom Data Source to do any
+        ///     Provides a method for this <see cref="IProcessingSource"/> to do any
         ///     special cleanup operations for processors created by
         ///     this instance, if applicable.
         ///     <para />

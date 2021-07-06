@@ -221,7 +221,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Gets the collection of Data Sources that are to be processed by a specific Custom Data Source.
+        ///     Gets the collection of Data Sources that are to be processed by a specific <see cref="IProcessingSource"/>.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -438,13 +438,13 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         /// <summary>
         ///     Adds the given Data Source to this instance for processing by
-        ///     the specific Custom Data Source.
+        ///     the specific <see cref="IProcessingSource"/>.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to process.
         /// </param>
         /// <param name="processingSourceType">
-        ///     The Custom Data Source to use to process the file.
+        ///     The <see cref="IProcessingSource"/> to use to process the file.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSource"/> is <c>null</c>.
@@ -461,7 +461,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The specified <paramref name="processingSourceType"/> cannot handle
         ///     the given Data Source.
         /// </exception>
-        /// <exception cref="UnsupportedCustomDataSourceException">
+        /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
         public void AddDataSource(IDataSource dataSource, Type processingSourceType)
@@ -471,16 +471,16 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         /// <summary>
         ///     Attempts to add the given Data Source to this instance for processing by
-        ///     the specific Custom Data Source.
+        ///     the specific <see cref="IProcessingSource"/>.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to process.
         /// </param>
         /// <param name="processingSourceType">
-        ///     The Custom Data Source to use to process <paramref name="dataSource"/>.
+        ///     The <see cref="IProcessingSource"/> to use to process <paramref name="dataSource"/>.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the Data Source has been added for processing by the Custom Data Source;
+        ///     <c>true</c> if the <see cref="IDataSource"/> has been added for processing by the <see cref="IProcessingSource"/>;
         ///     <c>false</c> otherwise. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
@@ -494,7 +494,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         /// <summary>
         ///     Adds the given data sources to this instance for processing by
-        ///     the specific Custom Data Source. All of the files will be processed
+        ///     the specific <see cref="IProcessingSource"/>. All of the files will be processed
         ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
         ///     to ensure each Data Source is processed by a different instance, or
         ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
@@ -503,7 +503,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The Data Sources to process.
         /// </param>
         /// <param name="processingSourceType">
-        ///     The Custom Data Source to use to process the <paramref name="dataSources"/>.
+        ///     The <see cref="IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSources"/> is <c>null</c>.
@@ -520,7 +520,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The specified <paramref name="processingSourceType"/> cannot handle
         ///     the given Data Source.
         /// </exception>
-        /// <exception cref="UnsupportedCustomDataSourceException">
+        /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
         public void AddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
@@ -540,7 +540,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         /// <summary>
         ///     Attempts to add the given data sources to this instance for processing by
-        ///     the specific Custom Data Source. All of the files will be processed
+        ///     the specific <see cref="IProcessingSource"/>. All of the files will be processed
         ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
         ///     to ensure each Data Source is processed by a different instance, or
         ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
@@ -912,23 +912,23 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private void AddDataSourcesCore(
             IEnumerable<IDataSource> dataSources,
-            Type customDataSourceType,
-            List<ProcessingSourceReference> customDataSourceReferences,
+            Type processingSourceType,
+            List<ProcessingSourceReference> processingSourceReferences,
             Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
             Func<Type, Type, bool> typeIs)
         {
             Debug.Assert(dataSources != null);
-            Debug.Assert(customDataSourceType != null);
-            Debug.Assert(customDataSourceReferences != null);
+            Debug.Assert(processingSourceType != null);
+            Debug.Assert(processingSourceReferences != null);
             Debug.Assert(dataSourcesToProcess != null);
             Debug.Assert(typeIs != null);
 
             Debug.Assert(!this.IsProcessed);
 
-            var cdsr = customDataSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), customDataSourceType));
+            var cdsr = processingSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), processingSourceType));
             if (cdsr is null)
             {
-                throw new UnsupportedCustomDataSourceException(customDataSourceType);
+                throw new UnsupportedProcessingSourceException(processingSourceType);
             }
 
             var atLeastOneDataSourceProvided = false;
@@ -939,7 +939,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 atLeastOneDataSourceProvided = true;
                 if (!cdsr.Supports(dataSource))
                 {
-                    throw new UnsupportedDataSourceException(dataSource, customDataSourceType);
+                    throw new UnsupportedDataSourceException(dataSource, processingSourceType);
                 }
             }
 
@@ -961,7 +961,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             this.IsProcessed = true;
 
-            var allDataSourceAssociations = GroupAllDataSourcesToCustomDataSources(
+            var allDataSourceAssociations = GroupAllDataSourcesToProcessingSources(
                 this.processingSourceReferences,
                 this.freeDataSources,
                 this.dataSourcesToProcess);
@@ -1073,14 +1073,14 @@ namespace Microsoft.Performance.Toolkit.Engine
             return executors;
         }
 
-        private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToCustomDataSources(
-            IEnumerable<ProcessingSourceReference> customDataSources,
+        private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(
+            IEnumerable<ProcessingSourceReference> processingSources,
             IEnumerable<IDataSource> freeDataSourcesToProcess,
             IReadOnlyDictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess)
         {
             var allDataSourceAssociations = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
 
-            var freeDataSourceAssociations = DataSourceResolver.Assign(freeDataSourcesToProcess, customDataSources);
+            var freeDataSourceAssociations = DataSourceResolver.Assign(freeDataSourcesToProcess, processingSources);
 
             foreach (var kvp in dataSourcesToProcess)
             {

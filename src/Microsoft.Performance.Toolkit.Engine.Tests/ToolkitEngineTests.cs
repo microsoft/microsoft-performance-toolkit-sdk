@@ -209,12 +209,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var typeAssembly = typeof(Source123DataSource).Assembly;
             var engineAssemblies = System.Runtime.Loader.AssemblyLoadContext.Default.Assemblies.Where(x =>
                 x.GetName().Name.StartsWith("Microsoft.Performance.Toolkit.Engine"));
-            var customDataSources = this.Sut.ProcessingSources.ToList();
+            var processingSources = this.Sut.ProcessingSources.ToList();
             Assert.IsTrue(this.Sut.ProcessingSources.Any(x => x is Source123DataSource));
 
             var file = CreateTestFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedCustomDataSourceException>(() => this.Sut.AddDataSource(file, typeof(ToolkitEngineTests)));
-            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedCustomDataSource);
+            var e = Assert.ThrowsException<UnsupportedProcessingSourceException>(() => this.Sut.AddDataSource(file, typeof(ToolkitEngineTests)));
+            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedProcessingSource);
         }
 
         [TestMethod]
@@ -226,7 +226,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var file = CreateTestFile(".380298502");
             var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => this.Sut.AddDataSource(file, typeof(Source123DataSource)));
             Assert.AreEqual(file.Uri.ToString(), e.DataSource);
-            Assert.AreEqual(typeof(Source123DataSource).FullName, e.RequestedCustomDataSource);
+            Assert.AreEqual(typeof(Source123DataSource).FullName, e.RequestedProcessingSource);
         }
 
         [TestMethod]
@@ -290,7 +290,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var file = CreateTestFile(".380298502");
             var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => this.Sut.AddDataSource(file));
             Assert.AreEqual(file.Uri.ToString(), e.DataSource);
-            Assert.IsNull(e.RequestedCustomDataSource);
+            Assert.IsNull(e.RequestedProcessingSource);
         }
 
         [TestMethod]
@@ -511,8 +511,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(this.Sut.ProcessingSources.Any(x => x is Source123DataSource));
 
             var file = CreateTestFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedCustomDataSourceException>(() => this.Sut.AddDataSources(new[] { file, }, typeof(ToolkitEngineTests)));
-            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedCustomDataSource);
+            var e = Assert.ThrowsException<UnsupportedProcessingSourceException>(() => this.Sut.AddDataSources(new[] { file, }, typeof(ToolkitEngineTests)));
+            Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedProcessingSource);
         }
 
         [TestMethod]
@@ -526,7 +526,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => this.Sut.AddDataSources(new[] { file1, file2, }, typeof(Source4DataSource)));
 
             Assert.AreEqual(file1.Uri.ToString(), e.DataSource);
-            Assert.AreEqual(typeof(Source4DataSource).FullName, e.RequestedCustomDataSource);
+            Assert.AreEqual(typeof(Source4DataSource).FullName, e.RequestedProcessingSource);
         }
 
         [TestMethod]

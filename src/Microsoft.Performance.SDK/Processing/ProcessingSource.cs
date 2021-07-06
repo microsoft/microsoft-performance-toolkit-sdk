@@ -13,7 +13,7 @@ using System.Reflection;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Provides a base class for implementing custom data sources that
+    ///     Provides a base class for implementing <see cref="IProcessingSource"/>s that
     ///     contains default logic for discovering tables, providing their
     ///     descriptors.
     /// </summary>

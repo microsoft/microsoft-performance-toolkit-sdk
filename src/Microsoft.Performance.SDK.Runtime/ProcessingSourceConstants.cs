@@ -6,7 +6,7 @@ namespace Microsoft.Performance.SDK.Runtime
     public static class ProcessingSourceConstants
     {
         /// <summary>
-        ///     Default Custom Data Source Root Folder for loading plugins.
+        ///     Default <see cref="IProcessingSource"/> root folder for loading plugins.
         /// </summary>
         /// <remarks>
         ///     This is "CustomDataSources" because processing sources were historically

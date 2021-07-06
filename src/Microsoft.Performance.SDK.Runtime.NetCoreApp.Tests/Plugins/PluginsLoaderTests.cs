@@ -21,10 +21,10 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     /// <summary>
     ///     Tests logic for loading plugins with the <see cref="PluginsLoader"/>. Both
     ///     valid and invalid filesystem structures are tested, since the loader allows
-    ///     loading custom data sources from invalid folder schemas.
+    ///     loading <see cref="IProcessingSource"/>s from invalid folder schemas.
     ///     <para/>
     ///     The layout of .\MockProcessingSources is translated 1:1 to compiled binaries
-    ///     inside of a new folder. Each custom data sources is compiled into its own
+    ///     inside of a new folder. Each <see cref="IProcessingSource"/> is compiled into its own
     ///     DLL, and can be individually loaded by passing in its parent directory.
     /// </summary>
     [TestClass]
@@ -114,7 +114,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                         }
 
                         // If this Assert is hit, the SDK was likely updated to break
-                        // the custom data source definitions used to test this class
+                        // the processing source definitions used to test this class
                         Assert.Fail("ProcessingSource {0} failed to compile", plugin);
                     }
                     else
@@ -680,20 +680,20 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         /// <summary>
         ///     Checks that <paramref name="loader"/> has loaded and that each consumer in
         ///     <paramref name="consumers"/> has observed <paramref name="expected"/>
-        ///     custom data sources 
+        ///     <see cref="IProcessingSource"/>s 
         /// </summary>
         private static void AssertNumberProcessingSourcesLoaded(int expected, PluginsLoader loader, params MockPluginsConsumer[] consumers)
         {
             Assert.AreEqual(expected,
                 loader.LoadedProcessingSources.Count(),
-                "The plugins loader reports having loaded {0} instead of {1} custom data sources",
+                "The plugins loader reports having loaded {0} instead of {1} processing sources",
                 loader.LoadedProcessingSources.Count(),
                 expected);
             foreach (var consumer in consumers)
             {
                 Assert.AreEqual(expected,
                     consumer.ObservedDataSources.Count,
-                    "Consumer {0} observed {1} instead of {2} custom data sources",
+                    "Consumer {0} observed {1} instead of {2} processing sources",
                     consumer,
                     consumer.ObservedDataSources.Count,
                     expected);
@@ -701,7 +701,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         /// <summary>
-        ///     Checks that every custom data source defined in <paramref name="types"/>
+        ///     Checks that every <see cref="IProcessingSource"/> defined in <paramref name="types"/>
         ///     was loaded by <paramref name="loader"/>
         /// </summary>
         private static void AssertLoadedCDSs(Type[] types, PluginsLoader loader)
@@ -710,7 +710,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         /// <summary>
-        ///     Checks that every custom data source defined in <paramref name="types"/>
+        ///     Checks that every <see cref="IProcessingSource"/> defined in <paramref name="types"/>
         ///     was observed by each consumer in <paramref name="consumers"/>
         /// </summary>
         private static void AssertObservedCDSs(Type[] types, params MockPluginsConsumer[] consumers)
@@ -722,7 +722,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         /// <summary>
-        ///     Checks that every custom data source defined in <paramref name="types"/>
+        ///     Checks that every <see cref="IProcessingSource"/> defined in <paramref name="types"/>
         ///     is present in <paramref name="actualCDSs"/>
         /// </summary>
         private static void AssertCDSs(Type[] types, IEnumerable<ProcessingSourceReference> actualCDSs)

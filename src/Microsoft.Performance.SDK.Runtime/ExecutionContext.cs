@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     Represents the context of execution for
-    ///     a custom data source.
+    ///     an <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class ExecutionContext
         : IFormattable
@@ -108,7 +108,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <para/>
         ///     F - format as a comma separated list of file paths.
         ///     <para/>
-        ///     G - The default format. Returns the name of the custom data source.
+        ///     G - The default format. Returns the name of the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="formatProvider">
         ///     An object to provide formatting information. This parameter may be <c>null</c>.

@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 {
     /// <summary>
     ///     Handles loading SDK plugins into isolation assembly contexts and notifying
-    ///     <see cref="IPluginsConsumer"/> listeners of all custom data sources loaded
+    ///     <see cref="IPluginsConsumer"/> listeners of all <see cref="IProcessingSource"/>s loaded
     ///     by plugins.
     ///     <para/>
     ///     Plugins are loaded by supplying either <see cref="TryLoadPlugin(string, out ErrorInfo)"/> or
@@ -40,7 +40,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
     ///     of all plugins loaded prior to the subscription.
     ///     <para/>
     ///     All calls to loading or obtaining loaded plugins are thread-safe occur in a linearizable order. 
-    ///     Listeners are guaranteed to not miss any loaded custom data sources that get loaded concurrently
+    ///     Listeners are guaranteed to not miss any loaded <see cref="IProcessingSource"/>s that get loaded concurrently
     ///     with their <see cref="Subscribe(IPluginsConsumer)"/> call.
     /// </summary>
     public sealed class PluginsLoader
@@ -122,7 +122,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         }
 
         /// <summary>
-        ///     All of the custom data sources that have been loaded by plugins.
+        ///     All of the <see cref="IProcessingSource"/>s that have been loaded by plugins.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -242,7 +242,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                     }
                 }
 
-                // TODO: this does redundant work re-finalizing custom data sources
+                // TODO: this does redundant work re-finalizing processing sources
                 // loaded by previous calls to this method. The extension repository
                 // should get refactored to avoid this redundant work.
                 this.extensionRoot.FinalizeDataExtensions();

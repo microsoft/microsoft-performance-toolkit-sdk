@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Attribute to mark a Custom Data Source implementation as processing
+    ///     Attribute to mark an <see cref="IProcessingSource"/> implementation as processing
     ///     directories.
     /// </summary>
     public sealed class DirectoryDataSourceAttribute

@@ -11,7 +11,7 @@ using System.Linq;
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
-    ///     Represents a container of the execution results from the custom data source.
+    ///     Represents a container of the execution results from the <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class ExecutionResult
     {
@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <see cref="ExecutionContext"/> from the processing state.
         /// </param>
         /// <param name="dataSourceInfo">
-        ///     <see cref="DataSourceInfo"/> from the custom data source being processed.
+        ///     <see cref="DataSourceInfo"/> from the <see cref="IProcessingSource"/> being processed.
         /// </param>
         /// <param name="dataSourceInfoFailure">
         ///     <see cref="Exception"/> for the processing state (if available).
@@ -34,7 +34,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     Dictionary representing the failures for <see cref="TableDescriptor"/> (if any).
         /// </param>
         /// <param name="metadataName">
-        ///     Name of the custom data source being processed.
+        ///     Name of the <see cref="IProcessingSource"/> being processed.
         /// </param>
         /// <param name="builtMetadataTables">
         ///     Collection of <see cref="MetadataTableBuilder"/>.
@@ -160,12 +160,12 @@ namespace Microsoft.Performance.SDK.Runtime
         public IEnumerable<TableDescriptor> RequestedTables { get; }
 
         /// <summary>
-        ///     When true, this object has additional data from a custom data source and
-        ///     custom data processor.
+        ///     When true, this object has additional data from an <see cref="IProcessingSource"/> and
+        ///     <see cref="ICustomDataProcessor"/>.
         /// </summary>
         public bool AssociatedWithProcessingSource { get; }
 
-        // ---- The properties below are associated with a custom data source and custom data processor ----
+        /// ---- The properties below are associated with a <see cref="IProcessingSource"/> and <see cref="ICustomDataProcessor"/> ----
 
         /// <summary>
         ///     Gets the context that produced this result.

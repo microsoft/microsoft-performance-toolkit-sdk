@@ -84,7 +84,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -107,7 +107,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 env,
@@ -117,7 +117,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             Assert.AreEqual(
                 env,
-                fakeCustomDataSource.CreateProcessorCalls.Single().Item2);
+                fakeProcessingSource.CreateProcessorCalls.Single().Item2);
         }
 
         [TestMethod]
@@ -127,7 +127,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -149,7 +149,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -159,7 +159,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             Assert.AreEqual(
                 executionContext.CommandLineOptions,
-                fakeCustomDataSource.CreateProcessorCalls.Single().Item3);
+                fakeProcessingSource.CreateProcessorCalls.Single().Item3);
         }
 
         [TestMethod]
@@ -169,7 +169,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -189,7 +189,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -211,7 +211,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -231,7 +231,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -254,7 +254,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -276,7 +276,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -298,7 +298,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -320,7 +320,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -345,7 +345,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -365,7 +365,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -393,7 +393,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 }
             };
 
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -413,7 +413,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tablesToEnable,
                 Any.ProcessorEnvironment(),
@@ -446,7 +446,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 BuildMetadataTableFailure = new Exception(),
             };
 
-            var fakeCustomDataSource = new MockProcessingSource()
+            var fakeProcessingSource = new MockProcessingSource()
             {
                 DataProcessor = mockProcessor,
             };
@@ -466,7 +466,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tablesToEnable,
                 Any.ProcessorEnvironment(),
@@ -490,7 +490,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataSourceInfo = new DataSourceInfo(3, 4, DateTime.UnixEpoch),
             };
 
-            var fakeCustomDataSource = new MockProcessingSource
+            var fakeProcessingSource = new MockProcessingSource
             {
                 DataProcessor = mockProcessor,
             };
@@ -508,7 +508,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -531,7 +531,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataSourceInfo = null,
             };
 
-            var fakeCustomDataSource = new MockProcessingSource
+            var fakeProcessingSource = new MockProcessingSource
             {
                 DataProcessor = mockProcessor,
             };
@@ -549,7 +549,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -573,7 +573,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataSourceInfoFailure = new Exception(),
             };
 
-            var fakeCustomDataSource = new MockProcessingSource
+            var fakeProcessingSource = new MockProcessingSource
             {
                 DataProcessor = mockProcessor,
             };
@@ -591,7 +591,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -611,7 +611,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource
+            var fakeProcessingSource = new MockProcessingSource
             {
                 DataProcessor = mockProcessor,
             };
@@ -629,7 +629,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -638,7 +638,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             this.Sut.InitializeCustomDataProcessor(executionContext);
             var result = await this.Sut.ExecuteAsync(CancellationToken.None);
 
-            Assert.AreEqual(fakeCustomDataSource.TryGetName(), result.MetadataName);
+            Assert.AreEqual(fakeProcessingSource.TryGetName(), result.MetadataName);
         }
 
         [TestMethod]
@@ -648,7 +648,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor();
-            var fakeCustomDataSource = new MockProcessingSource
+            var fakeProcessingSource = new MockProcessingSource
             {
                 DataProcessor = mockProcessor,
             };
@@ -666,7 +666,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -688,7 +688,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var mockProcessor = new MockCustomDataProcessor();
 
-            var fakeCustomDataSource = new MockProcessingSource
+            var fakeProcessingSource = new MockProcessingSource
             {
                 DataProcessor = mockProcessor,
             };
@@ -706,7 +706,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => logger,
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),
@@ -731,7 +731,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 ProcessFailure = new Exception(),
             };
 
-            var fakeCustomDataSource = new MockProcessingSource
+            var fakeProcessingSource = new MockProcessingSource
             {
                 DataProcessor = mockProcessor,
             };
@@ -749,7 +749,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var executionContext = new ExecutionContext(
                 progress,
                 _ => new NullLogger(),
-                CreateReference(fakeCustomDataSource),
+                CreateReference(fakeProcessingSource),
                 dataSources,
                 tables,
                 Any.ProcessorEnvironment(),

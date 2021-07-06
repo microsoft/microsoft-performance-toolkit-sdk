@@ -9,7 +9,7 @@ using System.Collections.Generic;
 // in compilation errors. When this file is compiled programatically in unit tests,
 // the resulting assembly will be an exact copy of the 2.0.0 version of this file.
 //
-// This setup mimicks a plugin containing an older, unmodified custom data source in
+// This setup mimicks a plugin containing an older, unmodified processing source in
 // a new release. In the event that both versions of the plugin are loaded, we want
 // to ensure that only one instance of the CDS is advertised by the plugin loader.
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockProcessingSources

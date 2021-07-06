@@ -18,16 +18,16 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         public static readonly string DefaultFileName = "PlugInConfiguration.json";
 
         /// <summary>
-        ///     Reads a configuration for the given custom data source.
+        ///     Reads a configuration for the given <see cref="IProcessingSource"/>.
         /// </summary>
         /// <param name="processingSourceType">
-        ///     Type of the custom data source.
+        ///     Type of the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="logger">
         ///     Used to log any messages.
         /// </param>
         /// <returns>
-        ///     A PlugInConfiguration on success; <c>null</c> on failure.
+        ///     A <see cref="PlugInConfiguration"/> on success; <c>null</c> on failure.
         /// </returns>
         public static PlugInConfiguration ReadFromDefaultFile(Type processingSourceType, ILogger logger)
         {
