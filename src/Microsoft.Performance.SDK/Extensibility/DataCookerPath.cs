@@ -154,9 +154,9 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </summary>
         public string DataCookerId { get; }
 
-        ///// <summary>
-        ///// Gets the combination of the source parser Id and the data cooker Id.
-        ///// </summary>
+        /// <summary>
+        /// Gets the combination of the source parser Id and the data cooker Id.
+        /// </summary>
         [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
         public string CookerPath
         {
@@ -333,7 +333,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     True for a well formed path, false otherwise.
         /// </returns>
         [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        internal static bool IsWellFormed(string cookerPath)
+        public static bool IsWellFormed(string cookerPath)
         {
             if (string.IsNullOrWhiteSpace(cookerPath))
             {
