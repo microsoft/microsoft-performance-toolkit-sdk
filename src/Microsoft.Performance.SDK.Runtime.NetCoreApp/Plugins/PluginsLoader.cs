@@ -127,7 +127,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<ProcessingSourceReference> LoadedCustomDataSources
+        public IEnumerable<ProcessingSourceReference> LoadedProcessingSources
         {
             get
             {
@@ -250,7 +250,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 foreach (var source in this.extensionRoot.PlugIns.Except(oldPlugins))
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
-                    this.NotifyCustomDataSourceLoaded(name, version, source);
+                    this.NotifyProcessingSourceLoaded(name, version, source);
                 }
 
                 return failed.Count == 0;
@@ -275,7 +275,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         /// <summary>
         ///     Registers an <see cref="IPluginsConsumer"/> to receive all future plugins, and sends all
-        ///     previously loaded plugins to its <see cref="IPluginsConsumer.OnCustomDataSourceLoaded(string, ProcessingSourceReference)"/> handler.
+        ///     previously loaded plugins to its <see cref="IPluginsConsumer.OnProcessingSourceLoaded(string, Version, ProcessingSourceReference)"/> handler.
         ///     <para/>
         ///     If the <paramref name="consumer"/> is already subscribed, this method does nothing.
         ///     <para/>
@@ -306,7 +306,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 foreach (var source in this.extensionRoot.PlugIns)
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
-                    consumer.OnCustomDataSourceLoaded(name, version, source);
+                    consumer.OnProcessingSourceLoaded(name, version, source);
                 }
 
                 // Subscribe to all future plugin loads
@@ -445,7 +445,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             return (pluginName, pluginVersion);
         }
 
-        private void NotifyCustomDataSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference customDataSource)
+        private void NotifyProcessingSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference processingSource)
         {
             Guard.NotNull(this.extensionRoot, nameof(this.extensionRoot));
             if (!this.extensionRoot.IsLoaded)
@@ -455,7 +455,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             foreach (var consumer in this.subscribers)
             {
-                consumer.OnCustomDataSourceLoaded(pluginName, pluginVersion, customDataSource);
+                consumer.OnProcessingSourceLoaded(pluginName, pluginVersion, processingSource);
             }
         }
     }

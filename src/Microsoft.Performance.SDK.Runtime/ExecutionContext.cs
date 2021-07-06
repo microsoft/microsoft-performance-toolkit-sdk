@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public ExecutionContext(
             IProgress<int> progress,
             Func<ICustomDataProcessor, ILogger> loggerFactory,
-            ProcessingSourceReference customDataSource,
+            ProcessingSourceReference processingSource,
             IEnumerable<IDataSource> dataSources,
             IEnumerable<TableDescriptor> tablesToEnable,
             IProcessorEnvironment processorEnvironment,
@@ -31,7 +31,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             Guard.NotNull(progress, nameof(progress));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            Guard.NotNull(customDataSource, nameof(customDataSource));
+            Guard.NotNull(processingSource, nameof(processingSource));
             Guard.NotNull(dataSources, nameof(dataSources));
             Guard.All(dataSources, x => x != null, nameof(dataSources));
             Guard.NotNull(tablesToEnable, nameof(tablesToEnable));
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
             this.ProgressReporter = progress;
             this.LoggerFactory = loggerFactory;
-            this.CustomDataSource = customDataSource;
+            this.ProcessingSource = processingSource;
             this.DataSources = dataSources.ToList().AsReadOnly();
             this.TablesToEnable = tablesToEnable.ToList().AsReadOnly();
             this.ProcessorEnvironment = processorEnvironment;
@@ -63,11 +63,11 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     Gets the <see cref="ProcessingSourceReference"/> associated
         ///     with the given data items.
         /// </summary>
-        public ProcessingSourceReference CustomDataSource { get; }
+        public ProcessingSourceReference ProcessingSource { get; }
 
         /// <summary>
         ///     Gets the <see cref="IDataSource"/>s that can be
-        ///     processed by the <see cref="CustomDataSource"/>.
+        ///     processed by the <see cref="ProcessingSource"/>.
         /// </summary>
         public IEnumerable<IDataSource> DataSources { get; }
 
@@ -126,7 +126,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 case "G":
                 case "g":
                 case null:
-                    return this.CustomDataSource.Name;
+                    return this.ProcessingSource.Name;
 
                 default:
                     throw new FormatException($"Unsupported format specified: '{format}'");

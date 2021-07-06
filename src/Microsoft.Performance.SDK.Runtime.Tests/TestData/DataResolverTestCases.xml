@@ -13,10 +13,10 @@
         Id (string): A unique Identifier for the test case. This makes finding failed tests easier.
       <Parameters>
         This element contains the parameters to pass to the Resolver.
-        <CustomDataSources>
+        <ProcessingSources>
           This element contains a collection of zero (0) or more Custom Data Sources
           to pass to the Assign method. Duplicates are allowed.
-          <CustomDataSource>
+          <ProcessingSource>
             <Name>
               The name to use to reference this custom data source in 
               the Expected section.
@@ -28,8 +28,8 @@
                 Place the name of the data source here.
               </DataSource>
             </Supports>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources>
           This element contains a collection of zero (0) or more Data Sources
           to pass to the Assign method. Duplicates are allowed. It is not required
@@ -42,15 +42,15 @@
       <Expected>
         This element contains the expected results of a call to the Assign
         method with the given parameters.
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           This element contains a collection of zero (0) or more Assignments
           that are expected as a result of running the Assign method. There
           should be an entry for each Custom Data Source in the Parameters
           section. See the specification of the Assign Method.
           <Assignment>
-            <CustomDataSource>
+            <ProcessingSource>
               The name of the Custom Data Source.
-            </CustomDataSource>
+            </ProcessingSource>
             <DataSources>
               This element contains a collection of zero (0) or more Data Sources
               that are expected to be assigned to this Custom Data Source. The
@@ -61,7 +61,7 @@
               </DataSource>
             </DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
     </TestCase>
     
@@ -70,7 +70,7 @@
               Description="Empty Parameters does nothing."
               Id="1">
       <Parameters>
-        <CustomDataSources></CustomDataSources>
+        <ProcessingSources></ProcessingSources>
         <DataSources></DataSources>
       </Parameters>
       <Expected></Expected>
@@ -80,7 +80,7 @@
               Description="Empty Custom Data Sources does nothing."
               Id="2">
       <Parameters>
-        <CustomDataSources></CustomDataSources>
+        <ProcessingSources></ProcessingSources>
         <DataSources>
           <DataSource>1</DataSource>
         </DataSources>
@@ -92,20 +92,20 @@
               Description="Empty Data Sources has all Custom Data Sources assigned."
               Id="3">
       <Parameters>
-        <CustomDataSources>
-          <CustomDataSource>
+        <ProcessingSources>
+          <ProcessingSource>
             <Name>1</Name>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources></DataSources>
       </Parameters>
       <Expected>
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           <Assignment>
-            <CustomDataSource>1</CustomDataSource>
+            <ProcessingSource>1</ProcessingSource>
             <DataSources></DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
     </TestCase>
 
@@ -113,27 +113,27 @@
               Description="One Data Source Supported By One Custom Data Source."
               Id="4">
       <Parameters>
-        <CustomDataSources>
-          <CustomDataSource>
+        <ProcessingSources>
+          <ProcessingSource>
             <Name>1</Name>
             <Supports>
               <DataSource>1</DataSource>
             </Supports>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources>
           <DataSource>1</DataSource>
         </DataSources>
       </Parameters>
       <Expected>
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           <Assignment>
-            <CustomDataSource>1</CustomDataSource>
+            <ProcessingSource>1</ProcessingSource>
             <DataSources>
               <DataSource>1</DataSource>
             </DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
     </TestCase>
 
@@ -141,36 +141,36 @@
               Description="One Data Source Not Supported By Any Custom Data Source."
               Id="5">
       <Parameters>
-        <CustomDataSources>
-          <CustomDataSource>
+        <ProcessingSources>
+          <ProcessingSource>
             <Name>1</Name>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>2</Name>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>3</Name>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources>
           <DataSource>1</DataSource>
         </DataSources>
       </Parameters>
       <Expected>
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           <Assignment>
-            <CustomDataSource>1</CustomDataSource>
+            <ProcessingSource>1</ProcessingSource>
             <DataSources></DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>2</CustomDataSource>
+            <ProcessingSource>2</ProcessingSource>
             <DataSources></DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>3</CustomDataSource>
+            <ProcessingSource>3</ProcessingSource>
             <DataSources></DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
     </TestCase>
 
@@ -178,26 +178,26 @@
               Description="Multiple Custom Data Sources each supporting a Data Source."
               Id="6">
       <Parameters>
-        <CustomDataSources>
-          <CustomDataSource>
+        <ProcessingSources>
+          <ProcessingSource>
             <Name>1</Name>
             <Supports>
               <DataSource>1</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>2</Name>
             <Supports>
               <DataSource>2</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>3</Name>
             <Supports>
               <DataSource>3</DataSource>
             </Supports>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources>
           <DataSource>1</DataSource>
           <DataSource>2</DataSource>
@@ -205,26 +205,26 @@
         </DataSources>
       </Parameters>
       <Expected>
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           <Assignment>
-            <CustomDataSource>1</CustomDataSource>
+            <ProcessingSource>1</ProcessingSource>
             <DataSources>
               <DataSource>1</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>2</CustomDataSource>
+            <ProcessingSource>2</ProcessingSource>
             <DataSources>
               <DataSource>2</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>3</CustomDataSource>
+            <ProcessingSource>3</ProcessingSource>
             <DataSources>
               <DataSource>3</DataSource>
             </DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
 
     </TestCase>
@@ -233,26 +233,26 @@
               Description="Unsupported Data Sources do not appear in assignment."
               Id="7">
       <Parameters>
-        <CustomDataSources>
-          <CustomDataSource>
+        <ProcessingSources>
+          <ProcessingSource>
             <Name>1</Name>
             <Supports>
               <DataSource>1</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>2</Name>
             <Supports>
               <DataSource>2</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>3</Name>
             <Supports>
               <DataSource>3</DataSource>
             </Supports>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources>
           <DataSource>1</DataSource>
           <DataSource>2</DataSource>
@@ -261,26 +261,26 @@
         </DataSources>
       </Parameters>
       <Expected>
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           <Assignment>
-            <CustomDataSource>1</CustomDataSource>
+            <ProcessingSource>1</ProcessingSource>
             <DataSources>
               <DataSource>1</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>2</CustomDataSource>
+            <ProcessingSource>2</ProcessingSource>
             <DataSources>
               <DataSource>2</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>3</CustomDataSource>
+            <ProcessingSource>3</ProcessingSource>
             <DataSources>
               <DataSource>3</DataSource>
             </DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
     </TestCase>
 
@@ -288,27 +288,27 @@
               Description="Data Source supported by multiple Custom Data Sources appears in each list."
               Id="8">
       <Parameters>
-        <CustomDataSources>
-          <CustomDataSource>
+        <ProcessingSources>
+          <ProcessingSource>
             <Name>1</Name>
             <Supports>
               <DataSource>1</DataSource>
               <DataSource>2</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>2</Name>
             <Supports>
               <DataSource>2</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>3</Name>
             <Supports>
               <DataSource>3</DataSource>
             </Supports>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources>
           <DataSource>1</DataSource>
           <DataSource>2</DataSource>
@@ -316,27 +316,27 @@
         </DataSources>
       </Parameters>
       <Expected>
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           <Assignment>
-            <CustomDataSource>1</CustomDataSource>
+            <ProcessingSource>1</ProcessingSource>
             <DataSources>
               <DataSource>1</DataSource>
               <DataSource>2</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>2</CustomDataSource>
+            <ProcessingSource>2</ProcessingSource>
             <DataSources>
               <DataSource>2</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>3</CustomDataSource>
+            <ProcessingSource>3</ProcessingSource>
             <DataSources>
               <DataSource>3</DataSource>
             </DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
     </TestCase>
 
@@ -344,50 +344,50 @@
               Description="Supported Data Source that is not supplied is okay."
               Id="9">
       <Parameters>
-        <CustomDataSources>
-          <CustomDataSource>
+        <ProcessingSources>
+          <ProcessingSource>
             <Name>1</Name>
             <Supports>
               <DataSource>1</DataSource>
               <DataSource>2</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>2</Name>
             <Supports>
               <DataSource>2</DataSource>
             </Supports>
-          </CustomDataSource>
-          <CustomDataSource>
+          </ProcessingSource>
+          <ProcessingSource>
             <Name>3</Name>
             <Supports>
               <DataSource>3</DataSource>
             </Supports>
-          </CustomDataSource>
-        </CustomDataSources>
+          </ProcessingSource>
+        </ProcessingSources>
         <DataSources>
           <DataSource>2</DataSource>
         </DataSources>
       </Parameters>
       <Expected>
-        <CustomDataSourceAssignments>
+        <ProcessingSourceAssignments>
           <Assignment>
-            <CustomDataSource>1</CustomDataSource>
+            <ProcessingSource>1</ProcessingSource>
             <DataSources>
               <DataSource>2</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>2</CustomDataSource>
+            <ProcessingSource>2</ProcessingSource>
             <DataSources>
               <DataSource>2</DataSource>
             </DataSources>
           </Assignment>
           <Assignment>
-            <CustomDataSource>3</CustomDataSource>
+            <ProcessingSource>3</ProcessingSource>
             <DataSources></DataSources>
           </Assignment>
-        </CustomDataSourceAssignments>
+        </ProcessingSourceAssignments>
       </Expected>
     </TestCase>
 

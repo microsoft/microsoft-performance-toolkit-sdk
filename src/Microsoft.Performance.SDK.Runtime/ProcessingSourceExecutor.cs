@@ -38,7 +38,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             Guard.NotNull(context, nameof(context));
 
-            this.Processor = context.CustomDataSource.CreateProcessor(
+            this.Processor = context.ProcessingSource.CreateProcessor(
                 context.DataSources,
                 context.ProcessorEnvironment,
                 context.CommandLineOptions);
@@ -139,7 +139,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 Console.Error.WriteLine("Unable to get data source info for {0}: {1}", this.Processor, e);
             }
 
-            var metadataName = this.Context.CustomDataSource.Name;
+            var metadataName = this.Context.ProcessingSource.Name;
 
             return new ExecutionResult(
                 this.Context,

@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cds1 = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<Processing.DataSourceAttribute>());
 
             var repo = new DataExtensionRepository();
@@ -615,7 +615,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var r = new ProcessingSourceReference(
                 typeof(FakeProcessingSource), 
                 () => cds, 
-                Any.CustomDataSourceAttribute(), 
+                Any.ProcessingSourceAttribute(), 
                 new HashSet<Processing.DataSourceAttribute>());
 
             cds.CreateProcessorReturnValue = p;

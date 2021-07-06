@@ -75,7 +75,7 @@ namespace Microsoft.Performance.Testing.SDK
             return file;
         }
 
-        public static ProcessingSourceAttribute CustomDataSourceAttribute()
+        public static ProcessingSourceAttribute ProcessingSourceAttribute()
         {
             return new ProcessingSourceAttribute(
                 Guid.NewGuid().ToString(),

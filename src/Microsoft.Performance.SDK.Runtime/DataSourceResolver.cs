@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <see cref="ProcessingSourceReference"/>s on the basis of what 
         ///     can be processed by each Custom Data Source.
         ///     <para />
-        ///     Each <see cref="ProcessingSourceReference"/> in <paramref name="customDataSources"/>
+        ///     Each <see cref="ProcessingSourceReference"/> in <paramref name="processingSources"/>
         ///     will be a key in the returned mapping. The value for any given key represents
         ///     the <see cref="IDataSource"/>s that can be processed by the given 
         ///     <see cref="ProcessingSourceReference"/>/. If no <see cref="IDataSource"/>s
@@ -32,7 +32,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     that are able to process them. Any duplicate values in this parameter will be
         ///     ignored. Any <c>null</c> elements in this parameter will be ignored.
         /// </param>
-        /// <param name="customDataSources">
+        /// <param name="processingSources">
         ///     The collection of <see cref="ProcessingSourceReference"/>s that are potentially
         ///     eligible to process the elements of <paramref name="dataSources"/>.
         ///     Any duplicate values in this parameter will be ignored. Any <c>null</c> elements
@@ -46,17 +46,17 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="dataSources"/> is <c>null</c>.
         ///     - or -
-        ///     <paramref name="customDataSources"/> is <c>null</c>.
+        ///     <paramref name="processingSources"/> is <c>null</c>.
         /// </exception>
         public static IDictionary<ProcessingSourceReference, IEnumerable<IDataSource>> Assign(
             IEnumerable<IDataSource> dataSources,
-            IEnumerable<ProcessingSourceReference> customDataSources)
+            IEnumerable<ProcessingSourceReference> processingSources)
         {
             Guard.NotNull(dataSources, nameof(dataSources));
-            Guard.NotNull(customDataSources, nameof(customDataSources));
+            Guard.NotNull(processingSources, nameof(processingSources));
 
-            var dedupedDs = dataSources.Where(x => x is object).Distinct().ToList();
-            var dedupedCds = customDataSources.Where(x => x is object).Distinct().ToList();
+            var dedupedDataSources = dataSources.Where(x => x is object).Distinct().ToList();
+            var dedupedProcessingSources = processingSources.Where(x => x is object).Distinct().ToList();
 
             bool isSupported(ProcessingSourceReference cdsr, IDataSource dataSource)
             {
@@ -66,9 +66,9 @@ namespace Microsoft.Performance.SDK.Runtime
                          cdsr.Supports(dataSource)) ?? false;
             }
 
-            return dedupedCds.ToDictionary(
+            return dedupedProcessingSources.ToDictionary(
                 x => x,
-                x => dedupedDs.Where(ds => isSupported(x, ds)).ToList().AsEnumerable());
+                x => dedupedDataSources.Where(ds => isSupported(x, ds)).ToList().AsEnumerable());
         }
     }
 }

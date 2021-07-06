@@ -30,7 +30,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public void Assign_NullCustomDataSourcesThrows()
+        public void Assign_NullProcessingSourcesThrows()
         {
             Assert.ThrowsException<ArgumentNullException>(
                 () => DataSourceResolver.Assign(Array.Empty<IDataSource>(), null));
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var fakeCds = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
@@ -64,7 +64,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var fakeCds = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
@@ -90,7 +90,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var fakeCds = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
@@ -118,7 +118,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fakeCds = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
                 () => cds,
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
@@ -153,7 +153,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Debugger.Break();
             }
 
-            var actual = DataSourceResolver.Assign(testCase.DataSources, testCase.CustomDataSources);
+            var actual = DataSourceResolver.Assign(testCase.DataSources, testCase.ProcessingSources);
 
             Assert.AreEqual(testCase.Expected.Count, actual.Count);
             foreach (var kvp in testCase.Expected)
@@ -183,7 +183,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             public AssignTestCase()
             {
-                this.CustomDataSources = new List<ProcessingSourceReference>();
+                this.ProcessingSources = new List<ProcessingSourceReference>();
                 this.DataSources = new List<IDataSource>();
                 this.Expected = new Dictionary<ProcessingSourceReference, IEnumerable<IDataSource>>();
             }
@@ -194,7 +194,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public string Id { get; set; }
 
-            public List<ProcessingSourceReference> CustomDataSources { get; }
+            public List<ProcessingSourceReference> ProcessingSources { get; }
 
             public List<IDataSource> DataSources { get; }
 
@@ -247,8 +247,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                     parametersElement.GetChild("DataSources"),
                     testCaseToHydrate);
 
-                cdsNameToImpl = ParseCustomDataSources(
-                    parametersElement.GetChild("CustomDataSources"),
+                cdsNameToImpl = ParseProcessingSources(
+                    parametersElement.GetChild("ProcessingSources"),
                     dataSourcesNameToImpl,
                     testCaseToHydrate);
             }
@@ -276,18 +276,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 return dataSourcesNameToImpl;
             }
 
-            private static Dictionary<string, ProcessingSourceReference> ParseCustomDataSources(
-                XElement customDataSourcesElement,
+            private static Dictionary<string, ProcessingSourceReference> ParseProcessingSources(
+                XElement processingSourcesElement,
                 Dictionary<string, IDataSource> dataSourcesNameToImpl,
                 AssignTestCase testCaseToHydrate)
             {
-                Assert.IsNotNull(customDataSourcesElement);
+                Assert.IsNotNull(processingSourcesElement);
                 Assert.IsNotNull(dataSourcesNameToImpl);
                 Assert.IsNotNull(testCaseToHydrate);
 
                 var cdsNameToImpl = new Dictionary<string, ProcessingSourceReference>();
 
-                var cdsElements = customDataSourcesElement.GetChildren("CustomDataSource");
+                var cdsElements = processingSourcesElement.GetChildren("ProcessingSource");
                 foreach (var cdsElement in cdsElements)
                 {
                     var cds = new FakeProcessingSource();
@@ -326,7 +326,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                             }
                         });
 
-                    testCaseToHydrate.CustomDataSources.Add(fakeReference);
+                    testCaseToHydrate.ProcessingSources.Add(fakeReference);
                     cdsNameToImpl[name] = fakeReference;
                 }
 
@@ -344,12 +344,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.IsNotNull(cdsNameToImpl);
                 Assert.IsNotNull(testCaseToHydrate);
 
-                if (expectedElement.TryGetChild("CustomDataSourceAssignments", out var expectedMap))
+                if (expectedElement.TryGetChild("ProcessingSourceAssignments", out var expectedMap))
                 {
                     var assignments = expectedMap.GetChildren("Assignment");
                     foreach (var assignment in assignments)
                     {
-                        var cdsName = assignment.GetChild("CustomDataSource").Value;
+                        var cdsName = assignment.GetChild("ProcessingSource").Value;
 
                         var dataSources = new List<IDataSource>();
                         var dataSourceElements = assignment.GetChild("DataSources").GetChildren("DataSource");

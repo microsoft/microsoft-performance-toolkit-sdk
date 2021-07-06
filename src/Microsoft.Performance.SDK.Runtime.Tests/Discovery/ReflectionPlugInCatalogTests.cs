@@ -26,7 +26,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             this.ExtensionProvider = new TestExtensionProvider();
             this.Sut = new ReflectionPlugInCatalog(
                 this.ExtensionProvider,
-                this.ReferenceFactory.TryCreateCustomDataSourceReference);
+                this.ReferenceFactory.TryCreateProcessingSourceReference);
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
             public IDictionary<Type, ProcessingSourceReference> TypeToReference { get; }
 
-            public bool TryCreateCustomDataSourceReference(
+            public bool TryCreateProcessingSourceReference(
                 Type type,
                 out ProcessingSourceReference reference)
             {

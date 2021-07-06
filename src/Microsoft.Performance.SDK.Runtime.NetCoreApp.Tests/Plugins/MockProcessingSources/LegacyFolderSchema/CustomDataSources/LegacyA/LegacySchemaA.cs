@@ -4,12 +4,12 @@
 using Microsoft.Performance.SDK.Processing;
 using System.Collections.Generic;
 
-namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources
+namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockProcessingSources
 {
     [ProcessingSource(
-    "{DE9D525C-3D4F-4498-B0BA-63CED1E4E14A}", "Mock CDS - Invalid A", "A mock invalid data source A.")]
+    "{0A3709CE-BA67-498B-9AB4-FC14CC517DAC}", "Mock PS - Legacy A", "A mock legacy data source A.")]
     [FileDataSource(".sdk")]
-    public class InvalidSchemaA
+    public class LegacySchemaA
     : ProcessingSource
     {
         protected override ICustomDataProcessor CreateProcessorCore(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)

@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
-using Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources;
+using Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockProcessingSources;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,12 +23,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     ///     valid and invalid filesystem structures are tested, since the loader allows
     ///     loading custom data sources from invalid folder schemas.
     ///     <para/>
-    ///     The layout of .\MockCustomDataSources is translated 1:1 to compiled binaries
+    ///     The layout of .\MockProcessingSources is translated 1:1 to compiled binaries
     ///     inside of a new folder. Each custom data sources is compiled into its own
     ///     DLL, and can be individually loaded by passing in its parent directory.
     /// </summary>
     [TestClass]
-    [DeploymentItem(@"Plugins\MockCustomDataSources\", "TestPluginsSourceCode")]
+    [DeploymentItem(@"Plugins\MockProcessingSources\", "TestPluginsSourceCode")]
     public class PluginsLoaderTests
     {
         private const string Invalid = "InvalidFolderSchema";
@@ -82,7 +82,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                 var code = File.ReadAllText(plugin);
 
                 // Place assembly version attribute right before "namespace"
-                var namespaceStartIndex = code.IndexOf("namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources");
+                var namespaceStartIndex = code.IndexOf("namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockProcessingSources");
                 code = code.Insert(namespaceStartIndex - 1, AsmVersionAttrText);
 
                 // Compile the plugin
@@ -115,7 +115,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
                         // If this Assert is hit, the SDK was likely updated to break
                         // the custom data source definitions used to test this class
-                        Assert.Fail("CustomDatasource {0} failed to compile", plugin);
+                        Assert.Fail("ProcessingSource {0} failed to compile", plugin);
                     }
                     else
                     {
@@ -142,7 +142,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertNoPluginNames(consumer);
 
             var expected = new Type[] { typeof(InvalidSchemaA) };
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer);
             AssertLoadedCDSs(expected, loader);
             AssertObservedCDSs(expected, consumer);
         }
@@ -159,7 +159,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertNoPluginNames(consumer);
 
             var expected = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer);
             AssertLoadedCDSs(expected, loader);
             AssertObservedCDSs(expected, consumer);
         }
@@ -183,7 +183,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
             // Assert same CDS is loaded/observed only once
             var expected = new Type[] { typeof(InvalidSchemaA) };
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer);
             AssertLoadedCDSs(expected, loader);
             AssertObservedCDSs(expected, consumer);
         }
@@ -201,7 +201,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertNoPluginNames(consumer);
 
             var expected = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer);
             AssertLoadedCDSs(expected, loader);
             AssertObservedCDSs(expected, consumer);
         }
@@ -228,7 +228,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertExpectedPlugins(expectedPlugins, consumer);
 
             var expectedCDSs = new Type[] { typeof(ValidSchemaA1) };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -252,7 +252,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertExpectedPlugins(expectedPlugins, consumer);
 
             var expectedCDSs = new Type[] { typeof(ValidSchemaA1), typeof(ValidSchemaB) };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -283,7 +283,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertExpectedPlugins(expectedPlugins, consumer);
 
             var expectedCDSs = new Type[] { typeof(ValidSchemaA1) };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -307,7 +307,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertExpectedPlugins(expectedPlugins, consumer);
 
             var expectedCDSs = new Type[] { typeof(ValidSchemaA1), typeof(ValidSchemaA2) };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -333,7 +333,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             // Only one instance of A2 should be loaded, even though both v2 and v3 of ValidA
             // contain its definition.
             var expectedCDSs = new Type[] { typeof(ValidSchemaA2), typeof(ValidSchemaA3) };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -357,7 +357,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertExpectedPlugins(expectedPlugins, consumer);
 
             var expectedCDSs = new Type[] { typeof(LegacySchemaA) };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -375,7 +375,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             Assert.AreNotEqual(ErrorInfo.None, error);
 
             var expectedCDSs = new Type[] { };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -391,7 +391,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             CollectionAssert.AreEquivalent(dirs, failed.Keys.ToArray());
 
             var expectedCDSs = new Type[] { };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -408,7 +408,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             CollectionAssert.Contains(failed.Keys.ToArray(), "foo");
 
             var expectedCDSs = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
-            AssertNumberCustomDataSourcesLoaded(expectedCDSs.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
             AssertLoadedCDSs(expectedCDSs, loader);
             AssertObservedCDSs(expectedCDSs, consumer);
         }
@@ -431,14 +431,14 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
             // Check loader processed plugin
             var expected = new Type[] { typeof(InvalidSchemaA) };
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader);
             AssertLoadedCDSs(expected, loader);
 
             // Subscribe first consumer (i.e. a "late" subscription)
             loader.Subscribe(consumer1);
 
             // Assert first plugin observed through subscribe
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer1);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer1);
             AssertObservedCDSs(expected, consumer1);
 
             // Subscribe a new consumer
@@ -446,7 +446,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             loader.Subscribe(consumer2);
 
             // Assert new consumer was given first plugin
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer2);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer2);
             AssertObservedCDSs(expected, consumer2);
 
             // Load second plugin
@@ -458,7 +458,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
             // Assert both plugins observed by both consumers
             expected = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer1, consumer2);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer1, consumer2);
             AssertLoadedCDSs(expected, loader);
             AssertObservedCDSs(expected, consumer1, consumer2);
         }
@@ -476,7 +476,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
             // Assert first plugin processed correctly
             var expected1 = new Type[] { typeof(InvalidSchemaA) };
-            AssertNumberCustomDataSourcesLoaded(expected1.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected1.Length, loader, consumer);
             AssertLoadedCDSs(expected1, loader);
             AssertObservedCDSs(expected1, consumer);
 
@@ -492,7 +492,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
             // Assert consumer did not see second plugin, but loader advertises it
             var expected2 = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
-            AssertNumberCustomDataSourcesLoaded(expected2.Length, loader);
+            AssertNumberProcessingSourcesLoaded(expected2.Length, loader);
 
             Assert.AreEqual(expected1.Length, consumer.ObservedDataSources.Count);
             AssertLoadedCDSs(expected2, loader);
@@ -509,7 +509,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             // Assert consumer sees first plugin
             // Assert consumer sees InvalidA
             var expected = new Type[] { typeof(InvalidSchemaA) };
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer);
             AssertLoadedCDSs(expected, loader);
             AssertObservedCDSs(expected, consumer);
 
@@ -518,7 +518,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             Assert.IsFalse(result, "Consumer was allowed to subscribe more than once");
 
             // Assert observed plugins are the same
-            AssertNumberCustomDataSourcesLoaded(expected.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected.Length, loader, consumer);
             AssertObservedCDSs(expected, consumer);
         }
 
@@ -550,7 +550,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
             // Assert consumer sees InvalidA
             var expected0 = new Type[] { typeof(InvalidSchemaA) };
-            AssertNumberCustomDataSourcesLoaded(expected0.Length, loader, consumer);
+            AssertNumberProcessingSourcesLoaded(expected0.Length, loader, consumer);
             AssertLoadedCDSs(expected0, loader);
             AssertObservedCDSs(expected0, consumer);
 
@@ -568,7 +568,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             Assert.AreEqual(expected0.Length, consumer.ObservedDataSources.Count, "Non-blocking consumer observed a plugin loaded while a subscribe was occuring");
 
             // Allow InvalidA to be processed
-            blockingConsumer.ProcessOneCustomDataSource();
+            blockingConsumer.ProcessOneProcessingSource();
             taskSubscribe.Wait();
             Assert.IsTrue(taskSubscribe.Result, "Blocking consumer failed to subscribe");
 
@@ -581,13 +581,13 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             AssertObservedCDSs(expected0, blockingConsumer);
 
             // Allow InvalidB to be processed
-            blockingConsumer.ProcessOneCustomDataSource();
+            blockingConsumer.ProcessOneProcessingSource();
             taskConcurrentLoad.Wait();
             Assert.IsTrue(taskConcurrentLoad.Result, "Concurrent load failed");
 
             // Assert both observed both plugins
             var expected1 = new Type[] { typeof(InvalidSchemaA), typeof(InvalidSchemaB) };
-            AssertNumberCustomDataSourcesLoaded(expected1.Length, loader, consumer, blockingConsumer);
+            AssertNumberProcessingSourcesLoaded(expected1.Length, loader, consumer, blockingConsumer);
             AssertLoadedCDSs(expected1, loader);
             AssertObservedCDSs(expected1, consumer);
         }
@@ -600,7 +600,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             {
                 sut.Dispose();
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.LoadedCustomDataSources);
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.LoadedProcessingSources);
 
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Subscribe(new MockPluginsConsumer()));
                 await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.SubscribeAsync(new MockPluginsConsumer()));
@@ -682,12 +682,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         ///     <paramref name="consumers"/> has observed <paramref name="expected"/>
         ///     custom data sources 
         /// </summary>
-        private static void AssertNumberCustomDataSourcesLoaded(int expected, PluginsLoader loader, params MockPluginsConsumer[] consumers)
+        private static void AssertNumberProcessingSourcesLoaded(int expected, PluginsLoader loader, params MockPluginsConsumer[] consumers)
         {
             Assert.AreEqual(expected,
-                loader.LoadedCustomDataSources.Count(),
+                loader.LoadedProcessingSources.Count(),
                 "The plugins loader reports having loaded {0} instead of {1} custom data sources",
-                loader.LoadedCustomDataSources.Count(),
+                loader.LoadedProcessingSources.Count(),
                 expected);
             foreach (var consumer in consumers)
             {
@@ -706,7 +706,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         /// </summary>
         private static void AssertLoadedCDSs(Type[] types, PluginsLoader loader)
         {
-            AssertCDSs(types, loader.LoadedCustomDataSources);
+            AssertCDSs(types, loader.LoadedProcessingSources);
         }
 
         /// <summary>
@@ -739,19 +739,19 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
                 Assert.AreEqual(expected.Guid,
                     actual.Guid,
-                    "The loaded CustomDataSource at index {0} had the GUID {1} instead of {2}",
+                    "The loaded ProcessingSource at index {0} had the GUID {1} instead of {2}",
                     i,
                     actual.Guid,
                     expected.Guid);
                 Assert.AreEqual(expected.Name,
                     actual.Name,
-                    "CustomDataSource {0} was loaded with the name {1} instead of {2}",
+                    "ProcessingSource {0} was loaded with the name {1} instead of {2}",
                     actual.Guid,
                     actual.Name,
                     expected.Name);
                 Assert.AreEqual(expected.Description,
                     actual.Description,
-                    "CustomDataSource {0} was loaded with the description {1} instead of {2}",
+                    "ProcessingSource {0} was loaded with the description {1} instead of {2}",
                     actual.Guid,
                     actual.Description,
                     expected.Description);
@@ -800,11 +800,11 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             this.ObservedDataSources = new List<ProcessingSourceReference>();
         }
 
-        public virtual void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference customDataSource)
+        public virtual void OnProcessingSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference processingSource)
         {
             var name = (pluginName != null) ? pluginName : "";
 
-            this.ObservedDataSources.Add(customDataSource);
+            this.ObservedDataSources.Add(processingSource);
 
             // Keep track of every CDSR loaded for a given plugin name,
             // even the ones loaded without a name
@@ -813,7 +813,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                 loaded = new List<ProcessingSourceReference>();
                 this.ObservedDataSourcesByPluginName.Add(name, loaded);
             }
-            loaded.Add(customDataSource);
+            loaded.Add(processingSource);
 
             // If a name was provided, keep track of the version
             if (pluginName != null)
@@ -829,21 +829,21 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
     }
 
     /// <summary>
-    ///     A <seealso cref="MockPluginsConsumer"/> that does not return from <see cref="OnCustomDataSourceLoaded(string, Version, ProcessingSourceReference)"/>
-    ///     until <see cref="ProcessOneCustomDataSource"/> is called.
+    ///     A <seealso cref="MockPluginsConsumer"/> that does not return from <see cref="OnProcessingSourceLoaded(string, Version, ProcessingSourceReference)"/>
+    ///     until <see cref="ProcessOneProcessingSource"/> is called.
     /// </summary>
     internal class BlockingPluginsConsumer
         : MockPluginsConsumer
     {
         private AutoResetEvent handle = new AutoResetEvent(false);
 
-        public override void OnCustomDataSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference customDataSource)
+        public override void OnProcessingSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference processingSource)
         {
             handle.WaitOne();
-            base.OnCustomDataSourceLoaded(pluginName, pluginVersion, customDataSource);
+            base.OnProcessingSourceLoaded(pluginName, pluginVersion, processingSource);
         }
 
-        public void ProcessOneCustomDataSource()
+        public void ProcessOneProcessingSource()
         {
             handle.Set();
         }

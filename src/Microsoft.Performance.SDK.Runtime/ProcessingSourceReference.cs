@@ -38,7 +38,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     The <see cref="Type"/> of instance being referenced by this instance.
         /// </param>
         /// <param name="metadata">
-        ///     The CustomDataSource metadata.
+        ///     The <see cref="IProcessingSource"/> metadata.
         /// </param>
         /// <param name="dataSourceAttributes">
         ///     The declared data sources.
@@ -73,7 +73,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     The factory function for creating the instance.
         /// </param>
         /// <param name="metadata">
-        ///     The CustomDataSource metadata.
+        ///     The <see cref="IProcessingSource"/> metadata.
         /// </param>
         /// <param name="dataSourceAttributes">
         ///     The declared data sources.
@@ -270,7 +270,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <list type="bullet">
         ///         <item>must be public.</item>
         ///         <item>must be concrete.</item>
-        ///         <item>must implement ICustomDataSource somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="IProcessingSource"/> somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///         <item>must be decorated with the <see cref="ProcessingSourceAttribute"/>.</item>
         ///         <item>must be decorated with one (1) or more <see cref="DataSourceAttribute"/>s.</item>

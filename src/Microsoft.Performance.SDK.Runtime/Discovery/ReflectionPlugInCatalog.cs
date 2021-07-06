@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     ///     will be set to a non-null value. If <c>false</c> is returned, <paramref name="reference" />
     ///     will be set to <c>null</c>.
     /// </returns>
-    public delegate bool TryCreateCustomDataSourceReferenceDelegate(
+    public delegate bool TryCreateProcessingSourceReferenceDelegate(
         Type type,
         out ProcessingSourceReference reference);
 
@@ -40,7 +40,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         : IPlugInCatalog,
           IExtensionTypeObserver
     {
-        private TryCreateCustomDataSourceReferenceDelegate referenceFactory;
+        private TryCreateProcessingSourceReferenceDelegate referenceFactory;
 
         private Dictionary<Type, ProcessingSourceReference> loadedDataSources;
 
@@ -76,7 +76,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </param>
         /// <param name="referenceFactory">
         ///     The function to use to try to create references from a given
-        ///     <see cref="Type"/>. See <see cref="TryCreateCustomDataSourceReferenceDelegate"/>.
+        ///     <see cref="Type"/>. See <see cref="TryCreateProcessingSourceReferenceDelegate"/>.
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="extensionDiscovery"/> is <c>null</c>.
@@ -85,7 +85,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </exception>
         public ReflectionPlugInCatalog(
             IExtensionTypeProvider extensionDiscovery,
-            TryCreateCustomDataSourceReferenceDelegate referenceFactory)
+            TryCreateProcessingSourceReferenceDelegate referenceFactory)
         {
             Guard.NotNull(extensionDiscovery, nameof(extensionDiscovery));
             Guard.NotNull(referenceFactory, nameof(referenceFactory));

@@ -197,11 +197,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             try
             {
                 var result = ProcessingSourceReference.TryCreateReference(
-                    typeof(DisposableCustomDataSource),
+                    typeof(DisposableProcessingSource),
                     out sut);
                 Assert.IsTrue(result);
 
-                var instance = sut.Instance as DisposableCustomDataSource;
+                var instance = sut.Instance as DisposableProcessingSource;
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(0, instance.DisposeCalls);
 
@@ -223,11 +223,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             try
             {
                 var result = ProcessingSourceReference.TryCreateReference(
-                    typeof(DisposableCustomDataSource),
+                    typeof(DisposableProcessingSource),
                     out sut);
                 Assert.IsTrue(result);
 
-                var instance = sut.Instance as DisposableCustomDataSource;
+                var instance = sut.Instance as DisposableProcessingSource;
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(0, instance.DisposeCalls);
 
@@ -270,14 +270,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var fakeProcessor = new FakeCustomDataProcessor();
 
             var result = ProcessingSourceReference.TryCreateReference(
-                typeof(DisposableCustomDataSource),
+                typeof(DisposableProcessingSource),
                 out var sut);
 
             Assert.IsTrue(result);
             Assert.IsNotNull(sut);
             Assert.IsFalse(sut.TrackedProcessors.Any());
 
-            var instance = sut.Instance as DisposableCustomDataSource;
+            var instance = sut.Instance as DisposableProcessingSource;
             Assert.IsNotNull(instance);
             instance.ProcessorCreateFactory = () => fakeProcessor;
 
@@ -297,7 +297,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
                 () => cds,
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".csv"),
@@ -317,7 +317,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
                 () => cds,
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".csv"),
@@ -342,7 +342,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
                 () => cds,
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
             var dataSource = new FileDataSource("test.txt");
@@ -363,7 +363,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
                 () => cds,
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".csv"),
@@ -679,11 +679,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [ProcessingSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
         [FileDataSource("ext")]
-        public class DisposableCustomDataSource
+        public class DisposableProcessingSource
             : IProcessingSource,
               IDisposable
         {
-            public DisposableCustomDataSource()
+            public DisposableProcessingSource()
             {
                 this.DataTables = Enumerable.Empty<TableDescriptor>();
                 this.MetadataTables = Enumerable.Empty<TableDescriptor>();

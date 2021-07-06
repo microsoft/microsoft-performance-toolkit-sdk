@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         /// <summary>
         ///     Reads a configuration for the given custom data source.
         /// </summary>
-        /// <param name="customDataSourceType">
+        /// <param name="processingSourceType">
         ///     Type of the custom data source.
         /// </param>
         /// <param name="logger">
@@ -29,9 +29,9 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         /// <returns>
         ///     A PlugInConfiguration on success; <c>null</c> on failure.
         /// </returns>
-        public static PlugInConfiguration ReadFromDefaultFile(Type customDataSourceType, ILogger logger)
+        public static PlugInConfiguration ReadFromDefaultFile(Type processingSourceType, ILogger logger)
         {
-            var assemblyPath = customDataSourceType.Assembly.Location;
+            var assemblyPath = processingSourceType.Assembly.Location;
             var directory = Path.GetDirectoryName(assemblyPath);
 
             return ReadFromDefaultFile(directory, logger);

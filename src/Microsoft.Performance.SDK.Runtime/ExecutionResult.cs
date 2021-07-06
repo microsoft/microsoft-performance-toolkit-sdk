@@ -59,7 +59,7 @@ namespace Microsoft.Performance.SDK.Runtime
             Guard.NotNullOrWhiteSpace(metadataName, nameof(metadataName));
             Guard.NotNull(builtMetadataTables, nameof(builtMetadataTables));
 
-            this.AssociatedWithCustomDataSource = true;
+            this.AssociatedWithProcessingSource = true;
 
             // Exception may be null.
 
@@ -163,7 +163,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     When true, this object has additional data from a custom data source and
         ///     custom data processor.
         /// </summary>
-        public bool AssociatedWithCustomDataSource { get; }
+        public bool AssociatedWithProcessingSource { get; }
 
         // ---- The properties below are associated with a custom data source and custom data processor ----
 

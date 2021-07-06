@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
             var actual = cdsr.TryGetFileExtensions();
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>(extensions));
 
             var actual = cdsr.TryGetFileExtensions();
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
             var actual = cdsr.TryGetCanonicalFileExtensions();
@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>(extensions));
 
             var actual = cdsr.TryGetCanonicalFileExtensions();
@@ -98,7 +98,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -124,7 +124,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -148,7 +148,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -174,7 +174,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -197,7 +197,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -223,7 +223,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -247,7 +247,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -273,7 +273,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     fileAttr1,
@@ -293,14 +293,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
             Assert.IsFalse(cdsr.AreDirectoriesSupported());
 
             cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new DirectoryDataSourceAttribute("Empty"),
@@ -315,14 +315,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>());
 
             Assert.IsFalse(cdsr.AreExtensionlessFilesSupported());
 
             cdsr = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
-                Any.CustomDataSourceAttribute(),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<DataSourceAttribute>
                 {
                     new ExtensionlessFileDataSourceAttribute("Empty"),

@@ -12,20 +12,20 @@ using System.Collections.Generic;
 // This setup mimicks a plugin containing an older, unmodified custom data source in
 // a new release. In the event that both versions of the plugin are loaded, we want
 // to ensure that only one instance of the CDS is advertised by the plugin loader.
-namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockCustomDataSources
+namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Plugins.MockProcessingSources
 {
-    [CustomDataSource(
-    "{571640BE-E380-483A-81D8-A9A79EDCFF1E}", "Mock CDS - Valid A v2.0.0", "A mock valid data source A2.")]
+    [ProcessingSource(
+    "{571640BE-E380-483A-81D8-A9A79EDCFF1E}", "Mock PS - Valid A v2.0.0", "A mock valid data source A2.")]
     [FileDataSource(".sdk")]
     public class ValidSchemaA2
-    : CustomDataSourceBase
+    : ProcessingSource
     {
         protected override ICustomDataProcessor CreateProcessorCore(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
         {
             throw new System.NotImplementedException();
         }
 
-        protected override bool IsFileSupportedCore(string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
         {
             return true;
         }
