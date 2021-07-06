@@ -6,11 +6,11 @@ specific formats) and
 * zero or more __data outputs__
 
 
-A `CustomDatasource` (CDS) acts as the entry point for the SDK runtime to discover and create these mappings. 
-An SDK plugin may contain more than one CDS, but it is __highly recommended__ to only include one CDS per 
+A `ProcessingSource` (PS) acts as the entry point for the SDK runtime to discover and create these mappings. 
+An SDK plugin may contain more than one PS, but it is __highly recommended__ to only include one PS per 
 assembly inside a plugin.
 
-A standard CDS will utilize a `CustomDataProcessor` (CDP) to process the data sources that the SDK runtime provides it.
+A standard PS will utilize a `CustomDataProcessor` (CDP) to process the data sources that the SDK runtime provides it.
 
 A plugin may also define __tables__ that can be used by viewers such as Windows Performance Analyzer (WPA) to display the 
 processed data in an organized, interactable collection of rows. Tables are discovered and passed into CDPs by the SDK 
@@ -19,15 +19,15 @@ runtime.
 The SDK also supports advanced data processing pipelines through data cookers and extensions, but these topics are 
 covered in the advanced documentaton. Refer to [Overview](../Overview.md) for more information.
 
-In this tutorial, we will explore creating a simple SDK plugin that has one CDS, one CDP, and one table. 
+In this tutorial, we will explore creating a simple SDK plugin that has one PS, one CDP, and one table. 
 Refer to [the following sample](../../samples/SimpleDataSource/SampleAddIn.csproj) for source code that implements the steps outlined in this file.
 
 ## Requirements of a Simple Plugin
 
 To create a simple plugin, you must:
 
-1. Create a public class that implements the abstract class `CustomDataSourceBase`. This is your Custom Data Source 
-   (CDS)
+1. Create a public class that implements the abstract class `Processing`. This is your Processing Source 
+   (PS)
 2. Create a public class that implements the abstract class `CustomDataProcessorBase`. This your Custom Data Processor 
    (CDP)
 3. Create one or more data table classes. These classes must:
@@ -37,24 +37,24 @@ To create a simple plugin, you must:
      about the table. If these requirements are not met, the SDK runtime will not be able to find and pass your tables 
      to your CDP
 
-## Implementing a Custom Data Source Class
+## Implementing a Processing Class
 
-1. Create a public class that extends the abstract class `CustomDataSourceBase`. Note that the class is decorated with 
-   two attributes: `CustomDataSourceAttribute` and `FileDataSourceAttribute`. The former is used by the SDK runtime to 
-   locate Custom Data Sources. The latter identifies a type of data source that the CDS can consume.
+1. Create a public class that extends the abstract class `ProcessingSource`. Note that this example is decorated with 
+   two attributes: `ProcessingSourceAttribute` and `FileDataSourceAttribute`. The former is used by the SDK runtime to 
+   locate `ProcessingSource`s. The latter identifies a type of data source that the PS can consume.
 
    ```cs
-   [CustomDataSource(
-      "{F73EACD4-1AE9-4844-80B9-EB77396781D1}",  // The GUID must be unique for your Custom Data Source. You can use 
+   [ProcessingSource(
+      "{F73EACD4-1AE9-4844-80B9-EB77396781D1}",  // The GUID must be unique for your ProcessingSource. You can use 
                                                  // Visual Studio's Tools -> Create Guid… tool to create a new GUID
-      "Simple Data Source",                      // The Custom Data Source MUST have a name
-      "A data source to count words!")]          // The Custom Data Source MUST have a description
+      "Simple Data Source",                      // The ProcessingSource MUST have a name
+      "A data source to count words!")]          // The ProcessingSource MUST have a description
    [FileDataSource(
       ".txt",                                    // A file extension is REQUIRED
       "Text files")]                             // A description is OPTIONAL. The description is what appears in the 
                                                  // file open menu to help users understand what the file type actually 
                                                  // is. 
-   public class SimpleCustomDataSource : CustomDataSourceBase
+   public class SimpleProcessingSource : ProcessingSource
    {
    }
    ```
@@ -71,15 +71,15 @@ To create a simple plugin, you must:
    ```
 
 3. Overwrite the `IsFileSupportedCore` method. This is where your class will determine if a given file contains data 
-   appropriate to your CDS. For example, if your CDS consumes `.xml` files, not all `.xml` files will be valid for your
-   CDS. Use this method as an opportunity to filter out the files that aren't consumable by this CDS.  
+   appropriate to your PS. For example, if your PS consumes `.xml` files, not all `.xml` files will be valid for your
+   PS. Use this method as an opportunity to filter out the files that aren't consumable by this PS.  
    :warning: This method will be changed before 1.0 release - more details to come in patch notes.
    ```cs
    protected override bool IsFileSupportedCore(string path)
    {
       //
       // This method is called for every file whose filetype matches the one declared in the FileDataSource attribute. It may be useful
-      // to peek inside the file to truly determine if you can support it, especially if your CDS supports a common
+      // to peek inside the file to truly determine if you can support it, especially if your PS supports a common
       // filetype like .txt or .csv.
       // For this sample, we'll always return true for simplicity.
       //
@@ -88,8 +88,8 @@ To create a simple plugin, you must:
    }
    ```
 
-4. Overwrite the `CreateProcessorCore` method. When the SDK needs to process files your CDS supports, it will obtain an 
-   instance of your CDP by calling this method. This is also where your CDS learns about the files, passed as 
+4. Overwrite the `CreateProcessorCore` method. When the SDK needs to process files your PS supports, it will obtain an 
+   instance of your CDP by calling this method. This is also where your PS learns about the files, passed as 
    `IDataSource`s, that it will need to process.
 
    ```cs
@@ -188,7 +188,7 @@ Now let's implement the `SimpleCustomDataProcessor` being returned above.
    ```
 
 5. Override the `BuildTableCore` method. This method is responsible for instantiating a given table. This method is 
-called for each table identified by the SDK runtime as part of this CDS (see more on this in the "Create Tables" section). 
+called for each table identified by the SDK runtime as part of this PS (see more on this in the "Create Tables" section). 
 The table to build is identified by the `TableDescriptor` passed in as a parameter to this method. If the CDP isn't interested 
 in the given table, it may return immediately.
 
@@ -209,7 +209,7 @@ in the given table, it may return immediately.
 
 ## Create Tables
 
-Simple custom data sources provide tables as output. A table is set of columns and rows grouped together to provide output for related data. 
+Simple processing sources provide tables as output. A table is set of columns and rows grouped together to provide output for related data. 
 Tables must be created (built) to be a plugin output.
 
 Here are the requirements for a table to be discovered by the SDK runtime:

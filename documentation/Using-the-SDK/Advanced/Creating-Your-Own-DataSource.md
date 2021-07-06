@@ -7,9 +7,9 @@ beyond the `FileDataSource` and `DirectoryDataSource` provided by the SDK.
 
 For users that have data stored somewhere other than files or directories, it is
 desirable for the SDK to treat their `DataSource` as a first class `DataSource`.
-For example, suppose that you are writing many `CustomDataSource`s that get
+For example, suppose that you are writing many `ProcessingSource`s that get
 their data from a SQL database or from a web service. Rather than having a file
-with a URI in it, it would be nice to say that your `CustomDataSource` uses a 
+with a URI in it, it would be nice to say that your `ProcessingSource` uses a 
 `SqlServerDataSource` or a `WebServiceDataSource`.
 
 # Requirements
@@ -24,15 +24,15 @@ following:
 - Optionally implement the `Accepts` method on your new attribute.
 
 Once you have implemented these three items, the SDK will recognize your new
-`DataSource` and route it to `CustomDataSource`s as appropriate.
+`DataSource` and route it to `ProcessingSource`s as appropriate.
 
 # Implementation
 
 This section outlines implementing a new `DataSource` type to be
-consumed by `CustomDataSource`s. For the purposes of this walkthrough, we will
+consumed by `ProcessingSource`s. For the purposes of this walkthrough, we will
 be implementing a `DataSource` backed by data from a web service. This example will
 - Create a new `WebServiceDataSource` class derived from `DataSource`.
-- Create a new `WebServiceDataSourceAttribute` so that `CustomDataSource`s
+- Create a new `WebServiceDataSourceAttribute` so that `ProcessingSource`s
   can consume `WebServiceDataSource`s
 - Implement `Accepts` on the `WebServiceDataSourceAttribute`
 
@@ -57,7 +57,7 @@ public class WebServiceDataSource
 
 ## DataSourceAttribute
 
-We need some way for our `CustomDataSource`s to denote that they accept our
+We need some way for our `ProcessingSource`s to denote that they accept our
 `WebServiceDataSource`. So we will create a new `WebServiceDataSourceAttribute`:
 
 ````cs
@@ -83,18 +83,18 @@ public sealed class WebServiceDataSourceAttribute
 ## Accepts
 
 Finally, by default, all `DataSource`s of a given type will be routed to 
-`CustomDataSource`s that are decorated with its corresponding attribute. Currently,
-_ANY_ instance of a `WebServiceDataSource` will be routed to any `CustomDataSource`
+`ProcessingSource`s that are decorated with its corresponding attribute. Currently,
+_ANY_ instance of a `WebServiceDataSource` will be routed to any `ProcessingSource`
 decorated with the `WebServiceDataSourceAttribute`, and the `IsDataSourceSupportedCore`
 method would have to interrogate each `DataSource` to determine if it is supported.
 It would be nice to say "I only care about certain servces; don't even bother
 with others." This is what the `Accepts` method allows. The `Accepts` method is used
-to filter incoming `DataSource` objects before they ever reach a `CustomDataSource`,
+to filter incoming `DataSource` objects before they ever reach a `ProcessingSource`,
 so that your `IsDataSourceSupportedCore` logic is simpler. For example, the `FileDataSourceAttribute`
 in the SDK uses this method to reject anything that does not match the given
-file extension, so `CustomDataSource`s decorated with `FileDataSource(".txt")`, for
+file extension, so `ProcessingSource`s decorated with `FileDataSource(".txt")`, for
 example, only ever see `.txt` files. You should still implement
-`IsDataSourceSupportedCore` in your `CustomDataSource` to do the final determination.
+`IsDataSourceSupportedCore` in your `ProcessingSource` to do the final determination.
 
 ````cs
 // `DataSourceAttribute` has `AttributeUsage`, so you do not need to add that
@@ -144,13 +144,13 @@ with the rest of the SDK.
 
 namespace Sample
 {
-    [CustomDataSource(
+    [ProcessingSource(
         /* Guid here */,
         /* Name here */,
         /* Description here */)]
     [WebServiceDataSource("http://www.contoso.com")]
     public class ContosoDataSource
-        : CustomDataSourceBase
+        : ProcessingSource
     {
         protected override bool IsDataSourceSupportedCore(
             IDataSource dataSource
@@ -210,6 +210,6 @@ namespace Sample
 # Conclusion
 
 We have seen how to create a new kind of `DataSource` an how to seamlessly
-allow a `CustomDataSource` to leverage our new `DataSource`.
+allow a `ProcessingSource` to leverage our new `DataSource`.
 
 [Back to Advanced Topics](Overview.md)
