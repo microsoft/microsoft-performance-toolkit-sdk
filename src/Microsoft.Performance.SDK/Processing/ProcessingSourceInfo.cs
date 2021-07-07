@@ -8,7 +8,11 @@ namespace Microsoft.Performance.SDK.Processing
     ///     exposes authorship information, licensing information, and
     ///     any other information about your data source.
     /// </summary>
-    public sealed class ProcessingSourceInfo
+    /// <remarks>
+    ///     This class will be sealed prior to SDK v1.0.0 release candidate 1. It is
+    ///     currently not sealed to maintain backwards compatability with <see cref="CustomDataSourceInfo"/>
+    /// </remarks>
+    public class ProcessingSourceInfo
     {
         /// <summary>
         ///     Gets or sets the contact information of the owners
