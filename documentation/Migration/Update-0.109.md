@@ -11,14 +11,7 @@ There are a number of breaking changes in this version; please see the release n
 
 ## Custom Data Source
 
-The SDK has renamed `CustomDataSource` to `ProcessingSource`. All associated `CustomDataSource` classes have also
-been renamed.
-To fix compilation issues, the following references must be renamed:
-- `CustomDataSourceBase` -> `ProcessingSource`
-- `CustomDataSourceAttribute` -> `ProcessingSourceAttribute`
-- `CustomDataSourceInfo` -> `ProcessingSourceInfo`
-
-In order to update your `ProcessingSource` (formerly `CustomDataSource`), you will need to
+In order to update your `CustomDataSource`, (now named `ProcessingSource` - see below) you will need to
 - change your `IsFileSupportedCore(string)` method to `IsDataSourceSupportedCore(IDataSource)`
 - Update the logic to act on the data source.
  for example:
@@ -37,13 +30,15 @@ protected override bool IsFileSupportedCore(string path)
         (Path.GetExtension(fds.FullPath) == ".txt")
  }
  ````
- If you are implementing `IProcessingSource` (formerly `ICustomDataSource`) directly then you will change you `IsFileSupported(string)` method to `IsDataSourceSupported(IDataSource)` and update the logic similar to above.
+ If you are implementing `ICustomDataSource` (now named `IProcessingSource` - see below) directly then you will change you `IsFileSupported(string)` method to `IsDataSourceSupported(IDataSource)` and update the logic similar to above.
 
  ## Engine
 
 The following are required if you are using the `Engine`:
 
-- Try-catch blocks that were expecting `UnsupportedDataSourceException`s to signal an invalid `ProcessingSource` in any of the `Add*` methods should be updated to catch `UnsupportedProcessingSourceException`:
+- `UnsupportedCustomDataSourceException` has been renamed to `UnsupportedProcessingSourceException`
+
+- Try-catch blocks that were expecting `UnsupportedDataSourceException`s to signal an invalid `CustomDataSource`, (now named `ProcessingSource` - see below) in any of the `Add*` methods should be updated to catch `UnsupportedProcessingSourceException`:
 ````cs
 try
 {
@@ -153,12 +148,21 @@ var error = new ErrorInfo("error", "message")
 
 The following are changes that are not required, but may be useful to you.
 
-## ICustomDataSource
-The `ICustomDataSource` is now marked obsolete and will be removed prior to a v1.0.0 release candidate.
-You should update all references to use the renamed `IProcessingSource`.
-
-## ProcessingSource (formerly CustomDataSourceBase)
-
+## CustomDataSourceBase
 The method `SetApplicationEnvironmentCore` is now virtual, so you no longer have
 to override it if you do not want to. An `ApplicationEnvironment` property is
 now available on the base class that you may reference in your `ProcessingSource.`
+
+## Name changes
+
+The name "custom data source" will be phased out by SDK v1.0.0 release candidate 1. Any classes and 
+interfaces using this terminology must be renamed at that time. Existing classes have been marked 
+obsolete and will be removed by v1.0.0 release candidate 1.
+
+To prevent build breaks in the future, we recommend updating the following references:
+- `CustomDataSourceBase` -> `ProcessingSource`
+- `CustomDataSourceAttribute` -> `ProcessingSourceAttribute`
+- `CustomDataSourceInfo` -> `ProcessingSourceInfo`
+- `ICustomDataSource` -> `IProcessingSource`
+
+For v0.109, the SDK will still be compatible with any plugins using the now obsolete classes and interfaces. 
