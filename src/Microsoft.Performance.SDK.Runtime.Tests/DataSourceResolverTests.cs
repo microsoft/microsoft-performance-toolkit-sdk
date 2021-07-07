@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
     [DeploymentItem(TestCaseDataFileName)]
     public class DataSourceResolverTests
     {
-        public const string TestCaseDataFileName = @"TestData\DataResolverTestCases.xml";
+        public const string TestCaseDataFileName = @"TestData/DataResolverTestCases.xml";
 
         [TestMethod]
         [UnitTest]
@@ -40,13 +40,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_UnsupportedTypesNotAssignedToCds()
         {
-            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new[]
+            var fakeCds = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
-                },
-            };
+                });
 
             var fakeDs = new FakeDataSource("fake");
 
@@ -62,17 +62,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_FailedPreliminaryCheckNotAssignedToCds()
         {
-            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new DataSourceAttribute[]
+            var fakeCds = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
                     new FakeDataSourceAttribute()
                     {
                         PreliminaryCheckResult = false,
                     },
-                },
-            };
+                });
 
             var fakeDs = new FakeDataSource("fake");
 
@@ -88,17 +88,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_SucceededPreliminaryCheckFailedSupportsCheckNotAssignedToCds()
         {
-            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new DataSourceAttribute[]
+            var fakeCds = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
                     new FakeDataSourceAttribute()
                     {
                         PreliminaryCheckResult = true,
                     },
-                },
-            };
+                });
 
             var fakeDs = new FakeDataSource("fake");
 
@@ -114,21 +114,23 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_SucceededPreliminaryCheckSucceededSupportsCheckAssignedToCds()
         {
-            var fakeCds = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource))
-            {
-                DataSourcesSetter = new DataSourceAttribute[]
+            var cds = new FakeCustomDataSource();
+            var fakeCds = new CustomDataSourceReference(
+                typeof(FakeCustomDataSource),
+                () => cds,
+                Any.CustomDataSourceAttribute(),
+                new HashSet<DataSourceAttribute>
                 {
                     new FileDataSourceAttribute(".abc"),
                     new FakeDataSourceAttribute()
                     {
                         PreliminaryCheckResult = true,
                     },
-                },
-            };
+                });
 
             var fakeDs = new FakeDataSource("fake");
 
-            fakeCds.SupportedDataSources.Add(fakeDs);
+            cds.IsDataSourceSupportedReturnValue[fakeDs] = true;
 
             var assignment = DataSourceResolver.Assign(
                 new[] { fakeDs, },
@@ -288,10 +290,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 var cdsElements = customDataSourcesElement.GetChildren("CustomDataSource");
                 foreach (var cdsElement in cdsElements)
                 {
-                    var fakeReference = new FakeCustomDataSourceReference(typeof(FakeCustomDataSource));
+                    var cds = new FakeCustomDataSource();
 
                     var name = cdsElement.GetChild("Name").Value;
-                    fakeReference.NameSetter = name;
+                    var metadata = new CustomDataSourceAttribute(
+                        Guid.NewGuid().ToString(),
+                        name,
+                        "Description");
 
                     if (cdsElement.TryGetChild("Supports", out var supportElement))
                     {
@@ -305,14 +310,21 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                                 dataSourcesNameToImpl[dsName] = ds;
                             }
 
-                            fakeReference.SupportedDataSources.Add(ds);
+                            cds.IsDataSourceSupportedReturnValue[ds] = true;
                         }
-
-                        fakeReference.DataSourcesSetter = new[]
-                        {
-                            new FakeDataSourceAttribute(),
-                        };
                     }
+
+                    var fakeReference = new CustomDataSourceReference(
+                        typeof(FakeCustomDataSource),
+                        () => cds,
+                        metadata,
+                        new HashSet<DataSourceAttribute>
+                        {
+                            new FakeDataSourceAttribute
+                            {
+                                PreliminaryCheckResult = true,
+                            }
+                        });
 
                     testCaseToHydrate.CustomDataSources.Add(fakeReference);
                     cdsNameToImpl[name] = fakeReference;

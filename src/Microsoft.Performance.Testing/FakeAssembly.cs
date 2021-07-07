@@ -3,7 +3,6 @@
 
 using System;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Testing
 {
@@ -12,23 +11,35 @@ namespace Microsoft.Performance.Testing
     {
         public FakeAssembly()
         {
-            this.TypesToReturn = Type.EmptyTypes;
+            this.AssemblyName = new AssemblyName("MyFakeAssembly");
             this.CodeBaseToReturn = Guid.NewGuid().ToString();
             this.LocationToReturn = Guid.NewGuid().ToString();
+            this.ReferencedAssemblies = Array.Empty<AssemblyName>();
+            this.TypesToReturn = Type.EmptyTypes;
         }
 
-        public Type[] TypesToReturn { get; set; }
+        public AssemblyName AssemblyName { get; set; }
         public string CodeBaseToReturn { get; set; }
         public string LocationToReturn { get; set; }
+        public AssemblyName[] ReferencedAssemblies { get; set; }
+        public Type[] TypesToReturn { get; set; }
 
         public override string CodeBase => this.CodeBaseToReturn;
         public override string Location => this.LocationToReturn;
 
+        public override AssemblyName GetName()
+        {
+            return this.AssemblyName;
+        }
+
+        public override AssemblyName[] GetReferencedAssemblies()
+        {
+            return this.ReferencedAssemblies ?? Array.Empty<AssemblyName>();
+        }
+
         public override Type[] GetTypes()
         {
-            Assert.IsNotNull(this.TypesToReturn);
-
-            return this.TypesToReturn;
+            return this.TypesToReturn ?? Array.Empty<Type>();
         }
     }
 }

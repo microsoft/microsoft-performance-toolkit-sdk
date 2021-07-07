@@ -68,5 +68,22 @@ namespace Microsoft.Performance.SDK.Runtime
                 assemblyName.Version.Minor,
                 assemblyName.Version.Build);
         }
+
+        /// <summary>
+        ///     Determines whether the given <see cref="Assembly"/> references the
+        ///     SDK.
+        /// </summary>
+        /// <param name="self">
+        ///     The <see cref="Assembly"/> to check.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if <paramref name="self" /> references the SDK;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        public static bool ReferencesSdk(this Assembly self)
+        {
+            return self.GetReferencedAssemblies()
+                .Any(x => x.Name.Equals(SdkAssembly.Assembly.GetName().Name));
+        }
     }
 }

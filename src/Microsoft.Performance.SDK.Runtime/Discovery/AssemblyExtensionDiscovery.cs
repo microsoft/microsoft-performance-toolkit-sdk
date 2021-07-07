@@ -297,7 +297,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             watch.Stop();
             Console.Error.WriteLine("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
-            
+
             if (directoryErrors.Count > 0)
             {
                 Debug.Assert(!allLoaded);
@@ -317,7 +317,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 Debug.Assert(allLoaded);
                 error = null;
             }
-            
+
             return allLoaded;
         }
 
@@ -326,6 +326,18 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             out ErrorInfo error)
         {
             Guard.NotNull(assembly, nameof(assembly));
+
+            if (!assembly.ReferencesSdk())
+            {
+                //
+                // Without an SDK reference, there cannot be plugins
+                // or extensions in the assembly, so we can save some
+                // work by just skipping it.
+                //
+
+                error = ErrorInfo.None;
+                return true;
+            }
 
             var assemblyName = assembly.GetName().FullName;
 

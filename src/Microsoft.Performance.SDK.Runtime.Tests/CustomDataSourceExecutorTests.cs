@@ -764,9 +764,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsTrue(result.IsProcessorFaulted);
         }
 
-        private static FakeCustomDataSourceReference CreateReference(ICustomDataSource source)
+        private static CustomDataSourceReference CreateReference(ICustomDataSource source)
         {
-            return new FakeCustomDataSourceReference(source);
+            return new CustomDataSourceReference(source);
         }
 
         [CustomDataSource("{D6E5DC8D-E19D-4E55-99D9-746813C55A97}", "Test", "Test")]
