@@ -4,32 +4,35 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Testing.SDK
 {
+    [CustomDataSource("{0B48CF41-45DB-42C1-8B23-E568EF5F560E}", "Fake", "This is a test class.")]
     public sealed class FakeCustomDataSource
         : ICustomDataSource
     {
-        public IEnumerable<TableDescriptor> DataTables => throw new NotImplementedException();
+        public IEnumerable<TableDescriptor> DataTables => Enumerable.Empty<TableDescriptor>();
 
-        public IEnumerable<TableDescriptor> MetadataTables => throw new NotImplementedException();
+        public IEnumerable<TableDescriptor> MetadataTables => Enumerable.Empty<TableDescriptor>();
 
-        public IEnumerable<Option> CommandLineOptions => throw new NotImplementedException();
+        public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
 
+
+        public ICustomDataProcessor CreateProcessorReturnValue { get; set; }
         public ICustomDataProcessor CreateProcessor(IDataSource dataSource, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
         {
-            throw new NotImplementedException();
+            return this.CreateProcessorReturnValue;
         }
 
         public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
         {
-            throw new NotImplementedException();
+            return this.CreateProcessorReturnValue;
         }
 
         public void DisposeProcessor(ICustomDataProcessor processor)
         {
-            throw new NotImplementedException();
         }
 
         public CustomDataSourceInfo GetAboutInfo()
@@ -42,9 +45,24 @@ namespace Microsoft.Performance.Testing.SDK
             throw new NotImplementedException();
         }
 
+
+        public List<IDataSource> IsDataSourceSupportedCalls { get; } = new List<IDataSource>();
+        public Exception IsDataSourceSupportedError { get; set; }
+        public Dictionary<IDataSource, bool> IsDataSourceSupportedReturnValue { get; } = new Dictionary<IDataSource, bool>();
         public bool IsDataSourceSupported(IDataSource dataSource)
         {
-            throw new NotImplementedException();
+            this.IsDataSourceSupportedCalls.Add(dataSource);
+            if (this.IsDataSourceSupportedError != null)
+            {
+                throw this.IsDataSourceSupportedError;
+            }
+            
+            if (!this.IsDataSourceSupportedReturnValue.TryGetValue(dataSource, out var r))
+            {
+                return false;
+            }
+
+            return r;
         }
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)

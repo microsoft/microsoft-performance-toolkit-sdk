@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
@@ -72,6 +73,14 @@ namespace Microsoft.Performance.Testing.SDK
             var file = Path.Combine(folder, fileName) + extension;
             File.WriteAllText(file, "THIS IS A TEST FILE");
             return file;
+        }
+
+        public static CustomDataSourceAttribute CustomDataSourceAttribute()
+        {
+            return new CustomDataSourceAttribute(
+                Guid.NewGuid().ToString(),
+                "AnyCds",
+                "Irrelevant");
         }
 
         private sealed class FakeDataSource

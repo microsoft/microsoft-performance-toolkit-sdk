@@ -203,8 +203,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             var exclusions = new[] { "Blawp.dll", };
 
-            this.FindFiles.enumerateFiles = 
-                (directory, searchPattern, searchOptions) => new List<string>() {exclusions[0].ToLower(),};
+            this.FindFiles.enumerateFiles =
+                (directory, searchPattern, searchOptions) => new List<string>() { exclusions[0].ToLower(), };
 
             this.Observers.Add(new TestExtensionObserver());
 
@@ -225,8 +225,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             var exclusions = new[] { "Blawp.dll", };
 
-            this.FindFiles.enumerateFiles = 
-                (directory, searchPattern, searchOptions) => new List<string>() {exclusions[0].ToLower(),};
+            this.FindFiles.enumerateFiles =
+                (directory, searchPattern, searchOptions) => new List<string>() { exclusions[0].ToLower(), };
 
             this.Observers.Add(new TestExtensionObserver());
             RegisterObservers();
@@ -241,6 +241,74 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true, out _);
 
             Assert.IsTrue(assemblyLoaded);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void ProcessAssemblies_ValidAssemblyThatDoesNotReferenceSdk_TypesNotEnumerated()
+        {
+            var files = new[] { "Blawp.dll", };
+            this.FindFiles.enumerateFiles =
+                (directory, searchPattern, searchOptions) =>
+                    searchPattern.EndsWith(".dll")
+                        ? new List<string>() { files[0].ToLower(), }
+                        : new List<string>();
+
+            var observer = new TestExtensionObserver();
+            this.Observers.Add(observer);
+            RegisterObservers();
+
+            var assembly = new FakeAssembly
+            {
+                TypesToReturn = new[]
+                {
+                    typeof(int),
+                    typeof(bool),
+                    typeof(string),
+                },
+            };
+
+            this.Loader.LoadAssemblyFunc = s => assembly;
+
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, out _);
+
+            Assert.AreEqual(0, observer.ProcessTypes.Count);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void ProcessAssemblies_ValidAssemblyThatReferencesSdk_TypesEnumerated()
+        {
+            var files = new[] { "Blawp.dll", };
+            this.FindFiles.enumerateFiles =
+                (directory, searchPattern, searchOptions) =>
+                    searchPattern.EndsWith(".dll")
+                        ? new List<string>() { files[0].ToLower(), }
+                        : new List<string>();
+
+            var observer = new TestExtensionObserver();
+            this.Observers.Add(observer);
+            RegisterObservers();
+
+            var assembly = new FakeAssembly
+            {
+                ReferencedAssemblies = new[]
+                {
+                    SdkAssembly.Assembly.GetName(),
+                },
+                TypesToReturn = new[]
+                {
+                    typeof(int),
+                    typeof(bool),
+                    typeof(string),
+                },
+            };
+
+            this.Loader.LoadAssemblyFunc = s => assembly;
+
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, out _);
+
+            CollectionAssert.AreEquivalent(assembly.TypesToReturn, observer.ProcessTypes);
         }
     }
 }

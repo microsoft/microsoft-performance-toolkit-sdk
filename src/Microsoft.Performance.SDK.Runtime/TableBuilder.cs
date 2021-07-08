@@ -157,7 +157,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         // Provides a default way of building TableDetails from the generators.
-        private TableDetails DefaultTableDetailsBuilder(IReadOnlyList<int> rows)
+        private TableDetails DefaultTableDetailsBuilder(IEnumerable<int> rows)
         {
             Guard.NotNull(rows, nameof(rows));
 
