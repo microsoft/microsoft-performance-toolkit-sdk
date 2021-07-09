@@ -151,3 +151,9 @@ The following are changes that are not required, but may be useful to you.
 The method `SetApplicationEnvironmentCore` is now virtual, so you no longer have
 to override it if you do not want to. An `ApplicationEnvironment` property is
 now available on the base class that you may reference in your `CustomDataSource.`
+
+## TableConfiguration
+
+The property `Layout` has been marked obsolete and will be removed prior to SDK v1.0.0 
+release candidate 1. If you are setting this property on a `TableConfiguration`, you 
+can move to setting the property on the table's `TableDescriptor`.
