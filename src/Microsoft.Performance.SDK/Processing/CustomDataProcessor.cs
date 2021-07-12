@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     simplifies some of the management of tables and processing.
     ///     This class is meant to be used in conjunction with <see cref="CustomDataSourceBase"/>.
     /// </summary>
-    public abstract class CustomDataProcessorBase
+    public abstract class CustomDataProcessor
         : ICustomDataProcessor,
           IDataDerivedTables
     {
@@ -26,10 +26,10 @@ namespace Microsoft.Performance.SDK.Processing
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CustomDataProcessorBase"/>
+        ///     Initializes a new instance of the <see cref="CustomDataProcessor"/>
         ///     class.
         /// </summary>
-        protected CustomDataProcessorBase(
+        protected CustomDataProcessor(
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,

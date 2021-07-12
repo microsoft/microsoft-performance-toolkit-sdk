@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Performance.SDK.Tests
 {
     [TestClass]
-    public class CustomDataProcessorBaseTests
+    public class CustomDataProcessorTests
     {
         private ProcessorOptions Options { get; set; }
         private IApplicationEnvironment ApplicationEnvironment { get; set; }
@@ -135,7 +135,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
 
         private sealed class MockProcessor
-            : CustomDataProcessorBase
+            : CustomDataProcessor
         {
             public MockProcessor(
                 ProcessorOptions options,

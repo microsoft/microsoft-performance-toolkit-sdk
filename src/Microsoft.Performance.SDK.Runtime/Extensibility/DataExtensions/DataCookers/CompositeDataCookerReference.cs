@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     ///     Represents a reference to a composite data cooker.
     /// </summary>
     internal sealed class CompositeDataCookerReference
-        : BaseDataCookerReference<CompositeDataCookerReference>,
+        : DataCookerReference<CompositeDataCookerReference>,
           ICompositeDataCookerReference
     {
         /// <summary>
