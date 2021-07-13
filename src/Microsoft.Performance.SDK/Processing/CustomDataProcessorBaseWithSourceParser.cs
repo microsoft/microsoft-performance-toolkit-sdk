@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <typeparam name="TKey">Type that will be used to identify data from the source that is relevant to this extension</typeparam>
     public abstract class CustomDataProcessorBaseWithSourceParser<T, TContext, TKey>
         : CustomDataProcessorBase,
-          ICustomDataProcessorWithSourceParser<T, TContext, TKey> 
+          ICustomDataProcessorWithSourceParser<T, TContext, TKey>
           where T : IKeyedDataType<TKey>
     {
         private readonly IDataProcessorExtensibilitySupport extensibilitySupport;
@@ -44,7 +44,7 @@ namespace Microsoft.Performance.SDK.Processing
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
             IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables) 
+            IEnumerable<TableDescriptor> metadataTables)
             : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
         {
             Guard.NotNull(sourceParser, nameof(sourceParser));
@@ -131,12 +131,13 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
 
-        /// <summary>
-        /// Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
-        /// </summary>
-        /// <typeparam name="TOutput">Data output type</typeparam>
-        /// <param name="dataOutputPath">Path to the data output</param>
-        /// <returns>Data output of the specified type</returns>
+        /// <inheritdoc/>
+        /// <remarks>
+        ///     Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     The source id in the <paramref name="dataOutputPath"/> does not match the data processor.
+        /// </exception>
         public TOutput QueryOutput<TOutput>(DataOutputPath dataOutputPath)
         {
             if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
@@ -149,11 +150,16 @@ namespace Microsoft.Performance.SDK.Processing
             return dataCooker.QueryOutput<TOutput>(dataOutputPath);
         }
 
-        /// <summary>
-        /// Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
-        /// </summary>
-        /// <param name="dataOutputPath">Path to the data output</param>
-        /// <returns>Data output as an <see cref="object"/></returns>
+        /// <inheritdoc/>
+        /// <remarks>
+        ///     Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     The source id in the <paramref name="dataOutputPath"/> does not match the data processor.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     The data cooker referenced by <paramref name="dataOutputPath"/> is not enabled on the data processor.
+        /// </exception>
         public object QueryOutput(DataOutputPath dataOutputPath)
         {
             if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
@@ -163,7 +169,63 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             var dataCooker = this.SourceProcessingSession.GetSourceDataCooker(dataOutputPath.CookerPath);
+            if (dataCooker == null)
+            {
+                throw new InvalidOperationException(string.Format(
+                    "The specified data cooker '{0}' is not enabled on this processor.",
+                    dataOutputPath.CookerPath));
+            }
+
             return dataCooker.QueryOutput(dataOutputPath);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        ///     Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
+        /// </remarks>
+        public bool TryQueryOutput<TOutput>(DataOutputPath identifier, out TOutput result)
+        {
+            bool success = TryQueryOutput(identifier, out var baseResult);
+            if (success)
+            {
+                try
+                {
+                    result = (TOutput)baseResult;
+                    return true;
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            result = default;
+            return false;
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        ///     Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
+        /// </remarks>
+        public bool TryQueryOutput(DataOutputPath dataOutputPath, out object result)
+        {
+            if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
+            {
+                result = default;
+                return false;
+            }
+
+            try
+            {
+                var dataCooker = this.SourceProcessingSession.GetSourceDataCooker(dataOutputPath.CookerPath);
+                result = dataCooker.QueryOutput(dataOutputPath);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            result = default;
+            return false;
         }
 
         /// <inheritdoc cref="CustomDataProcessorBase"/>

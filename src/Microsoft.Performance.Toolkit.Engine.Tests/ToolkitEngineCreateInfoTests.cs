@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -20,7 +21,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void Initialize()
         {
             Directory.CreateDirectory(ScratchDir);
-            this.Sut = new EngineCreateInfo();
+
+            var dir1 = Path.Combine(ScratchDir, "Dir1");
+            var dir2 = Path.Combine(ScratchDir, "Dir2");
+            Directory.CreateDirectory(dir1);
+            Directory.CreateDirectory(dir2);
         }
 
         [TestCleanup]
@@ -33,26 +38,19 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Ctor_ExtensionDirectory_IsCurrent()
         {
-            Assert.AreEqual(Environment.CurrentDirectory, this.Sut.ExtensionDirectory);
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void ExtensionDirectory_Null_SetToCurrent()
-        {
-            this.Sut.ExtensionDirectory = ScratchDir;
-            this.Sut.ExtensionDirectory = null;
-
-            Assert.AreEqual(Environment.CurrentDirectory, this.Sut.ExtensionDirectory);
+            this.Sut = new EngineCreateInfo();
+            Assert.AreEqual(1, this.Sut.ExtensionDirectories.Count());
+            Assert.AreEqual(Environment.CurrentDirectory, this.Sut.ExtensionDirectories.First());
         }
 
         [TestMethod]
         [IntegrationTest]
         public void ExtensionDirectory_ExistingDirectory_Sets()
         {
-            this.Sut.ExtensionDirectory = ScratchDir;
+            this.Sut = new EngineCreateInfo(ScratchDir);
 
-            Assert.AreEqual(ScratchDir, this.Sut.ExtensionDirectory);
+            Assert.AreEqual(1, this.Sut.ExtensionDirectories.Count());
+            Assert.AreEqual(ScratchDir, this.Sut.ExtensionDirectories.First());
         }
 
         [TestMethod]
@@ -63,7 +61,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             File.WriteAllText(file, "test");
 
             var e = Assert.ThrowsException<InvalidExtensionDirectoryException>(
-                () => this.Sut.ExtensionDirectory = file);
+                () => new EngineCreateInfo(file));
             Assert.AreEqual(file, e.Path);
         }
 
@@ -74,7 +72,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var doesNotExist = Path.Combine(ScratchDir, "doesNotExist");
 
             var e = Assert.ThrowsException<InvalidExtensionDirectoryException>(
-                () => this.Sut.ExtensionDirectory = doesNotExist);
+                () => new EngineCreateInfo(doesNotExist));
             Assert.AreEqual(doesNotExist, e.Path);
         }
 
@@ -84,9 +82,36 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
             var relative = Path.GetFileName(ScratchDir);
 
-            this.Sut.ExtensionDirectory = relative;
+            this.Sut = new EngineCreateInfo(relative);
 
-            Assert.AreEqual(ScratchDir, this.Sut.ExtensionDirectory);
+            Assert.AreEqual(1, this.Sut.ExtensionDirectories.Count());
+            Assert.AreEqual(ScratchDir, this.Sut.ExtensionDirectories.First());
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void ExtensionDirectories_MultipePaths_Sets()
+        {
+            var dir1 = Path.Combine(ScratchDir, "Dir1");
+            var dir2 = Path.Combine(ScratchDir, "Dir2");
+
+            this.Sut = new EngineCreateInfo(new[] { dir1, dir2 });
+
+            Assert.AreEqual(2, this.Sut.ExtensionDirectories.Count());
+            Assert.IsTrue(this.Sut.ExtensionDirectories.Contains(dir1));
+            Assert.IsTrue(this.Sut.ExtensionDirectories.Contains(dir2));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void ExtensionDirectories_AnInvalidPath_Throws()
+        {
+            var dir1 = Path.Combine(ScratchDir, "Dir1");
+            var dirDoesNotExist = Path.Combine(ScratchDir, "doesNotExist");
+
+            var e = Assert.ThrowsException<InvalidExtensionDirectoryException>(
+                () => new EngineCreateInfo(new[] { dir1, dirDoesNotExist }));
+            Assert.AreEqual(dirDoesNotExist, e.Path);
         }
     }
 }

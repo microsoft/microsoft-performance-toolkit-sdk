@@ -56,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private DataExtensionFactory factory;
         private ExtensionRoot extensionRoot;
 
-        private string extensionDirectory;
+        private IReadOnlyCollection<string> extensionDirectories;
         private bool isProcessed;
         private IEnumerable<ErrorInfo> creationErrors;
 
@@ -104,18 +104,18 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public string ExtensionDirectory
+        public IReadOnlyCollection<string> ExtensionDirectories
         {
             get
             {
                 this.ThrowIfDisposed();
-                return this.extensionDirectory;
+                return this.extensionDirectories;
             }
             private set
             {
                 Debug.Assert(!this.isDisposed);
                 this.ThrowIfDisposed();
-                this.extensionDirectory = value;
+                this.extensionDirectories = value;
             }
         }
 
@@ -765,10 +765,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (disposing)
             {
                 this.extensionRoot.SafeDispose();
-                
+
                 this.applicationEnvironment = null;
                 this.creationErrors = null;
-                this.extensionDirectory = null;
+                this.extensionDirectories = null;
                 this.extensionRoot = null;
                 this.factory = null;
                 this.loader = null;
@@ -815,9 +815,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Engine instance = null;
             try
             {
-
-                var extensionDirectory = createInfo.ExtensionDirectory;
-                Debug.Assert(extensionDirectory != null);
+                var extensionDirectories = createInfo.ExtensionDirectories.ToList().AsReadOnly();
+                Debug.Assert(extensionDirectories.Any());
 
                 var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
 
@@ -831,7 +830,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     assemblyDiscovery,
                     repo);
 
-                assemblyDiscovery.ProcessAssemblies(extensionDirectory, out var discoveryError);
+                assemblyDiscovery.ProcessAssemblies(extensionDirectories, out var discoveryError);
 
                 repo.FinalizeDataExtensions();
 
@@ -841,20 +840,28 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 instance = new EngineImpl();
 
-                instance.ExtensionDirectory = extensionDirectory;
+                instance.ExtensionDirectories = extensionDirectories;
                 instance.CreationErrors = new[] { discoveryError, };
                 instance.customDataSourceReferences.AddRange(catalog.PlugIns);
                 instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
                 instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-                instance.extensionRoot = new ExtensionRoot(catalog, repo);                
+                instance.extensionRoot = new ExtensionRoot(catalog, repo);
 
                 instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
 
                 instance.factory = repoTuple.Item1;
 
+                string runtimeName = !string.IsNullOrWhiteSpace(createInfo.RuntimeName)
+                    ? createInfo.RuntimeName
+                    : "Microsoft.Performance.Toolkit.Engine";
+
+                string applicationName = !string.IsNullOrWhiteSpace(createInfo.ApplicationName)
+                    ? createInfo.ApplicationName
+                    : string.Empty;
+
                 instance.applicationEnvironment = new ApplicationEnvironment(
-                    applicationName: string.Empty,
-                    runtimeName: "Microsoft.Performance.Toolkit.Engine",
+                    applicationName: applicationName,
+                    runtimeName: runtimeName,
                     new RuntimeTableSynchronizer(),
                     new TableConfigurationsSerializer(),
                     instance.extensionRoot,
@@ -868,9 +875,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     try
                     {
                         cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
-
-                        // todo: CreateLogger func should be passed in from the EngineCreateInfo
-                        cds.Instance.SetLogger(Logger.Create(cds.Instance.GetType()));
+                        cds.Instance.SetLogger(createInfo.Logger ?? Logger.Create(cds.Instance.GetType()));
                     }
                     catch (Exception e)
                     {
@@ -982,7 +987,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     var executor = executors.Single(x => x.Context.CustomDataSource.AvailableTables.Contains(table));
                     executor.Processor.EnableTable(table);
                     processorTables.Add(table, executor.Processor);
-                }                                
+                }
             }
 
             var processors = this.extensionRoot.EnableDataCookers(
@@ -997,7 +1002,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 extendedTables);
 
                 processors.UnionWith(processorForTable);
-            }            
+            }
 
             var executionResults = new List<ExecutionResult>(executors.Count);
             foreach (var executor in executors)
@@ -1208,6 +1213,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
             {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
             }
 
             public void SubmitColumnChangeRequest(
@@ -1216,6 +1223,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
             {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
             }
         }
 
