@@ -136,14 +136,14 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
         /// </remarks>
         /// <exception cref="ArgumentException">
-        ///     The source id in the <paramref name="dataOutputPath"/> does not match the data processor.
+        ///     <paramref name="dataOutputPath"/> does not target the data processor.
         /// </exception>
         public TOutput QueryOutput<TOutput>(DataOutputPath dataOutputPath)
         {
             if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
             {
                 throw new ArgumentException(
-                    $"The source Id in {nameof(dataOutputPath)} does not match this data processor.");
+                    $"{nameof(dataOutputPath)} does not target this data processor.");
             }
 
             var dataCooker = this.SourceProcessingSession.GetSourceDataCooker(dataOutputPath.CookerPath);
@@ -155,7 +155,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Returns data from a source data cooker registered with <see cref="SourceProcessingSession"/>.
         /// </remarks>
         /// <exception cref="ArgumentException">
-        ///     The source id in the <paramref name="dataOutputPath"/> does not match the data processor.
+        ///     <paramref name="dataOutputPath"/> does not target the data processor.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         ///     The data cooker referenced by <paramref name="dataOutputPath"/> is not enabled on the data processor.
@@ -165,14 +165,14 @@ namespace Microsoft.Performance.SDK.Processing
             if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
             {
                 throw new ArgumentException(
-                    $"The source Id in {nameof(dataOutputPath)} does not match this data processor.");
+                    $"{nameof(dataOutputPath)} does not target this data processor.");
             }
 
             var dataCooker = this.SourceProcessingSession.GetSourceDataCooker(dataOutputPath.CookerPath);
             if (dataCooker == null)
             {
                 throw new InvalidOperationException(string.Format(
-                    "The specified data cooker '{0}' is not enabled on this processor.",
+                    "The specified data cooker '{0}' is not enabled on this data processor.",
                     dataOutputPath.CookerPath));
             }
 

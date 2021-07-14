@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 
 namespace Microsoft.Performance.SDK.Extensibility
@@ -84,7 +85,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     The uniquely identified data.
         /// </param>
         /// <returns>
-        ///     true if the value was successfully retrieved; false otherwise
+        ///     <c>true</c> if the value was successfully retrieved; <c>false</c> otherwise.
         /// </returns>
         public static bool TryQueryOutput(
             this ICookedDataRetrieval retrieval,
@@ -120,7 +121,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     <paramref name="cookerPath"/>.
         /// </exception>
         /// <exception cref="InvalidCastException">
-        ///     The value at <paramref name="identifier"/> cannot be cast to <typeparamref name="T"/>.
+        ///     The value at <paramref name="outputId"/> cannot be cast to <typeparamref name="T"/>.
         /// </exception>
         public static T QueryOutput<T>(
             this ICookedDataRetrieval retrieval,
@@ -155,7 +156,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     <paramref name="cookerPath"/>.
         /// </exception>
         /// <exception cref="InvalidCastException">
-        ///     The value at <paramref name="identifier"/> cannot be cast to <typeparamref name="T"/>.
+        ///     The value at <paramref name="outputId"/> cannot be cast to <typeparamref name="T"/>.
         /// </exception>
         public static void QueryOutput<T>(
             this ICookedDataRetrieval retrieval,
@@ -187,7 +188,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     The uniquely identified data.
         /// </param>
         /// <returns>
-        ///     true if the value was successfully retrieved; false otherwise
+        ///     <c>true</c> if the value was successfully retrieved; <c>false</c> otherwise.
         /// </returns>
         public static bool TryQueryOutput<T>(
             this ICookedDataRetrieval retrieval,

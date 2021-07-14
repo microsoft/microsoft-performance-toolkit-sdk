@@ -96,10 +96,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Gets the directory that the engine will scan for extensions.
-        ///     This directory is scanned during <see cref="Create"/> when
-        ///     creating an instance of the engine. See <see cref="SetExtensionDirectory(string)"/>
-        ///     and <see cref="ResetExtensionDirectory"/> for manipulating this property.
+        ///     Gets the directories that the engine will scan for extensions.
+        ///     These directories are scanned during <see cref="Create"/> when
+        ///     creating an instance of the engine.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.

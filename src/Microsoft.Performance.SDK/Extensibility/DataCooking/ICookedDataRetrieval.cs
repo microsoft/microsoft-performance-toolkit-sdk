@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Performance.SDK.Extensibility.DataCooking
 {
     /// <summary>
@@ -59,7 +61,7 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking
         ///     The uniquely identified data.
         /// </param>
         /// <returns>
-        ///     true if the value was successfully retrieved; false otherwise
+        ///     <c>true</c> if the value was successfully retrieved; <c>false</c> otherwise.
         /// </returns>
         bool TryQueryOutput<T>(DataOutputPath identifier, out T result);
 
@@ -73,7 +75,7 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking
         ///     The uniquely identified data, as an object.
         /// </param>
         /// <returns>
-        ///     true if the value was successfully retrieved; false otherwise
+        ///     <c>true</c> if the value was successfully retrieved; <c>false</c> otherwise.
         /// </returns>
         bool TryQueryOutput(DataOutputPath identifier, out object result);
     }

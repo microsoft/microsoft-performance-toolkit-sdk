@@ -23,6 +23,11 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <returns>
         ///     True if criteria is met.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="candidateType"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="expectedType"/> is <c>null</c>.
+        /// </exception>
         public static bool IsPublicAndInstantiatableOfType(this Type candidateType, Type expectedType)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
@@ -43,6 +48,11 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <returns>
         ///     True if criteria is met.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="candidateType"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="expectedType"/> is <c>null</c>.
+        /// </exception>
         public static bool IsInstantiatableOfType(this Type candidateType, Type expectedType)
         {
             Guard.NotNull(candidateType, nameof(candidateType));

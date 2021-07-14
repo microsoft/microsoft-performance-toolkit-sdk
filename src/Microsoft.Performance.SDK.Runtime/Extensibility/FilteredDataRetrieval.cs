@@ -184,13 +184,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
                 compositeCooker = compositeCookerReference.GetOrCreateInstance(
                     this.dataRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath));
-                if (compositeCooker == null)
-                {
-                    compositeCooker = default;
-                    return false;
-                }
 
-                return true;
+                return compositeCooker != null;
             }
             catch (Exception)
             {
