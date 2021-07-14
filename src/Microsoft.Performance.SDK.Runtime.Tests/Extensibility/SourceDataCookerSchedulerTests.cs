@@ -38,7 +38,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // Pass: 0, Block: 0
             this.dataCooker1 = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "Cooker1"),
+                Path = DataCookerPath.ForSource(SourceParserId, "Cooker1"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = EmptyDependencyTypes,
@@ -48,7 +48,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // Pass: 0, Block: 0
             this.dataCooker4 = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "Cooker4"),
+                Path = DataCookerPath.ForSource(SourceParserId, "Cooker4"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = new ReadOnlyDictionary<DataCookerPath, DataCookerDependencyType>(
@@ -62,7 +62,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // Pass: 0, Block: 1
             this.dataCooker3 = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "Cooker3"),
+                Path = DataCookerPath.ForSource(SourceParserId, "Cooker3"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.AsConsumed,
                 DependencyTypes = new ReadOnlyDictionary<DataCookerPath, DataCookerDependencyType>(
@@ -76,7 +76,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // Pass: 1, Block: 0
             this.dataCooker2 = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "Cooker2"),
+                Path = DataCookerPath.ForSource(SourceParserId, "Cooker2"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.AsConsumed,
                 DependencyTypes = EmptyDependencyTypes,
@@ -86,7 +86,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // Pass: 1, Block: 1
             this.dataCooker5 = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "Cooker5"),
+                Path = DataCookerPath.ForSource(SourceParserId, "Cooker5"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = EmptyDependencyTypes,
@@ -96,7 +96,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // Pass: 1, Block: 2
             this.dataCooker6 = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "Cooker6"),
+                Path = DataCookerPath.ForSource(SourceParserId, "Cooker6"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = new ReadOnlyDictionary<DataCookerPath, DataCookerDependencyType>(
@@ -110,7 +110,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // Pass: 1, Block: 2
             this.dataCooker7 = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "Cooker7"),
+                Path = DataCookerPath.ForSource(SourceParserId, "Cooker7"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = new ReadOnlyDictionary<DataCookerPath, DataCookerDependencyType>(
@@ -202,7 +202,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var dataCookerA = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "CookerA"),
+                Path = DataCookerPath.ForSource(SourceParserId, "CookerA"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = EmptyDependencyTypes,
@@ -211,7 +211,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var dataCookerB = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "CookerB"),
+                Path = DataCookerPath.ForSource(SourceParserId, "CookerB"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = EmptyDependencyTypes,
@@ -220,7 +220,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var dataCookerC = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "CookerC"),
+                Path = DataCookerPath.ForSource(SourceParserId, "CookerC"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = EmptyDependencyTypes,
@@ -229,7 +229,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var dataCookerD = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "CookerD"),
+                Path = DataCookerPath.ForSource(SourceParserId, "CookerD"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.AsConsumed,
                 DependencyTypes = EmptyDependencyTypes,
@@ -243,7 +243,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var dataCookerE = new ValidSourceDataCookerWithoutDependencies
             {
-                Path = new DataCookerPath(SourceParserId, "CookerE"),
+                Path = DataCookerPath.ForSource(SourceParserId, "CookerE"),
                 Description = "Test data cooker",
                 DataProductionStrategy = DataProductionStrategy.PostSourceParsing,
                 DependencyTypes = EmptyDependencyTypes,

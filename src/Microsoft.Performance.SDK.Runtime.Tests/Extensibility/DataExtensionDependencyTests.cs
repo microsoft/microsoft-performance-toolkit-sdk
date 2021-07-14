@@ -100,7 +100,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker0"),
             };
 
             cooker0.ProcessDependencies(testRepo);
@@ -121,12 +121,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker0"),
             };
 
             var cooker1 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker1"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker1"),
             };
 
             var testRepo = new TestDataExtensionRepository();
@@ -153,12 +153,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker0"),
             };
 
             var cooker1 = new TestSourceDataCookerReference(false)
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker1"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker1"),
                 availability = DataExtensionAvailability.Error,
             };
 
@@ -185,17 +185,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker0"),
             };
 
             var cooker1 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker1"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker1"),
             };
 
             var cooker2 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker2"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker2"),
             };
 
             // the repository has all source cookers
@@ -232,7 +232,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker0"),
             };
 
             // the repository has all source cookers
@@ -240,7 +240,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             testRepo.sourceCookersByPath.Add(cooker0.Path, cooker0);
 
             // setup the requirements for the cookers
-            cooker0.requiredDataCookers.Add(new DataCookerPath("TestSourceParser", "Cooker1"));
+            cooker0.requiredDataCookers.Add(DataCookerPath.ForSource("TestSourceParser", "Cooker1"));
 
             cooker0.ProcessDependencies(testRepo);
 
@@ -263,17 +263,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker0"),
             };
 
             var cooker1 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker1"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker1"),
             };
 
             var cooker2 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker2"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker2"),
             };
 
             // the repository has all source cookers
@@ -304,12 +304,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser0", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser0", "Cooker0"),
             };
 
             var cooker1 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser1", "Cooker1"),
+                Path = DataCookerPath.ForSource("TestSourceParser1", "Cooker1"),
             };
 
             var testRepo = new TestDataExtensionRepository();
@@ -333,12 +333,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestCompositeDataCookerReference
             {
-                Path = new DataCookerPath("TestSourceParser", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSourceParser", "Cooker0"),
             };
 
             var cooker1 = new TestCompositeDataCookerReference
             {
-                Path = new DataCookerPath(DataCookerPath.EmptySourceParserId, "Cooker1"),
+                Path = DataCookerPath.ForComposite("Cooker1"),
             };
 
             var testRepo = new TestDataExtensionRepository();
@@ -366,14 +366,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var cooker0 = new TestCompositeDataCookerReference
             {
-                Path = new DataCookerPath(DataCookerPath.EmptySourceParserId, "Cooker0"),
+                Path = DataCookerPath.ForComposite("Cooker0"),
             };
 
             var testRepo = new TestDataExtensionRepository();
             testRepo.compositeCookersByPath.Add(cooker0.Path, cooker0);
 
             // this doesn't exist
-            cooker0.requiredDataCookers.Add(new DataCookerPath("Cooker1"));
+            cooker0.requiredDataCookers.Add(DataCookerPath.ForComposite("Cooker1"));
 
             cooker0.ProcessDependencies(testRepo);
 
@@ -399,12 +399,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cooker0 = new TestSourceDataCookerReference
             {
-                Path = new DataCookerPath("TestSource0", "Cooker0"),
+                Path = DataCookerPath.ForSource("TestSource0", "Cooker0"),
             };
 
             var cooker1 = new TestCompositeDataCookerReference
             {
-                Path = new DataCookerPath(DataCookerPath.EmptySourceParserId, "Cooker0"),
+                Path = DataCookerPath.ForComposite("Cooker0"),
             };
 
             var testRepo = new TestDataExtensionRepository();

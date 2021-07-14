@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
     {
         public DisposableCompositeDataCooker()
         {
-            this.Path = new DataCookerPath(nameof(DisposableCompositeDataCooker));
+            this.Path = DataCookerPath.ForComposite(nameof(DisposableCompositeDataCooker));
             this.RequiredDataCookers = new List<DataCookerPath>();
         }
 

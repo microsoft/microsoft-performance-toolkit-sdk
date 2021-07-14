@@ -24,7 +24,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         protected TestDataCookerReference(bool useDataExtensionDependencyState)
             : base(useDataExtensionDependencyState)
         {
-            this.Path = new DataCookerPath(
+            this.Path = DataCookerPath.ForComposite(
                 string.Concat(
                     this.GetType().Name,
                     " ",

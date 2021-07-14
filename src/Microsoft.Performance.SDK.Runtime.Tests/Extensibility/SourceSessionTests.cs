@@ -67,7 +67,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceDataCooker = new TestSourceDataCooker()
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker")
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker")
             };
 
             sourceSession.RegisterSourceDataCooker(sourceDataCooker);
@@ -90,28 +90,28 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceDataCooker1 = new TestSourceDataCooker(dataCookerContext)
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker1"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker1"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 }),
             };
             sourceSession.RegisterSourceDataCooker(sourceDataCooker1);
 
             var sourceDataCooker2 = new TestSourceDataCooker(dataCookerContext)
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker2"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker2"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 113, 145, 167, 1000 }),
             };
             sourceSession.RegisterSourceDataCooker(sourceDataCooker2);
 
             var sourceDataCooker3 = new TestSourceDataCooker(dataCookerContext)
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker3"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker3"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 200, 250, 286, 1000 }),
             };
             sourceSession.RegisterSourceDataCooker(sourceDataCooker3);
 
             var sourceDataCooker4 = new TestSourceDataCooker(dataCookerContext)
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker4"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker4"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 145, 316, 315, 301 }),
             };
             sourceSession.RegisterSourceDataCooker(sourceDataCooker4);
@@ -231,14 +231,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceDataCooker1 = new TestSourceDataCooker()
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker1"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker1"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 })
             };
             sourceSession.RegisterSourceDataCooker(sourceDataCooker1);
 
             var sourceDataCooker2 = new TestSourceDataCooker()
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker2"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker2"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 113, 145, 167, 1000 }),
             };
             sourceSession.RegisterSourceDataCooker(sourceDataCooker2);
@@ -269,14 +269,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceDataCooker1 = new TestSourceDataCooker()
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker1"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker1"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 })
             };
             sourceSession.RegisterSourceDataCooker(sourceDataCooker1);
 
             var sourceDataCooker2 = new TestSourceDataCooker()
             {
-                Path = new DataCookerPath(sourceParser.Id, "TestSourceDataCooker2"),
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker2"),
                 DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() {}),
                 Options = SDK.Extensibility.DataCooking.SourceDataCooking.SourceDataCookerOptions.ReceiveAllDataElements,
             };

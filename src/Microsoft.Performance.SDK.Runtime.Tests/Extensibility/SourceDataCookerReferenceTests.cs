@@ -24,7 +24,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         : BaseSourceDataCooker<TestDataElement, TestDataContext, int>
     {
         public InternalSourceDataCooker()
-            : base(new DataCookerPath("SourceId", "CookerId"))
+            : base(DataCookerPath.ForSource("SourceId", "CookerId"))
         {
         }
 

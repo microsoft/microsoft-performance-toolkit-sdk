@@ -34,8 +34,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestData
         [DataMember(Name = "filePaths")]
         public string[] FilePaths { get; set; }
 
-        [DataMember(Name = "cookersToEnable")]
-        public string[] CookersToEnable { get; set; }
+        [DataMember(Name = "sourceCookersToEnable")]
+        public EngineProcessDataCookerPathDto[] SourceCookersToEnable { get; set; }
+
+        [DataMember(Name = "compositeCookersToEnable")]
+        public EngineProcessDataCookerPathDto[] CompositeCookersToEnable { get; set; }
 
         [DataMember(Name = "expectedOutputs")]
         public Dictionary<string, Dictionary<string, string>[]> ExpectedOutputs { get; set; }
@@ -47,5 +50,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestData
         {
             return this.Id + ": " + this.Description;
         }
+    }
+
+    [DataContract]
+    public class EngineProcessDataCookerPathDto
+    {
+        [DataMember(Name = "sourceParserId")]
+        public string SourceParserId { get; set; }
+
+        [DataMember(Name = "dataCookerId")]
+        public string DataCookerId { get; set; }
     }
 }

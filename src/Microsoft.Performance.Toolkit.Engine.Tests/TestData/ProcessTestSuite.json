@@ -4,8 +4,11 @@
         {
             "id": "0001",
             "description": "Test One Source Cooker processes correctly",
-            "cookersToEnable": [
-                "Source4Parser/Source4DataCooker"
+            "sourceCookersToEnable": [
+                {
+                    "sourceParserId": "Source4Parser",
+                    "dataCookerId": "Source4DataCooker"
+                }
             ],
             "filePaths": [
                 "TestData/source123_test_data.s123d",
@@ -52,8 +55,11 @@
         {
             "id": "0002",
             "description": "Test A source cooker that depends on other source cookers",
-            "cookersToEnable": [
-                "Source123Parser/Source3DataCooker"
+            "sourceCookersToEnable": [
+                {
+                    "sourceParserId": "Source123Parser",
+                    "dataCookerId": "Source3DataCooker"
+                }
             ],
             "filePaths": [
                 "TestData/source123_test_data.s123d",
@@ -109,8 +115,10 @@
         {
             "id": "0003",
             "description": "Test one composite cooker that depends on one source cooker.",
-            "cookersToEnable": [
-                "/Composite2Cooker"
+            "compositeCookersToEnable": [
+                {
+                    "dataCookerId": "Composite2Cooker"
+                }
             ],
             "filePaths": [
                 "TestData/source123_test_data.s123d",
@@ -167,15 +175,17 @@
         {
             "id": "0004",
             "description": "Test one composite cooker that depends on one source cooker and one composite cooker",
-            "comments":[
+            "comments": [
                 "Note that a composite cooker does not have to be enabled.",
                 "A composite cooker will always be available as long as all",
                 "of its dependencies are available. Thus, we get the side effect",
                 "of potentially more than just the cooker that you are interested",
                 "in being available."
             ],
-            "cookersToEnable": [
-                "/Composite3Cooker"
+            "compositeCookersToEnable": [
+                {
+                    "dataCookerId": "Composite3Cooker"
+                }
             ],
             "filePaths": [
                 "TestData/source123_test_data.s123d",
@@ -260,8 +270,10 @@
             "id": "0005",
             "description": "Test one composite cooker that depends on two composite cookers",
             "debugBreak": true,
-            "cookersToEnable": [
-                "/Composite4Cooker"
+            "compositeCookersToEnable": [
+                {
+                    "dataCookerId": "Composite4Cooker"
+                }
             ],
             "filePaths": [
                 "TestData/source123_test_data.s123d",
@@ -349,14 +361,18 @@
             },
             "throwingOutputs": []
         },
-
-
         {
             "id": "0006",
             "description": "Test Many Source Cookers process correctly",
-            "cookersToEnable": [
-                "Source123Parser/Source1DataCooker",
-                "Source123Parser/Source2DataCooker"
+            "sourceCookersToEnable": [
+                {
+                    "sourceParserId": "Source123Parser",
+                    "dataCookerId": "Source1DataCooker"
+                },
+                {
+                    "sourceParserId": "Source123Parser",
+                    "dataCookerId": "Source2DataCooker"
+                }
             ],
             "filePaths": [
                 "TestData/source123_test_data.s123d",
@@ -394,11 +410,19 @@
         {
             "id": "0007",
             "description": "Test Enabling Everything",
-            "cookersToEnable": [
-                "/Composite1Cooker",
-                "/Composite2Cooker",
-                "/Composite3Cooker",
-                "/Composite4Cooker",
+            "compositeCookersToEnable": [
+                {
+                    "dataCookerId": "Composite1Cooker"
+                },
+                {
+                    "dataCookerId": "Composite2Cooker"
+                },
+                {
+                    "dataCookerId": "Composite3Cooker"
+                },
+                {
+                    "dataCookerId": "Composite4Cooker"
+                }
             ],
             "filePaths": [
                 "TestData/source123_test_data.s123d",

@@ -36,7 +36,7 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
         ///     This cooker's ID.
         /// </param>
         protected BaseSourceDataCooker(string sourceId, string cookerId)
-            : this(new DataCookerPath(sourceId, cookerId))
+            : this(DataCookerPath.ForSource(sourceId, cookerId))
         {
         }
 

@@ -38,13 +38,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var sourceDataCookerReference1 = new TestSourceDataCookerReference(false)
             {
                 availability = DataExtensionAvailability.Available,
-                Path = new DataCookerPath("Source1", "SourceCooker1"),
+                Path = DataCookerPath.ForSource("Source1", "SourceCooker1"),
             };
 
             var dataCookerReference = new TestCompositeDataCookerReference(false)
             {
                 availability = DataExtensionAvailability.Available,
-                Path = new DataCookerPath("CompositeCooker1"),
+                Path = DataCookerPath.ForComposite("CompositeCooker1"),
             };
             dataCookerReference.requiredDataCookers.Add(sourceDataCookerReference1.Path);
 
@@ -73,7 +73,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var cookedDataRetrieval = new TestCookedDataRetrieval();
             var dataExtensionRepository = new TestDataExtensionRepository();
 
-            var cookerPath = new DataCookerPath("CompositeCooker1");
+            var cookerPath = DataCookerPath.ForComposite("CompositeCooker1");
 
             var dataExtensionRetrievalFactory =
                 new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
@@ -92,7 +92,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataCookerReference = new TestCompositeDataCookerReference(false)
             {
                 availability = DataExtensionAvailability.Error,
-                Path = new DataCookerPath("CompositeCooker1"),
+                Path = DataCookerPath.ForComposite("CompositeCooker1"),
             };
 
             dataExtensionRepository.compositeCookersByPath.Add(dataCookerReference.Path, dataCookerReference);
@@ -114,13 +114,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var sourceDataCookerReference1 = new TestSourceDataCookerReference(false)
             {
                 availability = DataExtensionAvailability.Available,
-                Path = new DataCookerPath("Source1", "SourceCooker1"),
+                Path = DataCookerPath.ForSource("Source1", "SourceCooker1"),
             };
 
             var dataCookerReference = new TestCompositeDataCookerReference(false)
             {
                 availability = DataExtensionAvailability.Available,
-                Path = new DataCookerPath("CompositeCooker1"),
+                Path = DataCookerPath.ForComposite("CompositeCooker1"),
             };
             dataCookerReference.requiredDataCookers.Add(sourceDataCookerReference1.Path);
 
@@ -176,7 +176,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataCookerReference = new TestCompositeDataCookerReference(false)
             {
                 availability = DataExtensionAvailability.Error,
-                Path = new DataCookerPath("CompositeCooker1"),
+                Path = DataCookerPath.ForComposite("CompositeCooker1"),
             };
 
             var tableReference = new TestTableExtensionReference(false)

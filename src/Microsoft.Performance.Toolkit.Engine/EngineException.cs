@@ -83,12 +83,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.DataCookerPath = dataCookerPath;
         }
 
-        /// <inheritdoc />
-        protected CookerNotFoundException(SerializationInfo info, StreamingContext context)
-        {
-            this.DataCookerPath = new DataCookerPath(info.GetString(nameof(DataCookerPath)));
-        }
-
         /// <summary>
         ///     Gets the requested cooker path that is the cause of this error.
         /// </summary>
@@ -98,7 +92,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue(nameof(DataCookerPath), this.DataCookerPath.CookerPath);
+            info.AddValue(nameof(DataCookerPath), this.DataCookerPath.ToString());
         }
 
         /// <inheritdoc />
@@ -153,14 +147,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             : base($"The requested data '{dataOutputPath}' was not found", inner)
         {
             this.DataOutputPath = dataOutputPath;
-        }
-
-        /// <inheritdoc />
-        protected DataOutputNotFoundException(SerializationInfo info, StreamingContext context)
-        {
-            this.DataOutputPath = new DataOutputPath(
-                new DataCookerPath(info.GetString(nameof(CookerPath))),
-                info.GetString(nameof(OutputId)));
         }
 
         /// <summary>

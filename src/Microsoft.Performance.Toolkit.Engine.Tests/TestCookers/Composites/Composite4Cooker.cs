@@ -11,7 +11,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Composites
         : CookedDataReflector,
           ICompositeDataCookerDescriptor
     {
-        public static readonly DataCookerPath DataCookerPath = new DataCookerPath(nameof(Composite4Cooker));
+        public static readonly DataCookerPath DataCookerPath = DataCookerPath.ForComposite(nameof(Composite4Cooker));
 
         public Composite4Cooker()
             : base(DataCookerPath)
