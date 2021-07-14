@@ -23,13 +23,7 @@ namespace Microsoft.Performance.SDK.Runtime
         internal static bool TryGetEmptyConstructor(this Type type, out ConstructorInfo constructor)
         {
             constructor = type.GetConstructor(Type.EmptyTypes);
-            if (constructor != null)
-            {
-                return true;
-            }
-
-            constructor = null;
-            return false;
+            return constructor != null;
         }
     }
 }

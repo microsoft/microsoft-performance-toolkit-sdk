@@ -107,7 +107,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Gets or sets the name of the runtime on which the application is built.
         /// </summary>
         /// <remarks>
-        ///     Defauls to "Microsoft.Performance.Toolkit.Engine".
+        ///     Defaults to "Microsoft.Performance.Toolkit.Engine".
         /// </remarks>
         public string RuntimeName { get; set; } = "Microsoft.Performance.Toolkit.Engine";
 
