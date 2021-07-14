@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
     ///     Defines an option that is accepted on the command line for a
-    ///     custom data source.
+    ///     <see cref="IProcessingSource"/>.
     /// </summary>
     public class Option
     {

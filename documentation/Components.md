@@ -9,8 +9,8 @@ understand how different components work together at a higher level.
 
 ----
 
-## Custom Data Sources
-Custom data sources are the entry points the SDK runtime uses to interact with your plugin when a user wants to 
+## Processing Sources
+Processing sources are the entry points the SDK runtime uses to interact with your plugin when a user wants to 
 open a file/data source for analysis. They provide the SDK with
 1) Information on what types of data sources your plugin supports
 2) A way to obtain a **Custom Data Processor** that implements logic for processing the data sources your plugin supports

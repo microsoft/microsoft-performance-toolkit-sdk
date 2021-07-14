@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     Abstract class meant to be extended to support
-    ///     functionality like data extensibility and custom data sources, 
+    ///     functionality like data extensibility and <see cref="IProcessingSource"/>s, 
     ///     adding an Instance property of type <see cref="T"/>.
     /// </summary>
     /// <typeparam name="T">

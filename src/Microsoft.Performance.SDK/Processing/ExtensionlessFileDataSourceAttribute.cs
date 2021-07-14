@@ -7,7 +7,7 @@ using System.IO;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Attribute to mark a custom data source implementation as processing
+    ///     Attribute to mark an <see cref="IProcessingSource"/> implementation as processing
     ///     files that do not have extensions.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]

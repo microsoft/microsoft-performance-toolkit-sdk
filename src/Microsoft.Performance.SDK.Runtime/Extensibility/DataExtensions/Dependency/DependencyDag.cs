@@ -121,7 +121,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             foreach (var node in allNodes)
             {
                 node.Target.Match(
-                    (CustomDataSourceReference x) =>
+                    (ProcessingSourceReference x) =>
                     {
                         foreach (var p in x.TrackedProcessors.OfType<ICustomDataProcessorWithSourceParser>())
                         {
@@ -352,13 +352,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     class.
             /// </summary>
             /// <param name="cdsr">
-            ///     The <see cref="CustomDataSourceReference"/> that is
+            ///     The <see cref="ProcessingSourceReference"/> that is
             ///     the target of this instance.
             /// </param>
             /// <exception cref="System.ArgumentNullException">
             ///     <paramref name="cdsr"/> is <c>null</c>.
             /// </exception>
-            public Node(CustomDataSourceReference cdsr)
+            public Node(ProcessingSourceReference cdsr)
                 : this(Reference.Create(cdsr))
             {
             }
@@ -548,19 +548,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             /// <summary>
             ///     Creates a new instance of the <see cref="Reference"/>
-            ///     class using a <see cref="CustomDataSourceReference"/>.
+            ///     class using a <see cref="ProcessingSourceReference"/>.
             /// </summary>
             /// <param name="value">
             ///     The value.
             /// </param>
             /// <returns>
             ///     A new discriminated union whose value represents
-            ///     a <see cref="CustomDataSourceReference"/>.
+            ///     a <see cref="ProcessingSourceReference"/>.
             /// </returns>            
             /// <exception cref="System.ArgumentNullException">
             ///     <paramref name="value"/> is <c>null</c>.
             /// </exception>
-            public static Reference Create(CustomDataSourceReference value)
+            public static Reference Create(ProcessingSourceReference value)
             {
                 Guard.NotNull(value, nameof(value));
 
@@ -650,7 +650,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             /// </typeparam>
             /// <param name="a">
             ///     The function to invoke if this instance targets a
-            ///     <see cref="CustomDataSourceReference"/>.
+            ///     <see cref="ProcessingSourceReference"/>.
             /// </param>
             /// <param name="b">
             ///     The function to invoke if this instance targets an
@@ -665,7 +665,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     <paramref name="b"/> is <c>null</c>.
             /// </exception>
             public abstract void Match(
-                Action<CustomDataSourceReference> a,
+                Action<ProcessingSourceReference> a,
                 Action<IDataExtensionReference> b);
 
             /// <summary>
@@ -677,7 +677,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             /// </typeparam>
             /// <param name="a">
             ///     The function to invoke if this instance targets a
-            ///     <see cref="CustomDataSourceReference"/>.
+            ///     <see cref="ProcessingSourceReference"/>.
             /// </param>
             /// <param name="b">
             ///     The function to invoke if this instance targets an
@@ -692,17 +692,17 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             ///     <paramref name="b"/> is <c>null</c>.
             /// </exception>
             public abstract T Match<T>(
-                Func<CustomDataSourceReference, T> a, 
+                Func<ProcessingSourceReference, T> a, 
                 Func<IDataExtensionReference, T> b);
 
             /// <summary>
             ///     Represents the case when the <see cref="Reference"/> is
-            ///     to be interpreted as a <see cref="CustomDataSourceReference"/>.
+            ///     to be interpreted as a <see cref="ProcessingSourceReference"/>.
             /// </summary>
             private sealed class Cdsr
                 : Reference
             {
-                private readonly CustomDataSourceReference value;
+                private readonly ProcessingSourceReference value;
 
                 /// <summary>
                 ///     Initializes a new instance of the <see cref="Cdsr"/>
@@ -711,7 +711,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 /// <param name="value">
                 ///     The <see cref="IDataExtensionReference"/>.
                 /// </param>
-                internal Cdsr(CustomDataSourceReference value)
+                internal Cdsr(ProcessingSourceReference value)
                 {
                     Debug.Assert(value != null);
                     this.value = value;
@@ -719,7 +719,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
                 /// <inheritdoc />
                 public override void Match(
-                    Action<CustomDataSourceReference> a,
+                    Action<ProcessingSourceReference> a,
                     Action<IDataExtensionReference> b)
                 {
                     Debug.Assert(a != null);
@@ -728,7 +728,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
                 /// <inheritdoc />
                 public override T Match<T>(
-                    Func<CustomDataSourceReference, T> a, 
+                    Func<ProcessingSourceReference, T> a, 
                     Func<IDataExtensionReference, T> b)
                 {
                     Debug.Assert(a != null);
@@ -778,7 +778,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 }
 
                 /// <inheritdoc />
-                public override void Match(Action<CustomDataSourceReference> a, Action<IDataExtensionReference> b)
+                public override void Match(Action<ProcessingSourceReference> a, Action<IDataExtensionReference> b)
                 {
                     Debug.Assert(b != null);
                     b(this.value);
@@ -786,7 +786,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
                 /// <inheritdoc />
                 public override T Match<T>(
-                    Func<CustomDataSourceReference, T> a,
+                    Func<ProcessingSourceReference, T> a,
                     Func<IDataExtensionReference, T> b)
                 {
                     Debug.Assert(b != null);

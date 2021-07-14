@@ -1,6 +1,6 @@
 # Abstract
 
-This document outlines how to make a `CustomDataSource` or SDK
+This document outlines how to make a `ProcessingSource` or SDK
 extension - such as a `DataCooker` - disposable.
 
 # Motiviation
@@ -16,7 +16,7 @@ only need to make sure your extension implements `IDisposable`.
 
 Users may add the `IDisposable` interface to classes implementing the following
 interfaces:
-- `ICustomDataSource`
+- `IProcessingSource`
 - `ICustomDataProcessor`
 - `ISourceDataCooker`
 - `ICompositeDataCookerDescriptor`
@@ -36,8 +36,8 @@ You can add `IDisposable` on types deriving any base classes that implement the
 above interfaces, too.
 
 ````cs
-public class MyDisposableCustomDataSource
-    : CustomDataSourceBase,
+public class MyDisposableProcessingSource
+    : ProcessingSource,
       IDisposable
 {
     // ...
@@ -72,12 +72,12 @@ then the `CompositeCooker` will be disposed of _before_ the `SourceCooker`.
 In short, all extensions are disposed of before any of their dependencies are
 disposed.
 
-Due to the relationship between a `CustomDataSource` and a
-`CustomDataProcessor`, `ICustomDataSource` has a `DisposeProcessor` method.
-This method is invoked on a `CustomDataSource` right before a
-`CustomDataProcessor` is to be cleaned up. This gives the `CustomDataSource` an
+Due to the relationship between a `ProcessingSource` and a
+`CustomDataProcessor`, `IProcessingSource` has a `DisposeProcessor` method.
+This method is invoked on a `ProcessingSource` right before a
+`CustomDataProcessor` is to be cleaned up. This gives the `ProcessingSource` an
 opportunity to clean up any state it might have related to its processor.
-`CustomDataSourceBase` provides a default implementation of this method that
+`ProcessingSource` provides a default implementation of this method that
 does nothing.
 
 # Additional Notes

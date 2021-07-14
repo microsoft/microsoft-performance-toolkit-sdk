@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
     ///     Base attribute for denoting a Data Source that feeds into
-    ///     a Custom Data Source. This class cannot be instantiated.
+    ///     a <see cref="IProcessingSource"/>. This class cannot be instantiated.
     ///     <para/>
     ///     Because users can implement their own
     ///     <see cref="IDataSource"/>s, they can implement an
@@ -27,16 +27,16 @@ namespace Microsoft.Performance.SDK.Processing
     ///             }
     ///         }
     ///         
-    ///         [CustomDataSource(/* properties elided */)]
+    ///         [ProcessingSource(/* properties elided */)]
     ///         [SqlServerDataSource(/* properties elided */)]
-    ///         public sealed class SqlCustomDataSource
-    ///             : CustomDataSourceBase
+    ///         public sealed class SqlProcessingSource
+    ///             : ProcessingSource
     ///         {
     ///             // implementation elided
     ///         }
     ///     </code>
     ///     Any instances of the SqlServerDataSource Data Source will be
-    ///     routed to this Custom Data Source for further analysis during
+    ///     routed to this <see cref="IProcessingSource"/> for further analysis during
     ///     processing.
     ///     </example>
     /// </summary>
@@ -93,8 +93,8 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     This method is used to filter anyincoming Data Sources so that only
-        ///     Data Sources that could conceivably be processed by the decorated
-        ///     Custom Data Source are passed to the Custom Data Source for evaluation.
+        ///     <see cref="IDataSource"/> that could conceivably be processed by the decorated
+        ///     <see cref="IProcessingSource"/> are passed to the <see cref="IProcessingSource"/> for evaluation.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to check.
@@ -127,18 +127,18 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     When overridden in a derived class, this method is used to filter any
         ///     incoming Data Sources so that only Data Sources that could conceivably
-        ///     be processed by the decorated Custom Data Source are passed to the
-        ///     Custom Data Source for evaluation.
+        ///     be processed by the decorated <see cref="IProcessingSource"/> are passed to the
+        ///     <see cref="IProcessingSource"/> for evaluation.
         ///     <para />
         ///     This method returns <c>true</c> if it is not overridden. This method should
         ///     be overridden if your Data Source is potentially useful to lots of different
-        ///     Custom Data Sources (e.g. a file) but you know for a fact that most Custom
+        ///     <see cref="IProcessingSource"/>s (e.g. a file) but you know for a fact that most Custom
         ///     Data Sources would not be able to do anything with them, and so you want to
-        ///     filter a subset of said Data Sources to your Custom Data Source.
+        ///     filter a subset of said Data Sources to your <see cref="IProcessingSource"/>.
         ///     <para/>
         ///     For example, The <see cref="FileDataSourceAttribute" /> uses this method to
         ///     reject any <see cref="FileDataSource"/>s that do not have the prescribed extension.
-        ///     This way, only files with the relevant extension get passed to the Custom Data Source
+        ///     This way, only files with the relevant extension get passed to the <see cref="IProcessingSource"/>
         ///     for further inspection. See the <see cref="FileDataSourceAttribute"/> class for
         ///     the implementation.
         ///     <para />

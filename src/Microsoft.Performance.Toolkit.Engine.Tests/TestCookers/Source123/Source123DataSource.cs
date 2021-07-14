@@ -9,13 +9,13 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 {
-    [CustomDataSource(
+    [ProcessingSource(
        "{FA37C400-D2C4-48F7-B485-48F119BEE02E}",
        nameof(Source123DataSource),
        "Source123 for Runtime Tests")]
     [FileDataSource(Extension)]
     public sealed class Source123DataSource
-        : CustomDataSourceBase
+        : ProcessingSource
     {
         public const string Extension = ".s123d";
 

@@ -10,7 +10,7 @@ namespace Microsoft.Performance.SDK
 {
     /// <summary>
     ///     Represents any error that can be thrown by a user
-    ///     extension (CustomDataSource, CustomDataProcessor, etc) to
+    ///     extension (ProcessingSource, CustomDataProcessor, etc) to
     ///     uniformly report fatal error conditions.
     /// </summary>
     [Serializable]

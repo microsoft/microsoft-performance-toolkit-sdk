@@ -75,7 +75,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public bool IsLoaded => this.Catalog.IsLoaded;
 
         /// <inheritdoc />
-        public IEnumerable<CustomDataSourceReference> PlugIns => this.Catalog.PlugIns;
+        public IEnumerable<ProcessingSourceReference> PlugIns => this.Catalog.PlugIns;
 
         /// <inheritdoc />
         public IEnumerable<DataCookerPath> SourceDataCookers => this.Repository.SourceDataCookers;

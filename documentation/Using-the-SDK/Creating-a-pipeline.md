@@ -31,14 +31,14 @@ __Source parsers__ parse data from a data source into data that can be
 manipulated by your application. For example, a source parser may parse an ETW 
 `.etl` file into a stream of `Event` objects.  The following are required in order to implement a 
 source parser:
-1) A `CustomDataSource`
+1) A `ProcessingSource`
 2) A class implementing `SourceParserBase`
 3) A `CustomDataProcessor` implementing `CustomDataProcessorBaseWithSourceParser`
 
-A `CustomDataSource` is required in order to expose your data, whether 
-you are using a DPP or not. The `CustomDataSource` is used as the entry point for 
+A `ProcessingSource` is required in order to expose your data, whether 
+you are using a DPP or not. The `ProcessingSource` is used as the entry point for 
 creating the `CustomDataProcessor` that processes your data. Please see 
-[here](/Creating-a-simple-sdk-plugin) for more on `CustomDataSource`s. 
+[here](/Creating-a-simple-sdk-plugin) for more on `ProcessingSource`s. 
 
 The source parser implements the actual logic of parsing the raw data 
 into the initial object stream. This source parser is passed to the `CustomDataProcessor` 
@@ -65,14 +65,14 @@ what is required:
 
 ````cs
 
-    [CustomDataSource(
+    [ProcessingSource(
         // Id here,
         // Name here,
         // Description here
     )]
     // Other attributes here
-    public sealed class SampleCustomDataSource
-        : CustomDataSourceBase
+    public sealed class SampleProcessingSource
+        : ProcessingSource
     {
         protected override ICustomDataProcessor CreateProcessorCore(
             IEnumerable<IDataSource> dataSources, 

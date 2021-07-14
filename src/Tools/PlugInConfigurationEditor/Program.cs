@@ -94,7 +94,7 @@ namespace PlugInConfigurationEditor
             };
 
             command.AddArgument(dirArgument);
-            command.AddArgument(new Argument<string>(name: "name", description: "Custom data source name"));
+            command.AddArgument(new Argument<string>(name: "name", description: "Processing source name"));
 
             command.AddOption(new Option<SemanticVersion>(
                 new[] { "-c", "--version" },

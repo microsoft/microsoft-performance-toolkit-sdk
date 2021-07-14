@@ -10,9 +10,9 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     Represents a session data source. A session data source
-    ///     is an <see cref="ICustomDataSource"/> and the associated
+    ///     is an <see cref="IProcessingSource"/> and the associated
     ///     <see cref="IDataSource"/>s that can be processed by the
-    ///     <see cref="ICustomDataSource"/>.
+    ///     <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class DataSessionSource
     {
@@ -21,15 +21,15 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     class.
         /// </summary>
         public DataSessionSource(
-            CustomDataSourceReference customDataSource,
+            ProcessingSourceReference processingSource,
             IEnumerable<IDataSource> dataSources,
             ProcessorOptions options)
         {
-            Guard.NotNull(customDataSource, nameof(customDataSource));
+            Guard.NotNull(processingSource, nameof(processingSource));
             Guard.NotNull(dataSources, nameof(dataSources));
             Guard.NotNull(options, nameof(options));
 
-            this.CustomDataSource = customDataSource;
+            this.ProcessingSource = processingSource;
             this.DataSources = dataSources.ToList().AsReadOnly();
             this.Options = options;
 
@@ -37,14 +37,14 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Gets the <see cref="ICustomDataSource"/> associated
+        ///     Gets the <see cref="IProcessingSource"/> associated
         ///     with the given data items.
         /// </summary>
-        public CustomDataSourceReference CustomDataSource { get; }
+        public ProcessingSourceReference ProcessingSource { get; }
 
         /// <summary>
         ///     Gets the <see cref="IDataSource"/>s that can be
-        ///     processed by the <see cref="CustomDataSource"/>.
+        ///     processed by the <see cref="ProcessingSource"/>.
         /// </summary>
         public IEnumerable<IDataSource> DataSources { get; }
 
@@ -91,7 +91,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public override string ToString()
         {
             var sb = new StringBuilder();
-            var dataSourceName = this.CustomDataSource.Name;
+            var dataSourceName = this.ProcessingSource.Name;
             sb.Append(dataSourceName);
 
             sb.Append(" (");

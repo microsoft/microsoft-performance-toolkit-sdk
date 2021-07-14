@@ -1,6 +1,6 @@
 # The Data Processing Pipeline
 
-Within a plugin, a `CustomDataSource` delegates the task of processing data sources to a `CustomDataProcessor`. 
+Within a plugin, a `ProcessingSource` delegates the task of processing data sources to a `CustomDataProcessor`. 
 In order to minimize the overhead of accessing persistent data storage, a well-designed plugin aims to have its 
 `CustomDataProcessor`s directly access data sources as infrequently as possible. Additionally, it would be nice 
 if the SDK provided a way to
@@ -31,7 +31,7 @@ processing its data sources to a `SourceParser`.
 From an interface perspective, a `SourceParser` has the following properties:
 * A `SourceParser` has a `string` identifier
 * A `SourceParser` is bound to a specific `CustomDataProcesor`
-* A `SourceParser` must, at some point, process the data sources originally given to the `CustomDataSource` which  
+* A `SourceParser` must, at some point, process the data sources originally given to the `ProcessingSource` which  
   created the `CustomDataProcessor` the parser is bound to 
 * A `SourceParser` will, *while processing its data sources*, emit each individual data point contained 
   within the data sources it is processing

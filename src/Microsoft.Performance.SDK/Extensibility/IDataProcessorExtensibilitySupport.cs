@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Extensibility
     public interface IDataProcessorExtensibilitySupport
     {
         /// <summary>
-        ///     This should be called for every table internal to a custom data source that will need access to an
+        ///     This should be called for every table internal to an <see cref="IProcessingSource"/> that will need access to an
         ///     <see cref="IDataExtensionRetrieval"/> object in order to build the table.
         /// </summary>
         /// <param name="tableDescriptor">
@@ -26,9 +26,9 @@ namespace Microsoft.Performance.SDK.Extensibility
         bool AddTable(TableDescriptor tableDescriptor);
 
         /// <summary>
-        ///     This processes all of the dependencies for tables internal to a custom data source, such as metadata 
+        ///     This processes all of the dependencies for tables internal to an <see cref="IProcessingSource"/>, such as metadata 
         ///     tables. It should be called before processing a data source, after all data cookers have been enabled
-        ///     on the custom data source.
+        ///     on the <see cref="IProcessingSource"/>.
         ///     </summary>
         /// <remarks>
         ///     A table that was added successfully through <see cref="AddTable"/> maybe be filtered out during this call.

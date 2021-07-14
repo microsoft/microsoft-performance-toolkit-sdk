@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
     ///     ITableBuilder is the only way to get ITableBuilderWithRowCount to force the
-    ///     custom data source to set a row count.
+    ///     <see cref="IProcessingSource"/> to set a row count.
     /// </summary>
     public interface ITableBuilder
     {

@@ -8,9 +8,9 @@ using System.Text;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Attribute to mark a custom data source implementation as processing
+    ///     Attribute to mark an <see cref="IProcessingSource"/> implementation as processing
     ///     files of a specific type. This is used to instruct callers to route files
-    ///     with a given extension to the decorated Custom Data Source for processing.
+    ///     with a given extension to the decorated <see cref="IProcessingSource"/> for processing.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public sealed class FileDataSourceAttribute

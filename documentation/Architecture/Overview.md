@@ -63,8 +63,8 @@ The SDK operates as a common interface between the driver and plugins. It facili
 ## Plugins
 
 From an interface perspective, a plugin is a collection of
-* One or more `CustomDataSource`s
-* One `CustomDataProcessor` for each `CustomDataSource`
+* One or more `ProcessingSource`s
+* One `CustomDataProcessor` for each `ProcessingSource`
 * Zero or more `Table`s
 * Zero or more `DataCooker`s
 
@@ -76,18 +76,18 @@ that work together to
 A plugin is an **abstract collection of these objects** which can be bundled together for distribution and loaded as a single 
 unit by the SDK driver. *A plugin can be, and often is, made up of multiple assemblies*.
 
-:warning: Note that while a single assembly *can* define more than one `CustomDataSource`, __it is highly recommended that an assembly only contains 
-a single `CustomDataSource`.__ Tables, data cookers, and custom data processors are almost always associated with a single `CustomDataSource`. 
-It is best therefore to package __only one__ `CustomDataSource` and all of its associated classes in a single binary. 
+:warning: Note that while a single assembly *can* define more than one `ProcessingSource`, __it is highly recommended that an assembly only contains 
+a single `ProcessingSource`.__ Tables, data cookers, and custom data processors are almost always associated with a single `ProcessingSource`. 
+It is best therefore to package __only one__ `ProcessingSource` and all of its associated classes in a single binary. 
 
 The diagram below demonstrates how these objects work together to acheive this high-level interface:
 
 <img src=".attachments/plugin.svg" width="800">
 
-1) The `CustomDataSource` advertises to the SDK which data sources it supports and all the tables a driver can consume from it. The `CustomDataSource` is 
+1) The `ProcessingSource` advertises to the SDK which data sources it supports and all the tables a driver can consume from it. The `ProcessingSource` is 
    primarily an interface definition, but it also implements creating a `CustomDataProcessor`
 2) The `CustomDataProcessor` contains implementation logic for processing the data sources provided by the SDK. The data sources 
-   are given to the `CustomDataSource`, which typically passes them to the `CustomDataProcessor` it creates
+   are given to the `ProcessingSource`, which typically passes them to the `CustomDataProcessor` it creates
 3) `DataCooker` classes participate in the plugin's [processing pipeline](./The-Data-Processing-Pipeline) and
     1) Export `DataOutput`s that can be queried, via the SDK, by anyone who knows an output's *data path*
     2) Advertise to the SDK *data paths* that can be used by either outside sources (such as concurrently loaded plugins), or other parts 
@@ -95,8 +95,8 @@ The diagram below demonstrates how these objects work together to acheive this h
 4) `Table` classes populate the tables ultimately returned by the plugin. The data inside these tables comes from the `CustomDataProcessor`,
    either directly or indirectly through a [processing pipeline](./The-Data-Processing-Pipeline)
 
-For implementation details on how to create a simple plugin containing one `CustomDataSource` and its associated `CustomDataProcessor` and
-`Table`s, please view [Using the SDK/Creating A Simple Custom Data Source](../Using-the-SDK/Creating-a-simple-custom-data-source.md).
+For implementation details on how to create a simple plugin containing one `ProcessingSource`, its associated `CustomDataProcessor` and a
+`Table`, please view [Using the SDK/Creating A Simple SDK Plugin](../Using-the-SDK/Creating-a-simple-sdk-plugin.md).
 
 For implementation details on how to create a plugin containing `DataCooker`s, please view [Using the SDK/Creating a Data Processing Pipeline](../Using-the-SDK/Creating-a-pipeline.md)
 
