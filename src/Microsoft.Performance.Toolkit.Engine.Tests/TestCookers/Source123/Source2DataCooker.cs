@@ -11,7 +11,7 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 {
     public sealed class Source2DataCooker
-        : BaseSourceDataCooker<Source123DataObject, EngineTestContext, int>
+        : SourceDataCooker<Source123DataObject, EngineTestContext, int>
     {
         public static readonly DataCookerPath DataCookerPath = new DataCookerPath(
             nameof(Source123Parser),

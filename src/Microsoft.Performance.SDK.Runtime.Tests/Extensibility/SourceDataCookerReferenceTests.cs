@@ -21,7 +21,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 {
     internal class InternalSourceDataCooker
-        : BaseSourceDataCooker<TestDataElement, TestDataContext, int>
+        : SourceDataCooker<TestDataElement, TestDataContext, int>
     {
         public InternalSourceDataCooker()
             : base(new DataCookerPath("SourceId", "CookerId"))
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     }
 
     public class NoEmptyPublicConstructorSourceDataCooker
-        : BaseSourceDataCooker<TestDataElement, TestDataContext, int>
+        : SourceDataCooker<TestDataElement, TestDataContext, int>
     {
         public NoEmptyPublicConstructorSourceDataCooker(string sourceId, string cookerId)
             : base(sourceId, cookerId)
@@ -63,7 +63,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     }
 
     public class NoPublicConstructorSourceDataCooker
-        : BaseSourceDataCooker<TestDataElement, TestDataContext, int>
+        : SourceDataCooker<TestDataElement, TestDataContext, int>
     {
         internal NoPublicConstructorSourceDataCooker()
             : base("SourceId", "CookerId")

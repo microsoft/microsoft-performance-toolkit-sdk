@@ -19,13 +19,13 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
     /// <typeparam name="TKey">
     ///     Identifier for the <see cref="Type"/> of data element.
     /// </typeparam>
-    public abstract class BaseSourceDataCooker<T, TContext, TKey>
+    public abstract class SourceDataCooker<T, TContext, TKey>
         : CookedDataReflector,
           ISourceDataCooker<T, TContext, TKey>
         where T : IKeyedDataType<TKey>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="BaseSourceDataCooker{T, TContext, TKey}"/>
+        ///     Initializes a new instance of the <see cref="SourceDataCooker{T, TContext, TKey}"/>
         ///     class for the given cooker.
         /// </summary>
         /// <param name="sourceId">
@@ -35,20 +35,20 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
         /// <param name="cookerId">
         ///     This cooker's ID.
         /// </param>
-        protected BaseSourceDataCooker(string sourceId, string cookerId)
+        protected SourceDataCooker(string sourceId, string cookerId)
             : this(new DataCookerPath(sourceId, cookerId))
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="BaseSourceDataCooker{T, TContext, TKey}"/>
+        ///     Initializes a new instance of the <see cref="SourceDataCooker{T, TContext, TKey}"/>
         ///     class for the given cooker.
         /// </summary>
         /// </param>
         /// <param name="dataCookerPath">
         ///     This cooker's path.
         /// </param>
-        protected BaseSourceDataCooker(DataCookerPath dataCookerPath)
+        protected SourceDataCooker(DataCookerPath dataCookerPath)
             : base(dataCookerPath)
         {
             this.Path = dataCookerPath;

@@ -11,7 +11,7 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
 {
     public sealed class Source5DataCooker
-        : BaseSourceDataCooker<Source5DataObject, EngineTestContext, int>
+        : SourceDataCooker<Source5DataObject, EngineTestContext, int>
     {
         public static readonly DataCookerPath DataCookerPath = new DataCookerPath(
             nameof(Source5Parser),
