@@ -165,7 +165,6 @@ namespace SqlPlugin
                                     case "EndTime":
                                         endTime = reader.ReadElementContentAsDateTime().ToUniversalTime();
                                         break;
-
                                 }
                             }
 

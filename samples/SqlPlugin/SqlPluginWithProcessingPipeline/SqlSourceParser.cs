@@ -49,9 +49,9 @@ namespace SqlPluginWithProcessingPipeline
         }
 
         public void ProcessSource(ISourceDataProcessor<SqlEvent, SqlSourceParser, string> dataProcessor,
-                                                       ILogger logger,
-                                                       IProgress<int> progress,
-                                                       CancellationToken cancellationToken)
+                                  ILogger logger,
+                                  IProgress<int> progress,
+                                  CancellationToken cancellationToken)
         {
             using (FileStream stream = File.OpenRead(this.filePath))
             using (XmlReader reader = XmlReader.Create(stream))
@@ -121,12 +121,15 @@ namespace SqlPluginWithProcessingPipeline
                                             traceStartTime = startTime;
                                             this.StartWallClockUtc = startTime.Value;
                                         }
+
+                                        if (!traceEndTime.HasValue || traceEndTime.Value <= startTime)
+                                        {
+                                            traceEndTime = startTime;
+                                        }
                                         break;
                                     case "EndTime":
                                         endTime = reader.ReadElementContentAsDateTime().ToUniversalTime();
-                                        traceEndTime = endTime;
                                         break;
-
                                 }
                             }
 
