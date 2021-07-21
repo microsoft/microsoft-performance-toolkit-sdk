@@ -53,6 +53,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly List<TableDescriptor> enabledTables;
         private readonly ReadOnlyCollection<TableDescriptor> enabledTablesRO;
 
+        private readonly Func<Type, ILogger> loggerFactory;
+
         private DataExtensionFactory factory;
         private ExtensionRoot extensionRoot;
 
@@ -64,7 +66,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private IAssemblyLoader loader;
         private bool isDisposed;
 
-        internal Engine()
+        internal Engine(Func<Type, ILogger> loggerFactory)
         {
             this.customDataSourceReferences = new List<CustomDataSourceReference>();
             this.customDataSourceReferencesRO = new ReadOnlyCollection<CustomDataSourceReference>(this.customDataSourceReferences);
@@ -91,6 +93,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.enabledTables = new List<TableDescriptor>();
             this.enabledTablesRO = new ReadOnlyCollection<TableDescriptor>(this.enabledTables);
+
+            this.loggerFactory = loggerFactory;
 
             this.isDisposed = false;
         }
@@ -804,6 +808,22 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Creates a logger for the given type.
+        /// </summary>
+        /// <param name="type">
+        ///     The <c>Type</c> for which the logger is created.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="ILogger"/>.
+        /// </returns>
+        protected ILogger CreateLogger(Type type)
+        {
+            Debug.Assert(!this.isDisposed);
+            this.ThrowIfDisposed();
+            return loggerFactory?.Invoke(type) ?? Logger.Create(type);
+        }
+
         private static Engine CreateCore(
             EngineCreateInfo createInfo)
         {
@@ -837,7 +857,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 Debug.Assert(repoTuple != null);
 
-                instance = new EngineImpl();
+                instance = new EngineImpl(createInfo.LoggerFactory);
 
                 instance.ExtensionDirectories = extensionDirectories;
                 instance.CreationErrors = new[] { discoveryError, };
@@ -873,9 +893,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     try
                     {
-                        Type type = cds.Instance.GetType();
                         cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
-                        cds.Instance.SetLogger(createInfo.LoggerFactory?.Invoke(type) ?? Logger.Create(type));
+                        cds.Instance.SetLogger(instance.CreateLogger(cds.Instance.GetType()));
                     }
                     catch (Exception e)
                     {
@@ -1056,7 +1075,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             cds,
                             dataSources,
                             cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
-                            new RuntimeProcessorEnvironment(this.extensionRoot),
+                            new RuntimeProcessorEnvironment(this.extensionRoot, this.CreateLogger),
                             ProcessorOptions.Default);
 
                         var executor = new CustomDataSourceExecutor();
@@ -1148,23 +1167,31 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class EngineImpl
             : Engine
         {
+            internal EngineImpl(Func<Type, ILogger> loggerFactory)
+                : base(loggerFactory)
+            {
+            }
         }
 
         private sealed class RuntimeProcessorEnvironment
             : IProcessorEnvironment
         {
             private readonly IDataExtensionRepository repository;
+            private readonly Func<Type, ILogger> loggerFactory;
             private readonly object loggerLock = new object();
 
             private ILogger logger;
             private Type processorType;
 
             public RuntimeProcessorEnvironment(
-                IDataExtensionRepository repository)
+                IDataExtensionRepository repository,
+                Func<Type, ILogger> loggerFactory)
             {
                 Debug.Assert(repository != null);
+                Debug.Assert(loggerFactory != null);
 
                 this.repository = repository;
+                this.loggerFactory = loggerFactory;
             }
 
             public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(
@@ -1192,7 +1219,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     }
 
                     this.processorType = processorType;
-                    this.logger = Logger.Create(processorType);
+                    this.logger = this.loggerFactory(processorType);
                     return this.logger;
                 }
             }
