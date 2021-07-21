@@ -873,8 +873,9 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     try
                     {
+                        Type type = cds.Instance.GetType();
                         cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
-                        cds.Instance.SetLogger(createInfo.Logger ?? Logger.Create(cds.Instance.GetType()));
+                        cds.Instance.SetLogger(createInfo.LoggerFactory?.Invoke(type) ?? Logger.Create(type));
                     }
                     catch (Exception e)
                     {

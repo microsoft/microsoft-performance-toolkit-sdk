@@ -117,8 +117,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         public string ApplicationName { get; set; }
 
         /// <summary>
-        ///     Gets or sets a means of logging information.
+        ///     Gets or sets a logger factory.
         /// </summary>
-        public ILogger Logger { get; set; }
+        /// <remarks>
+        ///     The logger factory should be able to provide each processing source a logger specific to its type.
+        /// </remarks>
+        public Func<Type, ILogger> LoggerFactory { get; set; }
     }
 }
