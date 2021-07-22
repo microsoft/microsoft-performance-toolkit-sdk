@@ -143,9 +143,9 @@ namespace Microsoft.Performance.SDK
         /// </summary>
         public TimestampDelta Duration
         {
-            get 
-            { 
-                return this.EndTime - this.StartTime; 
+            get
+            {
+                return this.EndTime - this.StartTime;
             }
         }
 
@@ -305,9 +305,9 @@ namespace Microsoft.Performance.SDK
         /// </summary>
         public static TimeRange Default
         {
-            get 
-            { 
-                return new TimeRange(Timestamp.Zero, Timestamp.MaxValue); 
+            get
+            {
+                return new TimeRange(Timestamp.Zero, Timestamp.MaxValue);
             }
         }
 
@@ -316,9 +316,9 @@ namespace Microsoft.Performance.SDK
         /// </summary>
         public static TimeRange FullRange
         {
-            get 
-            { 
-                return new TimeRange(Timestamp.MinValue, Timestamp.MaxValue); 
+            get
+            {
+                return new TimeRange(Timestamp.MinValue, Timestamp.MaxValue);
             }
         }
 
@@ -327,9 +327,9 @@ namespace Microsoft.Performance.SDK
         /// </summary>
         public static TimeRange Zero
         {
-            get 
-            { 
-                return new TimeRange(Timestamp.Zero, Timestamp.Zero); 
+            get
+            {
+                return new TimeRange(Timestamp.Zero, Timestamp.Zero);
             }
         }
 
@@ -359,7 +359,6 @@ namespace Microsoft.Performance.SDK
         /// <exception cref="System.FormatException">
         ///     <paramref name="s"/> is not parseable into a <see cref="TimeRange"/>.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "s")]
         public static TimeRange Parse(string s)
         {
             if (s == null)
@@ -389,7 +388,6 @@ namespace Microsoft.Performance.SDK
         ///     <c>true</c> if parsing was successful; <c>false</c>
         ///     otherwise.
         /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "s")]
         public static bool TryParse(string s, out TimeRange result)
         {
             if (s == null)

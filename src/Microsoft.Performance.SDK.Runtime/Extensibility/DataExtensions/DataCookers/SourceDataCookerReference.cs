@@ -118,10 +118,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     A <see cref="Type"/> must satisfy the following criteria in order to 
         ///     be eligible as a reference:
         ///     <list type="bullet">
-        ///         <item>must be public.</item>
         ///         <item>must be concrete.</item>
-        ///         <item>must implement IDataCooker somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
-        ///         <item>must implement ISourceDataCooker<,,> somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must implement IDataCooker somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement ISourceDataCooker<,,> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>
@@ -159,13 +158,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                     i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISourceDataCooker<,,>)))
             {
                 // this is ok, it might be some other type of data cooker
-                return false;
-            }
-
-            if (!candidateType.IsPublic())
-            {
-                Console.Error.WriteLine(
-                    $"Warning: type {candidateType} seems to be a source data cooker, but is not public.");
                 return false;
             }
 
@@ -260,7 +252,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                         });
                 }
 
-                if(ProductionStrategy == DataProductionStrategy.AsRequired)
+                if (ProductionStrategy == DataProductionStrategy.AsRequired)
                 {
                     if (((SourceDataCookerReference)requiredDataExtension).ProductionStrategy != DataProductionStrategy.AsRequired)
                     {

@@ -118,7 +118,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 throw new NotImplementedException();
             }
+
+            public bool TryQueryOutput<T>(DataOutputPath identifier, out T result)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool TryQueryOutput(DataOutputPath identifier, out object result)
+            {
+                throw new NotImplementedException();
+            }
         }
+
         private sealed class FakeSupport
         : IDataExtensionDependencyStateSupport
         {

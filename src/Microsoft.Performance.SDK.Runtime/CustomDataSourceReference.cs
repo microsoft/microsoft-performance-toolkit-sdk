@@ -270,7 +270,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <list type="bullet">
         ///         <item>must be public.</item>
         ///         <item>must be concrete.</item>
-        ///         <item>must implement ICustomDataSource somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must implement ICustomDataSource somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///         <item>must be decorated with the <see cref="CustomDataSourceAttribute"/>.</item>
         ///         <item>must be decorated with one (1) or more <see cref="DataSourceAttribute"/>s.</item>

@@ -35,7 +35,20 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public Func<DataCookerPath, ISourceDataCooker<T, TContext, TKey>> GetSourceDataCookerFunc { get; set; }
         public ISourceDataCooker<T, TContext, TKey> GetSourceDataCooker(DataCookerPath cookerPath)
         {
-            return this.GetSourceDataCookerFunc?.Invoke(cookerPath);
+            if (this.GetSourceDataCookerFunc != null)
+            {
+                return this.GetSourceDataCookerFunc.Invoke(cookerPath);
+            }
+
+            foreach (var cooker in SourceDataCookers)
+            {
+                if (cooker.Path == cookerPath)
+                {
+                    return cooker;
+                }
+            }
+
+            return null;
         }
 
         public Func<T, TContext, CancellationToken, DataProcessingResult> ProcessDataElementFunc { get; set; }
@@ -54,7 +67,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public Action<ISourceDataCooker<T, TContext, TKey>> RegisterSourceDataCookerAction { get; set; }
         public void RegisterSourceDataCooker(ISourceDataCooker<T, TContext, TKey> dataCooker)
         {
-            this.RegisterSourceDataCookerAction?.Invoke(dataCooker);
+            if (this.RegisterSourceDataCookerAction != null)
+            {
+                this.RegisterSourceDataCookerAction.Invoke(dataCooker);
+            }
+            else
+            {
+                this.SourceDataCookers.Add(dataCooker);
+            }
         }
     }
 }
