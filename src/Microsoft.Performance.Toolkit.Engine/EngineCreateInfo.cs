@@ -17,20 +17,35 @@ namespace Microsoft.Performance.Toolkit.Engine
     /// </summary>
     public sealed class EngineCreateInfo
     {
+        private static string DefaultRuntimeName;
+
+        static EngineCreateInfo()
+        {
+            EngineCreateInfo.DefaultRuntimeName = typeof(EngineCreateInfo).Assembly.GetName().Name;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
+        /// </summary>
+        /// <remarks>
+        ///     The current directory is used to locate plugins.
+        /// </remarks>
+        public EngineCreateInfo()
+            : this(new string[] { Environment.CurrentDirectory })
+        {
+        }
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
         /// </summary>
         /// <param name="extensionDirectory">
         ///     The extension directory from which the runtime instance is to load plugins.
         /// </param>
-        /// <remarks>
-        ///     If no extension directory is specified, the current directory is used.
-        /// </remarks>
         /// <exception cref="InvalidExtensionDirectoryException">
         ///     Thrown if <paramref name="extensionDirectory"/> is an invalid directory path.
         /// </exception>
-        public EngineCreateInfo(string extensionDirectory = null)
-            : this(new string[] { extensionDirectory ?? Environment.CurrentDirectory })
+        public EngineCreateInfo(string extensionDirectory)
+            : this(new string[] { extensionDirectory })
         {
         }
 
@@ -107,9 +122,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Gets or sets the name of the runtime on which the application is built.
         /// </summary>
         /// <remarks>
-        ///     Defaults to "Microsoft.Performance.Toolkit.Engine".
+        ///     Defaults to the engine assembly name.
         /// </remarks>
-        public string RuntimeName { get; set; } = "Microsoft.Performance.Toolkit.Engine";
+        public string RuntimeName { get; set; } = EngineCreateInfo.DefaultRuntimeName;
 
         /// <summary>
         ///     Gets or sets the application name.

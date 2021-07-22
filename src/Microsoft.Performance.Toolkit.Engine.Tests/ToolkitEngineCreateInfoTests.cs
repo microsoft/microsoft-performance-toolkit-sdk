@@ -113,5 +113,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 () => new EngineCreateInfo(new[] { dir1, dirDoesNotExist }));
             Assert.AreEqual(dirDoesNotExist, e.Path);
         }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void ExtensionDirectory_DefaultRuntime_Set()
+        {
+            this.Sut = new EngineCreateInfo();
+
+            string expectedName = typeof(EngineCreateInfo).Assembly.GetName().Name;
+            Assert.AreEqual(expectedName, this.Sut.RuntimeName);
+        }
     }
 }
