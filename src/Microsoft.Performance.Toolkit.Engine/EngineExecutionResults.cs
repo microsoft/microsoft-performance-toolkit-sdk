@@ -9,7 +9,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -19,6 +18,7 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents the results of processing data using the <see cref="Engine"/>.
     /// </summary>
     public sealed class RuntimeExecutionResults
+        : ICookedDataRetrieval
     {
         private readonly ICookedDataRetrieval cookedDataRetrieval;
         private readonly IDataExtensionRetrievalFactory retrievalFactory;
@@ -329,7 +329,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 filledTableBulder = null;
                 return false;
-            }            
+            }
         }
 
         // Will perform the Func on the Repository if the table is contained, else false.
@@ -341,9 +341,9 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 var tableRetrieval = this.retrievalFactory.CreateDataRetrievalForTable(tableDescriptor.Guid);
 
-                result = func(reference, tableRetrieval);                    
+                result = func(reference, tableRetrieval);
 
-                return true;               
+                return true;
             }
 
             return false;
@@ -356,7 +356,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (this.tableToProcessorMap.TryGetValue(tableDescriptor, out ICustomDataProcessor processor))
             {
-                result = func(processor);                    
+                result = func(processor);
 
                 return true;
             }
@@ -424,7 +424,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 this.RowCount = numberOfRows;
                 return this;
-            }           
+            }
 
             public int RowCount { get; private set; }
 

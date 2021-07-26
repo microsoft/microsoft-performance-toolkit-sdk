@@ -37,5 +37,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
             throw new System.NotImplementedException();
         }
+
+        public bool TryQueryOutput<T>(DataOutputPath identifier, out T result)
+        {
+            result = default;
+            return false;
+        }
+
+        public bool TryQueryOutput(DataOutputPath identifier, out object result)
+        {
+            result = default;
+            return false;
+        }
     }
 }

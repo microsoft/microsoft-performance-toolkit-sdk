@@ -50,17 +50,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         }
 
         public TestCustomDataProcessor(
-            ISourceParser<TestRecord, TestParserContext, int> sourceParser, 
-            ProcessorOptions options, 
-            IApplicationEnvironment applicationEnvironment, 
-            IProcessorEnvironment processorEnvironment, 
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping, 
-            IEnumerable<TableDescriptor> metadataTables) 
+            ISourceParser<TestRecord, TestParserContext, int> sourceParser,
+            ProcessorOptions options,
+            IApplicationEnvironment applicationEnvironment,
+            IProcessorEnvironment processorEnvironment,
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
+            IEnumerable<TableDescriptor> metadataTables)
             : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
         {
         }
 
-        public CustomDataProcessorExtensibilitySupport ExtensibilitySupport { get; set;}
+        public CustomDataProcessorExtensibilitySupport ExtensibilitySupport { get; set; }
 
         public TestDataExtensionRepository ExtensionRepository { get; set; }
     }

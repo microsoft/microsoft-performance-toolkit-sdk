@@ -33,9 +33,22 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             return (TOut)QueryOutput(dataOutputPath);
         }
 
+        public bool TryQueryOutput<TOut>(DataOutputPath dataOutputPath, out TOut result)
+        {
+            var success = TryQueryOutput(dataOutputPath, out var baseResult);
+            if (success)
+            {
+                result = (TOut)baseResult;
+                return true;
+            }
+
+            result = default;
+            return false;
+        }
+
         public object QueryOutput(DataOutputPath dataOutputPath)
         {
-            if(this.availableSourceCookers.Contains(dataOutputPath.CookerPath))
+            if (this.availableSourceCookers.Contains(dataOutputPath.CookerPath))
             {
                 var cooker = this.sourceDataCookers.GetSourceDataCooker(dataOutputPath.CookerPath);
                 return cooker.QueryOutput(dataOutputPath);
@@ -45,6 +58,24 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 $"The requested data cooker is not available: {dataOutputPath.CookerPath}. " +
                 "Consider adding it to the requirements for this data extension.",
                 nameof(dataOutputPath));
+        }
+
+        public bool TryQueryOutput(DataOutputPath dataOutputPath, out object result)
+        {
+            try
+            {
+                if (this.availableSourceCookers.Contains(dataOutputPath.CookerPath))
+                {
+                    var cooker = this.sourceDataCookers.GetSourceDataCooker(dataOutputPath.CookerPath);
+                    return cooker.TryQueryOutput(dataOutputPath, out result);
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+            result = default;
+            return false;
         }
     }
 }
