@@ -92,8 +92,8 @@ namespace Microsoft.Performance.SDK.Processing
         public string Description { get; }
 
         /// <summary>
-        ///     This method is used to filter anyincoming Data Sources so that only
-        ///     <see cref="IDataSource"/> that could conceivably be processed by the decorated
+        ///     This method is used to filter any incoming <see cref="IDataSource"/>s so that only
+        ///     <see cref="IDataSource"/>s that could conceivably be processed by the decorated
         ///     <see cref="IProcessingSource"/> are passed to the <see cref="IProcessingSource"/> for evaluation.
         /// </summary>
         /// <param name="dataSource">

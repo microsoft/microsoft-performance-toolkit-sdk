@@ -129,7 +129,7 @@ namespace Microsoft.Performance.SDK.Processing
         protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> AllTables => this.allTablesRO;
 
         /// <summary>
-        ///     This is set by default when the SetApplicationEnvironment is called by the runtime.
+        ///     This is set by default when the <see cref="SetApplicationEnvironment"/> is called by the runtime.
         ///     <seealso cref="IApplicationEnvironment"/>
         /// </summary>
         protected IApplicationEnvironment ApplicationEnvironment { get; private set; }
@@ -141,12 +141,6 @@ namespace Microsoft.Performance.SDK.Processing
         protected ILogger Logger { get; private set; }
 
         /// <inheritdoc />
-        /// <summary>
-        ///     When overridden in a derived class, saves the given environment into this instance.
-        /// </summary>
-        /// <param name="applicationEnvironment">
-        ///     The handle back to the application environment.
-        /// </param>
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
             this.ApplicationEnvironment = applicationEnvironment;
@@ -310,8 +304,8 @@ namespace Microsoft.Performance.SDK.Processing
         protected abstract bool IsDataSourceSupportedCore(IDataSource dataSource);
 
         /// <summary>
-        ///     A derived class may implement this to perform additional actions when an application
-        ///     environment is made available.
+        ///     A derived class may implement this to perform additional actions when an <see cref="IApplicationEnvironment"/>
+        ///     is made available.
         /// </summary>
         /// <param name="applicationEnvironment">
         ///     The handle back to the application environment.
@@ -323,7 +317,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     A derived class may implement this to perform additional actions when a logger is made available.
         /// </summary>
-        /// <param name="logger">Use to log information. <seealso cref="ILogger"/></param>
+        /// <param name="logger">
+        ///     The <seealso cref="ILogger"/> used to log information.
+        /// </param>
         protected virtual void SetLoggerCore(ILogger logger)
         {
         }

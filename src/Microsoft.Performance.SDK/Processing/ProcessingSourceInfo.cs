@@ -4,9 +4,7 @@
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Represents information about an <see cref="IProcessingSource"/>. This
-    ///     exposes authorship information, licensing information, and
-    ///     any other information about your data source.
+    ///     Represents information about an <see cref="IProcessingSource"/>.
     /// </summary>
     /// <remarks>
     ///     This class will be sealed prior to SDK v1.0.0 release candidate 1. It is
@@ -16,29 +14,28 @@ namespace Microsoft.Performance.SDK.Processing
     {
         /// <summary>
         ///     Gets or sets the contact information of the owners
-        ///     of this data source.
+        ///     of the <see cref="IProcessingSource"/>.
         /// </summary>
         public ContactInfo[] Owners { get; set; }
 
         /// <summary>
-        ///     Gets or sets the project information, if any.
+        ///     Gets or sets the project information of the <see cref="IProcessingSource"/>, if any.
         /// </summary>
         public ProjectInfo ProjectInfo { get; set; }
 
         /// <summary>
-        ///     Gets or sets the license information, if any.
+        ///     Gets or sets the license information of the <see cref="IProcessingSource"/>, if any.
         /// </summary>
         public LicenseInfo LicenseInfo { get; set; }
 
         /// <summary>
-        ///     Gets or sets the copyright notice, if any.
+        ///     Gets or sets the copyright notice of the <see cref="IProcessingSource"/>, if any.
         /// </summary>
         public string CopyrightNotice { get; set; }
 
         /// <summary>
-        ///     Gets or sets any additional information you wish to
-        ///     convey to the user. Each entry in the array is logically
-        ///     a new paragraph.
+        ///     Gets or sets any additional information about the <see cref="IProcessingSource"/> to convey to the user. 
+        ///     Each entry in the array is logically a new paragraph.
         /// </summary>
         public string[] AdditionalInformation { get; set; }
     }
@@ -71,7 +68,7 @@ namespace Microsoft.Performance.SDK.Processing
     }
 
     /// <summary>
-    ///     Represents the license information for a data source.
+    ///     Represents the license information for a <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class LicenseInfo
     {
@@ -93,7 +90,7 @@ namespace Microsoft.Performance.SDK.Processing
     }
 
     /// <summary>
-    ///     Represents project information about a data source.
+    ///     Represents project information about the <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class ProjectInfo
     {

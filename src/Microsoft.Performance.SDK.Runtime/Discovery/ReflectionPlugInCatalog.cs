@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -139,7 +140,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 {
                     this.loadedDataSources.Add(type, reference);
                 }
-                catch { }                
+                catch { }
             }
         }
 

@@ -25,7 +25,7 @@ namespace Microsoft.Performance.SDK.Processing
     public interface IProcessingSource
     {
         /// <summary>
-        ///     Gets the collection of tables exposed by this data source.
+        ///     Gets the collection of tables exposed by this <see cref="IProcessingSource"/>.
         ///     These are the data tables for exposing the processed data.
         /// </summary>
         IEnumerable<TableDescriptor> DataTables { get; }
@@ -37,16 +37,15 @@ namespace Microsoft.Performance.SDK.Processing
         IEnumerable<TableDescriptor> MetadataTables { get; }
 
         /// <summary>
-        ///     Gets the options that are supported by this data source.
+        ///     Gets the options that are supported by this <see cref="IProcessingSource"/>.
         /// </summary>
         IEnumerable<Option> CommandLineOptions { get; }
 
         /// <summary>
-        ///     Gets information about this <see cref="IProcessingSource"/>. This information
-        ///     is displayed in the About Box for this data source.
+        ///     Gets information about this <see cref="IProcessingSource"/>.
         /// </summary>
         /// <returns>
-        ///     The data source information.
+        ///     The <see cref="ProcessingSourceInfo"/> for this <see cref="IProcessingSource"/>.
         /// </returns>
         ProcessingSourceInfo GetAboutInfo();
 
@@ -59,7 +58,7 @@ namespace Microsoft.Performance.SDK.Processing
         void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment);
 
         /// <summary>
-        ///     Called to provide the data source an application-appropriate logging mechanism.
+        ///     Provides the <see cref="IProcessingSource"/> an application-appropriate logging mechanism.
         /// </summary>
         /// <param name="logger">
         ///     Used to log information.
