@@ -3,13 +3,13 @@
 
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 {
@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     "Other",
                     true,
                     requiredDataCookers: new List<DataCookerPath> { DataCookerPath.ForSource(SourceParserId, "CookerId1") })
-                { Type = typeof(TestTable1) };
+            { Type = typeof(TestTable1) };
 
             public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
             {
@@ -47,7 +47,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     "Other",
                     true,
                     requiredDataCookers: new List<DataCookerPath> { DataCookerPath.ForSource(SourceParserId, "CookerId1") })
-                { Type = typeof(TestTable2) };
+            { Type = typeof(TestTable2) };
 
             public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
             {
@@ -110,7 +110,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
-                { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
+            { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
@@ -136,7 +136,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable2.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
-                { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
+            { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
@@ -161,7 +161,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
-                { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
+            { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
@@ -181,7 +181,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
-                { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
+            { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
@@ -200,13 +200,183 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var sourceCooker = new TestSourceDataCooker() { Path = DataCookerPath.ForSource(TestTable1.SourceParserId, "CookerId1") };
             var sourceCookerReference = new TestSourceDataCookerReference(false)
-                { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
+            { availability = DataExtensionAvailability.Available, Path = sourceCooker.Path };
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
             Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
 
             Assert.ThrowsException<InvalidOperationException>(() => cdp.ExtensibilitySupport.GetDataExtensionRetrieval(TestTable1.TableDescriptor));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void QueryInvalidSourceParserIdThrows()
+        {
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor();
+            Assert.ThrowsException<ArgumentException>(
+                () => cdp.QueryOutput(DataCookerPath.ForSource("InvalidParserId", "RandomeCookerName"), "DataId"));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryQueryInvalidSourceParserIdFails()
+        {
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor();
+            var success = cdp.TryQueryOutput(
+                DataCookerPath.ForSource("InvalidParserId", "RandomeCookerName"),
+                "DataId",
+                out var result);
+
+            Assert.IsFalse(success);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void QueryInvalidSourceParserIdGenericThrows()
+        {
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor();
+            Assert.ThrowsException<ArgumentException>(
+                () => cdp.QueryOutput<int>(DataCookerPath.ForSource("InvalidParserId", "RandomeCookerName"), "DataId"));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryQueryInvalidSourceParserIdGenericFails()
+        {
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor();
+            var success = cdp.TryQueryOutput(
+                DataCookerPath.ForSource("InvalidParserId", "RandomCookerName"),
+                "DataId",
+                out bool result);
+
+            Assert.IsFalse(success);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void QueryOutput()
+        {
+            string sourceParserId = "TestSourceParser";
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(sourceParserId);
+
+            var dataCookerPath = DataCookerPath.ForSource(sourceParserId, "CookerId1");
+            var cookedDataReflector = new TestCookedDataReflector(dataCookerPath);
+
+            var sourceCooker = new TestSourceDataCooker() { Path = dataCookerPath };
+            sourceCooker.SetCookedDataReflector(cookedDataReflector);
+
+            var sourceCookerReference = new TestSourceDataCookerReference(false)
+            {
+                availability = DataExtensionAvailability.Available,
+                Path = sourceCooker.Path,
+                createInstance = () => sourceCooker,
+            };
+
+            cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
+            cdp.EnableCooker(sourceCookerReference);
+
+            var addFuncAsObject = cdp.QueryOutput(dataCookerPath, nameof(TestCookedDataReflector.AddFunc));
+
+            int result = ((Func<int, int, int>)addFuncAsObject)(0, 1);
+            Assert.AreEqual(1, result);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void QueryOutputByType()
+        {
+            string sourceParserId = "TestSourceParser";
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(sourceParserId);
+
+            var dataCookerPath = DataCookerPath.ForSource(sourceParserId, "CookerId1");
+            var cookedDataReflector = new TestCookedDataReflector(dataCookerPath);
+
+            var sourceCooker = new TestSourceDataCooker() { Path = dataCookerPath };
+            sourceCooker.SetCookedDataReflector(cookedDataReflector);
+
+            var sourceCookerReference = new TestSourceDataCookerReference(false)
+            {
+                availability = DataExtensionAvailability.Available,
+                Path = sourceCooker.Path,
+                createInstance = () => sourceCooker,
+            };
+
+            cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
+            cdp.EnableCooker(sourceCookerReference);
+
+            var addFuncAsObject = cdp.QueryOutput<Func<int, int, int>>(
+                dataCookerPath,
+                nameof(TestCookedDataReflector.AddFunc));
+
+            int result = addFuncAsObject(5, 10);
+            Assert.AreEqual(15, result);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryQueryOutput()
+        {
+            string sourceParserId = "TestSourceParser";
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(sourceParserId);
+
+            var dataCookerPath = DataCookerPath.ForSource(sourceParserId, "CookerId1");
+            var cookedDataReflector = new TestCookedDataReflector(dataCookerPath);
+
+            var sourceCooker = new TestSourceDataCooker() { Path = dataCookerPath };
+            sourceCooker.SetCookedDataReflector(cookedDataReflector);
+
+            var sourceCookerReference = new TestSourceDataCookerReference(false)
+            {
+                availability = DataExtensionAvailability.Available,
+                Path = sourceCooker.Path,
+                createInstance = () => sourceCooker,
+            };
+
+            cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
+            cdp.EnableCooker(sourceCookerReference);
+
+            bool success = cdp.TryQueryOutput(
+                dataCookerPath,
+                nameof(TestCookedDataReflector.HasData),
+                out var hasDataAsObject);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual(cookedDataReflector.HasData, (bool)hasDataAsObject);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryQueryOutputByType()
+        {
+            string sourceParserId = "TestSourceParser";
+            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(sourceParserId);
+
+            var dataCookerPath = DataCookerPath.ForSource(sourceParserId, "CookerId1");
+            var cookedDataReflector = new TestCookedDataReflector(dataCookerPath);
+
+            var sourceCooker = new TestSourceDataCooker() { Path = dataCookerPath };
+            sourceCooker.SetCookedDataReflector(cookedDataReflector);
+
+            var sourceCookerReference = new TestSourceDataCookerReference(false)
+            {
+                availability = DataExtensionAvailability.Available,
+                Path = sourceCooker.Path,
+                createInstance = () => sourceCooker,
+            };
+
+            cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
+            cdp.EnableCooker(sourceCookerReference);
+
+            var success = cdp.TryQueryOutput<bool>(
+                dataCookerPath,
+                nameof(TestCookedDataReflector.HasData),
+                out var result);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual(cookedDataReflector.HasData, result);
         }
     }
 }

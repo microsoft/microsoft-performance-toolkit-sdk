@@ -53,10 +53,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly List<TableDescriptor> enabledTables;
         private readonly ReadOnlyCollection<TableDescriptor> enabledTablesRO;
 
+        private readonly Func<Type, ILogger> loggerFactory;
+
         private DataExtensionFactory factory;
         private ExtensionRoot extensionRoot;
 
-        private string extensionDirectory;
+        private IReadOnlyCollection<string> extensionDirectories;
         private bool isProcessed;
         private IEnumerable<ErrorInfo> creationErrors;
 
@@ -64,7 +66,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private IAssemblyLoader loader;
         private bool isDisposed;
 
-        internal Engine()
+        internal Engine(Func<Type, ILogger> loggerFactory)
         {
             this.customDataSourceReferences = new List<CustomDataSourceReference>();
             this.customDataSourceReferencesRO = new ReadOnlyCollection<CustomDataSourceReference>(this.customDataSourceReferences);
@@ -92,30 +94,31 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.enabledTables = new List<TableDescriptor>();
             this.enabledTablesRO = new ReadOnlyCollection<TableDescriptor>(this.enabledTables);
 
+            this.loggerFactory = loggerFactory;
+
             this.isDisposed = false;
         }
 
         /// <summary>
-        ///     Gets the directory that the engine will scan for extensions.
-        ///     This directory is scanned during <see cref="Create"/> when
-        ///     creating an instance of the engine. See <see cref="SetExtensionDirectory(string)"/>
-        ///     and <see cref="ResetExtensionDirectory"/> for manipulating this property.
+        ///     Gets the directories that the engine will scan for extensions.
+        ///     These directories are scanned during <see cref="Create"/> when
+        ///     creating an instance of the engine.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public string ExtensionDirectory
+        public IReadOnlyCollection<string> ExtensionDirectories
         {
             get
             {
                 this.ThrowIfDisposed();
-                return this.extensionDirectory;
+                return this.extensionDirectories;
             }
             private set
             {
                 Debug.Assert(!this.isDisposed);
                 this.ThrowIfDisposed();
-                this.extensionDirectory = value;
+                this.extensionDirectories = value;
             }
         }
 
@@ -765,10 +768,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (disposing)
             {
                 this.extensionRoot.SafeDispose();
-                
+
                 this.applicationEnvironment = null;
                 this.creationErrors = null;
-                this.extensionDirectory = null;
+                this.extensionDirectories = null;
                 this.extensionRoot = null;
                 this.factory = null;
                 this.loader = null;
@@ -805,6 +808,22 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Creates a logger for the given type.
+        /// </summary>
+        /// <param name="type">
+        ///     The <c>Type</c> for which the logger is created.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="ILogger"/>.
+        /// </returns>
+        protected ILogger CreateLogger(Type type)
+        {
+            Debug.Assert(!this.isDisposed);
+            this.ThrowIfDisposed();
+            return loggerFactory?.Invoke(type) ?? Logger.Create(type);
+        }
+
         private static Engine CreateCore(
             EngineCreateInfo createInfo)
         {
@@ -815,9 +834,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Engine instance = null;
             try
             {
-
-                var extensionDirectory = createInfo.ExtensionDirectory;
-                Debug.Assert(extensionDirectory != null);
+                var extensionDirectories = createInfo.ExtensionDirectories.ToList().AsReadOnly();
+                Debug.Assert(extensionDirectories.Any());
 
                 var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
 
@@ -831,7 +849,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     assemblyDiscovery,
                     repo);
 
-                assemblyDiscovery.ProcessAssemblies(extensionDirectory, out var discoveryError);
+                assemblyDiscovery.ProcessAssemblies(extensionDirectories, out var discoveryError);
 
                 repo.FinalizeDataExtensions();
 
@@ -839,22 +857,30 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 Debug.Assert(repoTuple != null);
 
-                instance = new EngineImpl();
+                instance = new EngineImpl(createInfo.LoggerFactory);
 
-                instance.ExtensionDirectory = extensionDirectory;
+                instance.ExtensionDirectories = extensionDirectories;
                 instance.CreationErrors = new[] { discoveryError, };
                 instance.customDataSourceReferences.AddRange(catalog.PlugIns);
                 instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
                 instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-                instance.extensionRoot = new ExtensionRoot(catalog, repo);                
+                instance.extensionRoot = new ExtensionRoot(catalog, repo);
 
                 instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
 
                 instance.factory = repoTuple.Item1;
 
+                string runtimeName = !string.IsNullOrWhiteSpace(createInfo.RuntimeName)
+                    ? createInfo.RuntimeName
+                    : "Microsoft.Performance.Toolkit.Engine";
+
+                string applicationName = !string.IsNullOrWhiteSpace(createInfo.ApplicationName)
+                    ? createInfo.ApplicationName
+                    : string.Empty;
+
                 instance.applicationEnvironment = new ApplicationEnvironment(
-                    applicationName: string.Empty,
-                    runtimeName: "Microsoft.Performance.Toolkit.Engine",
+                    applicationName: applicationName,
+                    runtimeName: runtimeName,
                     new RuntimeTableSynchronizer(),
                     new TableConfigurationsSerializer(),
                     instance.extensionRoot,
@@ -868,9 +894,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     try
                     {
                         cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
-
-                        // todo: CreateLogger func should be passed in from the EngineCreateInfo
-                        cds.Instance.SetLogger(Logger.Create(cds.Instance.GetType()));
+                        cds.Instance.SetLogger(instance.CreateLogger(cds.Instance.GetType()));
                     }
                     catch (Exception e)
                     {
@@ -982,7 +1006,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     var executor = executors.Single(x => x.Context.CustomDataSource.AvailableTables.Contains(table));
                     executor.Processor.EnableTable(table);
                     processorTables.Add(table, executor.Processor);
-                }                                
+                }
             }
 
             var processors = this.extensionRoot.EnableDataCookers(
@@ -997,7 +1021,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 extendedTables);
 
                 processors.UnionWith(processorForTable);
-            }            
+            }
 
             var executionResults = new List<ExecutionResult>(executors.Count);
             foreach (var executor in executors)
@@ -1051,7 +1075,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             cds,
                             dataSources,
                             cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
-                            new RuntimeProcessorEnvironment(this.extensionRoot),
+                            new RuntimeProcessorEnvironment(this.extensionRoot, this.CreateLogger),
                             ProcessorOptions.Default);
 
                         var executor = new CustomDataSourceExecutor();
@@ -1143,23 +1167,31 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class EngineImpl
             : Engine
         {
+            internal EngineImpl(Func<Type, ILogger> loggerFactory)
+                : base(loggerFactory)
+            {
+            }
         }
 
         private sealed class RuntimeProcessorEnvironment
             : IProcessorEnvironment
         {
             private readonly IDataExtensionRepository repository;
+            private readonly Func<Type, ILogger> loggerFactory;
             private readonly object loggerLock = new object();
 
             private ILogger logger;
             private Type processorType;
 
             public RuntimeProcessorEnvironment(
-                IDataExtensionRepository repository)
+                IDataExtensionRepository repository,
+                Func<Type, ILogger> loggerFactory)
             {
                 Debug.Assert(repository != null);
+                Debug.Assert(loggerFactory != null);
 
                 this.repository = repository;
+                this.loggerFactory = loggerFactory;
             }
 
             public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(
@@ -1187,7 +1219,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     }
 
                     this.processorType = processorType;
-                    this.logger = Logger.Create(processorType);
+                    this.logger = this.loggerFactory(processorType);
                     return this.logger;
                 }
             }
@@ -1208,6 +1240,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
             {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
             }
 
             public void SubmitColumnChangeRequest(
@@ -1216,6 +1250,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
             {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
             }
         }
 

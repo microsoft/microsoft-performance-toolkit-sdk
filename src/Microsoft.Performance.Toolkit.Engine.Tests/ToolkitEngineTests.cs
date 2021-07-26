@@ -90,7 +90,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_NoParameters_UsesCurrentDirectory()
         {
-            Assert.AreEqual(Environment.CurrentDirectory, this.Sut.ExtensionDirectory);
+            Assert.AreEqual(Environment.CurrentDirectory, this.Sut.ExtensionDirectories.First());
         }
 
         [TestMethod]
@@ -162,9 +162,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 // we loaded from an assembly in a different folder, so the type is 'technically' different, so do a name
                 // compare this time.
                 engine = Engine.Create(
-                    new EngineCreateInfo
+                    new EngineCreateInfo(tempDir)
                     {
-                        ExtensionDirectory = tempDir,
                         Versioning = new FakeVersionChecker(),
                     });
                 Assert.IsTrue(engine.CustomDataSources.Any());
@@ -282,9 +281,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Directory.CreateDirectory(tempDir);
             CopyAssemblyContainingType(typeof(Source123DataSource), tempDir);
             var sut = Engine.Create(
-                new EngineCreateInfo
+                new EngineCreateInfo(tempDir)
                 {
-                    ExtensionDirectory = tempDir,
                     Versioning = new FakeVersionChecker(),
                 });
 
@@ -334,9 +332,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Directory.CreateDirectory(tempDir);
             CopyAssemblyContainingType(typeof(Source123DataSource), tempDir);
             using (var sut = Engine.Create(
-                new EngineCreateInfo
+                new EngineCreateInfo(tempDir)
                 {
-                    ExtensionDirectory = tempDir,
                     Versioning = new FakeVersionChecker(),
                 }))
             {
@@ -683,7 +680,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
             Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
             Assert.AreEqual(1, this.Sut.DataSourcesToProcess[expectedDataSource].Count);
-            Assert.AreEqual(files.Length, this.Sut.DataSourcesToProcess[expectedDataSource][0].Count); 
+            Assert.AreEqual(files.Length, this.Sut.DataSourcesToProcess[expectedDataSource][0].Count);
             for (var i = 0; i < files.Length; ++i)
             {
                 Assert.AreEqual(files[i], this.Sut.DataSourcesToProcess[expectedDataSource][0][i]);
@@ -860,7 +857,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableTable_Known_EmptyTable()
         {
-            var sut = Engine.Create();            
+            var sut = Engine.Create();
 
             sut.EnableTable(EmptyTable.TableDescriptor);
 
@@ -1127,7 +1124,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     }
                 }
             }
-            
+
             foreach (var throwingTable in testCase.ThrowingTables)
             {
                 // TODO: Re-enable when the following issue is fixed: https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/55
@@ -1242,7 +1239,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 }
 
                 Assert.AreEqual(
-                    expectedDataPoints.Length, 
+                    expectedDataPoints.Length,
                     enumeratedData.Count,
                     "The processor did not process the correct amount of data: {0}",
                     dataOutputPath);
@@ -1411,7 +1408,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.CreationErrors);
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.CustomDataSources);
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.DataSourcesToProcess);
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.ExtensionDirectory);
+            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.ExtensionDirectories);
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.FreeDataSourcesToProcess);
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.IsProcessed);
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.SourceDataCookers);
