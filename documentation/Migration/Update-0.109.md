@@ -190,3 +190,9 @@ To prevent future build breaks, replace calls to this class' constructor with ei
 - `DataOutputPath.ForComposite`
 - `DataOutputPath.ForSource`
 depending on the type of data cooker the data output path is for.
+
+## TableConfiguration
+
+The property `Layout` has been marked obsolete and will be removed prior to SDK v1.0.0 
+release candidate 1. If you are setting this property on a `TableConfiguration`, you 
+can move to setting the property on the table's `TableDescriptor`.
