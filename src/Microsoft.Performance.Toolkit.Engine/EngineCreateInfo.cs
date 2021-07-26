@@ -52,6 +52,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
         /// </summary>
+        /// <param name="extensionDirectories">
+        ///     The extension directories from which the runtime instance is to load plugins.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     Thrown is <paramref name="extensionDirectories"/> is <c>null</c>.
         /// </exception>
