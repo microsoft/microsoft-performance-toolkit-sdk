@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -270,7 +270,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <list type="bullet">
         ///         <item>must be public.</item>
         ///         <item>must be concrete.</item>
-        ///         <item>must implement <see cref="IProcessingSource"/> somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="IProcessingSource"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///         <item>must be decorated with the <see cref="ProcessingSourceAttribute"/>.</item>
         ///         <item>must be decorated with one (1) or more <see cref="DataSourceAttribute"/>s.</item>

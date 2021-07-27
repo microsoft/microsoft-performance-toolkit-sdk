@@ -94,6 +94,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Gets or sets the layout style for the table.
         /// </summary>
+        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. TableLayoutStyles should only be set on TableDescriptors.")]
         public TableLayoutStyle Layout { get; set; }
 
         /// <summary>

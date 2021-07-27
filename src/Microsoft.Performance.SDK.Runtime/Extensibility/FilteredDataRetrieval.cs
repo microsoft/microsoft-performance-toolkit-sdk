@@ -35,8 +35,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <inheritdoc/>
         public T QueryOutput<T>(DataOutputPath dataOutputPath)
         {
-            Guard.NotNull(dataOutputPath, nameof(dataOutputPath));
-
             if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
             {
                 // this is a source cooker, so it already exists
@@ -51,8 +49,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <inheritdoc/>
         public object QueryOutput(DataOutputPath dataOutputPath)
         {
-            Guard.NotNull(dataOutputPath, nameof(dataOutputPath));
-
             if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
             {
                 // this is a source cooker, so it already exists
@@ -61,6 +57,34 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             else
             {
                 return this.QueryCompositeOutput(dataOutputPath);
+            }
+        }
+
+        /// <inheritdoc/>
+        public bool TryQueryOutput<T>(DataOutputPath dataOutputPath, out T result)
+        {
+            if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
+            {
+                // this is a source cooker, so it already exists
+                return this.TryQuerySourceOutput<T>(dataOutputPath, out result);
+            }
+            else
+            {
+                return this.TryQueryCompositeOutput<T>(dataOutputPath, out result);
+            }
+        }
+
+        /// <inheritdoc/>
+        public bool TryQueryOutput(DataOutputPath dataOutputPath, out object result)
+        {
+            if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
+            {
+                // this is a source cooker, so it already exists
+                return this.TryQuerySourceOutput(dataOutputPath, out result);
+            }
+            else
+            {
+                return this.TryQueryCompositeOutput(dataOutputPath, out result);
             }
         }
 
@@ -102,6 +126,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             }
         }
 
+        private bool TryValidateSourceDataCooker(DataOutputPath dataOutputPath)
+        {
+            return this.extensionDependencies.RequiredSourceDataCookerPaths.Contains(dataOutputPath.CookerPath);
+        }
+
         private IDataCooker ValidateCompositeDataCooker(DataOutputPath dataOutputPath)
         {
             var cookerPath = dataOutputPath.CookerPath;
@@ -133,16 +162,71 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             return compositeCooker;
         }
 
+        private bool TryValidateCompositeDataCooker(DataOutputPath dataOutputPath, out IDataCooker compositeCooker)
+        {
+            try
+            {
+                var cookerPath = dataOutputPath.CookerPath;
+
+                if (!this.extensionDependencies.RequiredCompositeDataCookerPaths.Contains(cookerPath))
+                {
+                    compositeCooker = default;
+                    return false;
+                }
+
+                var compositeCookerReference =
+                    this.dataRetrievalFactory.DataExtensionRepository.GetCompositeDataCookerReference(cookerPath);
+                if (compositeCookerReference == null)
+                {
+                    compositeCooker = default;
+                    return false;
+                }
+
+                compositeCooker = compositeCookerReference.GetOrCreateInstance(
+                    this.dataRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath));
+
+                return compositeCooker != null;
+            }
+            catch (Exception)
+            {
+            }
+
+            compositeCooker = default;
+            return false;
+        }
+
         private T QuerySourceOutput<T>(DataOutputPath dataOutputPath)
         {
             this.ValidateSourceDataCooker(dataOutputPath);
             return this.dataRetrievalFactory.CookedSourceData.QueryOutput<T>(dataOutputPath);
         }
 
+        private bool TryQuerySourceOutput<T>(DataOutputPath dataOutputPath, out T result)
+        {
+            if (this.TryValidateSourceDataCooker(dataOutputPath))
+            {
+                return this.dataRetrievalFactory.CookedSourceData.TryQueryOutput<T>(dataOutputPath, out result);
+            }
+
+            result = default;
+            return false;
+        }
+
         private T QueryCompositeOutput<T>(DataOutputPath dataOutputPath)
         {
             var compositeCooker = this.ValidateCompositeDataCooker(dataOutputPath);
             return compositeCooker.QueryOutput<T>(dataOutputPath);
+        }
+
+        private bool TryQueryCompositeOutput<T>(DataOutputPath dataOutputPath, out T result)
+        {
+            if (this.TryValidateCompositeDataCooker(dataOutputPath, out var compositeCooker))
+            {
+                return compositeCooker.TryQueryOutput<T>(dataOutputPath, out result);
+            }
+
+            result = default;
+            return false;
         }
 
         private object QuerySourceOutput(DataOutputPath dataOutputPath)
@@ -155,6 +239,28 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         {
             var compositeCooker = this.ValidateCompositeDataCooker(dataOutputPath);
             return compositeCooker.QueryOutput(dataOutputPath);
+        }
+
+        private bool TryQuerySourceOutput(DataOutputPath dataOutputPath, out object result)
+        {
+            if (this.TryValidateSourceDataCooker(dataOutputPath))
+            {
+                return this.dataRetrievalFactory.CookedSourceData.TryQueryOutput(dataOutputPath, out result);
+            }
+
+            result = default;
+            return false;
+        }
+
+        private bool TryQueryCompositeOutput(DataOutputPath dataOutputPath, out object result)
+        {
+            if (this.TryValidateCompositeDataCooker(dataOutputPath, out var compositeCooker))
+            {
+                return compositeCooker.TryQueryOutput(dataOutputPath, out result);
+            }
+
+            result = default;
+            return false;
         }
     }
 }

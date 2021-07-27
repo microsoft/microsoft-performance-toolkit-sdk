@@ -13,7 +13,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
     public sealed class Source2DataCooker
         : BaseSourceDataCooker<Source123DataObject, EngineTestContext, int>
     {
-        public static readonly DataCookerPath DataCookerPath = new DataCookerPath(
+        public static readonly DataCookerPath DataCookerPath = DataCookerPath.ForSource(
             nameof(Source123Parser),
             nameof(Source2DataCooker));
 

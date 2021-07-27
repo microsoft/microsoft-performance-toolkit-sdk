@@ -166,3 +166,48 @@ To prevent build breaks in the future, we recommend updating the following refer
 - `ICustomDataSource` -> `IProcessingSource`
 
 For v0.109, the SDK will still be compatible with any plugins using the now obsolete classes and interfaces. 
+
+## DataCookerPath
+
+The following have been marked as obsolete and will be removed by SDK v1.0.0 release candidate 1:
+- `DataCookerPath.Format`
+- `DataCookerPath.EmptySourceParserId`
+- `DataCookerPath.CookerPath`
+- `DataCookerPath.Parse`
+- `DataCookerPath.GetSourceParserId`
+- `DataCookerPath.GetDataCookerId`
+- `DataCookerPath.IsWellFormed`
+To prevent future build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataCookerPath` that accept string arguments and `DataCookerPath.Create` 
+have been marked obsolete and will be removed by SDK v1.0.0 release candidate 1. 
+To prevent future build breaks, replace calls to this class' constructor with either
+- `DataCookerPath.ForComposite`
+- `DataCookerPath.ForSource`
+depending on the type of data cooker the path is for.
+
+## DataOutputPath
+
+The following have been marked as obsolete and will be removed by SDK v1.0.0 release candidate 1:
+- `DataOutputPath.Format`
+- `DataOutputPath.Path`
+- `DataOutputPath.Combine`
+- `DataOutputPath.GetSourceId`
+- `DataOutputPath.GetDataCookerId`
+- `DataOutputPath.GetDataCookerPath`
+- `DataOutputPath.TryGetConstituents`
+- `DataOutputPath.IsWellFormed`
+To prevent future build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataOutputPath` that accept string arguments and `DataOutputPath.Create` 
+have been marked obsolete and will be removed by SDK v1.0.0 release candidate 1. 
+To prevent future build breaks, replace calls to this class' constructor with either
+- `DataOutputPath.ForComposite`
+- `DataOutputPath.ForSource`
+depending on the type of data cooker the data output path is for.
+
+## TableConfiguration
+
+The property `Layout` has been marked obsolete and will be removed prior to SDK v1.0.0 
+release candidate 1. If you are setting this property on a `TableConfiguration`, you 
+can move to setting the property on the table's `TableDescriptor`.
