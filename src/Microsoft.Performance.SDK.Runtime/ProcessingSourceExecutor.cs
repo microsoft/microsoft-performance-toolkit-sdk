@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
-    ///     Executes the processor of a data source.
+    ///     Executes the <see cref="ICustomDataProcessor"/> of a <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class ProcessingSourceExecutor
     {
