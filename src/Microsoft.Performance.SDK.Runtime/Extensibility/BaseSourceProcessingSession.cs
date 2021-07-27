@@ -32,7 +32,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 	{
 		private Dictionary<TKey, List<ISourceDataCooker<T, TContext, TKey>>> activeCookerRegistry;
 		private List<ISourceDataCooker<T, TContext, TKey>> activeCookers;
-		private HashSet<ISourceDataCooker<T, TContext, TKey>> activeReceiveAllDataCookers;
+		private List<ISourceDataCooker<T, TContext, TKey>> activeReceiveAllDataCookers;
 
 		private readonly Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>
 			cookerById = new Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>();
@@ -116,16 +116,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
 			var key = data.GetKey();
 
-			if (!this.activeCookerRegistry.ContainsKey(key) && !this.receiveAllDataCookers.Any())
+			if (!this.activeCookerRegistry.ContainsKey(key) && this.receiveAllDataCookers.Count == 0)
 			{
 				return DataProcessingResult.Ignored;
 			}
 
-			DataProcessingResult ProcessDataCookers(ISourceDataCooker<T, TContext, TKey>[] cookers)
+			DataProcessingResult ProcessDataCookers(List<ISourceDataCooker<T, TContext, TKey>> cookers)
 			{
 				DataProcessingResult dataResult = DataProcessingResult.Ignored;
 
-				for (int cookerIdx = 0; cookerIdx < cookers.Length; cookerIdx++)
+				for (int cookerIdx = 0; cookerIdx < cookers.Count; cookerIdx++)
 				{
 					var sourceDataCooker = cookers[cookerIdx];
 					var result = sourceDataCooker.CookDataElement(data, context, cancellationToken);
@@ -144,9 +144,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 			}
 
 			var keyedResult = DataProcessingResult.Ignored;
-			if (this.activeCookerRegistry.ContainsKey(key))
+			if (this.activeCookerRegistry.TryGetValue(key,
+				out List<ISourceDataCooker<T, TContext, TKey>> sourceDataCookers))
 			{
-				var sourceDataCookers = this.activeCookerRegistry[key].ToArray();
 				keyedResult = ProcessDataCookers(sourceDataCookers);
 				if (keyedResult == DataProcessingResult.CorruptData)
 				{
@@ -154,7 +154,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 				}
 			}
 
-			var allDataCookers = this.activeReceiveAllDataCookers.ToArray();
+			var allDataCookers = this.activeReceiveAllDataCookers;
 			var allDataResult = ProcessDataCookers(allDataCookers);
 			if (allDataResult == DataProcessingResult.CorruptData)
 			{
@@ -192,7 +192,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 		protected void ClearActiveCookers(int newCapacityCount)
 		{
 			this.activeCookers = new List<ISourceDataCooker<T, TContext, TKey>>(newCapacityCount);
-			this.activeReceiveAllDataCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
+			this.activeReceiveAllDataCookers = new List<ISourceDataCooker<T, TContext, TKey>>();
 		}
 
 		protected void ActivateCooker(ISourceDataCooker<T, TContext, TKey> sourceDataCooker)
@@ -200,7 +200,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 			Guard.NotNull(sourceDataCooker, nameof(sourceDataCooker));
 
 			this.activeCookers.Add(sourceDataCooker);
-			if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements))
+			if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements) &&
+				!this.activeReceiveAllDataCookers.Contains(sourceDataCooker))
 			{
 				this.activeReceiveAllDataCookers.Add(sourceDataCooker);
 			}
