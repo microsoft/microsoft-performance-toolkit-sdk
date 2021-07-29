@@ -9,7 +9,7 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
-## Custom Data Source
+## CustomDataSource (now ProcessingSource)
 
 In order to update your `CustomDataSource`, (now named `ProcessingSource` - see below) you will need to
 - change your `IsFileSupportedCore(string)` method to `IsDataSourceSupportedCore(IDataSource)`
@@ -36,8 +36,6 @@ protected override bool IsFileSupportedCore(string path)
 
 The following are required if you are using the `Engine`:
 
-- `UnsupportedCustomDataSourceException` has been renamed to `UnsupportedProcessingSourceException`
-
 - Try-catch blocks that were expecting `UnsupportedDataSourceException`s to signal an invalid `CustomDataSource`, (now named `ProcessingSource` - see below) in any of the `Add*` methods should be updated to catch `UnsupportedProcessingSourceException`:
 ````cs
 try
@@ -60,6 +58,8 @@ catch (UnsupportedProcessingSourceException)
     // ...
 }
 ````
+
+Note that `UnsupportedProcessingSourceException` was named `UnsupportedCustomDataSourceException` in a previous preview of v0.109.0.
 
 - Try-catch blocks that were expecting `UnsupportedFileException`s to signal an invalid file in any of the `Add*` methods should be updated to catch `UnsupportedDataSourceExcepton`:
 ````cs

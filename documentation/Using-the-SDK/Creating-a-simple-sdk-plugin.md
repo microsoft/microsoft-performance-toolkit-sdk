@@ -37,7 +37,7 @@ To create a simple plugin, you must:
      about the table. If these requirements are not met, the SDK runtime will not be able to find and pass your tables 
      to your CDP
 
-## Implementing a Processing Class
+## Implementing a ProcessingSource Class
 
 1. Create a public class that extends the abstract class `ProcessingSource`. Note that this example is decorated with 
    two attributes: `ProcessingSourceAttribute` and `FileDataSourceAttribute`. The former is used by the SDK runtime to 
