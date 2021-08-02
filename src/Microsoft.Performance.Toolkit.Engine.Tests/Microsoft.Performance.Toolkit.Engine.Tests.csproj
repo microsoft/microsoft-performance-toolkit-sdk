@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
@@ -37,6 +38,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime.NetCoreApp\Microsoft.Performance.SDK.Runtime.NetCoreApp.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime.Tests\Microsoft.Performance.SDK.Runtime.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime\Microsoft.Performance.SDK.Runtime.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Testing.SDK\Microsoft.Performance.Testing.SDK.csproj" />
