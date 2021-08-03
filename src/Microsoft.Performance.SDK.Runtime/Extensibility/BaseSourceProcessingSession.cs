@@ -14,229 +14,229 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility
 {
-	/// <summary>
-	///     Provides the framework for processing a source, passing along parsed data elements to registered data cookers.
-	/// </summary>
-	/// <typeparam name="T">
-	///     Data element type.
-	/// </typeparam>
-	/// <typeparam name="TContext">
-	///     Data context type.
-	/// </typeparam>
-	/// <typeparam name="TKey">
-	///     Data element key type.
-	/// </typeparam>
-	internal abstract class BaseSourceProcessingSession<T, TContext, TKey>
-		: ISourceProcessingSession<T, TContext, TKey>
-		  where T : IKeyedDataType<TKey>
-	{
-		private Dictionary<TKey, List<ISourceDataCooker<T, TContext, TKey>>> activeCookerRegistry;
-		private List<ISourceDataCooker<T, TContext, TKey>> activeCookers;
-		private List<ISourceDataCooker<T, TContext, TKey>> activeReceiveAllDataCookers;
+    /// <summary>
+    ///     Provides the framework for processing a source, passing along parsed data elements to registered data cookers.
+    /// </summary>
+    /// <typeparam name="T">
+    ///     Data element type.
+    /// </typeparam>
+    /// <typeparam name="TContext">
+    ///     Data context type.
+    /// </typeparam>
+    /// <typeparam name="TKey">
+    ///     Data element key type.
+    /// </typeparam>
+    internal abstract class BaseSourceProcessingSession<T, TContext, TKey>
+        : ISourceProcessingSession<T, TContext, TKey>
+          where T : IKeyedDataType<TKey>
+    {
+        private Dictionary<TKey, List<ISourceDataCooker<T, TContext, TKey>>> activeCookerRegistry;
+        private List<ISourceDataCooker<T, TContext, TKey>> activeCookers;
+        private List<ISourceDataCooker<T, TContext, TKey>> activeReceiveAllDataCookers;
 
-		private readonly Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>
-			cookerById = new Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>();
+        private readonly Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>
+            cookerById = new Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>();
 
-		private readonly HashSet<ISourceDataCooker<T, TContext, TKey>>
-			registeredCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
+        private readonly HashSet<ISourceDataCooker<T, TContext, TKey>>
+            registeredCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
 
-		private readonly HashSet<ISourceDataCooker<T, TContext, TKey>>
-			receiveAllDataCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
+        private readonly HashSet<ISourceDataCooker<T, TContext, TKey>>
+            receiveAllDataCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
 
-		private readonly IEqualityComparer<TKey> keyEqualityComparer;
+        private readonly IEqualityComparer<TKey> keyEqualityComparer;
 
-		protected BaseSourceProcessingSession(
-			ISourceParser<T, TContext, TKey> sourceParser,
-			IEqualityComparer<TKey> comparer)
-		{
-			Guard.NotNull(sourceParser, nameof(sourceParser));
-			Guard.NotNull(comparer, nameof(comparer));
+        protected BaseSourceProcessingSession(
+            ISourceParser<T, TContext, TKey> sourceParser,
+            IEqualityComparer<TKey> comparer)
+        {
+            Guard.NotNull(sourceParser, nameof(sourceParser));
+            Guard.NotNull(comparer, nameof(comparer));
 
-			this.SourceParser = sourceParser;
-			this.keyEqualityComparer = comparer;
-		}
+            this.SourceParser = sourceParser;
+            this.keyEqualityComparer = comparer;
+        }
 
-		public ISourceParser<T, TContext, TKey> SourceParser { get; }
+        public ISourceParser<T, TContext, TKey> SourceParser { get; }
 
-		public IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredSourceDataCookers
-			=> this.RegisteredCookers;
+        public IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredSourceDataCookers
+            => this.RegisteredCookers;
 
-		public string Id => this.SourceParser.Id;
+        public string Id => this.SourceParser.Id;
 
-		public Type DataElementType => this.SourceParser.DataElementType;
+        public Type DataElementType => this.SourceParser.DataElementType;
 
-		public Type DataContextType => this.SourceParser.DataContextType;
+        public Type DataContextType => this.SourceParser.DataContextType;
 
-		public Type DataKeyType => this.SourceParser.DataKeyType;
+        public Type DataKeyType => this.SourceParser.DataKeyType;
 
-		public int MaxSourceParseCount => this.SourceParser.MaxSourceParseCount;
+        public int MaxSourceParseCount => this.SourceParser.MaxSourceParseCount;
 
-		protected IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredCookers => this.registeredCookers;
+        protected IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredCookers => this.registeredCookers;
 
-		public void RegisterSourceDataCooker(ISourceDataCooker<T, TContext, TKey> dataCooker)
-		{
-			Guard.NotNull(dataCooker, nameof(dataCooker));
+        public void RegisterSourceDataCooker(ISourceDataCooker<T, TContext, TKey> dataCooker)
+        {
+            Guard.NotNull(dataCooker, nameof(dataCooker));
 
-			if (!StringComparer.Ordinal.Equals(dataCooker.Path.SourceParserId, SourceParser.Id))
-			{
-				throw new ArgumentException(
-					$"The {nameof(IDataCookerDescriptor.Path.SourceParserId)} of {nameof(dataCooker)} doesn't match "
-						+ $"{nameof(SourceParser)}.",
-					nameof(dataCooker));
-			}
+            if (!StringComparer.Ordinal.Equals(dataCooker.Path.SourceParserId, SourceParser.Id))
+            {
+                throw new ArgumentException(
+                    $"The {nameof(IDataCookerDescriptor.Path.SourceParserId)} of {nameof(dataCooker)} doesn't match "
+                        + $"{nameof(SourceParser)}.",
+                    nameof(dataCooker));
+            }
 
-			if (!this.cookerById.ContainsKey(dataCooker.Path))
-			{
-				this.cookerById[dataCooker.Path] = dataCooker;
-				this.registeredCookers.Add(dataCooker);
+            if (!this.cookerById.ContainsKey(dataCooker.Path))
+            {
+                this.cookerById[dataCooker.Path] = dataCooker;
+                this.registeredCookers.Add(dataCooker);
 
-				if (dataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements))
-				{
-					this.receiveAllDataCookers.Add(dataCooker);
-				}
-			}
-		}
+                if (dataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements))
+                {
+                    this.receiveAllDataCookers.Add(dataCooker);
+                }
+            }
+        }
 
-		public ISourceDataCooker<T, TContext, TKey> GetSourceDataCooker(DataCookerPath cookerPath)
-		{
-			Guard.NotNull(cookerPath, nameof(cookerPath));
+        public ISourceDataCooker<T, TContext, TKey> GetSourceDataCooker(DataCookerPath cookerPath)
+        {
+            Guard.NotNull(cookerPath, nameof(cookerPath));
 
-			this.cookerById.TryGetValue(cookerPath, out var cooker);
-			return cooker;
-		}
+            this.cookerById.TryGetValue(cookerPath, out var cooker);
+            return cooker;
+        }
 
-		public DataProcessingResult ProcessDataElement(T data, TContext context, CancellationToken cancellationToken)
-		{
-			Guard.NotNull(data, nameof(data));
-			Guard.NotNull(context, nameof(context));
-			Guard.NotNull(cancellationToken, nameof(cancellationToken));
+        public DataProcessingResult ProcessDataElement(T data, TContext context, CancellationToken cancellationToken)
+        {
+            Guard.NotNull(data, nameof(data));
+            Guard.NotNull(context, nameof(context));
+            Guard.NotNull(cancellationToken, nameof(cancellationToken));
 
-			Debug.Assert(this.activeCookerRegistry != null);
-			Debug.Assert(this.activeReceiveAllDataCookers != null);
+            Debug.Assert(this.activeCookerRegistry != null);
+            Debug.Assert(this.activeReceiveAllDataCookers != null);
 
-			var key = data.GetKey();
+            var key = data.GetKey();
 
-			if (!this.activeCookerRegistry.ContainsKey(key) && this.receiveAllDataCookers.Count == 0)
-			{
-				return DataProcessingResult.Ignored;
-			}
+            if (!this.activeCookerRegistry.ContainsKey(key) && this.receiveAllDataCookers.Count == 0)
+            {
+                return DataProcessingResult.Ignored;
+            }
 
-			DataProcessingResult ProcessDataCookers(List<ISourceDataCooker<T, TContext, TKey>> cookers)
-			{
-				DataProcessingResult dataResult = DataProcessingResult.Ignored;
+            DataProcessingResult ProcessDataCookers(List<ISourceDataCooker<T, TContext, TKey>> cookers)
+            {
+                DataProcessingResult dataResult = DataProcessingResult.Ignored;
 
-				for (int cookerIdx = 0; cookerIdx < cookers.Count; cookerIdx++)
-				{
-					var sourceDataCooker = cookers[cookerIdx];
-					var result = sourceDataCooker.CookDataElement(data, context, cancellationToken);
-					if (result == DataProcessingResult.CorruptData)
-					{
-						return result;
-					}
+                for (int cookerIdx = 0; cookerIdx < cookers.Count; cookerIdx++)
+                {
+                    var sourceDataCooker = cookers[cookerIdx];
+                    var result = sourceDataCooker.CookDataElement(data, context, cancellationToken);
+                    if (result == DataProcessingResult.CorruptData)
+                    {
+                        return result;
+                    }
 
-					if (result == DataProcessingResult.Processed)
-					{
-						dataResult = result;
-					}
-				}
+                    if (result == DataProcessingResult.Processed)
+                    {
+                        dataResult = result;
+                    }
+                }
 
-				return dataResult;
-			}
+                return dataResult;
+            }
 
-			var keyedResult = DataProcessingResult.Ignored;
-			if (this.activeCookerRegistry.TryGetValue(key,
-				out List<ISourceDataCooker<T, TContext, TKey>> sourceDataCookers))
-			{
-				keyedResult = ProcessDataCookers(sourceDataCookers);
-				if (keyedResult == DataProcessingResult.CorruptData)
-				{
-					return keyedResult;
-				}
-			}
+            var keyedResult = DataProcessingResult.Ignored;
+            if (this.activeCookerRegistry.TryGetValue(key,
+                out List<ISourceDataCooker<T, TContext, TKey>> sourceDataCookers))
+            {
+                keyedResult = ProcessDataCookers(sourceDataCookers);
+                if (keyedResult == DataProcessingResult.CorruptData)
+                {
+                    return keyedResult;
+                }
+            }
 
-			var allDataResult = ProcessDataCookers(this.activeReceiveAllDataCookers);
-			if (allDataResult == DataProcessingResult.CorruptData)
-			{
-				return allDataResult;
-			}
+            var allDataResult = ProcessDataCookers(this.activeReceiveAllDataCookers);
+            if (allDataResult == DataProcessingResult.CorruptData)
+            {
+                return allDataResult;
+            }
 
-			if (keyedResult == DataProcessingResult.Processed || allDataResult == DataProcessingResult.Processed)
-			{
-				return DataProcessingResult.Processed;
-			}
+            if (keyedResult == DataProcessingResult.Processed || allDataResult == DataProcessingResult.Processed)
+            {
+                return DataProcessingResult.Processed;
+            }
 
-			return DataProcessingResult.Ignored;
-		}
+            return DataProcessingResult.Ignored;
+        }
 
-		public abstract void ProcessSource(ILogger logger, IProgress<int> progress, CancellationToken cancellationToken);
+        public abstract void ProcessSource(ILogger logger, IProgress<int> progress, CancellationToken cancellationToken);
 
-		protected virtual void SetActiveDataCookers()
-		{
-			// this default implementation just adds all registered cookers
+        protected virtual void SetActiveDataCookers()
+        {
+            // this default implementation just adds all registered cookers
 
-			ClearActiveCookers(this.registeredCookers.Count);
-			foreach (var cooker in this.registeredCookers)
-			{
-				ActivateCooker(cooker);
-			}
-		}
+            ClearActiveCookers(this.registeredCookers.Count);
+            foreach (var cooker in this.registeredCookers)
+            {
+                ActivateCooker(cooker);
+            }
+        }
 
-		protected void InitializeForSourceParsing()
-		{
-			SetActiveDataCookers();
-			this.RegisterCookers();
-			this.InitializeSourceParserForProcessing();
-		}
+        protected void InitializeForSourceParsing()
+        {
+            SetActiveDataCookers();
+            this.RegisterCookers();
+            this.InitializeSourceParserForProcessing();
+        }
 
-		protected void ClearActiveCookers(int newCapacityCount)
-		{
-			this.activeCookers = new List<ISourceDataCooker<T, TContext, TKey>>(newCapacityCount);
-			this.activeReceiveAllDataCookers = new List<ISourceDataCooker<T, TContext, TKey>>();
-		}
+        protected void ClearActiveCookers(int newCapacityCount)
+        {
+            this.activeCookers = new List<ISourceDataCooker<T, TContext, TKey>>(newCapacityCount);
+            this.activeReceiveAllDataCookers = new List<ISourceDataCooker<T, TContext, TKey>>();
+        }
 
-		protected void ActivateCooker(ISourceDataCooker<T, TContext, TKey> sourceDataCooker)
-		{
-			Guard.NotNull(sourceDataCooker, nameof(sourceDataCooker));
+        protected void ActivateCooker(ISourceDataCooker<T, TContext, TKey> sourceDataCooker)
+        {
+            Guard.NotNull(sourceDataCooker, nameof(sourceDataCooker));
 
-			this.activeCookers.Add(sourceDataCooker);
-			if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements) &&
-				!this.activeReceiveAllDataCookers.Contains(sourceDataCooker))
-			{
-				this.activeReceiveAllDataCookers.Add(sourceDataCooker);
-			}
-		}
+            this.activeCookers.Add(sourceDataCooker);
+            if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements) &&
+                !this.activeReceiveAllDataCookers.Contains(sourceDataCooker))
+            {
+                this.activeReceiveAllDataCookers.Add(sourceDataCooker);
+            }
+        }
 
-		private void RegisterCookers()
-		{
-			this.activeCookerRegistry = new Dictionary<TKey, List<ISourceDataCooker<T, TContext, TKey>>>(this.keyEqualityComparer);
+        private void RegisterCookers()
+        {
+            this.activeCookerRegistry = new Dictionary<TKey, List<ISourceDataCooker<T, TContext, TKey>>>(this.keyEqualityComparer);
 
-			foreach (var sourceDataCooker in this.activeCookers)
-			{
-				if (sourceDataCooker.DataKeys == null)
-				{
-					continue;
-				}
+            foreach (var sourceDataCooker in this.activeCookers)
+            {
+                if (sourceDataCooker.DataKeys == null)
+                {
+                    continue;
+                }
 
-				if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements))
-				{
-					continue;
-				}
+                if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements))
+                {
+                    continue;
+                }
 
-				foreach (var key in sourceDataCooker.DataKeys)
-				{
-					if (!this.activeCookerRegistry.ContainsKey(key))
-					{
-						this.activeCookerRegistry.Add(key, new List<ISourceDataCooker<T, TContext, TKey>>());
-					}
+                foreach (var key in sourceDataCooker.DataKeys)
+                {
+                    if (!this.activeCookerRegistry.ContainsKey(key))
+                    {
+                        this.activeCookerRegistry.Add(key, new List<ISourceDataCooker<T, TContext, TKey>>());
+                    }
 
-					this.activeCookerRegistry[key].Add(sourceDataCooker);
-				}
-			}
-		}
+                    this.activeCookerRegistry[key].Add(sourceDataCooker);
+                }
+            }
+        }
 
-		private void InitializeSourceParserForProcessing()
-		{
-			this.SourceParser.PrepareForProcessing(this.activeReceiveAllDataCookers.Any(), activeCookerRegistry.Keys);
-		}
-	}
+        private void InitializeSourceParserForProcessing()
+        {
+            this.SourceParser.PrepareForProcessing(this.activeReceiveAllDataCookers.Any(), activeCookerRegistry.Keys);
+        }
+    }
 }
