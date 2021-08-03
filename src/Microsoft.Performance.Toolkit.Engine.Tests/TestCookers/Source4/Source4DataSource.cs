@@ -8,13 +8,13 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
 {
-    [CustomDataSource(
+    [ProcessingSource(
        "{BE673F97-D329-4074-8A0D-FBA74AED130A}",
        nameof(Source4DataSource),
        "Source4 for Runtime Tests")]
     [FileDataSource(Extension)]
     public sealed class Source4DataSource
-        : CustomDataSourceBase
+        : ProcessingSource
     {
         public const string Extension = ".s4d";
 

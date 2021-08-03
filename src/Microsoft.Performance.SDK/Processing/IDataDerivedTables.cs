@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// </summary>
     /// <remarks>
     /// These tables will not show up in some table lists, as these tables won't always be available from the given
-    /// custom data source.
+    /// <see cref="IProcessingSource"/>.
     /// </remarks>
     public interface IDataDerivedTables
     {

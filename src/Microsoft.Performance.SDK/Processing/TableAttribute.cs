@@ -90,7 +90,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <param name="internalTable">
         ///     When this is set, the table will not be exposed through the data extension repository.
-        ///     Note that the custom data source that owns this will be required to create this table
+        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
         ///     when this is set.
         /// </param>
         public TableAttribute(
@@ -120,7 +120,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     When this is set, the table will not be exposed through the data extension repository.
-        ///     Note that the custom data source that owns this will be required to create this table
+        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
         ///     when this is set.
         /// </summary>
         public bool InternalTable { get; set; }

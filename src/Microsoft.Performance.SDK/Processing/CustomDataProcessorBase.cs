@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Provides a base class for implementing custom data processors that
     ///     simplifies some of the management of tables and processing.
-    ///     This class is meant to be used in conjunction with <see cref="CustomDataSourceBase"/>.
+    ///     This class is meant to be used in conjunction with <see cref="ProcessingSource"/>.
     /// </summary>
     public abstract class CustomDataProcessorBase
         : ICustomDataProcessor,

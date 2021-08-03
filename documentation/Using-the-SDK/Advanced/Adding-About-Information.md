@@ -6,24 +6,24 @@ This document outlines how to add about/author information to your plugins.
 
 When a plugin is used by a large and/or public audience, it is useful to 
 give users an easy way to contact its owners/maintainers. SDK Drivers such as 
-WPA look for __about information__ on a `CustomDataSource` for it to  
+WPA look for __about information__ on a `ProcessingSource` for it to  
 present to users.
 
 # Implementation
 
-To add about information to your `CustomDataSource`, simply override or 
+To add about information to your `ProcessingSource`, simply override or 
 implement `GetAboutInfo`:
 
 ```cs
-[CustomDataSource(...)]
-public class MyCustomDataSource
-    : CustomDataSourceBase
+[ProcessingSource(...)]
+public class MyProcessingSource
+    : ProcessingSource
 {
     // ...
 
-    public override CustomDataSourceInfo GetAboutInfo()
+    public override ProcessingSourceInfo GetAboutInfo()
     {
-        return new CustomDataSourceInfo
+        return new ProcessingSourceInfo
         {
             Owners = new[]
             {
@@ -49,15 +49,15 @@ public class MyCustomDataSource
 or
 
 ```cs
-[CustomDataSource(...)]
-public class MyOtherCustomDataSource
-    : ICustomDataSource
+[ProcessingSource(...)]
+public class MyOtherProcessingSource
+    : IProcessingSource
 {
     // ...
 
-    public CustomDataSourceInfo GetAboutInfo()
+    public ProcessingSourceInfo GetAboutInfo()
     {
-        return new CustomDataSourceInfo
+        return new ProcessingSourceInfo
         {
             Owners = new[]
             {
