@@ -35,7 +35,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <inheritdoc/>
         public T QueryOutput<T>(DataOutputPath dataOutputPath)
         {
-            if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
+            if (dataOutputPath.CookerPath.DataCookerType == DataCookerType.SourceDataCooker)
             {
                 // this is a source cooker, so it already exists
                 return this.QuerySourceOutput<T>(dataOutputPath);
@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <inheritdoc/>
         public object QueryOutput(DataOutputPath dataOutputPath)
         {
-            if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
+            if (dataOutputPath.CookerPath.DataCookerType == DataCookerType.SourceDataCooker)
             {
                 // this is a source cooker, so it already exists
                 return this.QuerySourceOutput(dataOutputPath);
@@ -63,7 +63,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <inheritdoc/>
         public bool TryQueryOutput<T>(DataOutputPath dataOutputPath, out T result)
         {
-            if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
+            if (dataOutputPath.CookerPath.DataCookerType == DataCookerType.SourceDataCooker)
             {
                 // this is a source cooker, so it already exists
                 return this.TryQuerySourceOutput<T>(dataOutputPath, out result);
@@ -77,7 +77,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <inheritdoc/>
         public bool TryQueryOutput(DataOutputPath dataOutputPath, out object result)
         {
-            if (!string.IsNullOrWhiteSpace(dataOutputPath.SourceParserId))
+            if (dataOutputPath.CookerPath.DataCookerType == DataCookerType.SourceDataCooker)
             {
                 // this is a source cooker, so it already exists
                 return this.TryQuerySourceOutput(dataOutputPath, out result);
