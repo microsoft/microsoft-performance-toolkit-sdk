@@ -47,9 +47,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataProcessor = new TestDataProcessorReference();
             var table = new TestTableExtensionReference();
 
-            var cds1 = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource),
-                Any.CustomDataSourceAttribute(),
+            var cds1 = new ProcessingSourceReference(
+                typeof(FakeProcessingSource),
+                Any.ProcessingSourceAttribute(),
                 new HashSet<Processing.DataSourceAttribute>());
 
             var repo = new DataExtensionRepository();
@@ -611,11 +611,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(),
                 Array.Empty<TableDescriptor>());
 
-            var cds = new FakeCustomDataSource();
-            var r = new CustomDataSourceReference(
-                typeof(FakeCustomDataSource), 
+            var cds = new FakeProcessingSource();
+            var r = new ProcessingSourceReference(
+                typeof(FakeProcessingSource), 
                 () => cds, 
-                Any.CustomDataSourceAttribute(), 
+                Any.ProcessingSourceAttribute(), 
                 new HashSet<Processing.DataSourceAttribute>());
 
             cds.CreateProcessorReturnValue = p;

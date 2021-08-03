@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     Represents the context of execution for
-    ///     a custom data source.
+    ///     an <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class ExecutionContext
         : IFormattable
@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public ExecutionContext(
             IProgress<int> progress,
             Func<ICustomDataProcessor, ILogger> loggerFactory,
-            CustomDataSourceReference customDataSource,
+            ProcessingSourceReference processingSource,
             IEnumerable<IDataSource> dataSources,
             IEnumerable<TableDescriptor> tablesToEnable,
             IProcessorEnvironment processorEnvironment,
@@ -31,7 +31,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             Guard.NotNull(progress, nameof(progress));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            Guard.NotNull(customDataSource, nameof(customDataSource));
+            Guard.NotNull(processingSource, nameof(processingSource));
             Guard.NotNull(dataSources, nameof(dataSources));
             Guard.All(dataSources, x => x != null, nameof(dataSources));
             Guard.NotNull(tablesToEnable, nameof(tablesToEnable));
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
             this.ProgressReporter = progress;
             this.LoggerFactory = loggerFactory;
-            this.CustomDataSource = customDataSource;
+            this.ProcessingSource = processingSource;
             this.DataSources = dataSources.ToList().AsReadOnly();
             this.TablesToEnable = tablesToEnable.ToList().AsReadOnly();
             this.ProcessorEnvironment = processorEnvironment;
@@ -60,14 +60,14 @@ namespace Microsoft.Performance.SDK.Runtime
         public Func<ICustomDataProcessor, ILogger> LoggerFactory { get; }
 
         /// <summary>
-        ///     Gets the <see cref="CustomDataSourceReference"/> associated
+        ///     Gets the <see cref="ProcessingSourceReference"/> associated
         ///     with the given data items.
         /// </summary>
-        public CustomDataSourceReference CustomDataSource { get; }
+        public ProcessingSourceReference ProcessingSource { get; }
 
         /// <summary>
         ///     Gets the <see cref="IDataSource"/>s that can be
-        ///     processed by the <see cref="CustomDataSource"/>.
+        ///     processed by the <see cref="ProcessingSource"/>.
         /// </summary>
         public IEnumerable<IDataSource> DataSources { get; }
 
@@ -108,7 +108,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <para/>
         ///     F - format as a comma separated list of file paths.
         ///     <para/>
-        ///     G - The default format. Returns the name of the custom data source.
+        ///     G - The default format. Returns the name of the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="formatProvider">
         ///     An object to provide formatting information. This parameter may be <c>null</c>.
@@ -126,7 +126,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 case "G":
                 case "g":
                 case null:
-                    return this.CustomDataSource.Name;
+                    return this.ProcessingSource.Name;
 
                 default:
                     throw new FormatException($"Unsupported format specified: '{format}'");

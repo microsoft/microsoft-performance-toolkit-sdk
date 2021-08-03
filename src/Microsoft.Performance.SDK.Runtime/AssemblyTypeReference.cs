@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     Abstract class meant to be extended to support
-    ///     functionality like data extensibility and custom data sources.
+    ///     functionality like data extensibility and <see cref="IProcessingSource"/>s.
     /// </summary>
     /// <typeparam name="TDerived">
     ///     A type that extends this class.
