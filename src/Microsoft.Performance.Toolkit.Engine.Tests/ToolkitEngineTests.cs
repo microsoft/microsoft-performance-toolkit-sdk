@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -120,7 +121,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
             protected override void RunCore()
             {
-                var expectedSourceCookerPath = new DataCookerPath("SourceId", "CookerId");
+                var expectedSourceCookerPath = DataCookerPath.ForSource("SourceId", "CookerId");
 
                 var engine = Engine.Create();
 
@@ -774,7 +775,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_NotKnown_Throws()
         {
-            var cooker = new DataCookerPath("not-there-id");
+            var cooker = DataCookerPath.ForComposite("not-there-id");
 
             var e = Assert.ThrowsException<CookerNotFoundException>(() => this.Sut.EnableCooker(cooker));
             Assert.AreEqual(cooker, e.DataCookerPath);
@@ -821,7 +822,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_NotKnown_False()
         {
-            var cooker = new DataCookerPath("not-there-id");
+            var cooker = DataCookerPath.ForComposite("not-there-id");
 
             Assert.IsFalse(this.Sut.TryEnableCooker(cooker));
         }
@@ -1187,9 +1188,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 System.Diagnostics.Debugger.Break();
             }
 
-            foreach (var cooker in testCase.CookersToEnable)
+            foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
-                var cookerPath = DataCookerPath.Parse(cooker);
+                var cookerPath = DataCookerPath.ForSource(cooker.SourceParserId, cooker.DataCookerId);
+                Assert.IsTrue(this.Sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+            }
+
+            foreach (var cooker in testCase.CompositeCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
+            {
+                var cookerPath = DataCookerPath.ForComposite(cooker.DataCookerId);
                 Assert.IsTrue(this.Sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
             }
 
@@ -1202,9 +1209,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var expectedData in testCase.ExpectedOutputs)
             {
-                var dataOutputPathRaw = expectedData.Key;
+                string dataOutputPathRaw = expectedData.Key;
                 var expectedDataPoints = expectedData.Value;
-                var dataOutputPath = DataOutputPath.Create(dataOutputPathRaw);
+
+                DataOutputPath dataOutputPath = Parse(dataOutputPathRaw); 
 
                 Assert.IsTrue(
                     results.TryQueryOutput(dataOutputPath, out object data), "Output for {0} not found.", dataOutputPathRaw);
@@ -1257,7 +1265,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var dataOutputPathRaw in testCase.ThrowingOutputs)
             {
-                var dataOutputPath = DataOutputPath.Create(dataOutputPathRaw);
+                DataOutputPath dataOutputPath = Parse(dataOutputPathRaw);
                 Assert.IsFalse(
                     results.TryQueryOutput(dataOutputPath, out var _),
                     "Output should not have been available: {0}",
@@ -1300,9 +1308,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     Versioning = new FakeVersionChecker(),
                 });
 
-            foreach (var cooker in testCase.CookersToEnable)
+            foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
-                var cookerPath = DataCookerPath.Parse(cooker);
+                var cookerPath = DataCookerPath.ForSource(cooker.SourceParserId, cooker.DataCookerId);
+                Assert.IsTrue(runtime.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+            }
+
+            foreach (var cooker in testCase.CompositeCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
+            {
+                var cookerPath = DataCookerPath.ForComposite(cooker.DataCookerId);
                 Assert.IsTrue(runtime.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
             }
 
@@ -1317,7 +1331,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             {
                 var dataOutputPathRaw = expectedData.Key;
                 var expectedDataPoints = expectedData.Value;
-                var dataOutputPath = DataOutputPath.Create(dataOutputPathRaw);
+                DataOutputPath dataOutputPath = Parse(dataOutputPathRaw);
 
                 Assert.IsTrue(
                     results.TryQueryOutput(dataOutputPath, out object data), "Output for {0} not found.", dataOutputPathRaw);
@@ -1370,7 +1384,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var dataOutputPathRaw in testCase.ThrowingOutputs)
             {
-                var dataOutputPath = DataOutputPath.Create(dataOutputPathRaw);
+                DataOutputPath dataOutputPath = Parse(dataOutputPathRaw);
                 Assert.IsFalse(
                     results.TryQueryOutput(dataOutputPath, out var _),
                     "Output should not have been available: {0}",
@@ -1502,6 +1516,28 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     Extension,
                     Path.GetExtension(dataSource.Uri.LocalPath));
             }
+        }
+
+        public static DataOutputPath Parse(string dataCookerOutputPath)
+        {
+            var split = dataCookerOutputPath.Split('/');
+            Debug.Assert(split.Length == 3);
+
+            string parserId = split[0];
+            string cookerId = split[1];
+            string outputId = split[2];
+
+            DataCookerPath dataCookerPath;
+            if (string.IsNullOrWhiteSpace(parserId))
+            {
+                dataCookerPath = DataCookerPath.ForComposite(cookerId);
+            }
+            else
+            {
+                dataCookerPath = DataCookerPath.ForSource(parserId, cookerId);
+            }
+
+            return new DataOutputPath(dataCookerPath, outputId);
         }
     }
 }

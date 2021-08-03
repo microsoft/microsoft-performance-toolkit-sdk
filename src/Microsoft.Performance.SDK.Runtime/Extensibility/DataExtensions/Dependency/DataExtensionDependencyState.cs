@@ -272,7 +272,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             foreach (var requiredDataCookerPath in this.target.RequiredDataCookers)
             {
-                IDataCookerReference dataCookerReference = null;
+                IDataCookerReference dataCookerReference;
 
                 var sourceId = requiredDataCookerPath.SourceParserId;
                 if (string.IsNullOrWhiteSpace(sourceId))
@@ -308,7 +308,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                     this.dependencyReferences.AddRequiredSourceDataCookerPath(requiredCookerReference.Path);
                 }
 
-                this.ProcessRequiredExtension(dataCookerReference, requiredDataCookerPath.CookerPath, availableDataExtensions);
+                this.ProcessRequiredExtension(dataCookerReference, requiredDataCookerPath.ToString(), availableDataExtensions);
             }
         }
 
