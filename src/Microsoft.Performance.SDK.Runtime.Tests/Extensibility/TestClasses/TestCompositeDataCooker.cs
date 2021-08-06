@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
     {
         public TestCompositeDataCooker()
         {
-            this.Path = new DataCookerPath(nameof(TestCompositeDataCooker));
+            this.Path = DataCookerPath.ForComposite(nameof(TestCompositeDataCooker));
             this.RequiredDataCookers = new List<DataCookerPath>();
         }
 
@@ -36,6 +36,18 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public object QueryOutput(DataOutputPath identifier)
         {
             throw new System.NotImplementedException();
+        }
+
+        public bool TryQueryOutput<T>(DataOutputPath identifier, out T result)
+        {
+            result = default;
+            return false;
+        }
+
+        public bool TryQueryOutput(DataOutputPath identifier, out object result)
+        {
+            result = default;
+            return false;
         }
     }
 }

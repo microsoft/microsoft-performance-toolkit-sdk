@@ -2,7 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 
@@ -14,52 +17,89 @@ namespace Microsoft.Performance.Toolkit.Engine
     /// </summary>
     public sealed class EngineCreateInfo
     {
-        private string extensionDirectory;
+        private static string DefaultRuntimeName;
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> 
-        ///     class.
-        /// </summary>
-        public EngineCreateInfo()
+        static EngineCreateInfo()
         {
-            this.ExtensionDirectory = Environment.CurrentDirectory;
+            EngineCreateInfo.DefaultRuntimeName = typeof(EngineCreateInfo).Assembly.GetName().Name;
         }
 
         /// <summary>
-        ///     Gets or sets the extension directory from
-        ///     which the runtime instance is to load plugins.
-        ///     By default, this value is the current working
-        ///     directory. If you set it to <c>null</c>,
-        ///     the current working directory will be used.
+        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
         /// </summary>
-        public string ExtensionDirectory
+        /// <remarks>
+        ///     The current directory is used to locate plugins.
+        /// </remarks>
+        public EngineCreateInfo()
+            : this(new string[] { Environment.CurrentDirectory })
         {
-            get
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
+        /// </summary>
+        /// <param name="extensionDirectory">
+        ///     The extension directory from which the runtime instance is to load plugins.
+        /// </param>
+        /// <exception cref="InvalidExtensionDirectoryException">
+        ///     Thrown if <paramref name="extensionDirectory"/> is an invalid directory path.
+        /// </exception>
+        public EngineCreateInfo(string extensionDirectory)
+            : this(new string[] { extensionDirectory })
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
+        /// </summary>
+        /// <param name="extensionDirectories">
+        ///     The extension directories from which the runtime instance is to load plugins.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     Thrown is <paramref name="extensionDirectories"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="InvalidExtensionDirectoryException">
+        ///     Thrown if <paramref name="extensionDirectories"/> contains an invalid directory path.
+        /// </exception>
+        public EngineCreateInfo(IEnumerable<string> extensionDirectories)
+        {
+            Guard.NotNull(extensionDirectories, nameof(extensionDirectories));
+
+            var directories = new List<string>();
+
+            foreach (var directory in extensionDirectories)
             {
-                return this.extensionDirectory;
-            }
-            set
-            {
-                var candidateValue = value ?? Environment.CurrentDirectory;
+                if (string.IsNullOrWhiteSpace(directory))
+                {
+                    throw new InvalidExtensionDirectoryException(directory);
+                }
 
                 DirectoryInfo dirInfo;
                 try
                 {
-                    dirInfo = new DirectoryInfo(candidateValue);
+                    dirInfo = new DirectoryInfo(directory);
                 }
                 catch (Exception e)
                 {
-                    throw new InvalidExtensionDirectoryException(candidateValue, e);
+                    throw new InvalidExtensionDirectoryException(directory, e);
                 }
 
                 if (!dirInfo.Exists)
                 {
-                    throw new InvalidExtensionDirectoryException(value);
+                    throw new InvalidExtensionDirectoryException(directory);
                 }
 
-                this.extensionDirectory = dirInfo.FullName;
+                directories.Add(dirInfo.FullName);
             }
+
+            this.ExtensionDirectories = directories.AsReadOnly();
         }
+
+        /// <summary>
+        ///     Gets the extension directories from
+        ///     which the runtime instance is to load plugins.
+        /// </summary>
+        public IEnumerable<string> ExtensionDirectories { get; }
 
         /// <summary>
         ///     Gets or sets the <see cref="IAssemblyLoader"/> to
@@ -71,7 +111,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     this property. Changing the loading behavior is for
         ///     advanced scenarios.
         /// </summary>
-        public IAssemblyLoader AssemblyLoader{ get; set;  }
+        public IAssemblyLoader AssemblyLoader { get; set; }
 
         /// <summary>
         ///     Gets the <see cref="VersionChecker"/> to
@@ -80,5 +120,26 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     behavior.
         /// </summary>
         public VersionChecker Versioning { get; internal set; }
+
+        /// <summary>
+        ///     Gets or sets the name of the runtime on which the application is built.
+        /// </summary>
+        /// <remarks>
+        ///     Defaults to the engine assembly name.
+        /// </remarks>
+        public string RuntimeName { get; set; } = EngineCreateInfo.DefaultRuntimeName;
+
+        /// <summary>
+        ///     Gets or sets the application name.
+        /// </summary>
+        public string ApplicationName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a logger factory.
+        /// </summary>
+        /// <remarks>
+        ///     The logger factory should be able to provide each processing source a logger specific to its type.
+        /// </remarks>
+        public Func<Type, ILogger> LoggerFactory { get; set; }
     }
 }

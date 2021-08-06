@@ -27,8 +27,8 @@ namespace Microsoft.Performance.Toolkit.Engine
     public abstract class Engine
         : IDisposable
     {
-        private readonly List<CustomDataSourceReference> customDataSourceReferences;
-        private readonly ReadOnlyCollection<CustomDataSourceReference> customDataSourceReferencesRO;
+        private readonly List<ProcessingSourceReference> processingSourceReferences;
+        private readonly ReadOnlyCollection<ProcessingSourceReference> processingSourceReferencesRO;
 
         private readonly List<DataCookerPath> sourceDataCookers;
         private readonly ReadOnlyCollection<DataCookerPath> sourceDataCookersRO;
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly List<DataProcessorId> dataProcessors;
 
-        private readonly Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
+        private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
 
         private readonly List<IDataSource> freeDataSources;
         private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
@@ -53,10 +53,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly List<TableDescriptor> enabledTables;
         private readonly ReadOnlyCollection<TableDescriptor> enabledTablesRO;
 
+        private readonly Func<Type, ILogger> loggerFactory;
+
         private DataExtensionFactory factory;
         private ExtensionRoot extensionRoot;
 
-        private string extensionDirectory;
+        private IReadOnlyCollection<string> extensionDirectories;
         private bool isProcessed;
         private IEnumerable<ErrorInfo> creationErrors;
 
@@ -64,10 +66,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         private IAssemblyLoader loader;
         private bool isDisposed;
 
-        internal Engine()
+        internal Engine(Func<Type, ILogger> loggerFactory)
         {
-            this.customDataSourceReferences = new List<CustomDataSourceReference>();
-            this.customDataSourceReferencesRO = new ReadOnlyCollection<CustomDataSourceReference>(this.customDataSourceReferences);
+            this.processingSourceReferences = new List<ProcessingSourceReference>();
+            this.processingSourceReferencesRO = new ReadOnlyCollection<ProcessingSourceReference>(this.processingSourceReferences);
 
             this.sourceDataCookers = new List<DataCookerPath>();
             this.sourceDataCookersRO = new ReadOnlyCollection<DataCookerPath>(this.sourceDataCookers);
@@ -81,7 +83,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.dataProcessors = new List<DataProcessorId>();
 
-            this.dataSourcesToProcess = new Dictionary<CustomDataSourceReference, List<List<IDataSource>>>();
+            this.dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
 
             this.freeDataSources = new List<IDataSource>();
             this.freeDataSourcesRO = new ReadOnlyCollection<IDataSource>(this.freeDataSources);
@@ -92,30 +94,31 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.enabledTables = new List<TableDescriptor>();
             this.enabledTablesRO = new ReadOnlyCollection<TableDescriptor>(this.enabledTables);
 
+            this.loggerFactory = loggerFactory;
+
             this.isDisposed = false;
         }
 
         /// <summary>
-        ///     Gets the directory that the engine will scan for extensions.
-        ///     This directory is scanned during <see cref="Create"/> when
-        ///     creating an instance of the engine. See <see cref="SetExtensionDirectory(string)"/>
-        ///     and <see cref="ResetExtensionDirectory"/> for manipulating this property.
+        ///     Gets the directories that the engine will scan for extensions.
+        ///     These directories are scanned during <see cref="Create"/> when
+        ///     creating an instance of the engine.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public string ExtensionDirectory
+        public IReadOnlyCollection<string> ExtensionDirectories
         {
             get
             {
                 this.ThrowIfDisposed();
-                return this.extensionDirectory;
+                return this.extensionDirectories;
             }
             private set
             {
                 Debug.Assert(!this.isDisposed);
                 this.ThrowIfDisposed();
-                this.extensionDirectory = value;
+                this.extensionDirectories = value;
             }
         }
 
@@ -147,12 +150,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<ICustomDataSource> CustomDataSources
+        public IEnumerable<IProcessingSource> ProcessingSources
         {
             get
             {
                 this.ThrowIfDisposed();
-                return this.customDataSourceReferencesRO.Select(x => x.Instance);
+                return this.processingSourceReferencesRO.Select(x => x.Instance);
             }
         }
 
@@ -221,12 +224,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Gets the collection of Data Sources that are to be processed by a specific Custom Data Source.
+        ///     Gets the collection of Data Sources that are to be processed by a specific <see cref="IProcessingSource"/>.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IReadOnlyDictionary<ICustomDataSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
+        public IReadOnlyDictionary<IProcessingSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
         {
             get
             {
@@ -419,7 +422,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            if (!this.customDataSourceReferences.Any(x => x.Supports(dataSource)))
+            if (!this.processingSourceReferences.Any(x => x.Supports(dataSource)))
             {
                 return false;
             }
@@ -438,18 +441,18 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         /// <summary>
         ///     Adds the given Data Source to this instance for processing by
-        ///     the specific Custom Data Source.
+        ///     the specific <see cref="IProcessingSource"/>.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to process.
         /// </param>
-        /// <param name="customDataSourceType">
-        ///     The Custom Data Source to use to process the file.
+        /// <param name="processingSourceType">
+        ///     The <see cref="IProcessingSource"/> to use to process the file.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSource"/> is <c>null</c>.
         ///     - or -
-        ///     <paramref name="customDataSourceType"/> is <c>null</c>.
+        ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
@@ -458,43 +461,43 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
-        ///     The specified <paramref name="customDataSourceType"/> cannot handle
+        ///     The specified <paramref name="processingSourceType"/> cannot handle
         ///     the given Data Source.
         /// </exception>
-        /// <exception cref="UnsupportedCustomDataSourceException">
-        ///     The specified <paramref name="customDataSourceType"/> is unknown.
+        /// <exception cref="UnsupportedProcessingSourceException">
+        ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
-        public void AddDataSource(IDataSource dataSource, Type customDataSourceType)
+        public void AddDataSource(IDataSource dataSource, Type processingSourceType)
         {
-            this.AddDataSources(new[] { dataSource, }, customDataSourceType);
+            this.AddDataSources(new[] { dataSource, }, processingSourceType);
         }
 
         /// <summary>
         ///     Attempts to add the given Data Source to this instance for processing by
-        ///     the specific Custom Data Source.
+        ///     the specific <see cref="IProcessingSource"/>.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to process.
         /// </param>
-        /// <param name="customDataSourceType">
-        ///     The Custom Data Source to use to process <paramref name="dataSource"/>.
+        /// <param name="processingSourceType">
+        ///     The <see cref="IProcessingSource"/> to use to process <paramref name="dataSource"/>.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the Data Source has been added for processing by the Custom Data Source;
+        ///     <c>true</c> if the <see cref="IDataSource"/> has been added for processing by the <see cref="IProcessingSource"/>;
         ///     <c>false</c> otherwise. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public bool TryAddDataSource(IDataSource dataSource, Type customDataSourceType)
+        public bool TryAddDataSource(IDataSource dataSource, Type processingSourceType)
         {
-            return this.TryAddDataSources(new[] { dataSource, }, customDataSourceType);
+            return this.TryAddDataSources(new[] { dataSource, }, processingSourceType);
         }
 
         /// <summary>
         ///     Adds the given data sources to this instance for processing by
-        ///     the specific Custom Data Source. All of the files will be processed
+        ///     the specific <see cref="IProcessingSource"/>. All of the files will be processed
         ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
         ///     to ensure each Data Source is processed by a different instance, or
         ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
@@ -502,13 +505,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="dataSources">
         ///     The Data Sources to process.
         /// </param>
-        /// <param name="customDataSourceType">
-        ///     The Custom Data Source to use to process the <paramref name="dataSources"/>.
+        /// <param name="processingSourceType">
+        ///     The <see cref="IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSources"/> is <c>null</c>.
         ///     - or -
-        ///     <paramref name="customDataSourceType"/> is <c>null</c>.
+        ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
@@ -517,16 +520,16 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
-        ///     The specified <paramref name="customDataSourceType"/> cannot handle
+        ///     The specified <paramref name="processingSourceType"/> cannot handle
         ///     the given Data Source.
         /// </exception>
-        /// <exception cref="UnsupportedCustomDataSourceException">
-        ///     The specified <paramref name="customDataSourceType"/> is unknown.
+        /// <exception cref="UnsupportedProcessingSourceException">
+        ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
-        public void AddDataSources(IEnumerable<IDataSource> dataSources, Type customDataSourceType)
+        public void AddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
         {
             Guard.NotNull(dataSources, nameof(dataSources));
-            Guard.NotNull(customDataSourceType, nameof(customDataSourceType));
+            Guard.NotNull(processingSourceType, nameof(processingSourceType));
             if (dataSources.Any(x => x is null))
             {
                 throw new ArgumentNullException(nameof(dataSources));
@@ -535,12 +538,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ThrowIfDisposed();
             this.ThrowIfProcessed();
 
-            this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs);
+            this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferences, this.dataSourcesToProcess, this.TypeIs);
         }
 
         /// <summary>
         ///     Attempts to add the given data sources to this instance for processing by
-        ///     the specific Custom Data Source. All of the files will be processed
+        ///     the specific <see cref="IProcessingSource"/>. All of the files will be processed
         ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
         ///     to ensure each Data Source is processed by a different instance, or
         ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
@@ -548,19 +551,19 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="dataSources">
         ///     The Data Sources to process.
         /// </param>
-        /// <param name="customDataSourceType">
-        ///     The Custom Data Source to use to process the <paramref name="dataSources"/>.
+        /// <param name="processingSourceType">
+        ///     The <see cref="IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
         /// </param>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public bool TryAddDataSources(IEnumerable<IDataSource> dataSources, Type customDataSourceType)
+        public bool TryAddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
         {
             this.ThrowIfDisposed();
 
             if (dataSources is null ||
                 dataSources.Any(x => x is null) ||
-                customDataSourceType is null ||
+                processingSourceType is null ||
                 this.IsProcessed)
             {
                 return false;
@@ -568,7 +571,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                this.AddDataSourcesCore(dataSources, customDataSourceType, this.customDataSourceReferences, this.dataSourcesToProcess, this.TypeIs);
+                this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferences, this.dataSourcesToProcess, this.TypeIs);
                 return true;
             }
             catch
@@ -765,10 +768,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (disposing)
             {
                 this.extensionRoot.SafeDispose();
-                
+
                 this.applicationEnvironment = null;
                 this.creationErrors = null;
-                this.extensionDirectory = null;
+                this.extensionDirectories = null;
                 this.extensionRoot = null;
                 this.factory = null;
                 this.loader = null;
@@ -805,6 +808,22 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Creates a logger for the given type.
+        /// </summary>
+        /// <param name="type">
+        ///     The <c>Type</c> for which the logger is created.
+        /// </param>
+        /// <returns>
+        ///     An instance of <see cref="ILogger"/>.
+        /// </returns>
+        protected ILogger CreateLogger(Type type)
+        {
+            Debug.Assert(!this.isDisposed);
+            this.ThrowIfDisposed();
+            return loggerFactory?.Invoke(type) ?? Logger.Create(type);
+        }
+
         private static Engine CreateCore(
             EngineCreateInfo createInfo)
         {
@@ -815,9 +834,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Engine instance = null;
             try
             {
-
-                var extensionDirectory = createInfo.ExtensionDirectory;
-                Debug.Assert(extensionDirectory != null);
+                var extensionDirectories = createInfo.ExtensionDirectories.ToList().AsReadOnly();
+                Debug.Assert(extensionDirectories.Any());
 
                 var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
 
@@ -831,7 +849,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     assemblyDiscovery,
                     repo);
 
-                assemblyDiscovery.ProcessAssemblies(extensionDirectory, out var discoveryError);
+                assemblyDiscovery.ProcessAssemblies(extensionDirectories, out var discoveryError);
 
                 repo.FinalizeDataExtensions();
 
@@ -839,22 +857,30 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 Debug.Assert(repoTuple != null);
 
-                instance = new EngineImpl();
+                instance = new EngineImpl(createInfo.LoggerFactory);
 
-                instance.ExtensionDirectory = extensionDirectory;
+                instance.ExtensionDirectories = extensionDirectories;
                 instance.CreationErrors = new[] { discoveryError, };
-                instance.customDataSourceReferences.AddRange(catalog.PlugIns);
+                instance.processingSourceReferences.AddRange(catalog.PlugIns);
                 instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
                 instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-                instance.extensionRoot = new ExtensionRoot(catalog, repo);                
+                instance.extensionRoot = new ExtensionRoot(catalog, repo);
 
                 instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
 
                 instance.factory = repoTuple.Item1;
 
+                string runtimeName = !string.IsNullOrWhiteSpace(createInfo.RuntimeName)
+                    ? createInfo.RuntimeName
+                    : "Microsoft.Performance.Toolkit.Engine";
+
+                string applicationName = !string.IsNullOrWhiteSpace(createInfo.ApplicationName)
+                    ? createInfo.ApplicationName
+                    : string.Empty;
+
                 instance.applicationEnvironment = new ApplicationEnvironment(
-                    applicationName: string.Empty,
-                    runtimeName: "Microsoft.Performance.Toolkit.Engine",
+                    applicationName: applicationName,
+                    runtimeName: runtimeName,
                     new RuntimeTableSynchronizer(),
                     new TableConfigurationsSerializer(),
                     instance.extensionRoot,
@@ -863,14 +889,12 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 instance.loader = assemblyLoader;
 
-                foreach (var cds in instance.customDataSourceReferences)
+                foreach (var cds in instance.processingSourceReferences)
                 {
                     try
                     {
                         cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
-
-                        // todo: CreateLogger func should be passed in from the EngineCreateInfo
-                        cds.Instance.SetLogger(Logger.Create(cds.Instance.GetType()));
+                        cds.Instance.SetLogger(instance.CreateLogger(cds.Instance.GetType()));
                     }
                     catch (Exception e)
                     {
@@ -912,23 +936,23 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private void AddDataSourcesCore(
             IEnumerable<IDataSource> dataSources,
-            Type customDataSourceType,
-            List<CustomDataSourceReference> customDataSourceReferences,
-            Dictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
+            Type processingSourceType,
+            List<ProcessingSourceReference> processingSourceReferences,
+            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
             Func<Type, Type, bool> typeIs)
         {
             Debug.Assert(dataSources != null);
-            Debug.Assert(customDataSourceType != null);
-            Debug.Assert(customDataSourceReferences != null);
+            Debug.Assert(processingSourceType != null);
+            Debug.Assert(processingSourceReferences != null);
             Debug.Assert(dataSourcesToProcess != null);
             Debug.Assert(typeIs != null);
 
             Debug.Assert(!this.IsProcessed);
 
-            var cdsr = customDataSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), customDataSourceType));
+            var cdsr = processingSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), processingSourceType));
             if (cdsr is null)
             {
-                throw new UnsupportedCustomDataSourceException(customDataSourceType);
+                throw new UnsupportedProcessingSourceException(processingSourceType);
             }
 
             var atLeastOneDataSourceProvided = false;
@@ -939,7 +963,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 atLeastOneDataSourceProvided = true;
                 if (!cdsr.Supports(dataSource))
                 {
-                    throw new UnsupportedDataSourceException(dataSource, customDataSourceType);
+                    throw new UnsupportedDataSourceException(dataSource, processingSourceType);
                 }
             }
 
@@ -961,8 +985,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             this.IsProcessed = true;
 
-            var allDataSourceAssociations = GroupAllDataSourcesToCustomDataSources(
-                this.customDataSourceReferences,
+            var allDataSourceAssociations = GroupAllDataSourcesToProcessingSources(
+                this.processingSourceReferences,
                 this.freeDataSources,
                 this.dataSourcesToProcess);
 
@@ -979,10 +1003,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
                 else
                 {
-                    var executor = executors.Single(x => x.Context.CustomDataSource.AvailableTables.Contains(table));
+                    var executor = executors.Single(x => x.Context.ProcessingSource.AvailableTables.Contains(table));
                     executor.Processor.EnableTable(table);
                     processorTables.Add(table, executor.Processor);
-                }                                
+                }
             }
 
             var processors = this.extensionRoot.EnableDataCookers(
@@ -997,7 +1021,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 extendedTables);
 
                 processors.UnionWith(processorForTable);
-            }            
+            }
 
             var executionResults = new List<ExecutionResult>(executors.Count);
             foreach (var executor in executors)
@@ -1032,10 +1056,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             return results;
         }
 
-        private List<CustomDataSourceExecutor> CreateExecutors(
-            Dictionary<CustomDataSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
+        private List<ProcessingSourceExecutor> CreateExecutors(
+            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
         {
-            var executors = new List<CustomDataSourceExecutor>();
+            var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
             {
                 try
@@ -1051,10 +1075,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                             cds,
                             dataSources,
                             cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
-                            new RuntimeProcessorEnvironment(this.extensionRoot),
+                            new RuntimeProcessorEnvironment(this.extensionRoot, this.CreateLogger),
                             ProcessorOptions.Default);
 
-                        var executor = new CustomDataSourceExecutor();
+                        var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
 
                         executors.Add(executor);
@@ -1073,14 +1097,14 @@ namespace Microsoft.Performance.Toolkit.Engine
             return executors;
         }
 
-        private static Dictionary<CustomDataSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToCustomDataSources(
-            IEnumerable<CustomDataSourceReference> customDataSources,
+        private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(
+            IEnumerable<ProcessingSourceReference> processingSources,
             IEnumerable<IDataSource> freeDataSourcesToProcess,
-            IReadOnlyDictionary<CustomDataSourceReference, List<List<IDataSource>>> dataSourcesToProcess)
+            IReadOnlyDictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess)
         {
-            var allDataSourceAssociations = new Dictionary<CustomDataSourceReference, List<List<IDataSource>>>();
+            var allDataSourceAssociations = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
 
-            var freeDataSourceAssociations = DataSourceResolver.Assign(freeDataSourcesToProcess, customDataSources);
+            var freeDataSourceAssociations = DataSourceResolver.Assign(freeDataSourcesToProcess, processingSources);
 
             foreach (var kvp in dataSourcesToProcess)
             {
@@ -1143,23 +1167,31 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class EngineImpl
             : Engine
         {
+            internal EngineImpl(Func<Type, ILogger> loggerFactory)
+                : base(loggerFactory)
+            {
+            }
         }
 
         private sealed class RuntimeProcessorEnvironment
             : IProcessorEnvironment
         {
             private readonly IDataExtensionRepository repository;
+            private readonly Func<Type, ILogger> loggerFactory;
             private readonly object loggerLock = new object();
 
             private ILogger logger;
             private Type processorType;
 
             public RuntimeProcessorEnvironment(
-                IDataExtensionRepository repository)
+                IDataExtensionRepository repository,
+                Func<Type, ILogger> loggerFactory)
             {
                 Debug.Assert(repository != null);
+                Debug.Assert(loggerFactory != null);
 
                 this.repository = repository;
+                this.loggerFactory = loggerFactory;
             }
 
             public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(
@@ -1187,7 +1219,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     }
 
                     this.processorType = processorType;
-                    this.logger = Logger.Create(processorType);
+                    this.logger = this.loggerFactory(processorType);
                     return this.logger;
                 }
             }
@@ -1208,6 +1240,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
             {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
             }
 
             public void SubmitColumnChangeRequest(
@@ -1216,6 +1250,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
             {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
             }
         }
 

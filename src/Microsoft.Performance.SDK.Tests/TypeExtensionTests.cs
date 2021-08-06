@@ -87,7 +87,7 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        public void IsReturnsFalseWhenNotInHeirarchy()
+        public void IsReturnsFalseWhenNotInHierarchy()
         {
             Assert.IsFalse(typeof(ConcreteType).Is(typeof(StaticType)));
         }
@@ -130,7 +130,7 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        public void IsGenericReturnsFalseWhenNotInHeirarchy()
+        public void IsGenericReturnsFalseWhenNotInHierarchy()
         {
             Assert.IsFalse(typeof(ConcreteType).Is<InterfaceType>());
         }

@@ -33,12 +33,42 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public T QueryOutput<T>(DataOutputPath identifier)
         {
-            throw new System.NotImplementedException();
+            if (Reflector == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            return Reflector.QueryOutput<T>(identifier);
         }
 
         public object QueryOutput(DataOutputPath identifier)
         {
-            throw new System.NotImplementedException();
+            if (Reflector == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            return Reflector.QueryOutput(identifier);
+        }
+
+        public bool TryQueryOutput<T>(DataOutputPath identifier, out T result)
+        {
+            if (Reflector == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            return Reflector.TryQueryOutput<T>(identifier, out result);
+        }
+
+        public bool TryQueryOutput(DataOutputPath identifier, out object result)
+        {
+            if (Reflector == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            return Reflector.TryQueryOutput(identifier, out result);
         }
 
         public IReadOnlyCollection<DataOutputPath> OutputIdentifiers { get; set; }
@@ -92,5 +122,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         //public int CountOfTestRecordsReceived = 0;
 
         public TestSourceDataCookerContext Context { get; set; }
+
+
+        internal TestCookedDataReflector Reflector { get; private set; }
+
+        internal void SetCookedDataReflector(TestCookedDataReflector reflector)
+        {
+            Reflector = reflector;
+            OutputIdentifiers = reflector.OutputIdentifiers;
+        }
     }
 }

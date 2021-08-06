@@ -13,12 +13,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
     {
         public TestPluginCatalog()
         {
-            this.PlugIns = Enumerable.Empty<CustomDataSourceReference>();
+            this.PlugIns = Enumerable.Empty<ProcessingSourceReference>();
         }
 
         public bool IsLoaded { get; set; }
 
-        public IEnumerable<CustomDataSourceReference> PlugIns { get; set; }
+        public IEnumerable<ProcessingSourceReference> PlugIns { get; set; }
 
         public void Dispose()
         {

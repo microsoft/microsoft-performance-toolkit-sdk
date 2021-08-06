@@ -64,7 +64,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="filePath"/> is <c>null</c>.
         ///     - or -
-        ///     <paramref name="customDataSourceType"/> is <c>null</c>.
+        ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="ArgumentException">
         ///     <paramref name="filePath"/> is whitespace.
@@ -82,12 +82,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The specified <paramref name="dataSourceType"/> cannot handle
         ///     the given file.
         /// </exception>
-        /// <exception cref="UnsupportedCustomDataSourceException">
+        /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="dataSourceType"/> is unknown.
         /// </exception>
-        public static void AddFile(this Engine self, string filePath, Type customDataSourceType)
+        public static void AddFile(this Engine self, string filePath, Type processingSourceType)
         {
-            self.AddDataSource(CreateFSDataSource(filePath), customDataSourceType);
+            self.AddDataSource(CreateFSDataSource(filePath), processingSourceType);
         }
 
         /// <summary>
@@ -123,20 +123,20 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="filePath">
         ///     The path to the file to process.
         /// </param>
-        /// <param name="customDataSourceType">
-        ///     The Custom Data Source to use to process the file.
+        /// <param name="processingSourceType">
+        ///     The <see cref="IProcessingSource"/> to use to process the file.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the file has been added for processing by this Custom Data Source;
+        ///     <c>true</c> if the file has been added for processing by this <see cref="IProcessingSource"/>;
         ///     <c>false</c> otherwise. Note that <c>false</c>
         ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public static bool TryAddFile(this Engine self, string filePath, Type customDataSourceType)
+        public static bool TryAddFile(this Engine self, string filePath, Type processingSourceType)
         {
-            return self.TryAddDataSource(CreateFSDataSource(filePath), customDataSourceType);
+            return self.TryAddDataSource(CreateFSDataSource(filePath), processingSourceType);
         }
 
         /// <summary>
@@ -152,13 +152,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="filePaths">
         ///     The path to the files to process.
         /// </param>
-        /// <param name="customDataSourceType">
+        /// <param name="processingSourceType">
         ///     The data source to use to process the file.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     One or more paths specified by <paramref name="filePaths"/> is <c>null</c>.
         ///     - or -
-        ///     <paramref name="customDataSourceType"/> is <c>null</c>.
+        ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="ArgumentException">
         ///     One or more paths specified by <paramref name="filePaths"/> is whitespace.
@@ -173,15 +173,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
-        ///     The specified <paramref name="customDataSourceType"/> cannot handle
+        ///     The specified <paramref name="processingSourceType"/> cannot handle
         ///     the given file.
         /// </exception>
-        /// <exception cref="UnsupportedCustomDataSourceException">
-        ///     The specified <paramref name="customDataSourceType"/> is unknown.
+        /// <exception cref="UnsupportedProcessingSourceException">
+        ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
-        public static void AddFiles(this Engine self, IEnumerable<string> filePaths, Type customDataSourceType)
+        public static void AddFiles(this Engine self, IEnumerable<string> filePaths, Type processingSourceType)
         {
-            self.AddDataSources(filePaths.Select(CreateFSDataSource), customDataSourceType);
+            self.AddDataSources(filePaths.Select(CreateFSDataSource), processingSourceType);
         }
 
         /// <summary>
@@ -203,9 +203,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public static bool TryAddFiles(this Engine self, IEnumerable<string> filePaths, Type customDataSourceType)
+        public static bool TryAddFiles(this Engine self, IEnumerable<string> filePaths, Type processingSourceType)
         {
-            return self.TryAddDataSources(filePaths.Select(CreateFSDataSource), customDataSourceType);
+            return self.TryAddDataSources(filePaths.Select(CreateFSDataSource), processingSourceType);
         }
 
         private static IDataSource CreateFSDataSource(string path)

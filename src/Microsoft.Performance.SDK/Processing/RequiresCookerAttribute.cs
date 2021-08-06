@@ -12,14 +12,20 @@ namespace Microsoft.Performance.SDK.Processing
     /// or on individual <see cref="TableDescriptor"/> static properties to indicate that a 
     /// table described by the <see cref="TableDescriptor"/> requires a data cooker.
     /// </summary>
-    [AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+    [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. Please use RequiresSourceCooker or RequiresCompositeCooker attributes instead.")]
     public class RequiresCookerAttribute
         : Attribute
     {
+        // Placeholder so deriving classes can call a constructor. When this class is made abstract this can be removed.
+        protected RequiresCookerAttribute()
+        {
+        }
+
         /// <summary>
         /// Constructor that takes a data cooker path.
         /// </summary>
         /// <param name="dataCookerPath">Identifies the required data cooker</param>
+        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. Please use RequiresSourceCooker or RequiresCompositeCooker attributes instead.")]
         public RequiresCookerAttribute(string dataCookerPath)
         {
             Guard.NotNullOrWhiteSpace(dataCookerPath, nameof(dataCookerPath));
@@ -30,7 +36,7 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             this.RequiredDataCookerPath = new DataCookerPath(
-                DataCookerPath.GetSourceParserId(dataCookerPath), 
+                DataCookerPath.GetSourceParserId(dataCookerPath),
                 DataCookerPath.GetDataCookerId(dataCookerPath));
         }
 
@@ -38,6 +44,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// Constructor that takes a data cooker path.
         /// </summary>
         /// <param name="dataCookerPath">Identifies the required data cooker</param>
+        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. Please use RequiresSourceCooker or RequiresCompositeCooker attributes instead.")]
         public RequiresCookerAttribute(DataCookerPath dataCookerPath)
         {
             this.RequiredDataCookerPath = dataCookerPath;
@@ -47,6 +54,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// Constructor that takes a type which implements <see cref="IDataCookerDescriptor"/>.
         /// </summary>
         /// <param name="dataCookerType">Identifies the required data cooker</param>
+        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. Please use RequiresSourceCooker or RequiresCompositeCooker attributes instead.")]
         public RequiresCookerAttribute(Type dataCookerType)
         {
             Guard.NotNull(dataCookerType, nameof(dataCookerType));
@@ -84,6 +92,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         /// Path to a required data cooker for the given table.
         /// </summary>
-        public DataCookerPath RequiredDataCookerPath { get; }
+        public DataCookerPath RequiredDataCookerPath { get; protected set; }
     }
 }

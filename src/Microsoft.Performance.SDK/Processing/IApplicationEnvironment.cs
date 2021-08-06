@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
     ///     Exposes information about the application environment in
-    ///     which the custom data source is being executed.
+    ///     which the <see cref="IProcessingSource"/> is being executed.
     /// </summary>
     public interface IApplicationEnvironment
     {

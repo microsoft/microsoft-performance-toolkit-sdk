@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 {
     /// <summary>
     ///     Handles loading SDK plugins into isolation assembly contexts and notifying
-    ///     <see cref="IPluginsConsumer"/> listeners of all custom data sources loaded
+    ///     <see cref="IPluginsConsumer"/> listeners of all <see cref="IProcessingSource"/>s loaded
     ///     by plugins.
     ///     <para/>
     ///     Plugins are loaded by supplying either <see cref="TryLoadPlugin(string, out ErrorInfo)"/> or
@@ -40,7 +40,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
     ///     of all plugins loaded prior to the subscription.
     ///     <para/>
     ///     All calls to loading or obtaining loaded plugins are thread-safe occur in a linearizable order. 
-    ///     Listeners are guaranteed to not miss any loaded custom data sources that get loaded concurrently
+    ///     Listeners are guaranteed to not miss any loaded <see cref="IProcessingSource"/>s that get loaded concurrently
     ///     with their <see cref="Subscribe(IPluginsConsumer)"/> call.
     /// </summary>
     public sealed class PluginsLoader
@@ -122,20 +122,20 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         }
 
         /// <summary>
-        ///     All of the custom data sources that have been loaded by plugins.
+        ///     All of the <see cref="IProcessingSource"/>s that have been loaded by plugins.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<CustomDataSourceReference> LoadedCustomDataSources
+        public IEnumerable<ProcessingSourceReference> LoadedProcessingSources
         {
             get
             {
                 this.ThrowIfDisposed();
-                IEnumerable<CustomDataSourceReference> copy;
+                IEnumerable<ProcessingSourceReference> copy;
                 lock (this.mutex)
                 {
-                    copy = new HashSet<CustomDataSourceReference>(this.extensionRoot.PlugIns);
+                    copy = new HashSet<ProcessingSourceReference>(this.extensionRoot.PlugIns);
                 }
                 return copy;
             }
@@ -232,7 +232,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             lock (this.mutex)
             {
                 failed = new Dictionary<string, ErrorInfo>();
-                var oldPlugins = new HashSet<CustomDataSourceReference>(this.extensionRoot.PlugIns);
+                var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.PlugIns);
                 foreach (var dir in directories)
                 {
                     if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
@@ -242,7 +242,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                     }
                 }
 
-                // TODO: this does redundant work re-finalizing custom data sources
+                // TODO: this does redundant work re-finalizing processing sources
                 // loaded by previous calls to this method. The extension repository
                 // should get refactored to avoid this redundant work.
                 this.extensionRoot.FinalizeDataExtensions();
@@ -250,7 +250,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 foreach (var source in this.extensionRoot.PlugIns.Except(oldPlugins))
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
-                    this.NotifyCustomDataSourceLoaded(name, version, source);
+                    this.NotifyProcessingSourceLoaded(name, version, source);
                 }
 
                 return failed.Count == 0;
@@ -275,7 +275,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
         /// <summary>
         ///     Registers an <see cref="IPluginsConsumer"/> to receive all future plugins, and sends all
-        ///     previously loaded plugins to its <see cref="IPluginsConsumer.OnCustomDataSourceLoaded(string, CustomDataSourceReference)"/> handler.
+        ///     previously loaded plugins to its <see cref="IPluginsConsumer.OnProcessingSourceLoaded(string, Version, ProcessingSourceReference)"/> handler.
         ///     <para/>
         ///     If the <paramref name="consumer"/> is already subscribed, this method does nothing.
         ///     <para/>
@@ -306,7 +306,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 foreach (var source in this.extensionRoot.PlugIns)
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
-                    consumer.OnCustomDataSourceLoaded(name, version, source);
+                    consumer.OnProcessingSourceLoaded(name, version, source);
                 }
 
                 // Subscribe to all future plugin loads
@@ -408,7 +408,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             }
         }
 
-        private (string, Version) GetPluginNameAndVersion(CustomDataSourceReference cds)
+        private (string, Version) GetPluginNameAndVersion(ProcessingSourceReference cds)
         {
             var fileName = cds.AssemblyPath;
             Guard.NotNullOrWhiteSpace(fileName, nameof(fileName));
@@ -425,7 +425,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 pluginName = parentFolder.Parent.Name;
                 pluginVersion = Version.TryParse(parentFolder.Name, out var version) ? version : null;
             }
-            else if (parentFolder?.Parent?.Name == CustomDataSourceConstants.CustomDataSourceRootFolderName)
+            else if (parentFolder?.Parent?.Name == ProcessingSourceConstants.ProcessingSourceRootFolderName)
             {
                 // Legacy: this plugin was bundled with WPA. It has its binaries inside of one folder
                 // named after the plugin itself.
@@ -445,7 +445,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             return (pluginName, pluginVersion);
         }
 
-        private void NotifyCustomDataSourceLoaded(string pluginName, Version pluginVersion, CustomDataSourceReference customDataSource)
+        private void NotifyProcessingSourceLoaded(string pluginName, Version pluginVersion, ProcessingSourceReference processingSource)
         {
             Guard.NotNull(this.extensionRoot, nameof(this.extensionRoot));
             if (!this.extensionRoot.IsLoaded)
@@ -455,7 +455,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             foreach (var consumer in this.subscribers)
             {
-                consumer.OnCustomDataSourceLoaded(pluginName, pluginVersion, customDataSource);
+                consumer.OnProcessingSourceLoaded(pluginName, pluginVersion, processingSource);
             }
         }
     }
