@@ -27,7 +27,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public Type DataKeyType { get; set; }
 
         /// <inheritdoc />
-        public int MaxSourceParseCount { get; set; }
+        public int MaxSourceParseCount => SourceParsingConstants.UnlimitedPassCount;
 
         public bool ReceivedAllEventsConsumed { get; set; }
         public IReadOnlyCollection<int> RequestedDataKeys { get; set; }
@@ -40,8 +40,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         /// <inheritdoc />
         public void ProcessSource(
-            ISourceDataProcessor<TestRecord, TestParserContext, int> dataProcessor, 
-            ILogger logger, 
+            ISourceDataProcessor<TestRecord, TestParserContext, int> dataProcessor,
+            ILogger logger,
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
