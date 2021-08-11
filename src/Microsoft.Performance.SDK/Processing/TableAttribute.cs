@@ -15,61 +15,23 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     The default name of the static class property which returns the <see cref="TableDescriptor"/>.
         /// </summary>
-        public const string DefaultTableDescriptorPropertyName = "TableDescriptor";
+        protected const string DefaultTableDescriptorPropertyName = "TableDescriptor";
 
         /// <summary>
         ///     The default name of the static class method which builds a table.
         ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
         /// </summary>
-        public const string DefaultTableBuilderMethodName = "BuildTable";
+        protected const string DefaultTableBuilderMethodName = "BuildTable";
 
         /// <summary>
         ///     The default name of the static class method which checks if a table has data.
         ///     bool IsDataAvailable(IDataExtensionRetrieval)
         /// </summary>
-        public const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
+        protected const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
 
-        /// <summary>
-        ///     Constructor is defunct.
-        /// </summary>
-        /// <param name="guid">
-        ///     The unique identifier for this table. This MAY NOT be
-        ///     the default (empty) <see cref="Guid"/>.
-        /// </param>
-        /// <param name="name">
-        ///     The name of this table.
-        /// </param>
-        /// <param name="description">
-        ///     A user friendly description of this table.
-        /// </param>
-        /// <param name="category">
-        ///     The category into which this table belongs. This parameter
-        ///     may be null, at which point the table is assumed to be in
-        ///     the <see cref="TableDescriptor.DefaultCategory"/> category.
-        /// </param>
-        /// <exception cref="System.ArgumentException">
-        ///     <paramref name="guid"/> is whitespace.
-        ///     - or -
-        ///     <paramref name="guid"/> parsed to a value
-        ///     equal to <c>default(Guid)</c>.
-        ///     - or -
-        ///     <paramref name="name"/> is whitespace.
-        ///     - or -
-        ///     <paramref name="description"/> is whitespace.
-        /// </exception>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="guid"/> is <c>null</c>.
-        ///     - or -
-        ///     <paramref name="name"/> is <c>null</c>.
-        ///     - or -
-        ///     <paramref name="description"/> is <c>null</c>.
-        /// </exception>
-        [Obsolete("This TableAttribute constructor has been deprecated. Please replace with new constructor.", true)]
         public TableAttribute(
-            string guid,
-            string name,
-            string description,
-            string category = "Other")
+            bool InternalTable = false)
+            : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName, InternalTable)
         {
         }
 
@@ -88,12 +50,12 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The name of the static class method which checks if the table has data.
         ///     IsDataAvailable(IDataExtensionRetrieval)
         /// </param>
-        /// <param name="internalTable">
+        /// <param name="InternalTable">
         ///     When this is set, the table will not be exposed through the data extension repository.
         ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
         ///     when this is set.
         /// </param>
-        public TableAttribute(
+        protected TableAttribute(
             string tableDescriptorPropertyName = DefaultTableDescriptorPropertyName,
             string buildTableActionMethodName = DefaultTableBuilderMethodName,
             string isDataAvailableMethodName = DefaultIsDataAvailableMethodName,
@@ -108,27 +70,27 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
+        ///     When this is set, the table will not be exposed through the data extension repository.
+        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
+        ///     when this is set.
+        /// </summary>
+        public bool InternalTable { get; protected set; }
+
+        /// <summary>
         ///     The name of the static class property which returns the <see cref="TableDescriptor"/>.
         /// </summary>
-        public string TableDescriptorPropertyName { get; }
+        protected internal string TableDescriptorPropertyName { get; }
 
         /// <summary>
         ///     The name of the static class method which builds a table.
         ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
         /// </summary>
-        public string BuildTableActionMethodName { get; }
-
-        /// <summary>
-        ///     When this is set, the table will not be exposed through the data extension repository.
-        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
-        ///     when this is set.
-        /// </summary>
-        public bool InternalTable { get; set; }
+        protected internal string BuildTableActionMethodName { get; }
 
         /// <summary>
         ///     The name of the static class method which checks if the table has data.
         ///     IsDataAvailable(IDataExtensionRetrieval)
         /// </summary>
-        public string IsDataAvailableMethodName { get; }
+        protected internal string IsDataAvailableMethodName { get; }
     }
 }
