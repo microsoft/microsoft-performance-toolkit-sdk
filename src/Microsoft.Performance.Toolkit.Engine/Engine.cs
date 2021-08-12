@@ -994,8 +994,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.freeDataSources,
                 this.dataSourcesToProcess);
 
-            // This is the set of composite cookers that will be used by the system of data processors included in this
-            // system of data processors.
+            // This contains the set of composite cookers that will be used by the system of data processors available
+            // to this RuntimeExecutionResults.
             var compositeCookers = new ProcessingSystemCompositeCookers(this.extensionRoot);
 
             var executors = CreateExecutors(allDataSourceAssociations, compositeCookers);
@@ -1052,9 +1052,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
             }
 
-            var retrieval = this.factory.CreateCrossParserSourceDataCookerRetrieval(processors);
-            var engineCookerData = new ProcessingSystemCookerData(retrieval, compositeCookers);
-            var processingSession = new ProcessingSystemData(engineCookerData, this.extensionRoot, processorTables);
+            var sourceCookerDataRetrieval = this.factory.CreateCrossParserSourceDataCookerRetrieval(processors);
+            var processingSession = new ProcessingSystemData(sourceCookerDataRetrieval, compositeCookers, processorTables, this.extensionRoot);
 
             this.runtimeExecutionResult = new RuntimeExecutionResults(
                 processingSession,

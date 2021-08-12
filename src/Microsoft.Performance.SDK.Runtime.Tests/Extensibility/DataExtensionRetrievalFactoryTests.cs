@@ -15,12 +15,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     [TestClass]
     public class DataExtensionRetrievalFactoryTests
     {
-        private static ProcessingSystemCookerData CreateCookerData(IDataExtensionRepository repo)
+        private static TestProcessingSystemCookerData CreateCookerData(IDataExtensionRepository repo)
         {
             var cookedDataRetrieval = new TestCookedDataRetrieval();
             var compositeCookers = new ProcessingSystemCompositeCookers(repo);
 
-            return new ProcessingSystemCookerData(cookedDataRetrieval, compositeCookers);
+            return new TestProcessingSystemCookerData(cookedDataRetrieval, compositeCookers);
         }
 
         [TestMethod]

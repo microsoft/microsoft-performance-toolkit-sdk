@@ -400,7 +400,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        protected void ThrowIfDisposed()
+        private void ThrowIfDisposed()
         {
             if (this.isDisposed)
             {

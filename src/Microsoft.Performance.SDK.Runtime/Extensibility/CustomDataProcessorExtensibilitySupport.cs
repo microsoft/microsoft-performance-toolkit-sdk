@@ -138,7 +138,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                     // from the pool of cookers in the system of processors to which this processor belongs. this is why
                     // we've passed down the ProcessingSystemCompositeCookers.
                     //
-                    var cookerData = new ProcessingSystemCookerData(this.dataProcessor, this.compositeCookers);
+                    var cookerData = new ProcessingSystemCookerData(this.dataProcessor, this.compositeCookers, false);
                     this.dataExtensionRetrievalFactory = new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
                 }
             }
