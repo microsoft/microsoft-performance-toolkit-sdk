@@ -116,7 +116,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             get
             {
                 this.ThrowIfDisposed();
-                return this.CookerData;
+                return this.cookerDataRetrieval;
             }
         }
 
