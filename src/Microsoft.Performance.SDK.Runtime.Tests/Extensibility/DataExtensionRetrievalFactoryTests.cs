@@ -5,6 +5,7 @@ using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -14,26 +15,41 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     [TestClass]
     public class DataExtensionRetrievalFactoryTests
     {
-        [TestMethod]
-        [UnitTest]
-        public void Constructor()
+        private static ProcessingSystemCookerData CreateCookerData(IDataExtensionRepository repo)
         {
             var cookedDataRetrieval = new TestCookedDataRetrieval();
+            var compositeCookers = new ProcessingSystemCompositeCookers(repo);
+
+            return new ProcessingSystemCookerData(cookedDataRetrieval, compositeCookers);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Constructor_NullRepo_Throws()
+        {
+            var dataExtensionRepository = new TestDataExtensionRepository();
+            var cookerData = CreateCookerData(dataExtensionRepository);
+
+            Assert.ThrowsException<ArgumentNullException>(() =>
+                new DataExtensionRetrievalFactory(cookerData, null));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Constructor_NullProcessingSessionData_Throws()
+        {
             var dataExtensionRepository = new TestDataExtensionRepository();
 
-            var dataExtensionRetrievalFactory =
-                new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
-
-            Assert.AreEqual(cookedDataRetrieval, dataExtensionRetrievalFactory.CookedSourceData);
-            Assert.AreEqual(dataExtensionRepository, dataExtensionRetrievalFactory.DataExtensionRepository);
+            Assert.ThrowsException<ArgumentNullException>(() =>
+                new DataExtensionRetrievalFactory(null, dataExtensionRepository));
         }
 
         [TestMethod]
         [UnitTest]
         public void CreateDataRetrievalForCompositeDataCookerSucceeds()
         {
-            var cookedDataRetrieval = new TestCookedDataRetrieval();
             var dataExtensionRepository = new TestDataExtensionRepository();
+            var cookerData = CreateCookerData(dataExtensionRepository);
 
             var sourceDataCookerReference1 = new TestSourceDataCookerReference(false)
             {
@@ -52,7 +68,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             dataExtensionRepository.compositeCookersByPath.Add(dataCookerReference.Path, dataCookerReference);
 
             var dataExtensionRetrievalFactory =
-                new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
+                new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
 
             var dataRetrieval = dataExtensionRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(dataCookerReference.Path);
 
@@ -70,13 +86,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void CreateDataRetrievalForCompositeDataCooker_MissingCookerThrows()
         {
-            var cookedDataRetrieval = new TestCookedDataRetrieval();
             var dataExtensionRepository = new TestDataExtensionRepository();
+            var cookerData = CreateCookerData(dataExtensionRepository);
 
             var cookerPath = DataCookerPath.ForComposite("CompositeCooker1");
 
             var dataExtensionRetrievalFactory =
-                new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
+                new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath));
@@ -86,8 +102,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void CreateDataRetrievalForCompositeDataCooker_NotAvailableCookerThrows()
         {
-            var cookedDataRetrieval = new TestCookedDataRetrieval();
             var dataExtensionRepository = new TestDataExtensionRepository();
+            var cookerData = CreateCookerData(dataExtensionRepository);
 
             var dataCookerReference = new TestCompositeDataCookerReference(false)
             {
@@ -98,7 +114,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             dataExtensionRepository.compositeCookersByPath.Add(dataCookerReference.Path, dataCookerReference);
 
             var dataExtensionRetrievalFactory =
-                new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
+                new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(dataCookerReference.Path));
@@ -108,8 +124,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void CreateDataRetrievalForTableSucceeds()
         {
-            var cookedDataRetrieval = new TestCookedDataRetrieval();
             var dataExtensionRepository = new TestDataExtensionRepository();
+            var cookerData = CreateCookerData(dataExtensionRepository);
 
             var sourceDataCookerReference1 = new TestSourceDataCookerReference(false)
             {
@@ -136,7 +152,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             dataExtensionRepository.tablesById.Add(tableReference.TableDescriptor.Guid, tableReference);
 
             var dataExtensionRetrievalFactory =
-                new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
+                new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
 
             var dataRetrieval = dataExtensionRetrievalFactory.CreateDataRetrievalForTable(tableReference.TableDescriptor.Guid);
 
@@ -154,13 +170,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void CreateDataRetrievalForTable_MissingCookerThrows()
         {
-            var cookedDataRetrieval = new TestCookedDataRetrieval();
             var dataExtensionRepository = new TestDataExtensionRepository();
+            var cookerData = CreateCookerData(dataExtensionRepository);
 
             var tableId = Guid.Parse("{6BB197C8-B3BE-4926-B23A-6F01451D80A3}");
 
             var dataExtensionRetrievalFactory =
-                new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
+                new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForTable(tableId));
@@ -170,8 +186,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void CreateDataRetrievalForTable_NotAvailableCookerThrows()
         {
-            var cookedDataRetrieval = new TestCookedDataRetrieval();
             var dataExtensionRepository = new TestDataExtensionRepository();
+            var cookerData = CreateCookerData(dataExtensionRepository);
 
             var dataCookerReference = new TestCompositeDataCookerReference(false)
             {
@@ -190,7 +206,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             dataExtensionRepository.tablesById.Add(tableReference.TableDescriptor.Guid, tableReference);
 
             var dataExtensionRetrievalFactory =
-                new DataExtensionRetrievalFactory(cookedDataRetrieval, dataExtensionRepository);
+                new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
 
             Assert.ThrowsException<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForTable(tableReference.TableDescriptor.Guid));

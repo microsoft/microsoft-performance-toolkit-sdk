@@ -112,66 +112,66 @@
                 "/Composite4Cooker/Output"
             ]
         },
-        {
-            "id": "0003",
-            "description": "Test one composite cooker that depends on one source cooker.",
-            "compositeCookersToEnable": [
-                {
-                    "dataCookerId": "Composite2Cooker"
-                }
-            ],
-            "filePaths": [
-                "TestData/source123_test_data.s123d",
-                "TestData/source4_test_data.s4d",
-                "TestData/source5_test_data.s5d"
-            ],
-            "expectedOutputs": {
-                "Source5Parser/Source5DataCooker/Objects": [
-                    {
-                        "key": 1,
-                        "id": 1,
-                        "data": "Source5Row1"
-                    },
-                    {
-                        "key": 2,
-                        "id": 2,
-                        "data": "Source5Row2"
-                    },
-                    {
-                        "key": 3,
-                        "id": 3,
-                        "data": "Source5Row3"
-                    },
-                    {
-                        "key": 4,
-                        "id": 4,
-                        "data": "Source5Row4"
-                    },
-                    {
-                        "key": 5,
-                        "id": 5,
-                        "data": "Source5Row5"
-                    }
-                ],
-                "/Composite2Cooker/Output": [
-                    {
-                        "key": 5,
-                        "source5Count": 5
-                    }
-                ]
+      {
+        "id": "0003",
+        "description": "Test one composite cooker that depends on one source cooker.",
+        "compositeCookersToEnable": [
+          {
+            "dataCookerId": "Composite2Cooker"
+          }
+        ],
+        "filePaths": [
+          "TestData/source123_test_data.s123d",
+          "TestData/source4_test_data.s4d",
+          "TestData/source5_test_data.s5d"
+        ],
+        "expectedOutputs": {
+          "Source5Parser/Source5DataCooker/Objects": [
+            {
+              "key": 1,
+              "id": 1,
+              "data": "Source5Row1"
             },
-            "throwingOutputs": [
-                "Source123Parser/Source1DataCooker/Objects",
-                "Source123Parser/Source2DataCooker/Objects",
-                "Source123Parser/Source3DataCooker/Objects",
-                "Source123Parser/Source3DataCooker/Source1Objects",
-                "Source123Parser/Source3DataCooker/Source2Objects",
-                "Source4Parser/Source4DataCooker/Objects",
-                "/Composite1Cooker/Output",
-                "/Composite3Cooker/Output",
-                "/Composite4Cooker/Output"
-            ]
+            {
+              "key": 2,
+              "id": 2,
+              "data": "Source5Row2"
+            },
+            {
+              "key": 3,
+              "id": 3,
+              "data": "Source5Row3"
+            },
+            {
+              "key": 4,
+              "id": 4,
+              "data": "Source5Row4"
+            },
+            {
+              "key": 5,
+              "id": 5,
+              "data": "Source5Row5"
+            }
+          ],
+          "/Composite2Cooker/Output": [
+            {
+              "key": 5,
+              "source5Count": 5
+            }
+          ]
         },
+        "throwingOutputs": [
+          "Source123Parser/Source1DataCooker/Objects",
+          "Source123Parser/Source2DataCooker/Objects",
+          "Source123Parser/Source3DataCooker/Objects",
+          "Source123Parser/Source3DataCooker/Source1Objects",
+          "Source123Parser/Source3DataCooker/Source2Objects",
+          "Source4Parser/Source4DataCooker/Objects",
+          "/Composite1Cooker/Output",
+          "/Composite3Cooker/Output",
+          "/Composite4Cooker/Output"
+        ]
+      },
         {
             "id": "0004",
             "description": "Test one composite cooker that depends on one source cooker and one composite cooker",
@@ -269,7 +269,6 @@
         {
             "id": "0005",
             "description": "Test one composite cooker that depends on two composite cookers",
-            "debugBreak": true,
             "compositeCookersToEnable": [
                 {
                     "dataCookerId": "Composite4Cooker"

@@ -8,6 +8,7 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility
 {
@@ -18,17 +19,44 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
     internal class FilteredDataRetrieval
         : IDataExtensionRetrieval
     {
-        private readonly DataExtensionRetrievalFactory dataRetrievalFactory;
+        private readonly IProcessingSystemCookerData cookerData;
+        private readonly IDataExtensionRepository dataExtensionRepository;
+        private readonly Func<DataCookerPath, IDataExtensionRetrieval> createCompositeDataRetrieval;
+        private readonly Func<DataProcessorId, IDataExtensionRetrieval> createProcessorDataRetrieval;
         private readonly IDataExtensionDependencies extensionDependencies;
 
+        /// <summary>
+        ///     Creates an instance of the <see cref="FilteredDataRetrieval"/> class for a given data extension.
+        /// </summary>
+        /// <param name="cookerData">
+        ///     Provides access to source cooker data and composite cookers.
+        /// </param>
+        /// <param name="dataExtensionRepository">
+        ///     Provides access to data processors (to be removed for V1).
+        /// </param>
+        /// <param name="createProcessorDataRetrieval">
+        ///     Creates a data retrieval instance for a data processor extension.
+        /// </param>
+        /// <param name="extensionDependencies">
+        ///     The set of dependencies that the target data extension for this instance has access.
+        /// </param>
         internal FilteredDataRetrieval(
-            DataExtensionRetrievalFactory dataRetrievalFactory,
+            IProcessingSystemCookerData cookerData,
+            IDataExtensionRepository dataExtensionRepository,
+            Func<DataCookerPath, IDataExtensionRetrieval> createCompositeDataRetrieval,
+            Func<DataProcessorId, IDataExtensionRetrieval> createProcessorDataRetrieval,
             IDataExtensionDependencies extensionDependencies)
         {
-            Debug.Assert(dataRetrievalFactory != null, nameof(dataRetrievalFactory));
+            Debug.Assert(cookerData != null, nameof(cookerData));
+            Debug.Assert(dataExtensionRepository != null, nameof(dataExtensionRepository));
             Debug.Assert(extensionDependencies != null, nameof(extensionDependencies));
+            Debug.Assert(createCompositeDataRetrieval != null, nameof(createCompositeDataRetrieval));
+            Debug.Assert(createProcessorDataRetrieval != null, nameof(createProcessorDataRetrieval));
 
-            this.dataRetrievalFactory = dataRetrievalFactory;
+            this.cookerData = cookerData;
+            this.dataExtensionRepository = dataExtensionRepository;
+            this.createCompositeDataRetrieval = createCompositeDataRetrieval;
+            this.createProcessorDataRetrieval = createProcessorDataRetrieval;
             this.extensionDependencies = extensionDependencies;
         }
 
@@ -101,7 +129,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                     nameof(dataProcessorId));
             }
 
-            var processorReference = this.dataRetrievalFactory.DataExtensionRepository.GetDataProcessorReference(dataProcessorId);
+            var processorReference = this.dataExtensionRepository.GetDataProcessorReference(dataProcessorId);
             if (processorReference == null)
             {
                 throw new InvalidOperationException(
@@ -109,7 +137,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             }
 
             var processorDataRetrieval =
-                this.dataRetrievalFactory.CreateDataRetrievalForDataProcessor(dataProcessorId);
+                this.createProcessorDataRetrieval(dataProcessorId);
 
             return processorReference.GetOrCreateInstance(processorDataRetrieval);
         }
@@ -131,7 +159,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             return this.extensionDependencies.RequiredSourceDataCookerPaths.Contains(dataOutputPath.CookerPath);
         }
 
-        private IDataCooker ValidateCompositeDataCooker(DataOutputPath dataOutputPath)
+        private void ValidateCompositeDataCooker(DataOutputPath dataOutputPath)
         {
             var cookerPath = dataOutputPath.CookerPath;
 
@@ -143,69 +171,64 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                     nameof(dataOutputPath));
             }
 
-            var compositeCookerReference =
-                this.dataRetrievalFactory.DataExtensionRepository.GetCompositeDataCookerReference(cookerPath);
-            if (compositeCookerReference == null)
-            {
-                throw new InvalidOperationException(
-                    $"The data extension repository is missing expected composite data cooker: {cookerPath}");
-            }
+            //var compositeCooker = this.cookerData.GetOrCreateCompositeCooker(cookerPath);
+            //if (compositeCooker == null)
+            //{
+            //    throw new InvalidOperationException(
+            //        $"The composite cooker reference returned null cooker: {cookerPath}. Was it properly initialized?");
+            //}
 
-            var compositeCooker = compositeCookerReference.GetOrCreateInstance(
-                this.dataRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath));
-            if (compositeCooker == null)
-            {
-                throw new InvalidOperationException(
-                    $"The composite cooker reference returned null cooker: {cookerPath}. Was it properly initialized?");
-            }
-
-            return compositeCooker;
+            //return compositeCooker;
         }
 
-        private bool TryValidateCompositeDataCooker(DataOutputPath dataOutputPath, out IDataCooker compositeCooker)
+        /// <summary>
+        ///     Check that the requested composite cooker is available to this filtered data set.
+        /// </summary>
+        /// <param name="dataOutputPath">
+        ///     Path to a composite data cooker.
+        /// </param>
+        /// <param name="compositeCooker">
+        ///     An instance of the composite data cooker.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the composite cooker is valid; <c>false</c> otherwise.
+        /// </returns>
+        private bool TryValidateCompositeDataCooker(DataOutputPath dataOutputPath/*, out IDataCooker compositeCooker*/)
         {
-            try
+            //try
+            //{
+            var cookerPath = dataOutputPath.CookerPath;
+
+            if (!this.extensionDependencies.RequiredCompositeDataCookerPaths.Contains(cookerPath))
             {
-                var cookerPath = dataOutputPath.CookerPath;
-
-                if (!this.extensionDependencies.RequiredCompositeDataCookerPaths.Contains(cookerPath))
-                {
-                    compositeCooker = default;
-                    return false;
-                }
-
-                var compositeCookerReference =
-                    this.dataRetrievalFactory.DataExtensionRepository.GetCompositeDataCookerReference(cookerPath);
-                if (compositeCookerReference == null)
-                {
-                    compositeCooker = default;
-                    return false;
-                }
-
-                compositeCooker = compositeCookerReference.GetOrCreateInstance(
-                    this.dataRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath));
-
-                return compositeCooker != null;
-            }
-            catch (Exception)
-            {
+                //compositeCooker = default;
+                return false;
             }
 
-            compositeCooker = default;
-            return false;
+            //compositeCooker = this.cookerData.GetOrCreateCompositeCooker(cookerPath);
+
+            //return compositeCooker != null;
+            //}
+            //catch (Exception)
+            //{
+            //}
+
+            //compositeCooker = default;
+            //return false;
+            return true;
         }
 
         private T QuerySourceOutput<T>(DataOutputPath dataOutputPath)
         {
             this.ValidateSourceDataCooker(dataOutputPath);
-            return this.dataRetrievalFactory.CookedSourceData.QueryOutput<T>(dataOutputPath);
+            return this.cookerData.SourceCookerData.QueryOutput<T>(dataOutputPath);
         }
 
         private bool TryQuerySourceOutput<T>(DataOutputPath dataOutputPath, out T result)
         {
             if (this.TryValidateSourceDataCooker(dataOutputPath))
             {
-                return this.dataRetrievalFactory.CookedSourceData.TryQueryOutput<T>(dataOutputPath, out result);
+                return this.cookerData.SourceCookerData.TryQueryOutput<T>(dataOutputPath, out result);
             }
 
             result = default;
@@ -214,15 +237,17 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         private T QueryCompositeOutput<T>(DataOutputPath dataOutputPath)
         {
-            var compositeCooker = this.ValidateCompositeDataCooker(dataOutputPath);
-            return compositeCooker.QueryOutput<T>(dataOutputPath);
+            this.ValidateCompositeDataCooker(dataOutputPath);
+
+            return GetCompositeDataRetrieval(dataOutputPath).QueryOutput<T>(dataOutputPath);
         }
 
         private bool TryQueryCompositeOutput<T>(DataOutputPath dataOutputPath, out T result)
         {
-            if (this.TryValidateCompositeDataCooker(dataOutputPath, out var compositeCooker))
+            if (this.TryValidateCompositeDataCooker(dataOutputPath/*, out var compositeCooker*/))
             {
-                return compositeCooker.TryQueryOutput<T>(dataOutputPath, out result);
+                //return compositeCooker.TryQueryOutput<T>(dataOutputPath, out result);
+                return GetCompositeDataRetrieval(dataOutputPath).TryQueryOutput<T>(dataOutputPath, out result);
             }
 
             result = default;
@@ -232,20 +257,20 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         private object QuerySourceOutput(DataOutputPath dataOutputPath)
         {
             this.ValidateSourceDataCooker(dataOutputPath);
-            return this.dataRetrievalFactory.CookedSourceData.QueryOutput(dataOutputPath);
+            return this.cookerData.SourceCookerData.QueryOutput(dataOutputPath);
         }
 
         private object QueryCompositeOutput(DataOutputPath dataOutputPath)
         {
-            var compositeCooker = this.ValidateCompositeDataCooker(dataOutputPath);
-            return compositeCooker.QueryOutput(dataOutputPath);
+            this.ValidateCompositeDataCooker(dataOutputPath);
+            return GetCompositeDataRetrieval(dataOutputPath).QueryOutput(dataOutputPath);
         }
 
         private bool TryQuerySourceOutput(DataOutputPath dataOutputPath, out object result)
         {
             if (this.TryValidateSourceDataCooker(dataOutputPath))
             {
-                return this.dataRetrievalFactory.CookedSourceData.TryQueryOutput(dataOutputPath, out result);
+                return this.cookerData.SourceCookerData.TryQueryOutput(dataOutputPath, out result);
             }
 
             result = default;
@@ -254,13 +279,25 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         private bool TryQueryCompositeOutput(DataOutputPath dataOutputPath, out object result)
         {
-            if (this.TryValidateCompositeDataCooker(dataOutputPath, out var compositeCooker))
+            if (this.TryValidateCompositeDataCooker(dataOutputPath))
             {
-                return compositeCooker.TryQueryOutput(dataOutputPath, out result);
+                return GetCompositeDataRetrieval(dataOutputPath).TryQueryOutput(dataOutputPath, out result);
             }
 
             result = default;
             return false;
+        }
+
+        private ICookedDataRetrieval GetCompositeDataRetrieval(DataOutputPath outputPath)
+        {
+            return GetCompositeDataRetrieval(outputPath.CookerPath);
+        }
+
+        private ICookedDataRetrieval GetCompositeDataRetrieval(DataCookerPath cookerPath)
+        {
+            return this.cookerData.GetOrCreateCompositeCooker(
+                cookerPath,
+                this.createCompositeDataRetrieval);
         }
     }
 }

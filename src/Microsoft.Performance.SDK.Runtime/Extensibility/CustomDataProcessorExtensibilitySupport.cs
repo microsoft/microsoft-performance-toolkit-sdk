@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
-using System.Diagnostics;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility
 {
@@ -21,6 +21,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
     {
         private readonly ICustomDataProcessorWithSourceParser dataProcessor;
         private readonly IDataExtensionRepository dataExtensionRepository;
+        private readonly ProcessingSystemCompositeCookers compositeCookers;
         private readonly Dictionary<TableDescriptor, ITableExtensionReference> tableReferences;
 
         private DataExtensionRetrievalFactory dataExtensionRetrievalFactory;
@@ -39,16 +40,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// </param>
         public CustomDataProcessorExtensibilitySupport(
             ICustomDataProcessorWithSourceParser dataProcessor,
-            IDataExtensionRepository dataExtensionRepository)
+            IDataExtensionRepository dataExtensionRepository,
+            ProcessingSystemCompositeCookers compositeCookers)
         {
             this.dataProcessor = dataProcessor;
             this.dataExtensionRepository = dataExtensionRepository;
+            this.compositeCookers = compositeCookers;
             this.tableReferences = new Dictionary<TableDescriptor, ITableExtensionReference>();
         }
 
         /// <inheritdoc />
         public bool AddTable(TableDescriptor tableDescriptor)
         {
+            // todo: this doesn't prevent somone from calling FinalizeTables on another thread while AddTable is running.
             lock (this.dataProcessor)
             {
                 if (this.dataExtensionRetrievalFactory != null)
@@ -118,12 +122,24 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 this.tableReferences.Remove(tableDescriptor);
             }
 
+            //var tablesToProcessor = new Dictionary<TableDescriptor, ICustomDataProcessor>();
+            //foreach (var tableDescriptor in this.tableReferences.Keys)
+            //{
+            //    tablesToProcessor.Add(tableDescriptor, this.dataProcessor);
+            //}
+
             lock (this.dataProcessor)
             {
                 if (this.dataExtensionRetrievalFactory == null)
                 {
-                    this.dataExtensionRetrievalFactory =
-                        new DataExtensionRetrievalFactory(this.dataProcessor, dataExtensionRepository);
+                    var tablesToProcessor = new Dictionary<TableDescriptor, ICustomDataProcessor>();
+
+                    // Data processors can use composite cookers for internal extensions, and those cookers should come
+                    // from the pool of cookers in the system of processors to which this processor belongs. this is why
+                    // we've passed down the ProcessingSystemCompositeCookers.
+                    //
+                    var cookerData = new ProcessingSystemCookerData(this.dataProcessor, this.compositeCookers);
+                    this.dataExtensionRetrievalFactory = new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
                 }
             }
         }
@@ -146,10 +162,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 return null;
             }
 
-            ITableExtensionReference reference = this.tableReferences[tableDescriptor];
-            Debug.Assert(reference != null);
-
-            return this.dataExtensionRetrievalFactory.CreateDataRetrievalForTable(reference);
+            return this.dataExtensionRetrievalFactory.CreateDataRetrievalForTable(this.tableReferences[tableDescriptor]);
         }
 
         /// <inheritdoc />

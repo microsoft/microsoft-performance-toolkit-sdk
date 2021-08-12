@@ -64,6 +64,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private IApplicationEnvironment applicationEnvironment;
         private IAssemblyLoader loader;
+
+        private RuntimeExecutionResults runtimeExecutionResult;
+
         private bool isDisposed;
 
         internal Engine(Func<Type, ILogger> loggerFactory)
@@ -767,6 +770,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
+                this.runtimeExecutionResult.SafeDispose();
                 this.extensionRoot.SafeDispose();
 
                 this.applicationEnvironment = null;
@@ -990,7 +994,11 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.freeDataSources,
                 this.dataSourcesToProcess);
 
-            var executors = CreateExecutors(allDataSourceAssociations);
+            // This is the set of composite cookers that will be used by the system of data processors included in this
+            // system of data processors.
+            var compositeCookers = new ProcessingSystemCompositeCookers(this.extensionRoot);
+
+            var executors = CreateExecutors(allDataSourceAssociations, compositeCookers);
 
             var extendedTables = new HashSet<ITableExtensionReference>();
             var processorTables = new Dictionary<TableDescriptor, ICustomDataProcessor>();
@@ -1045,19 +1053,19 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             var retrieval = this.factory.CreateCrossParserSourceDataCookerRetrieval(processors);
-            var retrievalFactory = new DataExtensionRetrievalFactory(retrieval, this.extensionRoot);
+            var engineCookerData = new ProcessingSystemCookerData(retrieval, compositeCookers);
+            var processingSession = new ProcessingSystemData(engineCookerData, this.extensionRoot, processorTables);
 
-            var results = new RuntimeExecutionResults(
-                retrieval,
-                retrievalFactory,
-                this.extensionRoot,
-                processorTables);
+            this.runtimeExecutionResult = new RuntimeExecutionResults(
+                processingSession,
+                this.extensionRoot);
 
-            return results;
+            return this.runtimeExecutionResult;
         }
 
         private List<ProcessingSourceExecutor> CreateExecutors(
-            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
+            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations,
+            ProcessingSystemCompositeCookers compositeCookers)
         {
             var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
@@ -1075,7 +1083,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             cds,
                             dataSources,
                             cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
-                            new RuntimeProcessorEnvironment(this.extensionRoot, this.CreateLogger),
+                            new RuntimeProcessorEnvironment(this.extensionRoot, compositeCookers, this.CreateLogger),
                             ProcessorOptions.Default);
 
                         var executor = new ProcessingSourceExecutor();
@@ -1176,6 +1184,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class RuntimeProcessorEnvironment
             : IProcessorEnvironment
         {
+            private readonly ProcessingSystemCompositeCookers compositeCookers;
             private readonly IDataExtensionRepository repository;
             private readonly Func<Type, ILogger> loggerFactory;
             private readonly object loggerLock = new object();
@@ -1185,11 +1194,14 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public RuntimeProcessorEnvironment(
                 IDataExtensionRepository repository,
+                ProcessingSystemCompositeCookers compositeCookers,
                 Func<Type, ILogger> loggerFactory)
             {
                 Debug.Assert(repository != null);
+                Debug.Assert(compositeCookers != null);
                 Debug.Assert(loggerFactory != null);
 
+                this.compositeCookers = compositeCookers;
                 this.repository = repository;
                 this.loggerFactory = loggerFactory;
             }
@@ -1197,7 +1209,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(
                 ICustomDataProcessorWithSourceParser processor)
             {
-                return new CustomDataProcessorExtensibilitySupport(processor, this.repository);
+                return new CustomDataProcessorExtensibilitySupport(
+                    processor,
+                    this.repository,
+                    this.compositeCookers);
             }
 
             public ILogger CreateLogger(Type processorType)

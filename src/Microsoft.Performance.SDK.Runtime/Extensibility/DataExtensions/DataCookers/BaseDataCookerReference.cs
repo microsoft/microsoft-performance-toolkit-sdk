@@ -159,7 +159,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             {
                 this.AddError($"Unable to create an instance of {this.Type}");
                 this.InitialAvailability = DataExtensionAvailability.Error;
-                return;
             }
 
             if (string.IsNullOrWhiteSpace(instance.Path.DataCookerId))
@@ -204,19 +203,22 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 }
             }
 
-            if (descriptor is IDataCookerDependent cookerRequirements)
+            if (this.InitialAvailability != DataExtensionAvailability.Error)
             {
-                foreach (var dataCookerPath in cookerRequirements.RequiredDataCookers)
+                if (descriptor is IDataCookerDependent cookerRequirements)
                 {
-                    this.AddRequiredDataCooker(dataCookerPath);
+                    foreach (var dataCookerPath in cookerRequirements.RequiredDataCookers)
+                    {
+                        this.AddRequiredDataCooker(dataCookerPath);
+                    }
                 }
-            }
 
-            if (descriptor is IDataProcessorDependent processorRequirements)
-            {
-                foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
+                if (descriptor is IDataProcessorDependent processorRequirements)
                 {
-                    this.AddRequiredDataProcessor(dataProcessorId);
+                    foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
+                    {
+                        this.AddRequiredDataProcessor(dataProcessorId);
+                    }
                 }
             }
         }

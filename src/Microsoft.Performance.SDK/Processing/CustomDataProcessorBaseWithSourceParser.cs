@@ -137,16 +137,26 @@ namespace Microsoft.Performance.SDK.Processing
         /// </remarks>
         /// <exception cref="ArgumentException">
         ///     <paramref name="dataOutputPath"/> does not target the data processor.
+        ///     - or -
+        ///     <paramref name="dataOutputPath"/>'s data cooker is not available.
         /// </exception>
         public TOutput QueryOutput<TOutput>(DataOutputPath dataOutputPath)
         {
             if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
             {
                 throw new ArgumentException(
-                    $"{nameof(dataOutputPath)} does not target this data processor.");
+                    message: $"{nameof(dataOutputPath)} does not target this data processor.",
+                    paramName: nameof(dataOutputPath));
             }
 
             var dataCooker = this.SourceProcessingSession.GetSourceDataCooker(dataOutputPath.CookerPath);
+            if (dataCooker == null)
+            {
+                throw new ArgumentException(
+                    message: $"Requested data cooker is not available: {dataOutputPath.CookerPath}",
+                    paramName: nameof(dataOutputPath));
+            }
+
             return dataCooker.QueryOutput<TOutput>(dataOutputPath);
         }
 

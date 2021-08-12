@@ -9,6 +9,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -18,52 +19,78 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents the results of processing data using the <see cref="Engine"/>.
     /// </summary>
     public sealed class RuntimeExecutionResults
-        : ICookedDataRetrieval
+        : ICookedDataRetrieval,
+          IDisposable
     {
-        private readonly ICookedDataRetrieval cookedDataRetrieval;
-        private readonly IDataExtensionRetrievalFactory retrievalFactory;
+        private readonly ProcessingSystemData processingSession;
         private readonly IDataExtensionRepository repository;
         private readonly IEnumerable<DataCookerPath> sourceCookers;
-        private readonly IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap;
+
+        private bool disposedValue;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RuntimeExecutionResults"/>
         ///     class.
         /// </summary>
-        /// <param name="cookedDataRetrieval">
-        ///     The retrieval interface for getting to cooked data.
-        /// </param>
-        /// <param name="retrievalFactory">
-        ///     The factory for creating retrievals for composite cookers.
+        /// <param name="processingSession">
+        ///     Provides access to data from the processing session.
         /// </param>
         /// <param name="repository">
         ///     The repository that was used to process the data.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="cookedDataRetrieval"/> is <c>null</c>.
-        ///     - or -
-        ///     <paramref name="retrievalFactory"/> is <c>null</c>.
+        ///     <paramref name="processingSession"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="repository"/> is <c>null</c>.
         /// </exception>
         /// TODO: Going to move RuntimeExecutionResults to internal and expose calls via new interface
         ///       1 - 1 with the Engine when calling Process
         public RuntimeExecutionResults(
-            ICookedDataRetrieval cookedDataRetrieval,
-            IDataExtensionRetrievalFactory retrievalFactory,
-            IDataExtensionRepository repository,
-            IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap)
+            ProcessingSystemData processingSession,
+            IDataExtensionRepository repository)
         {
-            Guard.NotNull(cookedDataRetrieval, nameof(cookedDataRetrieval));
-            Guard.NotNull(retrievalFactory, nameof(retrievalFactory));
+            Guard.NotNull(processingSession, nameof(processingSession));
             Guard.NotNull(repository, nameof(repository));
-            Guard.NotNull(tableToProcessorMap, nameof(tableToProcessorMap));
 
-            this.cookedDataRetrieval = cookedDataRetrieval;
-            this.retrievalFactory = retrievalFactory;
+            this.processingSession = processingSession;
             this.repository = repository;
             this.sourceCookers = new HashSet<DataCookerPath>(this.repository.SourceDataCookers);
-            this.tableToProcessorMap = tableToProcessorMap;
+        }
+
+        private IDataExtensionRetrievalFactory DataRetrievalFactory
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.processingSession;
+            }
+        }
+
+        private IReadOnlyDictionary<TableDescriptor, ICustomDataProcessor> TableToProcessor
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.processingSession.TableToProcessor;
+            }
+        }
+
+        private ICookedDataRetrieval SourceCookerDataRetrieval
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.processingSession;
+            }
+        }
+
+        private ICompositeCookerRetrieval CompositeCookerDataRetrieval
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.processingSession;
+            }
         }
 
         /// <summary>
@@ -79,18 +106,21 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="CookerNotFoundException">
         ///     <paramref name="cookerPath"/> does not represent a known cooker.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public ICookedDataRetrieval GetCookedData(DataCookerPath cookerPath)
         {
+            this.ThrowIfDisposed();
+
             if (this.sourceCookers.Contains(cookerPath))
             {
-                return this.cookedDataRetrieval;
+                return this.SourceCookerDataRetrieval;
             }
 
             try
             {
-                var cooker = this.repository.GetCompositeDataCookerReference(cookerPath);
-                var retrieval = this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath);
-                return cooker.GetOrCreateInstance(retrieval);
+                return this.processingSession.GetCompositeCookerDataRetrieval(cookerPath);
             }
             catch (Exception e)
             {
@@ -141,6 +171,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="DataOutputNotFoundException">
         ///     No processed data could be found for the given <paramref name="dataOutputPath"/>.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public T QueryOutput<T>(DataOutputPath dataOutputPath)
         {
             return (T)this.QueryOutput(dataOutputPath);
@@ -158,8 +191,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="DataOutputNotFoundException">
         ///     No processed data could be found for the given <paramref name="dataOutputPath"/>.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public object QueryOutput(DataOutputPath dataOutputPath)
         {
+            this.ThrowIfDisposed();
+
             try
             {
                 var cooker = this.GetCookedData(dataOutputPath.CookerPath);
@@ -250,19 +288,28 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             try
             {
-                if (ExecuteOnRepositoryIfContained(tableDescriptor, (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval), out bool? repoIsDataAvail))
+                if (ExecuteOnRepositoryIfContained(
+                        tableDescriptor,
+                        (reference, tableRetrieval) => reference.IsDataAvailableFunc?.Invoke(tableRetrieval),
+                        out bool? repoIsDataAvail))
                 {
                     return repoIsDataAvail;
                 }
 
-                if (ExecuteOnProcessorIfContained(tableDescriptor, (processor) => processor.DoesTableHaveData(tableDescriptor), out bool processorIsDataAvail))
+                if (ExecuteOnProcessorIfContained(
+                        tableDescriptor,
+                        (processor) => processor.DoesTableHaveData(tableDescriptor),
+                        out bool processorIsDataAvail))
                 {
                     return processorIsDataAvail;
                 }
             }
             catch (Exception inner)
             {
-                throw new TableException($"An exception was thrown while calling IsDataAvailable for the {tableDescriptor}.", tableDescriptor, inner);
+                throw new TableException(
+                    $"An exception was thrown while calling IsDataAvailable for the {tableDescriptor}.",
+                    tableDescriptor,
+                    inner);
             }
 
             return null;
@@ -332,14 +379,24 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         // Will perform the Func on the Repository if the table is contained, else false.
-        private bool ExecuteOnRepositoryIfContained<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)
+        private bool ExecuteOnRepositoryIfContained<TResult>(
+            TableDescriptor tableDescriptor,
+            Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func,
+            out TResult result)
         {
             result = default;
 
             if (this.repository.TablesById.TryGetValue(tableDescriptor.Guid, out ITableExtensionReference reference))
             {
-                var tableRetrieval = this.retrievalFactory.CreateDataRetrievalForTable(tableDescriptor.Guid);
+                var tableRetrieval = this.DataRetrievalFactory.CreateDataRetrievalForTable(tableDescriptor.Guid);
 
                 result = func(reference, tableRetrieval);
 
@@ -350,11 +407,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         // Will perform the Func on the Processor if the table is contained, else false.
-        private bool ExecuteOnProcessorIfContained<TResult>(TableDescriptor tableDescriptor, Func<ICustomDataProcessor, TResult> func, out TResult result)
+        private bool ExecuteOnProcessorIfContained<TResult>(
+            TableDescriptor tableDescriptor,
+            Func<ICustomDataProcessor, TResult> func,
+            out TResult result)
         {
             result = default;
 
-            if (this.tableToProcessorMap.TryGetValue(tableDescriptor, out ICustomDataProcessor processor))
+            if (this.TableToProcessor.TryGetValue(tableDescriptor, out ICustomDataProcessor processor))
             {
                 result = func(processor);
 
@@ -384,7 +444,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.columnsRO = new ReadOnlyCollection<IDataColumn>(this.columns);
 
                 this.builtInTableConfigurations = new List<TableConfiguration>();
-                this.builtInTableConfigurationsRO = new ReadOnlyCollection<TableConfiguration>(this.builtInTableConfigurations);
+                this.builtInTableConfigurationsRO = new ReadOnlyCollection<TableConfiguration>(
+                    this.builtInTableConfigurations);
 
                 this.tableCommands = new Dictionary<string, TableCommandCallback>();
                 this.tableCommandsRO = new ReadOnlyDictionary<string, TableCommandCallback>(this.tableCommands);
@@ -443,10 +504,40 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return this;
             }
 
-            public ITableBuilderWithRowCount SetTableRowDetailsGenerator(Func<int, IEnumerable<TableRowDetailEntry>> generator)
+            public ITableBuilderWithRowCount SetTableRowDetailsGenerator(
+                Func<int, IEnumerable<TableRowDetailEntry>> generator)
             {
                 this.TableRowDetailsGenerator = generator;
                 return this;
+            }
+        }
+
+        /// <summary>
+        ///     Throws an exception if this instance has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        private void ThrowIfDisposed()
+        {
+            if (this.disposedValue)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.processingSession.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
             }
         }
     }

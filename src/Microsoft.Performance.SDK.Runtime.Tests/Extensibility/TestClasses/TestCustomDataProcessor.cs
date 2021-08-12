@@ -7,6 +7,7 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -24,11 +25,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             var dataExtensionRepo = new TestDataExtensionRepository();
 
             CustomDataProcessorExtensibilitySupport extensibilitySupport = null;
+            var compositeCookers = new ProcessingSystemCompositeCookers(dataExtensionRepo);
 
             applicationEnvironment.SourceSessionFactory = new TestSourceSessionFactory();
             processorEnvironment.CreateDataProcessorExtensibilitySupportFunc = (processor) =>
             {
-                extensibilitySupport = new CustomDataProcessorExtensibilitySupport(processor, dataExtensionRepo);
+                extensibilitySupport = new CustomDataProcessorExtensibilitySupport(
+                    processor,
+                    dataExtensionRepo,
+                    compositeCookers);
+
                 return extensibilitySupport;
             };
 

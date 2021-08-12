@@ -137,7 +137,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
         }
 
-        public IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData)
+        public IDataCooker CreateInstance(IDataExtensionRetrieval requiredData)
         {
             throw new NotImplementedException();
         }
