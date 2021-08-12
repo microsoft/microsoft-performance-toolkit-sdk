@@ -30,8 +30,8 @@ namespace Microsoft.Performance.SDK.Processing
         protected const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
 
         public TableAttribute(
-            bool InternalTable = false)
-            : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName, InternalTable)
+            bool internalTable = false)
+            : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName, internalTable)
         {
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
         ///     when this is set.
         /// </summary>
-        public bool InternalTable { get; protected set; }
+        public bool InternalTable { get; set; }
 
         /// <summary>
         ///     The name of the static class property which returns the <see cref="TableDescriptor"/>.

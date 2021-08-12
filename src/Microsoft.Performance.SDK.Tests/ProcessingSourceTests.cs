@@ -459,7 +459,7 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
-        [Table(InternalTable: true)]
+        [Table(InternalTable = true)]
         private sealed class StubDataTableOne
         {
             public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -481,7 +481,7 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
-        [Table(InternalTable: true)]
+        [Table(InternalTable = true)]
         private sealed class StubDataTableTwo
         {
             public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -503,7 +503,7 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
-        [Table(InternalTable: true)]
+        [Table(InternalTable = true)]
         private sealed class StubDataTableThree
         {
             public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -525,7 +525,7 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
-        [Table(InternalTable: true)]
+        [Table(InternalTable = true)]
         private sealed class StubMetadataTableOne
         {
             public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -548,7 +548,7 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
-        [Table(InternalTable: true)]
+        [Table(InternalTable = true)]
         private sealed class StubMetadataTableTwo
         {
             public bool TryCreateTable(ITableBuilder tableBuilder)
