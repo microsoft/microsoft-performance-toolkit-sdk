@@ -117,6 +117,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableCooker(this.DefaultSet.Plugins.AllCookers.First()));
         }
 
+        [TestMethod]
+        [IntegrationTest]
+        public void EnableCooker_NoData_Throws()
+        {
+            Assert.Inconclusive();
+        }
+
         #endregion Enable Cooker
 
         #region TryEnableCooker
@@ -171,6 +178,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsFalse(sut.TryEnableCooker(this.DefaultSet.Plugins.AllCookers.First()));
         }
 
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableCooker_NoData_False()
+        {
+            Assert.Inconclusive();
+        }
+
         #endregion TryEnableCooker
 
         #region EnableTable
@@ -222,6 +236,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.Process();
 
             Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableTable(sut.AvailableTables.First()));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void EnableTable_NoData_Throws()
+        {
+            Assert.Inconclusive();
         }
 
         #endregion EnableTable
@@ -300,6 +321,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.Process();
 
             Assert.IsFalse(sut.TryEnableTable(sut.AvailableTables.First()));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void TryEnableTable_NoData_False()
+        {
+            Assert.Inconclusive();
         }
 
         #endregion TryEnableTable
