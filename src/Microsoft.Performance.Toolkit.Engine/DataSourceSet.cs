@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -6,166 +9,165 @@ using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK.Runtime.Discovery;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
+    /// <summary>
+    ///     Represents a collection of <see cref="IDataSource"/>s to process.
+    /// </summary>
     public sealed class DataSourceSet
         : IDisposable
     {
-        private readonly EngineCreateInfo createInfo;
-        private readonly ExtensionRoot extensionRoot;
-        private readonly ReadOnlyCollection<string> extensionDirectories;
-        private readonly DataExtensionFactory factory;
-
         private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
-        private readonly List<ProcessingSourceReference> processingSourceReferences;
         private readonly List<IDataSource> freeDataSources;
+        private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
+        private readonly List<ProcessingSourceReference> processingSourceReferencesList;
 
-        private readonly IAssemblyLoader assemblyLoader;
-
-        private IEnumerable<ErrorInfo> creationErrors;
+        private readonly PluginSet plugins;
+        private readonly bool ownsPlugins;
 
         private bool isDisposed;
 
-        public DataSourceSet()
-            : this(new EngineCreateInfo())
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="DataSourceSet"/>
+        ///     class, referencing the given <see cref="PluginSet"/>.
+        /// </summary>
+        /// <param name="plugins">
+        ///     The plugins that are available to process data sources.
+        /// </param>
+        /// <param name="ownsPlugins">
+        ///     <c>true</c> to take ownership and dispose <paramref name="plugins"/>
+        ///     when this instance is disposed; <c>false</c> to leave
+        ///     <paramref name="plugins"/> undisposed.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="plugins"/> is <c>null</c>.
+        /// </exception>
+        private DataSourceSet(PluginSet plugins, bool ownsPlugins)
         {
-        }
+            Guard.NotNull(plugins, nameof(plugins));
 
-        public DataSourceSet(EngineCreateInfo createInfo)
-        {
-            Guard.NotNull(createInfo, nameof(createInfo));
-
-            this.createInfo = createInfo;
-            this.freeDataSources = new List<IDataSource>();
             this.dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
+            this.freeDataSources = new List<IDataSource>();
+            this.freeDataSourcesRO = new ReadOnlyCollection<IDataSource>(this.freeDataSources);
+            this.processingSourceReferencesList = plugins.ProcessingSourceReferences.ToList();
 
-            IPlugInCatalog catalog = null;
-            IDataExtensionRepositoryBuilder repo = null;
-
-            try
-            {
-                this.extensionDirectories = createInfo.ExtensionDirectories.ToList().AsReadOnly();
-                Debug.Assert(this.extensionDirectories.Any());
-
-                this.assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
-
-                var assemblyDiscovery = new AssemblyExtensionDiscovery(this.assemblyLoader, _ => new NullValidator());
-
-                catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
-
-                this.factory = new DataExtensionFactory();
-                repo = this.factory.CreateDataExtensionRepository();
-
-                var reflector = new DataExtensionReflector(
-                    assemblyDiscovery,
-                    repo);
-
-                assemblyDiscovery.ProcessAssemblies(this.extensionDirectories, out var discoveryError);
-
-                repo.FinalizeDataExtensions();
-
-                this.CreationErrors = new[] { discoveryError, };
-
-                this.extensionRoot = new ExtensionRoot(catalog, repo);
-                catalog = null;
-                repo = null;
-
-                this.processingSourceReferences = new List<ProcessingSourceReference>(catalog.PlugIns);
-            }
-            catch (Exception)
-            {
-                repo.SafeDispose();
-                catalog.SafeDispose();
-                throw;
-            }
+            this.plugins = plugins;
+            this.ownsPlugins = ownsPlugins;
         }
-
-        internal EngineCreateInfo CreateInfo
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.createInfo;
-            }
-        }
-
-        internal ExtensionRoot Extensions
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.extensionRoot;
-            }
-        }
-
-        internal DataExtensionFactory Factory
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.factory;
-            }
-        }
-
-        internal ReadOnlyCollection<string> ExtensionDirectories
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.extensionDirectories;
-            }
-        }
-
-        internal List<ProcessingSourceReference> ProcessingSourceReferences
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.processingSourceReferences;
-            }
-        }
-
-        internal IAssemblyLoader AssemblyLoader
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.assemblyLoader;
-            }
-        }
-
-        // do we want this? i'm thinking no - it makes it harder for us to add other Engine implementations,
-        // but I can see how it might be nice to the customer.
-        //public Engine CreateEngine()
-        //{
-        //    throw new NotImplementedException();
-        //}
 
         /// <summary>
-        ///     Gets any non-fatal errors that occured during engine
-        ///     creation. Because these errors are not fatal, they are
-        ///     reported here rather than raising an exception.
+        ///     Gets the collection of Data Sources that are to be processed by a specific <see cref="IProcessingSource"/>.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<ErrorInfo> CreationErrors
+        public IReadOnlyDictionary<ProcessingSourceReference, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
         {
             get
             {
                 this.ThrowIfDisposed();
-                return this.creationErrors;
+                return this.dataSourcesToProcess.ToDictionary(
+                    x => x.Key,
+                    x => (IReadOnlyList<IReadOnlyList<IDataSource>>)x.Value
+                        .Select(v => (IReadOnlyList<IDataSource>)v.AsReadOnly())
+                        .ToList()
+                        .AsReadOnly());
             }
-            private set
+        }
+
+        /// <summary>
+        ///     Gets the collection of Data Sources to process. These Data Sources will be processed in whatever
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/> are able to handle the Data Source.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public IEnumerable<IDataSource> FreeDataSourcesToProcess
+        {
+            get
             {
-                Debug.Assert(!this.isDisposed);
                 this.ThrowIfDisposed();
-                this.creationErrors = value;
+                return this.freeDataSourcesRO;
             }
+        }
+
+        /// <summary>
+        ///     Gets the plugins backing this set of data sources.
+        /// </summary>
+        public PluginSet Plugins
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.plugins;
+            }
+        }
+
+        /// <summary>
+        ///     Creates a new instance of the <see cref="DataSourceSet"/>
+        ///     class, using plugins loaded from the current working
+        ///     directory.
+        /// </summary>
+        public static DataSourceSet Create()
+        {
+            PluginSet plugins = null;
+            try
+            {
+                plugins = PluginSet.Load();
+                return Create(plugins);
+            }
+            catch
+            {
+                plugins.SafeDispose();
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Creates a new instance of the <see cref="DataSourceSet"/>
+        ///     class, referencing the given <see cref="PluginSet"/>.
+        /// </summary>
+        /// <param name="plugins">
+        ///     The plugins that are available to process data sources.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="plugins"/> is <c>null</c>.
+        /// </exception>
+        public static DataSourceSet Create(PluginSet plugins)
+        {
+            return Create(plugins, true);
+        }
+
+        /// <summary>
+        ///     Creates a new instance of the <see cref="DataSourceSet"/>
+        ///     class, referencing the given <see cref="PluginSet"/>.
+        /// </summary>
+        /// <param name="plugins">
+        ///     The plugins that are available to process data sources.
+        /// </param>
+        /// <param name="ownsPlugins">
+        ///     <c>true</c> to take ownership and dispose <paramref name="plugins"/>
+        ///     when this instance is disposed; <c>false</c> to leave
+        ///     <paramref name="plugins"/> undisposed.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="plugins"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        ///     <paramref name="ownsPlugins"/> is <c>false</c>. This feature will
+        ///     be enabled in a future update.
+        /// </exception>
+        public static DataSourceSet Create(PluginSet plugins, bool ownsPlugins)
+        {
+            return new DataSourceSet(plugins, ownsPlugins);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -221,7 +223,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            if (!this.processingSourceReferences.Any(x => x.Supports(dataSource)))
+            if (!this.processingSourceReferencesList.Any(x => x.Supports(dataSource)))
             {
                 return false;
             }
@@ -335,7 +337,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 throw new ArgumentNullException(nameof(dataSources));
             }
 
-            this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferences, this.dataSourcesToProcess, this.TypeIs);
+            this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferencesList, this.dataSourcesToProcess, this.TypeIs);
         }
 
         /// <summary>
@@ -367,7 +369,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferences, this.dataSourcesToProcess, this.TypeIs);
+                this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferencesList, this.dataSourcesToProcess, this.TypeIs);
                 return true;
             }
             catch
@@ -382,7 +384,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(first != null);
             Debug.Assert(second != null);
 
-            if (this.assemblyLoader.SupportsIsolation)
+            if (this.Plugins.ArePluginsIsolated)
             {
                 return first.GUID == second.GUID &&
                        first.AssemblyQualifiedName == second.AssemblyQualifiedName;
@@ -439,53 +441,29 @@ namespace Microsoft.Performance.Toolkit.Engine
             list.Add(dataSources.ToList());
         }
 
-        /// <summary>
-        ///     Throws an exception if this instance has been disposed.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
+        private void Dispose(bool disposing)
+        {
+            if (this.isDisposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                if (this.ownsPlugins)
+                {
+                    this.plugins.SafeDispose();
+                }
+            }
+
+            this.isDisposed = true;
+        }
+
         private void ThrowIfDisposed()
         {
             if (this.isDisposed)
             {
                 throw new ObjectDisposedException(nameof(Engine));
-            }
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!isDisposed)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                isDisposed = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        private sealed class NullValidator
-            : IPreloadValidator
-        {
-            public bool IsAssemblyAcceptable(string fullPath, out ErrorInfo error)
-            {
-                error = ErrorInfo.None;
-                return true;
-            }
-
-            public void Dispose()
-            {
             }
         }
     }

@@ -24,88 +24,58 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 {
     [TestClass]
     public class ToolkitEngineTests
+        : EngineFixture
     {
-        private static readonly string ScratchDirectory =
-            Path.GetFullPath(nameof(ToolkitEngineTests) + "_SCRATCH");
+        private DataSourceSet DefaultSet { get; set; }
 
-        public TestContext TestContext { get; set; }
-
-        private Engine Sut { get; set; }
-
-        [TestInitialize]
-        public void Initialize()
+        public override void OnInitialize()
         {
-            try
-            {
-                Directory.Delete(ScratchDirectory, true);
-            }
-            catch (DirectoryNotFoundException)
-            {
-            }
-            catch (Exception e)
-            {
-                this.TestContext.WriteLine("cannot delete {0}: {1}", ScratchDirectory, e);
-            }
-
-            try
-            {
-                Directory.CreateDirectory(ScratchDirectory);
-            }
-            catch (Exception e)
-            {
-                this.TestContext.WriteLine("cannot delete {0}: {1}", ScratchDirectory, e);
-                Assert.Fail("Unable to initialize the test directory.");
-            }
-
-            this.Sut = Engine.Create(
-                new EngineCreateInfo
-                {
-                    Versioning = new FakeVersionChecker(),
-                });
+            this.DefaultSet = DataSourceSet.Create();
+            base.OnInitialize();
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        public override void OnCleanup()
         {
-            try
-            {
-                Directory.Delete(ScratchDirectory, true);
-            }
-            catch (DirectoryNotFoundException)
-            {
-            }
-            catch (Exception e)
-            {
-                this.TestContext.WriteLine("cannot delete {0}: {1}", ScratchDirectory, e);
-            }
-            finally
-            {
-                this.Sut.Dispose();
-            }
+            this.DefaultSet.SafeDispose();
         }
 
         #region Create
 
         [TestMethod]
-        [IntegrationTest]
-        public void Create_NoParameters_UsesCurrentDirectory()
-        {
-            Assert.AreEqual(Environment.CurrentDirectory, this.Sut.ExtensionDirectories.First());
-        }
-
-        [TestMethod]
         [UnitTest]
-        public void Create_NullCreateInfo_Throws()
+        public void Create_NullParameters_Throw()
         {
             Assert.ThrowsException<ArgumentNullException>(
-                () => Engine.Create(null));
+                () => Engine.Create((EngineCreateInfo)null));
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create((IDataSource)null));
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create((IDataSource)null, typeof(Source123Processor)));
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create(Any.DataSource(), null));
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create((IEnumerable<IDataSource>)null, typeof(Source123Processor)));
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create(new[] { Any.DataSource(), }, null));
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create(null, typeof(Source123Processor), new EngineCreateInfo(DataSourceSet.Create())));
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create(new[] { Any.DataSource(), }, null, new EngineCreateInfo(DataSourceSet.Create())));
+            Assert.ThrowsException<ArgumentNullException>(
+                () => Engine.Create(new[] { Any.DataSource(), }, typeof(Source123Processor), null));
         }
 
         [TestMethod]
         [IntegrationTest]
         public void Create_IsProcessed_False()
         {
-            Assert.IsFalse(this.Sut.IsProcessed);
+            var info = new EngineCreateInfo(this.DefaultSet);
+            using var sut = Engine.Create(info);
+            Assert.IsFalse(sut.IsProcessed);
         }
 
         [TestMethod]
@@ -1450,9 +1420,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             File.Copy(assemblyFile, Path.Combine(destDir, assemblyFileName), true);
         }
 
-        private static IDataSource CreateTestFile(string extension)
+        private IDataSource CreateTestFile(string extension)
         {
-            var path = Any.FileOnDisk(extension, ScratchDirectory);
+            var path = Any.FileOnDisk(extension, this.Scratch.FullName);
             return new FileDataSource(path);
         }
 
