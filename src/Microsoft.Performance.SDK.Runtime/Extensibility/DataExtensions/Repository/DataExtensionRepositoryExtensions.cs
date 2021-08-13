@@ -25,6 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             out IReadOnlyCollection<DataCookerPath> compositeCookers,
             out IReadOnlyCollection<TableDescriptor> tables)
         {
+            throw new NotImplementedException();
         }
 
         /// <summary>

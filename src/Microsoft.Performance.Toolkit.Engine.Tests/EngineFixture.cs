@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests
@@ -76,6 +77,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         public virtual void OnCleanup()
         {
+        }
+
+        protected static void CopyAssemblyContainingType(Type type, DirectoryInfo destDir)
+        {
+            Assert.IsNotNull(type);
+
+            var assemblyFile = type.Assembly.GetCodeBaseAsLocalPath();
+            var assemblyFileName = Path.GetFileName(assemblyFile);
+            File.Copy(assemblyFile, Path.Combine(destDir.FullName, assemblyFileName), true);
         }
     }
 }

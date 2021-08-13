@@ -40,8 +40,6 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly EngineCreateInfo createInfo;
 
-        private readonly IDataExtensionRepository repository;
-
         private ILogger logger;
         private List<ProcessingSourceExecutor> executors;
         private DataSourceSet dataSourceSet;
@@ -714,7 +712,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Debug.Assert(createInfo != null);
 
-            var logger = createInfo.LoggerFactory.Invoke(typeof(Engine));
+            var loggerFactory = createInfo.LoggerFactory ?? Logger.Create;
+
+            var logger = loggerFactory(typeof(Engine));
 
             Engine instance = null;
             try
@@ -1059,7 +1059,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public RuntimeMessageBox(ILogger logger)
             {
-                Debug.Assert(this.logger != null);
+                Debug.Assert(logger != null);
+
                 this.logger = logger;
             }
 

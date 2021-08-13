@@ -171,7 +171,26 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </returns>
         public static PluginSet Load()
         {
-            return Load(new[] { Environment.CurrentDirectory, });
+            return Load(Environment.CurrentDirectory);
+        }
+
+        /// <summary>
+        ///     Creates a new <see cref="PluginSet"/>, loading all plugins found
+        ///     in the given directory.
+        /// </summary>
+        /// <param name="extensionDirectory">
+        ///     The path to the directory search for extensions.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the <see cref="PluginSet"/> class containing all
+        ///     of the successfully discovered plugins.
+        /// </returns>
+        /// <exception cref="InvalidExtensionDirectoryException">
+        ///     <paramref name="extensionDirectory"/> is invalid or does not exist.
+        /// </exception>
+        public static PluginSet Load(string extensionDirectory)
+        {
+            return Load(new[] { extensionDirectory, });
         }
 
         /// <summary>
@@ -190,6 +209,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         /// <exception cref="System.ArgumentException">
         ///     <paramref name="extensionDirectories"/> is empty.
+        /// </exception>
+        /// <exception cref="InvalidExtensionDirectoryException">
+        ///     One or more directory paths in <paramref name="extensionDirectories"/>
+        ///     is invalid or does not exist.
         /// </exception>
         public static PluginSet Load(
             IEnumerable<string> extensionDirectories)
@@ -222,6 +245,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         /// <exception cref="System.ArgumentException">
         ///     <paramref name="extensionDirectories"/> is empty.
+        /// </exception>
+        /// <exception cref="InvalidExtensionDirectoryException">
+        ///     One or more directory paths in <paramref name="extensionDirectories"/>
+        ///     is invalid or does not exist.
         /// </exception>
         public static PluginSet Load(
             IEnumerable<string> extensionDirectories,
@@ -282,6 +309,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             IDataExtensionRepositoryBuilder repo = null;
             ExtensionRoot extensionRoot = null;
 
+            var extensionDirectoriesFullPaths = new List<string>();
+
             foreach (var directory in extensionDirectories)
             {
                 if (string.IsNullOrWhiteSpace(directory))
@@ -303,6 +332,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     throw new InvalidExtensionDirectoryException(directory);
                 }
+
+                extensionDirectoriesFullPaths.Add(dirInfo.FullName);
             }
 
             try
@@ -319,7 +350,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 var reflector = new DataExtensionReflector(assemblyDiscovery, repo);
 
-                assemblyDiscovery.ProcessAssemblies(extensionDirectories, out var discoveryError);
+                assemblyDiscovery.ProcessAssemblies(extensionDirectoriesFullPaths, out var discoveryError);
 
                 repo.FinalizeDataExtensions();
 
@@ -330,7 +361,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 extensionRoot = new ExtensionRoot(catalog, repo);
 
                 return new PluginSet(
-                    extensionDirectories,
+                    extensionDirectoriesFullPaths,
                     extensionRoot,
                     factory,
                     creationErrors,
