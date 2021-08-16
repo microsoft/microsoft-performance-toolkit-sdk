@@ -102,8 +102,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var file1 = CreateTestFile(Source123DataSource.Extension);
             var file2 = CreateTestFile(Source123DataSource.Extension);
 
-            this.Sut.AddDataSource(file1, typeof(Source123DataSource));
-            this.Sut.AddDataSource(file2, typeof(Source123DataSource));
+            this.Sut.AddDataSource(file1, typeof(Source123DataSource))
+                    .AddDataSource(file2, typeof(Source123DataSource));
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
@@ -385,8 +385,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 CreateTestFile(Source123DataSource.Extension),
             };
 
-            this.Sut.AddDataSources(files1, typeof(Source123DataSource));
-            this.Sut.AddDataSources(files2, typeof(Source123DataSource));
+            this.Sut.AddDataSources(files1, typeof(Source123DataSource))
+                    .AddDataSources(files2, typeof(Source123DataSource));
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
@@ -542,6 +542,32 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             {
                 Assert.AreEqual(files2[i], this.Sut.DataSourcesToProcess[expectedDataSource][1][i]);
             }
+        }
+
+        #endregion
+
+        #region Seal
+
+        [TestMethod]
+        [IntegrationTest]
+        public void WhenSealed_AddsThrow()
+        {
+            this.Sut.Seal();
+
+            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddDataSource(Any.DataSource()));
+            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddDataSource(Any.DataSource(), typeof(object)));
+            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddDataSources(new[] { Any.DataSource(), }, typeof(object)));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void WhenSealed_TryAddsReturnFalse()
+        {
+            this.Sut.Seal();
+
+            Assert.IsFalse(this.Sut.TryAddDataSource(Any.DataSource()));
+            Assert.IsFalse(this.Sut.TryAddDataSource(Any.DataSource(), typeof(object)));
+            Assert.IsFalse(this.Sut.TryAddDataSources(new[] { Any.DataSource(), }, typeof(object)));
         }
 
         #endregion

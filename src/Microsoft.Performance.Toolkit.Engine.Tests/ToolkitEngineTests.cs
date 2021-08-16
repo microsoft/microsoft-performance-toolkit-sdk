@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Performance.SDK.Extensibility;
@@ -75,6 +74,110 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var info = new EngineCreateInfo(this.DefaultSet);
             using var sut = Engine.Create(info);
             Assert.IsFalse(sut.IsProcessed);
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_DataSourcesCloned()
+        {
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create();
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources);
+            using var sut = Engine.Create(info);
+
+            Assert.AreNotSame(dataSources, sut.DataSourcesToProcess);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
+            Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_CloneAlwaysDisposed()
+        {
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create();
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources);
+
+            {
+                info.OwnsDataSources = false;
+                using var sut = Engine.Create(info);
+                var clone = sut.DataSourcesToProcess;
+
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
+            }
+
+            {
+                info.OwnsDataSources = true;
+                using var sut = Engine.Create(info);
+                var clone = sut.DataSourcesToProcess;
+
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
+            }
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_OriginalOnlyDisposedWhenOwned()
+        {
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create();
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources);
+
+            {
+                info.OwnsDataSources = false;
+                using var sut = Engine.Create(info);
+
+                sut.Dispose();
+
+                Assert.AreEqual(1, dataSources.FreeDataSourcesToProcess.Count());
+            }
+
+            {
+                info.OwnsDataSources = true;
+                using var sut = Engine.Create(info);
+
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => dataSources.FreeDataSourcesToProcess);
+            }
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_CloneNeverTakesOwnershipOfPlugins()
+        {
+            using var plugins = PluginSet.Load();
+
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create(plugins, true);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources);
+
+            {
+                info.OwnsDataSources = false;
+                using var sut = Engine.Create(info);
+                var clone = sut.DataSourcesToProcess;
+
+                sut.Dispose();
+
+                //
+                // Touch the plugins to make sure they stayed around.
+                //
+
+                var cookers = plugins.AllCookers;
+                Assert.IsNotNull(cookers);
+            }
         }
 
         #endregion Create

@@ -16,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents a collection of <see cref="IDataSource"/>s to process.
     /// </summary>
     public sealed class DataSourceSet
-        : IDisposable
+         : IDisposable
     {
         private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
         private readonly List<IDataSource> freeDataSources;
@@ -25,6 +25,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly PluginSet plugins;
         private readonly bool ownsPlugins;
+
+        private bool isSealed;
 
         private bool isDisposed;
 
@@ -54,6 +56,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.plugins = plugins;
             this.ownsPlugins = ownsPlugins;
+            this.isSealed = false;
+            this.isDisposed = false;
         }
 
         /// <summary>
@@ -89,6 +93,23 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 this.ThrowIfDisposed();
                 return this.freeDataSourcesRO;
+            }
+        }
+
+        /// <summary>
+        ///     Gets a value indicating whether this instance is sealed. A sealed
+        ///     <see cref="DataSourceSet"/> does not accept any more additions of
+        ///     data sources.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public bool IsSealed
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.isSealed;
             }
         }
 
@@ -163,6 +184,46 @@ namespace Microsoft.Performance.Toolkit.Engine
             return new DataSourceSet(plugins, ownsPlugins);
         }
 
+        internal static DataSourceSet DeepCopy(DataSourceSet other)
+        {
+            //
+            // Creates a deep copy of the given data source set. This
+            // is used by the engine in order to make sure that it has
+            // a non-changing copy of the data sources to use for
+            // processing. Because a DataSourceSet may own the plugin set,
+            // copies created by this method will *never* own the plugin
+            // set from the original in order to avoid ambiguity in
+            // ownership of the plugin set. This means that the result
+            // of this method is not an exact deep copy, but for the 
+            // purposes of the engine, it works. If we decide we want to
+            // expose copy functionality to the public, then we need to
+            // figure out how to deal with ownership of the underlying
+            // plugin set in regards to copies so that we can communicate
+            // them appropriately.
+            //
+
+            Debug.Assert(other != null);
+            Debug.Assert(!other.isDisposed);
+
+            var copy = new DataSourceSet(other.plugins, false)
+            {
+                isSealed = other.isSealed,
+                isDisposed = false
+            };
+
+            foreach (var kvp in other.dataSourcesToProcess)
+            {
+                copy.dataSourcesToProcess[kvp.Key] = kvp.Value
+                    .Select(x => new List<IDataSource>(x))
+                    .ToList();
+            }
+
+            copy.freeDataSources.AddRange(other.FreeDataSourcesToProcess);
+            copy.processingSourceReferencesList.AddRange(other.processingSourceReferencesList);
+
+            return copy;
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -176,11 +237,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="dataSource">
         ///     The Data Source to process.
         /// </param>
+        /// <returns>
+        ///    A reference to this instance after the operation has completed.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSource"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="InstanceAlreadyProcessedException">
-        ///     This instance has already been processed.
+        /// <exception cref="InvalidOperationException">
+        ///     This instance is sealed.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -189,15 +253,19 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="dataSource"/> cannot be processed by any
         ///     discovered extensions.
         /// </exception>
-        public void AddDataSource(IDataSource dataSource)
+        public DataSourceSet AddDataSource(IDataSource dataSource)
         {
             this.ThrowIfDisposed();
+            this.ThrowIfSealed();
+
             Guard.NotNull(dataSource, nameof(dataSource));
 
             if (!this.TryAddDataSource(dataSource))
             {
                 throw new UnsupportedDataSourceException(dataSource);
             }
+
+            return this;
         }
 
         /// <summary>
@@ -218,6 +286,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         public bool TryAddDataSource(IDataSource dataSource)
         {
             this.ThrowIfDisposed();
+
+            if (this.isSealed)
+            {
+                return false;
+            }
+
             if (dataSource is null)
             {
                 return false;
@@ -250,6 +324,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="processingSourceType">
         ///     The <see cref="IProcessingSource"/> to use to process the file.
         /// </param>
+        /// <returns>
+        ///    A reference to this instance after the operation has completed.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSource"/> is <c>null</c>.
         ///     - or -
@@ -268,9 +345,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
-        public void AddDataSource(IDataSource dataSource, Type processingSourceType)
+        public DataSourceSet AddDataSource(IDataSource dataSource, Type processingSourceType)
         {
-            this.AddDataSources(new[] { dataSource, }, processingSourceType);
+            return this.AddDataSources(new[] { dataSource, }, processingSourceType);
         }
 
         /// <summary>
@@ -309,13 +386,16 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="processingSourceType">
         ///     The <see cref="IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
         /// </param>
+        /// <returns>
+        ///    A reference to this instance after the operation has completed.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSources"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="InstanceAlreadyProcessedException">
-        ///     This instance has already been processed.
+        /// <exception cref="InvalidOperationException">
+        ///     This instance is sealed.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -327,9 +407,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
-        public void AddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
+        public DataSourceSet AddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
         {
             this.ThrowIfDisposed();
+            this.ThrowIfSealed();
+
             Guard.NotNull(dataSources, nameof(dataSources));
             Guard.NotNull(processingSourceType, nameof(processingSourceType));
             if (dataSources.Any(x => x is null))
@@ -338,6 +420,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferencesList, this.dataSourcesToProcess, this.TypeIs);
+
+            return this;
         }
 
         /// <summary>
@@ -360,6 +444,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             this.ThrowIfDisposed();
 
+            if (this.isSealed)
+            {
+                return false;
+            }
+
             if (dataSources is null ||
                 dataSources.Any(x => x is null) ||
                 processingSourceType is null)
@@ -376,6 +465,24 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        ///     Seals this instance, preventing any new data sources from being added.
+        /// </summary>
+        /// <returns>
+        ///    A reference to this instance after the operation has completed.
+        /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public DataSourceSet Seal()
+        {
+            this.ThrowIfDisposed();
+
+            this.isSealed = true;
+
+            return this;
         }
 
         private bool TypeIs(Type first, Type second)
@@ -403,6 +510,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Func<Type, Type, bool> typeIs)
         {
             Debug.Assert(!this.isDisposed);
+            Debug.Assert(!this.isSealed);
+
             Debug.Assert(dataSources != null);
             Debug.Assert(processingSourceType != null);
             Debug.Assert(processingSourceReferences != null);
@@ -464,6 +573,14 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (this.isDisposed)
             {
                 throw new ObjectDisposedException(nameof(Engine));
+            }
+        }
+
+        private void ThrowIfSealed()
+        {
+            if (this.isSealed)
+            {
+                throw new InvalidOperationException("This collection is sealed.");
             }
         }
     }

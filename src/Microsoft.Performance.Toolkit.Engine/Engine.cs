@@ -42,7 +42,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private ILogger logger;
         private List<ProcessingSourceExecutor> executors;
-        private DataSourceSet dataSourceSet;
+        private DataSourceSet workingDataSourceSet;
+        private DataSourceSet originalDataSourceSet;
 
         private TableExtensionSelector tableExtensionSelector;
 
@@ -53,7 +54,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         internal Engine(EngineCreateInfo createInfo)
         {
-            this.dataSourceSet = createInfo.DataSources;
+            this.workingDataSourceSet = DataSourceSet.DeepCopy(createInfo.DataSources).Seal();
+            this.originalDataSourceSet = createInfo.DataSources;
+
             this.loggerFactory = createInfo.LoggerFactory;
 
             this.tableGuidToDescriptor = new Dictionary<Guid, TableDescriptor>();
@@ -104,7 +107,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             get
             {
                 this.ThrowIfDisposed();
-                return this.dataSourceSet;
+                return this.workingDataSourceSet;
             }
         }
 
@@ -653,13 +656,17 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
+                // we dispose the working clone regardless of ownership.
+                this.workingDataSourceSet.SafeDispose();
+
+                // we diposes the original set only if we own the data sources.
                 if (this.createInfo.OwnsDataSources)
                 {
-                    this.dataSourceSet.SafeDispose();
+                    this.originalDataSourceSet.SafeDispose();
                 }
             }
 
-            this.dataSourceSet = null;
+            this.workingDataSourceSet = null;
             this.applicationEnvironment = null;
             this.isDisposed = true;
         }

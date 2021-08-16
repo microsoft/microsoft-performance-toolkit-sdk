@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine
@@ -14,6 +15,10 @@ namespace Microsoft.Performance.Toolkit.Engine
     {
         private static string DefaultRuntimeName;
 
+        /// <summary>
+        ///     Initializes the statc members of the <see cref="EngineCreateInfo"/>
+        ///     class.
+        /// </summary>
         static EngineCreateInfo()
         {
             EngineCreateInfo.DefaultRuntimeName = typeof(EngineCreateInfo).Assembly.GetName().Name;
@@ -30,6 +35,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         public EngineCreateInfo(DataSourceSet dataSources)
         {
+            Guard.NotNull(dataSources, nameof(dataSources));
+
             this.DataSources = dataSources;
         }
 

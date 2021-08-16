@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Linq;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests
