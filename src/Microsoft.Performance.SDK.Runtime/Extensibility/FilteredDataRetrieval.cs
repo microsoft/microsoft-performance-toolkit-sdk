@@ -170,15 +170,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                     "Consider adding it to the requirements for this data extension.",
                     nameof(dataOutputPath));
             }
-
-            //var compositeCooker = this.cookerData.GetOrCreateCompositeCooker(cookerPath);
-            //if (compositeCooker == null)
-            //{
-            //    throw new InvalidOperationException(
-            //        $"The composite cooker reference returned null cooker: {cookerPath}. Was it properly initialized?");
-            //}
-
-            //return compositeCooker;
         }
 
         /// <summary>
@@ -195,26 +186,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// </returns>
         private bool TryValidateCompositeDataCooker(DataOutputPath dataOutputPath/*, out IDataCooker compositeCooker*/)
         {
-            //try
-            //{
             var cookerPath = dataOutputPath.CookerPath;
 
             if (!this.extensionDependencies.RequiredCompositeDataCookerPaths.Contains(cookerPath))
             {
-                //compositeCooker = default;
                 return false;
             }
 
-            //compositeCooker = this.cookerData.GetOrCreateCompositeCooker(cookerPath);
-
-            //return compositeCooker != null;
-            //}
-            //catch (Exception)
-            //{
-            //}
-
-            //compositeCooker = default;
-            //return false;
             return true;
         }
 
@@ -246,7 +224,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         {
             if (this.TryValidateCompositeDataCooker(dataOutputPath/*, out var compositeCooker*/))
             {
-                //return compositeCooker.TryQueryOutput<T>(dataOutputPath, out result);
                 return GetCompositeDataRetrieval(dataOutputPath).TryQueryOutput<T>(dataOutputPath, out result);
             }
 

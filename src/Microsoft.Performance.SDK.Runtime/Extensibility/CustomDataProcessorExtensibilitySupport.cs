@@ -52,7 +52,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <inheritdoc />
         public bool AddTable(TableDescriptor tableDescriptor)
         {
-            // todo: this doesn't prevent somone from calling FinalizeTables on another thread while AddTable is running.
             lock (this.dataProcessor)
             {
                 if (this.dataExtensionRetrievalFactory != null)
@@ -121,12 +120,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             {
                 this.tableReferences.Remove(tableDescriptor);
             }
-
-            //var tablesToProcessor = new Dictionary<TableDescriptor, ICustomDataProcessor>();
-            //foreach (var tableDescriptor in this.tableReferences.Keys)
-            //{
-            //    tablesToProcessor.Add(tableDescriptor, this.dataProcessor);
-            //}
 
             lock (this.dataProcessor)
             {

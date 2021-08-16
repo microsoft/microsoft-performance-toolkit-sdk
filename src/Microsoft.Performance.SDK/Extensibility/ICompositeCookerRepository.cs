@@ -7,9 +7,10 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 namespace Microsoft.Performance.SDK.Extensibility
 {
     /// <summary>
-    ///     Provides access to composite <see cref="ICookedDataRetrieval"/>s.
+    ///     Provides access to composite <see cref="ICookedDataRetrieval"/>s, creating them when necessary.
     /// </summary>
-    public interface ICompositeCookerRetrieval
+    public interface ICompositeCookerRepository
+        : IDisposable
     {
         /// <summary>
         ///     Gets or creates a composite <see cref="IDataCooker"/>.
@@ -32,7 +33,8 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        ICookedDataRetrieval GetCompositeCookerDataRetrieval(
-            DataCookerPath cookerPath);
+        ICookedDataRetrieval GetOrCreateCompositeCooker(
+            DataCookerPath cookerPath,
+            Func<DataCookerPath, IDataExtensionRetrieval> createDataRetrieval);
     }
 }

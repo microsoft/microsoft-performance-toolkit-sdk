@@ -1,0 +1,1334 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Performance.Toolkit.Engine</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.Engine">
+            <summary>
+                Provides the entry point for programmatically manipulating, cooking,
+                and accessing data.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.ExtensionDirectories">
+            <summary>
+                Gets the directories that the engine will scan for extensions.
+                These directories are scanned during <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.Create"/> when
+                creating an instance of the engine.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.IsProcessed">
+            <summary>
+                Gets a value indicating whether this instance has completed processing.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.ProcessingSources">
+            <summary>
+                Gets the collection of source parsers that the engine will use to 
+                cook data.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.SourceDataCookers">
+            <summary>
+                Gets the collection of paths to all source cookers that the engine
+                has discovered.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.CompositeDataCookers">
+            <summary>
+                Gets the collection of paths to all composite cookers that the engine
+                has discovered.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.AllCookers">
+            <summary>
+                Gets the collection of all cookers that the engine has discovered. This is the union
+                of <see cref="!:this.SourceDataCookers"/> and <see cref="!:this.CompositeDataCookers"/>.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.FreeDataSourcesToProcess">
+            <summary>
+                Gets the collection of Data Sources to process. These Data Sources will be processed in whatever
+                <see cref="T:Microsoft.Performance.SDK.Processing.ICustomDataProcessorWithSourceParser"/> are able to handle the Data Source.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.DataSourcesToProcess">
+            <summary>
+                Gets the collection of Data Sources that are to be processed by a specific <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.EnabledCookers">
+            <summary>
+                Gets the collection of all enabled cookers.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.CreationErrors">
+            <summary>
+                Gets any non-fatal errors that occured during engine
+                creation. Because these errors are not fatal, they are
+                reported here rather than raising an exception.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.EnabledTables">
+            <summary>
+                Gets the collection of all enabled tables
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception> 
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.Engine.AvailableTables">
+            <summary>
+                Gets the collection of available tables
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.Create">
+            <summary>
+                Creates a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine" /> class.
+            </summary>
+            <returns>
+                The created engine environment.
+            </returns>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.EngineException">
+                An fatal error occurred while creating the engine.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.Create(Microsoft.Performance.Toolkit.Engine.EngineCreateInfo)">
+            <summary>
+                Creates a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine" /> class.
+            </summary>
+            <param name="createInfo">
+                The parameters to use for creating a new engine instance.
+            </param>
+            <returns>
+                The created engine environment.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="createInfo"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.EngineException">
+                An fatal error occurred while creating the engine.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.AddDataSource(Microsoft.Performance.SDK.Processing.IDataSource)">
+            <summary>
+                Adds the given file to this instance for processing.
+            </summary>
+            <param name="dataSource">
+                The Data Source to process.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dataSource"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException">
+                <paramref name="dataSource"/> cannot be processed by any
+                discovered extensions.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.TryAddDataSource(Microsoft.Performance.SDK.Processing.IDataSource)">
+            <summary>
+                Attempts to add the given Data Source to this instance for processing.
+            </summary>
+            <param name="filePath">
+                The Data Source to process.
+            </param>
+            <returns>
+                <c>true</c> if the Data Source has been added for processing;
+                <c>false</c> if the Data Source is not valid, cannot be processed,
+                or the instance has already been processed. Note that <c>false</c>
+                is always returned when <see cref="P:Microsoft.Performance.Toolkit.Engine.Engine.IsProcessed"/> is <c>true</c>.
+            </returns>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.AddDataSource(Microsoft.Performance.SDK.Processing.IDataSource,System.Type)">
+            <summary>
+                Adds the given Data Source to this instance for processing by
+                the specific <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>.
+            </summary>
+            <param name="dataSource">
+                The Data Source to process.
+            </param>
+            <param name="processingSourceType">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> to use to process the file.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dataSource"/> is <c>null</c>.
+                - or -
+                <paramref name="processingSourceType"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException">
+                The specified <paramref name="processingSourceType"/> cannot handle
+                the given Data Source.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException">
+                The specified <paramref name="processingSourceType"/> is unknown.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.TryAddDataSource(Microsoft.Performance.SDK.Processing.IDataSource,System.Type)">
+            <summary>
+                Attempts to add the given Data Source to this instance for processing by
+                the specific <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>.
+            </summary>
+            <param name="dataSource">
+                The Data Source to process.
+            </param>
+            <param name="processingSourceType">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> to use to process <paramref name="dataSource"/>.
+            </param>
+            <returns>
+                <c>true</c> if the <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/> has been added for processing by the <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>;
+                <c>false</c> otherwise. Note that <c>false</c>
+                is always returned when <see cref="P:Microsoft.Performance.Toolkit.Engine.Engine.IsProcessed"/> is <c>true</c>.
+            </returns>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.AddDataSources(System.Collections.Generic.IEnumerable{Microsoft.Performance.SDK.Processing.IDataSource},System.Type)">
+            <summary>
+                Adds the given data sources to this instance for processing by
+                the specific <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>. All of the files will be processed
+                by the same instance of the Custom Data Processor. Use <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.AddDataSource(Microsoft.Performance.SDK.Processing.IDataSource,System.Type)"/>
+                to ensure each Data Source is processed by a different instance, or
+                use multiple calls to <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.AddDataSources(System.Collections.Generic.IEnumerable{Microsoft.Performance.SDK.Processing.IDataSource},System.Type)"/>.
+            </summary>
+            <param name="dataSources">
+                The Data Sources to process.
+            </param>
+            <param name="processingSourceType">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="dataSources"/> is <c>null</c>.
+                - or -
+                <paramref name="processingSourceType"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException">
+                The specified <paramref name="processingSourceType"/> cannot handle
+                the given Data Source.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException">
+                The specified <paramref name="processingSourceType"/> is unknown.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.TryAddDataSources(System.Collections.Generic.IEnumerable{Microsoft.Performance.SDK.Processing.IDataSource},System.Type)">
+            <summary>
+                Attempts to add the given data sources to this instance for processing by
+                the specific <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>. All of the files will be processed
+                by the same instance of the Custom Data Processor. Use <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.AddDataSource(Microsoft.Performance.SDK.Processing.IDataSource,System.Type)"/>
+                to ensure each Data Source is processed by a different instance, or
+                use multiple calls to <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.AddDataSources(System.Collections.Generic.IEnumerable{Microsoft.Performance.SDK.Processing.IDataSource},System.Type)"/>.
+            </summary>
+            <param name="dataSources">
+                The Data Sources to process.
+            </param>
+            <param name="processingSourceType">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
+            </param>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.EnableCooker(Microsoft.Performance.SDK.Extensibility.DataCookerPath)">
+            <summary>
+                Enables the given cooker for processing when <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.Process"/>
+                is called.
+            </summary>
+            <param name="dataCookerPath">
+                The cooker to enable.
+            </param>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException">
+                <paramref name="dataCookerPath"/> is not known by this instance.
+                See <see cref="P:Microsoft.Performance.Toolkit.Engine.Engine.AllCookers"/>.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.TryEnableCooker(Microsoft.Performance.SDK.Extensibility.DataCookerPath)">
+            <summary>
+                Attempts to enable the given cooker for processing when <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.Process"/>
+                is called.
+            </summary>
+            <param name="dataCookerPath">
+                The cooker to enable.
+            </param>
+            <returns>
+                <c>true</c> if the cooker exists and can be enabled;
+                <c>false</c> otherwise. Note that <c>false</c> is
+                always returned when <see cref="P:Microsoft.Performance.Toolkit.Engine.Engine.IsProcessed"/> is <c>true</c>.
+            </returns>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.EnableTable(Microsoft.Performance.SDK.Processing.TableDescriptor)">
+            <summary>
+                Enables the given table for processing when <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.Process"/>
+                is called.
+            </summary>
+            <param name="descriptor">
+                The table to enable.
+            </param>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.TableNotFoundException">
+                A table cannot be found for the given <paramref name="tableDescriptor"/>.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="descriptor"/> cannot be null.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.TryEnableTable(Microsoft.Performance.SDK.Processing.TableDescriptor)">
+            <summary>
+                Attempts to enable the given cooker for processing when <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.Process"/>
+                is called.
+            </summary>
+            <param name="descriptor">
+                The table to enable.
+            </param>
+            <returns>
+                <c>true</c> if the table exists and can be enabled;
+                <c>false</c> otherwise. Note that <c>false</c> is
+                always returned when <see cref="P:Microsoft.Performance.Toolkit.Engine.Engine.IsProcessed"/> is <c>true</c>.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="descriptor"/> cannot be null.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.Process">
+            <summary>
+                Processes all of the files given to this instance using all
+                of the enabled cookers.
+            </summary>
+            <returns>
+                The results of processing.
+            </returns>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+              <see cref="M:Microsoft.Performance.Toolkit.Engine.Engine.Process"/> has already been called on this instance.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.EngineException">
+                An unexpected error occurred.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.Dispose(System.Boolean)">
+            <summary>
+                Disoses all resources held by this class.
+            </summary>
+            <param name="disposing">
+                <c>true</c> to dispose both managed and unmanaged
+                resources; <c>false</c> to dispose only unmanaged
+                resources.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.ThrowIfDisposed">
+            <summary>
+                Throws an exception if this instance has been disposed.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.ThrowIfProcessed">
+            <summary>
+                Throws an exception if this instance has already processed.
+            </summary>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already processed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.Engine.CreateLogger(System.Type)">
+            <summary>
+                Creates a logger for the given type.
+            </summary>
+            <param name="type">
+                The <c>Type</c> for which the logger is created.
+            </param>
+            <returns>
+                An instance of <see cref="T:Microsoft.Performance.SDK.Processing.ILogger"/>.
+            </returns>
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo">
+            <summary>
+                Specifies a set of values that are used when
+                you create a <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.#ctor">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo"/> class.
+            </summary>
+            <remarks>
+                The current directory is used to locate plugins.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.#ctor(System.String)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo"/> class.
+            </summary>
+            <param name="extensionDirectory">
+                The extension directory from which the runtime instance is to load plugins.
+            </param>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException">
+                Thrown if <paramref name="extensionDirectory"/> is an invalid directory path.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.#ctor(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo"/> class.
+            </summary>
+            <param name="extensionDirectories">
+                The extension directories from which the runtime instance is to load plugins.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                Thrown is <paramref name="extensionDirectories"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException">
+                Thrown if <paramref name="extensionDirectories"/> contains an invalid directory path.
+            </exception>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.ExtensionDirectories">
+            <summary>
+                Gets the extension directories from
+                which the runtime instance is to load plugins.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.AssemblyLoader">
+            <summary>
+                Gets or sets the <see cref="T:Microsoft.Performance.SDK.Runtime.Discovery.IAssemblyLoader"/> to
+                use for loading plugins. This property may be <c>null</c>.
+                A <c>null</c> value indicates to use the default loading
+                behavior.
+                <para/>
+                The vast majority of use cases will not need to use
+                this property. Changing the loading behavior is for
+                advanced scenarios.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.Versioning">
+            <summary>
+                Gets the <see cref="T:Microsoft.Performance.SDK.Runtime.VersionChecker"/> to
+                use for loading plugins. This property may be <c>null</c>.
+                A <c>null</c> value indicates to use the default loading
+                behavior.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.RuntimeName">
+            <summary>
+                Gets or sets the name of the runtime on which the application is built.
+            </summary>
+            <remarks>
+                Defaults to the engine assembly name.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.ApplicationName">
+            <summary>
+                Gets or sets the application name.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.EngineCreateInfo.LoggerFactory">
+            <summary>
+                Gets or sets a logger factory.
+            </summary>
+            <remarks>
+                The logger factory should be able to provide each processing source a logger specific to its type.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.EngineException">
+            <summary>
+                Represents errors that occur when interacting with the WPT runtime.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException">
+            <summary>
+                Represents the error that occurs when an attempt is made to access a cooker
+                that is not known.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.#ctor(Microsoft.Performance.SDK.Extensibility.DataCookerPath)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException"/>
+                class with the given cooker path.
+            </summary>
+            <param name="dataCookerPath">
+                The path to the cooker that was not found.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.#ctor(Microsoft.Performance.SDK.Extensibility.DataCookerPath,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException"/>
+                class with the given cooker path, and the error that is the cause of this error.
+            </summary>
+            <param name="dataCookerPath">
+                The path to the cooker that was not found.
+            </param>
+            <param name="inner">
+                The error that is the cause of this error.
+            </param>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.DataCookerPath">
+            <summary>
+                Gets the requested cooker path that is the cause of this error.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException">
+            <summary>
+                Represents the error that occurs when an attempt is made to access a
+                data output that is not known.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.#ctor(Microsoft.Performance.SDK.Extensibility.DataOutputPath)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException"/>
+                class with the given output path.
+            </summary>
+            <param name="dataOutputPath">
+                The path to the data that was not found.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.#ctor(Microsoft.Performance.SDK.Extensibility.DataOutputPath,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException"/>
+                class with the given output path, and the error that is the cause of this error.
+            </summary>
+            <param name="dataOutputPath">
+                The path to the data that was not found.
+            </param>
+            <param name="inner">
+                The error that is the cause of this error.
+            </param>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.DataOutputPath">
+            <summary>
+                Gets the requested data output path that is the cause of this error.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.TableNotFoundException">
+            <summary>
+                Represents the error that occurs when an attempt is made to access a
+                <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/> that is not known.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.#ctor(Microsoft.Performance.SDK.Processing.TableDescriptor)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.TableNotFoundException"/>
+                class with the given <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/>.
+            </summary>
+            <param name="tableDescriptor">
+                The path to the data that was not found.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.#ctor(Microsoft.Performance.SDK.Processing.TableDescriptor,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.TableNotFoundException"/>
+                class with the given <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/>, and the error that is the cause of this error.
+            </summary>
+            <param name="tableDescriptor">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/> that was not found.
+            </param>
+            <param name="inner">
+                The error that is the cause of this error.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.Descriptor">
+            <summary>
+                Gets the requested <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/> that is the cause of this error.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableNotFoundException.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.TableException">
+            <summary>
+                Represents the error that occurs when an attempt is made to build a
+                <see cref="T:Microsoft.Performance.Toolkit.Engine.ITableResult"/> that with a specified <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.#ctor(System.String,Microsoft.Performance.SDK.Processing.TableDescriptor)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.TableException"/>
+                class with the given <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/>.
+            </summary>
+            <param name="message">
+                The message that describes the error.
+            </param>
+            <param name="tableDescriptor">
+                The path to the data that was not found.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.#ctor(System.String,Microsoft.Performance.SDK.Processing.TableDescriptor,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.TableException"/>
+                class with the given <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/>, and the error that is the cause of this error.
+            </summary>
+            <param name="message">
+                The message that describes the error.
+            </param>
+            <param name="tableDescriptor">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/> that was not found.
+            </param>
+            <param name="inner">
+                The error that is the cause of this error.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.TableException.Descriptor">
+            <summary>
+                Gets the requested <see cref="T:Microsoft.Performance.SDK.Processing.TableDescriptor"/> that is the cause of this error.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.TableException.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException">
+            <summary>
+                Represents the error that occurs when an attempt is made
+                to add a Data Source for processing that no processor can handle.
+                This can also happen if the user requests a processor to
+                process a Data Source that the processor cannot process.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.#ctor(Microsoft.Performance.SDK.Processing.IDataSource)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException" />
+                class for the given Data Source.
+            </summary>
+            <param name="dataSource">
+                The unsupported Data Source.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.#ctor(Microsoft.Performance.SDK.Processing.IDataSource,System.Type)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException" />
+                class for the given Data Source and requested <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>.
+            </summary>
+            <param name="dataSource">
+                The unsupported Data Source.
+            </param>
+            <param name="requestedProcessingSource">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> that was requested for the file.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.#ctor(Microsoft.Performance.SDK.Processing.IDataSource,System.Type,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException" />
+                class for the given <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>, requested <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>,
+                and the error that is the cause of this error.
+            </summary>
+            <param name="dataSource">
+                The unsupported Data Source.
+            </param>
+            <param name="requestedProcessingSource">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> that was requested for the Data Source.
+            </param>
+            <param name="inner">
+                The error that is the cause of this error.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.DataSource">
+            <summary>
+                Gets the URI of the requested Data Source.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.RequestedProcessingSource">
+            <summary>
+                Gets the fully qualified type name of the <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> requested for
+                the <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>. This property may be null if no <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> was requested
+                for the <see cref="T:Microsoft.Performance.SDK.Processing.IDataSource"/>. See <see cref="P:System.Type.FullName"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException">
+            <summary>
+                Represents the error that occurs when an attempt is made
+                to use an <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> that is unknown by the runtime.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.#ctor(System.Type)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException" />
+                class for the requested <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>.
+            </summary>
+            <param name="requestedProcessingSource">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> that was requested.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.#ctor(System.Type,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException" />
+                class for the requested data source and the error that is the
+                cause of this error.
+            </summary>
+            <param name="requestedProcessingSource">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> that was requested.
+            </param>
+            <param name="inner">
+                The error that is the cause of this error.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.RequestedProcessingSource">
+            <summary>
+                Gets the fully qualified type name of the <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> requested for
+                the file. This property may be null if no <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> was requested
+                for the file. See <see cref="P:System.Type.FullName"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException">
+            <summary>
+                Represents the error that occurs when an attempt is made
+                to use a path that is not valid as a directory for extensions.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException.#ctor(System.String)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException" />
+                class for the given path.
+            </summary>
+            <param name="path">
+                The path that is invalid.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException.#ctor(System.String,System.Exception)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException" />
+                class for the given file and the error that is the cause of this error.
+            </summary>
+            <param name="filePath">
+                The path to the unsupported file.
+            </param>
+            <param name="inner">
+                The error that is the cause of this error.
+            </param>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException.Path">
+            <summary>
+                Gets the invalid path.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InvalidExtensionDirectoryException.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+            <summary>
+                Represents errors that occur when attempting to mutate
+                the runtime after it has already been processed.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException.#ctor">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException.#ctor(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException.#ctor(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <inheritdoc />
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.EngineExtensions">
+            <summary>
+                Contains static (Shared in Visual Basic) methods for interacting
+                with <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/> instances.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineExtensions.AddFile(Microsoft.Performance.Toolkit.Engine.Engine,System.String)">
+            <summary>
+                Adds the given file to this instance for processing.
+            </summary>
+            <param name="self">
+                The <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/> instance.
+            </param>
+            <param name="filePath">
+                The path to the file to process.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="filePath"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="filePath"/> is whitespace.
+            </exception>
+            <exception cref="T:System.IO.FileNotFoundException">
+                The path specified by <paramref name="filePath"/> does not exist.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException">
+                <paramref name="filePath"/> cannot be processed by any
+                discovered extensions.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineExtensions.AddFile(Microsoft.Performance.Toolkit.Engine.Engine,System.String,System.Type)">
+            <summary>
+                Adds the given file to this instance for processing by
+                the specific source.
+            </summary>
+            <param name="self">
+                The <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/> instance.
+            </param>
+            <param name="filePath">
+                The path to the file to process.
+            </param>
+            <param name="dataSourceType">
+                The data source to use to process the file.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="filePath"/> is <c>null</c>.
+                - or -
+                <paramref name="processingSourceType"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="filePath"/> is whitespace.
+            </exception>
+            <exception cref="T:System.IO.FileNotFoundException">
+                The path specified by <paramref name="filePath"/> does not exist.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException">
+                The specified <paramref name="dataSourceType"/> cannot handle
+                the given file.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException">
+                The specified <paramref name="dataSourceType"/> is unknown.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineExtensions.TryAddFile(Microsoft.Performance.Toolkit.Engine.Engine,System.String)">
+            <summary>
+                Attempts to add the given file to this instance for processing.
+            </summary>
+            <param name="self">
+                The <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/> instance.
+            </param>
+            <param name="filePath">
+                The path to the file to process.
+            </param>
+            <returns>
+                <c>true</c> if the file has been added for processing;
+                <c>false</c> if the file is not valid, cannot be processed,
+                or the instance has already been processed. Note that <c>false</c>
+                is always returned when <see cref="!:IsProcessed"/> is <c>true</c>.
+            </returns>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineExtensions.TryAddFile(Microsoft.Performance.Toolkit.Engine.Engine,System.String,System.Type)">
+            <summary>
+                Attempts to add the given file to this instance for processing by
+                the specific source.
+            </summary>
+            <param name="self">
+                The <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/> instance.
+            </param>
+            <param name="filePath">
+                The path to the file to process.
+            </param>
+            <param name="processingSourceType">
+                The <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/> to use to process the file.
+            </param>
+            <returns>
+                <c>true</c> if the file has been added for processing by this <see cref="T:Microsoft.Performance.SDK.Processing.IProcessingSource"/>;
+                <c>false</c> otherwise. Note that <c>false</c>
+                is always returned when <see cref="!:IsProcessed"/> is <c>true</c>.
+            </returns>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineExtensions.AddFiles(Microsoft.Performance.Toolkit.Engine.Engine,System.Collections.Generic.IEnumerable{System.String},System.Type)">
+            <summary>
+                Adds the given files to this instance for processing by
+                the specific source. All of the files will be processed
+                by the same instance of data processor. Use <see cref="!:AddFile(string, Type)"/>
+                to ensure each file is processed by a different instance, or
+                use multiple calls to <see cref="!:AddFiles(IEnumerable&lt;string&gt;, Type)"/>.
+            </summary>
+            <param name="self">
+                The <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/> instance.
+            </param>
+            <param name="filePaths">
+                The path to the files to process.
+            </param>
+            <param name="processingSourceType">
+                The data source to use to process the file.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                One or more paths specified by <paramref name="filePaths"/> is <c>null</c>.
+                - or -
+                <paramref name="processingSourceType"/> is <c>null</c>.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                One or more paths specified by <paramref name="filePaths"/> is whitespace.
+            </exception>
+            <exception cref="T:System.IO.FileNotFoundException">
+                One or more paths specified by <paramref name="filePaths"/> does not exist.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.InstanceAlreadyProcessedException">
+                This instance has already been processed.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedDataSourceException">
+                The specified <paramref name="processingSourceType"/> cannot handle
+                the given file.
+            </exception>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.UnsupportedProcessingSourceException">
+                The specified <paramref name="processingSourceType"/> is unknown.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.EngineExtensions.TryAddFiles(Microsoft.Performance.Toolkit.Engine.Engine,System.Collections.Generic.IEnumerable{System.String},System.Type)">
+            <summary>
+                Attempts to add the given files to this instance. All of
+                the files will be processed by the same instance of 
+                data processor. Use <see cref="M:Microsoft.Performance.Toolkit.Engine.EngineExtensions.AddFile(Microsoft.Performance.Toolkit.Engine.Engine,System.String)"/> to ensure
+                each file is processed by a different instance.
+            </summary>
+            <param name="self">
+                The <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/> instance.
+            </param>
+            <param name="filePaths">
+                The paths to the files to add.
+            </param>
+            <returns>
+                <c>true</c> if the files are added;
+                <c>false</c> otherwise.
+            </returns>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.ITableResult">
+            <summary>
+                Enables access to table data generated by
+                <see cref="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.BuildTable(Microsoft.Performance.SDK.Processing.TableDescriptor)"/> or
+                <see cref="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.TryBuildTable(Microsoft.Performance.SDK.Processing.TableDescriptor,Microsoft.Performance.Toolkit.Engine.ITableResult@)"/>
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.ITableResult.BuiltInTableConfigurations">
+            <inheritdoc cref="P:Microsoft.Performance.SDK.Processing.ITableBuilder.BuiltInTableConfigurations"/>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.ITableResult.DefaultConfiguration">
+            <inheritdoc cref="P:Microsoft.Performance.SDK.Processing.ITableBuilder.DefaultConfiguration"/>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.ITableResult.RowCount">
+            <inheritdoc cref="P:Microsoft.Performance.SDK.Processing.ITableBuilderWithRowCount.RowCount"/>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.ITableResult.Columns">
+            <summary>
+                Gets the collection of columns that have been added to the table.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.ITableResult.TableCommands">
+            <summary>
+                Gets the dictionary of table command name and <see cref="T:Microsoft.Performance.SDK.Processing.TableCommandCallback"/> that have been assigned to the table.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Performance.Toolkit.Engine.ITableResult.TableRowDetailsGenerator">
+            <summary>
+                Gets the function to be used to generate details for a given row in the table.
+                <para/>
+                The function will take the row number being examined by the user, and should
+                return a collection of one or more entries given details for that row. This can
+                be used to support information on a row by row basis that does not make
+                sense in a columnar format.
+                <para/>
+                This method is not required to be set; it is perfectly acceptable
+                to not support details. This method may be called only zero (0) or one (1)
+                time(s) per instance.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults">
+            <summary>
+                Represents the results of processing data using the <see cref="T:Microsoft.Performance.Toolkit.Engine.Engine"/>.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.#ctor(Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.ProcessingSystemData,Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository.IDataExtensionRepository)">
+            <summary>
+                Initializes a new instance of the <see cref="T:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults"/>
+                class.
+            </summary>
+            <param name="processingSession">
+                Provides access to data from the processing session.
+            </param>
+            <param name="repository">
+                The repository that was used to process the data.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="processingSession"/> is <c>null</c>.
+                - or -
+                <paramref name="repository"/> is <c>null</c>.
+            </exception>
+            TODO: Going to move RuntimeExecutionResults to internal and expose calls via new interface
+                  1 - 1 with the Engine when calling Process
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.GetCookedData(Microsoft.Performance.SDK.Extensibility.DataCookerPath)">
+            <summary>
+                Gets the direct cooker retrieval for the specified
+                cooker.
+            </summary>
+            <param name="cookerPath">
+                The path to the cooker to retrieve.
+            </param>
+            <returns>
+                The interface to query for cooked data from said cooker.
+            </returns>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.CookerNotFoundException">
+                <paramref name="cookerPath"/> does not represent a known cooker.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.TryGetCookedData(Microsoft.Performance.SDK.Extensibility.DataCookerPath,Microsoft.Performance.SDK.Extensibility.DataCooking.ICookedDataRetrieval@)">
+            <summary>
+                Attempts to get the direct cooker retrieval for the specified
+                cooker.
+            </summary>
+            <param name="cookerPath">
+                The path to the cooker to retrieve.
+            </param>
+            <param name="retrieval">
+                The found retrieval, if any.
+            </param>
+            <returns>
+                <c>true</c> if the cooker can be queried;
+                <c>false</c> otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.QueryOutput``1(Microsoft.Performance.SDK.Extensibility.DataOutputPath)">
+            <summary>
+                Queries for processed data from the given path.
+            </summary>
+            <typeparam name="T">
+                The <see cref="T:System.Type"/> of data being queried.
+            </typeparam>
+            <param name="dataOutputPath">
+                The fully qualified output path to the data to retrieve.
+            </param>
+            <returns>
+                The cooked data.
+            </returns>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException">
+                No processed data could be found for the given <paramref name="dataOutputPath"/>.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.QueryOutput(Microsoft.Performance.SDK.Extensibility.DataOutputPath)">
+            <summary>
+                Queries for processed data from the given path.
+            </summary>
+            <param name="dataOutputPath">
+                The fully qualified output path to the data to retrieve.
+            </param>
+            <returns>
+                The cooked data.
+            </returns>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.DataOutputNotFoundException">
+                No processed data could be found for the given <paramref name="dataOutputPath"/>.
+            </exception>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.TryQueryOutput(Microsoft.Performance.SDK.Extensibility.DataOutputPath,System.Object@)">
+            <summary>
+                Attempts to query for processed data from the given path.
+            </summary>
+            <param name="dataOutputPath">
+                The fully qualified output path to the data to retrieve.
+            </param>
+            <param name="data">
+                The retrieved data, if any.
+            </param>
+            <returns>
+                <c>true</c> if data at the given path was found;
+                <c>false</c> otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.TryQueryOutput``1(Microsoft.Performance.SDK.Extensibility.DataOutputPath,``0@)">
+            <summary>
+                Attempts to query for processed data from the given path.
+            </summary>
+            <typeparam name="T">
+                The <see cref="T:System.Type"/> of data being queried.
+            </typeparam>
+            <param name="dataOutputPath">
+                The fully qualified output path to the data to retrieve.
+            </param>
+            <param name="data">
+                The retrieved data, if any.
+            </param>
+            <returns>
+                <c>true</c> if data at the given path was found;
+                <c>false</c> otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.IsTableDataAvailable(Microsoft.Performance.SDK.Processing.TableDescriptor)">
+            <summary>
+                Checks if the given <paramref name="tableDescriptor"/> has data available.
+            </summary>
+            <param name="tableDescriptor">
+                The table to check.
+            </param>
+            <returns>
+                <c>true</c> the table has data available;
+                <c>false</c> otherwise.
+                <c>null</c> the table does not support checking if data is available.
+            </returns>
+            <remarks>
+                If this method returns <c>null</c> and you must check if the given 
+                descriptor has data, you can check if the <see cref="T:Microsoft.Performance.SDK.Processing.ITableBuilder"/> 
+                returned from <see cref="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.BuildTable(Microsoft.Performance.SDK.Processing.TableDescriptor)"/> 
+                has a <see cref="!:ITableBuilder.RowCount"/> greater than 0."
+            </remarks>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.TableException">
+                A exception occured when calling IsDataAvailable on the specified <paramref name="tableDescriptor"/>.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.BuildTable(Microsoft.Performance.SDK.Processing.TableDescriptor)">
+            <summary>
+                Builds a table with the given <paramref name="tableDescriptor"/>.
+            </summary>
+            <param name="tableDescriptor">
+                The table to build.
+            </param>
+            <returns>
+                The built table.
+            </returns>
+            <exception cref="T:Microsoft.Performance.Toolkit.Engine.TableException">
+                A table cannot be built for the given <paramref name="tableDescriptor"/>.
+            </exception>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.TryBuildTable(Microsoft.Performance.SDK.Processing.TableDescriptor,Microsoft.Performance.Toolkit.Engine.ITableResult@)">
+            <summary>
+                Attempts to build a table with the given <paramref name="tableDescriptor"/>.
+            </summary>
+            <param name="tableDescriptor">
+                The table to build.
+            </param>
+            <param name="filledTableBulder">
+                The built table, if any.
+            </param>
+            <returns>
+                <c>true</c> if the table for the given <paramref name="tableDescriptor"/> was built;
+                <c>false</c> otherwise.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Performance.Toolkit.Engine.RuntimeExecutionResults.ThrowIfDisposed">
+            <summary>
+                Throws an exception if this instance has been disposed.
+            </summary>
+            <exception cref="T:System.ObjectDisposedException">
+                This instance is disposed.
+            </exception>
+        </member>
+    </members>
+</doc>

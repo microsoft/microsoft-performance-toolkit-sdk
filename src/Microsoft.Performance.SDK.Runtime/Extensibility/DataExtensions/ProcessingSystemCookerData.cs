@@ -31,12 +31,20 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             this.ownsCompositeCookers = ownsCompositeCookers;
         }
 
-        public ICookedDataRetrieval SourceCookerData => this.sourceCookerData;
+        public ICookedDataRetrieval SourceCookerData
+        {
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.sourceCookerData;
+            }
+        }
 
         public ICookedDataRetrieval GetOrCreateCompositeCooker(
             DataCookerPath cookerPath,
             Func<DataCookerPath, IDataExtensionRetrieval> createDataRetrieval)
         {
+            this.ThrowIfDisposed();
             return this.compositeCookers.GetOrCreateCompositeCooker(cookerPath, createDataRetrieval);
         }
 
@@ -50,7 +58,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!this.disposedValue)
             {
                 if (disposing)
                 {
@@ -61,7 +69,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 }
 
                 this.sourceCookerData = null;
-                disposedValue = true;
+                this.disposedValue = true;
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (this.disposedValue)
+            {
+                throw new ObjectDisposedException(nameof(ProcessingSystemCookerData));
             }
         }
     }

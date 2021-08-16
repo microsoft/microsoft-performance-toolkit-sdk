@@ -7,7 +7,7 @@ namespace Microsoft.Performance.SDK.Extensibility
 {
     /// <summary>
     ///     Used to generate an <see cref="IDataExtensionRetrieval"/> unique to a given data extension. The
-    ///     <see cref="IDataExtensionRetrieval"/> access only to data that the data extension has identified as
+    ///     <see cref="IDataExtensionRetrieval"/> has access only to data that the data extension has identified as
     ///     required.
     /// </summary>
     public interface IDataExtensionRetrievalFactory
