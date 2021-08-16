@@ -452,7 +452,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 dataSources.AddFile(file);
             }
 
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(dataSources));
 
             sut.EnableTable(Source123Table.TableDescriptor);
 
@@ -501,7 +501,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 dataSources.AddFile(file);
             }
 
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(dataSources));
 
             foreach (var tableGuid in testCase.TablesToEnable)
             {
@@ -616,7 +616,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 dataSources.AddDataSource(new FileDataSource(file));
             }
 
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(dataSources));
 
             foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
