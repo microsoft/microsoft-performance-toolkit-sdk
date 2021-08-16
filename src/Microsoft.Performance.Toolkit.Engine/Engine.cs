@@ -433,6 +433,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="NoInputDataException">
+        ///     There are inadequate data sources in <see cref="DataSourcesToProcess"/>
+        ///     in order for the specified cooker to participate in processing.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -441,10 +445,17 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ThrowIfDisposed();
             this.ThrowIfProcessed();
 
-            if (!this.TryEnableCooker(dataCookerPath))
+            if (!this.Plugins.AllCookers.Contains(dataCookerPath))
             {
                 throw new CookerNotFoundException(dataCookerPath);
             }
+
+            if (!this.CouldCookerHaveData(dataCookerPath))
+            {
+                throw new NoInputDataException(dataCookerPath);
+            }
+
+            this.enabledCookers.Add(dataCookerPath);
         }
 
         /// <summary>
@@ -475,6 +486,11 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
+            if (!this.CouldCookerHaveData(dataCookerPath))
+            {
+                return false;
+            }
+
             this.enabledCookers.Add(dataCookerPath);
             return true;
         }
@@ -486,20 +502,20 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="descriptor">
         ///     The table to enable.
         /// </param>
-        /// <exception cref="TableNotFoundException">
-        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
-        /// </exception>
-        /// <exception cref="TableException">
-        ///     A table is not available <paramref name="tableDescriptor"/>.
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="descriptor"/> cannot be null.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="descriptor"/> cannot be null.
-        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
+        /// </exception>
+        /// <exception cref="TableException">
+        ///     A table is not available <paramref name="tableDescriptor"/>.
+        /// </exception>
+        /// <exception cref="TableNotFoundException">
+        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
         /// </exception>
         public void EnableTable(TableDescriptor descriptor)
         {
@@ -792,6 +808,40 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.SafeDispose();
                 throw;
             }
+        }
+
+        private bool CouldCookerHaveData(DataCookerPath dataCookerPath)
+        {
+            if (dataCookerPath.DataCookerType == DataCookerType.CompositeDataCooker)
+            {
+                //
+                // Composite cookers are always enabled, so it doesn't make sense to
+                // determine whether they might have data. Whether they might have data
+                // is determined by which cookers they depend on having data. Ultimately,
+                // if the source cookers that ultimately feed into the composite cooker
+                // are enabled, then the composite could have data. Thus, this method
+                // will only check if it is feasible that a source cooker could have data.
+                // This is sufficient because if the source cooker cannot have have data,
+                // then by definition any composite cookers that depend on it could not
+                // have data, and when the source cooker is enabled, this method would
+                // return false, thus there is no situation where a composite cooker
+                // could have data but one of the required source cookers did not.
+                //
+
+                return true;
+            }
+
+            var found = this.Plugins.Extensions.TryGetDataCookerReference(dataCookerPath, out var cooker);
+            Debug.Assert(found);
+            Debug.Assert(cooker != null);
+
+            var sourceParsers = this.executors.Select(x => (x, x.Processor))
+                .Where(x => x.Processor is ICustomDataProcessorWithSourceParser)
+                .Select(x => (x.x, (ICustomDataProcessorWithSourceParser)x.Processor))
+                .Where(x => x.Item2.SourceParserId == dataCookerPath.SourceParserId)
+                .ToList();
+
+            return sourceParsers.Count > 0;
         }
 
         private RuntimeExecutionResults ProcessCore()

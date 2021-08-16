@@ -14,6 +14,7 @@ using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
+using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestData;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestTables;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -92,94 +93,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
 
-        [TestMethod]
-        [IntegrationTest]
-        public void Create_CloneAlwaysDisposed()
-        {
-            var file = new FileDataSource("test" + Source123DataSource.Extension);
-            using var dataSources = DataSourceSet.Create();
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-
-            var info = new EngineCreateInfo(dataSources);
-
-            {
-                info.OwnsDataSources = false;
-                using var sut = Engine.Create(info);
-                var clone = sut.DataSourcesToProcess;
-
-                sut.Dispose();
-
-                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
-            }
-
-            {
-                info.OwnsDataSources = true;
-                using var sut = Engine.Create(info);
-                var clone = sut.DataSourcesToProcess;
-
-                sut.Dispose();
-
-                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
-            }
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void Create_OriginalOnlyDisposedWhenOwned()
-        {
-            var file = new FileDataSource("test" + Source123DataSource.Extension);
-            using var dataSources = DataSourceSet.Create();
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-
-            var info = new EngineCreateInfo(dataSources);
-
-            {
-                info.OwnsDataSources = false;
-                using var sut = Engine.Create(info);
-
-                sut.Dispose();
-
-                Assert.AreEqual(1, dataSources.FreeDataSourcesToProcess.Count());
-            }
-
-            {
-                info.OwnsDataSources = true;
-                using var sut = Engine.Create(info);
-
-                sut.Dispose();
-
-                Assert.ThrowsException<ObjectDisposedException>(() => dataSources.FreeDataSourcesToProcess);
-            }
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void Create_CloneNeverTakesOwnershipOfPlugins()
-        {
-            using var plugins = PluginSet.Load();
-
-            var file = new FileDataSource("test" + Source123DataSource.Extension);
-            using var dataSources = DataSourceSet.Create(plugins, true);
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-
-            var info = new EngineCreateInfo(dataSources);
-
-            {
-                info.OwnsDataSources = false;
-                using var sut = Engine.Create(info);
-                var clone = sut.DataSourcesToProcess;
-
-                sut.Dispose();
-
-                //
-                // Touch the plugins to make sure they stayed around.
-                //
-
-                var cookers = plugins.AllCookers;
-                Assert.IsNotNull(cookers);
-            }
-        }
-
         #endregion Create
 
         #region Enable Cooker
@@ -188,8 +101,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_Known_Enables()
         {
+            this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
             using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
-            var cooker = this.DefaultSet.Plugins.AllCookers.FirstOrDefault();
+
+            var cooker = Source1DataCooker.DataCookerPath;
 
             sut.EnableCooker(cooker);
 
@@ -224,7 +139,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_NoData_Throws()
         {
-            Assert.Inconclusive();
+            this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var createInfo = new EngineCreateInfo(this.DefaultSet);
+
+            using var sut = Engine.Create(createInfo);
+
+            Assert.ThrowsException<NoInputDataException>(() => sut.EnableCooker(Source4DataCooker.DataCookerPath));
         }
 
         #endregion Enable Cooker
@@ -235,9 +155,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_Known_Enables()
         {
+            this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
             using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
 
-            var cooker = this.DefaultSet.Plugins.AllCookers.FirstOrDefault();
+            var cooker = Source1DataCooker.DataCookerPath;
 
             sut.TryEnableCooker(cooker);
 
@@ -249,9 +170,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_Known_True()
         {
+            this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
             using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
 
-            var cooker = this.DefaultSet.Plugins.AllCookers.FirstOrDefault();
+            var cooker = Source1DataCooker.DataCookerPath;
 
             Assert.IsTrue(sut.TryEnableCooker(cooker));
 
@@ -285,7 +207,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_NoData_False()
         {
-            Assert.Inconclusive();
+            this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var createInfo = new EngineCreateInfo(this.DefaultSet);
+
+            using var sut = Engine.Create(createInfo);
+
+            Assert.IsFalse(sut.TryEnableCooker(Source4DataCooker.DataCookerPath));
         }
 
         #endregion TryEnableCooker
@@ -339,13 +266,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.Process();
 
             Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableTable(sut.AvailableTables.First()));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void EnableTable_NoData_Throws()
-        {
-            Assert.Inconclusive();
         }
 
         #endregion EnableTable
@@ -424,13 +344,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.Process();
 
             Assert.IsFalse(sut.TryEnableTable(sut.AvailableTables.First()));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void TryEnableTable_NoData_False()
-        {
-            Assert.Inconclusive();
         }
 
         #endregion TryEnableTable
@@ -514,6 +427,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [TestMethod]
         [FunctionalTest]
         [DeploymentItem(@"TestData/source123_test_data.s123d")]
+        [DeploymentItem(@"TestData/source4_test_data.s4d")]
+        [DeploymentItem(@"TestData/source5_test_data.s5d")]
         [DeploymentItem(@"TestData/BuildTableTestSuite.json")]
         [DynamicData(nameof(BuildTableTestData), DynamicDataSourceType.Method)]
         public void BuildTable_ProcessorSingleRowTable(
@@ -939,6 +854,94 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.Dispose();
             sut.Dispose();
             sut.Dispose();
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Dispose_CloneAlwaysDisposed()
+        {
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create();
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources);
+
+            {
+                info.OwnsDataSources = false;
+                using var sut = Engine.Create(info);
+                var clone = sut.DataSourcesToProcess;
+
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
+            }
+
+            {
+                info.OwnsDataSources = true;
+                using var sut = Engine.Create(info);
+                var clone = sut.DataSourcesToProcess;
+
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
+            }
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Dispose_OriginalOnlyDisposedWhenOwned()
+        {
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create();
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources);
+
+            {
+                info.OwnsDataSources = false;
+                using var sut = Engine.Create(info);
+
+                sut.Dispose();
+
+                Assert.AreEqual(1, dataSources.FreeDataSourcesToProcess.Count());
+            }
+
+            {
+                info.OwnsDataSources = true;
+                using var sut = Engine.Create(info);
+
+                sut.Dispose();
+
+                Assert.ThrowsException<ObjectDisposedException>(() => dataSources.FreeDataSourcesToProcess);
+            }
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Dispose_CloneNeverTakesOwnershipOfPlugins()
+        {
+            using var plugins = PluginSet.Load();
+
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create(plugins, true);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources);
+
+            {
+                info.OwnsDataSources = false;
+                using var sut = Engine.Create(info);
+                var clone = sut.DataSourcesToProcess;
+
+                sut.Dispose();
+
+                //
+                // Touch the plugins to make sure they stayed around.
+                //
+
+                var cookers = plugins.AllCookers;
+                Assert.IsNotNull(cookers);
+            }
         }
 
         #endregion
