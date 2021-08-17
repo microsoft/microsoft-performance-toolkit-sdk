@@ -36,11 +36,41 @@ protected override bool IsFileSupportedCore(string path)
 
 The following are required if you are using the `Engine`:
 
+### Creation
+
+Plugins and DataSources are now loaded independently of the `Engine`. These changes were motivated by a desire to make feedback to the user about issues clearer, reduce coupling, and enable reuse. This makes the `Engine` much more powerful and flexible.
+
+- Users will now need to create a `DataSourceSet` to pass to the `Engine` via the `EngineCreateInfo` class rather than calling the `Engine.Add*` methods.
+    - See the [`Engine`](Using-the-SDK/Using-the-engine.md) documentation for more details on using `DataSourceSet`, `PluginSet`, and the `Engine` together.
+
+As a simple example:
+````cs
+using var engine = Engine.Create();
+engine.AddDataSource(new FileDataSource("test.txt"));
+engine.EnableCooker(cookerPath);
+
+// ... use the engine as desired.
+
+````
+becomes
+````cs
+
+using var dataSources = DataSourceSet.Create();
+dataSources.AddDataSource(new FileDataSource("test.txt"));
+
+var info = new EngineCreateInfo(dataSources);
+using var engine = Engine.Create(info);
+engine.EnableCooker(cookerPath);
+
+// ... use the engine as desired.
+
+````
+
 - Try-catch blocks that were expecting `UnsupportedDataSourceException`s to signal an invalid `CustomDataSource`, (now named `ProcessingSource` - see below) in any of the `Add*` methods should be updated to catch `UnsupportedProcessingSourceException`:
 ````cs
 try
 {
-    engine.AddFile("test", typeof(BadProcessingSource))
+    dataSources.AddFile("test", typeof(BadProcessingSource))
 }
 catch (UnsupportedDataSourceException)
 {
@@ -51,7 +81,7 @@ becomes
 ````cs
 try
 {
-    engine.AddFile("test", typeof(BadProcessingSource))
+    dataSources.AddFile("test", typeof(BadProcessingSource))
 }
 catch (UnsupportedProcessingSourceException)
 {
@@ -65,7 +95,7 @@ Note that `UnsupportedProcessingSourceException` was named `UnsupportedCustomDat
 ````cs
 try
 {
-    engine.AddFile("test.nope")
+    dataSources.AddDataSource(new FileDataSource("test.nope"));
 }
 catch (UnsupportedFileException)
 {
@@ -76,7 +106,7 @@ becomes
 ````cs
 try
 {
-    engine.AddFile("test.nope")
+    dataSources.AddDataSource(new FileDataSource("test.nope"));
 }
 catch (UnsupportedDataSourceException)
 {
