@@ -7,7 +7,8 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 namespace Microsoft.Performance.SDK.Extensibility
 {
     /// <summary>
-    ///     Provides access to composite <see cref="ICookedDataRetrieval"/>s, creating them when necessary.
+    ///     This class holds references to composite cookerse. It offers basic functionality to retrieve a cooker's
+    ///     <see cref="ICookedDataRetrieval"/>, possibly creating new cooker instances to do so.
     /// </summary>
     public interface ICompositeCookerRepository
         : IDisposable
