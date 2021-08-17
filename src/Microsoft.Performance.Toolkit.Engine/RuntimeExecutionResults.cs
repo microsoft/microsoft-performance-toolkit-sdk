@@ -10,6 +10,7 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -97,6 +98,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         public ICookedDataRetrieval GetCookedData(DataCookerPath cookerPath)
         {
+            this.ThrowIfDisposed();
+
             if (this.sourceCookerPaths.Contains(cookerPath))
             {
                 return this.sourceCookerData;
@@ -110,9 +113,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                return this.compositeCookerData.GetOrCreateCompositeCooker(
-                    cookerPath,
-                    this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker);
+                return this.compositeCookerData.GetOrCreateCompositeCooker(cookerPath);
             }
             catch (Exception e)
             {
@@ -353,8 +354,18 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         // Will perform the Func on the Repository if the table is contained, else false.
-        private bool ExecuteOnRepositoryIfContained<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)
+        private bool ExecuteOnRepositoryIfContained<TResult>(
+            TableDescriptor tableDescriptor,
+            Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func,
+            out TResult result)
         {
             result = default;
 
@@ -371,7 +382,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         // Will perform the Func on the Processor if the table is contained, else false.
-        private bool ExecuteOnProcessorIfContained<TResult>(TableDescriptor tableDescriptor, Func<ICustomDataProcessor, TResult> func, out TResult result)
+        private bool ExecuteOnProcessorIfContained<TResult>(
+            TableDescriptor tableDescriptor,
+            Func<ICustomDataProcessor, TResult> func,
+            out TResult result)
         {
             result = default;
 
@@ -383,6 +397,32 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             return false;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (this.disposedValue)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.compositeCookerData.SafeDispose();
+                }
+
+                this.sourceCookerData = null;
+                this.tableToProcessorMap = null;
+                this.retrievalFactory = null;
+                this.repository = null;
+                this.sourceCookerPaths = null;
+                disposedValue = true;
+            }
         }
 
         private sealed class TableBuilder
@@ -469,31 +509,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.TableRowDetailsGenerator = generator;
                 return this;
             }
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    this.compositeCookerData.SafeDispose();
-                }
-
-                this.sourceCookerData = null;
-                this.tableToProcessorMap = null;
-                this.retrievalFactory = null;
-                this.repository = null;
-                this.sourceCookerPaths = null;
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

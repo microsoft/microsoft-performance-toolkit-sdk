@@ -131,10 +131,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                     // from the pool of cookers in the system of processors to which this processor belongs. this is why
                     // we've passed down the for the given processing system.
                     //
+
+                    var filteredRetrievalFactory = this.compositeCookers.CreateFilteredRepository();
+
                     this.dataExtensionRetrievalFactory = new DataExtensionRetrievalFactory(
                         this.dataProcessor,
-                        this.compositeCookers,
+                        filteredRetrievalFactory,
                         dataExtensionRepository);
+
+                    filteredRetrievalFactory.Initialize(this.dataExtensionRetrievalFactory);
                 }
             }
         }

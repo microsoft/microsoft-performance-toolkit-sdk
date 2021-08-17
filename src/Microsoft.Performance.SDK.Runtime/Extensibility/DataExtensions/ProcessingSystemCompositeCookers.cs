@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -17,12 +16,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
     public sealed class ProcessingSystemCompositeCookers
           : ICompositeCookerRepository
     {
-        private readonly ReaderWriterLockSlim compositeCookerLock = new ReaderWriterLockSlim();
-
         private readonly ConcurrentDictionary<DataCookerPath, IDataCooker> compositeCookersByPath
             = new ConcurrentDictionary<DataCookerPath, IDataCooker>();
 
-        private readonly IDataExtensionRepository dataExtensionRepository;
+        private IDataExtensionRepository dataExtensionRepository;
+        private IDataExtensionRetrievalFactory retrievalFactory;
         private bool disposedValue;
 
         /// <summary>
@@ -37,12 +35,48 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             this.dataExtensionRepository = dataExtensionRepository;
         }
 
+        public void Initialize(IDataExtensionRetrievalFactory retrievalFactory)
+        {
+            this.ThrowIfDisposed();
+            this.retrievalFactory = retrievalFactory;
+        }
+
         /// <inheritdoc/>
-        public ICookedDataRetrieval GetOrCreateCompositeCooker(
+        public ICookedDataRetrieval GetOrCreateCompositeCooker(DataCookerPath dataCookerPath)
+        {
+            Debug.Assert(
+                this.retrievalFactory != null,
+                $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
+
+            if (this.retrievalFactory == null)
+            {
+                // this is a bug if it's happening from our Engine implementation
+                throw new InvalidOperationException(
+                    $"{nameof(ProcessingSystemCompositeCookers.Initialize)} hasn't been called.");
+            }
+
+            return this.GetOrCreateCompositeCooker(
+                dataCookerPath,
+                this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker);
+        }
+
+        internal FilteredCompositeCookers CreateFilteredRepository()
+        {
+            return new FilteredCompositeCookers(this);
+        }
+
+        private ICookedDataRetrieval GetOrCreateCompositeCooker(
             DataCookerPath cookerPath,
             Func<DataCookerPath, IDataExtensionRetrieval> createDataRetrieval)
         {
             this.ThrowIfDisposed();
+
+            if (this.retrievalFactory == null)
+            {
+                Debug.Assert(false, $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
+                throw new InvalidOperationException(
+                    $"{nameof(ProcessingSystemCompositeCookers.Initialize)} hasn't been called.");
+            }
 
             if (this.compositeCookersByPath.TryGetValue(cookerPath, out var dataCooker))
             {
@@ -86,12 +120,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        ///     Throws an exception if this instance has been disposed.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
         private void ThrowIfDisposed()
         {
             if (this.disposedValue)
@@ -112,11 +140,77 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                     }
 
                     this.compositeCookersByPath.Clear();
-
-                    this.compositeCookerLock.Dispose();
                 }
 
+                this.dataExtensionRepository = null;
+                this.retrievalFactory = null;
                 this.disposedValue = true;
+            }
+        }
+
+        internal sealed class FilteredCompositeCookers
+            : ICompositeCookerRepository
+        {
+            private bool disposedValue;
+
+            private ProcessingSystemCompositeCookers compositeCookers;
+            private IDataExtensionRetrievalFactory retrievalFactory;
+
+            internal FilteredCompositeCookers(
+                ProcessingSystemCompositeCookers compositeCookers)
+            {
+                this.compositeCookers = compositeCookers;
+            }
+
+            public ICookedDataRetrieval GetOrCreateCompositeCooker(DataCookerPath cookerPath)
+            {
+                this.ThrowIfDisposed();
+
+                if (this.retrievalFactory == null)
+                {
+                    Debug.Assert(false, $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
+                    throw new InvalidOperationException(
+                        $"{nameof(ProcessingSystemCompositeCookers.Initialize)} hasn't been called.");
+                }
+
+                return this.compositeCookers.GetOrCreateCompositeCooker(
+                    cookerPath,
+                    this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker);
+            }
+
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
+            }
+
+            internal void Initialize(IDataExtensionRetrievalFactory retrievalFactory)
+            {
+                this.retrievalFactory = retrievalFactory;
+            }
+
+            private void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    if (disposing)
+                    {
+                        // nothing to do, this class doesn't own anything
+                    }
+
+                    this.compositeCookers = null;
+                    this.retrievalFactory = null;
+                    disposedValue = true;
+                }
+            }
+
+            private void ThrowIfDisposed()
+            {
+                if (this.disposedValue)
+                {
+                    throw new ObjectDisposedException(this.GetType().Name);
+                }
             }
         }
     }

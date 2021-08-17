@@ -86,7 +86,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.sourceCookerData,
                 this.compositeCookers,
                 this.dataExtensionRepository,
-                this.CreateDataRetrievalForCompositeDataCooker,
                 this.CreateDataRetrievalForDataProcessor,
                 compositeDataCookerReference.DependencyReferences);
 
@@ -130,7 +129,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.sourceCookerData,
                 this.compositeCookers,
                 this.dataExtensionRepository,
-                this.CreateDataRetrievalForCompositeDataCooker,
                 this.CreateDataRetrievalForDataProcessor,
                 dataProcessorReference.DependencyReferences);
 
@@ -201,7 +199,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.sourceCookerData,
                 this.compositeCookers,
                 this.dataExtensionRepository,
-                this.CreateDataRetrievalForCompositeDataCooker,
                 this.CreateDataRetrievalForDataProcessor,
                 tableExtensionReference.DependencyReferences);
 

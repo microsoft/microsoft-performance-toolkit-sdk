@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK.Extensibility;
 
-namespace Microsoft.Performance.SDK.Extensibility
+namespace Microsoft.Performance.SDK.Runtime.Extensibility
 {
     /// <summary>
     ///     Used to generate an <see cref="IDataExtensionRetrieval"/> unique to a given data extension. The

@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 
-namespace Microsoft.Performance.SDK.Extensibility
+namespace Microsoft.Performance.SDK.Runtime.Extensibility
 {
     /// <summary>
     ///     This class holds references to composite cookerse. It offers basic functionality to retrieve a cooker's
@@ -19,9 +20,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <param name="cookerPath">
         ///     Uniquely identifies a composite data cooker.
         /// </param>
-        /// <param name="createDataRetrieval">
-        ///     Function to create an <see cref="IDataExtensionRetrieval"/> for the composite cooker.
-        /// </param>
         /// <returns>
         ///     An instance of a composite data cooker.
         /// </returns>
@@ -34,8 +32,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        ICookedDataRetrieval GetOrCreateCompositeCooker(
-            DataCookerPath cookerPath,
-            Func<DataCookerPath, IDataExtensionRetrieval> createDataRetrieval);
+        ICookedDataRetrieval GetOrCreateCompositeCooker(DataCookerPath cookerPath);
     }
 }

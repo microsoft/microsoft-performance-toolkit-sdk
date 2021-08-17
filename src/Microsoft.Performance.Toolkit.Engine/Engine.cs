@@ -1021,7 +1021,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 new HashSet<DataCookerPath>(this.enabledCookers));
 
-
             if (extendedTables.Any())
             {
                 var processorForTable = this.extensionRoot.EnableSourceDataCookersForTables(
@@ -1053,11 +1052,17 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             var sourceCookerDataRetrieval = this.factory.CreateCrossParserSourceDataCookerRetrieval(processors);
+            var dataRetrievalFactory = new DataExtensionRetrievalFactory(
+                sourceCookerDataRetrieval,
+                compositeCookers,
+                this.extensionRoot);
+
+            compositeCookers.Initialize(dataRetrievalFactory);
 
             this.runtimeExecutionResult = new RuntimeExecutionResults(
                 sourceCookerDataRetrieval,
                 compositeCookers,
-                new DataExtensionRetrievalFactory(sourceCookerDataRetrieval, compositeCookers, this.extensionRoot),
+                dataRetrievalFactory,
                 this.extensionRoot,
                 processorTables);
 

@@ -21,7 +21,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         private readonly ICookedDataRetrieval sourceCookerData;
         private readonly ICompositeCookerRepository compositeCookers;
         private readonly IDataExtensionRepository dataExtensionRepository;
-        private readonly Func<DataCookerPath, IDataExtensionRetrieval> createCompositeDataRetrieval;
         private readonly Func<DataProcessorId, IDataExtensionRetrieval> createProcessorDataRetrieval;
         private readonly IDataExtensionDependencies extensionDependencies;
 
@@ -44,7 +43,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             ICookedDataRetrieval sourceCookerData,
             ICompositeCookerRepository compositeCookers,
             IDataExtensionRepository dataExtensionRepository,
-            Func<DataCookerPath, IDataExtensionRetrieval> createCompositeDataRetrieval,
             Func<DataProcessorId, IDataExtensionRetrieval> createProcessorDataRetrieval,
             IDataExtensionDependencies extensionDependencies)
         {
@@ -52,13 +50,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             Debug.Assert(compositeCookers != null, nameof(compositeCookers));
             Debug.Assert(dataExtensionRepository != null, nameof(dataExtensionRepository));
             Debug.Assert(extensionDependencies != null, nameof(extensionDependencies));
-            Debug.Assert(createCompositeDataRetrieval != null, nameof(createCompositeDataRetrieval));
             Debug.Assert(createProcessorDataRetrieval != null, nameof(createProcessorDataRetrieval));
 
             this.sourceCookerData = sourceCookerData;
             this.compositeCookers = compositeCookers;
             this.dataExtensionRepository = dataExtensionRepository;
-            this.createCompositeDataRetrieval = createCompositeDataRetrieval;
             this.createProcessorDataRetrieval = createProcessorDataRetrieval;
             this.extensionDependencies = extensionDependencies;
         }
@@ -275,9 +271,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         private ICookedDataRetrieval GetCompositeDataRetrieval(DataCookerPath cookerPath)
         {
-            return this.compositeCookers.GetOrCreateCompositeCooker(
-                cookerPath,
-                this.createCompositeDataRetrieval);
+            return this.compositeCookers.GetOrCreateCompositeCooker(cookerPath);
         }
     }
 }
