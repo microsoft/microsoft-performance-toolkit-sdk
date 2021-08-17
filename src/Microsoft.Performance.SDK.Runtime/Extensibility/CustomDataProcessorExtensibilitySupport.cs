@@ -129,10 +129,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
                     // Data processors can use composite cookers for internal extensions, and those cookers should come
                     // from the pool of cookers in the system of processors to which this processor belongs. this is why
-                    // we've passed down the ProcessingSystemCompositeCookers.
+                    // we've passed down the for the given processing system.
                     //
-                    var cookerData = new ProcessingSystemCookerData(this.dataProcessor, this.compositeCookers, false);
-                    this.dataExtensionRetrievalFactory = new DataExtensionRetrievalFactory(cookerData, dataExtensionRepository);
+                    this.dataExtensionRetrievalFactory = new DataExtensionRetrievalFactory(
+                        this.dataProcessor,
+                        this.compositeCookers,
+                        dataExtensionRepository);
                 }
             }
         }

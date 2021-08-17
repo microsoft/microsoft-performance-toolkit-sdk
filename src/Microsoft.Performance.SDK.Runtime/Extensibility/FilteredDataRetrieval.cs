@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 
@@ -19,7 +18,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
     internal class FilteredDataRetrieval
         : IDataExtensionRetrieval
     {
-        private readonly IProcessingSystemCookerData cookerData;
+        private readonly ICookedDataRetrieval sourceCookerData;
+        private readonly ICompositeCookerRepository compositeCookers;
         private readonly IDataExtensionRepository dataExtensionRepository;
         private readonly Func<DataCookerPath, IDataExtensionRetrieval> createCompositeDataRetrieval;
         private readonly Func<DataProcessorId, IDataExtensionRetrieval> createProcessorDataRetrieval;
@@ -41,19 +41,22 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         ///     The set of dependencies that the target data extension for this instance has access.
         /// </param>
         internal FilteredDataRetrieval(
-            IProcessingSystemCookerData cookerData,
+            ICookedDataRetrieval sourceCookerData,
+            ICompositeCookerRepository compositeCookers,
             IDataExtensionRepository dataExtensionRepository,
             Func<DataCookerPath, IDataExtensionRetrieval> createCompositeDataRetrieval,
             Func<DataProcessorId, IDataExtensionRetrieval> createProcessorDataRetrieval,
             IDataExtensionDependencies extensionDependencies)
         {
-            Debug.Assert(cookerData != null, nameof(cookerData));
+            Debug.Assert(sourceCookerData != null, nameof(sourceCookerData));
+            Debug.Assert(compositeCookers != null, nameof(compositeCookers));
             Debug.Assert(dataExtensionRepository != null, nameof(dataExtensionRepository));
             Debug.Assert(extensionDependencies != null, nameof(extensionDependencies));
             Debug.Assert(createCompositeDataRetrieval != null, nameof(createCompositeDataRetrieval));
             Debug.Assert(createProcessorDataRetrieval != null, nameof(createProcessorDataRetrieval));
 
-            this.cookerData = cookerData;
+            this.sourceCookerData = sourceCookerData;
+            this.compositeCookers = compositeCookers;
             this.dataExtensionRepository = dataExtensionRepository;
             this.createCompositeDataRetrieval = createCompositeDataRetrieval;
             this.createProcessorDataRetrieval = createProcessorDataRetrieval;
@@ -199,14 +202,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         private T QuerySourceOutput<T>(DataOutputPath dataOutputPath)
         {
             this.ValidateSourceDataCooker(dataOutputPath);
-            return this.cookerData.SourceCookerData.QueryOutput<T>(dataOutputPath);
+            return this.sourceCookerData.QueryOutput<T>(dataOutputPath);
         }
 
         private bool TryQuerySourceOutput<T>(DataOutputPath dataOutputPath, out T result)
         {
             if (this.TryValidateSourceDataCooker(dataOutputPath))
             {
-                return this.cookerData.SourceCookerData.TryQueryOutput<T>(dataOutputPath, out result);
+                return this.sourceCookerData.TryQueryOutput<T>(dataOutputPath, out result);
             }
 
             result = default;
@@ -234,7 +237,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         private object QuerySourceOutput(DataOutputPath dataOutputPath)
         {
             this.ValidateSourceDataCooker(dataOutputPath);
-            return this.cookerData.SourceCookerData.QueryOutput(dataOutputPath);
+            return this.sourceCookerData.QueryOutput(dataOutputPath);
         }
 
         private object QueryCompositeOutput(DataOutputPath dataOutputPath)
@@ -247,7 +250,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         {
             if (this.TryValidateSourceDataCooker(dataOutputPath))
             {
-                return this.cookerData.SourceCookerData.TryQueryOutput(dataOutputPath, out result);
+                return this.sourceCookerData.TryQueryOutput(dataOutputPath, out result);
             }
 
             result = default;
@@ -272,7 +275,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         private ICookedDataRetrieval GetCompositeDataRetrieval(DataCookerPath cookerPath)
         {
-            return this.cookerData.GetOrCreateCompositeCooker(
+            return this.compositeCookers.GetOrCreateCompositeCooker(
                 cookerPath,
                 this.createCompositeDataRetrieval);
         }

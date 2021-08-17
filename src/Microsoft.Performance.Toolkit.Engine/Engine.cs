@@ -1053,11 +1053,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             var sourceCookerDataRetrieval = this.factory.CreateCrossParserSourceDataCookerRetrieval(processors);
-            var processingSession = new ProcessingSystemData(sourceCookerDataRetrieval, compositeCookers, processorTables, this.extensionRoot);
 
             this.runtimeExecutionResult = new RuntimeExecutionResults(
-                processingSession,
-                this.extensionRoot);
+                sourceCookerDataRetrieval,
+                compositeCookers,
+                new DataExtensionRetrievalFactory(sourceCookerDataRetrieval, compositeCookers, this.extensionRoot),
+                this.extensionRoot,
+                processorTables);
 
             return this.runtimeExecutionResult;
         }
@@ -1069,19 +1071,19 @@ namespace Microsoft.Performance.Toolkit.Engine
             var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
             {
-                try
-                {
-                    var cds = kvp.Key;
-                    var dataSourceLists = kvp.Value;
+                var processingSource = kvp.Key;
+                var dataSourceLists = kvp.Value;
 
-                    foreach (var dataSources in dataSourceLists)
+                foreach (var dataSources in dataSourceLists)
+                {
+                    try
                     {
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
                             x => ConsoleLogger.Create(x.GetType()),
-                            cds,
+                            processingSource,
                             dataSources,
-                            cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
+                            processingSource.Instance.DataTables.Concat(processingSource.Instance.MetadataTables),
                             new RuntimeProcessorEnvironment(this.extensionRoot, compositeCookers, this.CreateLogger),
                             ProcessorOptions.Default);
 
@@ -1090,14 +1092,19 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                         executors.Add(executor);
                     }
-                }
-                catch (Exception e)
-                {
-                    //
-                    // todo: log
-                    //
+                    catch (Exception e)
+                    {
+                        //
+                        // todo: log
+                        //
 
-                    Console.Error.WriteLine(e);
+                        Console.Error.WriteLine(e);
+                        //this.logger.Error(
+                        //    "Error processing dataSources {0} on processing source {1}: {2}",
+                        //    dataSources.ToString(),
+                        //    processingSource.Name,
+                        //    e);
+                    }
                 }
             }
 

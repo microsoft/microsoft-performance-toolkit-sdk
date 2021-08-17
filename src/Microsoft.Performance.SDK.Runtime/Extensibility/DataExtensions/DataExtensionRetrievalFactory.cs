@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -25,7 +26,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
     {
         private readonly DataRetrievalCache dataRetrievalCache = new DataRetrievalCache();
 
-        private readonly IProcessingSystemCookerData cookerData;
+        private readonly ICookedDataRetrieval sourceCookerData;
+        private readonly ICompositeCookerRepository compositeCookers;
         private readonly IDataExtensionRepository dataExtensionRepository;
 
         /// <summary>
@@ -38,13 +40,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         ///     Provides a way to generate data extensions other than source data cookers.
         /// </param>
         public DataExtensionRetrievalFactory(
-            IProcessingSystemCookerData cookerData,
+            ICookedDataRetrieval sourceCookerData,
+            ICompositeCookerRepository compositeCookers,
             IDataExtensionRepository dataExtensionRepository)
         {
-            Guard.NotNull(cookerData, nameof(cookerData));
+            Guard.NotNull(sourceCookerData, nameof(sourceCookerData));
+            Guard.NotNull(compositeCookers, nameof(compositeCookers));
             Guard.NotNull(dataExtensionRepository, nameof(dataExtensionRepository));
-
-            this.cookerData = cookerData;
+            this.sourceCookerData = sourceCookerData;
+            this.compositeCookers = compositeCookers;
             this.dataExtensionRepository = dataExtensionRepository;
         }
 
@@ -79,7 +83,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             }
 
             filteredData = new FilteredDataRetrieval(
-                this.cookerData,
+                this.sourceCookerData,
+                this.compositeCookers,
                 this.dataExtensionRepository,
                 this.CreateDataRetrievalForCompositeDataCooker,
                 this.CreateDataRetrievalForDataProcessor,
@@ -122,7 +127,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             }
 
             filteredData = new FilteredDataRetrieval(
-                this.cookerData,
+                this.sourceCookerData,
+                this.compositeCookers,
                 this.dataExtensionRepository,
                 this.CreateDataRetrievalForCompositeDataCooker,
                 this.CreateDataRetrievalForDataProcessor,
@@ -192,7 +198,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             }
 
             var filteredData = new FilteredDataRetrieval(
-                this.cookerData,
+                this.sourceCookerData,
+                this.compositeCookers,
                 this.dataExtensionRepository,
                 this.CreateDataRetrievalForCompositeDataCooker,
                 this.CreateDataRetrievalForDataProcessor,
