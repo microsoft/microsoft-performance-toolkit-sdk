@@ -38,6 +38,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <param name="dataExtensionRepository">
         ///     Provides access to a set of data extensions.
         /// </param>
+        /// <param name="compositeCookers">
+        ///     The composite cooker repository for a system of data processors.
+        /// </param>
         public CustomDataProcessorExtensibilitySupport(
             ICustomDataProcessorWithSourceParser dataProcessor,
             IDataExtensionRepository dataExtensionRepository,
@@ -125,11 +128,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             {
                 if (this.dataExtensionRetrievalFactory == null)
                 {
-                    var tablesToProcessor = new Dictionary<TableDescriptor, ICustomDataProcessor>();
-
                     // Data processors can use composite cookers for internal extensions, and those cookers should come
-                    // from the pool of cookers in the system of processors to which this processor belongs. this is why
-                    // we've passed down the for the given processing system.
+                    // from the pool of cookers in the system of processors to which this processor belongs. This is why
+                    // we've passed down the for the given processing system. Otherwise there might be mutiple instances
+                    // of composite cookers, each having processed the same data - a waste of memory and processing time.
                     //
 
                     var filteredRetrievalFactory = this.compositeCookers.CreateFilteredRepository();

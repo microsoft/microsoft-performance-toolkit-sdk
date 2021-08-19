@@ -11,7 +11,7 @@ using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 {
     /// <summary>
-    ///     This owns all instances of composite cookers for a given system.
+    ///     This owns all instances of composite cookers for a given processing system.
     /// </summary>
     public sealed class ProcessingSystemCompositeCookers
           : ICompositeCookerRepository
@@ -35,19 +35,32 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             this.dataExtensionRepository = dataExtensionRepository;
         }
 
+        /// <summary>
+        ///     Initializes this class with a <see cref="IDataExtensionRetrievalFactory"/>.
+        /// </summary>
+        /// <param name="retrievalFactory">
+        ///     Provides access to data needed to instantiate a composite cooker.
+        /// </param>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="retrievalFactory"/> is <c>null</c>.
+        /// </exception>
         public void Initialize(IDataExtensionRetrievalFactory retrievalFactory)
         {
             this.ThrowIfDisposed();
+            Guard.NotNull(retrievalFactory, nameof(retrievalFactory));
+
             this.retrievalFactory = retrievalFactory;
         }
 
         /// <inheritdoc/>
-        public ICookedDataRetrieval GetOrCreateCompositeCooker(DataCookerPath dataCookerPath)
+        public ICookedDataRetrieval GetCookerOutput(DataCookerPath dataCookerPath)
         {
             Debug.Assert(
                 this.retrievalFactory != null,
                 $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
-
             if (this.retrievalFactory == null)
             {
                 // this is a bug if it's happening from our Engine implementation
@@ -69,17 +82,23 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             DataCookerPath cookerPath,
             Func<DataCookerPath, IDataExtensionRetrieval> createDataRetrieval)
         {
+            Debug.Assert(createDataRetrieval != null);
+
             this.ThrowIfDisposed();
 
+            Debug.Assert(
+                this.retrievalFactory != null,
+                $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
             if (this.retrievalFactory == null)
             {
-                Debug.Assert(false, $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
+                // this is a bug if it's happening from our Engine implementation
                 throw new InvalidOperationException(
                     $"{nameof(ProcessingSystemCompositeCookers.Initialize)} hasn't been called.");
             }
 
             if (this.compositeCookersByPath.TryGetValue(cookerPath, out var dataCooker))
             {
+                // The cooker already exists and is ready to use.
                 return dataCooker;
             }
 
@@ -96,15 +115,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                     $"The data cooker is not available: {cookerPath}");
             }
 
-            if (createDataRetrieval == null)
+            var compositeCookerRequiredData = createDataRetrieval(cookerPath);
+            if (compositeCookerRequiredData == null)
             {
-                throw new ArgumentNullException(nameof(createDataRetrieval));
+                // is this a bug in the runtime?
+                Debug.Assert(false);
+                throw new InvalidOperationException(
+                    $"Failed to create {nameof(IDataExtensionRetrieval)} needed for the composite cooker.");
             }
 
-            var compositeCooker = compositeCookerReference.CreateInstance(createDataRetrieval(cookerPath));
+            var compositeCooker = compositeCookerReference.CreateInstance(compositeCookerRequiredData);
             if (compositeCooker == null)
             {
-                Debug.Assert(false, "If the data cooker reference is available, why did this fail?");
+                Debug.Assert(false, "If the data cooker reference is available, this shouldn't fail.");
                 throw new InvalidOperationException(
                     $"The composite cooker reference returned null cooker: {cookerPath}. Was it properly initialized?");
             }
@@ -162,7 +185,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.compositeCookers = compositeCookers;
             }
 
-            public ICookedDataRetrieval GetOrCreateCompositeCooker(DataCookerPath cookerPath)
+            public ICookedDataRetrieval GetCookerOutput(DataCookerPath cookerPath)
             {
                 this.ThrowIfDisposed();
 

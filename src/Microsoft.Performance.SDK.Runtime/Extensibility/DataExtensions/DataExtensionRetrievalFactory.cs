@@ -33,11 +33,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <summary>
         ///     Initialize an instance of this class.
         /// </summary>
-        /// <param name="cookerData">
-        ///     Provides access to cookers and cooker data.
+        /// <param name="sourceCookerData">
+        ///     Provides access to source cooker data.
+        /// </param>
+        /// <param name="compositeCookers">
+        ///     Provides access to composite cookers.
         /// </param>
         /// <param name="dataExtensionRepository">
-        ///     Provides a way to generate data extensions other than source data cookers.
+        ///     Provides access to extension references and extension tables.
         /// </param>
         public DataExtensionRetrievalFactory(
             ICookedDataRetrieval sourceCookerData,

@@ -27,8 +27,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <summary>
         ///     Creates an instance of the <see cref="FilteredDataRetrieval"/> class for a given data extension.
         /// </summary>
-        /// <param name="cookerData">
-        ///     Provides access to source cooker data and composite cookers.
+        /// <param name="sourceCookerData">
+        ///     Provides access to source cooker data.
+        /// </param>
+        /// <param name="compositeCookers">
+        ///     Provides access to composite cookers.
         /// </param>
         /// <param name="dataExtensionRepository">
         ///     Provides access to data processors (to be removed for V1).
@@ -171,28 +174,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             }
         }
 
-        /// <summary>
-        ///     Check that the requested composite cooker is available to this filtered data set.
-        /// </summary>
-        /// <param name="dataOutputPath">
-        ///     Path to a composite data cooker.
-        /// </param>
-        /// <param name="compositeCooker">
-        ///     An instance of the composite data cooker.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the composite cooker is valid; <c>false</c> otherwise.
-        /// </returns>
-        private bool TryValidateCompositeDataCooker(DataOutputPath dataOutputPath/*, out IDataCooker compositeCooker*/)
+        private bool TryValidateCompositeDataCooker(DataOutputPath dataOutputPath)
         {
-            var cookerPath = dataOutputPath.CookerPath;
-
-            if (!this.extensionDependencies.RequiredCompositeDataCookerPaths.Contains(cookerPath))
-            {
-                return false;
-            }
-
-            return true;
+            return this.extensionDependencies.RequiredCompositeDataCookerPaths.Contains(dataOutputPath.CookerPath);
         }
 
         private T QuerySourceOutput<T>(DataOutputPath dataOutputPath)
@@ -271,7 +255,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         private ICookedDataRetrieval GetCompositeDataRetrieval(DataCookerPath cookerPath)
         {
-            return this.compositeCookers.GetOrCreateCompositeCooker(cookerPath);
+            return this.compositeCookers.GetCookerOutput(cookerPath);
         }
     }
 }
