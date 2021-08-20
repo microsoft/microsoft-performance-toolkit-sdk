@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
@@ -72,6 +73,27 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 sut?.Dispose();
             }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void CreateInstance()
+        {
+            var result = CompositeDataCookerReference.TryCreateReference(
+                typeof(TestCompositeDataCooker),
+                out var sut);
+
+            Assert.IsTrue(result);
+
+            var requiredData = new FakeRetrieval();
+            IDataCooker instance = sut.CreateInstance(requiredData);
+
+            Assert.IsNotNull(instance);
+
+            var testCompositeCooker = instance as TestCompositeDataCooker;
+            Assert.IsNotNull(testCompositeCooker);
+
+            Assert.AreEqual(requiredData, testCompositeCooker.RequiredData);
         }
 
         private sealed class FakeRetrieval

@@ -29,9 +29,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <param name="dataExtensionRepository">
         ///     A data extension repository.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataExtensionRepository"/> is <c>null</c>.
+        /// </exception>
         public ProcessingSystemCompositeCookers(
             IDataExtensionRepository dataExtensionRepository)
         {
+            Guard.NotNull(dataExtensionRepository, nameof(dataExtensionRepository));
+
             this.dataExtensionRepository = dataExtensionRepository;
         }
 
@@ -58,15 +63,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <inheritdoc/>
         public ICookedDataRetrieval GetCookerOutput(DataCookerPath dataCookerPath)
         {
+            this.ThrowIfDisposed();
+
             Debug.Assert(
                 this.retrievalFactory != null,
                 $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
-            if (this.retrievalFactory == null)
-            {
-                // this is a bug if it's happening from our Engine implementation
-                throw new InvalidOperationException(
-                    $"{nameof(ProcessingSystemCompositeCookers.Initialize)} hasn't been called.");
-            }
 
             return this.GetOrCreateCompositeCooker(
                 dataCookerPath,
@@ -89,12 +90,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Debug.Assert(
                 this.retrievalFactory != null,
                 $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
-            if (this.retrievalFactory == null)
-            {
-                // this is a bug if it's happening from our Engine implementation
-                throw new InvalidOperationException(
-                    $"{nameof(ProcessingSystemCompositeCookers.Initialize)} hasn't been called.");
-            }
 
             if (this.compositeCookersByPath.TryGetValue(cookerPath, out var dataCooker))
             {

@@ -76,7 +76,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             else
             {
                 base.PerformAdditionalDataExtensionValidation(
-                    dependencyStateSupport, 
+                    dependencyStateSupport,
                     requiredDataExtension);
             }
         }
@@ -137,13 +137,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
         }
 
+        public Func<IDataCooker> createInstance;
         public IDataCooker CreateInstance(IDataExtensionRetrieval requiredData)
         {
-            throw new NotImplementedException();
+            return this.createInstance?.Invoke();
         }
+
+        public bool DisposeWasCalled { get; private set; }
 
         protected override void Dispose(bool disposing)
         {
+            this.DisposeWasCalled = true;
             base.Dispose(disposing);
         }
     }
