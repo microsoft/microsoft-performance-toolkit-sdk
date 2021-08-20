@@ -254,54 +254,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             IEnumerable<string> extensionDirectories,
             IAssemblyLoader assemblyLoader)
         {
-            return Load(extensionDirectories, assemblyLoader, null);
-        }
-
-        /// <summary>
-        ///     Creates a new <see cref="PluginSet"/>, loading all plugins found
-        ///     in the given directories, using the given loading function and
-        ///     validation function.
-        /// </summary>
-        /// <param name="extensionDirectories">
-        ///     The directories to search for plugins.
-        /// </param>
-        /// <param name="assemblyLoader">
-        ///     The loader to use to load plugin assemblies. This parameter may be
-        ///     <c>null</c>. If this parameter is <c>null</c>, then the default
-        ///     loader will be used.
-        ///     <remarks>
-        ///         The default loader provides no isolation.
-        ///     </remarks>
-        /// </param>
-        /// <param name="validatorFactory">
-        ///     A function providing validators to use to validate plugin assemblies.
-        ///     This parameter may be <c>null</c>. If this parameter is <c>null</c>,
-        ///     then the default validation strategy will be used.
-        ///     <remarks>
-        ///         The default validation strategy performs no validation.    
-        ///     </remarks>
-        /// </param>
-        /// <returns>
-        ///     A new instance of the <see cref="PluginSet"/> class containing all
-        ///     of the successfully discovered plugins. The returned instance will
-        ///     also contain a collection of non-fatal errors that occurred when
-        ///     creating this data set (i.e. a plugin failed to load.)
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="extensionDirectories"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="System.ArgumentException">
-        ///     <paramref name="extensionDirectories"/> is empty.
-        /// </exception>
-        /// <exception cref="InvalidExtensionDirectoryException">
-        ///     One or more directory paths in <paramref name="extensionDirectories"/>
-        ///     is invalid or does not exist.
-        /// </exception>
-        public static PluginSet Load(
-            IEnumerable<string> extensionDirectories,
-            IAssemblyLoader assemblyLoader,
-            Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
-        {
             Guard.NotNull(extensionDirectories, nameof(extensionDirectories));
             Guard.Any(extensionDirectories, nameof(extensionDirectories));
 
@@ -339,7 +291,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             try
             {
                 assemblyLoader ??= new AssemblyLoader();
-                validatorFactory ??= _ => new NullValidator();
+                var validatorFactory = new Func<IEnumerable<string>, IPreloadValidator>(_ => new NullValidator());
 
                 var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
 

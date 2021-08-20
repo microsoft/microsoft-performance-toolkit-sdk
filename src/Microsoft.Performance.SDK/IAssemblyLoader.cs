@@ -3,7 +3,7 @@
 
 using System.Reflection;
 
-namespace Microsoft.Performance.SDK.Runtime.Discovery
+namespace Microsoft.Performance.SDK
 {
     /// <summary>
     ///     Loads assemblies.
@@ -46,8 +46,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     <paramref name="error"/> parameter will contain
         ///     details as to the failure.
         /// </returns>
-        Assembly LoadAssembly(
-            string assemblyPath,
-            out ErrorInfo error);
+        Assembly LoadAssembly(string assemblyPath, out ErrorInfo error);
     }
 }
