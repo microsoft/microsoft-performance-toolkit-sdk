@@ -546,32 +546,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         #endregion
 
-        #region Seal
-
-        [TestMethod]
-        [IntegrationTest]
-        public void WhenSealed_AddsThrow()
-        {
-            this.Sut.Seal();
-
-            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddDataSource(Any.DataSource()));
-            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddDataSource(Any.DataSource(), typeof(object)));
-            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddDataSources(new[] { Any.DataSource(), }, typeof(object)));
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void WhenSealed_TryAddsReturnFalse()
-        {
-            this.Sut.Seal();
-
-            Assert.IsFalse(this.Sut.TryAddDataSource(Any.DataSource()));
-            Assert.IsFalse(this.Sut.TryAddDataSource(Any.DataSource(), typeof(object)));
-            Assert.IsFalse(this.Sut.TryAddDataSources(new[] { Any.DataSource(), }, typeof(object)));
-        }
-
-        #endregion
-
         private IDataSource CreateTestFile(string extension)
         {
             var path = Any.FileOnDisk(extension, this.Scratch.FullName);

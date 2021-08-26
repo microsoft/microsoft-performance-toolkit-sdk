@@ -26,8 +26,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly PluginSet plugins;
         private readonly bool ownsPlugins;
 
-        private bool isSealed;
-
         private bool isDisposed;
 
         /// <summary>
@@ -56,7 +54,6 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             this.plugins = plugins;
             this.ownsPlugins = ownsPlugins;
-            this.isSealed = false;
             this.isDisposed = false;
         }
 
@@ -93,23 +90,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 this.ThrowIfDisposed();
                 return this.freeDataSourcesRO;
-            }
-        }
-
-        /// <summary>
-        ///     Gets a value indicating whether this instance is sealed. A sealed
-        ///     <see cref="DataSourceSet"/> does not accept any more additions of
-        ///     data sources.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public bool IsSealed
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.isSealed;
             }
         }
 
@@ -184,46 +164,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             return new DataSourceSet(plugins, ownsPlugins);
         }
 
-        internal static DataSourceSet DeepCopy(DataSourceSet other)
-        {
-            //
-            // Creates a deep copy of the given data source set. This
-            // is used by the engine in order to make sure that it has
-            // a non-changing copy of the data sources to use for
-            // processing. Because a DataSourceSet may own the plugin set,
-            // copies created by this method will *never* own the plugin
-            // set from the original in order to avoid ambiguity in
-            // ownership of the plugin set. This means that the result
-            // of this method is not an exact deep copy, but for the 
-            // purposes of the engine, it works. If we decide we want to
-            // expose copy functionality to the public, then we need to
-            // figure out how to deal with ownership of the underlying
-            // plugin set in regards to copies so that we can communicate
-            // them appropriately.
-            //
-
-            Debug.Assert(other != null);
-            Debug.Assert(!other.isDisposed);
-
-            var copy = new DataSourceSet(other.plugins, false)
-            {
-                isSealed = other.isSealed,
-                isDisposed = false
-            };
-
-            foreach (var kvp in other.dataSourcesToProcess)
-            {
-                copy.dataSourcesToProcess[kvp.Key] = kvp.Value
-                    .Select(x => new List<IDataSource>(x))
-                    .ToList();
-            }
-
-            copy.freeDataSources.AddRange(other.FreeDataSourcesToProcess);
-            copy.processingSourceReferencesList.AddRange(other.processingSourceReferencesList);
-
-            return copy;
-        }
-
         /// <inheritdoc />
         public void Dispose()
         {
@@ -256,7 +196,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         public DataSourceSet AddDataSource(IDataSource dataSource)
         {
             this.ThrowIfDisposed();
-            this.ThrowIfSealed();
 
             Guard.NotNull(dataSource, nameof(dataSource));
 
@@ -286,11 +225,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         public bool TryAddDataSource(IDataSource dataSource)
         {
             this.ThrowIfDisposed();
-
-            if (this.isSealed)
-            {
-                return false;
-            }
 
             if (dataSource is null)
             {
@@ -410,7 +344,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         public DataSourceSet AddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
         {
             this.ThrowIfDisposed();
-            this.ThrowIfSealed();
 
             Guard.NotNull(dataSources, nameof(dataSources));
             Guard.NotNull(processingSourceType, nameof(processingSourceType));
@@ -444,11 +377,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             this.ThrowIfDisposed();
 
-            if (this.isSealed)
-            {
-                return false;
-            }
-
             if (dataSources is null ||
                 dataSources.Any(x => x is null) ||
                 processingSourceType is null)
@@ -476,13 +404,44 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public DataSourceSet Seal()
+        public ReadOnlyDataSourceSet AsReadOnly()
         {
             this.ThrowIfDisposed();
 
-            this.isSealed = true;
+            //
+            // Create a deep copy of the given data source set. This
+            // is used to make sure that the readonly set cannot be
+            // changed by manipulating the original data source set reference.
+            // Because a DataSourceSet may own the plugin set,
+            // copies created by this method will *never* own the plugin
+            // set from the original in order to avoid ambiguity in
+            // ownership of the plugin set. This means that the result
+            // of this method is not an exact deep copy, but for the 
+            // purposes of the engine, it works. If we decide we want to
+            // expose copy functionality to the public, then we need to
+            // figure out how to deal with ownership of the underlying
+            // plugin set in regards to copies so that we can communicate
+            // them appropriately.
+            //
 
-            return this;
+            var dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
+            var freeDataSources = new List<IDataSource>();
+            var processingSourceReferencesList = new List<ProcessingSourceReference>();
+
+            foreach (var kvp in this.dataSourcesToProcess)
+            {
+                dataSourcesToProcess[kvp.Key] = kvp.Value
+                    .Select(x => new List<IDataSource>(x))
+                    .ToList();
+            }
+
+            freeDataSources.AddRange(this.FreeDataSourcesToProcess);
+            processingSourceReferencesList.AddRange(this.processingSourceReferencesList);
+
+            return new ReadOnlyDataSourceSet(
+                dataSourcesToProcess,
+                freeDataSources,
+                this.plugins);
         }
 
         private bool TypeIs(Type first, Type second)
@@ -510,7 +469,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             Func<Type, Type, bool> typeIs)
         {
             Debug.Assert(!this.isDisposed);
-            Debug.Assert(!this.isSealed);
 
             Debug.Assert(dataSources != null);
             Debug.Assert(processingSourceType != null);
@@ -573,14 +531,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (this.isDisposed)
             {
                 throw new ObjectDisposedException(nameof(Engine));
-            }
-        }
-
-        private void ThrowIfSealed()
-        {
-            if (this.isSealed)
-            {
-                throw new InvalidOperationException("This collection is sealed.");
             }
         }
     }

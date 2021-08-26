@@ -61,9 +61,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 () => Engine.Create(new[] { Any.DataSource(), }, null));
 
             Assert.ThrowsException<ArgumentNullException>(
-                () => Engine.Create(null, typeof(Source123Processor), new EngineCreateInfo(DataSourceSet.Create())));
+                () => Engine.Create(null, typeof(Source123Processor), new EngineCreateInfo(DataSourceSet.Create().AsReadOnly())));
             Assert.ThrowsException<ArgumentNullException>(
-                () => Engine.Create(new[] { Any.DataSource(), }, null, new EngineCreateInfo(DataSourceSet.Create())));
+                () => Engine.Create(new[] { Any.DataSource(), }, null, new EngineCreateInfo(DataSourceSet.Create().AsReadOnly())));
             Assert.ThrowsException<ArgumentNullException>(
                 () => Engine.Create(new[] { Any.DataSource(), }, typeof(Source123Processor), null));
         }
@@ -72,7 +72,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_IsProcessed_False()
         {
-            var info = new EngineCreateInfo(this.DefaultSet);
+            var info = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
             using var sut = Engine.Create(info);
             Assert.IsFalse(sut.IsProcessed);
         }
@@ -85,7 +85,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             using var dataSources = DataSourceSet.Create();
             dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
 
-            var info = new EngineCreateInfo(dataSources);
+            var info = new EngineCreateInfo(dataSources.AsReadOnly());
             using var sut = Engine.Create(info);
 
             Assert.AreNotSame(dataSources, sut.DataSourcesToProcess);
@@ -102,7 +102,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void EnableCooker_Known_Enables()
         {
             this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var cooker = Source1DataCooker.DataCookerPath;
 
@@ -116,7 +116,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_NotKnown_Throws()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var cooker = DataCookerPath.ForComposite("not-there-id");
 
@@ -128,7 +128,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableCooker_AlreadyProcessed_Throws()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Process();
 
@@ -140,7 +140,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void EnableCooker_NoData_Throws()
         {
             this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-            var createInfo = new EngineCreateInfo(this.DefaultSet);
+            var createInfo = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
 
             using var sut = Engine.Create(createInfo);
 
@@ -156,7 +156,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void TryEnableCooker_Known_Enables()
         {
             this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var cooker = Source1DataCooker.DataCookerPath;
 
@@ -171,7 +171,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void TryEnableCooker_Known_True()
         {
             this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var cooker = Source1DataCooker.DataCookerPath;
 
@@ -185,7 +185,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_NotKnown_False()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var cooker = DataCookerPath.ForComposite("not-there-id");
 
@@ -196,7 +196,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableCooker_AlreadyProcessed_False()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Process();
 
@@ -208,7 +208,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void TryEnableCooker_NoData_False()
         {
             this.DefaultSet.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-            var createInfo = new EngineCreateInfo(this.DefaultSet);
+            var createInfo = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
 
             using var sut = Engine.Create(createInfo);
 
@@ -223,7 +223,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableTable_Known_Enables()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var table = sut.AvailableTables.FirstOrDefault();
 
@@ -237,7 +237,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableTable_Known_EmptyTable()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.EnableTable(EmptyTable.TableDescriptor);
 
@@ -249,7 +249,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableTable_NotKnown_Throws()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var table = new TableDescriptor(Guid.NewGuid(), "Unknown Table", "Unknown Table");
 
@@ -261,7 +261,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void EnableTable_AlreadyProcessed_Throws()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Process();
 
@@ -276,7 +276,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableTable_Known_Enables()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var table = sut.AvailableTables.FirstOrDefault();
 
@@ -290,7 +290,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableTable_Known_Enables_True()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var table = sut.AvailableTables.FirstOrDefault();
 
@@ -304,7 +304,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableTable_Known_EmptyTable()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.TryEnableTable(EmptyTable.TableDescriptor);
 
@@ -316,7 +316,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableTable_Known_EmptyTable_True()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             Assert.IsTrue(sut.TryEnableTable(EmptyTable.TableDescriptor));
 
@@ -328,7 +328,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableTable_NotKnown_Throws()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var table = new TableDescriptor(Guid.NewGuid(), "Unknown Table", "Unknown Table");
 
@@ -339,7 +339,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void TryEnableTable_AlreadyProcessed_Throws()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Process();
 
@@ -354,7 +354,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void BuildTable_EmptyTable()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.EnableTable(EmptyTable.TableDescriptor);
 
@@ -378,7 +378,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void BuildTable_EmptyTable_IsDataAvailable()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.EnableTable(EmptyTableWithIsData.TableDescriptor);
 
@@ -403,7 +403,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void BuildTable_SingleRowTable()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.EnableTable(SingleRowTable.TableDescriptor);
 
@@ -452,7 +452,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 dataSources.AddFile(file);
             }
 
-            using var sut = Engine.Create(new EngineCreateInfo(dataSources));
+            using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
 
             sut.EnableTable(Source123Table.TableDescriptor);
 
@@ -501,7 +501,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 dataSources.AddFile(file);
             }
 
-            using var sut = Engine.Create(new EngineCreateInfo(dataSources));
+            using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
 
             foreach (var tableGuid in testCase.TablesToEnable)
             {
@@ -558,7 +558,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_WhenComplete_IsProcessedSetToTrue()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Process();
 
@@ -569,7 +569,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_NothingEnabled_DoesNothing()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             var results = sut.Process();
 
@@ -581,7 +581,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [FunctionalTest]
         public void Process_AlreadyProcessed_Throws()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Process();
 
@@ -616,7 +616,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 dataSources.AddDataSource(new FileDataSource(file));
             }
 
-            using var sut = Engine.Create(new EngineCreateInfo(dataSources));
+            using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
 
             foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
@@ -739,7 +739,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 dataSources.AddDataSource(new FileDataSource(file));
             }
 
-            var runtime = Engine.Create(new EngineCreateInfo(dataSources));
+            var runtime = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
 
             foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
@@ -828,7 +828,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [UnitTest]
         public void WhenDisposed_EverythingThrows()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Dispose();
 
@@ -849,7 +849,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [UnitTest]
         public void CanDisposeMultipleTimes()
         {
-            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet));
+            using var sut = Engine.Create(new EngineCreateInfo(this.DefaultSet.AsReadOnly()));
 
             sut.Dispose();
             sut.Dispose();
@@ -858,67 +858,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         [TestMethod]
         [IntegrationTest]
-        public void Dispose_CloneAlwaysDisposed()
-        {
-            var file = new FileDataSource("test" + Source123DataSource.Extension);
-            using var dataSources = DataSourceSet.Create();
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-
-            var info = new EngineCreateInfo(dataSources);
-
-            {
-                info.OwnsDataSources = false;
-                using var sut = Engine.Create(info);
-                var clone = sut.DataSourcesToProcess;
-
-                sut.Dispose();
-
-                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
-            }
-
-            {
-                info.OwnsDataSources = true;
-                using var sut = Engine.Create(info);
-                var clone = sut.DataSourcesToProcess;
-
-                sut.Dispose();
-
-                Assert.ThrowsException<ObjectDisposedException>(() => clone.FreeDataSourcesToProcess);
-            }
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void Dispose_OriginalOnlyDisposedWhenOwned()
-        {
-            var file = new FileDataSource("test" + Source123DataSource.Extension);
-            using var dataSources = DataSourceSet.Create();
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-
-            var info = new EngineCreateInfo(dataSources);
-
-            {
-                info.OwnsDataSources = false;
-                using var sut = Engine.Create(info);
-
-                sut.Dispose();
-
-                Assert.AreEqual(1, dataSources.FreeDataSourcesToProcess.Count());
-            }
-
-            {
-                info.OwnsDataSources = true;
-                using var sut = Engine.Create(info);
-
-                sut.Dispose();
-
-                Assert.ThrowsException<ObjectDisposedException>(() => dataSources.FreeDataSourcesToProcess);
-            }
-        }
-
-        [TestMethod]
-        [IntegrationTest]
-        public void Dispose_CloneNeverTakesOwnershipOfPlugins()
+        public void Dispose_NeverTakesOwnershipOfPlugins()
         {
             using var plugins = PluginSet.Load();
 
@@ -926,10 +866,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             using var dataSources = DataSourceSet.Create(plugins, true);
             dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
 
-            var info = new EngineCreateInfo(dataSources);
+            var info = new EngineCreateInfo(dataSources.AsReadOnly());
 
             {
-                info.OwnsDataSources = false;
                 using var sut = Engine.Create(info);
                 var clone = sut.DataSourcesToProcess;
 

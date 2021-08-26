@@ -42,8 +42,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private ILogger logger;
         private List<ProcessingSourceExecutor> executors;
-        private DataSourceSet workingDataSourceSet;
-        private DataSourceSet originalDataSourceSet;
+        private ReadOnlyDataSourceSet workingDataSourceSet;
+        private DataSourceSet internalDataSourceSet;
 
         private TableExtensionSelector tableExtensionSelector;
 
@@ -52,10 +52,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         private IApplicationEnvironment applicationEnvironment;
         private bool isDisposed;
 
-        internal Engine(EngineCreateInfo createInfo)
+        internal Engine(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
         {
-            this.workingDataSourceSet = DataSourceSet.DeepCopy(createInfo.DataSources).Seal();
-            this.originalDataSourceSet = createInfo.DataSources;
+            this.workingDataSourceSet = createInfo.DataSources;
+            this.internalDataSourceSet = internalDataSourceSet;
 
             this.loggerFactory = createInfo.LoggerFactory;
 
@@ -102,7 +102,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public DataSourceSet DataSourcesToProcess
+        public ReadOnlyDataSourceSet DataSourcesToProcess
         {
             get
             {
@@ -219,7 +219,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 dataSourceSet = DataSourceSet.Create();
                 dataSourceSet.AddDataSource(dataSource);
 
-                var info = new EngineCreateInfo(dataSourceSet);
+                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
                 return Create(info);
             }
             catch
@@ -272,8 +272,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 dataSourceSet = DataSourceSet.Create();
                 dataSourceSet.AddDataSource(dataSource, processingSourceType);
 
-                var info = new EngineCreateInfo(dataSourceSet);
-                return Create(info);
+                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
+                return CreateCore(info, dataSourceSet);
             }
             catch
             {
@@ -328,8 +328,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 dataSourceSet = DataSourceSet.Create();
                 dataSourceSet.AddDataSources(dataSources, processingSourceType);
 
-                var info = new EngineCreateInfo(dataSourceSet);
-                return Create(info);
+                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
+                return CreateCore(info, dataSourceSet);
             }
             catch
             {
@@ -377,8 +377,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 dataSourceSet = DataSourceSet.Create();
                 dataSourceSet.AddDataSources(dataSources, processingSourceType);
 
-                var info = new EngineCreateInfo(dataSourceSet);
-                return Create(info);
+                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
+                return CreateCore(info, dataSourceSet);
             }
             catch
             {
@@ -409,7 +409,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                return CreateCore(createInfo);
+                return CreateCore(createInfo, null);
             }
             catch (Exception e)
             {
@@ -672,17 +672,17 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
-                // we dispose the working clone regardless of ownership.
-                this.workingDataSourceSet.SafeDispose();
-
+                //
                 // we diposes the original set only if we own the data sources.
-                if (this.createInfo.OwnsDataSources)
-                {
-                    this.originalDataSourceSet.SafeDispose();
-                }
+                // this only occurs when the user uses one of the convenience
+                // methods that creates a DataSource internally, e.g. Create(IDataSource).
+                //
+
+                this.internalDataSourceSet.SafeDispose();
             }
 
             this.workingDataSourceSet = null;
+            this.internalDataSourceSet = null;
             this.applicationEnvironment = null;
             this.isDisposed = true;
         }
@@ -731,7 +731,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             return loggerFactory?.Invoke(type) ?? Logger.Create(type);
         }
 
-        private static Engine CreateCore(EngineCreateInfo createInfo)
+        private static Engine CreateCore(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
         {
             Debug.Assert(createInfo != null);
 
@@ -743,7 +743,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             try
             {
 
-                instance = new EngineImpl(createInfo);
+                instance = new EngineImpl(createInfo, internalDataSourceSet);
                 instance.logger = logger;
                 instance.tableExtensionSelector = new TableExtensionSelector(createInfo.DataSources.Plugins.Extensions.Repository);
 
@@ -1021,8 +1021,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class EngineImpl
             : Engine
         {
-            internal EngineImpl(EngineCreateInfo createInfo)
-                : base(createInfo)
+            internal EngineImpl(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
+                : base(createInfo, internalDataSourceSet)
             {
             }
         }

@@ -33,7 +33,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     Thrown is <paramref name="dataSources"/> is <c>null</c>.
         /// </exception>
-        public EngineCreateInfo(DataSourceSet dataSources)
+        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources)
         {
             Guard.NotNull(dataSources, nameof(dataSources));
 
@@ -65,18 +65,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Gets the data sources that are to be processed by an <see cref="Engine"/>
         ///     instance.
         /// </summary>
-        public DataSourceSet DataSources { get; }
-
-        /// <summary>
-        ///     Gets or sets a value indicating whether the created <see cref="Engine"/>
-        ///     instance owns the data sources passed in <see cref="DataSources"/>.
-        ///     If this parameter is set to <c>true</c>, then when the <see cref="Engine"/>
-        ///     instance is disposed, the <see cref="DataSources"/> instance will be disposed.
-        ///     Set this property to <c>false</c> if you wish to use the same <see cref="DataSourceSet" />
-        ///     across multiple <see cref="Engine"/> instances.
-        ///     <para />
-        ///     The default value is <c>true</c>.
-        /// </summary>
-        public bool OwnsDataSources { get; set; } = true;
+        public ReadOnlyDataSourceSet DataSources { get; }
     }
 }
