@@ -200,7 +200,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="dataSource"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="EngineException">
-        ///     An fatal error occurred while creating the engine.
+        ///     A fatal error occurred while creating the engine.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     <paramref name="dataSource"/> cannot be processed by any
@@ -247,7 +247,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="EngineException">
-        ///     An fatal error occurred while creating the engine.
+        ///     A fatal error occurred while creating the engine.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     The specified <paramref name="processingSourceType"/> cannot handle
@@ -310,7 +310,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
         /// <exception cref="EngineException">
-        ///     An fatal error occurred while creating the engine.
+        ///     A fatal error occurred while creating the engine.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -357,7 +357,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="createInfo"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="EngineException">
-        ///     An fatal error occurred while creating the engine.
+        ///     A fatal error occurred while creating the engine.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -398,7 +398,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="createInfo"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="EngineException">
-        ///     An fatal error occurred while creating the engine.
+        ///     A fatal error occurred while creating the engine.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
