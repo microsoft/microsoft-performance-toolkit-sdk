@@ -13,11 +13,14 @@ major components to be aware of when using the `Engine`:
 ## Plugin Set
 
 The `PluginSet` is a collection of all of your plugins and extensions that can
-be used to process data from data sources (i.e. files.) You can create a new
+be used to process data from data sources (e.g. files). You can create a new
 `PluginSet` by loading one or more extension directories:
 
 ````cs
-using var plugins = PluginSet.Load("c:\\my\\plugin\\directory");
+using (var plugins = PluginSet.Load("c:\\my\\plugin\\directory"))
+{
+    // Use the set
+}
 ````
 
 In advanced scenarios, overloads are provided to allow for you to pass your
@@ -50,7 +53,7 @@ If an attempt is made to add an `IDataSource` to the `DataSourceSet` for which
 no plugin can process, then the `DataSourceSet` will throw an exception. The
 `DataSourceSet` class provides Try versions of each of the methods (e.g.
 `TryAddDataSource`) that will not throw if the `IDataSource` does not have a
-corresponding plugin that can process the data source.
+plugin to process the data source.
 
 Finally, you can specify that the `DataSourceSet` should take ownership of the
 `PluginSet`. This means that when the `DataSourceSet` is disposed, the
@@ -87,18 +90,21 @@ participate in processing. If an attempt is made to enable a cooker for which
 there is no corresponding data source in the `DataSourceSet`, then an exception
 will be thrown. You may use the Try versions of the Enable methods to avoid
 the exceptions.
-Once you are read, call process and then examine the results.
+Once you are ready, call process and then examine the results.
 
 ````cs
-using var plugins = PluginSet.Load();
-using var dataSources = DataSourceSet.Create(plugins);
-dataSources.Add(new FileDataSource("myfile.txt");
+using (var plugins = PluginSet.Load())
+using (var dataSources = DataSourceSet.Create(plugins))
+{
+    dataSources.Add(new FileDataSource("myfile.txt");
 
-var createInfo = new EngineCreateInfo(dataSources);
-using var engine = Engine.Create(info);
+    var createInfo = new EngineCreateInfo(dataSources);
+    using (var engine = Engine.Create(info))
+    {
+        engine.EnableCooker(DataCookerPath);
 
-engine.EnableCooker(DataCookerPath);
-
-var results = engine.Process();
+        var results = engine.Process();
+    }
+}
 ````
 
