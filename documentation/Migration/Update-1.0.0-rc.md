@@ -1,7 +1,7 @@
 # Abstract
 
 This document outlines major code changes that might be needed when updating from 
-Preview Version 0.109.\* to Release Candidate Version 1.0.\* This document is divided
+Preview Version 0.109.\* to Release Candidate Version 1.0.0-rc This document is divided
 into two sections: [Breaking Changes](#breaking-changes) and 
 [Suggested Changes](#suggested-changes).
 
@@ -96,4 +96,8 @@ catch (UnsupportedDataSourceException)
     // ...
 }
 ````
+
+# Suggested Changes
+
+None at this time.
 
