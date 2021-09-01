@@ -158,6 +158,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// </exception>
         public DataExtensionAvailability InitialAvailability
         {
+            // todo: it seems like this is only ever set to or compared to DataExtensionAvailability.Error
+            //       given this, should it just be made into a bool?
+
             get
             {
                 this.ThrowIfDisposed();

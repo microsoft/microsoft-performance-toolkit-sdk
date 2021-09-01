@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Processing
     public interface ICustomDataProcessor
     {
         /// <summary>
-        ///     Instructs the processor to that a table is being
+        ///     Instructs the processor that a table is being
         ///     requested by the user. This means that the processor
         ///     should do whatever is necessary in ProcessAsync to
         ///     make sure the table can be used.
@@ -28,6 +28,20 @@ namespace Microsoft.Performance.SDK.Processing
         ///     processor as to which table is being requested.
         /// </param>
         void EnableTable(TableDescriptor tableDescriptor);
+
+        /// <summary>
+        ///     Instructs the processor that a table is being
+        ///     requested by the user. This means that the processor
+        ///     should do whatever is necessary in ProcessAsync to
+        ///     make sure the table can be used.
+        ///     <para />
+        ///     This method must be thread-safe.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The <see cref="TableDescriptor"/> that instructs the
+        ///     processor as to which table is being requested.
+        /// </param>
+        bool TryEnableTable(TableDescriptor tableDescriptor);
 
         /// <summary>
         ///     Asynchronously processes the data source.

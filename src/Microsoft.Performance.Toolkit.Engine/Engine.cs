@@ -990,9 +990,9 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.IsProcessed = true;
 
             var allDataSourceAssociations = GroupAllDataSourcesToProcessingSources(
-                this.processingSourceReferences,
-                this.freeDataSources,
-                this.dataSourcesToProcess);
+               this.processingSourceReferences,
+               this.freeDataSources,
+               this.dataSourcesToProcess);
 
             // This contains the set of composite cookers that will be used by the system of data processors available
             // to this RuntimeExecutionResults.
@@ -1011,9 +1011,22 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
                 else
                 {
-                    var executor = executors.Single(x => x.Context.ProcessingSource.AvailableTables.Contains(table));
-                    executor.Processor.EnableTable(table);
-                    processorTables.Add(table, executor.Processor);
+                    var executorsWithTable = executors.Where(x => x.Context.ProcessingSource.AvailableTables.Contains(table));
+                    foreach (var executor in executorsWithTable)
+                    {
+                        try
+                        {
+                            executor.Processor.EnableTable(table);
+                            processorTables.Add(table, executor.Processor);
+                        }
+                        catch (Exception e)
+                        {
+                            // todo: use logger for this
+                            Console.Error.WriteLine(
+                                $"Unable to enable table {table.Guid} on processor " +
+                                $"{executor.Context.ProcessingSource} processor: {e}");
+                        }
+                    }
                 }
             }
 

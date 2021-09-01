@@ -363,6 +363,7 @@
         {
             "id": "0006",
             "description": "Test Many Source Cookers process correctly",
+            "debugBreak": true,
             "sourceCookersToEnable": [
                 {
                     "sourceParserId": "Source123Parser",

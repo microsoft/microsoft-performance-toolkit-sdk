@@ -166,6 +166,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             }
         }
 
+        /// <summary>
+        ///     This class uses <see cref="ProcessingSystemCompositeCookers"/> to create and store composite
+        ///     cookers, but uses a its own <see cref="IDataExtensionRetrievalFactory"/> which has access
+        ///     to a subset of source data cookers.
+        /// </summary>
         internal sealed class FilteredCompositeCookers
             : ICompositeCookerRepository
         {

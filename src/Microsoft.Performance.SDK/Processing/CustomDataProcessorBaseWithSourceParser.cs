@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Extensibility;
@@ -98,18 +97,12 @@ namespace Microsoft.Performance.SDK.Processing
             return this.SourceParser.DataSourceInfo;
         }
 
-        /// <summary>
-        /// Enables a source data cooker on the <see cref="SourceProcessingSession"/>.
-        /// </summary>
-        /// <param name="sourceDataCookerFactory">Source data cooker factory</param>
+        /// <inheritdoc/>
         public void EnableCooker(ISourceDataCookerFactory sourceDataCookerFactory)
         {
             Guard.NotNull(sourceDataCookerFactory, nameof(sourceDataCookerFactory));
 
-            if (this.SourceProcessingSession == null)
-            {
-                return;
-            }
+            Debug.Assert(this.SourceProcessingSession != null);
 
             EnableCookerCore(sourceDataCookerFactory);
 
@@ -117,7 +110,8 @@ namespace Microsoft.Performance.SDK.Processing
             {
                 if (!StringComparer.Ordinal.Equals(cooker.Path.SourceParserId, this.SourceParserId))
                 {
-                    Debug.Assert(false, "Attempting to enable a source data cooker on the wrong source parser.");
+                    throw new ArgumentException(
+                        "The given cooker is not applicable to this data processor.");
                 }
                 else
                 {
@@ -127,7 +121,7 @@ namespace Microsoft.Performance.SDK.Processing
             }
             else
             {
-                throw new ArgumentException("The given cooker reference is not applicable to this data processor.");
+                throw new ArgumentException("The given cooker is not applicable to this data processor.");
             }
         }
 
@@ -292,14 +286,27 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
 
+        protected override bool OnEnableTable(TableDescriptor tableDescriptor)
+        {
+            try
+            {
+                return ProcessTableForExtensibility(tableDescriptor);
+            }
+            catch (Exception)
+            {
+            }
+
+            return false;
+        }
+
+
         /// <inheritdoc />
         /// <summary>
-        /// Builds on top of the functionality provided by the base class by enabling the data cookers required
-        /// by the given table descriptor.
+        ///     Builds on top of the functionality provided by the base class by enabling the data cookers required
+        ///     by an internal table descriptor.
         /// </summary>
         protected override void OnTableEnabled(TableDescriptor tableDescriptor)
         {
-            ProcessTableForExtensibility(tableDescriptor);
         }
 
         /// <summary>
@@ -336,15 +343,28 @@ namespace Microsoft.Performance.SDK.Processing
         {
         }
 
-        private void ProcessTableForExtensibility(TableDescriptor tableDescriptor)
+        private bool ProcessTableForExtensibility(TableDescriptor tableDescriptor)
         {
-            if (tableDescriptor.RequiredDataCookers.Any() || tableDescriptor.RequiredDataProcessors.Any())
+            if (!tableDescriptor.RequiresDataExtensions())
             {
-                if (!this.extensibilitySupport.AddTable(tableDescriptor))
-                {
-                    throw new InvalidOperationException($"Unable to process table {tableDescriptor.Name} for dependencies.");
-                }
+                // there's nothing that needs to be done to prepare for this table by this processor
+                return true;
             }
+
+            // Processors need to be able to get an IDataExtensionRetrieval object to build
+            // internal tables. Calling this here will enable this as well as any required
+            // source data cookers.
+            //
+            return this.extensibilitySupport.AddTable(tableDescriptor);
+            //{
+            //    return;
+            //}
+
+            // This table couldn't be added as an internal table, so add any required
+            // source data cookers associated with this source parser required to build the
+            // table.
+            //
+            //this.extensibilitySupport.EnableRequiredSourceDataCookers(tableDescriptor);
         }
 
         private void EnableRequiredSourceDataCookers()

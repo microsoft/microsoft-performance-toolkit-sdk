@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 {
@@ -70,26 +70,15 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
         [UnitTest]
         [TestMethod]
-        public void AddTableWithRequiredDataExtensions()
-        {
-            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor();
-
-            Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
-        }
-
-        [UnitTest]
-        [TestMethod]
         public void AddTableWithMissingRequirements()
         {
             // Just make sure that this doesn't throw an exception
 
             var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(TestTable1.SourceParserId);
 
-            Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
+            // the table won't be available with a missing dependency
 
-            // Not adding the source data cooker that is required by the table, so we expect that FinalizeTables will
-            // remove the table.
-            //
+            Assert.IsFalse(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
 
             cdp.ExtensibilitySupport.FinalizeTables();
 
@@ -140,7 +129,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
-            Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable2.TableDescriptor));
+            // This requires a source cooker from a different cdp, so it should fail to be added
+            Assert.IsFalse(cdp.ExtensibilitySupport.AddTable(TestTable2.TableDescriptor));
 
             cdp.ExtensibilitySupport.FinalizeTables();
 

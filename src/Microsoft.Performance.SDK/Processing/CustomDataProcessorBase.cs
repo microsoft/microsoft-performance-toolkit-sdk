@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Processing
     {
         private readonly HashSet<TableDescriptor> enabledTables;
 
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> 
+        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
 
         /// <summary>
@@ -104,9 +104,33 @@ namespace Microsoft.Performance.SDK.Processing
         {
             lock (this.enabledTables)
             {
-                this.enabledTables.Add(tableDescriptor);
-                OnTableEnabled(tableDescriptor);
+                if (this.enabledTables.Contains(tableDescriptor))
+                {
+                    return;
+                }
+
+                if (OnEnableTable(tableDescriptor))
+                {
+                    this.enabledTables.Add(tableDescriptor);
+                    OnTableEnabled(tableDescriptor);
+                }
             }
+        }
+
+        public bool TryEnableTable(TableDescriptor tableDescriptor)
+        {
+            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
+
+            try
+            {
+                EnableTable(tableDescriptor);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -182,7 +206,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         [Obsolete("This method will be removed by release 1.0. Please use ProcessAsyncCore instead.", false)]
         public virtual Task ProcessAsync(
-            ILogger logger, 
+            ILogger logger,
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
@@ -242,11 +266,18 @@ namespace Microsoft.Performance.SDK.Processing
             Action<ITableBuilder, IDataExtensionRetrieval> createTable,
             ITableBuilder tableBuilder);
 
+        protected virtual bool OnEnableTable(TableDescriptor tableDescriptor)
+        {
+            return true;
+        }
+
         /// <summary>
-        /// This is called when a table has been enabled on this data processor. The default implementation does
-        /// nothing.
+        ///     This is called when a table has been enabled on this data processor. The default implementation does
+        ///     nothing.
         /// </summary>
-        /// <param name="tableDescriptor">Table that was enabled.</param>
+        /// <param name="tableDescriptor">
+        ///     Table that was enabled.
+        /// </param>
         protected virtual void OnTableEnabled(TableDescriptor tableDescriptor)
         {
         }
@@ -258,7 +289,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableDescriptor">Descriptor for the generated table.</param>
         /// <param name="buildAction">Action called to create the requested table.</param>
         protected void AddTableGeneratedFromDataProcessing(
-            TableDescriptor tableDescriptor, 
+            TableDescriptor tableDescriptor,
             Action<ITableBuilder, IDataExtensionRetrieval> buildAction)
         {
             // the buildAction may be null because the custom data processor may have a special way to handle

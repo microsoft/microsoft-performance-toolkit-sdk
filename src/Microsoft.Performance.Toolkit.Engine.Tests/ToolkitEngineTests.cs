@@ -1132,6 +1132,16 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             }
         }
 
+        //[TestMethod]
+        //[FunctionalTest]
+        //[DeploymentItem(@"TestData/source123_test_data.s123d")]
+        //[DeploymentItem(@"TestData/source4_test_data.s4d")]
+        //public void BuildTable_InternalTable(
+        //    EngineBuildTableTestCaseDto testCase)
+        //{
+
+        //}
+
         private static IEnumerable<object[]> BuildTableTestData()
         {
             var suite = EngineTestsLoader.Load<EngineBuildTableTestSuiteDto>("TestData/BuildTableTestSuite.json");
@@ -1212,7 +1222,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 string dataOutputPathRaw = expectedData.Key;
                 var expectedDataPoints = expectedData.Value;
 
-                DataOutputPath dataOutputPath = Parse(dataOutputPathRaw); 
+                DataOutputPath dataOutputPath = Parse(dataOutputPathRaw);
 
                 Assert.IsTrue(
                     results.TryQueryOutput(dataOutputPath, out object data), "Output for {0} not found.", dataOutputPathRaw);

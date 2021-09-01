@@ -168,13 +168,13 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Identifiers for data cookers necessary to create this table.
         /// </summary>
-        public IReadOnlyCollection<DataCookerPath> RequiredDataCookers => 
+        public IReadOnlyCollection<DataCookerPath> RequiredDataCookers =>
             new ReadOnlyCollection<DataCookerPath>(this.dataCookers.ToList());
 
         /// <summary>
         ///     Identifiers for data processors necessary to create this table.
         /// </summary>
-        public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors => 
+        public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors =>
             new ReadOnlyCollection<DataProcessorId>(this.dataProcessors.ToList());
 
         /// <inheritdoc />

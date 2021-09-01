@@ -45,5 +45,10 @@ namespace Microsoft.Performance.Testing.SDK
         {
             throw new NotImplementedException();
         }
+
+        public bool TryEnableTable(TableDescriptor tableDescriptor)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

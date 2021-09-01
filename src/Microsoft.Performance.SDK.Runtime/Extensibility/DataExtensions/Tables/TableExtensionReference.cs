@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
-using System;
-using System.Diagnostics;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 {
@@ -125,7 +125,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        internal bool IsInternalTable
+        public bool IsInternalTable
         {
             get
             {
@@ -183,7 +183,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
         ///     <c>false</c> otherwise.
         /// </returns>
-        internal static bool TryCreateReference(
+        internal static bool CreateReference(
             Type candidateType,
             bool allowInternalTables,
             out ITableExtensionReference reference)
@@ -192,7 +192,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 
             reference = null;
 
-            if (TableDescriptorFactory.TryCreate(
+            if (!TableDescriptorFactory.Create(
                     candidateType,
                     tableConfigSerializer,
                     out var isInternalTable,
@@ -200,27 +200,72 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
                     out var tableBuildAction,
                     out var tableIsDataAvailableFunc))
             {
-                if (isInternalTable)
-                {
-                    if (!allowInternalTables)
-                    {
-                        return false;
-                    }
-
-                    Debug.Assert(tableBuildAction != null);
-                }
-
-                var tableReference = new TableExtensionReference(
-                    candidateType,
-                    tableDescriptor,
-                    tableBuildAction,
-                    tableIsDataAvailableFunc,
-                    isInternalTable);
-
-                reference = tableReference;
+                return false;
             }
 
-            return reference != null;
+            if (isInternalTable)
+            {
+                if (!allowInternalTables)
+                {
+                    throw new ExtendedTableException(
+                        $"{candidateType} is marked as internal and cannot be instantiated outside of its " +
+                        "processor.");
+                }
+
+                Debug.Assert(tableBuildAction != null);
+            }
+
+            reference = new TableExtensionReference(
+                candidateType,
+                tableDescriptor,
+                tableBuildAction,
+                tableIsDataAvailableFunc,
+                isInternalTable);
+
+            return true;
+        }
+
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ITableExtensionReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             must expose a valid <see cref="TableDescriptor"/>.
+        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ISerializer, out TableDescriptor)"/>
+        ///             for details on how a table is to expose a descriptor.
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ITableExtensionReference"/>
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ITableExtensionReference"/>
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        internal static bool TryCreateReference(
+            Type candidateType,
+            bool allowInternalTables,
+            out ITableExtensionReference reference)
+        {
+            Guard.NotNull(candidateType, nameof(candidateType));
+
+            try
+            {
+                return CreateReference(candidateType, allowInternalTables, out reference);
+            }
+            catch (Exception)
+            {
+            }
+
+            reference = null;
+            return false;
         }
 
         /// <inheritdoc />

@@ -7,9 +7,10 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.SDK.Extensibility
 {
     /// <summary>
-    ///     Adds methods to support a custom data processor that supports data extensions. These methods make it
-    ///     possible to create the <see cref="IDataExtensionRetrieval"/> object that is necessary for retrieving
-    ///     data required by a data extension table.
+    ///     Adds methods to support a custom data processor that supports data extensions.
+    ///     
+    ///     Many of these methods make it possible to create the <see cref="IDataExtensionRetrieval"/> object that is 
+    ///     necessary for retrieving data required by an internal data extension table.
     /// </summary>
     public interface IDataProcessorExtensibilitySupport
     {
@@ -75,5 +76,14 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     An enumerable of tables.
         /// </returns>
         IEnumerable<TableDescriptor> GetAllRequiredTables();
+
+        /// <summary>
+        ///     Enable all  source cookers from the <see cref="ICustomDataProcessor"/> associated with this
+        ///     source processor required to instantiate the given table.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The table with required source cookers to enable.
+        /// </param>
+        //void EnableRequiredSourceDataCookers(TableDescriptor tableDescriptor);
     }
 }

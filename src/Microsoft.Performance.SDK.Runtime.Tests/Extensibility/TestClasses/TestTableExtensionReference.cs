@@ -34,5 +34,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public override IReadOnlyCollection<DataCookerPath> RequiredDataCookers => this.TableDescriptor.RequiredDataCookers;
 
         public override IReadOnlyCollection<DataProcessorId> RequiredDataProcessors => this.TableDescriptor.RequiredDataProcessors;
+
+        public bool IsInternalTable { get; set; }
     }
 }
