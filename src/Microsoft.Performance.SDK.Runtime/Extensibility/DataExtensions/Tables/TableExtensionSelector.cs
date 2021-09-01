@@ -25,7 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         ///     Repository of data extensions.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="self"/> is <c>null</c>.
+        ///     <paramref name="dataExtensions"/> is <c>null</c>.
         /// </exception>
         public TableExtensionSelector(IDataExtensionRepository dataExtensions)
         {
