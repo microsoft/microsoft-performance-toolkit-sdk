@@ -54,6 +54,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Gets a value indicating whether plugins are isolated into their
         ///     own isolated assembly contexts.
         /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
         public bool ArePluginsIsolated
         {
             get
@@ -238,7 +241,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     A new instance of the <see cref="PluginSet"/> class containing all
         ///     of the successfully discovered plugins. The returned instance will
         ///     also contain a collection of non-fatal errors that occurred when
-        ///     creating this data set (i.e. a plugin failed to load.)
+        ///     creating this data set (e.g. a plugin failed to load.)
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="extensionDirectories"/> is <c>null</c>.
