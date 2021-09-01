@@ -166,5 +166,13 @@ namespace Microsoft.Performance.SDK.Processing
         ///     building the table.
         /// </returns>
         ITableBuilderWithRowCount SetTableRowDetailsGenerator(Func<int, IEnumerable<TableRowDetailEntry>> generator);
+
+        /// <summary>
+        ///     Allows a table to provide its own time-related inforamtion.
+        /// </summary>
+        /// <remarks>
+        ///     This is required for tables that pull data from multiple processors.
+        /// </remarks>
+        void OverrideDataSourceInfo(DataSourceInfo dataSourceInfo);
     }
 }

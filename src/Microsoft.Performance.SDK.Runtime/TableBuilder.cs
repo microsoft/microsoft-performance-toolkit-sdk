@@ -29,7 +29,9 @@ namespace Microsoft.Performance.SDK.Runtime
         private readonly List<TableConfiguration> builtInTableConfigurations;
         private readonly List<TableCommand> commands;
         private readonly IReadOnlyList<TableCommand> commandsRO;
-       
+
+        private DataSourceInfo dataSourceInfo;
+
         // Maps a row to a collection of row detail entry
         private Func<int, IEnumerable<TableRowDetailEntry>> tableDetailsGenerator;
 
@@ -62,6 +64,9 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <inheritdoc />
         public IReadOnlyList<TableCommand> Commands => this.commandsRO;
+
+        /// <inheritdoc />
+        public DataSourceInfo DataSourceInfo => this.dataSourceInfo;
 
         // TODO:
         // We currently set this to a default builder - build a TableDetails instance from the 
@@ -169,6 +174,11 @@ namespace Microsoft.Performance.SDK.Runtime
             var tableRowDetailsCollection = rows.Select(row => new TableRowDetails(row, this.tableDetailsGenerator(row).ToList())).ToList();
 
             return new TableDetails(tableRowDetailsCollection);
+        }
+
+        public void OverrideDataSourceInfo(DataSourceInfo dataSourceInfo)
+        {
+            this.dataSourceInfo = dataSourceInfo;
         }
     }
 }

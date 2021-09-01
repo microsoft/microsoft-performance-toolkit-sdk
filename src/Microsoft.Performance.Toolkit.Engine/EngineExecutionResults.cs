@@ -378,6 +378,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             private readonly Dictionary<string, TableCommandCallback> tableCommands;
             private readonly ReadOnlyDictionary<string, TableCommandCallback> tableCommandsRO;
 
+            private DataSourceInfo dataSourceInfo;
+
             internal TableBuilder()
             {
                 this.columns = new List<IDataColumn>();
@@ -447,6 +449,11 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 this.TableRowDetailsGenerator = generator;
                 return this;
+            }
+
+            public void OverrideDataSourceInfo(DataSourceInfo dataSourceInfo)
+            {
+                this.dataSourceInfo = dataSourceInfo;
             }
         }
     }
