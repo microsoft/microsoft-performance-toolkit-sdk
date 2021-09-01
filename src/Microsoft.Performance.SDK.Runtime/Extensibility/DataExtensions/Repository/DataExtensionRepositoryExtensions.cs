@@ -17,17 +17,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
     /// </summary>
     public static class DataExtensionRepositoryExtensions
     {
-        // todo: use a new class instead of n out parameters
-        public static void GetAvailableExtensions(
-            this IDataExtensionRepository self,
-            IEnumerable<string> availableSourceParsers,
-            out IReadOnlyCollection<DataCookerPath> sourceCookers,
-            out IReadOnlyCollection<DataCookerPath> compositeCookers,
-            out IReadOnlyCollection<TableDescriptor> tables)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         ///     Attempts to get a data cooker reference given a data cooker path.
         /// </summary>
