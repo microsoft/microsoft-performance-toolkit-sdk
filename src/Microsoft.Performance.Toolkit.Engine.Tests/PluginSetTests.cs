@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
@@ -17,8 +16,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
     public class PluginSetTests
         : EngineFixture
     {
-
-
         [TestMethod]
         [IntegrationTest]
         public void Ctor_ExtensionDirectory_IsCurrent()
