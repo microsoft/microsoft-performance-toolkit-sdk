@@ -31,7 +31,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The data sources to be processed in the engine.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     Thrown is <paramref name="dataSources"/> is <c>null</c>.
+        ///     <paramref name="dataSources"/> is <c>null</c>.
         /// </exception>
         public EngineCreateInfo(ReadOnlyDataSourceSet dataSources)
         {
