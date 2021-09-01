@@ -58,12 +58,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Gets the collection of Data Sources that are to be processed by a specific <see cref="IProcessingSource"/>.
+        ///     Gets the collection of Data Sources grouped by their <see cref="IProcessingSource"/>.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IReadOnlyDictionary<ProcessingSourceReference, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
+        public IReadOnlyDictionary<ProcessingSourceReference, IReadOnlyList<IReadOnlyList<IDataSource>>> AssignedDataSourcesToProcess
         {
             get
             {

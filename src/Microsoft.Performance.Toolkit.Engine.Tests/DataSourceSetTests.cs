@@ -88,9 +88,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(file, this.Sut.DataSourcesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(file, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][0]);
         }
 
         [TestMethod]
@@ -107,10 +107,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(file1, this.Sut.DataSourcesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(file2, this.Sut.DataSourcesToProcess[expectedDataSource][1][0]);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(file1, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(file2, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][1][0]);
         }
 
         [TestMethod]
@@ -243,9 +243,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var expectedFile = file;
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(expectedFile, this.Sut.DataSourcesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(expectedFile, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][0]);
         }
 
         [TestMethod]
@@ -273,10 +273,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(file1, this.Sut.DataSourcesToProcess[expectedDataSource][0][0]);
-            Assert.AreEqual(file2, this.Sut.DataSourcesToProcess[expectedDataSource][1][0]);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(file1, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][0]);
+            Assert.AreEqual(file2, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][1][0]);
         }
 
         #endregion
@@ -355,13 +355,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(files.Length, this.Sut.DataSourcesToProcess[expectedDataSource][0].Count);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(files.Length, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0].Count);
 
             for (var i = 0; i < files.Length; ++i)
             {
-                Assert.AreEqual(files[i], this.Sut.DataSourcesToProcess[expectedDataSource][0][i]);
+                Assert.AreEqual(files[i], this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][i]);
             }
         }
 
@@ -390,19 +390,19 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(2, this.Sut.DataSourcesToProcess[expectedDataSource].Count);
-            Assert.AreEqual(files1.Length, this.Sut.DataSourcesToProcess[expectedDataSource][0].Count);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(2, this.Sut.AssignedDataSourcesToProcess[expectedDataSource].Count);
+            Assert.AreEqual(files1.Length, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0].Count);
             for (var i = 0; i < files1.Length; ++i)
             {
-                Assert.AreEqual(files1[i], this.Sut.DataSourcesToProcess[expectedDataSource][0][i]);
+                Assert.AreEqual(files1[i], this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][i]);
             }
 
-            Assert.AreEqual(files2.Length, this.Sut.DataSourcesToProcess[expectedDataSource][1].Count);
+            Assert.AreEqual(files2.Length, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][1].Count);
             for (var i = 0; i < files2.Length; ++i)
             {
-                Assert.AreEqual(files2[i], this.Sut.DataSourcesToProcess[expectedDataSource][1][i]);
+                Assert.AreEqual(files2[i], this.Sut.AssignedDataSourcesToProcess[expectedDataSource][1][i]);
             }
         }
 
@@ -477,13 +477,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess[expectedDataSource].Count);
-            Assert.AreEqual(files.Length, this.Sut.DataSourcesToProcess[expectedDataSource][0].Count);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess[expectedDataSource].Count);
+            Assert.AreEqual(files.Length, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0].Count);
             for (var i = 0; i < files.Length; ++i)
             {
-                Assert.AreEqual(files[i], this.Sut.DataSourcesToProcess[expectedDataSource][0][i]);
+                Assert.AreEqual(files[i], this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][i]);
             }
         }
 
@@ -528,19 +528,19 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var expectedDataSource = this.Sut.Plugins.ProcessingSourceReferences.Single(x => x.Instance is Source123DataSource);
 
-            Assert.AreEqual(1, this.Sut.DataSourcesToProcess.Count);
-            Assert.IsTrue(this.Sut.DataSourcesToProcess.ContainsKey(expectedDataSource));
-            Assert.AreEqual(2, this.Sut.DataSourcesToProcess[expectedDataSource].Count);
-            Assert.AreEqual(files1.Length, this.Sut.DataSourcesToProcess[expectedDataSource][0].Count);
+            Assert.AreEqual(1, this.Sut.AssignedDataSourcesToProcess.Count);
+            Assert.IsTrue(this.Sut.AssignedDataSourcesToProcess.ContainsKey(expectedDataSource));
+            Assert.AreEqual(2, this.Sut.AssignedDataSourcesToProcess[expectedDataSource].Count);
+            Assert.AreEqual(files1.Length, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0].Count);
             for (var i = 0; i < files1.Length; ++i)
             {
-                Assert.AreEqual(files1[i], this.Sut.DataSourcesToProcess[expectedDataSource][0][i]);
+                Assert.AreEqual(files1[i], this.Sut.AssignedDataSourcesToProcess[expectedDataSource][0][i]);
             }
 
-            Assert.AreEqual(files2.Length, this.Sut.DataSourcesToProcess[expectedDataSource][1].Count);
+            Assert.AreEqual(files2.Length, this.Sut.AssignedDataSourcesToProcess[expectedDataSource][1].Count);
             for (var i = 0; i < files2.Length; ++i)
             {
-                Assert.AreEqual(files2[i], this.Sut.DataSourcesToProcess[expectedDataSource][1][i]);
+                Assert.AreEqual(files2[i], this.Sut.AssignedDataSourcesToProcess[expectedDataSource][1][i]);
             }
         }
 
