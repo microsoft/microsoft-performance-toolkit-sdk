@@ -639,33 +639,33 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     but no ETL files are present in the set of files to process.
     /// </summary>
     [Serializable]
-    public class NoInputDataException
+    public class NoDataSourceException
         : EngineException
     {
         /// <inheritdoc />
-        public NoInputDataException() : base() { }
+        public NoDataSourceException() : base() { }
 
         /// <inheritdoc />
-        public NoInputDataException(string message) : base(message) { }
+        public NoDataSourceException(string message) : base(message) { }
 
         /// <inheritdoc />
-        public NoInputDataException(string message, Exception inner) : base(message, inner) { }
+        public NoDataSourceException(string message, Exception inner) : base(message, inner) { }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="NoInputDataException"/>
+        ///     Initializes a new instance of the <see cref="NoDataSourceException"/>
         ///     class with the specified <see cref="DataCookerPath"/>.
         /// </summary>
         /// <param name="cookerPath">
         ///     The path to the cooker which will not be able to participate in data
         ///     processing due to there being inadequate data in the data source set.
         /// </param>
-        public NoInputDataException(DataCookerPath cookerPath)
+        public NoDataSourceException(DataCookerPath cookerPath)
             : this(cookerPath, null)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="NoInputDataException"/>
+        ///     Initializes a new instance of the <see cref="NoDataSourceException"/>
         ///     class with the specified <see cref="DataCookerPath"/> and the error
         ///     that is the cause of this error, if any.
         /// </summary>
@@ -676,14 +676,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="inner">
         ///     The error that is the cause of this error.
         /// </param>
-        public NoInputDataException(DataCookerPath cookerPath, Exception inner)
+        public NoDataSourceException(DataCookerPath cookerPath, Exception inner)
             : base("No data sources produce input for the specified cooker.", inner)
         {
             this.CookerPath = cookerPath;
         }
 
         /// <inheritdoc />
-        protected NoInputDataException(SerializationInfo info, StreamingContext context)
+        protected NoDataSourceException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             var type = (DataCookerType)info.GetInt32(nameof(this.CookerPath.DataCookerType));

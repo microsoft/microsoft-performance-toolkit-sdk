@@ -326,6 +326,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSources"/> is <c>null</c>.
         ///     - or -
+        ///     One or more elements of <paramref name="dataSources"/>
+        ///     is <c>null</c>.
+        ///     - or -
         ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="InvalidOperationException">
@@ -352,7 +355,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 throw new ArgumentNullException(nameof(dataSources));
             }
 
-            this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferencesList, this.dataSourcesToProcess, this.TypeIs);
+            this.AddDataSourcesCore(dataSources, processingSourceType);
 
             return this;
         }
@@ -386,7 +389,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferencesList, this.dataSourcesToProcess, this.TypeIs);
+                this.AddDataSourcesCore(dataSources, processingSourceType);
                 return true;
             }
             catch
@@ -396,11 +399,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Seals this instance, preventing any new data sources from being added.
+        ///     Returns a readonly deep-copy of this instance.
         /// </summary>
-        /// <returns>
-        ///    A reference to this instance after the operation has completed.
-        /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -463,20 +463,14 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private void AddDataSourcesCore(
             IEnumerable<IDataSource> dataSources,
-            Type processingSourceType,
-            List<ProcessingSourceReference> processingSourceReferences,
-            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
-            Func<Type, Type, bool> typeIs)
+            Type processingSourceType)
         {
             Debug.Assert(!this.isDisposed);
 
             Debug.Assert(dataSources != null);
             Debug.Assert(processingSourceType != null);
-            Debug.Assert(processingSourceReferences != null);
-            Debug.Assert(dataSourcesToProcess != null);
-            Debug.Assert(typeIs != null);
 
-            var cdsr = processingSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), processingSourceType));
+            var cdsr = this.processingSourceReferencesList.FirstOrDefault(x => this.TypeIs(x.Instance.GetType(), processingSourceType));
             if (cdsr is null)
             {
                 throw new UnsupportedProcessingSourceException(processingSourceType);
@@ -499,10 +493,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                 throw new ArgumentException("The Data Source collection cannot be empty.", nameof(dataSources));
             }
 
-            if (!dataSourcesToProcess.TryGetValue(cdsr, out var list))
+            if (!this.dataSourcesToProcess.TryGetValue(cdsr, out var list))
             {
                 list = new List<List<IDataSource>>();
-                dataSourcesToProcess[cdsr] = list;
+                this.dataSourcesToProcess[cdsr] = list;
             }
 
             list.Add(dataSources.ToList());

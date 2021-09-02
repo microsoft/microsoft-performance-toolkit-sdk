@@ -54,6 +54,17 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         internal Engine(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
         {
+            //
+            // The internalDataSourceSet is used by the helper methods
+            // that take DataSources and return a new engine. For those
+            // methods, we create a new DataSourceSet under the hood to
+            // reference those data sources, and so need to keep track
+            // of that set in order to dispose it when the engine is
+            // disposed. This is because the user is unaware that a new
+            // DataSourceSet was created and thus there is no way that
+            // they could be responsible for freeing it.
+            //
+
             this.workingDataSourceSet = createInfo.DataSources;
             this.internalDataSourceSet = internalDataSourceSet;
 
@@ -433,7 +444,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
-        /// <exception cref="NoInputDataException">
+        /// <exception cref="NoDataSourceException">
         ///     There are inadequate data sources in <see cref="DataSourcesToProcess"/>
         ///     in order for the specified cooker to participate in processing.
         /// </exception>
@@ -452,7 +463,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (!this.CouldCookerHaveData(dataCookerPath))
             {
-                throw new NoInputDataException(dataCookerPath);
+                throw new NoDataSourceException(dataCookerPath);
             }
 
             this.enabledCookers.Add(dataCookerPath);
@@ -505,6 +516,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="descriptor"/> cannot be null.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     The processing sources referenced by the table could
+        ///     not be found.
+        /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
@@ -512,7 +527,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="TableException">
-        ///     A table is not available <paramref name="tableDescriptor"/>.
+        ///     A table is not available for the given <paramref name="tableDescriptor"/>.
         /// </exception>
         /// <exception cref="TableNotFoundException">
         ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
@@ -1133,7 +1148,13 @@ namespace Microsoft.Performance.Toolkit.Engine
                     string.Concat("[", icon.ToString(), "]: ", message));
             }
 
-            public ButtonResult Show(MessageBoxIcon icon, IFormatProvider formatProvider, Buttons buttons, string caption, string format, params object[] args)
+            public ButtonResult Show(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
+                Buttons buttons, 
+                string caption,
+                string format,
+                params object[] args)
             {
                 var message = string.Format(formatProvider, format, args);
 

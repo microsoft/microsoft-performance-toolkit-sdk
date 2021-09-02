@@ -144,7 +144,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             using var sut = Engine.Create(createInfo);
 
-            Assert.ThrowsException<NoInputDataException>(() => sut.EnableCooker(Source4DataCooker.DataCookerPath));
+            Assert.ThrowsException<NoDataSourceException>(() => sut.EnableCooker(Source4DataCooker.DataCookerPath));
         }
 
         #endregion Enable Cooker
