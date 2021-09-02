@@ -547,8 +547,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                     throw new TableException($"The requested table is not available: {tableReference.Availability}.");
                 }
 
-                // todo: we need to check the "filtered repository" to make sure that it's available
-
                 this.enabledTables.Add(descriptor);
             }
             else
