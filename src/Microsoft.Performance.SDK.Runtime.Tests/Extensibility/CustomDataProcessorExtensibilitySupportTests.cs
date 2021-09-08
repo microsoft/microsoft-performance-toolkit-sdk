@@ -65,7 +65,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 "Simple Test Table",
                 "This table has no required data extensions");
 
-            Assert.IsFalse(cdp.ExtensibilitySupport.AddTable(tableDescriptorWithNoRequirements));
+            Assert.IsFalse(cdp.ExtensibilitySupport.TryEnableTable(tableDescriptorWithNoRequirements));
         }
 
         [UnitTest]
@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             // the table won't be available with a missing dependency
 
-            Assert.IsFalse(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
+            Assert.IsFalse(cdp.ExtensibilitySupport.TryEnableTable(TestTable1.TableDescriptor));
 
             cdp.ExtensibilitySupport.FinalizeTables();
 
@@ -103,7 +103,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
-            Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
+            Assert.IsTrue(cdp.ExtensibilitySupport.TryEnableTable(TestTable1.TableDescriptor));
 
             cdp.ExtensibilitySupport.FinalizeTables();
 
@@ -130,7 +130,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
             // This requires a source cooker from a different cdp, so it should fail to be added
-            Assert.IsFalse(cdp.ExtensibilitySupport.AddTable(TestTable2.TableDescriptor));
+            Assert.IsFalse(cdp.ExtensibilitySupport.TryEnableTable(TestTable2.TableDescriptor));
 
             cdp.ExtensibilitySupport.FinalizeTables();
 
@@ -155,7 +155,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
-            Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
+            Assert.IsTrue(cdp.ExtensibilitySupport.TryEnableTable(TestTable1.TableDescriptor));
 
             cdp.ExtensibilitySupport.FinalizeTables();
             Assert.ThrowsException<InvalidOperationException>(() => cdp.ExtensibilitySupport.FinalizeTables());
@@ -175,7 +175,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
-            Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
+            Assert.IsTrue(cdp.ExtensibilitySupport.TryEnableTable(TestTable1.TableDescriptor));
 
             Assert.ThrowsException<InvalidOperationException>(() => cdp.ExtensibilitySupport.GetAllRequiredSourceDataCookers());
         }
@@ -194,7 +194,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             cdp.ExtensionRepository.sourceCookersByPath.Add(sourceCooker.Path, sourceCookerReference);
 
-            Assert.IsTrue(cdp.ExtensibilitySupport.AddTable(TestTable1.TableDescriptor));
+            Assert.IsTrue(cdp.ExtensibilitySupport.TryEnableTable(TestTable1.TableDescriptor));
 
             Assert.ThrowsException<InvalidOperationException>(() => cdp.ExtensibilitySupport.GetDataExtensionRetrieval(TestTable1.TableDescriptor));
         }

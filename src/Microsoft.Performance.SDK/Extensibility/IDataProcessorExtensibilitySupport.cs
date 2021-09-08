@@ -8,33 +8,30 @@ namespace Microsoft.Performance.SDK.Extensibility
 {
     /// <summary>
     ///     Adds methods to support a custom data processor that supports data extensions.
-    ///     
-    ///     Many of these methods make it possible to create the <see cref="IDataExtensionRetrieval"/> object that is 
-    ///     necessary for retrieving data required by an internal data extension table.
     /// </summary>
     public interface IDataProcessorExtensibilitySupport
     {
         /// <summary>
-        ///     This should be called for every table internal to an <see cref="IProcessingSource"/> that will need access to an
-        ///     <see cref="IDataExtensionRetrieval"/> object in order to build the table.
+        ///     This should be called for every extended table internal to an <see cref="IProcessingSource"/> that will need 
+        ///     access to an <see cref="IDataExtensionRetrieval"/> object in order to build the table.
+        ///     <para/>
+        ///     If the table isn't internal, the data sources from the associated <see cref="ICustomDataProcessor"/>
+        ///     will be enabled on that processor so that the table can be built later.
         /// </summary>
         /// <param name="tableDescriptor">
         ///     Identifies the table to add.
         /// </param>
         /// <returns>
-        ///     True if a reference to the table was added successfully, otherwise false.
+        ///     <c>true</c> if a reference to the table was successfully enabled; otherwise false.
         /// </returns>
-        bool AddTable(TableDescriptor tableDescriptor);
+        bool TryEnableTable(TableDescriptor tableDescriptor);
 
         /// <summary>
-        ///     This processes all of the dependencies for tables internal to an <see cref="IProcessingSource"/>, such as metadata 
-        ///     tables. It should be called before processing a data source, after all data cookers have been enabled
-        ///     on the <see cref="IProcessingSource"/>.
-        ///     </summary>
+        ///     This prepares the object for processing and must be called before
+        ///     <see cref="ICustomDataProcessor.ProcessAsync(System.IProgress{int}, System.Threading.CancellationToken)"/>.
+        /// </summary>
         /// <remarks>
-        ///     A table that was added successfully through <see cref="AddTable"/> maybe be filtered out during this call.
-        ///     This may happen because a required data extension is not available, or because the table requires a
-        ///     source data cooker that is not associated with the source parser in the custom data processor.
+        ///     Additional tables may not be enabled after this method has executed.
         /// </remarks>
         void FinalizeTables();
 
@@ -50,7 +47,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </summary>
         /// <returns>
         ///     An object that can be used to generate an IDataExtensionRetrieval, or null if the table descriptor is not
-        ///     supported. This could happen if <see cref="AddTable"/> returned false, or if <see cref="FinalizeTables"/>
+        ///     supported. This could happen if <see cref="TryEnableTable"/> returned false, or if <see cref="FinalizeTables"/>
         ///     filtered out the table.
         /// </returns>
         /// <remarks>
@@ -61,7 +58,7 @@ namespace Microsoft.Performance.SDK.Extensibility
 
         /// <summary>
         ///     Retrieves a set of all source data cooker paths required by the tables that were added through a call to
-        ///     <see cref="AddTable(TableDescriptor)"/>.
+        ///     <see cref="TryEnableTable(TableDescriptor)"/>.
         /// </summary>
         /// <returns>
         ///     A set of source data cooker paths.
@@ -70,20 +67,11 @@ namespace Microsoft.Performance.SDK.Extensibility
 
         /// <summary>
         ///     Retrieves an enumerable of tables that were added through a call to
-        ///     <see cref="AddTable(TableDescriptor)"/>.
+        ///     <see cref="TryEnableTable(TableDescriptor)"/>.
         /// </summary>
         /// <returns>
         ///     An enumerable of tables.
         /// </returns>
         IEnumerable<TableDescriptor> GetAllRequiredTables();
-
-        /// <summary>
-        ///     Enable all  source cookers from the <see cref="ICustomDataProcessor"/> associated with this
-        ///     source processor required to instantiate the given table.
-        /// </summary>
-        /// <param name="tableDescriptor">
-        ///     The table with required source cookers to enable.
-        /// </param>
-        //void EnableRequiredSourceDataCookers(TableDescriptor tableDescriptor);
     }
 }

@@ -355,7 +355,7 @@ namespace Microsoft.Performance.SDK.Processing
             // internal tables. Calling this here will enable this as well as any required
             // source data cookers.
             //
-            return this.extensibilitySupport.AddTable(tableDescriptor);
+            return this.extensibilitySupport.TryEnableTable(tableDescriptor);
             //{
             //    return;
             //}

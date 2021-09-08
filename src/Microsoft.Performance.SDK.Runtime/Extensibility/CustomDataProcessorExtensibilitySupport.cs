@@ -53,7 +53,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public bool AddTable(TableDescriptor tableDescriptor)
+        public bool TryEnableTable(TableDescriptor tableDescriptor)
         {
             lock (this.dataProcessor)
             {
