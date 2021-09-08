@@ -8,8 +8,8 @@ using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    /// Wraps the ICustomDataProcessor with additional functionality required to operate with a
-    /// source parser and data extensions.
+    ///     Wraps the ICustomDataProcessor with additional functionality required to operate with a
+    ///     source parser and data extensions.
     /// </summary>
     public interface ICustomDataProcessorWithSourceParser
         : ICustomDataProcessor,

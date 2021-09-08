@@ -109,14 +109,15 @@ namespace Microsoft.Performance.SDK.Processing
                     return;
                 }
 
-                if (OnEnableTable(tableDescriptor))
+                if (OnBeforeEnableTable(tableDescriptor))
                 {
                     this.enabledTables.Add(tableDescriptor);
-                    OnTableEnabled(tableDescriptor);
+                    OnAfterEnableTable(tableDescriptor);
                 }
             }
         }
 
+        /// <inheritdoc />
         public bool TryEnableTable(TableDescriptor tableDescriptor)
         {
             Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
@@ -266,19 +267,29 @@ namespace Microsoft.Performance.SDK.Processing
             Action<ITableBuilder, IDataExtensionRetrieval> createTable,
             ITableBuilder tableBuilder);
 
-        protected virtual bool OnEnableTable(TableDescriptor tableDescriptor)
+        /// <summary>
+        ///     This is called before a table has been enabled on this data processor. The default implementation
+        ///     returns true.
+        /// </summary>
+        /// <returns>
+        ///     <c>true</c> to allow this table to be enabled; <c>false</c> to prevent enabling this table.
+        /// </returns>
+        /// <param name="tableDescriptor">
+        ///     Table that was enabled.
+        /// </param>
+        protected virtual bool OnBeforeEnableTable(TableDescriptor tableDescriptor)
         {
             return true;
         }
 
         /// <summary>
-        ///     This is called when a table has been enabled on this data processor. The default implementation does
+        ///     This is called after a table has been enabled on this data processor. The default implementation does
         ///     nothing.
         /// </summary>
         /// <param name="tableDescriptor">
         ///     Table that was enabled.
         /// </param>
-        protected virtual void OnTableEnabled(TableDescriptor tableDescriptor)
+        protected virtual void OnAfterEnableTable(TableDescriptor tableDescriptor)
         {
         }
 

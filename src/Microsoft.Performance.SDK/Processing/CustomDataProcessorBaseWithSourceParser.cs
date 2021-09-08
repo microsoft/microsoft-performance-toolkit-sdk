@@ -286,7 +286,7 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
 
-        protected override bool OnEnableTable(TableDescriptor tableDescriptor)
+        protected override bool OnBeforeEnableTable(TableDescriptor tableDescriptor)
         {
             try
             {
@@ -297,16 +297,6 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             return false;
-        }
-
-
-        /// <inheritdoc />
-        /// <summary>
-        ///     Builds on top of the functionality provided by the base class by enabling the data cookers required
-        ///     by an internal table descriptor.
-        /// </summary>
-        protected override void OnTableEnabled(TableDescriptor tableDescriptor)
-        {
         }
 
         /// <summary>
@@ -356,15 +346,6 @@ namespace Microsoft.Performance.SDK.Processing
             // source data cookers.
             //
             return this.extensibilitySupport.TryEnableTable(tableDescriptor);
-            //{
-            //    return;
-            //}
-
-            // This table couldn't be added as an internal table, so add any required
-            // source data cookers associated with this source parser required to build the
-            // table.
-            //
-            //this.extensibilitySupport.EnableRequiredSourceDataCookers(tableDescriptor);
         }
 
         private void EnableRequiredSourceDataCookers()

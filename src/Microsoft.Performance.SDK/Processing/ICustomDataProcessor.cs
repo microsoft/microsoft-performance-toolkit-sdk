@@ -41,6 +41,9 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The <see cref="TableDescriptor"/> that instructs the
         ///     processor as to which table is being requested.
         /// </param>
+        /// <returns>
+        ///     <c>true</c> if the table was enabled; <c>false</c> otherwise.
+        /// </returns>
         bool TryEnableTable(TableDescriptor tableDescriptor);
 
         /// <summary>
