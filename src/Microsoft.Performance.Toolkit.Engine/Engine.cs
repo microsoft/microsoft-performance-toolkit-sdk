@@ -353,55 +353,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Creates a new instance of the <see cref="Engine" /> class.
         /// </summary>
         /// <param name="createInfo">
-        ///     The parameters to use for creating a new engine instance.
-        /// </param>
-        /// <param name="dataSources">
-        ///     The Data Sources to process.
-        /// </param>
-        /// <param name="processingSourceType">
-        ///     The <see cref="IProcessingSource"/> to use to process <paramref name="dataSources"/>.
-        /// </param>
-        /// <returns>
-        ///     The created engine environment.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="createInfo"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="EngineException">
-        ///     A fatal error occurred while creating the engine.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public static Engine Create(
-            IEnumerable<IDataSource> dataSources,
-            Type processingSourceType,
-            EngineCreateInfo createInfo)
-        {
-            Guard.NotNull(dataSources, nameof(dataSources));
-            Guard.NotNull(processingSourceType, nameof(processingSourceType));
-            Guard.NotNull(createInfo, nameof(createInfo));
-
-            DataSourceSet dataSourceSet = null;
-            try
-            {
-                dataSourceSet = DataSourceSet.Create();
-                dataSourceSet.AddDataSources(dataSources, processingSourceType);
-
-                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
-                return CreateCore(info, dataSourceSet);
-            }
-            catch
-            {
-                dataSourceSet.SafeDispose();
-                throw;
-            }
-        }
-
-        /// <summary>
-        ///     Creates a new instance of the <see cref="Engine" /> class.
-        /// </summary>
-        /// <param name="createInfo">
         ///     Provides details on how to create the engine as well as what 
         ///     the engine should process.
         /// </param>

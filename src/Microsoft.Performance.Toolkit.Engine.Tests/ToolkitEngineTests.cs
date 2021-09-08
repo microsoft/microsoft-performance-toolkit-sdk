@@ -59,13 +59,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 () => Engine.Create((IEnumerable<IDataSource>)null, typeof(Source123Processor)));
             Assert.ThrowsException<ArgumentNullException>(
                 () => Engine.Create(new[] { Any.DataSource(), }, null));
-
-            Assert.ThrowsException<ArgumentNullException>(
-                () => Engine.Create(null, typeof(Source123Processor), new EngineCreateInfo(DataSourceSet.Create().AsReadOnly())));
-            Assert.ThrowsException<ArgumentNullException>(
-                () => Engine.Create(new[] { Any.DataSource(), }, null, new EngineCreateInfo(DataSourceSet.Create().AsReadOnly())));
-            Assert.ThrowsException<ArgumentNullException>(
-                () => Engine.Create(new[] { Any.DataSource(), }, typeof(Source123Processor), null));
         }
 
         [TestMethod]
