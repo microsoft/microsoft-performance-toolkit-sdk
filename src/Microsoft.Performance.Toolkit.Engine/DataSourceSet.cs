@@ -129,6 +129,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Creates a new instance of the <see cref="DataSourceSet"/>
         ///     class, referencing the given <see cref="PluginSet"/>.
         /// </summary>
+        /// <remarks>
+        ///     The <see cref="DataSourceSet"/> created by this method will
+        ///     take ownership of <see cref="plugins"/>. If you do not want
+        ///     this behavior, use <see cref="Create(PluginSet, bool)"/>.
+        /// </remarks>
         /// <param name="plugins">
         ///     The plugins that are available to process data sources.
         /// </param>

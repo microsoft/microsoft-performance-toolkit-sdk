@@ -13,6 +13,13 @@ namespace Microsoft.Performance.Toolkit.Engine
     /// <summary>
     ///     Presents a readonly view of a <see cref="DataSourceSet"/>.
     /// </summary>
+    /// <remarks>
+    ///     Instances of this class are only valid for as long as the creating
+    ///     <see cref="DataSourceSet"/> is valid. Instances of this class are
+    ///     invalidated when the creating <see cref="DataSourceSet"/> is disposed.
+    ///     The behavior of instances of this class after the creating 
+    ///     <see cref="DataSourceSet"/> is disposed is undefined.
+    /// </remarks>
     public sealed class ReadOnlyDataSourceSet
     {
         private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
