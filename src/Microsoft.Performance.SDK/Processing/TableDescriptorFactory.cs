@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Performance.SDK.Extensibility;
 
@@ -161,25 +160,14 @@ namespace Microsoft.Performance.SDK.Processing
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             out Func<IDataExtensionRetrieval, bool> isDataAvailableFunc)
         {
-            try
-            {
-                return Create(
-                    type,
-                    tableConfigSerializer,
-                    out isInternalTable,
-                    out tableDescriptor,
-                    out buildTableAction,
-                    out isDataAvailableFunc);
-            }
-            catch (Exception)
-            {
-            }
-
-            isInternalTable = false;
-            tableDescriptor = null;
-            buildTableAction = null;
-            isDataAvailableFunc = null;
-            return false;
+            return TryCreate(
+                type,
+                tableConfigSerializer,
+                null,
+                out isInternalTable,
+                out tableDescriptor,
+                out buildTableAction,
+                out isDataAvailableFunc);
         }
 
         /// <summary>
@@ -208,6 +196,9 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The serializer object that is used to deserialize the 
         ///     pre-built table configuration JSON files.
         /// </param>
+        /// <param name="logger">
+        ///     Used to log any relevant messages.
+        /// </param>
         /// <param name="isInternalTable">
         ///     This table is private to the <see cref="IProcessingSource"/>.
         /// </param>
@@ -226,18 +217,10 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <c>true</c> if <paramref name="type"/> is a valid table,
         ///     <c>false</c> otherwise.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="type"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="type"/> is missing a <see cref="TableAttribute"/>.
-        /// </exception>
-        /// <exception cref="ExtendedTableException">
-        ///     There is a problem creating a table from the given type.
-        /// </exception>
-        public static bool Create(
+        public static bool TryCreate(
             Type type,
             ISerializer tableConfigSerializer,
+            ILogger logger,
             out bool isInternalTable,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
@@ -248,18 +231,20 @@ namespace Microsoft.Performance.SDK.Processing
             isDataAvailableFunc = null;
             isInternalTable = false;
 
-            Guard.NotNull(type, nameof(type));
+            if (type is null)
+            {
+                return false;
+            }
 
             var tableAttribute = type.GetCustomAttribute<TableAttribute>();
             if (tableAttribute == null)
             {
-                // Note: this doesn't throw as we expect all types in an assembly to be tested.
                 return false;
             }
 
             if (!type.IsStatic() && !type.IsConcrete())
             {
-                throw new ExtendedTableException($"Type '{type}' must be static or concrete to be a table.");
+                return false;
             }
 
             isInternalTable = tableAttribute.InternalTable;
@@ -268,9 +253,13 @@ namespace Microsoft.Performance.SDK.Processing
             tableDescriptor = GetTableDescriptor(
                 type,
                 tableAttribute.TableDescriptorPropertyName,
-                tableConfigSerializer);
+                tableConfigSerializer,
+                logger);
 
-            Debug.Assert(tableDescriptor != null);
+            if (tableDescriptor == null)
+            {
+                return false;
+            }
 
             // I'm looking at this for the first time in months, and the certain tables aren't showing up because they're not specifically marked as internal
             // and they don't have build actions on them either. So for now, I'm going to try marking any table that doesn't have a build action as internal
@@ -303,10 +292,10 @@ namespace Microsoft.Performance.SDK.Processing
         private static TableDescriptor GetTableDescriptor(
             Type type,
             string propertyName,
-            ISerializer tableConfigSerializer)
+            ISerializer tableConfigSerializer,
+            ILogger logger)
         {
-            Debug.Assert(type != null);
-            Debug.Assert(!string.IsNullOrWhiteSpace(propertyName));
+            Guard.NotNull(type, nameof(type));
 
             TableDescriptor tableDescriptor = null;
             IEnumerable<RequiresCookerAttribute> cookerAttributes = null;
@@ -317,20 +306,19 @@ namespace Microsoft.Performance.SDK.Processing
                 var getMethodInfo = tableDescriptorPropertyInfo.GetMethod;
                 if (!getMethodInfo.IsPublic)
                 {
-                    var errorMessage =
+                    logger?.Warn(
                         $"Type {type} appears to be a Table, but the " +
-                        $"{nameof(TableAttribute.TableDescriptorPropertyName)}.get method is not found as public.";
-
-                    throw new ExtendedTableException(errorMessage);
+                        $"{nameof(TableAttribute.TableDescriptorPropertyName)}.get method is not found as public.");
+                    return null;
                 }
 
                 if (getMethodInfo.ReturnType != typeof(TableDescriptor))
                 {
-                    var errorMessage =
-                        $"Type {type} appears to be a Table, but the table descriptor property {propertyName}.get" +
-                        $"method must return type {nameof(TableDescriptor)}.";
-
-                    throw new ExtendedTableException(errorMessage);
+                    logger?.Warn(
+                        $"Type {type} appears to be a Table, but the " +
+                        $"{nameof(TableAttribute.TableDescriptorPropertyName)}.get method must return type " +
+                        $"{nameof(TableDescriptor)}.");
+                    return null;
                 }
 
                 // Allow [RequiresCooker] attribute on the property that returns the TableDescriptor
@@ -344,18 +332,11 @@ namespace Microsoft.Performance.SDK.Processing
                 var tableDescriptorFieldInfo = type.GetField(propertyName, BindingFlags.Public | BindingFlags.Static);
                 if (tableDescriptorFieldInfo == null)
                 {
-                    var errorMessage =
-                        $"Type {type} appears to be a Table, but the table descriptor property {propertyName}" +
-                        $"is not found as public and static.";
-
-                    throw new ExtendedTableException(errorMessage);
-                }
-
-                if (tableDescriptorFieldInfo.FieldType != typeof(TableDescriptor))
-                {
-                    throw new ExtendedTableException(
-                        $"Type {type} appears to be a table, but the table descriptor field {propertyName}" +
-                        $"must be of type {nameof(TableDescriptor)}.");
+                    logger?.Warn(
+                        $"Type {type} appears to be a class, but the " +
+                        $"{nameof(TableAttribute.TableDescriptorPropertyName)} property is not found as public and " +
+                        "static.");
+                    return null;
                 }
 
                 // Allow [RequiresCooker] attribute on the property that returns the TableDescriptor
@@ -363,14 +344,17 @@ namespace Microsoft.Performance.SDK.Processing
                 tableDescriptor = tableDescriptorFieldInfo.GetValue(null) as TableDescriptor;
             }
 
-            Debug.Assert(tableDescriptor != null);
+            if (tableDescriptor == null)
+            {
+                return null;
+            }
 
             tableDescriptor.Type = type;
             tableDescriptor.PrebuiltTableConfigurations = TableConfigurations.GetPrebuiltTableConfigurations(
                 type,
                 tableDescriptor.Guid,
                 tableConfigSerializer,
-                null);
+                logger);
 
             foreach (var cooker in cookerAttributes)
             {
