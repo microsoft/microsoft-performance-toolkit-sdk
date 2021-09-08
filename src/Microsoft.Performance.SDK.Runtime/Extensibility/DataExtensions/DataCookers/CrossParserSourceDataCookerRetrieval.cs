@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             if (!this.processorsByParser.TryGetValue(dataOutputPath.SourceParserId, out var processor))
             {
-                throw new ArgumentException($"The specified source parser ({nameof(dataOutputPath.SourceParserId)}) was not found.");
+                throw new ArgumentException($"The specified source parser ({dataOutputPath.SourceParserId}) was not found.");
             }
 
             return processor.QueryOutput<T>(dataOutputPath);
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             if (!this.processorsByParser.TryGetValue(dataOutputPath.SourceParserId, out var processor))
             {
-                throw new ArgumentException($"The specified source parser ({nameof(dataOutputPath.SourceParserId)}) was not found.");
+                throw new ArgumentException($"The specified source parser ({dataOutputPath.SourceParserId}) was not found.");
             }
 
             return processor.QueryOutput(dataOutputPath);
