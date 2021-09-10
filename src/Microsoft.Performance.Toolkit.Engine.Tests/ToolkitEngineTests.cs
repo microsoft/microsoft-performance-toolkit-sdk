@@ -702,11 +702,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var throwingSourcePaths = testCase.ThrowingOutputs
                 .Select(x => (x, Parse(x)))
-                .Where(x => x.Item2.CookerPath.IsSource)
+                .Where(x => x.Item2.CookerPath.DataCookerType == DataCookerType.SourceDataCooker)
                 .ToDictionary(x => x.Item1, x => x.Item2);
             var throwingCompositePaths = testCase.ThrowingOutputs
                 .Select(x => (x, Parse(x)))
-                .Where(x => x.Item2.CookerPath.IsComposite)
+                .Where(x => x.Item2.CookerPath.DataCookerType == DataCookerType.CompositeDataCooker)
                 .ToDictionary(x => x.Item1, x => x.Item2);
 
             foreach (var kvp in throwingSourcePaths)

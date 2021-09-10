@@ -109,7 +109,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private static DataOutputPath CreateOutputPath(DataCookerPath cookerPath, string name)
         {
-            return cookerPath.IsSource
+            return cookerPath.DataCookerType == DataCookerType.SourceDataCooker
                 ? DataOutputPath.ForSource(cookerPath.SourceParserId, cookerPath.DataCookerId, name)
                 : DataOutputPath.ForComposite(cookerPath.DataCookerId, name);
         }

@@ -155,18 +155,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         public string DataCookerId { get; }
 
         /// <summary>
-        ///     Gets a value indicating whether this path is a path to a
-        ///     composite cooker.
-        /// </summary>
-        public bool IsComposite => string.IsNullOrEmpty(this.SourceParserId);
-
-        /// <summary>
-        ///     Gets a value indicating whether this path is a path to a
-        ///     source cooker.
-        /// </summary>
-        public bool IsSource => !this.IsComposite;
-
-        /// <summary>
         /// Gets the combination of the source parser Id and the data cooker Id.
         /// </summary>
         [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
