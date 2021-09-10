@@ -74,7 +74,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The path to the cooker to retrieve.
         /// </param>
         /// <returns>
-        ///     The interface to query for cooked data from said cooker.
+        ///     The object to query for cooked data from said cooker.
         /// </returns>
         /// <exception cref="CookerNotFoundException">
         ///     <paramref name="cookerPath"/> does not represent a known cooker.
@@ -93,7 +93,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The path to the cooker to retrieve.
         /// </param>
         /// <param name="retrieval">
-        ///     The found retrieval, if any.
+        ///     The object to query for cooked data, if any.
         /// </param>
         /// <returns>
         ///     <c>true</c> if the cooker can be queried;
