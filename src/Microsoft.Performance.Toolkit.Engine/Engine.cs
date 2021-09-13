@@ -11,7 +11,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK.Runtime.Discovery;
 using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
@@ -27,25 +26,9 @@ namespace Microsoft.Performance.Toolkit.Engine
     public abstract class Engine
         : IDisposable
     {
-        private readonly List<ProcessingSourceReference> processingSourceReferences;
-        private readonly ReadOnlyCollection<ProcessingSourceReference> processingSourceReferencesRO;
-
-        private readonly List<DataCookerPath> sourceDataCookers;
-        private readonly ReadOnlyCollection<DataCookerPath> sourceDataCookersRO;
-
-        private readonly List<DataCookerPath> compositeDataCookers;
-        private readonly ReadOnlyCollection<DataCookerPath> compositeDataCookersRO;
-
         private readonly Dictionary<Guid, TableDescriptor> tableGuidToDescriptor;
         private readonly List<TableDescriptor> allTables;
         private readonly ReadOnlyCollection<TableDescriptor> allTablesRO;
-
-        private readonly List<DataProcessorId> dataProcessors;
-
-        private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
-
-        private readonly List<IDataSource> freeDataSources;
-        private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
 
         private readonly List<DataCookerPath> enabledCookers;
         private readonly ReadOnlyCollection<DataCookerPath> enabledCookersRO;
@@ -55,38 +38,41 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly Func<Type, ILogger> loggerFactory;
 
-        private DataExtensionFactory factory;
-        private ExtensionRoot extensionRoot;
+        private readonly EngineCreateInfo createInfo;
 
-        private IReadOnlyCollection<string> extensionDirectories;
+        private ILogger logger;
+        private List<ProcessingSourceExecutor> executors;
+        private ReadOnlyDataSourceSet workingDataSourceSet;
+        private DataSourceSet internalDataSourceSet;
+
+        private TableExtensionSelector tableExtensionSelector;
+
         private bool isProcessed;
-        private IEnumerable<ErrorInfo> creationErrors;
 
         private IApplicationEnvironment applicationEnvironment;
-        private IAssemblyLoader loader;
         private bool isDisposed;
 
-        internal Engine(Func<Type, ILogger> loggerFactory)
+        internal Engine(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
         {
-            this.processingSourceReferences = new List<ProcessingSourceReference>();
-            this.processingSourceReferencesRO = new ReadOnlyCollection<ProcessingSourceReference>(this.processingSourceReferences);
+            //
+            // The internalDataSourceSet is used by the helper methods
+            // that take DataSources and return a new engine. For those
+            // methods, we create a new DataSourceSet under the hood to
+            // reference those data sources, and so need to keep track
+            // of that set in order to dispose it when the engine is
+            // disposed. This is because the user is unaware that a new
+            // DataSourceSet was created and thus there is no way that
+            // they could be responsible for freeing it.
+            //
 
-            this.sourceDataCookers = new List<DataCookerPath>();
-            this.sourceDataCookersRO = new ReadOnlyCollection<DataCookerPath>(this.sourceDataCookers);
+            this.workingDataSourceSet = createInfo.DataSources;
+            this.internalDataSourceSet = internalDataSourceSet;
 
-            this.compositeDataCookers = new List<DataCookerPath>();
-            this.compositeDataCookersRO = new ReadOnlyCollection<DataCookerPath>(this.compositeDataCookers);
+            this.loggerFactory = createInfo.LoggerFactory;
 
             this.tableGuidToDescriptor = new Dictionary<Guid, TableDescriptor>();
             this.allTables = new List<TableDescriptor>();
             this.allTablesRO = new ReadOnlyCollection<TableDescriptor>(this.allTables);
-
-            this.dataProcessors = new List<DataProcessorId>();
-
-            this.dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
-
-            this.freeDataSources = new List<IDataSource>();
-            this.freeDataSourcesRO = new ReadOnlyCollection<IDataSource>(this.freeDataSources);
 
             this.enabledCookers = new List<DataCookerPath>();
             this.enabledCookersRO = new ReadOnlyCollection<DataCookerPath>(this.enabledCookers);
@@ -94,32 +80,9 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.enabledTables = new List<TableDescriptor>();
             this.enabledTablesRO = new ReadOnlyCollection<TableDescriptor>(this.enabledTables);
 
-            this.loggerFactory = loggerFactory;
+            this.createInfo = createInfo;
 
             this.isDisposed = false;
-        }
-
-        /// <summary>
-        ///     Gets the directories that the engine will scan for extensions.
-        ///     These directories are scanned during <see cref="Create"/> when
-        ///     creating an instance of the engine.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IReadOnlyCollection<string> ExtensionDirectories
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.extensionDirectories;
-            }
-            private set
-            {
-                Debug.Assert(!this.isDisposed);
-                this.ThrowIfDisposed();
-                this.extensionDirectories = value;
-            }
         }
 
         /// <summary>
@@ -144,104 +107,28 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Gets the collection of source parsers that the engine will use to 
-        ///     cook data.
+        ///     Gets the collection of all data sources to process in this
+        ///     engine instance.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<IProcessingSource> ProcessingSources
+        public ReadOnlyDataSourceSet DataSourcesToProcess
         {
             get
             {
                 this.ThrowIfDisposed();
-                return this.processingSourceReferencesRO.Select(x => x.Instance);
+                return this.workingDataSourceSet;
             }
         }
 
         /// <summary>
-        ///     Gets the collection of paths to all source cookers that the engine
-        ///     has discovered.
+        ///     Gets the collection of all plugins loaded into this engine instance.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<DataCookerPath> SourceDataCookers
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.sourceDataCookersRO;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the collection of paths to all composite cookers that the engine
-        ///     has discovered.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IEnumerable<DataCookerPath> CompositeDataCookers
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.compositeDataCookersRO;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the collection of all cookers that the engine has discovered. This is the union
-        ///     of <see cref="this.SourceDataCookers"/> and <see cref="this.CompositeDataCookers"/>.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IEnumerable<DataCookerPath> AllCookers
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.SourceDataCookers.Concat(this.CompositeDataCookers);
-            }
-        }
-
-        /// <summary>
-        ///     Gets the collection of Data Sources to process. These Data Sources will be processed in whatever
-        ///     <see cref="ICustomDataProcessorWithSourceParser"/> are able to handle the Data Source.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IEnumerable<IDataSource> FreeDataSourcesToProcess
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.freeDataSourcesRO;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the collection of Data Sources that are to be processed by a specific <see cref="IProcessingSource"/>.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IReadOnlyDictionary<IProcessingSource, IReadOnlyList<IReadOnlyList<IDataSource>>> DataSourcesToProcess
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.dataSourcesToProcess.ToDictionary(
-                    x => x.Key.Instance,
-                    x => (IReadOnlyList<IReadOnlyList<IDataSource>>)x.Value
-                        .Select(v => (IReadOnlyList<IDataSource>)v.AsReadOnly())
-                        .ToList()
-                        .AsReadOnly());
-            }
-        }
+        public PluginSet Plugins => this.DataSourcesToProcess.Plugins;
 
         /// <summary>
         ///     Gets the collection of all enabled cookers.
@@ -255,29 +142,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 this.ThrowIfDisposed();
                 return this.enabledCookersRO;
-            }
-        }
-
-        /// <summary>
-        ///     Gets any non-fatal errors that occured during engine
-        ///     creation. Because these errors are not fatal, they are
-        ///     reported here rather than raising an exception.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IEnumerable<ErrorInfo> CreationErrors
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.creationErrors;
-            }
-            private set
-            {
-                Debug.Assert(!this.isDisposed);
-                this.ThrowIfDisposed();
-                this.creationErrors = value;
             }
         }
 
@@ -312,169 +176,72 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Creates a new instance of the <see cref="Engine" /> class.
+        ///     Gets the parameters used to create this instance.
         /// </summary>
-        /// <returns>
-        ///     The created engine environment.
-        /// </returns>
-        /// <exception cref="EngineException">
-        ///     An fatal error occurred while creating the engine.
-        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public static Engine Create()
+        public EngineCreateInfo CreateInfo
         {
-            return Create(new EngineCreateInfo());
+            get
+            {
+                this.ThrowIfDisposed();
+                return this.createInfo;
+            }
         }
+
+        private IEnumerable<ProcessingSourceReference> ProcessingSourceReferences => this.Plugins.ProcessingSourceReferences;
+
+        private bool ArePluginsIsolated => this.Plugins.ArePluginsIsolated;
+
+        private ExtensionRoot Extensions => this.Plugins.Extensions;
+
+        private DataExtensionFactory Factory => this.Plugins.Factory;
 
         /// <summary>
         ///     Creates a new instance of the <see cref="Engine" /> class.
-        /// </summary>
-        /// <param name="createInfo">
-        ///     The parameters to use for creating a new engine instance.
-        /// </param>
-        /// <returns>
-        ///     The created engine environment.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="createInfo"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="EngineException">
-        ///     An fatal error occurred while creating the engine.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public static Engine Create(
-            EngineCreateInfo createInfo)
-        {
-            Guard.NotNull(createInfo, nameof(createInfo));
-
-            try
-            {
-                return CreateCore(createInfo);
-            }
-            catch (Exception e)
-            {
-                throw new EngineException(
-                    "Unable to create the engine. See the inner exception for details.",
-                    e);
-            }
-        }
-
-        /// <summary>
-        ///     Adds the given file to this instance for processing.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to process.
         /// </param>
+        /// <returns>
+        ///     The created engine environment.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSource"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="InstanceAlreadyProcessedException">
-        ///     This instance has already been processed.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
+        /// <exception cref="EngineException">
+        ///     A fatal error occurred while creating the engine.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     <paramref name="dataSource"/> cannot be processed by any
         ///     discovered extensions.
         /// </exception>
-        public void AddDataSource(IDataSource dataSource)
-        {
-            Guard.NotNull(dataSource, nameof(dataSource));
-            this.ThrowIfDisposed();
-            this.ThrowIfProcessed();
-
-            if (!this.TryAddDataSource(dataSource))
-            {
-                throw new UnsupportedDataSourceException(dataSource);
-            }
-        }
-
-        /// <summary>
-        ///     Attempts to add the given Data Source to this instance for processing.
-        /// </summary>
-        /// <param name="filePath">
-        ///     The Data Source to process.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the Data Source has been added for processing;
-        ///     <c>false</c> if the Data Source is not valid, cannot be processed,
-        ///     or the instance has already been processed. Note that <c>false</c>
-        ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
-        /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public bool TryAddDataSource(IDataSource dataSource)
+        public static Engine Create(IDataSource dataSource)
         {
-            this.ThrowIfDisposed();
-            if (dataSource is null)
-            {
-                return false;
-            }
+            Guard.NotNull(dataSource, nameof(dataSource));
 
-            if (this.IsProcessed)
-            {
-                return false;
-            }
-
-            if (!this.processingSourceReferences.Any(x => x.Supports(dataSource)))
-            {
-                return false;
-            }
-
+            DataSourceSet dataSourceSet = null;
             try
             {
-                this.freeDataSources.Add(dataSource);
+                dataSourceSet = DataSourceSet.Create();
+                dataSourceSet.AddDataSource(dataSource);
+
+                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
+                return Create(info);
             }
             catch
             {
-                return false;
+                dataSourceSet.SafeDispose();
+                throw;
             }
-
-            return true;
         }
 
         /// <summary>
-        ///     Adds the given Data Source to this instance for processing by
-        ///     the specific <see cref="IProcessingSource"/>.
-        /// </summary>
-        /// <param name="dataSource">
-        ///     The Data Source to process.
-        /// </param>
-        /// <param name="processingSourceType">
-        ///     The <see cref="IProcessingSource"/> to use to process the file.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="dataSource"/> is <c>null</c>.
-        ///     - or -
-        ///     <paramref name="processingSourceType"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="InstanceAlreadyProcessedException">
-        ///     This instance has already been processed.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        /// <exception cref="UnsupportedDataSourceException">
-        ///     The specified <paramref name="processingSourceType"/> cannot handle
-        ///     the given Data Source.
-        /// </exception>
-        /// <exception cref="UnsupportedProcessingSourceException">
-        ///     The specified <paramref name="processingSourceType"/> is unknown.
-        /// </exception>
-        public void AddDataSource(IDataSource dataSource, Type processingSourceType)
-        {
-            this.AddDataSources(new[] { dataSource, }, processingSourceType);
-        }
-
-        /// <summary>
-        ///     Attempts to add the given Data Source to this instance for processing by
-        ///     the specific <see cref="IProcessingSource"/>.
+        ///     Creates a new instance of the <see cref="Engine" /> class.
         /// </summary>
         /// <param name="dataSource">
         ///     The Data Source to process.
@@ -483,41 +250,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The <see cref="IProcessingSource"/> to use to process <paramref name="dataSource"/>.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the <see cref="IDataSource"/> has been added for processing by the <see cref="IProcessingSource"/>;
-        ///     <c>false</c> otherwise. Note that <c>false</c>
-        ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
+        ///     The created engine environment.
         /// </returns>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public bool TryAddDataSource(IDataSource dataSource, Type processingSourceType)
-        {
-            return this.TryAddDataSources(new[] { dataSource, }, processingSourceType);
-        }
-
-        /// <summary>
-        ///     Adds the given data sources to this instance for processing by
-        ///     the specific <see cref="IProcessingSource"/>. All of the files will be processed
-        ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
-        ///     to ensure each Data Source is processed by a different instance, or
-        ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
-        /// </summary>
-        /// <param name="dataSources">
-        ///     The Data Sources to process.
-        /// </param>
-        /// <param name="processingSourceType">
-        ///     The <see cref="IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSources"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="InstanceAlreadyProcessedException">
-        ///     This instance has already been processed.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
+        /// <exception cref="EngineException">
+        ///     A fatal error occurred while creating the engine.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
         ///     The specified <paramref name="processingSourceType"/> cannot handle
@@ -526,57 +267,117 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
-        public void AddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public static Engine Create(
+            IDataSource dataSource,
+            Type processingSourceType)
         {
-            Guard.NotNull(dataSources, nameof(dataSources));
+            Guard.NotNull(dataSource, nameof(dataSource));
             Guard.NotNull(processingSourceType, nameof(processingSourceType));
-            if (dataSources.Any(x => x is null))
+
+            DataSourceSet dataSourceSet = null;
+            try
             {
-                throw new ArgumentNullException(nameof(dataSources));
+                dataSourceSet = DataSourceSet.Create();
+                dataSourceSet.AddDataSource(dataSource, processingSourceType);
+
+                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
+                return CreateCore(info, dataSourceSet);
             }
-
-            this.ThrowIfDisposed();
-            this.ThrowIfProcessed();
-
-            this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferences, this.dataSourcesToProcess, this.TypeIs);
+            catch
+            {
+                dataSourceSet.SafeDispose();
+                throw;
+            }
         }
 
         /// <summary>
-        ///     Attempts to add the given data sources to this instance for processing by
-        ///     the specific <see cref="IProcessingSource"/>. All of the files will be processed
-        ///     by the same instance of the Custom Data Processor. Use <see cref="AddDataSource(IDataSource, Type)"/>
-        ///     to ensure each Data Source is processed by a different instance, or
-        ///     use multiple calls to <see cref="AddDataSources(IEnumerable{IDataSource}, Type)"/>.
+        ///     Creates a new instance of the <see cref="Engine" /> class.
         /// </summary>
         /// <param name="dataSources">
         ///     The Data Sources to process.
         /// </param>
         /// <param name="processingSourceType">
-        ///     The <see cref="IProcessingSource"/> to use to process the <paramref name="dataSources"/>.
+        ///     The <see cref="IProcessingSource"/> to use to process <paramref name="dataSources"/>.
         /// </param>
+        /// <returns>
+        ///     The created engine environment.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSources"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="processingSourceType"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="InstanceAlreadyProcessedException">
+        ///     This instance has already been processed.
+        /// </exception>
+        /// <exception cref="UnsupportedDataSourceException">
+        ///     The specified <paramref name="processingSourceType"/> cannot handle
+        ///     the given Data Source.
+        /// </exception>
+        /// <exception cref="UnsupportedProcessingSourceException">
+        ///     The specified <paramref name="processingSourceType"/> is unknown.
+        /// </exception>
+        /// <exception cref="EngineException">
+        ///     A fatal error occurred while creating the engine.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public bool TryAddDataSources(IEnumerable<IDataSource> dataSources, Type processingSourceType)
+        public static Engine Create(
+            IEnumerable<IDataSource> dataSources,
+            Type processingSourceType)
         {
-            this.ThrowIfDisposed();
+            Guard.NotNull(dataSources, nameof(dataSources));
+            Guard.NotNull(processingSourceType, nameof(processingSourceType));
 
-            if (dataSources is null ||
-                dataSources.Any(x => x is null) ||
-                processingSourceType is null ||
-                this.IsProcessed)
-            {
-                return false;
-            }
-
+            DataSourceSet dataSourceSet = null;
             try
             {
-                this.AddDataSourcesCore(dataSources, processingSourceType, this.processingSourceReferences, this.dataSourcesToProcess, this.TypeIs);
-                return true;
+                dataSourceSet = DataSourceSet.Create();
+                dataSourceSet.AddDataSources(dataSources, processingSourceType);
+
+                var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
+                return CreateCore(info, dataSourceSet);
             }
             catch
             {
-                return false;
+                dataSourceSet.SafeDispose();
+                throw;
+            }
+        }
+
+        /// <summary>
+        ///     Creates a new instance of the <see cref="Engine" /> class.
+        /// </summary>
+        /// <param name="createInfo">
+        ///     Provides details on how to create the engine as well as what 
+        ///     the engine should process.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="createInfo"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="EngineException">
+        ///     A fatal error occurred while creating the engine.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        public static Engine Create(EngineCreateInfo createInfo)
+        {
+            Guard.NotNull(createInfo, nameof(createInfo));
+
+            try
+            {
+                return CreateCore(createInfo, null);
+            }
+            catch (Exception e)
+            {
+                throw new EngineException(
+                    "Unable to create the engine. See the inner exception for details.",
+                    e);
             }
         }
 
@@ -594,6 +395,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
+        /// <exception cref="NoDataSourceException">
+        ///     There are inadequate data sources in <see cref="DataSourcesToProcess"/>
+        ///     in order for the specified cooker to participate in processing.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
@@ -602,10 +407,17 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ThrowIfDisposed();
             this.ThrowIfProcessed();
 
-            if (!this.TryEnableCooker(dataCookerPath))
+            if (!this.Plugins.AllCookers.Contains(dataCookerPath))
             {
                 throw new CookerNotFoundException(dataCookerPath);
             }
+
+            if (!this.CouldCookerHaveData(dataCookerPath))
+            {
+                throw new NoDataSourceException(dataCookerPath);
+            }
+
+            this.enabledCookers.Add(dataCookerPath);
         }
 
         /// <summary>
@@ -631,7 +443,12 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            if (!this.AllCookers.Contains(dataCookerPath))
+            if (!this.Plugins.AllCookers.Contains(dataCookerPath))
+            {
+                return false;
+            }
+
+            if (!this.CouldCookerHaveData(dataCookerPath))
             {
                 return false;
             }
@@ -647,17 +464,24 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="descriptor">
         ///     The table to enable.
         /// </param>
-        /// <exception cref="TableNotFoundException">
-        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="descriptor"/> cannot be null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     The processing sources referenced by the table could
+        ///     not be found.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
         /// </exception>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="descriptor"/> cannot be null.
-        /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
+        /// </exception>
+        /// <exception cref="TableException">
+        ///     A table is not available for the given <paramref name="tableDescriptor"/>.
+        /// </exception>
+        /// <exception cref="TableNotFoundException">
+        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
         /// </exception>
         public void EnableTable(TableDescriptor descriptor)
         {
@@ -665,9 +489,46 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ThrowIfProcessed();
             Guard.NotNull(descriptor, nameof(descriptor));
 
-            if (!this.TryEnableTable(descriptor))
+            if (this.enabledTables.Contains(descriptor))
+            {
+                return;
+            }
+
+            if (!this.allTables.Contains(descriptor))
             {
                 throw new TableNotFoundException(descriptor);
+            }
+
+            if (this.Extensions.TablesById.TryGetValue(descriptor.Guid, out ITableExtensionReference reference))
+            {
+                if (!this.Extensions.TablesById.TryGetValue(descriptor.Guid, out var tableReference))
+                {
+                    Debug.Assert(
+                        false,
+                        "If allTables contains the descriptor, then it should be found or there's a bug.");
+                }
+
+                if (tableReference.Availability != DataExtensionAvailability.Available)
+                {
+                    throw new TableException($"The requested table is not available: {tableReference.Availability}.");
+                }
+
+                this.enabledTables.Add(descriptor);
+            }
+            else
+            {
+                var executor = this.executors.FirstOrDefault(
+                    x => x.Context.ProcessingSource.AvailableTables.Contains(descriptor));
+                if (executor == default)
+                {
+                    throw new ArgumentException(
+                        "No data source found for the given table.",
+                        paramName: nameof(descriptor));
+                }
+                else
+                {
+                    this.enabledTables.Add(descriptor);
+                }
             }
         }
 
@@ -709,7 +570,15 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return true;
             }
 
-            this.enabledTables.Add(descriptor);
+            try
+            {
+                EnableTable(descriptor);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
             return true;
         }
 
@@ -767,16 +636,18 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
-                this.extensionRoot.SafeDispose();
+                //
+                // we diposes the original set only if we own the data sources.
+                // this only occurs when the user uses one of the convenience
+                // methods that creates a DataSource internally, e.g. Create(IDataSource).
+                //
 
-                this.applicationEnvironment = null;
-                this.creationErrors = null;
-                this.extensionDirectories = null;
-                this.extensionRoot = null;
-                this.factory = null;
-                this.loader = null;
+                this.internalDataSourceSet.SafeDispose();
             }
 
+            this.workingDataSourceSet = null;
+            this.internalDataSourceSet = null;
+            this.applicationEnvironment = null;
             this.isDisposed = true;
         }
 
@@ -824,51 +695,21 @@ namespace Microsoft.Performance.Toolkit.Engine
             return loggerFactory?.Invoke(type) ?? Logger.Create(type);
         }
 
-        private static Engine CreateCore(
-            EngineCreateInfo createInfo)
+        private static Engine CreateCore(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
         {
             Debug.Assert(createInfo != null);
 
-            IPlugInCatalog catalog = null;
-            IDataExtensionRepositoryBuilder repo = null;
+            var loggerFactory = createInfo.LoggerFactory ?? Logger.Create;
+
+            var logger = loggerFactory(typeof(Engine));
+
             Engine instance = null;
             try
             {
-                var extensionDirectories = createInfo.ExtensionDirectories.ToList().AsReadOnly();
-                Debug.Assert(extensionDirectories.Any());
 
-                var assemblyLoader = createInfo.AssemblyLoader ?? new AssemblyLoader();
-
-                var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, _ => new NullValidator());
-
-                catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
-
-                var factory = new DataExtensionFactory();
-                repo = factory.CreateDataExtensionRepository();
-                var reflector = new DataExtensionReflector(
-                    assemblyDiscovery,
-                    repo);
-
-                assemblyDiscovery.ProcessAssemblies(extensionDirectories, out var discoveryError);
-
-                repo.FinalizeDataExtensions();
-
-                var repoTuple = Tuple.Create(factory, repo);
-
-                Debug.Assert(repoTuple != null);
-
-                instance = new EngineImpl(createInfo.LoggerFactory);
-
-                instance.ExtensionDirectories = extensionDirectories;
-                instance.CreationErrors = new[] { discoveryError, };
-                instance.processingSourceReferences.AddRange(catalog.PlugIns);
-                instance.sourceDataCookers.AddRange(repoTuple.Item2.SourceDataCookers);
-                instance.compositeDataCookers.AddRange(repoTuple.Item2.CompositeDataCookers);
-                instance.extensionRoot = new ExtensionRoot(catalog, repo);
-
-                instance.dataProcessors.AddRange(repoTuple.Item2.DataProcessors);
-
-                instance.factory = repoTuple.Item1;
+                instance = new EngineImpl(createInfo, internalDataSourceSet);
+                instance.logger = logger;
+                instance.tableExtensionSelector = new TableExtensionSelector(createInfo.DataSources.Plugins.Extensions.Repository);
 
                 string runtimeName = !string.IsNullOrWhiteSpace(createInfo.RuntimeName)
                     ? createInfo.RuntimeName
@@ -883,13 +724,11 @@ namespace Microsoft.Performance.Toolkit.Engine
                     runtimeName: runtimeName,
                     new RuntimeTableSynchronizer(),
                     new TableConfigurationsSerializer(),
-                    instance.extensionRoot,
-                    instance.factory.CreateSourceSessionFactory(),
-                    new RuntimeMessageBox());
+                    instance.Extensions,
+                    instance.Factory.CreateSourceSessionFactory(),
+                    new RuntimeMessageBox(instance.logger));
 
-                instance.loader = assemblyLoader;
-
-                foreach (var cds in instance.processingSourceReferences)
+                foreach (var cds in instance.ProcessingSourceReferences)
                 {
                     try
                     {
@@ -898,22 +737,18 @@ namespace Microsoft.Performance.Toolkit.Engine
                     }
                     catch (Exception e)
                     {
-                        //
-                        // todo: log
-                        //
-
-                        Console.Error.WriteLine(e);
+                        logger.Error($"Failed to initialize processing source '{cds.Name}': {e}");
                     }
                 }
 
                 var allTables = new HashSet<TableDescriptor>();
-                foreach (var tableId in repoTuple.Item2.TablesById)
+                foreach (var tableId in createInfo.DataSources.Plugins.TablesById)
                 {
                     allTables.Add(tableId.Value.TableDescriptor);
                     instance.tableGuidToDescriptor[tableId.Key] = tableId.Value.TableDescriptor;
                 }
 
-                foreach (var descriptor in catalog.PlugIns.SelectMany(x => x.AvailableTables))
+                foreach (var descriptor in createInfo.DataSources.Plugins.ProcessingSourceReferences.SelectMany(x => x.AvailableTables))
                 {
                     allTables.Add(descriptor);
                     instance.tableGuidToDescriptor[descriptor.Guid] = descriptor;
@@ -921,110 +756,97 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 instance.allTables.AddRange(allTables);
 
+                var allDataSourceAssociations = GroupAllDataSourcesToProcessingSources(
+                    instance.Plugins.ProcessingSourceReferences,
+                    instance.DataSourcesToProcess.FreeDataSourcesToProcess,
+                    instance.DataSourcesToProcess.DataSourcesToProcess);
+
+                instance.executors = instance.CreateExecutors(allDataSourceAssociations);
+
                 instance.IsProcessed = false;
 
                 return instance;
             }
-            catch
+            catch (Exception)
             {
                 instance.SafeDispose();
-                repo.SafeDispose();
-                catalog.SafeDispose();
                 throw;
             }
         }
 
-        private void AddDataSourcesCore(
-            IEnumerable<IDataSource> dataSources,
-            Type processingSourceType,
-            List<ProcessingSourceReference> processingSourceReferences,
-            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
-            Func<Type, Type, bool> typeIs)
+        private bool CouldCookerHaveData(DataCookerPath dataCookerPath)
         {
-            Debug.Assert(dataSources != null);
-            Debug.Assert(processingSourceType != null);
-            Debug.Assert(processingSourceReferences != null);
-            Debug.Assert(dataSourcesToProcess != null);
-            Debug.Assert(typeIs != null);
-
-            Debug.Assert(!this.IsProcessed);
-
-            var cdsr = processingSourceReferences.FirstOrDefault(x => typeIs(x.Instance.GetType(), processingSourceType));
-            if (cdsr is null)
+            if (dataCookerPath.DataCookerType == DataCookerType.CompositeDataCooker)
             {
-                throw new UnsupportedProcessingSourceException(processingSourceType);
+                //
+                // Composite cookers are always enabled, so it doesn't make sense to
+                // determine whether they might have data. Whether they might have data
+                // is determined by which cookers they depend on having data. Ultimately,
+                // if the source cookers that ultimately feed into the composite cooker
+                // are enabled, then the composite could have data. Thus, this method
+                // will only check if it is feasible that a source cooker could have data.
+                // This is sufficient because if the source cooker cannot have have data,
+                // then by definition any composite cookers that depend on it could not
+                // have data, and when the source cooker is enabled, this method would
+                // return false, thus there is no situation where a composite cooker
+                // could have data but one of the required source cookers did not.
+                //
+
+                return true;
             }
 
-            var atLeastOneDataSourceProvided = false;
-            foreach (var dataSource in dataSources)
-            {
-                Debug.Assert(dataSource != null);
+            var found = this.Plugins.Extensions.TryGetDataCookerReference(dataCookerPath, out var cooker);
+            Debug.Assert(found);
+            Debug.Assert(cooker != null);
 
-                atLeastOneDataSourceProvided = true;
-                if (!cdsr.Supports(dataSource))
-                {
-                    throw new UnsupportedDataSourceException(dataSource, processingSourceType);
-                }
-            }
+            var sourceParsers = this.executors.Select(x => (x, x.Processor))
+                .Where(x => x.Processor is ICustomDataProcessorWithSourceParser)
+                .Select(x => (x.x, (ICustomDataProcessorWithSourceParser)x.Processor))
+                .Where(x => x.Item2.SourceParserId == dataCookerPath.SourceParserId)
+                .ToList();
 
-            if (!atLeastOneDataSourceProvided)
-            {
-                throw new ArgumentException("The Data Source collection cannot be empty.", nameof(dataSources));
-            }
-
-            if (!dataSourcesToProcess.TryGetValue(cdsr, out var list))
-            {
-                list = new List<List<IDataSource>>();
-                dataSourcesToProcess[cdsr] = list;
-            }
-
-            list.Add(dataSources.ToList());
+            return sourceParsers.Count > 0;
         }
 
         private RuntimeExecutionResults ProcessCore()
         {
             this.IsProcessed = true;
 
-            var allDataSourceAssociations = GroupAllDataSourcesToProcessingSources(
-                this.processingSourceReferences,
-                this.freeDataSources,
-                this.dataSourcesToProcess);
-
-            var executors = CreateExecutors(allDataSourceAssociations);
-
             var extendedTables = new HashSet<ITableExtensionReference>();
             var processorTables = new Dictionary<TableDescriptor, ICustomDataProcessor>();
 
             foreach (var table in this.enabledTables)
             {
-                if (this.extensionRoot.TablesById.TryGetValue(table.Guid, out ITableExtensionReference reference))
+                if (this.Extensions.TablesById.TryGetValue(table.Guid, out ITableExtensionReference reference))
                 {
                     extendedTables.Add(reference);
                 }
                 else
                 {
-                    var executor = executors.Single(x => x.Context.ProcessingSource.AvailableTables.Contains(table));
+                    var executor = this.executors.Single(
+                        x => x.Context.ProcessingSource.AvailableTables.Contains(table));
                     executor.Processor.EnableTable(table);
                     processorTables.Add(table, executor.Processor);
                 }
             }
 
-            var processors = this.extensionRoot.EnableDataCookers(
-                executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
+            var processors = this.Extensions.EnableDataCookers(
+                this.executors.Select(
+                    x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 new HashSet<DataCookerPath>(this.enabledCookers));
-
 
             if (extendedTables.Any())
             {
-                var processorForTable = this.extensionRoot.EnableSourceDataCookersForTables(
-                executors.Select(x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
+                var processorForTable = this.Extensions.EnableSourceDataCookersForTables(
+                this.executors.Select(
+                    x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
                 extendedTables);
 
                 processors.UnionWith(processorForTable);
             }
 
-            var executionResults = new List<ExecutionResult>(executors.Count);
-            foreach (var executor in executors)
+            var executionResults = new List<ExecutionResult>(this.executors.Count);
+            foreach (var executor in this.executors)
             {
                 try
                 {
@@ -1037,20 +859,20 @@ namespace Microsoft.Performance.Toolkit.Engine
                 catch (Exception e)
                 {
                     //
-                    // todo: log
+                    // todo: better error message
                     //
 
-                    Console.Error.WriteLine(e);
+                    this.logger.Error($"Failed to process: {e}");
                 }
             }
 
-            var retrieval = this.factory.CreateCrossParserSourceDataCookerRetrieval(processors);
-            var retrievalFactory = new DataExtensionRetrievalFactory(retrieval, this.extensionRoot);
+            var retrieval = this.Factory.CreateCrossParserSourceDataCookerRetrieval(processors);
+            var retrievalFactory = new DataExtensionRetrievalFactory(retrieval, this.Extensions);
 
             var results = new RuntimeExecutionResults(
                 retrieval,
                 retrievalFactory,
-                this.extensionRoot,
+                this.Extensions,
                 processorTables);
 
             return results;
@@ -1075,7 +897,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             cds,
                             dataSources,
                             cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
-                            new RuntimeProcessorEnvironment(this.extensionRoot, this.CreateLogger),
+                            new RuntimeProcessorEnvironment(this.Extensions, this.CreateLogger),
                             ProcessorOptions.Default);
 
                         var executor = new ProcessingSourceExecutor();
@@ -1086,11 +908,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
                 catch (Exception e)
                 {
-                    //
-                    // todo: log
-                    //
-
-                    Console.Error.WriteLine(e);
+                    this.logger.Error($"Failed to initialize data processor in '{kvp.Key.Name}': {e}");
                 }
             }
 
@@ -1100,7 +918,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(
             IEnumerable<ProcessingSourceReference> processingSources,
             IEnumerable<IDataSource> freeDataSourcesToProcess,
-            IReadOnlyDictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess)
+            IReadOnlyDictionary<ProcessingSourceReference, IReadOnlyList<IReadOnlyList<IDataSource>>> dataSourcesToProcess)
         {
             var allDataSourceAssociations = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
 
@@ -1153,7 +971,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(first != null);
             Debug.Assert(second != null);
 
-            if (this.loader.SupportsIsolation)
+            if (this.ArePluginsIsolated)
             {
                 return first.GUID == second.GUID &&
                        first.AssemblyQualifiedName == second.AssemblyQualifiedName;
@@ -1167,8 +985,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class EngineImpl
             : Engine
         {
-            internal EngineImpl(Func<Type, ILogger> loggerFactory)
-                : base(loggerFactory)
+            internal EngineImpl(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
+                : base(createInfo, internalDataSourceSet)
             {
             }
         }
@@ -1258,6 +1076,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class RuntimeMessageBox
             : IMessageBox
         {
+            private readonly ILogger logger;
+
+            public RuntimeMessageBox(ILogger logger)
+            {
+                Debug.Assert(logger != null);
+
+                this.logger = logger;
+            }
+
             public void Show(
                 MessageBoxIcon icon,
                 IFormatProvider formatProvider,
@@ -1266,34 +1093,46 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 var message = string.Format(formatProvider, format, args);
 
-                Console.Error.WriteLine(
+                // todo: use the logger here too
+
+                this.logger.Error(
                     string.Concat("[", icon.ToString(), "]: ", message));
             }
 
-            public ButtonResult Show(MessageBoxIcon icon, IFormatProvider formatProvider, Buttons buttons, string caption, string format, params object[] args)
+            public ButtonResult Show(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
+                Buttons buttons, 
+                string caption,
+                string format,
+                params object[] args)
             {
                 var message = string.Format(formatProvider, format, args);
 
-                Console.Error.WriteLine(
-                    string.Concat("[", icon.ToString(), "]: ", message));
+                switch (icon)
+                {
+                    case MessageBoxIcon.Error:
+                        this.logger.Error("{0}", message);
+                        break;
+
+                    case MessageBoxIcon.Information:
+                        this.logger.Info("{0}", message);
+                        break;
+
+                    case MessageBoxIcon.Warning:
+                        this.logger.Warn("{0}", message);
+                        break;
+
+                    default:
+                        // todo: not sure if this is the 'best' approach
+                        this.logger.Info(
+                            string.Concat("[", icon.ToString(), "]: ", message));
+                        break;
+                }
 
                 // todo: how do we want to handle this?
                 // User prompts? Default?
                 return ButtonResult.None;
-            }
-        }
-
-        private sealed class NullValidator
-            : IPreloadValidator
-        {
-            public bool IsAssemblyAcceptable(string fullPath, out ErrorInfo error)
-            {
-                error = ErrorInfo.None;
-                return true;
-            }
-
-            public void Dispose()
-            {
             }
         }
     }
