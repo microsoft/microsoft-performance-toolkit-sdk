@@ -11,9 +11,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 {
     /// <summary>
     ///     Contains static (Shared in Visual Basic) methods for interacting
-    ///     with <see cref="Engine"/> instances.
+    ///     with <see cref="DataSourceSet"/> instances.
     /// </summary>
-    public static class EngineExtensions
+    public static class DataSourceSetExtensions
     {
         /// <summary>
         ///     Adds the given file to this instance for processing.
@@ -43,7 +43,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="filePath"/> cannot be processed by any
         ///     discovered extensions.
         /// </exception>
-        public static void AddFile(this Engine self, string filePath)
+        public static void AddFile(this DataSourceSet self, string filePath)
         {
             self.AddDataSource(CreateFSDataSource(filePath));
         }
@@ -85,7 +85,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="dataSourceType"/> is unknown.
         /// </exception>
-        public static void AddFile(this Engine self, string filePath, Type processingSourceType)
+        public static void AddFile(this DataSourceSet self, string filePath, Type processingSourceType)
         {
             self.AddDataSource(CreateFSDataSource(filePath), processingSourceType);
         }
@@ -108,7 +108,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public static bool TryAddFile(this Engine self, string filePath)
+        public static bool TryAddFile(this DataSourceSet self, string filePath)
         {
             return self.TryAddDataSource(CreateFSDataSource(filePath));
         }
@@ -134,7 +134,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public static bool TryAddFile(this Engine self, string filePath, Type processingSourceType)
+        public static bool TryAddFile(this DataSourceSet self, string filePath, Type processingSourceType)
         {
             return self.TryAddDataSource(CreateFSDataSource(filePath), processingSourceType);
         }
@@ -179,7 +179,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="UnsupportedProcessingSourceException">
         ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
-        public static void AddFiles(this Engine self, IEnumerable<string> filePaths, Type processingSourceType)
+        public static void AddFiles(this DataSourceSet self, IEnumerable<string> filePaths, Type processingSourceType)
         {
             self.AddDataSources(filePaths.Select(CreateFSDataSource), processingSourceType);
         }
@@ -203,7 +203,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public static bool TryAddFiles(this Engine self, IEnumerable<string> filePaths, Type processingSourceType)
+        public static bool TryAddFiles(this DataSourceSet self, IEnumerable<string> filePaths, Type processingSourceType)
         {
             return self.TryAddDataSources(filePaths.Select(CreateFSDataSource), processingSourceType);
         }

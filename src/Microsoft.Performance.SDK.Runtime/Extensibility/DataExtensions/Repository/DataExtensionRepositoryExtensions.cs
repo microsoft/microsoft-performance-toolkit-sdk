@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(processorsWithParsers, nameof(processorsWithParsers));
 
-            var sourceParserIds = 
+            var sourceParserIds =
                 processorsWithParsers.Select(p => p.SourceParserId);
             var uniqueSourceParserIds = new HashSet<string>(sourceParserIds, StringComparer.Ordinal);
 
@@ -144,6 +144,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         ///     The set of custom data processors that have data cookers enabled in order to build the requested set
         ///     of tables.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="self"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="processors"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="enabledTables"/> is <c>null</c>.
+        /// </exception>
         public static ISet<ICustomDataProcessorWithSourceParser> EnableSourceDataCookersForTables(
             this IDataExtensionRepository self,
             IEnumerable<ICustomDataProcessorWithSourceParser> processors,

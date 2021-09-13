@@ -11,7 +11,6 @@ namespace SqlPlugin
     // Makes this table discoverable to SDK
     //
     [Table]
-
     public class SqlTable
     {
         private readonly ReadOnlyCollection<SqlEventWithRelativeTimestamp> sqlEvents;
