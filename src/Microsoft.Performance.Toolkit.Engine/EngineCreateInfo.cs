@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
-using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK.Runtime.Discovery;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -14,71 +13,58 @@ namespace Microsoft.Performance.Toolkit.Engine
     /// </summary>
     public sealed class EngineCreateInfo
     {
-        private string extensionDirectory;
+        private static string DefaultRuntimeName;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> 
+        ///     Initializes the statc members of the <see cref="EngineCreateInfo"/>
         ///     class.
         /// </summary>
-        public EngineCreateInfo()
+        static EngineCreateInfo()
         {
-            this.ExtensionDirectory = Environment.CurrentDirectory;
+            EngineCreateInfo.DefaultRuntimeName = typeof(EngineCreateInfo).Assembly.GetName().Name;
         }
 
         /// <summary>
-        ///     Gets or sets the extension directory from
-        ///     which the runtime instance is to load plugins.
-        ///     By default, this value is the current working
-        ///     directory. If you set it to <c>null</c>,
-        ///     the current working directory will be used.
+        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
         /// </summary>
-        public string ExtensionDirectory
+        /// <param name="dataSources">
+        ///     The data sources to be processed in the engine.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSources"/> is <c>null</c>.
+        /// </exception>
+        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources)
         {
-            get
-            {
-                return this.extensionDirectory;
-            }
-            set
-            {
-                var candidateValue = value ?? Environment.CurrentDirectory;
+            Guard.NotNull(dataSources, nameof(dataSources));
 
-                DirectoryInfo dirInfo;
-                try
-                {
-                    dirInfo = new DirectoryInfo(candidateValue);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidExtensionDirectoryException(candidateValue, e);
-                }
-
-                if (!dirInfo.Exists)
-                {
-                    throw new InvalidExtensionDirectoryException(value);
-                }
-
-                this.extensionDirectory = dirInfo.FullName;
-            }
+            this.DataSources = dataSources;
         }
 
         /// <summary>
-        ///     Gets or sets the <see cref="IAssemblyLoader"/> to
-        ///     use for loading plugins. This property may be <c>null</c>.
-        ///     A <c>null</c> value indicates to use the default loading
-        ///     behavior.
-        ///     <para/>
-        ///     The vast majority of use cases will not need to use
-        ///     this property. Changing the loading behavior is for
-        ///     advanced scenarios.
+        ///     Gets or sets the name of the runtime on which the application is built.
         /// </summary>
-        public IAssemblyLoader AssemblyLoader{ get; set;  }
+        /// <remarks>
+        ///     Defaults to the engine assembly name.
+        /// </remarks>
+        public string RuntimeName { get; set; } = EngineCreateInfo.DefaultRuntimeName;
 
         /// <summary>
-        ///     Gets the <see cref="VersionChecker"/> to
-        ///     use for loading plugins. This property may be <c>null</c>.
-        ///     A <c>null</c> value indicates to use the default loading
-        ///     behavior.
+        ///     Gets or sets the application name.
         /// </summary>
-        public VersionChecker Versioning { get; internal set; }
+        public string ApplicationName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a logger factory.
+        /// </summary>
+        /// <remarks>
+        ///     The logger factory should be able to provide each processing source a logger specific to its type.
+        /// </remarks>
+        public Func<Type, ILogger> LoggerFactory { get; set; }
+
+        /// <summary>
+        ///     Gets the data sources that are to be processed by an <see cref="Engine"/>
+        ///     instance.
+        /// </summary>
+        public ReadOnlyDataSourceSet DataSources { get; }
     }
 }

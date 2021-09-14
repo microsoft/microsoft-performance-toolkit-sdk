@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
@@ -24,7 +23,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         : SourceDataCooker<TestDataElement, TestDataContext, int>
     {
         public InternalSourceDataCooker()
-            : base(new DataCookerPath("SourceId", "CookerId"))
+            : base(DataCookerPath.ForSource("SourceId", "CookerId"))
         {
         }
 
@@ -101,20 +100,20 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
         [TestMethod]
         [UnitTest]
-        public void TryCreateReferenceFails1()
+        public void TryCreateInternalReferenceSucceeds()
         {
             var result =
                 SourceDataCookerReference.TryCreateReference(
                     typeof(InternalSourceDataCooker),
                     out var sourceDataCookerReference);
 
-            Assert.IsFalse(result);
-            Assert.IsNull(sourceDataCookerReference);
+            Assert.IsTrue(result);
+            Assert.IsNotNull(sourceDataCookerReference);
         }
 
         [TestMethod]
         [UnitTest]
-        public void TryCreateReferenceFails2()
+        public void TryCreateReferenceFails1()
         {
             var result =
                 SourceDataCookerReference.TryCreateReference(
@@ -127,7 +126,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
         [TestMethod]
         [UnitTest]
-        public void TryCreateReferenceFails3()
+        public void TryCreateReferenceFails2()
         {
             var result =
                 SourceDataCookerReference.TryCreateReference(

@@ -26,6 +26,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception> 
-        IEnumerable<CustomDataSourceReference> PlugIns { get; }
+        IEnumerable<ProcessingSourceReference> PlugIns { get; }
     }
 }

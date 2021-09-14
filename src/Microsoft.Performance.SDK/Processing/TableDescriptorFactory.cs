@@ -84,7 +84,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     pre-built table configuration JSON files.
         /// </param>
         /// <param name="isInternalTable">
-        ///     This table is private to the custom data source.
+        ///     This table is private to the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="tableDescriptor">
         ///     If <paramref name="type"/> is a valid table type, then this is
@@ -135,7 +135,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     pre-built table configuration JSON files.
         /// </param>
         /// <param name="isInternalTable">
-        ///     This table is private to the custom data source.
+        ///     This table is private to the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="tableDescriptor">
         ///     If <paramref name="type"/> is a valid table type, then this is
@@ -200,7 +200,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Used to log any relevant messages.
         /// </param>
         /// <param name="isInternalTable">
-        ///     This table is private to the custom data source.
+        ///     This table is private to the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="tableDescriptor">
         ///     If <paramref name="type"/> is a valid table type, then this is

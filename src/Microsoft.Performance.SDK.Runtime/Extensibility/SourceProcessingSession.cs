@@ -148,7 +148,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
             var cookersByPass = this.scheduler.DataCookersBySourcePass;
 
-            if (this.maxSourcePassCount == 0)
+            if (this.maxSourcePassCount == SourceParsingConstants.UnlimitedPassCount)
             {
                 this.maxSourcePassCount = cookersByPass.Count;
             }

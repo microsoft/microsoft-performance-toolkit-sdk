@@ -13,7 +13,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
     public sealed class Source5DataCooker
         : SourceDataCooker<Source5DataObject, EngineTestContext, int>
     {
-        public static readonly DataCookerPath DataCookerPath = new DataCookerPath(
+        public static readonly DataCookerPath DataCookerPath = DataCookerPath.ForSource(
             nameof(Source5Parser),
             nameof(Source5DataCooker));
 

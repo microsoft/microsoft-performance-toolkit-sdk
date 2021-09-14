@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
-using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 {
@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     internal class CrossParserSourceDataCookerRetrieval
         : ICookedDataRetrieval
     {
-        private readonly IDictionary<string, ICustomDataProcessorWithSourceParser> processorsByParser 
+        private readonly IDictionary<string, ICustomDataProcessorWithSourceParser> processorsByParser
             = new Dictionary<string, ICustomDataProcessorWithSourceParser>(StringComparer.Ordinal);
 
         internal CrossParserSourceDataCookerRetrieval(
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             if (!this.processorsByParser.TryGetValue(dataOutputPath.SourceParserId, out var processor))
             {
-                throw new ArgumentException($"The specified source parser ({nameof(dataOutputPath.SourceParserId)}) was not found.");
+                throw new ArgumentException($"The specified source parser ({dataOutputPath.SourceParserId}) was not found.");
             }
 
             return processor.QueryOutput<T>(dataOutputPath);
@@ -57,10 +57,44 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             if (!this.processorsByParser.TryGetValue(dataOutputPath.SourceParserId, out var processor))
             {
-                throw new ArgumentException($"The specified source parser ({nameof(dataOutputPath.SourceParserId)}) was not found.");
+                throw new ArgumentException($"The specified source parser ({dataOutputPath.SourceParserId}) was not found.");
             }
 
             return processor.QueryOutput(dataOutputPath);
+        }
+
+        /// <inheritdoc />
+        public bool TryQueryOutput(DataOutputPath dataOutputPath, out object result)
+        {
+            if (!this.processorsByParser.TryGetValue(dataOutputPath.SourceParserId, out var processor))
+            {
+                result = default;
+                return false;
+            }
+
+            return processor.TryQueryOutput(dataOutputPath, out result);
+        }
+
+        /// <inheritdoc />
+        public bool TryQueryOutput<TOutput>(DataOutputPath dataOutputPath, out TOutput result)
+        {
+            if (!this.processorsByParser.TryGetValue(dataOutputPath.SourceParserId, out var processor))
+            {
+                result = default;
+                return false;
+            }
+
+            try
+            {
+                result = processor.QueryOutput<TOutput>(dataOutputPath);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            result = default;
+            return false;
         }
     }
 }

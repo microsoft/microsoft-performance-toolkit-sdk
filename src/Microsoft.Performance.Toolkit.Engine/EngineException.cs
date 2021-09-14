@@ -83,12 +83,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.DataCookerPath = dataCookerPath;
         }
 
-        /// <inheritdoc />
-        protected CookerNotFoundException(SerializationInfo info, StreamingContext context)
-        {
-            this.DataCookerPath = new DataCookerPath(info.GetString(nameof(DataCookerPath)));
-        }
-
         /// <summary>
         ///     Gets the requested cooker path that is the cause of this error.
         /// </summary>
@@ -98,7 +92,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue(nameof(DataCookerPath), this.DataCookerPath.CookerPath);
+            info.AddValue(nameof(DataCookerPath), this.DataCookerPath.ToString());
         }
 
         /// <inheritdoc />
@@ -153,14 +147,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             : base($"The requested data '{dataOutputPath}' was not found", inner)
         {
             this.DataOutputPath = dataOutputPath;
-        }
-
-        /// <inheritdoc />
-        protected DataOutputNotFoundException(SerializationInfo info, StreamingContext context)
-        {
-            this.DataOutputPath = new DataOutputPath(
-                new DataCookerPath(info.GetString(nameof(CookerPath))),
-                info.GetString(nameof(OutputId)));
         }
 
         /// <summary>
@@ -388,53 +374,53 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The unsupported Data Source.
         /// </param>
         public UnsupportedDataSourceException(IDataSource dataSource)
-            : this($"Data Source '{dataSource}' cannot be processed by any known Custom Data Sources.")
+            : this($"Data Source '{dataSource}' cannot be processed by any known {nameof(IProcessingSource)}.")
         {
             this.DataSource = dataSource.Uri.ToString();
-            this.RequestedCustomDataSource = null;
+            this.RequestedProcessingSource = null;
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="UnsupportedDataSourceException" />
-        ///     class for the given Data Source and requested Custom Data Source.
+        ///     class for the given Data Source and requested <see cref="IProcessingSource"/>.
         /// </summary>
         /// <param name="dataSource">
         ///     The unsupported Data Source.
         /// </param>
-        /// <param name="requestedCustomDataSource">
-        ///     The Custom Data Source that was requested for the file.
+        /// <param name="requestedProcessingSource">
+        ///     The <see cref="IProcessingSource"/> that was requested for the file.
         /// </param>
-        public UnsupportedDataSourceException(IDataSource dataSource, Type requestedCustomDataSource)
-            : this(dataSource, requestedCustomDataSource, null)
+        public UnsupportedDataSourceException(IDataSource dataSource, Type requestedProcessingSource)
+            : this(dataSource, requestedProcessingSource, null)
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="UnsupportedDataSourceException" />
-        ///     class for the given Data Source, requested Custom Data Source, and the error that is the
-        ///     cause of this error.
+        ///     class for the given <see cref="IDataSource"/>, requested <see cref="IProcessingSource"/>,
+        ///     and the error that is the cause of this error.
         /// </summary>
         /// <param name="dataSource">
         ///     The unsupported Data Source.
         /// </param>
-        /// <param name="requestedDataSource">
-        ///     The Custom Data Source that was requested for the Data Source.
+        /// <param name="requestedProcessingSource">
+        ///     The <see cref="IProcessingSource"/> that was requested for the Data Source.
         /// </param>
         /// <param name="inner">
         ///     The error that is the cause of this error.
         /// </param>
-        public UnsupportedDataSourceException(IDataSource dataSource, Type requestedCustomDataSource, Exception inner)
-            : base($"Data Source '{dataSource}' cannot be processed by '{requestedCustomDataSource}'", inner)
+        public UnsupportedDataSourceException(IDataSource dataSource, Type requestedProcessingSource, Exception inner)
+            : base($"Data Source '{dataSource}' cannot be processed by '{requestedProcessingSource}'", inner)
         {
             this.DataSource = dataSource.Uri.ToString();
-            this.RequestedCustomDataSource = requestedCustomDataSource?.FullName ?? string.Empty;
+            this.RequestedProcessingSource = requestedProcessingSource?.FullName ?? string.Empty;
         }
 
         /// <inheritdoc />
         protected UnsupportedDataSourceException(SerializationInfo info, StreamingContext context)
         {
             this.DataSource = info.GetString(nameof(DataSource));
-            this.RequestedCustomDataSource = info.GetString(nameof(RequestedCustomDataSource));
+            this.RequestedProcessingSource = info.GetString(nameof(RequestedProcessingSource));
         }
 
         /// <summary>
@@ -443,18 +429,18 @@ namespace Microsoft.Performance.Toolkit.Engine
         public string DataSource { get; }
 
         /// <summary>
-        ///     Gets the fully qualified type name of the Custom Data Source requested for
-        ///     the Data Source. This property may be null if no Custom Data Source was requested
-        ///     for the Data Source. See <see cref="Type.FullName"/>.
+        ///     Gets the fully qualified type name of the <see cref="IProcessingSource"/> requested for
+        ///     the <see cref="IDataSource"/>. This property may be null if no <see cref="IProcessingSource"/> was requested
+        ///     for the <see cref="IDataSource"/>. See <see cref="Type.FullName"/>.
         /// </summary>
-        public string RequestedCustomDataSource { get; }
+        public string RequestedProcessingSource { get; }
 
         /// <inheritdoc />
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
             info.AddValue(nameof(DataSource), this.DataSource);
-            info.AddValue(nameof(RequestedCustomDataSource), this.RequestedCustomDataSource);
+            info.AddValue(nameof(RequestedProcessingSource), this.RequestedProcessingSource);
         }
 
         /// <inheritdoc />
@@ -462,10 +448,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             var sb = new StringBuilder(base.ToString()).AppendLine()
                 .AppendFormat("{0}: {1}", nameof(DataSource), this.DataSource);
-            if (!string.IsNullOrWhiteSpace(this.RequestedCustomDataSource))
+            if (!string.IsNullOrWhiteSpace(this.RequestedProcessingSource))
             {
                 sb = sb.AppendLine()
-                    .AppendFormat("{0}: {1}", nameof(RequestedCustomDataSource), this.RequestedCustomDataSource);
+                    .AppendFormat("{0}: {1}", nameof(RequestedProcessingSource), this.RequestedProcessingSource);
             }
 
             return sb.ToString();
@@ -474,30 +460,30 @@ namespace Microsoft.Performance.Toolkit.Engine
 
     /// <summary>
     ///     Represents the error that occurs when an attempt is made
-    ///     to use a Custom Data Source that is unknown by the runtime.
+    ///     to use an <see cref="IProcessingSource"/> that is unknown by the runtime.
     /// </summary>
     [Serializable]
-    public class UnsupportedCustomDataSourceException
+    public class UnsupportedProcessingSourceException
         : EngineException
     {
         /// <inheritdoc />
-        public UnsupportedCustomDataSourceException() : base() { }
+        public UnsupportedProcessingSourceException() : base() { }
 
         /// <inheritdoc />
-        public UnsupportedCustomDataSourceException(string message) : base(message) { }
+        public UnsupportedProcessingSourceException(string message) : base(message) { }
 
         /// <inheritdoc />
-        public UnsupportedCustomDataSourceException(string message, Exception inner) : base(message, inner) { }
+        public UnsupportedProcessingSourceException(string message, Exception inner) : base(message, inner) { }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedCustomDataSourceException" />
-        ///     class for the requested Custom Data Source.
+        ///     Initializes a new instance of the <see cref="UnsupportedProcessingSourceException" />
+        ///     class for the requested <see cref="IProcessingSource"/>.
         /// </summary>
-        /// <param name="requestedCustomDataSource">
-        ///     The Custom Data Source that was requested.
+        /// <param name="requestedProcessingSource">
+        ///     The <see cref="IProcessingSource"/> that was requested.
         /// </param>
-        public UnsupportedCustomDataSourceException(Type requestedCustomDataSource)
-            : this(requestedCustomDataSource, null)
+        public UnsupportedProcessingSourceException(Type requestedProcessingSource)
+            : this(requestedProcessingSource, null)
         {
         }
 
@@ -506,43 +492,43 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     class for the requested data source and the error that is the
         ///     cause of this error.
         /// </summary>
-        /// <param name="requestedCustomDataSource">
-        ///     The Custom Data Source that was requested.
+        /// <param name="requestedProcessingSource">
+        ///     The <see cref="IProcessingSource"/> that was requested.
         /// </param>
         /// <param name="inner">
         ///     The error that is the cause of this error.
         /// </param>
-        public UnsupportedCustomDataSourceException(Type requestedCustomDataSource, Exception inner)
-            : base($"Data source '{requestedCustomDataSource}' is unknown", inner)
+        public UnsupportedProcessingSourceException(Type requestedProcessingSource, Exception inner)
+            : base($"Data source '{requestedProcessingSource}' is unknown", inner)
         {
-            this.RequestedCustomDataSource = requestedCustomDataSource.FullName;
+            this.RequestedProcessingSource = requestedProcessingSource.FullName;
         }
 
         /// <inheritdoc />
-        protected UnsupportedCustomDataSourceException(SerializationInfo info, StreamingContext context)
+        protected UnsupportedProcessingSourceException(SerializationInfo info, StreamingContext context)
         {
-            this.RequestedCustomDataSource = info.GetString(nameof(RequestedCustomDataSource));
+            this.RequestedProcessingSource = info.GetString(nameof(RequestedProcessingSource));
         }
 
         /// <summary>
-        ///     Gets the fully qualified type name of the Custom Data Source requested for
-        ///     the file. This property may be null if no Custom Data Source was requested
+        ///     Gets the fully qualified type name of the <see cref="IProcessingSource"/> requested for
+        ///     the file. This property may be null if no <see cref="IProcessingSource"/> was requested
         ///     for the file. See <see cref="Type.FullName"/>.
         /// </summary>
-        public string RequestedCustomDataSource { get; }
+        public string RequestedProcessingSource { get; }
 
         /// <inheritdoc />
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
-            info.AddValue(nameof(RequestedCustomDataSource), this.RequestedCustomDataSource);
+            info.AddValue(nameof(RequestedProcessingSource), this.RequestedProcessingSource);
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
             return new StringBuilder(base.ToString()).AppendLine()
-                .AppendFormat("{0}: {1}", nameof(RequestedCustomDataSource), this.RequestedCustomDataSource)
+                .AppendFormat("{0}: {1}", nameof(RequestedProcessingSource), this.RequestedProcessingSource)
                 .ToString();
         }
     }
@@ -640,6 +626,100 @@ namespace Microsoft.Performance.Toolkit.Engine
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
+        }
+    }
+
+    /// <summary>
+    ///     Represents the error that occurs when an attempt is made to enable a
+    ///     source cooker on the engine when the data sources do not provide the
+    ///     data required for said cooker.
+    ///     <para />
+    ///     An example of this condition would be when you attempt to add a cooker
+    ///     that cooks events from an ETL file (Event Tracing for Windows trace file),
+    ///     but no ETL files are present in the set of files to process.
+    /// </summary>
+    [Serializable]
+    public class NoDataSourceException
+        : EngineException
+    {
+        /// <inheritdoc />
+        public NoDataSourceException() : base() { }
+
+        /// <inheritdoc />
+        public NoDataSourceException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public NoDataSourceException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="NoDataSourceException"/>
+        ///     class with the specified <see cref="DataCookerPath"/>.
+        /// </summary>
+        /// <param name="cookerPath">
+        ///     The path to the cooker which will not be able to participate in data
+        ///     processing due to there being inadequate data in the data source set.
+        /// </param>
+        public NoDataSourceException(DataCookerPath cookerPath)
+            : this(cookerPath, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="NoDataSourceException"/>
+        ///     class with the specified <see cref="DataCookerPath"/> and the error
+        ///     that is the cause of this error, if any.
+        /// </summary>
+        /// <param name="cookerPath">
+        ///     The path to the cooker which will not be able to participate in data
+        ///     processing due to there being inadequate data in the data source set.
+        /// </param>
+        /// <param name="inner">
+        ///     The error that is the cause of this error.
+        /// </param>
+        public NoDataSourceException(DataCookerPath cookerPath, Exception inner)
+            : base("No data sources produce input for the specified cooker.", inner)
+        {
+            this.CookerPath = cookerPath;
+        }
+
+        /// <inheritdoc />
+        protected NoDataSourceException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+            var type = (DataCookerType)info.GetInt32(nameof(this.CookerPath.DataCookerType));
+            var dataCookerId = info.GetString(nameof(this.CookerPath.DataCookerId));
+            switch (type)
+            {
+                case DataCookerType.CompositeDataCooker:
+                    this.CookerPath = DataCookerPath.ForComposite(dataCookerId);
+                    break;
+
+                case DataCookerType.SourceDataCooker:
+                    {
+                        var sourceParserId = info.GetString(nameof(this.CookerPath.SourceParserId));
+                        this.CookerPath = DataCookerPath.ForSource(sourceParserId, dataCookerId);
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the path to the cooker that will not have any input.
+        /// </summary>
+        public DataCookerPath CookerPath { get; }
+
+        /// <inheritdoc />
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(nameof(this.CookerPath.SourceParserId), this.CookerPath.SourceParserId);
+            info.AddValue(nameof(this.CookerPath.DataCookerId), this.CookerPath.DataCookerId);
+            info.AddValue(nameof(this.CookerPath.DataCookerType), (int)this.CookerPath.DataCookerType);
         }
     }
 }

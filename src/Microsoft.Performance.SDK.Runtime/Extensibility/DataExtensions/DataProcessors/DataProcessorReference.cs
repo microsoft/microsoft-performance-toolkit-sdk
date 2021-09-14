@@ -150,9 +150,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
         ///     A <see cref="Type"/> must satisfy the following criteria in order to 
         ///     be eligible as a reference:
         ///     <list type="bullet">
-        ///         <item>must be public.</item>
         ///         <item>must be concrete.</item>
-        ///         <item>must implement IDataProcessor somewhere in the inheritance heirarchy (either directly or indirectly.)</item>
+        ///         <item>must implement IDataProcessor somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>
@@ -174,7 +173,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
 
             reference = null;
 
-            if (candidateType.IsPublicAndInstantiatableOfType(typeof(IDataProcessor)))
+            if (candidateType.IsInstantiatableOfType(typeof(IDataProcessor)))
             {
                 // There must be an empty, public constructor
                 if (candidateType.TryGetEmptyPublicConstructor(out var constructor))

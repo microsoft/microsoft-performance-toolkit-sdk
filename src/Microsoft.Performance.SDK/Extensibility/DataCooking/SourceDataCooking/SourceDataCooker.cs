@@ -36,7 +36,7 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
         ///     This cooker's ID.
         /// </param>
         protected SourceDataCooker(string sourceId, string cookerId)
-            : this(new DataCookerPath(sourceId, cookerId))
+            : this(DataCookerPath.ForSource(sourceId, cookerId))
         {
         }
 
@@ -125,7 +125,7 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
         ///     By default, there are no required cookers. Override this member
         ///     in order to declare additional requirements.
         /// </summary>
-        public virtual IReadOnlyCollection<DataCookerPath> RequiredDataCookers { get; } 
+        public virtual IReadOnlyCollection<DataCookerPath> RequiredDataCookers { get; }
             = new ReadOnlyCollection<DataCookerPath>(new List<DataCookerPath>());
 
         /// <summary>

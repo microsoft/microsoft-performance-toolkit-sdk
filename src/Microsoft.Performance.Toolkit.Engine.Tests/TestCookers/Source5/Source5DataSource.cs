@@ -8,13 +8,13 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
 {
-    [CustomDataSource(
+    [ProcessingSource(
        "{6DBA249D-F113-4F8D-A758-CD030D6C16F8}",
        nameof(Source5DataSource),
        "Source5 for Runtime Tests")]
     [FileDataSource(Extension)]
     public sealed class Source5DataSource
-        : CustomDataSourceBase
+        : ProcessingSource
     {
         public const string Extension = ".s5d";
 
