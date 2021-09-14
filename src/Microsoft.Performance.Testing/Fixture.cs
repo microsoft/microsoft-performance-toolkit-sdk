@@ -8,13 +8,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Testing
 {
-    public abstract class BaseFixture
+    public abstract class Fixture
     {
         private readonly List<DirectoryInfo> temporaryDirectories;
 
         public TestContext TestContext { get; set; }
 
-        protected BaseFixture()
+        protected Fixture()
         {
             this.temporaryDirectories = new List<DirectoryInfo>();
         }

@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     ///     This class provides a way to create an instance of a particular data extension.
     /// </summary>
     internal sealed class SourceDataCookerReference
-        : BaseDataCookerReference<SourceDataCookerReference>,
+        : DataCookerReference<SourceDataCookerReference>,
           ISourceDataCookerReference
     {
         private List<IDataCookerDescriptor> instances = new List<IDataCookerDescriptor>();

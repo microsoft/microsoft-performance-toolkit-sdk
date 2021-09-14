@@ -26,7 +26,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
     /// <typeparam name="TKey">
     ///     Data element key type.
     /// </typeparam>
-    internal abstract class BaseSourceProcessingSession<T, TContext, TKey>
+    internal abstract class SourceProcessingSessionBase<T, TContext, TKey>
         : ISourceProcessingSession<T, TContext, TKey>
           where T : IKeyedDataType<TKey>
     {
@@ -45,7 +45,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         private readonly IEqualityComparer<TKey> keyEqualityComparer;
 
-        protected BaseSourceProcessingSession(
+        protected SourceProcessingSessionBase(
             ISourceParser<T, TContext, TKey> sourceParser, 
             IEqualityComparer<TKey> comparer)
         {

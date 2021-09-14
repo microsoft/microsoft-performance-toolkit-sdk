@@ -12,11 +12,11 @@ namespace Microsoft.Performance.SDK.Processing
     /// <typeparam name="T">
     ///     The <see cref="Type"/> of data projected by this column.
     /// </typeparam>
-    public class BaseDataColumn<T>
+    public class DataColumn<T>
         : IDataColumn<T>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="BaseDataColumn{T}" />
+        ///     Initializes a new instance of the <see cref="DataColumn{T}" />
         ///     class.
         /// </summary>
         /// <param name="metadata">
@@ -34,7 +34,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     - or -
         ///     <paramref name="projection"/> is <c>null</c>.
         /// </exception>
-        public BaseDataColumn(
+        public DataColumn(
             ColumnMetadata metadata,
             UIHints displayHints,
             IProjection<int, T> projection)
@@ -43,7 +43,7 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="BaseDataColumn{T}" />
+        ///     Initializes a new instance of the <see cref="DataColumn{T}" />
         ///     class.
         /// </summary>
         /// <param name="configuration">
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     - or -
         ///     <paramref name="projection"/> is <c>null</c>.
         /// </exception>
-        public BaseDataColumn(
+        public DataColumn(
             ColumnConfiguration configuration,
             IProjection<int, T> projection)
         {
