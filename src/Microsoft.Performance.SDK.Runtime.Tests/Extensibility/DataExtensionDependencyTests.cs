@@ -384,47 +384,49 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.AreEqual(cooker0.DependencyState.MissingDataCookers.Count, 1);
         }
 
-        /// <summary>
-        /// A data processor requires a source data cooker and a composite data cooker,
-        /// both which are available.
-        /// </summary>
-        [TestMethod]
-        [UnitTest]
-        public void EstablishAvailability_DataProcessorReliesOnAvailableDataCookers()
-        {
-            var dataProcessor = new TestDataProcessorReference
-            {
-                Id = "DataProcessor",
-            };
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        /////// A data processor requires a source data cooker and a composite data cooker,
+        /////// both which are available.
+        /////// </summary>
+        ////[TestMethod]
+        ////[UnitTest]
+        ////public void EstablishAvailability_DataProcessorReliesOnAvailableDataCookers()
+        ////{
+        ////    var dataProcessor = new TestDataProcessorReference
+        ////    {
+        ////        Id = "DataProcessor",
+        ////    };
 
-            var cooker0 = new TestSourceDataCookerReference
-            {
-                Path = DataCookerPath.ForSource("TestSource0", "Cooker0"),
-            };
+        ////    var cooker0 = new TestSourceDataCookerReference
+        ////    {
+        ////        Path = DataCookerPath.ForSource("TestSource0", "Cooker0"),
+        ////    };
 
-            var cooker1 = new TestCompositeDataCookerReference
-            {
-                Path = DataCookerPath.ForComposite("Cooker0"),
-            };
+        ////    var cooker1 = new TestCompositeDataCookerReference
+        ////    {
+        ////        Path = DataCookerPath.ForComposite("Cooker0"),
+        ////    };
 
-            var testRepo = new TestDataExtensionRepository();
-            testRepo.sourceCookersByPath.Add(cooker0.Path, cooker0);
-            testRepo.compositeCookersByPath.Add(cooker1.Path, cooker1);
+        ////    var testRepo = new TestDataExtensionRepository();
+        ////    testRepo.sourceCookersByPath.Add(cooker0.Path, cooker0);
+        ////    testRepo.compositeCookersByPath.Add(cooker1.Path, cooker1);
 
-            // setup the requirements
-            dataProcessor.requiredDataCookers.Add(cooker0.Path);
-            dataProcessor.requiredDataCookers.Add(cooker1.Path);
+        ////    // setup the requirements
+        ////    dataProcessor.requiredDataCookers.Add(cooker0.Path);
+        ////    dataProcessor.requiredDataCookers.Add(cooker1.Path);
 
-            dataProcessor.ProcessDependencies(testRepo);
+        ////    dataProcessor.ProcessDependencies(testRepo);
 
-            Assert.IsTrue(cooker0.Availability == DataExtensionAvailability.Available);
-            Assert.IsTrue(cooker1.Availability == DataExtensionAvailability.Available);
-            Assert.IsTrue(dataProcessor.Availability == DataExtensionAvailability.Available);
+        ////    Assert.IsTrue(cooker0.Availability == DataExtensionAvailability.Available);
+        ////    Assert.IsTrue(cooker1.Availability == DataExtensionAvailability.Available);
+        ////    Assert.IsTrue(dataProcessor.Availability == DataExtensionAvailability.Available);
 
-            Assert.AreEqual(dataProcessor.DependencyState.Errors.Count, 0);
-            Assert.AreEqual(dataProcessor.DependencyReferences.RequiredSourceDataCookerPaths.Count, 1);
-            Assert.AreEqual(dataProcessor.DependencyReferences.RequiredCompositeDataCookerPaths.Count, 1);
-            Assert.AreEqual(dataProcessor.DependencyState.MissingDataCookers.Count, 0);
-        }
+        ////    Assert.AreEqual(dataProcessor.DependencyState.Errors.Count, 0);
+        ////    Assert.AreEqual(dataProcessor.DependencyReferences.RequiredSourceDataCookerPaths.Count, 1);
+        ////    Assert.AreEqual(dataProcessor.DependencyReferences.RequiredCompositeDataCookerPaths.Count, 1);
+        ////    Assert.AreEqual(dataProcessor.DependencyState.MissingDataCookers.Count, 0);
+        ////}
     }
 }

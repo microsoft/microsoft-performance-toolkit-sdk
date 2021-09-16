@@ -88,31 +88,33 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             }
         }
 
-        /// <inheritdoc/>
-        public object QueryDataProcessor(DataProcessorId dataProcessorId)
-        {
-            Guard.NotNull(dataProcessorId, nameof(dataProcessorId));
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc/>
+        ////public object QueryDataProcessor(DataProcessorId dataProcessorId)
+        ////{
+        ////    Guard.NotNull(dataProcessorId, nameof(dataProcessorId));
 
-            if (!this.extensionDependencies.RequiredDataProcessorIds.Contains(dataProcessorId))
-            {
-                throw new ArgumentException(
-                    $"The requested data processor is not available: {dataProcessorId}. " +
-                    "Consider adding it to the requirements for this data extension.",
-                    nameof(dataProcessorId));
-            }
+        ////    if (!this.extensionDependencies.RequiredDataProcessorIds.Contains(dataProcessorId))
+        ////    {
+        ////        throw new ArgumentException(
+        ////            $"The requested data processor is not available: {dataProcessorId}. " +
+        ////            "Consider adding it to the requirements for this data extension.",
+        ////            nameof(dataProcessorId));
+        ////    }
 
-            var processorReference = this.dataRetrievalFactory.DataExtensionRepository.GetDataProcessorReference(dataProcessorId);
-            if (processorReference == null)
-            {
-                throw new InvalidOperationException(
-                    $"Failed to retrieve a reference to data processor: {dataProcessorId}.");
-            }
+        ////    var processorReference = this.dataRetrievalFactory.DataExtensionRepository.GetDataProcessorReference(dataProcessorId);
+        ////    if (processorReference == null)
+        ////    {
+        ////        throw new InvalidOperationException(
+        ////            $"Failed to retrieve a reference to data processor: {dataProcessorId}.");
+        ////    }
 
-            var processorDataRetrieval =
-                this.dataRetrievalFactory.CreateDataRetrievalForDataProcessor(dataProcessorId);
+        ////    var processorDataRetrieval =
+        ////        this.dataRetrievalFactory.CreateDataRetrievalForDataProcessor(dataProcessorId);
 
-            return processorReference.GetOrCreateInstance(processorDataRetrieval);
-        }
+        ////    return processorReference.GetOrCreateInstance(processorDataRetrieval);
+        ////}
 
         private void ValidateSourceDataCooker(DataOutputPath dataOutputPath)
         {

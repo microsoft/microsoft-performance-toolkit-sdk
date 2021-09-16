@@ -3,7 +3,6 @@
 
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -25,9 +24,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
                     self.AddCompositeDataCookerReference(cdcr);
                     return true;
 
-                case IDataProcessorReference dpr:
-                    self.AddDataProcessorReference(dpr);
-                    return true;
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                ////case IDataProcessorReference dpr:
+                ////    self.AddDataProcessorReference(dpr);
+                ////    return true;
 
                 case ITableExtensionReference ter:
                     self.AddTableExtensionReference(ter);

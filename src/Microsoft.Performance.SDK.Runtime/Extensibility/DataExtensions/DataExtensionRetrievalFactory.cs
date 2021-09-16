@@ -87,43 +87,45 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             return filteredData;
         }
 
-        /// <summary>
-        ///     A data processor has access to source data cookers, composite data cookers, as well as other
-        ///     data processors.
-        /// </summary>
-        /// <param name="dataProcessorId">
-        ///     Identifies the data processor.
-        /// </param>
-        /// <returns>
-        ///     A set of data uniquely tailored to this data processor.
-        /// </returns>
-        public IDataExtensionRetrieval CreateDataRetrievalForDataProcessor(
-            DataProcessorId dataProcessorId)
-        {
-            var filteredData = this.dataRetrievalCache.GetDataProcessorFilteredData(dataProcessorId);
-            if (filteredData != null)
-            {
-                return filteredData;
-            }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     A data processor has access to source data cookers, composite data cookers, as well as other
+        ///////     data processors.
+        /////// </summary>
+        /////// <param name="dataProcessorId">
+        ///////     Identifies the data processor.
+        /////// </param>
+        /////// <returns>
+        ///////     A set of data uniquely tailored to this data processor.
+        /////// </returns>
+        ////public IDataExtensionRetrieval CreateDataRetrievalForDataProcessor(
+        ////    DataProcessorId dataProcessorId)
+        ////{
+        ////    var filteredData = this.dataRetrievalCache.GetDataProcessorFilteredData(dataProcessorId);
+        ////    if (filteredData != null)
+        ////    {
+        ////        return filteredData;
+        ////    }
 
-            var dataProcessorReference = this.DataExtensionRepository.GetDataProcessorReference(dataProcessorId);
+        ////    var dataProcessorReference = this.DataExtensionRepository.GetDataProcessorReference(dataProcessorId);
 
-            if (dataProcessorReference == null)
-            {
-                throw new ArgumentException("Data retrieval requested for data processor not found in repository.");
-            }
+        ////    if (dataProcessorReference == null)
+        ////    {
+        ////        throw new ArgumentException("Data retrieval requested for data processor not found in repository.");
+        ////    }
 
-            if (dataProcessorReference.Availability != DataExtensionAvailability.Available)
-            {
-                throw new ArgumentException("Data retrieval requested for data processor that is not available.");
-            }
+        ////    if (dataProcessorReference.Availability != DataExtensionAvailability.Available)
+        ////    {
+        ////        throw new ArgumentException("Data retrieval requested for data processor that is not available.");
+        ////    }
 
-            filteredData = new FilteredDataRetrieval(this, dataProcessorReference.DependencyReferences);
+        ////    filteredData = new FilteredDataRetrieval(this, dataProcessorReference.DependencyReferences);
 
-            this.dataRetrievalCache.AddDataProcessorFilteredData(dataProcessorId, filteredData);
+        ////    this.dataRetrievalCache.AddDataProcessorFilteredData(dataProcessorId, filteredData);
 
-            return filteredData;
-        }
+        ////    return filteredData;
+        ////}
 
         /// <summary>
         ///     A table has access to source data cookers, composite data cookers, and data processors.

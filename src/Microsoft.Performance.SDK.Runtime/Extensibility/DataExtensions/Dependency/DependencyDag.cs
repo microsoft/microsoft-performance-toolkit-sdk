@@ -218,10 +218,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 .Concat(
                     deps.RequiredCompositeDataCookerPaths.Select(reps.GetCompositeDataCookerReference)
                         .OfType<IDataExtensionReference>())
-                .Concat(
-                    deps.RequiredDataProcessorIds
-                        .Select(reps.GetDataProcessorReference)
-                        .OfType<IDataExtensionReference>())
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                ////.Concat(
+                ////    deps.RequiredDataProcessorIds
+                ////        .Select(reps.GetDataProcessorReference)
+                ////        .OfType<IDataExtensionReference>())
                 .Concat(
                     der.RequiredDataCookers
                         .Select(
@@ -231,10 +233,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                                 return r ? c : null;
                             })
                         .OfType<IDataExtensionReference>())
-                .Concat(
-                    der.RequiredDataProcessors
-                        .Select(reps.GetDataProcessorReference)
-                        .OfType<IDataExtensionReference>())
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                ////.Concat(
+                ////    der.RequiredDataProcessors
+                ////        .Select(reps.GetDataProcessorReference)
+                ////        .OfType<IDataExtensionReference>())
                 .Select(Reference.Create)
                 .ToSet();
         }

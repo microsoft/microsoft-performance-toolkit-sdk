@@ -86,8 +86,10 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById => this.Repository.TablesById;
 
-        /// <inheritdoc />
-        public IEnumerable<DataProcessorId> DataProcessors => this.Repository.DataProcessors;
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public IEnumerable<DataProcessorId> DataProcessors => this.Repository.DataProcessors;
 
         /// <inheritdoc />
         public bool AddCompositeDataCookerReference(ICompositeDataCookerReference dataCooker)
@@ -95,11 +97,13 @@ namespace Microsoft.Performance.SDK.Runtime
             return this.Repository.AddCompositeDataCookerReference(dataCooker);
         }
 
-        /// <inheritdoc />
-        public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
-        {
-            return this.Repository.AddDataProcessorReference(dataProcessorReference);
-        }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
+        ////{
+        ////    return this.Repository.AddDataProcessorReference(dataProcessorReference);
+        ////}
 
         /// <inheritdoc />
         public bool AddSourceDataCookerReference(ISourceDataCookerReference dataCooker)
@@ -133,11 +137,13 @@ namespace Microsoft.Performance.SDK.Runtime
             return this.Repository.GetCompositeDataCookerReference(dataCookerPath);
         }
 
-        /// <inheritdoc />
-        public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
-        {
-            return this.Repository.GetDataProcessorReference(dataProcessorId);
-        }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
+        ////{
+        ////    return this.Repository.GetDataProcessorReference(dataProcessorId);
+        ////}
 
         /// <inheritdoc />
         public ISourceDataCookerFactory GetSourceDataCookerFactory(DataCookerPath dataCookerPath)

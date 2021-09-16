@@ -138,13 +138,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById => this.Extensions.TablesById;
 
-        /// <summary>
-        ///     Gets the paths of all loaded Data Processors.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IEnumerable<DataProcessorId> DataProcessors => this.Extensions.DataProcessors;
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     Gets the paths of all loaded Data Processors.
+        /////// </summary>
+        /////// <exception cref="ObjectDisposedException">
+        ///////     This instance is disposed.
+        /////// </exception>
+        ////public IEnumerable<DataProcessorId> DataProcessors => this.Extensions.DataProcessors;
 
         internal ExtensionRoot Extensions
         {

@@ -70,26 +70,28 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             return CompositeDataCookerReference.TryCreateReference(candidateType, out reference);
         }
 
-        /// <summary>
-        ///     Generate a data processor reference from a given type.
-        /// </summary>
-        /// <param name="candidateType">
-        ///     Data extension type.
-        /// </param>
-        /// <param name="reference">
-        ///     Data extension reference.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if succeeded, <c>false</c> otherwise.
-        /// </returns>
-        public bool TryCreateDataProcessorReference(
-            Type candidateType,
-            out IDataProcessorReference reference)
-        {
-            Guard.NotNull(candidateType, nameof(candidateType));
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     Generate a data processor reference from a given type.
+        /////// </summary>
+        /////// <param name="candidateType">
+        ///////     Data extension type.
+        /////// </param>
+        /////// <param name="reference">
+        ///////     Data extension reference.
+        /////// </param>
+        /////// <returns>
+        ///////     <c>true</c> if succeeded, <c>false</c> otherwise.
+        /////// </returns>
+        ////public bool TryCreateDataProcessorReference(
+        ////    Type candidateType,
+        ////    out IDataProcessorReference reference)
+        ////{
+        ////    Guard.NotNull(candidateType, nameof(candidateType));
 
-            return DataProcessorReference.TryCreateReference(candidateType, out reference);
-        }
+        ////    return DataProcessorReference.TryCreateReference(candidateType, out reference);
+        ////}
 
         /// <summary>
         ///     Generate a table reference from a given type.

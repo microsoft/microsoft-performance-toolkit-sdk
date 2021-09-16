@@ -164,7 +164,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.PerformAdditionalDataExtensionValidation(new FakeSupport(), new FakeReference()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataCookers);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataProcessors);
+
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                // Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataProcessors);
             }
             finally
             {
