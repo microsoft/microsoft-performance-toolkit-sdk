@@ -9,6 +9,10 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
+## Data Processors
+
+Data Processors have been removed.
+
 ## Engine
 
 The following are required if you are using the `Engine`:
