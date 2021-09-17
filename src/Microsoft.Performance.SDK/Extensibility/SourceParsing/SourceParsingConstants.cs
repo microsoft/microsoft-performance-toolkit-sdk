@@ -12,6 +12,6 @@ namespace Microsoft.Performance.SDK.Extensibility.SourceParsing
         ///     This may be set on <see cref="ISourceParserDescriptor.MaxSourceParseCount"/> to allow
         ///     as many passes through the source as necessary.
         /// </summary>
-        public static readonly int UnlimitedPassCount = 0;
+        public static readonly int UnlimitedPassCount = -1;
     }
 }
