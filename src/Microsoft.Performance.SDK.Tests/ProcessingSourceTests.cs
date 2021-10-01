@@ -27,170 +27,6 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        public void NoTablesInAssemblyLeavesEmptyProperties()
-        {
-            var assembly = new FakeAssembly
-            {
-                TypesToReturn = new[]
-                {
-                    typeof(DateTime),
-                }
-            };
-
-            StubDataSource.Assembly = assembly;
-
-            var sut = new StubDataSource();
-            sut.SetApplicationEnvironment(applicationEnvironment);
-
-            Assert.IsFalse(sut.DataTables.Any());
-            Assert.IsFalse(sut.MetadataTables.Any());
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void OnlyDataTablesInAssemblyPopulatesCorrectly()
-        {
-            var assembly = new FakeAssembly
-            {
-                TypesToReturn = new[]
-                {
-                    typeof(DateTime),
-                    typeof(StubDataTableOne),
-                    typeof(StubDataTableTwo),
-                    typeof(StubDataTableThree),
-                    typeof(Exception),
-                }
-            };
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableThree),
-                    serializer,
-                    out TableDescriptor expectedDescriptor3));
-
-            StubDataSource.Assembly = assembly;
-
-            var sut = new StubDataSource();
-            sut.SetApplicationEnvironment(applicationEnvironment);
-
-            Assert.AreEqual(3, sut.DataTables.Count());
-            Assert.IsTrue(sut.DataTables.Contains(expectedDescriptor1));
-            Assert.IsTrue(sut.DataTables.Contains(expectedDescriptor2));
-            Assert.IsTrue(sut.DataTables.Contains(expectedDescriptor3));
-
-            Assert.IsFalse(sut.MetadataTables.Any());
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void OnlyMetadataTablesInAssemblyPopulatesCorrectly()
-        {
-            var assembly = new FakeAssembly
-            {
-                TypesToReturn = new[]
-                {
-                    typeof(DateTime),
-                    typeof(StubMetadataTableOne),
-                    typeof(StubMetadataTableTwo),
-                    typeof(Exception),
-                }
-            };
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
-
-            StubDataSource.Assembly = assembly;
-
-            var sut = new StubDataSource();
-            sut.SetApplicationEnvironment(applicationEnvironment);
-
-            Assert.IsFalse(sut.DataTables.Any());
-
-            Assert.AreEqual(2, sut.MetadataTables.Count());
-            Assert.IsTrue(sut.MetadataTables.Contains(expectedDescriptor1));
-            Assert.IsTrue(sut.MetadataTables.Contains(expectedDescriptor2));
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void BothTableTypesInInAssemblyPopulatesCorrectly()
-        {
-            var assembly = new FakeAssembly
-            {
-                TypesToReturn = new[]
-                {
-                    typeof(DateTime),
-                    typeof(StubDataTableOne),
-                    typeof(StubDataTableTwo),
-                    typeof(StubDataTableThree),
-                    typeof(StubMetadataTableOne),
-                    typeof(StubMetadataTableTwo),
-                    typeof(Exception),
-                }
-            };
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableThree),
-                    serializer,
-                    out TableDescriptor expectedDescriptor3));
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor4));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor5));
-
-            StubDataSource.Assembly = assembly;
-
-            var sut = new StubDataSource();
-            sut.SetApplicationEnvironment(applicationEnvironment);
-
-            Assert.AreEqual(3, sut.DataTables.Count());
-            Assert.IsTrue(sut.DataTables.Contains(expectedDescriptor1));
-            Assert.IsTrue(sut.DataTables.Contains(expectedDescriptor2));
-            Assert.IsTrue(sut.DataTables.Contains(expectedDescriptor3));
-
-            Assert.AreEqual(2, sut.MetadataTables.Count());
-            Assert.IsTrue(sut.MetadataTables.Contains(expectedDescriptor4));
-            Assert.IsTrue(sut.MetadataTables.Contains(expectedDescriptor5));
-        }
-
-        [TestMethod]
-        [UnitTest]
         public void AllTablesIsUnionOfDataAndMetadata()
         {
             var assembly = new FakeAssembly
@@ -327,6 +163,7 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
+        [Obsolete("Remove when the deprectated constructor is removed.")]
         public void WhenAdditionalTableProviderProvidedThenAdditionalTablesAdded()
         {
             var assembly = new FakeAssembly
@@ -398,6 +235,75 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.IsTrue(descriptor5BuildWasCalled);
         }
 
+        [TestMethod]
+        [UnitTest]
+        public void WhenTableDiscoveryProvidedUsesDiscovery()
+        {
+            Assert.IsTrue(
+                TableDescriptorFactory.TryCreate(
+                    typeof(StubDataTableOne),
+                    serializer,
+                    out _,
+                    out TableDescriptor expectedDescriptor1,
+                    out var buildTable1));
+            Assert.IsTrue(
+                TableDescriptorFactory.TryCreate(
+                    typeof(StubDataTableTwo),
+                    serializer,
+                    out _,
+                    out TableDescriptor expectedDescriptor2,
+                    out var buildTable2));
+            Assert.IsTrue(
+                TableDescriptorFactory.TryCreate(
+                    typeof(StubDataTableThree),
+                    serializer,
+                    out _,
+                    out TableDescriptor expectedDescriptor3,
+                    out var buildTable3));
+
+            Assert.IsTrue(
+                TableDescriptorFactory.TryCreate(
+                    typeof(StubMetadataTableOne),
+                    serializer,
+                    out _,
+                    out TableDescriptor expectedDescriptor4,
+                    out var buildTable4));
+            Assert.IsTrue(
+                TableDescriptorFactory.TryCreate(
+                    typeof(StubMetadataTableTwo),
+                    serializer,
+                    out _,
+                    out TableDescriptor expectedDescriptor5,
+                    out var buildTable5));
+
+            var discovery = new FakeTableProvider();
+            discovery.DiscoverReturnValue = new HashSet<DiscoveredTable>
+            {
+                new DiscoveredTable(expectedDescriptor1, buildTable1),
+                new DiscoveredTable(expectedDescriptor2, buildTable2),
+                new DiscoveredTable(expectedDescriptor3, buildTable3),
+                new DiscoveredTable(expectedDescriptor4, buildTable4),
+                new DiscoveredTable(expectedDescriptor5, buildTable5),
+            };
+
+            var sut = new StubDataSource(discovery);
+            sut.SetApplicationEnvironment(applicationEnvironment);
+
+            Assert.AreEqual(5, sut.AllTablesExposed.Count);
+
+            // call the build action of each of our tables
+            foreach (var kvp in sut.AllTablesExposed)
+            {
+                kvp.Value.Invoke(null, null);
+            }
+
+            Assert.IsTrue(StubDataTableOne.BuildTableWasCalled);
+            Assert.IsTrue(StubDataTableTwo.BuildTableWasCalled);
+            Assert.IsTrue(StubDataTableThree.BuildTableWasCalled);
+            Assert.IsTrue(StubMetadataTableOne.BuildTableWasCalled);
+            Assert.IsTrue(StubMetadataTableTwo.BuildTableWasCalled);
+        }
+
         [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
         [FileDataSource(".csv")]
         private sealed class StubDataSource
@@ -409,10 +315,21 @@ namespace Microsoft.Performance.SDK.Tests
             }
 
             public StubDataSource()
-                : this(() => new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>())
+                : this(TableDiscovery.CreateForAssembly(Assembly))
             {
             }
 
+            public StubDataSource(ITableProvider discovery)
+               : base(discovery)
+            {
+                this.CommandLineOptionsToReturn = new List<Option>();
+                this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
+                this.ProcessorToReturn = new MockCustomDataProcessor();
+                this.CreateProcessorCoreCalls =
+                    new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
+            }
+
+            [Obsolete("Remove when deprecated constructor is removed.")]
             public StubDataSource(
                 Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTableProvider)
                 : base(additionalTableProvider, () => Assembly)
@@ -456,118 +373,6 @@ namespace Microsoft.Performance.SDK.Tests
             protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return true;
-            }
-        }
-
-        [Table(InternalTable = true)]
-        private sealed class StubDataTableOne
-        {
-            public bool TryCreateTable(ITableBuilder tableBuilder)
-            {
-                throw new NotImplementedException();
-            }
-
-            public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
-                Guid.Parse("{F3F7B534-5DC5-40FB-93D9-07FDAC073A13}"),
-                "Name0",
-                "Description",
-                "Category");
-
-            public static bool BuildTableWasCalled { get; private set; }
-
-            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval cookedData)
-            {
-                BuildTableWasCalled = true;
-            }
-        }
-
-        [Table(InternalTable = true)]
-        private sealed class StubDataTableTwo
-        {
-            public bool TryCreateTable(ITableBuilder tableBuilder)
-            {
-                throw new NotImplementedException();
-            }
-
-            public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
-                Guid.Parse("{677CA54E-45D2-46B1-80BE-6DBA96597435}"),
-                "Name1",
-                "Description",
-                "Category");
-
-            public static bool BuildTableWasCalled { get; private set; }
-
-            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval cookedData)
-            {
-                BuildTableWasCalled = true;
-            }
-        }
-
-        [Table(InternalTable = true)]
-        private sealed class StubDataTableThree
-        {
-            public bool TryCreateTable(ITableBuilder tableBuilder)
-            {
-                throw new NotImplementedException();
-            }
-
-            public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
-                Guid.Parse("{96D8DD5E-C0FC-4681-85E2-CFAFD1A0803C}"),
-                "Name2",
-                "Description",
-                "Category");
-
-            public static bool BuildTableWasCalled { get; private set; }
-
-            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval cookedData)
-            {
-                BuildTableWasCalled = true;
-            }
-        }
-
-        [Table(InternalTable = true)]
-        private sealed class StubMetadataTableOne
-        {
-            public bool TryCreateTable(ITableBuilder tableBuilder)
-            {
-                throw new NotImplementedException();
-            }
-
-            public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
-                Guid.Parse("{824C0827-40E8-4DE7-ACD2-C6614E916D86}"),
-                "Metadata1",
-                "Description",
-                TableDescriptor.DefaultCategory,
-                true);
-
-            public static bool BuildTableWasCalled { get; private set; }
-
-            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval cookedData)
-            {
-                BuildTableWasCalled = true;
-            }
-        }
-
-        [Table(InternalTable = true)]
-        private sealed class StubMetadataTableTwo
-        {
-            public bool TryCreateTable(ITableBuilder tableBuilder)
-            {
-                throw new NotImplementedException();
-            }
-
-            public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
-                Guid.Parse("{2072CA7C-79F0-4FA5-9DBD-1453D117629F}"),
-                "Metadata2",
-                "Description",
-                TableDescriptor.DefaultCategory,
-                true);
-
-            public static bool BuildTableWasCalled { get; private set; }
-
-            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval cookedData)
-            {
-                BuildTableWasCalled = true;
             }
         }
     }

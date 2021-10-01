@@ -26,8 +26,7 @@ namespace Microsoft.Performance.SDK.Processing
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
 
-        private readonly Func<Assembly> tableAssemblyProvider;
-        private readonly Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider;
+        private readonly ITableProvider tableDiscoverer;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSource"/>
@@ -46,8 +45,30 @@ namespace Microsoft.Performance.SDK.Processing
             // so unfortunately we have to use an older idiom of every constructor calling an
             // init method so that we can pass the concrete type's assembly.
             //
-            this.tableAssemblyProvider = () => this.GetType().Assembly;
-            this.additionalTablesProvider = () => new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
+
+            this.tableDiscoverer = TableDiscovery.CreateForAssembly(this.GetType().Assembly);
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ProcessingSource"/>
+        ///     class.
+        /// </summary>
+        /// <param name="tableDiscoverer">
+        ///     Object used to provide the tables that are exposed by this <see cref="ProcessingSource"/>.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="tableDiscoverer"/> is <c>null</c>.
+        /// </exception>
+        protected ProcessingSource(ITableProvider tableDiscoverer)
+        {
+            Guard.NotNull(tableDiscoverer, nameof(tableDiscoverer));
+
+            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
+            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(this.allTables);
+            this.metadataTables = new HashSet<TableDescriptor>();
+            this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
+
+            this.tableDiscoverer = tableDiscoverer;
         }
 
         /// <summary>
@@ -62,6 +83,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="additionalTablesProvider"/> is <c>null</c>.
         /// </exception>
+        [Obsolete("This constructor will be removed in 1.0.0-rc. Please use the constructor that takes an ITableDiscoverer.")]
         protected ProcessingSource(
             Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider)
         {
@@ -72,9 +94,10 @@ namespace Microsoft.Performance.SDK.Processing
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
-            // See note in parameterless constructor
-            this.tableAssemblyProvider = () => this.GetType().Assembly;
-            this.additionalTablesProvider = additionalTablesProvider;
+            this.tableDiscoverer = new DeprecatedConstructorSupportProvider(
+                additionalTablesProvider, 
+                () => this.GetType().Assembly,
+                this);
         }
 
         /// <summary>
@@ -95,6 +118,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     - or -
         ///     <paramref name="tableAssemblyProvider"/> is <c>null</c>.
         /// </exception>
+        [Obsolete("This constructor will be removed in 1.0.0-rc. Please use the constructor that takes an ITableProvider.")]
         protected ProcessingSource(
             Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider,
             Func<Assembly> tableAssemblyProvider)
@@ -107,8 +131,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
-            this.tableAssemblyProvider = tableAssemblyProvider;
-            this.additionalTablesProvider = additionalTablesProvider;
+            this.tableDiscoverer = new DeprecatedConstructorSupportProvider(additionalTablesProvider, tableAssemblyProvider, this);
         }
 
         /// <inheritdoc />
@@ -148,7 +171,7 @@ namespace Microsoft.Performance.SDK.Processing
             // Call derived class in case things need to be set before calling InitializeAllTables
             SetApplicationEnvironmentCore(applicationEnvironment);
 
-            this.InitializeAllTables(this.tableAssemblyProvider, this.additionalTablesProvider, applicationEnvironment.Serializer);
+            this.InitializeAllTables(applicationEnvironment.Serializer);
         }
 
         /// <inheritdoc />
@@ -336,51 +359,79 @@ namespace Microsoft.Performance.SDK.Processing
             return null;
         }
 
-        private void InitializeAllTables(
-            Func<Assembly> tableAssemblyProvider,
-            Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider,
-            ISerializer tableConfigSerializer)
+        private void InitializeAllTables(ISerializer tableConfigSerializer)
         {
-            Debug.Assert(tableAssemblyProvider != null);
-            Debug.Assert(additionalTablesProvider != null);
             Debug.Assert(tableConfigSerializer != null);
 
-            var assembly = tableAssemblyProvider();
-            if (assembly != null)
+            var tables = this.tableDiscoverer.Discover(tableConfigSerializer);
+            foreach (var t in tables)
             {
-                var allTableTypes = assembly.GetTypes();
-                foreach (var tableType in allTableTypes)
+                if (t.IsMetadata)
                 {
-                    if (TableDescriptorFactory.TryCreate(
-                        tableType,
-                        tableConfigSerializer,
-                        out bool internalTable,
-                        out var descriptor,
-                        out var buildTableAction) && internalTable)
-                    {
-                        if (descriptor.IsMetadataTable)
-                        {
-                            this.metadataTables.Add(descriptor);
-                        }
+                    this.metadataTables.Add(t.Descriptor);
+                }
 
-                        this.allTables[descriptor] = buildTableAction ?? GetTableBuildAction(tableType);
+                this.allTables[t.Descriptor] = t.BuildTable;
+            }
+        }
+
+        // this class is temporary until the deprecated constructors are removed.
+        private sealed class DeprecatedConstructorSupportProvider
+            : ITableProvider
+        {
+            private readonly Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> provider;
+            private readonly Func<Assembly> assemblyProvider;
+            private readonly ProcessingSource parent;
+
+            internal DeprecatedConstructorSupportProvider(
+                Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> provider,
+                Func<Assembly> assemblyProvider,
+                ProcessingSource parent)
+            {
+                Debug.Assert(parent != null);
+
+                this.provider = provider;
+                this.assemblyProvider = assemblyProvider;
+                this.parent = parent;
+            }
+
+            public ISet<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            {
+                var tables = new HashSet<DiscoveredTable>();
+
+                var assembly = this.assemblyProvider?.Invoke();
+                if (assembly != null)
+                {
+                    var allTableTypes = assembly.GetTypes();
+                    foreach (var tableType in allTableTypes)
+                    {
+                        if (TableDescriptorFactory.TryCreate(
+                            tableType,
+                            tableConfigSerializer,
+                            out bool internalTable,
+                            out var descriptor,
+                            out var buildTableAction) && internalTable)
+                        {
+                            tables.Add(
+                                new DiscoveredTable(
+                                    descriptor,
+                                    buildTableAction ?? this.parent.GetTableBuildAction(tableType)));
+                        }
                     }
                 }
-            }
 
-            var additionalTables = additionalTablesProvider();
-            if (additionalTables == null)
-            {
-                return;
-            }
-
-            foreach (var kvp in additionalTables)
-            {
-                this.allTables[kvp.Key] = kvp.Value;
-                if (kvp.Key.IsMetadataTable)
+                if (this.provider != null)
                 {
-                    this.metadataTables.Add(kvp.Key);
+                    foreach (var kvp in this.provider())
+                    {
+                        tables.Add(
+                            new DiscoveredTable(
+                                kvp.Key,
+                                kvp.Value ?? this.parent.GetTableBuildAction(kvp.Key.Type)));
+                    }
                 }
+
+                return tables;
             }
         }
     }
