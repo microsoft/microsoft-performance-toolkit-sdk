@@ -41,6 +41,65 @@ namespace SampleCustomDataSource
     {
         private IApplicationEnvironment applicationEnvironment;
 
+        //
+        // Provides information about this Custom Data Source, such as the author,
+        // a project link, licensing, etc. This information can be used by tools
+        // to display "About" information for your Custom Data Source. For example,
+        // Windows Performance Analyzer (WPA) uses this information for Help->About.
+        //
+
+        public override CustomDataSourceInfo GetAboutInfo()
+        {
+            return new CustomDataSourceInfo
+            {
+                //
+                // The copyright notice for this Custom Data Source.
+                //
+                CopyrightNotice = "Copyright 2021 Microsoft Corporation. All Rights Reserved.",
+
+                //
+                // The license under which this Custom Data Source may be used.
+                //
+                LicenseInfo = new LicenseInfo
+                {
+                    Name = "MIT",
+                    Text = "Please see the link for the full license text.",
+                    Uri = "https://github.com/microsoft/microsoft-performance-toolkit-sdk/blob/main/LICENSE.txt",
+                },
+
+                //
+                // A collection of the people or entities that own this Custom Data Source.
+                //
+                Owners = new[]
+                {
+                    new ContactInfo
+                    {
+                        Address = "1 Microsoft Way, Redmond, WA 98052",
+                        EmailAddresses = new[]
+                        {
+                            "noreply@microsoft.com",
+                        },
+                    },
+                },
+
+                //
+                // Information, if applicable, of where users can find this project.
+                //
+                ProjectInfo = new ProjectInfo
+                {
+                    Uri = "https://github.com/microsoft/microsoft-performance-toolkit-sdk",
+                },
+
+                //
+                // Any additional information you wish your users to know about this Custom Data Source.
+                //
+                AdditionalInformation = new[]
+                {
+                    "This Custom Data Source is a sample showcasing the Performance Toolkit SDK.",
+                }
+            };
+        }
+
         protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
         {
             //
