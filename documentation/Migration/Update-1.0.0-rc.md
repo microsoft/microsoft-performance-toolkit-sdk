@@ -97,6 +97,11 @@ catch (UnsupportedDataSourceException)
 }
 ````
 
+### Engine Execution Results
+
+A new parameter has been added to the constructor. Most end-user code is not
+constructing this class directly, so this probably does not affect you.
+
 # Suggested Changes
 
 None at this time.
