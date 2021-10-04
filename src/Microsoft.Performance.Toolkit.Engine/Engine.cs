@@ -873,7 +873,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 retrieval,
                 retrievalFactory,
                 this.Extensions,
-                processorTables);
+                processorTables,
+                this.enabledTables);
 
             return results;
         }
