@@ -17,6 +17,35 @@ namespace SqlPluginWithProcessingPipeline
     {
         private IApplicationEnvironment applicationEnvironment;
 
+        public override CustomDataSourceInfo GetAboutInfo()
+        {
+            return new CustomDataSourceInfo
+            {
+                CopyrightNotice = "Copyright 2021 Microsoft Corporation. All Rights Reserved.",
+                LicenseInfo = new LicenseInfo
+                {
+                    Name = "MIT",
+                    Text = "Please see the link for the full license text.",
+                    Uri = "https://github.com/microsoft/microsoft-performance-toolkit-sdk/blob/main/LICENSE.txt",
+                },
+                Owners = new[]
+                {
+                    new ContactInfo
+                    {
+                        Address = "1 Microsoft Way, Redmond, WA 98052",
+                        EmailAddresses = new[]
+                        {
+                            "noreply@microsoft.com",
+                        },
+                    },
+                },
+                ProjectInfo = new ProjectInfo
+                {
+                    Uri = "https://github.com/microsoft/microsoft-performance-toolkit-sdk",
+                },
+            };
+        }
+
         protected override ICustomDataProcessor CreateProcessorCore(IEnumerable<IDataSource> dataSources,
                                                                     IProcessorEnvironment processorEnvironment,
                                                                     ProcessorOptions options)
