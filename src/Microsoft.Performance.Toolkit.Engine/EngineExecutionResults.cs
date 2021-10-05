@@ -83,28 +83,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The path to the cooker to retrieve.
         /// </param>
         /// <returns>
-        ///     The interface to query for cooked data from said cooker.
+        ///     The object to query for cooked data from said cooker.
         /// </returns>
         /// <exception cref="CookerNotFoundException">
         ///     <paramref name="cookerPath"/> does not represent a known cooker.
         /// </exception>
-        public ICookedDataRetrieval GetCookedData(DataCookerPath cookerPath)
+        public CookerOutput GetCookedData(DataCookerPath cookerPath)
         {
-            if (this.sourceCookers.Contains(cookerPath))
-            {
-                return this.cookedDataRetrieval;
-            }
-
-            try
-            {
-                var cooker = this.repository.GetCompositeDataCookerReference(cookerPath);
-                var retrieval = this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath);
-                return cooker.GetOrCreateInstance(retrieval);
-            }
-            catch (Exception e)
-            {
-                throw new CookerNotFoundException(cookerPath, e);
-            }
+            var r = this.GetRetrieval(cookerPath);
+            return new CookerOutput(cookerPath, r);
         }
 
         /// <summary>
@@ -115,13 +102,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The path to the cooker to retrieve.
         /// </param>
         /// <param name="retrieval">
-        ///     The found retrieval, if any.
+        ///     The object to query for cooked data, if any.
         /// </param>
         /// <returns>
         ///     <c>true</c> if the cooker can be queried;
         ///     <c>false</c> otherwise.
         /// </returns>
-        public bool TryGetCookedData(DataCookerPath cookerPath, out ICookedDataRetrieval retrieval)
+        public bool TryGetCookedData(DataCookerPath cookerPath, out CookerOutput retrieval)
         {
             try
             {
@@ -171,8 +158,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             try
             {
-                var cooker = this.GetCookedData(dataOutputPath.CookerPath);
-                return cooker.QueryOutput(dataOutputPath);
+                var retrieval = this.GetRetrieval(dataOutputPath.CookerPath);
+                return retrieval.QueryOutput(dataOutputPath);
             }
             catch (Exception e)
             {
@@ -345,6 +332,26 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
         }
+
+        private ICookedDataRetrieval GetRetrieval(DataCookerPath cookerPath)
+        {
+            if (this.sourceCookers.Contains(cookerPath))
+            {
+                return this.cookedDataRetrieval;
+            }
+
+            try
+            {
+                var cooker = this.repository.GetCompositeDataCookerReference(cookerPath);
+                var retrieval = this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath);
+                return cooker.GetOrCreateInstance(retrieval);
+            }
+            catch (Exception e)
+            {
+                throw new CookerNotFoundException(cookerPath, e);
+            }
+        }
+
 
         // Will perform the Func on the Repository if the table is contained, else false.
         private bool ExecuteOnRepositoryIfContained<TResult>(TableDescriptor tableDescriptor, Func<ITableExtensionReference, IDataExtensionRetrieval, TResult> func, out TResult result)

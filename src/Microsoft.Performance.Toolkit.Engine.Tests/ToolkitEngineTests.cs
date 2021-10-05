@@ -624,17 +624,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var results = sut.Process();
 
-            foreach (var expectedData in testCase.ExpectedOutputs)
+            void assertOutput(
+                Dictionary<string, string>[] expectedDataPoints,
+                object data,
+                DataOutputPath dataOutputPath)
             {
-                string dataOutputPathRaw = expectedData.Key;
-                var expectedDataPoints = expectedData.Value;
-
-                DataOutputPath dataOutputPath = Parse(dataOutputPathRaw); 
-
-                Assert.IsTrue(
-                    results.TryQueryOutput(dataOutputPath, out object data), "Output for {0} not found.", dataOutputPathRaw);
-                Assert.IsNotNull(data, "output for {0} was null ???", dataOutputPathRaw);
-
                 var enumerableData = data as IEnumerable;
                 Assert.IsNotNull(
                     enumerableData,
@@ -680,12 +674,71 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 }
             }
 
-            foreach (var dataOutputPathRaw in testCase.ThrowingOutputs)
+            foreach (var expectedData in testCase.ExpectedOutputs)
             {
+                string dataOutputPathRaw = expectedData.Key;
+                var expectedDataPoints = expectedData.Value;
+
                 DataOutputPath dataOutputPath = Parse(dataOutputPathRaw);
+
+                Assert.IsTrue(
+                    results.TryQueryOutput(dataOutputPath, out object data),
+                    "Output for {0} not found.",
+                    dataOutputPathRaw);
+                Assert.IsNotNull(data, "output for {0} was null ???", dataOutputPathRaw);
+                assertOutput(expectedDataPoints, data, dataOutputPath);
+
+                Assert.IsTrue(
+                    results.TryGetCookedData(dataOutputPath.CookerPath, out var co),
+                    "Unable to retrieve CookerOutput: {0}",
+                    dataOutputPath.CookerPath);
+                Assert.IsTrue(
+                    co.TryQueryOutput(dataOutputPath.OutputId, out data),
+                    "Output on CookedData {0} not found.",
+                    dataOutputPathRaw);
+                assertOutput(expectedDataPoints, data, dataOutputPath);
+            }
+
+            var throwingSourcePaths = testCase.ThrowingOutputs
+                .Select(x => (x, Parse(x)))
+                .Where(x => x.Item2.CookerPath.DataCookerType == DataCookerType.SourceDataCooker)
+                .ToDictionary(x => x.Item1, x => x.Item2);
+            var throwingCompositePaths = testCase.ThrowingOutputs
+                .Select(x => (x, Parse(x)))
+                .Where(x => x.Item2.CookerPath.DataCookerType == DataCookerType.CompositeDataCooker)
+                .ToDictionary(x => x.Item1, x => x.Item2);
+
+            foreach (var kvp in throwingSourcePaths)
+            {
+                string dataOutputPathRaw = kvp.Key;
+                DataOutputPath dataOutputPath = kvp.Value;
+
                 Assert.IsFalse(
                     results.TryQueryOutput(dataOutputPath, out var _),
                     "Output should not have been available: {0}",
+                    dataOutputPathRaw);
+                Assert.IsTrue(
+                    results.TryGetCookedData(dataOutputPath.CookerPath, out var co),
+                    "Source Output should have been available: {0}",
+                    dataOutputPathRaw);
+                Assert.IsFalse(
+                    co.TryQueryOutput(dataOutputPath.OutputId, out var _),
+                    "Output should not have been available: {0}",
+                    dataOutputPathRaw);
+            }
+
+            foreach (var kvp in throwingCompositePaths)
+            {
+                string dataOutputPathRaw = kvp.Key;
+                DataOutputPath dataOutputPath = kvp.Value;
+
+                Assert.IsFalse(
+                    results.TryQueryOutput(dataOutputPath, out var _),
+                    "Output should not have been available: {0}",
+                    dataOutputPathRaw);
+                Assert.IsFalse(
+                    results.TryGetCookedData(dataOutputPath.CookerPath, out var _),
+                    "Composite Output should not have been available: {0}",
                     dataOutputPathRaw);
             }
         }
