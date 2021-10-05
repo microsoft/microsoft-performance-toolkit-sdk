@@ -1,7 +1,8 @@
 # Abstract
 
 This document outlines major code changes that might be needed when updating from 
-Preview Version 0.109.\* to Release Candidate Version 1.0.0-rc This document is divided
+Preview Version 0.109.\* to 1.0.0 Relase Candidate 1\*.
+This document is divided
 into two sections: [Breaking Changes](#breaking-changes) and 
 [Suggested Changes](#suggested-changes).
 
@@ -25,6 +26,14 @@ This change only effects those `ProcessingSource`s that use custom table provide
 Two helper methods have been added for use:
 `TableDiscovery.CreateForAssembly` and `TableDiscovery.CreateForNamespace.` Users
 may also provide their own implementations.
+
+## Renamed Classes
+The following references must be changed:
+- `BaseSourceDataCooker` -> `SourceDataCooker`
+- `SourceParserBase` -> `SourceParser`
+- `BaseDataColumn` -> `DataColumn`
+- `CustomDataProcessorBase` -> `CustomDataProcessor`
+- `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
 
 ## Engine
 

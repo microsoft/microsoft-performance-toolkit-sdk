@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 {
     public class TestCustomDataProcessor
-        : CustomDataProcessorBaseWithSourceParser<TestRecord, TestParserContext, int>
+        : CustomDataProcessorWithSourceParser<TestRecord, TestParserContext, int>
     {
         internal static TestCustomDataProcessor CreateTestCustomDataProcessor(
             string sourceParserId = "TestSourceParser")

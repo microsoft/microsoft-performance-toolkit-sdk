@@ -29,7 +29,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private readonly List<TableConfiguration> builtInTableConfigurations;
         private readonly List<TableCommand> commands;
         private readonly IReadOnlyList<TableCommand> commandsRO;
-       
+
         // Maps a row to a collection of row detail entry
         private Func<int, IEnumerable<TableRowDetailEntry>> tableDetailsGenerator;
 
@@ -71,6 +71,14 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <inheritdoc />
         public TableDetailsGeneratorCallback TableDetailsBuilder => this.DefaultTableDetailsBuilder;
+
+        public bool HasTableRowDetailsGenerator
+        {
+            get
+            {
+                return this.tableDetailsGenerator != null;
+            }
+        }
 
         /// <inheritdoc />
         public ITableBuilder AddTableCommand(string name, TableCommandCallback callback)
