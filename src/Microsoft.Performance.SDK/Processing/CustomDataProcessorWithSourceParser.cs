@@ -21,8 +21,8 @@ namespace Microsoft.Performance.SDK.Processing
     /// <typeparam name="T">Type of data from the source to be processed</typeparam>
     /// <typeparam name="TContext">Type that contains context about the data from the source</typeparam>
     /// <typeparam name="TKey">Type that will be used to identify data from the source that is relevant to this extension</typeparam>
-    public abstract class CustomDataProcessorBaseWithSourceParser<T, TContext, TKey>
-        : CustomDataProcessorBase,
+    public abstract class CustomDataProcessorWithSourceParser<T, TContext, TKey>
+        : CustomDataProcessor,
           ICustomDataProcessorWithSourceParser<T, TContext, TKey>
           where T : IKeyedDataType<TKey>
     {
@@ -38,7 +38,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="processorEnvironment">Processor environment</param>
         /// <param name="allTablesMapping">Maps table descriptors to possible build actions</param>
         /// <param name="metadataTables">Metadata tables</param>
-        protected CustomDataProcessorBaseWithSourceParser(
+        protected CustomDataProcessorWithSourceParser(
             ISourceParser<T, TContext, TKey> sourceParser,
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
@@ -65,7 +65,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// data processor as appropriate.
         /// </summary>
         /// <param name="other">An existing custom data processor</param>
-        protected CustomDataProcessorBaseWithSourceParser(CustomDataProcessorBaseWithSourceParser<T, TContext, TKey> other)
+        protected CustomDataProcessorWithSourceParser(CustomDataProcessorWithSourceParser<T, TContext, TKey> other)
             : this(
                   other.SourceParser,
                   other.Options,
@@ -228,7 +228,7 @@ namespace Microsoft.Performance.SDK.Processing
             return false;
         }
 
-        /// <inheritdoc cref="CustomDataProcessorBase"/>
+        /// <inheritdoc cref="CustomDataProcessor"/>
         /// <summary>
         /// Adds to the base class functionality, validating that the <see cref="SourceParser"/> and
         /// <see cref="SourceProcessingSession"/> have been initialized, and then uses the <see cref="SourceProcessingSession"/>

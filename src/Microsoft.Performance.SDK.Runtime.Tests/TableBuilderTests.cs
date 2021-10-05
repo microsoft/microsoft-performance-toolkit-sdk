@@ -65,7 +65,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AddColumnAdds()
         {
-            var column = new BaseDataColumn<string>(
+            var column = new DataColumn<string>(
                 new ColumnMetadata(Guid.NewGuid(), "name"),
                 new UIHints { Width = 200, },
                 Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -79,7 +79,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AddColumnReturnsBuilder()
         {
-            var column = new BaseDataColumn<string>(
+            var column = new DataColumn<string>(
                new ColumnMetadata(Guid.NewGuid(), "name"),
                new UIHints { Width = 200, },
                Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -91,7 +91,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void ReplaceColumnOldNullThrows()
         {
-            var column = new BaseDataColumn<string>(
+            var column = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -104,7 +104,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void ReplaceColumnNewNullThrows()
         {
-            var column = new BaseDataColumn<string>(
+            var column = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -117,7 +117,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void ReplaceColumnWithSelfNoOps()
         {
-            var column = new BaseDataColumn<string>(
+            var column = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -133,12 +133,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void ReplaceColumnThatExistsReplaces()
         {
-            var columnOld = new BaseDataColumn<string>(
+            var columnOld = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
 
-            var columnNew = new BaseDataColumn<string>(
+            var columnNew = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -154,12 +154,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void ReplaceColumnThatDoesNotExistAdds()
         {
-            var columnNotThere = new BaseDataColumn<string>(
+            var columnNotThere = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
 
-            var columnNew = new BaseDataColumn<string>(
+            var columnNew = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -174,12 +174,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void ReplaceColumnReturnsBuilder()
         {
-            var columnOld = new BaseDataColumn<string>(
+            var columnOld = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
 
-            var columnNew = new BaseDataColumn<string>(
+            var columnNew = new DataColumn<string>(
               new ColumnMetadata(Guid.NewGuid(), "name"),
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
