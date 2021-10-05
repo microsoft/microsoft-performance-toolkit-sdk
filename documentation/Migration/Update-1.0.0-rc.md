@@ -23,7 +23,7 @@ The default behavior of using all tables found in the assembly has been preserve
 This change only effects those `ProcessingSource`s that use custom table providers.
 
 Two helper methods have been added for use:
-`TableDiscovery.CreateForAssembly` and `TableDiscovery.CreateForNamespace.` User's
+`TableDiscovery.CreateForAssembly` and `TableDiscovery.CreateForNamespace.` Users
 may also provide their own implementations.
 
 ## Engine
