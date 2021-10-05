@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.Extensibility.SourceParsing
     /// <typeparam name="TKey">
     ///     Type that will be used to key data from the source for distribution.
     /// </typeparam>
-    public abstract class SourceParserBase<T, TContext, TKey>
+    public abstract class SourceParser<T, TContext, TKey>
         : ISourceParser<T, TContext, TKey> 
           where T : IKeyedDataType<TKey>
     {
