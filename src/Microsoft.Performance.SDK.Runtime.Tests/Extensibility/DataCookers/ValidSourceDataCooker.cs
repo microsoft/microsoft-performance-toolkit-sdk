@@ -10,7 +10,7 @@ using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataCookers
 {
     public class ValidSourceDataCooker
-        : BaseSourceDataCooker<TestDataElement, TestDataContext, int>
+        : SourceDataCooker<TestDataElement, TestDataContext, int>
     {
         public ValidSourceDataCooker() 
             : base("SourceId", "CookerId")

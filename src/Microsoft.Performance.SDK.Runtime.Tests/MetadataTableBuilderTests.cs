@@ -104,7 +104,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AddColumnAdds()
         {
-            var column = new BaseDataColumn<string>(
+            var column = new DataColumn<string>(
                 new ColumnMetadata(Guid.NewGuid(), "name"),
                 new UIHints { Width = 100, },
                 Projection.CreateUsingFuncAdaptor(i => "test"));
@@ -118,7 +118,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AddColumnReturnsBuilder()
         {
-            var column = new BaseDataColumn<string>(
+            var column = new DataColumn<string>(
                new ColumnMetadata(Guid.NewGuid(), "name"),
                new UIHints { Width = 100, },
                Projection.CreateUsingFuncAdaptor(i => "test"));
