@@ -29,7 +29,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
     ///     Data element key type.
     /// </typeparam>
     internal class SourceProcessingSession<T, TContext, TKey>
-        : BaseSourceProcessingSession<T, TContext, TKey>
+        : SourceProcessingSessionBase<T, TContext, TKey>
         where T : IKeyedDataType<TKey>
     {
         private static readonly int InvalidPass = -1;
@@ -148,7 +148,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
             var cookersByPass = this.scheduler.DataCookersBySourcePass;
 
-            if (this.maxSourcePassCount == 0)
+            if (this.maxSourcePassCount == SourceParsingConstants.UnlimitedPassCount)
             {
                 this.maxSourcePassCount = cookersByPass.Count;
             }
