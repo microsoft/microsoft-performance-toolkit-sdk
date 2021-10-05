@@ -32,15 +32,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
     {
         private Dictionary<TKey, List<ISourceDataCooker<T, TContext, TKey>>> activeCookerRegistry;
         private List<ISourceDataCooker<T, TContext, TKey>> activeCookers;
-        private HashSet<ISourceDataCooker<T, TContext, TKey>> activeReceiveAllDataCookers;
+        private List<ISourceDataCooker<T, TContext, TKey>> activeReceiveAllDataCookers;
 
-        private readonly Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>> 
+        private readonly Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>
             cookerById = new Dictionary<DataCookerPath, ISourceDataCooker<T, TContext, TKey>>();
 
-        private readonly HashSet<ISourceDataCooker<T, TContext, TKey>> 
+        private readonly HashSet<ISourceDataCooker<T, TContext, TKey>>
             registeredCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
 
-        private readonly HashSet<ISourceDataCooker<T, TContext, TKey>> 
+        private readonly HashSet<ISourceDataCooker<T, TContext, TKey>>
             receiveAllDataCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
 
         private readonly IEqualityComparer<TKey> keyEqualityComparer;
@@ -58,7 +58,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         public ISourceParser<T, TContext, TKey> SourceParser { get; }
 
-        public IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredSourceDataCookers 
+        public IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredSourceDataCookers
             => this.RegisteredCookers;
 
         public string Id => this.SourceParser.Id;
@@ -81,7 +81,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             {
                 throw new ArgumentException(
                     $"The {nameof(IDataCookerDescriptor.Path.SourceParserId)} of {nameof(dataCooker)} doesn't match "
-                        + $"{nameof(SourceParser)}.", 
+                        + $"{nameof(SourceParser)}.",
                     nameof(dataCooker));
             }
 
@@ -99,7 +99,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         public ISourceDataCooker<T, TContext, TKey> GetSourceDataCooker(DataCookerPath cookerPath)
         {
-            Guard.NotNull(cookerPath, nameof(cookerPath ));
+            Guard.NotNull(cookerPath, nameof(cookerPath));
 
             this.cookerById.TryGetValue(cookerPath, out var cooker);
             return cooker;
@@ -116,17 +116,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
             var key = data.GetKey();
 
-            if (!this.activeCookerRegistry.ContainsKey(key) && !this.receiveAllDataCookers.Any())
+            if (!this.activeCookerRegistry.ContainsKey(key) && this.receiveAllDataCookers.Count == 0)
             {
                 return DataProcessingResult.Ignored;
             }
 
-            DataProcessingResult ProcessDataCookers(IEnumerable<ISourceDataCooker<T, TContext, TKey>> cookers)
+            DataProcessingResult ProcessDataCookers(List<ISourceDataCooker<T, TContext, TKey>> cookers)
             {
                 DataProcessingResult dataResult = DataProcessingResult.Ignored;
 
-                foreach (var sourceDataCooker in cookers)
+                for (int cookerIdx = 0; cookerIdx < cookers.Count; cookerIdx++)
                 {
+                    var sourceDataCooker = cookers[cookerIdx];
                     var result = sourceDataCooker.CookDataElement(data, context, cancellationToken);
                     if (result == DataProcessingResult.CorruptData)
                     {
@@ -143,9 +144,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             }
 
             var keyedResult = DataProcessingResult.Ignored;
-            if (this.activeCookerRegistry.ContainsKey(key))
+            if (this.activeCookerRegistry.TryGetValue(key,
+                out List<ISourceDataCooker<T, TContext, TKey>> sourceDataCookers))
             {
-                var sourceDataCookers = this.activeCookerRegistry[key];
                 keyedResult = ProcessDataCookers(sourceDataCookers);
                 if (keyedResult == DataProcessingResult.CorruptData)
                 {
@@ -190,7 +191,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         protected void ClearActiveCookers(int newCapacityCount)
         {
             this.activeCookers = new List<ISourceDataCooker<T, TContext, TKey>>(newCapacityCount);
-            this.activeReceiveAllDataCookers = new HashSet<ISourceDataCooker<T, TContext, TKey>>();
+            this.activeReceiveAllDataCookers = new List<ISourceDataCooker<T, TContext, TKey>>();
         }
 
         protected void ActivateCooker(ISourceDataCooker<T, TContext, TKey> sourceDataCooker)
@@ -198,7 +199,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             Guard.NotNull(sourceDataCooker, nameof(sourceDataCooker));
 
             this.activeCookers.Add(sourceDataCooker);
-            if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements))
+            if (sourceDataCooker.Options.HasFlag(SourceDataCookerOptions.ReceiveAllDataElements) &&
+                !this.activeReceiveAllDataCookers.Contains(sourceDataCooker))
             {
                 this.activeReceiveAllDataCookers.Add(sourceDataCooker);
             }
