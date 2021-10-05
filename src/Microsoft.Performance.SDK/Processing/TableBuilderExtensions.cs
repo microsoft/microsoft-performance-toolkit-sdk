@@ -47,7 +47,7 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(projection, nameof(projection));
 
-            return self.AddColumn(new BaseDataColumn<T>(column, projection));
+            return self.AddColumn(new DataColumn<T>(column, projection));
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(old, nameof(old));
             Guard.NotNull(newProjection, nameof(newProjection));
 
-            var newColumn = new BaseDataColumn<T>(old.Configuration, newProjection);
+            var newColumn = new DataColumn<T>(old.Configuration, newProjection);
             return self.ReplaceColumn(old, newColumn);
         }
     }

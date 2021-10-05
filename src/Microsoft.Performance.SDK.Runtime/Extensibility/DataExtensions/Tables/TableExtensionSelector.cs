@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 {
@@ -19,11 +19,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         private readonly IDataExtensionRepository dataExtensions;
 
         /// <summary>
-        ///  Constructor
+        ///  Creates a new instance of the <see cref="TableExtensionSelector" /> class.
         /// </summary>
         /// <param name="dataExtensions">
         ///     Repository of data extensions.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataExtensions"/> is <c>null</c>.
+        /// </exception>
         public TableExtensionSelector(IDataExtensionRepository dataExtensions)
         {
             Guard.NotNull(dataExtensions, nameof(dataExtensions));

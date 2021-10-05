@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     The <see cref="Type"/> of data exposed by this column.
     /// </typeparam>
     public class HierarchicalDataColumn<T>
-        : BaseDataColumn<T>,
+        : DataColumn<T>,
           IHierarchicalDataColumn<T>
     {
         /// <summary>
