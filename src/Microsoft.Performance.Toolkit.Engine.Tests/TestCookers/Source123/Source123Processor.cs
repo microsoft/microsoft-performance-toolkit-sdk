@@ -10,7 +10,7 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 {
     public sealed class Source123Processor
-        : CustomDataProcessorBaseWithSourceParser<Source123DataObject, EngineTestContext, int>
+        : CustomDataProcessorWithSourceParser<Source123DataObject, EngineTestContext, int>
     {
         public Source123Processor(
             ISourceParser<Source123DataObject, EngineTestContext, int> sourceParser, 
