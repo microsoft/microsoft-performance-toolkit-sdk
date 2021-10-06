@@ -83,7 +83,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <summary>
         ///     Gets a value that indicates whether the process is running in a graphical user environment.
         /// </summary>
-        public bool GraphicalUserEnvironment { get; set; }
+        public bool IsInteractive { get; set; }
 
         /// <summary>
         ///     Gets an object to serialize/deserialize data (e.g. table configurations).

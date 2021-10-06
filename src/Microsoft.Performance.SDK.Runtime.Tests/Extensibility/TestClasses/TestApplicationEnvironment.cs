@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public string RuntimeName { get; set; }
 
-        public bool GraphicalUserEnvironment { get; set; }
+        public bool IsInteractive { get; set; }
 
         public ISerializer Serializer { get; set; }
 
