@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Testing.SDK;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 {
@@ -21,15 +19,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         public const string Extension = ".s123d";
 
         public Source123DataSource()
-            : base(new ThunkedTableProvider(GetTable))
+            : base(new Discovery())
         {
-        }
-
-        private static IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> GetTable()
-        {
-            var tables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(1);
-            tables.Add(Source123Table.TableDescriptor, null);
-            return tables;
         }
 
         protected override ICustomDataProcessor CreateProcessorCore(
@@ -53,6 +44,18 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             return StringComparer.OrdinalIgnoreCase.Equals(
                    Extension,
                    Path.GetExtension(dataSource.Uri.LocalPath));
+        }
+
+        private sealed class Discovery
+            : ITableProvider
+        {
+            public ISet<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            {
+                return new HashSet<DiscoveredTable>
+                {
+                    new DiscoveredTable(Source123Table.TableDescriptor),
+                };
+            }
         }
     }
 }
