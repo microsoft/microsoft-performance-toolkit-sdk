@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Testing.SDK;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         public const string Extension = ".s123d";
 
         public Source123DataSource()
-            : base(GetTable)
+            : base(new ThunkedTableProvider(GetTable))
         {
         }
 

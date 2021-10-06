@@ -71,69 +71,6 @@ namespace Microsoft.Performance.SDK.Processing
             this.tableDiscoverer = tableDiscoverer;
         }
 
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ProcessingSource"/>
-        ///     class.
-        /// </summary>
-        /// <param name="additionalTablesProvider">
-        ///     A function the provides an additional set of tables descriptors and their
-        ///     underlying table types that should be exposed in addition to the tables
-        ///     found via reflection.
-        /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="additionalTablesProvider"/> is <c>null</c>.
-        /// </exception>
-        [Obsolete("This constructor will be removed in 1.0.0-rc. Please use the constructor that takes an ITableDiscoverer.")]
-        protected ProcessingSource(
-            Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider)
-        {
-            Guard.NotNull(additionalTablesProvider, nameof(additionalTablesProvider));
-
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(this.allTables);
-            this.metadataTables = new HashSet<TableDescriptor>();
-            this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
-
-            this.tableDiscoverer = new DeprecatedConstructorSupportProvider(
-                additionalTablesProvider, 
-                () => this.GetType().Assembly,
-                this);
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ProcessingSource"/>
-        ///     class.
-        /// </summary>
-        /// <param name="additionalTablesProvider">
-        ///     A function the provides an additional set of tables descriptors and their
-        ///     underlying table types that should be exposed in addition to the tables
-        ///     found via reflection.
-        /// </param>
-        /// <param name="tableAssemblyProvider">
-        ///     A function that provides the <see cref="Assembly"/> that should be searched
-        ///     for tables.
-        /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="additionalTablesProvider"/> is <c>null</c>.
-        ///     - or -
-        ///     <paramref name="tableAssemblyProvider"/> is <c>null</c>.
-        /// </exception>
-        [Obsolete("This constructor will be removed in 1.0.0-rc. Please use the constructor that takes an ITableProvider.")]
-        protected ProcessingSource(
-            Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider,
-            Func<Assembly> tableAssemblyProvider)
-        {
-            Guard.NotNull(additionalTablesProvider, nameof(additionalTablesProvider));
-            Guard.NotNull(tableAssemblyProvider, nameof(tableAssemblyProvider));
-
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(this.allTables);
-            this.metadataTables = new HashSet<TableDescriptor>();
-            this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
-
-            this.tableDiscoverer = new DeprecatedConstructorSupportProvider(additionalTablesProvider, tableAssemblyProvider, this);
-        }
-
         /// <inheritdoc />
         public IEnumerable<TableDescriptor> DataTables => this.allTables.Keys
             .Except(this.metadataTablesRO);
@@ -372,66 +309,6 @@ namespace Microsoft.Performance.SDK.Processing
                 }
 
                 this.allTables[t.Descriptor] = t.BuildTable;
-            }
-        }
-
-        // this class is temporary until the deprecated constructors are removed.
-        private sealed class DeprecatedConstructorSupportProvider
-            : ITableProvider
-        {
-            private readonly Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> provider;
-            private readonly Func<Assembly> assemblyProvider;
-            private readonly ProcessingSource parent;
-
-            internal DeprecatedConstructorSupportProvider(
-                Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> provider,
-                Func<Assembly> assemblyProvider,
-                ProcessingSource parent)
-            {
-                Debug.Assert(parent != null);
-
-                this.provider = provider;
-                this.assemblyProvider = assemblyProvider;
-                this.parent = parent;
-            }
-
-            public ISet<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
-            {
-                var tables = new HashSet<DiscoveredTable>();
-
-                var assembly = this.assemblyProvider?.Invoke();
-                if (assembly != null)
-                {
-                    var allTableTypes = assembly.GetTypes();
-                    foreach (var tableType in allTableTypes)
-                    {
-                        if (TableDescriptorFactory.TryCreate(
-                            tableType,
-                            tableConfigSerializer,
-                            out bool internalTable,
-                            out var descriptor,
-                            out var buildTableAction) && internalTable)
-                        {
-                            tables.Add(
-                                new DiscoveredTable(
-                                    descriptor,
-                                    buildTableAction ?? this.parent.GetTableBuildAction(tableType)));
-                        }
-                    }
-                }
-
-                if (this.provider != null)
-                {
-                    foreach (var kvp in this.provider())
-                    {
-                        tables.Add(
-                            new DiscoveredTable(
-                                kvp.Key,
-                                kvp.Value ?? this.parent.GetTableBuildAction(kvp.Key.Type)));
-                    }
-                }
-
-                return tables;
             }
         }
     }

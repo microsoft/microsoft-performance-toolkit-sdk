@@ -145,61 +145,6 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        [Obsolete("Remove when the deprectated constructor is removed.")]
-        public void WhenAdditionalTableProviderProvidedThenAdditionalTablesAdded()
-        {
-            var assembly = new FakeAssembly
-            {
-                TypesToReturn = new[]
-                {
-                    typeof(DateTime),
-                    typeof(StubDataTableOne),
-                    typeof(StubMetadataTableOne),
-                    typeof(Exception),
-                }
-            };
-
-            var expectedDescriptors = Utils.CreateTableDescriptors(
-                serializer,
-                typeof(StubDataTableOne),
-                typeof(StubDataTableTwo),
-                typeof(StubDataTableThree),
-                typeof(StubMetadataTableOne),
-                typeof(StubMetadataTableTwo));
-
-            StubDataSource.Assembly = assembly;
-
-            bool descriptor2BuildWasCalled = false;
-            bool descriptor3BuildWasCalled = false;
-            bool descriptor5BuildWasCalled = false;
-
-            var additionalTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
-            {
-                { expectedDescriptors[1], (tableBuilder, cookedData) => { descriptor2BuildWasCalled = true;} },
-                { expectedDescriptors[2], (tableBuilder, cookedData) => { descriptor3BuildWasCalled = true;} },
-                { expectedDescriptors[4], (tableBuilder, cookedData) => { descriptor5BuildWasCalled = true;} },
-            };
-
-            var sut = new StubDataSource(() => additionalTables);
-            sut.SetApplicationEnvironment(applicationEnvironment);
-
-            Assert.AreEqual(5, sut.AllTablesExposed.Count);
-
-            // call the build action of each of our tables
-            foreach (var kvp in sut.AllTablesExposed)
-            {
-                kvp.Value.Invoke(null, null);
-            }
-
-            Assert.IsTrue(StubDataTableOne.BuildTableWasCalled);
-            Assert.IsTrue(descriptor2BuildWasCalled);
-            Assert.IsTrue(descriptor3BuildWasCalled);
-            Assert.IsTrue(StubMetadataTableOne.BuildTableWasCalled);
-            Assert.IsTrue(descriptor5BuildWasCalled);
-        }
-
-        [TestMethod]
-        [UnitTest]
         public void WhenTableDiscoveryProvidedUsesDiscovery()
         {
             Utils.CreateTableDescriptors(
@@ -258,18 +203,6 @@ namespace Microsoft.Performance.SDK.Tests
 
             public StubDataSource(ITableProvider discovery)
                : base(discovery)
-            {
-                this.CommandLineOptionsToReturn = new List<Option>();
-                this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
-                this.ProcessorToReturn = new MockCustomDataProcessor();
-                this.CreateProcessorCoreCalls =
-                    new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
-            }
-
-            [Obsolete("Remove when deprecated constructor is removed.")]
-            public StubDataSource(
-                Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTableProvider)
-                : base(additionalTableProvider, () => Assembly)
             {
                 this.CommandLineOptionsToReturn = new List<Option>();
                 this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
