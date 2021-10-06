@@ -16,6 +16,31 @@ namespace Microsoft.Performance.SDK.Processing
     {
         /// <summary>
         ///     Creates a new <see cref="ITableProvider"/> instance that will
+        ///     discover tables in the given <see cref="Assembly"/> containing the
+        ///     given <see cref="IProcessingSource"/>. Tables are discovered in the
+        ///     assembly by being a type decorated with the <see cref="TableAttribute"/>
+        ///     attribute.
+        /// </summary>
+        /// <param name="processingSource">
+        ///     The <see cref="IProcessingSource"/> whose <see cref="Assembly"/> is to
+        ///     be searched for tables.
+        /// </param>
+        /// <returns>
+        ///     A new <see cref="ITableProvider"/> that discovers tables in the
+        ///     <see cref="Assembly"/> containing the <paramref name="processingSource"/>
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="processingSource"/> is <c>null</c>.
+        /// </exception>
+        public static ITableProvider CreateForAssembly(IProcessingSource processingSource)
+        {
+            Guard.NotNull(processingSource, nameof(processingSource));
+
+            return CreateForAssembly(processingSource.GetType().Assembly);
+        }
+
+        /// <summary>
+        ///     Creates a new <see cref="ITableProvider"/> instance that will
         ///     discover tables in the given <see cref="Assembly"/>. Tables are
         ///     discovered in the assembly by being a type decorated with the
         ///     <see cref="TableAttribute"/> attribute.
@@ -32,6 +57,37 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(assembly, nameof(assembly));
 
             return new AssemblyTableDiscoverer(assembly);
+        }
+
+        /// <summary>
+        ///     Creates a new <see cref="ITableProvider"/> instance that will
+        ///     discover tables in the given namespace in the <see cref="Assembly"/>
+        ///     containing the specified <see cref="IProcessingSource"/>.
+        /// </summary>
+        /// <param name="namespace">
+        ///     The namespace to search for tables. This parameter may be empty to
+        ///     specify the global namespace.
+        /// </param>
+        /// <param name="processingSource">
+        ///     The <see cref="IProcessingSource"/> whose <see cref="Assembly"/> is
+        ///     to be searched for tables.
+        /// </param>
+        /// <returns>
+        ///     A new <see cref="ITableProvider"/> that discovers tables in the
+        ///     specified <paramref name="namespace"/> in the <see cref="Assembly"/>
+        ///     containing <paramref name="processingSource"/>.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="namespace"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="processingSource"/> is <c>null</c>.
+        /// </exception>
+        public static ITableProvider CreateForNamespace(string @namespace, IProcessingSource processingSource)
+        {
+            Guard.NotNull(@namespace, nameof(@namespace));
+            Guard.NotNull(processingSource, nameof(processingSource));
+
+            return CreateForNamespace(@namespace, processingSource.GetType().Assembly);
         }
 
         /// <summary>
@@ -175,5 +231,4 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
     }
-
 }
