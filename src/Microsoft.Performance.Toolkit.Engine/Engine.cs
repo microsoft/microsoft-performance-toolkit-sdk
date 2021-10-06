@@ -726,7 +726,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     new TableConfigurationsSerializer(),
                     instance.Extensions,
                     instance.Factory.CreateSourceSessionFactory(),
-                    new RuntimeMessageBox(instance.logger));
+                    new RuntimeMessageBox(instance.logger, createInfo.IsInteractive));
 
                 foreach (var cds in instance.ProcessingSourceReferences)
                 {
@@ -1077,12 +1077,16 @@ namespace Microsoft.Performance.Toolkit.Engine
             : IMessageBox
         {
             private readonly ILogger logger;
+            private readonly bool isInteractive;
 
-            public RuntimeMessageBox(ILogger logger)
+            public RuntimeMessageBox(
+                ILogger logger,
+                bool isInteractive)
             {
                 Debug.Assert(logger != null);
 
                 this.logger = logger;
+                this.isInteractive = isInteractive;
             }
 
             public void Show(
@@ -1092,8 +1096,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 params object[] args)
             {
                 var message = string.Format(formatProvider, format, args);
-
-                // todo: use the logger here too
 
                 this.logger.Error(
                     string.Concat("[", icon.ToString(), "]: ", message));
