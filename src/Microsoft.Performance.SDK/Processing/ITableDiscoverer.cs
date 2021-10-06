@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Processing
     public interface ITableProvider
     {
         /// <summary>
-        ///     Returns a collection of tables.
+        ///     Returns the collection of tables that should be associated with a Processing Source.
         /// </summary>
         /// <param name="tableConfigSerializer">
         ///     The serializer used to deserialize table configurations.
