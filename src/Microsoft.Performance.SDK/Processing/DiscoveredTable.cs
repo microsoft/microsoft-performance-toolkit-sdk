@@ -38,7 +38,10 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <param name="buildTable">
         ///     The build action for the table. This parameter may be <c>null</c> to specify
-        ///     that the default build action should be used.
+        ///     that the default build action should be used. The default build action is determined
+        ///     by an implementation of a <see cref="CustomDataProcessor"/> in the 
+        ///     <see cref="CustomDataProcessor.BuildTableCore(TableDescriptor, Action{ITableBuilder, IDataExtensionRetrieval}, ITableBuilder)"/>
+        ///     method. 
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="descriptor"/> is <c>null</c>.
