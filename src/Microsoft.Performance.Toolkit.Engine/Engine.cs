@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -726,7 +727,9 @@ namespace Microsoft.Performance.Toolkit.Engine
                     new TableConfigurationsSerializer(),
                     instance.Extensions,
                     instance.Factory.CreateSourceSessionFactory(),
-                    new RuntimeMessageBox(instance.logger, createInfo.IsInteractive));
+                    createInfo.IsInteractive
+                        ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
+                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger));
 
                 foreach (var cds in instance.ProcessingSourceReferences)
                 {
@@ -1073,21 +1076,16 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
-        private sealed class RuntimeMessageBox
+        private abstract class RuntimeMessageBox
             : IMessageBox
         {
-            private readonly ILogger logger;
-            private readonly bool isInteractive;
-
-            public RuntimeMessageBox(
-                ILogger logger,
-                bool isInteractive)
+            internal RuntimeMessageBox(
+                ILogger logger)
             {
-                Debug.Assert(logger != null);
-
-                this.logger = logger;
-                this.isInteractive = isInteractive;
+                this.Logger = logger;
             }
+
+            protected ILogger Logger { get; }
 
             public void Show(
                 MessageBoxIcon icon,
@@ -1095,22 +1093,70 @@ namespace Microsoft.Performance.Toolkit.Engine
                 string format,
                 params object[] args)
             {
-                var message = string.Format(formatProvider, format, args);
-
-                this.logger.Error(
-                    string.Concat("[", icon.ToString(), "]: ", message));
+                var message = FormatMessage(icon, formatProvider, format, args);
+                this.Logger.Error(message);
             }
 
-            public ButtonResult Show(
-                MessageBoxIcon icon,
+            public abstract ButtonResult Show(
+                MessageBoxIcon icon, 
                 IFormatProvider formatProvider,
                 Buttons buttons, 
                 string caption,
                 string format,
+                params object[] args);
+
+            protected static string FormatMessage(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
+                string format,
                 params object[] args)
             {
                 var message = string.Format(formatProvider, format, args);
+                return string.Concat("[", icon.ToString("G"), "]: ", message);
+            }
+        }
 
+        private sealed class NonInteractiveMessageBox
+            : RuntimeMessageBox
+        {
+            private readonly ILogger logger;
+
+            public NonInteractiveMessageBox(ILogger logger)
+                : base(logger)
+            {
+            }
+
+            public override ButtonResult Show(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
+                Buttons buttons,
+                string caption,
+                string format,
+                params object[] args)
+            {
+                throw new InvalidOperationException("This engine was created with IsInteractive set to false. User interaction with plugins is no allowed in this mode.");
+            }
+        }
+
+        private sealed class InteractiveRuntimeMessageBox
+           : RuntimeMessageBox
+        {
+            private readonly ILogger logger;
+
+            public InteractiveRuntimeMessageBox(ILogger logger)
+                : base(logger)
+            {
+            }
+
+            public override ButtonResult Show(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
+                Buttons buttons,
+                string caption,
+                string format,
+                params object[] args)
+            {
+                var message = FormatMessage(icon, formatProvider, format, args);
                 switch (icon)
                 {
                     case MessageBoxIcon.Error:
@@ -1126,15 +1172,119 @@ namespace Microsoft.Performance.Toolkit.Engine
                         break;
 
                     default:
-                        // todo: not sure if this is the 'best' approach
-                        this.logger.Info(
-                            string.Concat("[", icon.ToString(), "]: ", message));
+                        this.logger.Info(message);
                         break;
                 }
 
-                // todo: how do we want to handle this?
-                // User prompts? Default?
-                return ButtonResult.None;
+                return GetUserInput(buttons);
+            }
+
+            private static ButtonResult GetUserInput(Buttons buttons)
+            {
+                switch (buttons)
+                {
+                    case Buttons.OK:
+                        {
+                            Console.Out.WriteLine("Press [Enter] to Continue.");
+                            Console.In.ReadLine();
+                            return ButtonResult.OK;
+                        }
+
+                    case Buttons.OKCancel:
+                        {
+                            var c = GetCharFromUser(
+                                "O(kay) / C(ancel) ? ",
+                                'O', 'o', 'C', 'c');
+                            switch (c)
+                            {
+                                case 'O':
+                                case 'o':
+                                    return ButtonResult.OK;
+
+                                case 'C':
+                                case 'c':
+                                    return ButtonResult.Cancel;
+
+                                default:
+                                    Debug.Assert(false);
+                                    throw new InvalidOperationException();
+                            }
+                        }
+
+                    case Buttons.YesNo:
+                        {
+                            var c = GetCharFromUser(
+                                "Y(es) / N(o) ? ",
+                                'Y', 'y', 'N', 'n');
+                            switch (c)
+                            {
+                                case 'Y':
+                                case 'y':
+                                    return ButtonResult.Yes;
+
+                                case 'N':
+                                case 'n':
+                                    return ButtonResult.No;
+
+                                default:
+                                    Debug.Assert(false);
+                                    throw new InvalidOperationException();
+                            }
+                        }
+
+                    case Buttons.YesNoCancel:
+                        {
+                            var c = GetCharFromUser(
+                               "Y(es) / N(o) / C(ancel) ? ",
+                               'Y', 'y', 'N', 'n', 'C', 'c');
+                            switch (c)
+                            {
+                                case 'Y':
+                                case 'y':
+                                    return ButtonResult.Yes;
+
+                                case 'N':
+                                case 'n':
+                                    return ButtonResult.No;
+
+                                case 'C':
+                                case 'c':
+                                    return ButtonResult.Cancel;
+
+                                default:
+                                    Debug.Assert(false);
+                                    throw new InvalidOperationException();
+                            }
+                        }
+
+                    default:
+                        {
+                            throw new InvalidEnumArgumentException(
+                                nameof(buttons),
+                                (int)buttons,
+                                typeof(Buttons));
+                        }
+                }
+            }
+
+            private static char GetCharFromUser(
+                string prompt,
+                params char[] valid)
+            {
+
+                char c = '\0';
+                do
+                {
+                    Console.Out.Write(prompt);
+
+                    var line = Console.In.ReadLine();
+                    if (line.Length > 0)
+                    {
+                        c = line[0];
+                    }
+                } while (!valid.Contains(c));
+
+                return c;
             }
         }
     }
