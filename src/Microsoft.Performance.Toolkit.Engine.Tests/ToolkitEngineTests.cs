@@ -931,6 +931,17 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         #endregion
 
+        #region Interactive
+
+        [TestMethod]
+        [FunctionalTest]
+        public void NonInteractive_Throws()
+        {
+            Assert.Inconclusive();
+        }
+
+        #endregion
+
         public static DataOutputPath Parse(string dataCookerOutputPath)
         {
             var split = dataCookerOutputPath.Split('/');
