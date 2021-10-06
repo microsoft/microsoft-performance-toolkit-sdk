@@ -48,29 +48,19 @@ namespace Microsoft.Performance.SDK.Tests
 
             var serializer = new FakeSerializer();
 
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableThree),
-                    serializer,
-                    out TableDescriptor expectedDescriptor3));
+            var expectedDescriptors = Utils.CreateTableDescriptors(
+                serializer,
+                typeof(StubDataTableOne),
+                typeof(StubDataTableTwo),
+                typeof(StubDataTableThree));
 
             var sut = TableDiscovery.CreateForAssembly(assembly);
             var tables = sut.Discover(new FakeSerializer());
 
             Assert.AreEqual(3, tables.Count);
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor1)));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor2)));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor3)));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[1])));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[2])));
         }
 
         [TestMethod]
@@ -89,24 +79,19 @@ namespace Microsoft.Performance.SDK.Tests
             };
 
             var serializer = new FakeSerializer();
+            
 
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
+            var expectedDescriptors = Utils.CreateTableDescriptors(
+                serializer,
+                typeof(StubMetadataTableOne),
+                typeof(StubMetadataTableTwo));
 
             var sut = TableDiscovery.CreateForAssembly(assembly);
             var tables = sut.Discover(new FakeSerializer());
 
             Assert.AreEqual(2, tables.Count);
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor1)));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor2)));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[1])));
         }
 
         [TestMethod]
@@ -129,42 +114,23 @@ namespace Microsoft.Performance.SDK.Tests
 
             var serializer = new FakeSerializer();
 
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableThree),
-                    serializer,
-                    out TableDescriptor expectedDescriptor3));
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor4));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor5));
+            var expectedDescriptors = Utils.CreateTableDescriptors(
+                serializer,
+                typeof(StubDataTableOne),
+                typeof(StubDataTableTwo),
+                typeof(StubDataTableThree),
+                typeof(StubMetadataTableOne),
+                typeof(StubMetadataTableTwo));
 
             var sut = TableDiscovery.CreateForAssembly(assembly);
             var tables = sut.Discover(new FakeSerializer());
 
             Assert.AreEqual(5, tables.Count);
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor1)));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor2)));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor3)));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor4)));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptor5)));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[1])));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[2])));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[3])));
+            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[4])));
         }
     }
 }

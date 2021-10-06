@@ -43,32 +43,13 @@ namespace Microsoft.Performance.SDK.Tests
                 }
             };
 
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableThree),
-                    serializer,
-                    out TableDescriptor expectedDescriptor3));
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor4));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor5));
+            var expectedDescriptors = Utils.CreateTableDescriptors(
+                serializer,
+                typeof(StubDataTableOne),
+                typeof(StubDataTableTwo),
+                typeof(StubDataTableThree),
+                typeof(StubMetadataTableOne),
+                typeof(StubMetadataTableTwo));
 
             StubDataSource.Assembly = assembly;
 
@@ -155,6 +136,7 @@ namespace Microsoft.Performance.SDK.Tests
             {
                 ProcessorToReturn = null,
             };
+
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.ThrowsException<InvalidOperationException>(
@@ -177,32 +159,13 @@ namespace Microsoft.Performance.SDK.Tests
                 }
             };
 
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor2));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableThree),
-                    serializer,
-                    out TableDescriptor expectedDescriptor3));
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableOne),
-                    serializer,
-                    out TableDescriptor expectedDescriptor4));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableTwo),
-                    serializer,
-                    out TableDescriptor expectedDescriptor5));
+            var expectedDescriptors = Utils.CreateTableDescriptors(
+                serializer,
+                typeof(StubDataTableOne),
+                typeof(StubDataTableTwo),
+                typeof(StubDataTableThree),
+                typeof(StubMetadataTableOne),
+                typeof(StubMetadataTableTwo));
 
             StubDataSource.Assembly = assembly;
 
@@ -212,9 +175,9 @@ namespace Microsoft.Performance.SDK.Tests
 
             var additionalTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
             {
-                { expectedDescriptor2, (tableBuilder, cookedData) => { descriptor2BuildWasCalled = true;} },
-                { expectedDescriptor3, (tableBuilder, cookedData) => { descriptor3BuildWasCalled = true;} },
-                { expectedDescriptor5, (tableBuilder, cookedData) => { descriptor5BuildWasCalled = true;} },
+                { expectedDescriptors[1], (tableBuilder, cookedData) => { descriptor2BuildWasCalled = true;} },
+                { expectedDescriptors[2], (tableBuilder, cookedData) => { descriptor3BuildWasCalled = true;} },
+                { expectedDescriptors[4], (tableBuilder, cookedData) => { descriptor5BuildWasCalled = true;} },
             };
 
             var sut = new StubDataSource(() => additionalTables);
@@ -239,51 +202,25 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void WhenTableDiscoveryProvidedUsesDiscovery()
         {
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableOne),
-                    serializer,
-                    out _,
-                    out TableDescriptor expectedDescriptor1,
-                    out var buildTable1));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableTwo),
-                    serializer,
-                    out _,
-                    out TableDescriptor expectedDescriptor2,
-                    out var buildTable2));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubDataTableThree),
-                    serializer,
-                    out _,
-                    out TableDescriptor expectedDescriptor3,
-                    out var buildTable3));
-
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableOne),
-                    serializer,
-                    out _,
-                    out TableDescriptor expectedDescriptor4,
-                    out var buildTable4));
-            Assert.IsTrue(
-                TableDescriptorFactory.TryCreate(
-                    typeof(StubMetadataTableTwo),
-                    serializer,
-                    out _,
-                    out TableDescriptor expectedDescriptor5,
-                    out var buildTable5));
+            Utils.CreateTableDescriptors(
+                serializer,
+                out var expectedDescriptors,
+                out var buildActions,
+                out _,
+                typeof(StubDataTableOne),
+                typeof(StubDataTableTwo),
+                typeof(StubDataTableThree),
+                typeof(StubMetadataTableOne),
+                typeof(StubMetadataTableTwo));
 
             var discovery = new FakeTableProvider();
             discovery.DiscoverReturnValue = new HashSet<DiscoveredTable>
             {
-                new DiscoveredTable(expectedDescriptor1, buildTable1),
-                new DiscoveredTable(expectedDescriptor2, buildTable2),
-                new DiscoveredTable(expectedDescriptor3, buildTable3),
-                new DiscoveredTable(expectedDescriptor4, buildTable4),
-                new DiscoveredTable(expectedDescriptor5, buildTable5),
+                new DiscoveredTable(expectedDescriptors[0], buildActions[0]),
+                new DiscoveredTable(expectedDescriptors[1], buildActions[1]),
+                new DiscoveredTable(expectedDescriptors[2], buildActions[2]),
+                new DiscoveredTable(expectedDescriptors[3], buildActions[3]),
+                new DiscoveredTable(expectedDescriptors[4], buildActions[4]),
             };
 
             var sut = new StubDataSource(discovery);
