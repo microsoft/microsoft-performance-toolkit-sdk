@@ -935,9 +935,20 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         [TestMethod]
         [FunctionalTest]
-        public void NonInteractive_Throws()
+        [DeploymentItem(@"TestData/interactive.ips")]
+        public void NonInteractive_ProcessThrows()
         {
-            Assert.Inconclusive();
+            using var set = DataSourceSet.Create();
+            set.AddFile(@"TestData\interactive.ips");
+
+            using var sut = Engine.Create(
+                new EngineCreateInfo(set.AsReadOnly())
+                {
+                    IsInteractive = false,
+                });
+
+            var rer = sut.Process();
+
         }
 
         #endregion

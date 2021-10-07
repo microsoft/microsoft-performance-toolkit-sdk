@@ -1119,9 +1119,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class NonInteractiveMessageBox
             : RuntimeMessageBox
         {
-            private readonly ILogger logger;
-
-            public NonInteractiveMessageBox(ILogger logger)
+            internal NonInteractiveMessageBox(ILogger logger)
                 : base(logger)
             {
             }
@@ -1141,9 +1139,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class InteractiveRuntimeMessageBox
            : RuntimeMessageBox
         {
-            private readonly ILogger logger;
-
-            public InteractiveRuntimeMessageBox(ILogger logger)
+            internal InteractiveRuntimeMessageBox(ILogger logger)
                 : base(logger)
             {
             }
@@ -1160,19 +1156,19 @@ namespace Microsoft.Performance.Toolkit.Engine
                 switch (icon)
                 {
                     case MessageBoxIcon.Error:
-                        this.logger.Error("{0}", message);
+                        this.Logger.Error("{0}", message);
                         break;
 
                     case MessageBoxIcon.Information:
-                        this.logger.Info("{0}", message);
+                        this.Logger.Info("{0}", message);
                         break;
 
                     case MessageBoxIcon.Warning:
-                        this.logger.Warn("{0}", message);
+                        this.Logger.Warn("{0}", message);
                         break;
 
                     default:
-                        this.logger.Info(message);
+                        this.Logger.Info(message);
                         break;
                 }
 
