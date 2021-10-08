@@ -45,6 +45,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="retrievalFactory"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="repository"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="errors"/> is <c>null</c>.
         /// </exception>
         /// TODO: Going to move RuntimeExecutionResults to internal and expose calls via new interface
         ///       1 - 1 with the Engine when calling Process
@@ -52,19 +54,28 @@ namespace Microsoft.Performance.Toolkit.Engine
             ICookedDataRetrieval cookedDataRetrieval,
             IDataExtensionRetrievalFactory retrievalFactory,
             IDataExtensionRepository repository,
-            IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap)
+            IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap,
+            IEnumerable<ProcessingError> errors)
         {
             Guard.NotNull(cookedDataRetrieval, nameof(cookedDataRetrieval));
             Guard.NotNull(retrievalFactory, nameof(retrievalFactory));
             Guard.NotNull(repository, nameof(repository));
             Guard.NotNull(tableToProcessorMap, nameof(tableToProcessorMap));
+            Guard.NotNull(errors, nameof(errors));
 
             this.cookedDataRetrieval = cookedDataRetrieval;
             this.retrievalFactory = retrievalFactory;
             this.repository = repository;
             this.sourceCookers = new HashSet<DataCookerPath>(this.repository.SourceDataCookers);
             this.tableToProcessorMap = tableToProcessorMap;
+
+            this.ProcessingErrors = errors.OfType<ProcessingError>().ToList().AsReadOnly();
         }
+
+        /// <summary>
+        ///     Gets the collection of errors, if any, that occurred during processing.
+        /// </summary>
+        public IReadOnlyCollection<ProcessingError> ProcessingErrors { get; }
 
         /// <summary>
         ///     Gets the direct cooker retrieval for the specified

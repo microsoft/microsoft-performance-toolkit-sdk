@@ -849,6 +849,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             var executionResults = new List<ExecutionResult>(this.executors.Count);
+            var errors = new List<ProcessingError>(this.executors.Count);
             foreach (var executor in this.executors)
             {
                 try
@@ -858,12 +859,23 @@ namespace Microsoft.Performance.Toolkit.Engine
                         .GetAwaiter()
                         .GetResult();
                     executionResults.Add(executionResult);
+                    if (executionResult.ProcessorFault != null)
+                    {
+                        errors.Add(new ProcessingError(executionResult));
+                    }
                 }
                 catch (Exception e)
                 {
                     //
                     // todo: better error message
                     //
+
+                    errors.Add(
+                        new ProcessingError(
+                            executor.Context.ProcessingSource.Guid,
+                            executor.Processor,
+                            executor.Context.DataSources,
+                            e));
 
                     this.logger.Error($"Failed to process: {e}");
                 }
@@ -876,7 +888,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 retrieval,
                 retrievalFactory,
                 this.Extensions,
-                processorTables);
+                processorTables,
+                errors);
 
             return results;
         }
