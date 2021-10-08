@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -301,14 +302,26 @@ namespace Microsoft.Performance.SDK.Processing
             Debug.Assert(tableConfigSerializer != null);
 
             var tables = this.tableDiscoverer.Discover(tableConfigSerializer);
-            foreach (var t in tables)
+
+            var tableSet = new HashSet<DiscoveredTable>(DiscoveredTableEqualityComparer.ByTableDescriptor);
+            foreach (var table in tables)
             {
-                if (t.IsMetadata)
+                if (!tableSet.Add(table))
                 {
-                    this.metadataTables.Add(t.Descriptor);
+                    var error = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "The table descriptor `{0}` appeared on more than one table in the ProcessingSource `{1}`. Tables must be unique according to their table descriptors.",
+                        table.Descriptor,
+                        this.GetType());
+                    throw new InvalidOperationException(error);
                 }
 
-                this.allTables[t.Descriptor] = t.BuildTable;
+                if (table.IsMetadata)
+                {
+                    this.metadataTables.Add(table.Descriptor);
+                }
+
+                this.allTables[table.Descriptor] = table.BuildTable;
             }
         }
     }

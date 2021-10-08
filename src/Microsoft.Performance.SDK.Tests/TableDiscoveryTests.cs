@@ -25,7 +25,7 @@ namespace Microsoft.Performance.SDK.Tests
             };
 
             var sut = TableDiscovery.CreateForAssembly(assembly);
-            var tables = sut.Discover(new FakeSerializer());
+            var tables = sut.Discover(new FakeSerializer()).ToList();
 
             Assert.AreEqual(0, tables.Count);
         }
@@ -48,14 +48,14 @@ namespace Microsoft.Performance.SDK.Tests
 
             var serializer = new FakeSerializer();
 
-            var expectedDescriptors = Utils.CreateTableDescriptors(
+            var expectedDescriptors = TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 typeof(StubDataTableOne),
                 typeof(StubDataTableTwo),
                 typeof(StubDataTableThree));
 
             var sut = TableDiscovery.CreateForAssembly(assembly);
-            var tables = sut.Discover(new FakeSerializer());
+            var tables = sut.Discover(new FakeSerializer()).ToList();
 
             Assert.AreEqual(3, tables.Count);
             Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
@@ -81,13 +81,13 @@ namespace Microsoft.Performance.SDK.Tests
             var serializer = new FakeSerializer();
             
 
-            var expectedDescriptors = Utils.CreateTableDescriptors(
+            var expectedDescriptors = TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 typeof(StubMetadataTableOne),
                 typeof(StubMetadataTableTwo));
 
             var sut = TableDiscovery.CreateForAssembly(assembly);
-            var tables = sut.Discover(new FakeSerializer());
+            var tables = sut.Discover(new FakeSerializer()).ToList();
 
             Assert.AreEqual(2, tables.Count);
             Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
@@ -114,7 +114,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             var serializer = new FakeSerializer();
 
-            var expectedDescriptors = Utils.CreateTableDescriptors(
+            var expectedDescriptors = TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 typeof(StubDataTableOne),
                 typeof(StubDataTableTwo),
@@ -123,7 +123,7 @@ namespace Microsoft.Performance.SDK.Tests
                 typeof(StubMetadataTableTwo));
 
             var sut = TableDiscovery.CreateForAssembly(assembly);
-            var tables = sut.Discover(new FakeSerializer());
+            var tables = sut.Discover(new FakeSerializer()).ToList();
 
             Assert.AreEqual(5, tables.Count);
             Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));

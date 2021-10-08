@@ -166,7 +166,7 @@ namespace Microsoft.Performance.SDK.Processing
             return new NamespaceTableDiscoverer(@namespace, set);
         }
 
-        private static ISet<DiscoveredTable> DoAssemblyDiscovery(
+        private static IEnumerable<DiscoveredTable> DoAssemblyDiscovery(
             IEnumerable<Assembly> assemblies,
             Func<Type, bool> typeFilter,
             ISerializer tableConfigSerializer)
@@ -175,7 +175,7 @@ namespace Microsoft.Performance.SDK.Processing
             Debug.Assert(typeFilter != null);
             Debug.Assert(assemblies.Any());
 
-            var s = new HashSet<DiscoveredTable>();
+            var s = new HashSet<DiscoveredTable>(DiscoveredTableEqualityComparer.ByTableDescriptor);
             foreach (var t in assemblies.SelectMany(x => x.GetTypes()).Where(typeFilter))
             {
                 if (TableDescriptorFactory.TryCreate(t, tableConfigSerializer, out var isInternal, out var td, out var buildTable))
@@ -199,7 +199,7 @@ namespace Microsoft.Performance.SDK.Processing
                 this.assembly = assembly;
             }
 
-            public ISet<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            public IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
             {
                 return DoAssemblyDiscovery(new[] { assembly, }, _ => true, tableConfigSerializer);
             }
@@ -222,7 +222,7 @@ namespace Microsoft.Performance.SDK.Processing
                 this.assemblies = assemblies;
             }
 
-            public ISet<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            public IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
             {
                 return DoAssemblyDiscovery(
                     this.assemblies,

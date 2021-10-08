@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Tests
 {
-    internal static class Utils
+    internal static class TableDescriptorUtils
     {
         internal static List<TableDescriptor> CreateTableDescriptors(
             ISerializer serializer,

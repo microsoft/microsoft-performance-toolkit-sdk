@@ -100,24 +100,5 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets a value indicating whether this table is a metadata table.
         /// </summary>
         public bool IsMetadata => this.Descriptor.IsMetadataTable;
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            var other = obj as DiscoveredTable;
-            return other != null &&
-                   this.Descriptor.Equals(other.Descriptor);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return this.Descriptor.GetHashCode();
-        }
     }
 }

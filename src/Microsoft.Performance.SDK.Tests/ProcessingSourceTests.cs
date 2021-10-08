@@ -43,7 +43,7 @@ namespace Microsoft.Performance.SDK.Tests
                 }
             };
 
-            var expectedDescriptors = Utils.CreateTableDescriptors(
+            var expectedDescriptors = TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 typeof(StubDataTableOne),
                 typeof(StubDataTableTwo),
@@ -147,7 +147,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void WhenTableDiscoveryProvidedUsesDiscovery()
         {
-            Utils.CreateTableDescriptors(
+            TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 out var expectedDescriptors,
                 out var buildActions,
@@ -184,6 +184,38 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.IsTrue(StubDataTableThree.BuildTableWasCalled);
             Assert.IsTrue(StubMetadataTableOne.BuildTableWasCalled);
             Assert.IsTrue(StubMetadataTableTwo.BuildTableWasCalled);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenDiscoveryProvidesDuplicateTables_DiscoveryThrows()
+        {
+            TableDescriptorUtils.CreateTableDescriptors(
+                serializer,
+                out var expectedDescriptors,
+                out var buildActions,
+                out _,
+                typeof(StubDataTableOne),
+
+                typeof(StubDataTableTwo),
+                typeof(StubDataTableTwo),
+
+                typeof(StubMetadataTableOne),
+                typeof(StubMetadataTableTwo));
+
+            var discovery = new FakeTableProvider();
+            discovery.DiscoverReturnValue = new HashSet<DiscoveredTable>
+            {
+                new DiscoveredTable(expectedDescriptors[0], buildActions[0]),
+                new DiscoveredTable(expectedDescriptors[1], buildActions[1]),
+                new DiscoveredTable(expectedDescriptors[2], buildActions[2]),
+                new DiscoveredTable(expectedDescriptors[3], buildActions[3]),
+                new DiscoveredTable(expectedDescriptors[4], buildActions[4]),
+            };
+
+            var sut = new StubDataSource(discovery);
+
+            Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
         [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
