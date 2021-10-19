@@ -6,10 +6,10 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     This class provides a level of indirection that
     ///     our struct projectors can use to make sure that
-    ///     modifications to copies still get the viewport
+    ///     modifications to copies still give the visible domain
     ///     to all instances.
-    ///     If we set the viewport on a copy, the mutation is
-    ///     lost. If we set the viewport on the container that
+    ///     If we set the visible domain on a copy, the mutation is
+    ///     lost. If we set the visible domain on the container that
     ///     is on a copy, then the original instance will also
     ///     see the update.
     ///     <para/>
@@ -24,8 +24,8 @@ namespace Microsoft.Performance.SDK.Processing
     /// </summary>
     internal sealed class VisibleTableRegionContainer
     {
-        public IVisibleTableRegion VisibleTableRegion { get; set; }
+        public IVisibleDomainRegion VisibleDomainRegion { get; set; }
 
-        public TimeRange Viewport => this.VisibleTableRegion?.Viewport ?? default(TimeRange);
+        public TimeRange VisibleDomain => this.VisibleDomainRegion?.Domain ?? default(TimeRange);
     }
 }

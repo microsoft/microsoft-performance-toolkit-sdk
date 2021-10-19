@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Processing
             ///     Projection of the computed division.
             /// </returns>
             public static IProjection<int, double> Create(
-                IProjection<int, double> numeratorColumn, 
+                IProjection<int, double> numeratorColumn,
                 IProjection<int, double> divisorColumn)
             {
                 Guard.NotNull(numeratorColumn, nameof(numeratorColumn));
@@ -60,7 +60,7 @@ namespace Microsoft.Performance.SDK.Processing
             ///     Projection of the computed division.
             /// </returns>
             public static IProjection<int, double> Create(
-                IProjection<int, TimestampDelta> numeratorColumn, 
+                IProjection<int, TimestampDelta> numeratorColumn,
                 IProjection<int, TimestampDelta> divisorColumn)
             {
                 Guard.NotNull(numeratorColumn, nameof(numeratorColumn));
@@ -85,7 +85,7 @@ namespace Microsoft.Performance.SDK.Processing
             ///     Projection of the computed division.
             /// </returns>
             public static IProjection<int, double> Create(
-                IProjection<int, int> numeratorColumn, 
+                IProjection<int, int> numeratorColumn,
                 IProjection<int, ulong> divisorColumn)
             {
                 Guard.NotNull(numeratorColumn, nameof(numeratorColumn));
@@ -110,7 +110,7 @@ namespace Microsoft.Performance.SDK.Processing
             ///     Projection of the computed division.
             /// </returns>
             public static IProjection<int, double> Create(
-                IProjection<int, ulong> numeratorColumn, 
+                IProjection<int, ulong> numeratorColumn,
                 IProjection<int, ulong> divisorColumn)
             {
                 Guard.NotNull(numeratorColumn, nameof(numeratorColumn));
@@ -124,7 +124,7 @@ namespace Microsoft.Performance.SDK.Processing
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
             private struct PercentGenerator<TGenerator1, TGenerator2>
                 : IProjection<int, double>,
-                  IViewportSensitiveProjection
+                  IVisibleDomainSensitiveProjection
                   where TGenerator1 : IProjection<int, double>
                   where TGenerator2 : IProjection<int, double>
             {
@@ -162,14 +162,14 @@ namespace Microsoft.Performance.SDK.Processing
                     get { return typeof(double); }
                 }
 
-                // IViewportSensitiveProjection
+                // IVisibleDomainSensitiveProjection
                 public object Clone()
                 {
-                    if (this.DependsOnViewport)
+                    if (this.DependsOnVisibleDomain)
                     {
                         return new PercentGenerator<TGenerator1, TGenerator2>(
-                            ViewportSensitiveProjection.CloneIfViewportSensitive(this.generatorNumerator),
-                            ViewportSensitiveProjection.CloneIfViewportSensitive(this.generatorDenominator));
+                            VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.generatorNumerator),
+                            VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.generatorDenominator));
                     }
                     else
                     {
@@ -177,21 +177,21 @@ namespace Microsoft.Performance.SDK.Processing
                     }
                 }
 
-                public bool NotifyViewportChanged(IVisibleTableRegion viewport)
+                public bool NotifyVisibleDomainChanged(IVisibleDomainRegion visibleDomain)
                 {
                     bool result = false;
-                    result |= ViewportSensitiveProjection.NotifyViewportChanged(this.generatorDenominator, viewport);
-                    result |= ViewportSensitiveProjection.NotifyViewportChanged(this.generatorNumerator, viewport);
+                    result |= VisibleDomainSensitiveProjection.NotifyVisibleDomainChanged(this.generatorDenominator, visibleDomain);
+                    result |= VisibleDomainSensitiveProjection.NotifyVisibleDomainChanged(this.generatorNumerator, visibleDomain);
                     return result;
                 }
 
-                public bool DependsOnViewport
+                public bool DependsOnVisibleDomain
                 {
                     get
                     {
                         bool result = false;
-                        result |= ViewportSensitiveProjection.DependsOnViewport(this.generatorDenominator);
-                        result |= ViewportSensitiveProjection.DependsOnViewport(this.generatorNumerator);
+                        result |= VisibleDomainSensitiveProjection.DependsOnVisibleDomain(this.generatorDenominator);
+                        result |= VisibleDomainSensitiveProjection.DependsOnVisibleDomain(this.generatorNumerator);
                         return result;
                     }
                 }
