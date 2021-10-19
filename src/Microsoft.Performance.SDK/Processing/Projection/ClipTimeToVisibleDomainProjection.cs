@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             /// <summary>
             ///     Create a <see cref="Timestamp"/> projection that is clipped to a
-            ///     <see cref="VisibleTableRegionContainer"/>.
+            ///     <see cref="VisibleDomainRegionContainer"/>.
             ///     See also <seealso cref="IVisibleDomainSensitiveProjection"/>.
             /// </summary>
             /// <param name="timestampProjection">
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             /// <summary>
             ///     Create a <see cref="TimeRange"/> projection that is clipped to a
-            ///     <see cref="VisibleTableRegionContainer"/>.
+            ///     <see cref="VisibleDomainRegionContainer"/>.
             ///     See also <seealso cref="IVisibleDomainSensitiveProjection"/>.
             /// </summary>
             /// <param name="timeRangeProjection">
@@ -96,12 +96,12 @@ namespace Microsoft.Performance.SDK.Processing
                   where TGenerator : IProjection<int, Timestamp>
             {
                 private readonly TGenerator generator;
-                private readonly VisibleTableRegionContainer visibleDomain;
+                private readonly VisibleDomainRegionContainer visibleDomain;
 
                 public ClipTimeToVisibleTimestampDomainColumnGenerator(TGenerator timestampGenerator)
                 {
                     this.generator = timestampGenerator;
-                    this.visibleDomain = new VisibleTableRegionContainer();
+                    this.visibleDomain = new VisibleDomainRegionContainer();
                 }
 
                 // IProjection<int, Timestamp>
@@ -158,12 +158,12 @@ namespace Microsoft.Performance.SDK.Processing
             {
                 internal TGenerator Generator { get; }
 
-                internal VisibleTableRegionContainer VisibleDomainContainer { get; }
+                internal VisibleDomainRegionContainer VisibleDomainContainer { get; }
 
                 public ClipTimeToVisibleTimeRangeDomainColumnGenerator(TGenerator timestampGenerator)
                 {
                     this.Generator = timestampGenerator;
-                    this.VisibleDomainContainer = new VisibleTableRegionContainer();
+                    this.VisibleDomainContainer = new VisibleDomainRegionContainer();
                 }
 
                 // IProjection<int, Timestamp>

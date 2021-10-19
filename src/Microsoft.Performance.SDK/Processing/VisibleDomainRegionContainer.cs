@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     This class is internal as it is an implementation detail
     ///     of projections.
     /// </summary>
-    internal sealed class VisibleTableRegionContainer
+    internal sealed class VisibleDomainRegionContainer
     {
         public IVisibleDomainRegion VisibleDomainRegion { get; set; }
 

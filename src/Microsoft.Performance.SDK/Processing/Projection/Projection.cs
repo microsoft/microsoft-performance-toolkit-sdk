@@ -1832,12 +1832,12 @@ with anonymous methods for small tables.");
               where TGenerator : IProjection<int, T>
         {
             private readonly TGenerator columnToAggregate;
-            private readonly VisibleTableRegionContainer visibleDomain;
+            private readonly VisibleDomainRegionContainer visibleDomain;
 
             public AggregateRowsInVisibleDomainColumnGenerator(TGenerator columnToAggregate)
             {
                 this.columnToAggregate = columnToAggregate;
-                this.visibleDomain = new VisibleTableRegionContainer();
+                this.visibleDomain = new VisibleDomainRegionContainer();
             }
 
             public TAggregate this[int value]
