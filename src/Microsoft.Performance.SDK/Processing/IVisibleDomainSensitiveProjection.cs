@@ -38,6 +38,9 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <c>true</c> if the projection has changed due to the new visible domain,
         ///     <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="visibleDomain"/> is <c>null</c>.
+        /// </exception>
         bool NotifyVisibleDomainChanged(IVisibleDomainRegion visibleDomain);
 
         /// <summary>

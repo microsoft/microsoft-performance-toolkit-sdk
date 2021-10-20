@@ -39,6 +39,17 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     The aggregated result.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="projection"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ComponentModel.InvalidEnumArgumentException">
+        ///     <paramref name="aggregationMode"/> is <see cref="AggregationMode.None"/>
+        ///     - or -
+        ///     <paramref name="aggregationMode"/> is not a valid member
+        ///     of the <see cref="AggregationMode"/> enumeration.
+        ///     - or -
+        ///     <paramref name="aggregationMode"/> is <see cref="AggregationMode.None"/>.
+        /// </exception>
         TAggregate AggregateVisibleRows<T, TAggregate>(
             IProjection<int, T> projection,
             AggregationMode aggregationMode);
