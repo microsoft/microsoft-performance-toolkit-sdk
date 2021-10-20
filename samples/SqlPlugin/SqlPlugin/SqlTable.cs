@@ -27,7 +27,8 @@ namespace SqlPlugin
             Guid.Parse("{66B35410-42E3-4690-920B-FDB452A0DDCC}"),
             "SQL Trace Events",
             "SQL Trace recorded with SQL Server Profiler",
-            "SQL");
+            "SQL",
+            defaultLayout: TableLayoutStyle.GraphAndTable);
 
         //
         // Column definitions
@@ -163,7 +164,6 @@ namespace SqlPlugin
                     TableConfiguration.GraphColumn,
                     RelativeTimestampColumn
                 },
-                Layout = TableLayoutStyle.GraphAndTable
             };
 
             //

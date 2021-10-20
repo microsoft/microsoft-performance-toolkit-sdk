@@ -8,18 +8,18 @@ using System.Linq;
 
 namespace SqlPlugin
 {
-    [CustomDataSource("7309FAED-6A34-4FD1-8551-7AEB5006C71E",
+    [ProcessingSource("7309FAED-6A34-4FD1-8551-7AEB5006C71E",
                       "SQL Trace Data Source",
                       "Processes SQL trace files exported as XML.")]
     [FileDataSource(".xml", "XML files exported from TRC files")]
-    public class SqlCustomDataSource
-        : CustomDataSourceBase
+    public class SqlProcessingSource
+        : ProcessingSource
     {
         private IApplicationEnvironment applicationEnvironment;
 
-        public override CustomDataSourceInfo GetAboutInfo()
+        public override ProcessingSourceInfo GetAboutInfo()
         {
-            return new CustomDataSourceInfo
+            return new ProcessingSourceInfo
             {
                 CopyrightNotice = "Copyright 2021 Microsoft Corporation. All Rights Reserved.",
                 LicenseInfo = new LicenseInfo
@@ -56,7 +56,7 @@ namespace SqlPlugin
             // plugin, every data source should be used.
             //
 
-            var filePath = dataSources.First().GetUri().LocalPath;
+            var filePath = dataSources.First().Uri.LocalPath;
             return new SqlCustomDataProcessor(filePath,
                                               options,
                                               this.applicationEnvironment,
@@ -65,10 +65,16 @@ namespace SqlPlugin
                                               this.MetadataTables);
         }
 
-        protected override bool IsFileSupportedCore(string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
         {
             // Peek inside the XML and make sure our XML namespace is declared and used
 
+            if (!(dataSource is FileDataSource fds))
+            {
+                return false;
+            }
+
+            var path = fds.FullPath;
             using (var reader = new StreamReader(path))
             {
                 // Skip first line since namespace should be on second
