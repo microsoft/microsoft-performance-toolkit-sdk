@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -25,6 +25,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private readonly IDataExtensionRepository repository;
         private readonly IEnumerable<DataCookerPath> sourceCookers;
         private readonly IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap;
+        private readonly HashSet<TableDescriptor> enabledTables;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RuntimeExecutionResults"/>
@@ -39,12 +40,17 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="repository">
         ///     The repository that was used to process the data.
         /// </param>
+        /// <param name="enabledTables">
+        ///     The tables that were enabled during processing.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="cookedDataRetrieval"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="retrievalFactory"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="repository"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="enabledTables"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="errors"/> is <c>null</c>.
         /// </exception>
@@ -55,12 +61,14 @@ namespace Microsoft.Performance.Toolkit.Engine
             IDataExtensionRetrievalFactory retrievalFactory,
             IDataExtensionRepository repository,
             IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap,
+            IEnumerable<TableDescriptor> enabledTables,
             IEnumerable<ProcessingError> errors)
         {
             Guard.NotNull(cookedDataRetrieval, nameof(cookedDataRetrieval));
             Guard.NotNull(retrievalFactory, nameof(retrievalFactory));
             Guard.NotNull(repository, nameof(repository));
             Guard.NotNull(tableToProcessorMap, nameof(tableToProcessorMap));
+            Guard.NotNull(enabledTables, nameof(enabledTables));
             Guard.NotNull(errors, nameof(errors));
 
             this.cookedDataRetrieval = cookedDataRetrieval;
@@ -68,6 +76,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.repository = repository;
             this.sourceCookers = new HashSet<DataCookerPath>(this.repository.SourceDataCookers);
             this.tableToProcessorMap = tableToProcessorMap;
+            this.enabledTables = enabledTables.ToHashSet();
 
             this.ProcessingErrors = errors.OfType<ProcessingError>().ToList().AsReadOnly();
         }
@@ -282,6 +291,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             var tableBuilder = new TableBuilder();
             Exception innerException = null;
+
+            if (!this.enabledTables.Contains(tableDescriptor))
+            {
+                throw new TableNotEnabledException(tableDescriptor);
+            }
 
             try
             {

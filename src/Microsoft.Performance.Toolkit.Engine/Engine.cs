@@ -889,6 +889,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 retrievalFactory,
                 this.Extensions,
                 processorTables,
+                this.enabledTables,
                 errors);
 
             return results;
