@@ -529,8 +529,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var throwingTable in testCase.ThrowingTables)
             {
-                // TODO: Re-enable when the following issue is fixed: https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/55
-                //Assert.ThrowsException<TableNotBuiltException>(() => result.BuildTable(sut.AllTables.Single(x => x.Guid == Guid.Parse(throwingTable))));
+                Assert.ThrowsException<TableNotEnabledException>(() => result.BuildTable(sut.AvailableTables.Single(x => x.Guid == Guid.Parse(throwingTable))));
             }
         }
 
