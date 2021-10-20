@@ -15,7 +15,7 @@ namespace SampleCustomDataSource.Tables
     //
 
     //
-    // Add a Table attribute in order for the CustomDataSourceBase to understand your table.
+    // Add a Table attribute in order for the ProcessingSource to understand your table.
     // 
 
     [Table]                      
@@ -36,7 +36,8 @@ namespace SampleCustomDataSource.Tables
             Guid.Parse("{E122471E-25A6-4F7F-BE6C-E62774FD0410}"), // The GUID must be unique across all tables
             "Word Stats",                                         // The Table must have a name
             "Statistics for words",                               // The Table must have a description
-            "Words");                                             // A category is optional. It useful for grouping different types of tables in the viewer's UI.
+            "Words",                                              // A category is optional. It useful for grouping different types of tables in the viewer's UI.
+            defaultLayout: TableLayoutStyle.GraphAndTable);       // A default layout is optional.     
 
         //
         // Declare columns here. You can do this using the ColumnConfiguration class. 
@@ -119,7 +120,6 @@ namespace SampleCustomDataSource.Tables
                     TableConfiguration.GraphColumn,
                     TimeColumn,
                 },
-                Layout = TableLayoutStyle.GraphAndTable,
             };
 
             //

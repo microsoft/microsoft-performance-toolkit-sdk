@@ -15,11 +15,11 @@ using System.Threading.Tasks;
 namespace SampleCustomDataSource
 {
     //
-    // This is a sample Custom Data Processor that processes simple text files.
+    // This is a sample CustomDataProcessor that processes simple text files.
     //
-    // Custom Data Processors are created in Custom Data Sources and are used to actually process the file(s).
-    // An instance of this Processor is created for each set of files opened whereas only one instance of the Custom Data Source is ever created.
-    // Note that CustomDataProcessorBase does not require any file(s) in its constructor, so another
+    // Custom Data Processors are created in Processing Sources and are used to actually process the file(s).
+    // An instance of this CustomDataProcessor is created for each set of files opened whereas only one instance of the Processing Source is ever created.
+    // Note that ProcessingSource does not require any file(s) in its constructor, so another
     // implementation might only store/process one file per instance.
     //
     // The data processor is responsible for instantiating the proper tables based on what the user has decided to enable.
@@ -28,11 +28,11 @@ namespace SampleCustomDataSource
     //
 
     //
-    // Derive the CustomDataProcessorBase abstract class.
+    // Derive the CustomDataProcessor abstract class.
     //
 
     public sealed class SimpleCustomDataProcessor
-        : CustomDataProcessorBase
+        : CustomDataProcessor
     {
         // The files this custom data processor will have to process
         private readonly string[] filePaths;

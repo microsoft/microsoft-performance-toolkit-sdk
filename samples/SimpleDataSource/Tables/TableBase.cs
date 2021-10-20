@@ -16,7 +16,7 @@ namespace SampleCustomDataSource.Tables
     //
     // The SDK does not have an explicit table interface so as to give you flexibility in how you implement your tables.
     // All that matters is that you have some way of getting the data out of the data files and into the ITableBuilder passed into
-    // the BuildTable method on your CustomDataProcessor.
+    // the BuildTable method on your ProcessingSource.
     //
 
     public abstract class TableBase
