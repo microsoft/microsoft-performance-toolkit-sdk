@@ -12,7 +12,7 @@ using System.Threading;
 namespace SqlPluginWithProcessingPipeline
 {
     public class SqlDataCooker
-        : BaseSourceDataCooker<SqlEvent, SqlSourceParser, string>
+        : SourceDataCooker<SqlEvent, SqlSourceParser, string>
     {
         // Backing field for this cooker's DataOutput
         private readonly List<SqlEventWithRelativeTimestamp> sqlEventsWithRelativeTimestamps;

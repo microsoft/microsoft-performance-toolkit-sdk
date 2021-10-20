@@ -8,18 +8,18 @@ using System.Linq;
 
 namespace SqlPluginWithProcessingPipeline
 {
-    [CustomDataSource("D075CBD0-EAB5-41CD-81FF-66FF590D5089",
+    [ProcessingSource("D075CBD0-EAB5-41CD-81FF-66FF590D5089",
                       "SQL Trace Data Source With Data Cookers",
                       "Processes SQL trace files exported as XML.")]
     [FileDataSource(".xml", "XML files exported from TRC files")]
-    public class SqlCustomDataSourceWithSourceParser
-        : CustomDataSourceBase
+    public class SqlProcessingSourceWithSourceParser
+        : ProcessingSource
     {
         private IApplicationEnvironment applicationEnvironment;
 
-        public override CustomDataSourceInfo GetAboutInfo()
+        public override ProcessingSourceInfo GetAboutInfo()
         {
-            return new CustomDataSourceInfo
+            return new ProcessingSourceInfo
             {
                 CopyrightNotice = "Copyright 2021 Microsoft Corporation. All Rights Reserved.",
                 LicenseInfo = new LicenseInfo
@@ -56,7 +56,7 @@ namespace SqlPluginWithProcessingPipeline
             // plugin, every data source should be used.
             //
 
-            var filePath = dataSources.First().GetUri().LocalPath;
+            var filePath = dataSources.First().Uri.LocalPath;
             var parser = new SqlSourceParser(filePath);
             return new SqlCustomDataProcessorWithSourceParser(parser,
                                                               options,
@@ -66,10 +66,16 @@ namespace SqlPluginWithProcessingPipeline
                                                               this.MetadataTables);
         }
 
-        protected override bool IsFileSupportedCore(string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
         {
             // Peek inside the XML and make sure our XML namespace is declared and used
 
+            if (!(dataSource is FileDataSource fds))
+            {
+                return false;
+            }
+
+            var path = fds.FullPath;
             using (var reader = new StreamReader(path))
             {
                 // Skip first line since namespace should be on second

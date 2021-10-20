@@ -16,6 +16,7 @@ namespace SqlPluginWithProcessingPipeline
             "SQL Trace Events from Data Cooker",
             "SQL Trace recorded with SQL Server Profiler",
             "SQL",
+            defaultLayout: TableLayoutStyle.GraphAndTable,
             // New: hook up table to our data cooker
             requiredDataCookers: new List<DataCookerPath> { SqlPluginConstants.CookerPath });
 
@@ -65,7 +66,6 @@ namespace SqlPluginWithProcessingPipeline
                     TableConfiguration.RightFreezeColumn,
                     RelativeTimestampColumn
                 },
-                Layout = TableLayoutStyle.GraphAndTable
             };
 
             tableConfig.AddColumnRole(ColumnRole.StartTime, RelativeTimestampColumn.Metadata.Guid);

@@ -16,7 +16,7 @@ namespace SqlPluginWithProcessingPipeline
     ///     gets built.
     /// </summary>
     public class SqlCustomDataProcessorWithSourceParser
-        : CustomDataProcessorBaseWithSourceParser<SqlEvent, SqlSourceParser, string>
+        : CustomDataProcessorWithSourceParser<SqlEvent, SqlSourceParser, string>
     {
         internal SqlCustomDataProcessorWithSourceParser(
             ISourceParser<SqlEvent, SqlSourceParser, string> sourceParser,
