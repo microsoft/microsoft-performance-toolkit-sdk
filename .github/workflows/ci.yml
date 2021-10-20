@@ -24,10 +24,9 @@ jobs:
       with:
         toolVersion: 3.3.37
     - name: Restore dependencies
-      run: dotnet restore "${{ github.workspace }}/src/SDK.sln"
+      run: dotnet restore "${{ github.workspace }}/SDK.sln"
     - name: Build solution
-      run: dotnet build "${{ github.workspace }}/src/SDK.sln" --no-restore -c Release
+      run: dotnet build "${{ github.workspace }}/SDK.sln" --no-restore -c Release
     - name: Run tests
-      run: dotnet test "${{ github.workspace }}/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
-    - name: Build samples
-      run: ls "${{ github.workspace }}/samples/**/*.sln" | % { dotnet build $_.FullName -c Release }
+      run: dotnet test "${{ github.workspace }}/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
+
