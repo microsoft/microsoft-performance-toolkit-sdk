@@ -722,4 +722,39 @@ namespace Microsoft.Performance.Toolkit.Engine
             info.AddValue(nameof(this.CookerPath.DataCookerType), (int)this.CookerPath.DataCookerType);
         }
     }
+
+    /// <summary>
+    ///     Represents errors that occur when attempting to build a table that was not enabled.
+    /// </summary>
+    public class TableNotEnabledException
+        : TableException
+    {
+        /// <inheritdoc />
+        public TableNotEnabledException() : base() { }
+
+        /// <inheritdoc />
+        public TableNotEnabledException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public TableNotEnabledException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableNotEnabledException"/>
+        ///     class for the given table.
+        /// </summary>
+        /// <param name="descriptor">
+        ///     The descriptor of the table that was requested to be built, but was not
+        ///     enabled for processing.
+        /// </param>
+        public TableNotEnabledException(TableDescriptor descriptor)
+            : base("The given table is not enabled.", descriptor)
+        {
+        }
+
+        /// <inheritdoc />
+        protected TableNotEnabledException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
 }
