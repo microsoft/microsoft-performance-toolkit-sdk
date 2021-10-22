@@ -15,7 +15,11 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <summary>
         ///     If the data cooker is not a source data cooker, this is the source parser Id.
         /// </summary>
-        internal const string EmptySourceParserId = "";
+        /// <remarks>
+        ///    This must match 
+        ///    Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers.DataCookerPathInternal.EmptySourceParserId.
+        /// </remarks>
+        private const string EmptySourceParserId = "";
 
         /// <summary>
         ///     Creates a new <see cref="DataCookerType.CompositeDataCooker"/> path.
