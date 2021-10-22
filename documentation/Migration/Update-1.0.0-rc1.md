@@ -169,6 +169,13 @@ already called out in this document, this includes
 - References to CustomDataSource, previously renamed to ProcessingSource
 - A constructor for `DataSourceInfo` that does not supply a wall clock value.
 
+## CustomDataProcessorBase
+
+This class has been renamed to `CustomDataProcessor`.
+
+Obsolete virtual method `ProcessAsync` has been removed and method `ProcessAsyncCore` has been made abstract.
+Please move any code from`ProcessAsync` to `ProcessAsyncCore`.
+
 # Suggested Changes
 
 None at this time.
