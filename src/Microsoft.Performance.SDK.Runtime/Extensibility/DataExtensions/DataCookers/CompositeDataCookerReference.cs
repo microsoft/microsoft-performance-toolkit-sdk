@@ -217,7 +217,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             this.ThrowIfDisposed();
             base.ValidateInstance(instance);
 
-            if (!StringComparer.Ordinal.Equals(instance.Path.SourceParserId, DataCookerPath.EmptySourceParserId))
+            if (!StringComparer.Ordinal.Equals(
+                instance.Path.SourceParserId,
+                DataCookerPathInternal.EmptySourceParserId))
             {
                 this.AddError($"Unable to create an instance of {this.Type}");
                 this.InitialAvailability = DataExtensionAvailability.Error;

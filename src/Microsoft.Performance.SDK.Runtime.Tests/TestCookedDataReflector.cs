@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public static readonly string CookerId = "TestDataReflector";
 
         public static readonly DataCookerPath DefaultCookerPath
-            = new DataCookerPath(ParserId, CookerId);
+            = DataCookerPath.ForSource(ParserId, CookerId);
 
         public TestCookedDataReflector(DataCookerPath cookerPath)
             : base(cookerPath)
