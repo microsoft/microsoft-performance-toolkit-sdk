@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.SDK.Runtime.DTO.Enums
+namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
 {
     internal enum TableLayoutStyle
     {

@@ -79,8 +79,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             this.columnsRO = new ReadOnlyCollection<ColumnConfiguration>(EmptyArray<ColumnConfiguration>.Instance);
             this.columnRoles = new Dictionary<ColumnRole, Guid>();
-
-            this.Layout = TableDescriptor.DefaultLayoutStyle;
+            
             this.ColumnRoles = new ReadOnlyDictionary<ColumnRole, Guid>(this.columnRoles);
 
             this.highlightEntriesRO = new ReadOnlyCollection<HighlightEntry>(EmptyArray<HighlightEntry>.Instance);
@@ -90,12 +89,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets or sets the name of this configuration.
         /// </summary>
         public string Name { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the layout style for the table.
-        /// </summary>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. TableLayoutStyles should only be set on TableDescriptors.")]
-        public TableLayoutStyle Layout { get; set; }
 
         /// <summary>
         ///     Gets or sets the type of chart displayed for this table.
