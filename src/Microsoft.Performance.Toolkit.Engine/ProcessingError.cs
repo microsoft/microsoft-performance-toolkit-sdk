@@ -42,6 +42,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     - or -
         ///     <paramref name="processFault"/> is <c>null</c>.
         /// </exception>
+        /// <exception cref="System.ArgumentException">
+        ///     <paramref name="processingSourceGuid"/> is equivalent to the default Guid
+        ///     (<see cref="Guid.Empty"/>).
+        /// </exception>
         public ProcessingError(
             Guid processingSourceGuid,
             ICustomDataProcessor processor,
@@ -51,6 +55,11 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(processor, nameof(processor));
             Guard.NotNull(dataSources, nameof(dataSources));
             Guard.NotNull(processFault, nameof(processFault));
+
+            if (processingSourceGuid == default(Guid))
+            {
+                throw new ArgumentException($"The default GUID `{default(Guid)}` is not allowed.", nameof(processingSourceGuid));
+            }
 
             this.Processor = processor;
             this.DataSources = dataSources.OfType<IDataSource>().ToList().AsReadOnly();

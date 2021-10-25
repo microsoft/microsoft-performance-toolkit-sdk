@@ -1,1 +1,6 @@
-﻿
+﻿This is a placeholder file for the Interactive ProcessingSource for testing
+user interaction. The file itself has no data; it is used so that we can tell
+the Engine that there is something for the InteractiveProcessingSource to do.
+
+Please see the tests in the ToolkitEngineTests class around interaction, and 
+the interactive command in the Toolkit.Engine.Tests.Driver CLI application.

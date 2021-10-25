@@ -70,62 +70,31 @@ namespace Microsoft.Performance.SDK.Runtime
             this.SourceSessionFactory = sourceSessionFactory;
         }
 
-        /// <summary>
-        ///     Gets the name of the application.
-        /// </summary>
+        /// <inheritdoc />
         public string ApplicationName { get; }
 
-        /// <summary>
-        ///     Gets the name of the runtime on which the application is built, if any.
-        /// </summary>
+        /// <inheritdoc />
         public string RuntimeName { get; }
 
-        /// <summary>
-        ///     Gets a value that indicates whether the process is running in a graphical user environment.
-        /// </summary>
+        /// <inheritdoc />
         public bool IsInteractive { get; set; }
 
-        /// <summary>
-        ///     Gets an object to serialize/deserialize data (e.g. table configurations).
-        /// </summary>
+        /// <inheritdoc />
         public ISerializer Serializer { get; }
 
-        /// <summary>
-        ///     Gets an object used to synchronize table data changes with the user interface.
-        /// </summary>
+        /// <inheritdoc />
         public ITableDataSynchronization TableDataSynchronizer { get; }
 
-        /// <summary>
-        ///     Gets a value that indicates if verbose output is enabled.
-        /// </summary>
+        /// <inheritdoc />
         public bool VerboseOutput { get; set; }
 
-        /// <summary>
-        ///     Gets an object that is used to retrieve an <see cref="ISourceDataCookerFactory"/>.
-        /// </summary>
+        /// <inheritdoc />
         public ISourceDataCookerFactoryRetrieval SourceDataCookerFactoryRetrieval { get; }
 
-        /// <summary>
-        ///     Gets an object that is used to create an <see cref="ISourceProcessingSession{T, TKey, TContext}"/>
-        ///     for a data processor.
-        /// </summary>
+        /// <inheritdoc />
         public ISourceSessionFactory SourceSessionFactory { get; }
 
-        /// <summary>
-        ///     Displays a message using an <see cref="IMessageBox"/>.
-        /// </summary>
-        /// <param name="messageType">
-        ///     The type of message to display.
-        /// </param>
-        /// <param name="formatProvider">
-        ///     Provides a mechanism for retrieving an object to control message formatting.
-        /// </param>
-        /// <param name="format">
-        ///     A composite format string.
-        /// </param>
-        /// <param name="args">
-        ///     An object array that contains zero or more objects to format.
-        /// </param>
+        /// <inheritdoc />
         public void DisplayMessage(
             MessageType messageType,
             IFormatProvider formatProvider,
@@ -139,27 +108,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 args);
         }
 
-        /// <summary>
-        ///     Displays a message using an <see cref="IMessageBox"/>.
-        /// </summary>
-        /// <param name="messageType">
-        ///     The type of message to display.
-        /// </param>
-        /// <param name="formatProvider">
-        ///     Provides a mechanism for retrieving an object to control message formatting.
-        /// </param>
-        /// <param name="buttons">
-        ///     A value that specifies which button or buttons to display.
-        /// </param>
-        /// <param name="caption">
-        ///     A <c>string</c> that specifies the title bar caption to display.
-        /// </param>
-        /// <param name="format">
-        ///     A composite format string.
-        /// </param>
-        /// <param name="args">
-        ///     An object array that contains zero or more objects to format.
-        /// </param>
+        /// <inheritdoc />
         public ButtonResult MessageBox(
              MessageType messageType,
              IFormatProvider formatProvider,
