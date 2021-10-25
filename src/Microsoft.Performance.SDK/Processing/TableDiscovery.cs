@@ -64,8 +64,8 @@ namespace Microsoft.Performance.SDK.Processing
         ///     discover tables in the given namespace in the <see cref="Assembly"/>
         ///     containing the specified <see cref="IProcessingSource"/>.
         /// </summary>
-        /// <param name="namespace">
-        ///     The namespace to search for tables. This parameter may be empty to
+        /// <param name="tableNamespace">
+        ///     The namespace to search for tables. This parameter may be <c>null</c> to
         ///     specify the global namespace.
         /// </param>
         /// <param name="processingSource">
@@ -74,28 +74,25 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <returns>
         ///     A new <see cref="ITableProvider"/> that discovers tables in the
-        ///     specified <paramref name="namespace"/> in the <see cref="Assembly"/>
+        ///     specified <paramref name="tableNamespace"/> in the <see cref="Assembly"/>
         ///     containing <paramref name="processingSource"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="namespace"/> is <c>null</c>.
-        ///     - or -
         ///     <paramref name="processingSource"/> is <c>null</c>.
         /// </exception>
-        public static ITableProvider CreateForNamespace(string @namespace, IProcessingSource processingSource)
+        public static ITableProvider CreateForNamespace(string tableNamespace, IProcessingSource processingSource)
         {
-            Guard.NotNull(@namespace, nameof(@namespace));
             Guard.NotNull(processingSource, nameof(processingSource));
 
-            return CreateForNamespace(@namespace, processingSource.GetType().Assembly);
+            return CreateForNamespace(tableNamespace, processingSource.GetType().Assembly);
         }
 
         /// <summary>
         ///     Creates a new <see cref="ITableProvider"/> instance that will
         ///     discover tables in the given namespace in the given assembly.
         /// </summary>
-        /// <param name="namespace">
-        ///     The namespace to search for tables. This parameter may be empty to
+        /// <param name="tableNamespace">
+        ///     The namespace to search for tables. This parameter may be <c>null</c> to
         ///     specify the global namespace.
         /// </param>
         /// <param name="assembly">
@@ -103,27 +100,25 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <returns>
         ///     A new <see cref="ITableProvider"/> that discovers tables in the
-        ///     specified <paramref name="namespace"/> in the specified <paramref name="assembly"/>.
+        ///     specified <paramref name="tableNamespace"/> in the specified <paramref name="assembly"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="namespace"/> is <c>null</c>.
-        ///     - or -
         ///     <paramref name="assembly"/> is <c>null</c>.
         /// </exception>
-        public static ITableProvider CreateForNamespace(string @namespace, Assembly assembly)
+        public static ITableProvider CreateForNamespace(string tableNamespace, Assembly assembly)
         {
-            Guard.NotNull(@namespace, nameof(@namespace));
             Guard.NotNull(assembly, nameof(assembly));
 
-            return CreateForNamespace(@namespace, new[] { assembly, });
+            return CreateForNamespace(tableNamespace, new[] { assembly, });
         }
 
         /// <summary>
         ///     Creates a new <see cref="ITableProvider"/> instance that will
         ///     discover tables in the given namespace in the given assemblies.
         /// </summary>
-        /// <param name="namespace">
-        ///     The namespace to search for tables.
+        /// <param name="tableNamespace">
+        ///     The namespace to search for tables. This parameter may be <c>null</c> to
+        ///     specify the global namespace.
         /// </param>
         /// <param name="assemblies">
         ///     The <see cref="Assembly"/> instances to search for tables. Any null elements in
@@ -131,19 +126,16 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <returns>
         ///     A new <see cref="ITableProvider"/> that discovers tables in the
-        ///     specified <paramref name="namespace"/> in the specified <paramref name="assembly"/>.
+        ///     specified <paramref name="tableNamespace"/> in the specified <paramref name="assembly"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="namespace"/> is <c>null</c>.
-        ///     - or -
         ///     <paramref name="assemblies"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="System.ArgumentException">
         ///     <paramref name="assemblies"/> has no non-null elements.
         /// </exception>
-        public static ITableProvider CreateForNamespace(string @namespace, Assembly[] assemblies)
+        public static ITableProvider CreateForNamespace(string tableNamespace, Assembly[] assemblies)
         {
-            Guard.NotNull(@namespace, nameof(@namespace));
             Guard.NotNull(assemblies, nameof(assemblies));
 
             var set = new HashSet<Assembly>(assemblies.Where(x => !(x is null)));
@@ -154,7 +146,7 @@ namespace Microsoft.Performance.SDK.Processing
                     nameof(assemblies));
             }
 
-            return new NamespaceTableDiscoverer(@namespace, set);
+            return new NamespaceTableDiscoverer(tableNamespace, set);
         }
 
         private static IEnumerable<DiscoveredTable> DoAssemblyDiscovery(
@@ -199,17 +191,16 @@ namespace Microsoft.Performance.SDK.Processing
         private sealed class NamespaceTableDiscoverer
             : ITableProvider
         {
-            private readonly string @namespace;
+            private readonly string tableNamespace;
             private readonly HashSet<Assembly> assemblies;
 
-            internal NamespaceTableDiscoverer(string @namespace, HashSet<Assembly> assemblies)
+            internal NamespaceTableDiscoverer(string tableNamespace, HashSet<Assembly> assemblies)
             {
-                Debug.Assert(@namespace != null);
                 Debug.Assert(assemblies != null);
                 Debug.Assert(assemblies.Count > 0);
                 Debug.Assert(assemblies.All(x => x != null));
 
-                this.@namespace = @namespace;
+                this.tableNamespace = tableNamespace;
                 this.assemblies = assemblies;
             }
 
@@ -217,7 +208,7 @@ namespace Microsoft.Performance.SDK.Processing
             {
                 return DoAssemblyDiscovery(
                     this.assemblies,
-                    x => StringComparer.Ordinal.Equals(this.@namespace, x.Namespace),
+                    x => StringComparer.Ordinal.Equals(this.tableNamespace, x.Namespace),
                     tableConfigSerializer);
             }
         }
