@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Processing
     {
         /// <summary>
         ///     Creates a new <see cref="ITableProvider"/> instance that will
-        ///     discover tables in the given <see cref="Assembly"/> containing the
+        ///     discover tables in the <see cref="Assembly"/> containing the
         ///     given <see cref="IProcessingSource"/>. Tables are discovered in the
         ///     assembly by being a type decorated with the <see cref="TableAttribute"/>
         ///     attribute.
@@ -120,7 +120,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     Creates a new <see cref="ITableProvider"/> instance that will
-        ///     discover tables in the given namespace in the given assembly.
+        ///     discover tables in the given namespace in the given assemblies.
         /// </summary>
         /// <param name="namespace">
         ///     The namespace to search for tables.
@@ -146,16 +146,7 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(@namespace, nameof(@namespace));
             Guard.NotNull(assemblies, nameof(assemblies));
 
-            var set = new HashSet<Assembly>();
-
-            for (var i = 0; i < assemblies.Length; ++i)
-            {
-                if (assemblies[i] != null)
-                {
-                    set.Add(assemblies[i]);
-                }
-            }
-
+            var set = new HashSet<Assembly>(assemblies.Where(x => !(x is null)));
             if (set.Count == 0)
             {
                 throw new ArgumentException(
