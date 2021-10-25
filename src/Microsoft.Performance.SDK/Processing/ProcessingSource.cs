@@ -320,7 +320,7 @@ namespace Microsoft.Performance.SDK.Processing
                     this.metadataTables.Add(table.Descriptor);
                 }
 
-                this.allTables[table.Descriptor] = table.BuildTable;
+                this.allTables[table.Descriptor] = table.BuildTable ?? GetTableBuildAction(table.Descriptor.Type);
             }
         }
     }
