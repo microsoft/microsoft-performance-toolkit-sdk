@@ -10,9 +10,10 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
-## Data Processors
+## Data Processors (NOT CustomDataProcessors)
 
-Data Processors have been removed.
+`DataProcessor`s have been removed. Note that these are not the same as
+`CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
 
 ## Renamed Classes
 The following references must be changed:
