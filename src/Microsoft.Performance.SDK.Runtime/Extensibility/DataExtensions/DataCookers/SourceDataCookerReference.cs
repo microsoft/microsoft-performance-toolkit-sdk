@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     ///     This class provides a way to create an instance of a particular data extension.
     /// </summary>
     internal sealed class SourceDataCookerReference
-        : BaseDataCookerReference<SourceDataCookerReference>,
+        : DataCookerReference<SourceDataCookerReference>,
           ISourceDataCookerReference
     {
         private List<IDataCookerDescriptor> instances = new List<IDataCookerDescriptor>();
@@ -263,17 +263,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                     }
                 }
             }
-            else if (requiredDataExtension is IDataProcessorReference dataProcessorReference)
-            {
-                dependencyStateSupport.AddError(
-                    new ErrorInfo(
-                        ErrorCodes.EXTENSION_DisallowedDataProcessorDependency,
-                        ErrorCodes.EXTENSION_DisallowedDataProcessorDependency.Description)
-                    {
-                        Target = dataProcessorReference.Id,
-                    });
-                dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
-            }
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////else if (requiredDataExtension is IDataProcessorReference dataProcessorReference)
+            ////{
+            ////    dependencyStateSupport.AddError(
+            ////        new ErrorInfo(
+            ////            ErrorCodes.EXTENSION_DisallowedDataProcessorDependency,
+            ////            ErrorCodes.EXTENSION_DisallowedDataProcessorDependency.Description)
+            ////        {
+            ////            Target = dataProcessorReference.Id,
+            ////        });
+            ////    dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
+            ////}
             else
             {
                 dependencyStateSupport.AddError(

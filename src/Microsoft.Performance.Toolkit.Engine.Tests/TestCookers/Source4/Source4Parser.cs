@@ -13,7 +13,7 @@ using Microsoft.Performance.SDK.Runtime;
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
 {
     public sealed class Source4Parser
-        : SourceParserBase<Source4DataObject, EngineTestContext, int>
+        : SourceParser<Source4DataObject, EngineTestContext, int>
     {
         private readonly List<string> filePaths;
 

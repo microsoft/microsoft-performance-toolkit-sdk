@@ -32,58 +32,6 @@ protected override bool IsFileSupportedCore(string path)
  ````
  If you are implementing `ICustomDataSource` (now named `IProcessingSource` - see below) directly then you will change you `IsFileSupported(string)` method to `IsDataSourceSupported(IDataSource)` and update the logic similar to above.
 
- ## Engine
-
-The following are required if you are using the `Engine`:
-
-- Try-catch blocks that were expecting `UnsupportedDataSourceException`s to signal an invalid `CustomDataSource`, (now named `ProcessingSource` - see below) in any of the `Add*` methods should be updated to catch `UnsupportedProcessingSourceException`:
-````cs
-try
-{
-    engine.AddFile("test", typeof(BadProcessingSource))
-}
-catch (UnsupportedDataSourceException)
-{
-    // ...
-}
-````
-becomes
-````cs
-try
-{
-    engine.AddFile("test", typeof(BadProcessingSource))
-}
-catch (UnsupportedProcessingSourceException)
-{
-    // ...
-}
-````
-
-Note that `UnsupportedProcessingSourceException` was named `UnsupportedCustomDataSourceException` in a previous preview of v0.109.0.
-
-- Try-catch blocks that were expecting `UnsupportedFileException`s to signal an invalid file in any of the `Add*` methods should be updated to catch `UnsupportedDataSourceExcepton`:
-````cs
-try
-{
-    engine.AddFile("test.nope")
-}
-catch (UnsupportedFileException)
-{
-    // ...
-}
-````
-becomes
-````cs
-try
-{
-    engine.AddFile("test.nope")
-}
-catch (UnsupportedDataSourceException)
-{
-    // ...
-}
-````
-
 ## IDataSource
 
 `IDataSource.GetUri()` has been changed to a read-only property: `IDataSource.Uri`.

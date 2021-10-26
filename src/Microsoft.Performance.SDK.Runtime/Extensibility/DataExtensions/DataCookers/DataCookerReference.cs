@@ -4,7 +4,6 @@
 using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Extensibility.DataProcessing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 {
@@ -15,9 +14,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     /// <typeparam name="TDerived">
     ///     The class deriving from this type.
     /// </typeparam>
-    internal abstract class BaseDataCookerReference<TDerived>
+    internal abstract class DataCookerReference<TDerived>
         : DataExtensionReference<TDerived>
-          where TDerived : BaseDataCookerReference<TDerived>
+          where TDerived : DataCookerReference<TDerived>
     {
         private DataCookerPath path;
         private string description;
@@ -26,21 +25,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         private bool isDisposed;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="BaseDataCookerReference{TDerived}"/>
+        ///     Initializes a new instance of the <see cref="DataCookerReference{TDerived}"/>
         ///     class for the given <see cref="Type"/>.
         /// </summary>
         /// <param name="type">
         ///     The <see cref="Type"/> of cooker referenced by this instance.
         ///     It is expected that <see cref="Type"/>is a calid cooker <see cref="Type"/>.
         /// </param>
-        protected BaseDataCookerReference(Type type)
+        protected DataCookerReference(Type type)
             : base(type)
         {
             this.isDisposed = false;
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="BaseDataCookerReference{TDerived}"/>
+        ///     Initializes a new instance of the <see cref="DataCookerReference{TDerived}"/>
         ///     class as a copy of the given reference.
         /// </summary>
         /// <param name="other">
@@ -49,7 +48,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
-        protected BaseDataCookerReference(DataExtensionReference<TDerived> other)
+        protected DataCookerReference(DataExtensionReference<TDerived> other)
             : base(other)
         {
         }
@@ -212,13 +211,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 }
             }
 
-            if (descriptor is IDataProcessorDependent processorRequirements)
-            {
-                foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
-                {
-                    this.AddRequiredDataProcessor(dataProcessorId);
-                }
-            }
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////if (descriptor is IDataProcessorDependent processorRequirements)
+            ////{
+            ////    foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
+            ////    {
+            ////        this.AddRequiredDataProcessor(dataProcessorId);
+            ////    }
+            ////}
         }
 
         /// <inheritdoc />

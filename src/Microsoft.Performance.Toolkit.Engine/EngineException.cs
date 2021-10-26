@@ -628,4 +628,133 @@ namespace Microsoft.Performance.Toolkit.Engine
             base.GetObjectData(info, context);
         }
     }
+
+    /// <summary>
+    ///     Represents the error that occurs when an attempt is made to enable a
+    ///     source cooker on the engine when the data sources do not provide the
+    ///     data required for said cooker.
+    ///     <para />
+    ///     An example of this condition would be when you attempt to add a cooker
+    ///     that cooks events from an ETL file (Event Tracing for Windows trace file),
+    ///     but no ETL files are present in the set of files to process.
+    /// </summary>
+    [Serializable]
+    public class NoDataSourceException
+        : EngineException
+    {
+        /// <inheritdoc />
+        public NoDataSourceException() : base() { }
+
+        /// <inheritdoc />
+        public NoDataSourceException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public NoDataSourceException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="NoDataSourceException"/>
+        ///     class with the specified <see cref="DataCookerPath"/>.
+        /// </summary>
+        /// <param name="cookerPath">
+        ///     The path to the cooker which will not be able to participate in data
+        ///     processing due to there being inadequate data in the data source set.
+        /// </param>
+        public NoDataSourceException(DataCookerPath cookerPath)
+            : this(cookerPath, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="NoDataSourceException"/>
+        ///     class with the specified <see cref="DataCookerPath"/> and the error
+        ///     that is the cause of this error, if any.
+        /// </summary>
+        /// <param name="cookerPath">
+        ///     The path to the cooker which will not be able to participate in data
+        ///     processing due to there being inadequate data in the data source set.
+        /// </param>
+        /// <param name="inner">
+        ///     The error that is the cause of this error.
+        /// </param>
+        public NoDataSourceException(DataCookerPath cookerPath, Exception inner)
+            : base("No data sources produce input for the specified cooker.", inner)
+        {
+            this.CookerPath = cookerPath;
+        }
+
+        /// <inheritdoc />
+        protected NoDataSourceException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+            var type = (DataCookerType)info.GetInt32(nameof(this.CookerPath.DataCookerType));
+            var dataCookerId = info.GetString(nameof(this.CookerPath.DataCookerId));
+            switch (type)
+            {
+                case DataCookerType.CompositeDataCooker:
+                    this.CookerPath = DataCookerPath.ForComposite(dataCookerId);
+                    break;
+
+                case DataCookerType.SourceDataCooker:
+                    {
+                        var sourceParserId = info.GetString(nameof(this.CookerPath.SourceParserId));
+                        this.CookerPath = DataCookerPath.ForSource(sourceParserId, dataCookerId);
+                    }
+
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the path to the cooker that will not have any input.
+        /// </summary>
+        public DataCookerPath CookerPath { get; }
+
+        /// <inheritdoc />
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            base.GetObjectData(info, context);
+
+            info.AddValue(nameof(this.CookerPath.SourceParserId), this.CookerPath.SourceParserId);
+            info.AddValue(nameof(this.CookerPath.DataCookerId), this.CookerPath.DataCookerId);
+            info.AddValue(nameof(this.CookerPath.DataCookerType), (int)this.CookerPath.DataCookerType);
+        }
+    }
+
+    /// <summary>
+    ///     Represents errors that occur when attempting to build a table that was not enabled.
+    /// </summary>
+    public class TableNotEnabledException
+        : TableException
+    {
+        /// <inheritdoc />
+        public TableNotEnabledException() : base() { }
+
+        /// <inheritdoc />
+        public TableNotEnabledException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public TableNotEnabledException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableNotEnabledException"/>
+        ///     class for the given table.
+        /// </summary>
+        /// <param name="descriptor">
+        ///     The descriptor of the table that was requested to be built, but was not
+        ///     enabled for processing.
+        /// </param>
+        public TableNotEnabledException(TableDescriptor descriptor)
+            : base("The given table is not enabled.", descriptor)
+        {
+        }
+
+        /// <inheritdoc />
+        protected TableNotEnabledException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
+    }
 }
