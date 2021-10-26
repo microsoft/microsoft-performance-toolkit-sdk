@@ -34,12 +34,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             this.Sut.Dispose();
 
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.CompositeDataCookers);
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.DataProcessors);
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.DataProcessors);
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.SourceDataCookers);
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TablesById);
 
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetCompositeDataCookerReference(new DataCookerPath()));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetDataProcessorReference(new DataProcessorId()));
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetDataProcessorReference(new DataProcessorId()));
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetSourceDataCookerFactory(new DataCookerPath()));
             Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetSourceDataCookerReference(new DataCookerPath()));
         }
@@ -71,12 +75,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 new TestCompositeDataCookerReference(),
             };
 
-            var processors = new[]
-            {
-                new TestDataProcessorReference(),
-                new TestDataProcessorReference(),
-                new TestDataProcessorReference(),
-            };
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////var processors = new[]
+            ////{
+            ////    new TestDataProcessorReference(),
+            ////    new TestDataProcessorReference(),
+            ////    new TestDataProcessorReference(),
+            ////};
 
             var tables = new[]
             {
@@ -87,7 +93,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             sources.ForEach(x => this.Sut.AddSourceDataCookerReference(x));
             composites.ForEach(x => this.Sut.AddCompositeDataCookerReference(x));
-            processors.ForEach(x => this.Sut.AddDataProcessorReference(x));
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////processors.ForEach(x => this.Sut.AddDataProcessorReference(x));
             tables.ForEach(x => this.Sut.AddTableExtensionReference(x));
 
             this.Sut.Dispose();
@@ -102,10 +110,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 Assert.AreEqual(1, composite.DisposeCalls);
             }
 
-            foreach (var processor in processors)
-            {
-                Assert.AreEqual(1, processor.DisposeCalls);
-            }
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////foreach (var processor in processors)
+            ////{
+            ////    Assert.AreEqual(1, processor.DisposeCalls);
+            ////}
 
             foreach (var table in tables)
             {

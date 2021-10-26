@@ -27,6 +27,11 @@ Two helper methods have been added for use:
 `TableDiscovery.CreateForAssembly` and `TableDiscovery.CreateForNamespace.` Users
 may also provide their own implementations.
 
+## Data Processors (NOT CustomDataProcessors)
+
+`DataProcessor`s have been removed. Note that these are not the same as
+`CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
+
 ## Renamed Classes
 The following references must be changed:
 - `BaseSourceDataCooker` -> `SourceDataCooker`
@@ -135,4 +140,3 @@ A new parameter has been added to the constructor.
 # Suggested Changes
 
 None at this time.
-

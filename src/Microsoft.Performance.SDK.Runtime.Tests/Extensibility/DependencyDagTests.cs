@@ -44,7 +44,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var sourceCooker1 = new TestSourceDataCookerReference();
             var sourceCooker2 = new TestSourceDataCookerReference();
-            var dataProcessor = new TestDataProcessorReference();
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////var dataProcessor = new TestDataProcessorReference();
             var table = new TestTableExtensionReference();
 
             var cds1 = new ProcessingSourceReference(
@@ -55,7 +57,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var repo = new DataExtensionRepository();
             repo.TryAddReference(sourceCooker1);
             repo.TryAddReference(sourceCooker2);
-            repo.AddDataProcessorReference(dataProcessor);
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////repo.AddDataProcessorReference(dataProcessor);
             repo.AddTableExtensionReference(table);
             repo.FinalizeDataExtensions();
 
@@ -67,7 +71,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 DependencyDag.Reference.Create(sourceCooker1),
                 DependencyDag.Reference.Create(sourceCooker2),
-                DependencyDag.Reference.Create(dataProcessor),
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                ////DependencyDag.Reference.Create(dataProcessor),
                 DependencyDag.Reference.Create(table),
                 DependencyDag.Reference.Create(cds1),
             };
