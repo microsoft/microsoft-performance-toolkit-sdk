@@ -30,50 +30,6 @@ namespace Microsoft.Performance.SDK.Processing
         public const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
 
         /// <summary>
-        ///     Constructor is defunct.
-        /// </summary>
-        /// <param name="guid">
-        ///     The unique identifier for this table. This MAY NOT be
-        ///     the default (empty) <see cref="Guid"/>.
-        /// </param>
-        /// <param name="name">
-        ///     The name of this table.
-        /// </param>
-        /// <param name="description">
-        ///     A user friendly description of this table.
-        /// </param>
-        /// <param name="category">
-        ///     The category into which this table belongs. This parameter
-        ///     may be null, at which point the table is assumed to be in
-        ///     the <see cref="TableDescriptor.DefaultCategory"/> category.
-        /// </param>
-        /// <exception cref="System.ArgumentException">
-        ///     <paramref name="guid"/> is whitespace.
-        ///     - or -
-        ///     <paramref name="guid"/> parsed to a value
-        ///     equal to <c>default(Guid)</c>.
-        ///     - or -
-        ///     <paramref name="name"/> is whitespace.
-        ///     - or -
-        ///     <paramref name="description"/> is whitespace.
-        /// </exception>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="guid"/> is <c>null</c>.
-        ///     - or -
-        ///     <paramref name="name"/> is <c>null</c>.
-        ///     - or -
-        ///     <paramref name="description"/> is <c>null</c>.
-        /// </exception>
-        [Obsolete("This TableAttribute constructor has been deprecated. Please replace with new constructor.", true)]
-        public TableAttribute(
-            string guid,
-            string name,
-            string description,
-            string category = "Other")
-        {
-        }
-
-        /// <summary>
         ///     Initializes a new instance of the <see cref="TableAttribute"/> class.
         /// </summary>
         /// <param name="tableDescriptorPropertyName">

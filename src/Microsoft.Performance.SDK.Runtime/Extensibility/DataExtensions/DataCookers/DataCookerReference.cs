@@ -190,15 +190,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             {
                 if (string.IsNullOrEmpty(descriptor.Path.SourceParserId))
                 {
-                    this.AddError($"A source data cooker's source Id must not be {nameof(DataCookerPath.EmptySourceParserId)}.");
+                    this.AddError(
+                        "A source data cooker's source Id must not be " +
+                        $"{nameof(DataCookerPathInternal.EmptySourceParserId)}.");
                     this.InitialAvailability = DataExtensionAvailability.Error;
                 }
             }
             else
             {
-                if (descriptor.Path.SourceParserId != DataCookerPath.EmptySourceParserId)
+                if (descriptor.Path.SourceParserId != DataCookerPathInternal.EmptySourceParserId)
                 {
-                    this.AddError($"A composite data cooker's source Id must be {nameof(DataCookerPath.EmptySourceParserId)}.");
+                    this.AddError(
+                        "A composite data cooker's source Id must be " +
+                        $"{nameof(DataCookerPathInternal.EmptySourceParserId)}.");
                     this.InitialAvailability = DataExtensionAvailability.Error;
                 }
             }
