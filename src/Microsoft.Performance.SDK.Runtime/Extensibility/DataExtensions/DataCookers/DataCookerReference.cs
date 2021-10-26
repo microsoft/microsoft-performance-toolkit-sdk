@@ -4,7 +4,6 @@
 using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Extensibility.DataProcessing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 {
@@ -216,13 +215,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 }
             }
 
-            if (descriptor is IDataProcessorDependent processorRequirements)
-            {
-                foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
-                {
-                    this.AddRequiredDataProcessor(dataProcessorId);
-                }
-            }
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////if (descriptor is IDataProcessorDependent processorRequirements)
+            ////{
+            ////    foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
+            ////    {
+            ////        this.AddRequiredDataProcessor(dataProcessorId);
+            ////    }
+            ////}
         }
 
         /// <inheritdoc />

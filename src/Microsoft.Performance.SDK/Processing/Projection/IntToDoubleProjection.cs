@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             private struct IntToDoubleColumnGenerator<TGenerator>
                 : IProjection<int, double>,
-                  IViewportSensitiveProjection
+                  IVisibleDomainSensitiveProjection
                   where TGenerator : IProjection<int, int>
             {
                 private readonly TGenerator generator;
@@ -70,13 +70,13 @@ namespace Microsoft.Performance.SDK.Processing
                     get { return typeof(double); }
                 }
 
-                // IViewportSensitiveProjection
+                // IVisibleDomainSensitiveProjection
                 public object Clone()
                 {
-                    if (DependsOnViewport)
+                    if (DependsOnVisibleDomain)
                     {
                         return new IntToDoubleColumnGenerator<TGenerator>(
-                            ViewportSensitiveProjection.CloneIfViewportSensitive(this.generator));
+                            VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.generator));
                     }
                     else
                     {
@@ -85,16 +85,16 @@ namespace Microsoft.Performance.SDK.Processing
                 }
 
 
-                public bool NotifyViewportChanged(IVisibleTableRegion viewport)
+                public bool NotifyVisibleDomainChanged(IVisibleDomainRegion visibleDomain)
                 {
-                    return ViewportSensitiveProjection.NotifyViewportChanged(this.generator, viewport);
+                    return VisibleDomainSensitiveProjection.NotifyVisibleDomainChanged(this.generator, visibleDomain);
                 }
 
-                public bool DependsOnViewport
+                public bool DependsOnVisibleDomain
                 {
                     get
                     {
-                        return ViewportSensitiveProjection.DependsOnViewport(this.generator);
+                        return VisibleDomainSensitiveProjection.DependsOnVisibleDomain(this.generator);
                     }
                 }
             }

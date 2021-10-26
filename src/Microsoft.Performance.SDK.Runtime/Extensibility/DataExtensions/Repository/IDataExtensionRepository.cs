@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository
@@ -15,7 +14,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         : ISourceDataCookerRepository,
           ICompositeDataCookerRepository,
           IDataTableRepository,
-          IDataProcessorRepository,
+          // TODO: __SDK_DP__
+          // IDataProcessorRepository,
           IDisposable
     {
     }

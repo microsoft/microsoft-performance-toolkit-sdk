@@ -279,10 +279,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
                             self.CompositeDataCookers
                                 .Select(x => self.GetCompositeDataCookerReference(x))
                                 .Cast<IDataExtensionReference>())
-                       .Concat(
-                            self.DataProcessors
-                                .Select(x => self.GetDataProcessorReference(x))
-                                .Cast<IDataExtensionReference>())
+                       // TODO: __SDK_DP__
+                       // Redesign Data Processor API
+                       ////.Concat(
+                       ////     self.DataProcessors
+                       ////         .Select(x => self.GetDataProcessorReference(x))
+                       ////         .Cast<IDataExtensionReference>())
                        .Concat(
                             self.TablesById.Values
                                 .Cast<IDataExtensionReference>());

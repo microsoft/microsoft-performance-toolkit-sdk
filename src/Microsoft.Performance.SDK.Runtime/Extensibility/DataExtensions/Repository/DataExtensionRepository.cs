@@ -31,8 +31,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         private Dictionary<DataCookerPath, ICompositeDataCookerReference> compositeDataCookerReferencesByPath
             = new Dictionary<DataCookerPath, ICompositeDataCookerReference>();
 
-        private ConcurrentSet<IDataProcessorReference> dataProcessors
-            = new ConcurrentSet<IDataProcessorReference>();
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        ////private ConcurrentSet<IDataProcessorReference> dataProcessors
+        ////    = new ConcurrentSet<IDataProcessorReference>();
 
         private ConcurrentDictionary<Guid, ITableExtensionReference> tablesById 
             =  new ConcurrentDictionary<Guid, ITableExtensionReference>();
@@ -69,15 +71,17 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             }
         }
 
-        /// <inheritdoc />
-        public IEnumerable<DataProcessorId> DataProcessors
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.dataProcessors.Select(x => new DataProcessorId(x.Id));
-            }
-        }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public IEnumerable<DataProcessorId> DataProcessors
+        ////{
+        ////    get
+        ////    {
+        ////        this.ThrowIfDisposed();
+        ////        return this.dataProcessors.Select(x => new DataProcessorId(x.Id));
+        ////    }
+        ////}
 
         /// <inheritdoc />
         public bool AddSourceDataCookerReference(ISourceDataCookerReference dataCooker)
@@ -176,23 +180,27 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
             return this.tablesById.TryAdd(tableExtensionReference.TableDescriptor.Guid, tableExtensionReference);
         }
 
-        /// <inheritdoc />
-        public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
-        {
-            Guard.NotNull(dataProcessorReference, nameof(dataProcessorReference));
-            this.ThrowIfDisposed();
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
+        ////{
+        ////    Guard.NotNull(dataProcessorReference, nameof(dataProcessorReference));
+        ////    this.ThrowIfDisposed();
 
-            return this.dataProcessors.Add(dataProcessorReference);
-        }
+        ////    return this.dataProcessors.Add(dataProcessorReference);
+        ////}
 
-        /// <inheritdoc />
-        public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
-        {
-            this.ThrowIfDisposed();
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
+        ////{
+        ////    this.ThrowIfDisposed();
 
-            return this.dataProcessors.FirstOrDefault(reference =>
-                StringComparer.Ordinal.Equals(reference.Id, dataProcessorId.Id));
-        }
+        ////    return this.dataProcessors.FirstOrDefault(reference =>
+        ////        StringComparer.Ordinal.Equals(reference.Id, dataProcessorId.Id));
+        ////}
 
         /// <summary>
         ///     After all data extensions have been added, this is called to process
@@ -215,10 +223,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
                 dataCookerReference.ProcessDependencies(this);
             }
 
-            foreach (var dataProcessorReference in this.dataProcessors)
-            {
-                dataProcessorReference.ProcessDependencies(this);
-            }
+            ////foreach (var dataProcessorReference in this.dataProcessors)
+            ////{
+            ////    dataProcessorReference.ProcessDependencies(this);
+            ////}
 
             foreach (var kvp in this.TablesById)
             {
@@ -260,10 +268,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
                     s.SafeDispose();
                 }
 
-                foreach (var d in this.dataProcessors)
-                {
-                    d.SafeDispose();
-                }
+                ////foreach (var d in this.dataProcessors)
+                ////{
+                ////    d.SafeDispose();
+                ////}
 
                 foreach (var t in this.tablesById.Values)
                 {
@@ -274,7 +282,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
                 this.compositeDataCookerReferencesByPath = null;
                 this.sourceDataCookerReferencesByPath = null;
                 this.dataCookerReferencesBySource = null;
-                this.dataProcessors = null;
+                // this.dataProcessors = null;
                 this.tablesById = null;
             }
 

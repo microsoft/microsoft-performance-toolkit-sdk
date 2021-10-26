@@ -13,6 +13,7 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
+using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestData;
@@ -926,6 +927,36 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 var cookers = plugins.AllCookers;
                 Assert.IsNotNull(cookers);
             }
+        }
+
+        #endregion
+
+        #region Interactive
+
+        [TestMethod]
+        [FunctionalTest]
+        [DeploymentItem(@"TestData/interactive.ips")]
+        public void NonInteractive_ProcessThrows()
+        {
+            using var set = DataSourceSet.Create();
+
+            var file = new FileDataSource(@"TestData\interactive.ips");
+            set.AddDataSource(file);
+
+            using var sut = Engine.Create(
+                new EngineCreateInfo(set.AsReadOnly())
+                {
+                    IsInteractive = false,
+                });
+
+            var rer = sut.Process();
+
+            Assert.AreEqual(1, rer.ProcessingErrors.Count);
+            var error = rer.ProcessingErrors.Single();
+
+            Assert.IsInstanceOfType(error.Processor, typeof(InteractiveProcessor));
+            Assert.AreEqual(file, error.DataSources.Single());
+            Assert.IsInstanceOfType(error.ProcessFault, typeof(InvalidOperationException));
         }
 
         #endregion

@@ -54,21 +54,23 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ICompositeDataCookerReference reference);
 
-        /// <summary>
-        ///     Generate a data processor reference from a given type.
-        /// </summary>
-        /// <param name="candidateType">
-        ///     data extension type.
-        /// </param>
-        /// <param name="reference">
-        ///     data extension reference.
-        /// </param>
-        /// <returns>
-        ///     true if succeeded.
-        /// </returns>
-        bool TryCreateDataProcessorReference(
-            Type candidateType,
-            out IDataProcessorReference reference);
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     Generate a data processor reference from a given type.
+        /////// </summary>
+        /////// <param name="candidateType">
+        ///////     data extension type.
+        /////// </param>
+        /////// <param name="reference">
+        ///////     data extension reference.
+        /////// </param>
+        /////// <returns>
+        ///////     true if succeeded.
+        /////// </returns>
+        ////bool TryCreateDataProcessorReference(
+        ////    Type candidateType,
+        ////    out IDataProcessorReference reference);
 
         /// <summary>
         ///     Generate a table reference from a given type.

@@ -60,12 +60,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.repoBuilder.AddTableExtensionReference(dataExtensionReference);
             }
 
-            // Find data processors
-            if (DataProcessorReference.TryCreateReference(type, out var dataProcessorReference))
-            {
-                Debug.Assert(dataProcessorReference != null);
-                this.repoBuilder.AddDataProcessorReference(dataProcessorReference);
-            }
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////// Find data processors
+            ////if (DataProcessorReference.TryCreateReference(type, out var dataProcessorReference))
+            ////{
+            ////    Debug.Assert(dataProcessorReference != null);
+            ////    this.repoBuilder.AddDataProcessorReference(dataProcessorReference);
+            ////}
         }
 
         /// <inheritdoc />

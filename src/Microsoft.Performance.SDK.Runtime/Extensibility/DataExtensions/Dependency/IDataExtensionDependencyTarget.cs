@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Extensibility.DataProcessing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency
 {
@@ -12,8 +11,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
     ///     of the data extension based on the status of its data extension requirements.
     /// </summary>
     public interface IDataExtensionDependencyTarget
-        : IDataCookerDependent,
-          IDataProcessorDependent
+        : IDataCookerDependent //,
+          // TODO: __SDK_DP__
+          // IDataProcessorDependent
     {
         /// <summary>
         ///     Gets an identifier for the given data extension.
