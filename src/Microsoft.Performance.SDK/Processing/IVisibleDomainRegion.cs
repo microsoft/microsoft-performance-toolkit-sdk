@@ -4,27 +4,21 @@
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Defines the portion of the table that is currently
-    ///     viewable in the application.
+    ///     Defines the domain region that is currently visible in
+    ///     the SDK driver.
     /// </summary>
-    public interface IVisibleTableRegion
+    /// <remarks>
+    ///     Currently, only <seealso cref="TimeRange"/>s are supported domains.
+    /// </remarks>
+    public interface IVisibleDomainRegion
     {
         /// <summary>
-        ///     Gets the index of the first row that is currently 
-        ///     visible in the UI for the table.
+        ///     Gets the currently visible domain in the SDK driver.
         /// </summary>
-        int TableRowStart { get; }
-
-        /// <summary>
-        ///     Gets the count of rows that are currently visible
-        ///     in the UI for the table.
-        /// </summary>
-        int TableRowCount { get; }
-
-        /// <summary>
-        ///     Gets the currently selected viewport for the table.
-        /// </summary>
-        TimeRange Viewport { get; }
+        /// <remarks>
+        ///     Currently, only <seealso cref="TimeRange"/>s are supported domains.
+        /// </remarks>
+        TimeRange Domain { get; }
 
         /// <summary>
         ///     Aggregates the given projection using the specified aggregation
@@ -56,7 +50,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     - or -
         ///     <paramref name="aggregationMode"/> is <see cref="AggregationMode.None"/>.
         /// </exception>
-        TAggregate AggregateRowsInViewport<T, TAggregate>(
+        TAggregate AggregateVisibleRows<T, TAggregate>(
             IProjection<int, T> projection,
             AggregationMode aggregationMode);
     }

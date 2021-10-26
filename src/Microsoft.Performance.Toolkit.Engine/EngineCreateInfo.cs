@@ -66,5 +66,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     instance.
         /// </summary>
         public ReadOnlyDataSourceSet DataSources { get; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether the Engine instance will
+        ///     allow for user interaction. If this property is set to <c>false</c>,
+        ///     then any attempts made by plugins to get interaction from a user
+        ///     will fail. By default, this property is <c>false</c>.
+        /// </summary>
+        public bool IsInteractive { get; set; }
     }
 }

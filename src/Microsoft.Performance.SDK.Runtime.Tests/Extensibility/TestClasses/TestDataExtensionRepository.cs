@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -65,17 +64,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public IEnumerable<DataProcessorId> DataProcessors => throw new NotImplementedException();
 
-        public Dictionary<DataProcessorId, IDataProcessorReference> dataProcessorsById = new Dictionary<DataProcessorId, IDataProcessorReference>();
-        public Func<DataProcessorId, IDataProcessorReference> getDataProcessor;
-        public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
-        {
-            if (this.dataProcessorsById.TryGetValue(dataProcessorId, out var processorReference))
-            {
-                return processorReference;
-            }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        ////public Dictionary<DataProcessorId, IDataProcessorReference> dataProcessorsById = new Dictionary<DataProcessorId, IDataProcessorReference>();
+        ////public Func<DataProcessorId, IDataProcessorReference> getDataProcessor;
+        ////public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
+        ////{
+        ////    if (this.dataProcessorsById.TryGetValue(dataProcessorId, out var processorReference))
+        ////    {
+        ////        return processorReference;
+        ////    }
 
-            return this.getDataProcessor?.Invoke(dataProcessorId);
-        }
+        ////    return this.getDataProcessor?.Invoke(dataProcessorId);
+        ////}
 
         public void FinalizeDataExtensions()
         {
@@ -89,10 +90,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
                 dataCookerReference.Value.ProcessDependencies(this);
             }
 
-            foreach (var dataProcessorReference in this.dataProcessorsById)
-            {
-                dataProcessorReference.Value.ProcessDependencies(this);
-            }
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////foreach (var dataProcessorReference in this.dataProcessorsById)
+            ////{
+            ////    dataProcessorReference.Value.ProcessDependencies(this);
+            ////}
 
             foreach (var tableReferenceBuilder in this.TablesById)
             {
