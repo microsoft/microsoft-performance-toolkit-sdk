@@ -6,7 +6,6 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using DataCookerPath = Microsoft.Performance.SDK.Extensibility.DataCookerPath;
 
@@ -99,14 +98,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
                     dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
                 }
             }
-            else if (reference is IDataProcessorReference dataProcessorReference)
-            {
-                dependencyStateSupport.AddError(
-                    new ErrorInfo(
-                        ErrorCodes.EXTENSION_DisallowedDataProcessorDependency,
-                        $"A source data cooker may not depend on a data processor: {dataProcessorReference.Id}"));
-                dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
-            }
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////else if (reference is IDataProcessorReference dataProcessorReference)
+            ////{
+            ////    dependencyStateSupport.AddError(
+            ////        new ErrorInfo(
+            ////            ErrorCodes.EXTENSION_DisallowedDataProcessorDependency,
+            ////            $"A source data cooker may not depend on a data processor: {dataProcessorReference.Id}"));
+            ////    dependencyStateSupport.UpdateAvailability(DataExtensionAvailability.Error);
+            ////}
             else
             {
                 dependencyStateSupport.AddError(

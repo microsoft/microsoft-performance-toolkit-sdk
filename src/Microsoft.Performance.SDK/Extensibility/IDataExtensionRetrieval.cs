@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Extensibility.DataProcessing;
 
 namespace Microsoft.Performance.SDK.Extensibility
 {
@@ -10,8 +9,9 @@ namespace Microsoft.Performance.SDK.Extensibility
     ///     This interface is used to query cooked data or data processors.
     /// </summary>
     public interface IDataExtensionRetrieval
-        : ICookedDataRetrieval,
-          IDataProcessorRetrieval
+        : ICookedDataRetrieval //,
+          // TODO: __SDK_DP__
+          // IDataProcessorRetrieval
     {
     }
 }

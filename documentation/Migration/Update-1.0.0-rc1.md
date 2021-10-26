@@ -10,7 +10,9 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
+
 ## Renamed Classes, Interfaces and Static Methods
+
 The following references must be changed:
 - `BaseSourceDataCooker` -> `SourceDataCooker`
 - `SourceParserBase` -> `SourceParser`
@@ -23,6 +25,33 @@ The following references must be changed:
 - `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
 - `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
 - `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
+
+## SDK
+
+The following are required if you are using the `ProcessingSource` base class and
+are using the cosntructors that take `additionalTablesProvider` and/or the
+`tableAssemblyProvider` parameters.
+
+These parameters are being removed and replaced by the `ITableProvider` interface.
+If you have custom logic for determining the tables exposed by a `ProcessingSource`,
+you must implement the new interface.
+
+The default behavior of using all tables found in the assembly has been preserved.
+This change only effects those `ProcessingSource`s that use custom table providers.
+
+Two helper methods have been added for use:
+`TableDiscovery.CreateForAssembly` and `TableDiscovery.CreateForNamespace.` Users
+may also provide their own implementations.
+
+## Data Processors (NOT CustomDataProcessors)
+
+`DataProcessor`s have been removed. Note that these are not the same as
+`CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
+
+## IApplicationEnvironment
+
+The following properties have been renamed to better indicate their purpose:
+- `GraphicalUserEnvironment` -> `IsInteractive`
 
 ## Engine
 
@@ -111,6 +140,10 @@ catch (UnsupportedDataSourceException)
     // ...
 }
 ````
+
+### Engine Execution Results
+
+A new parameter has been added to the constructor.
 
 ## IViewportSensitiveProjection
 

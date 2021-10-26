@@ -160,7 +160,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
 
             this.ValidateDataCookerDependencies(availableDataExtensions);
 
-            this.ValidateRequiredDataProcessors(availableDataExtensions);
+            // TODO: __SDK_DP__
+            // Redesign Data Processor API
+            ////this.ValidateRequiredDataProcessors(availableDataExtensions);
 
             this.UpdateAvailability(DataExtensionAvailability.Available);
 
@@ -312,32 +314,34 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             }
         }
 
-        /// <summary>
-        ///     This will process all of the data processor requirements for the target data
-        ///     extension. It will recursively descend through requirements, determining if
-        ///     the target data extension may be used.
-        /// </summary>
-        /// <param name="availableDataExtensions">
-        ///     Data extensions that have been exposed through the runtime.
-        /// </param>
-        private void ValidateRequiredDataProcessors(
-            IDataExtensionRepository availableDataExtensions)
-        {
-            Guard.NotNull(availableDataExtensions, nameof(availableDataExtensions));
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     This will process all of the data processor requirements for the target data
+        ///////     extension. It will recursively descend through requirements, determining if
+        ///////     the target data extension may be used.
+        /////// </summary>
+        /////// <param name="availableDataExtensions">
+        ///////     Data extensions that have been exposed through the runtime.
+        /////// </param>
+        ////private void ValidateRequiredDataProcessors(
+        ////    IDataExtensionRepository availableDataExtensions)
+        ////{
+        ////    Guard.NotNull(availableDataExtensions, nameof(availableDataExtensions));
 
-            foreach (var processorId in this.target.RequiredDataProcessors)
-            {
-                var processorReference = availableDataExtensions.GetDataProcessorReference(processorId);
-                if (processorReference == null)
-                {
-                    this.UpdateAvailability(DataExtensionAvailability.MissingRequirement);
-                    this.missingDataProcessors.Add(processorId);
-                    continue;
-                }
+        ////    foreach (var processorId in this.target.RequiredDataProcessors)
+        ////    {
+        ////        var processorReference = availableDataExtensions.GetDataProcessorReference(processorId);
+        ////        if (processorReference == null)
+        ////        {
+        ////            this.UpdateAvailability(DataExtensionAvailability.MissingRequirement);
+        ////            this.missingDataProcessors.Add(processorId);
+        ////            continue;
+        ////        }
 
-                this.ProcessRequiredExtension(processorReference, processorId.Id, availableDataExtensions);
-            }
-        }
+        ////        this.ProcessRequiredExtension(processorReference, processorId.Id, availableDataExtensions);
+        ////    }
+        ////}
 
         private void ProcessRequiredExtension(
             IDataExtensionReference reference,

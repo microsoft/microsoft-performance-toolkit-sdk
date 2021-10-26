@@ -22,17 +22,19 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </returns>
         IDataExtensionRetrieval CreateDataRetrievalForCompositeDataCooker(DataCookerPath dataCookerPath);
 
-        /// <summary>
-        ///     A data processor has access to source data cookers, composite data cookers, as well as other
-        ///     data processors.
-        /// </summary>
-        /// <param name="dataProcessorId">
-        ///     Identifies the data processor.
-        /// </param>
-        /// <returns>
-        ///     A set of data uniquely tailored to this data processor.
-        /// </returns>
-        IDataExtensionRetrieval CreateDataRetrievalForDataProcessor(DataProcessorId dataProcessorId);
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     A data processor has access to source data cookers, composite data cookers, as well as other
+        ///////     data processors.
+        /////// </summary>
+        /////// <param name="dataProcessorId">
+        ///////     Identifies the data processor.
+        /////// </param>
+        /////// <returns>
+        ///////     A set of data uniquely tailored to this data processor.
+        /////// </returns>
+        ////IDataExtensionRetrieval CreateDataRetrievalForDataProcessor(DataProcessorId dataProcessorId);
 
         /// <summary>
         ///     A table has access to source data cookers, composite data cookers, and data processors.
