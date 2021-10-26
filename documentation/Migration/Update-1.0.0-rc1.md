@@ -18,6 +18,11 @@ The following references must be changed:
 - `CustomDataProcessorBase` -> `CustomDataProcessor`
 - `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
 
+## IApplicationEnvironment
+
+The following properties have been renamed to better indicate their purpose:
+- `GraphicalUserEnvironment` -> `IsInteractive`
+
 ## Engine
 
 The following are required if you are using the `Engine`:
@@ -113,3 +118,4 @@ A new parameter has been added to the constructor.
 # Suggested Changes
 
 None at this time.
+
