@@ -6,13 +6,13 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Provides static (Shared in Visual Basic) methods for interacting
     ///     with <see cref="IProjection{TSource, TResult}"/> instances in
-    ///     regards to interaction with the caller's viewport.
+    ///     regards to interaction with the caller's visible domain.
     /// </summary>
-    public static class ViewportSensitiveProjection
+    public static class VisibleDomainSensitiveProjection
     {
         /// <summary>
         ///     Determines if the <see cref="IProjection{TSource, TResult}"/>
-        ///     depends on the current viewport in the application.
+        ///     depends on a visible domain.
         /// </summary>
         /// <typeparam name="TSource">
         ///     The <see cref="System.Type"/> of argument to the projection.
@@ -25,15 +25,15 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <returns>
         ///     <c>true</c> if the <see cref="IProjection{TSource, TResult}"/>
-        ///     depends on the viewport; <c>false</c> otherwise.
+        ///     depends on a visible domain; <c>false</c> otherwise.
         /// </returns>
-        public static bool DependsOnViewport<TSource, TResult>(
+        public static bool DependsOnVisibleDomain<TSource, TResult>(
             this IProjection<TSource, TResult> self)
         {
-            var casted = self as IViewportSensitiveProjection;
+            var casted = self as IVisibleDomainSensitiveProjection;
             if (casted != null)
             {
-                return casted.DependsOnViewport;
+                return casted.DependsOnVisibleDomain;
             }
 
             return false;
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     Determines if the <see cref="IProjection{TSource, TResult}"/>
-        ///     depends on the current viewport in the application.
+        ///     depends on a visible domain in the application.
         /// </summary>
         /// <typeparam name="TProjection">
         ///     The <see cref="System.Type"/> being interrogated.
@@ -51,15 +51,15 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <returns>
         ///     <c>true</c> if the <see cref="IProjection{TSource, TResult}"/>
-        ///     depends on the viewport; <c>false</c> otherwise.
+        ///     depends on the current visible domain; <c>false</c> otherwise.
         /// </returns>
-        public static bool DependsOnViewport<TProjection>(this TProjection self)
+        public static bool DependsOnVisibleDomain<TProjection>(this TProjection self)
             where TProjection : IProjectionDescription
         {
-            var casted = self as IViewportSensitiveProjection;
+            var casted = self as IVisibleDomainSensitiveProjection;
             if (casted != null)
             {
-                return casted.DependsOnViewport;
+                return casted.DependsOnVisibleDomain;
             }
 
             return false;
@@ -67,7 +67,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     Clones the given <see cref="IProjection{TSource, TResult}"/>
-        ///     if the projection is sensitive to the viewport; otherwise, the 
+        ///     if the projection is sensitive to a visible domain; otherwise, the 
         ///     projection itself is returned unmodified.
         /// </summary>
         /// <typeparam name="TSource">
@@ -83,12 +83,12 @@ namespace Microsoft.Performance.SDK.Processing
         ///     A clone of the specified projection, if possible;
         ///     <paramref name="self"/> otherwise.
         /// </returns>
-        public static IProjection<TSource, TResult> CloneIfViewportSensitive<TSource, TResult>(
+        public static IProjection<TSource, TResult> CloneIfVisibleDomainSensitive<TSource, TResult>(
             this IProjection<TSource, TResult> self)
         {
-            if (self.DependsOnViewport())
+            if (self.DependsOnVisibleDomain())
             {
-                return (IProjection<TSource, TResult>)((IViewportSensitiveProjection)self).Clone();
+                return (IProjection<TSource, TResult>)((IVisibleDomainSensitiveProjection)self).Clone();
             }
 
             return self;
@@ -96,7 +96,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     Clones the given <typeparamref name="TProjection"/>
-        ///     if the projection is sensitive to the viewport; otherwise, the 
+        ///     if the projection is sensitive to a visible domain; otherwise, the 
         ///     projection itself is returned unmodified.
         /// </summary>
         /// <typeparam name="TProjection">
@@ -109,10 +109,10 @@ namespace Microsoft.Performance.SDK.Processing
         ///     A clone of the specified projection, if possible;
         ///     <paramref name="self"/> otherwise.
         /// </returns>
-        public static TProjection CloneIfViewportSensitive<TProjection>(this TProjection self)
+        public static TProjection CloneIfVisibleDomainSensitive<TProjection>(this TProjection self)
             where TProjection : IProjectionDescription
         {
-            var casted = self as IViewportSensitiveProjection;
+            var casted = self as IVisibleDomainSensitiveProjection;
             if (casted != null)
             {
                 return (TProjection)casted.Clone();
@@ -122,8 +122,8 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Notifies the given projection of a viewport change if the
-        ///     projection depends on the viewport.
+        ///     Notifies the given projection of a visible domain change if the
+        ///     projection depends on a visible domain.
         /// </summary>
         /// <typeparam name="TProjection">
         ///     The <see cref="System.Type"/> being interrogated.
@@ -131,18 +131,18 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="self">
         ///     The projection being notified.
         /// </param>
-        /// <param name="newViewport">
-        ///     The new viewport.
+        /// <param name="newVisibleDomain">
+        ///     The new visible domain.
         /// </param>
-        public static bool NotifyViewportChanged<TProjection>(
+        public static bool NotifyVisibleDomainChanged<TProjection>(
             this TProjection self,
-            IVisibleTableRegion newViewport)
+            IVisibleDomainRegion newVisibleDomain)
             where TProjection : IProjectionDescription
         {
-            var casted = self as IViewportSensitiveProjection;
+            var casted = self as IVisibleDomainSensitiveProjection;
             if (casted != null)
             {
-                return casted.NotifyViewportChanged(newViewport);
+                return casted.NotifyVisibleDomainChanged(newVisibleDomain);
             }
 
             return false;

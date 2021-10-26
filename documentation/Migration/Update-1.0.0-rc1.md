@@ -10,6 +10,22 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
+
+## Renamed Classes, Interfaces and Static Methods
+
+The following references must be changed:
+- `BaseSourceDataCooker` -> `SourceDataCooker`
+- `SourceParserBase` -> `SourceParser`
+- `BaseDataColumn` -> `DataColumn`
+- `CustomDataProcessorBase` -> `CustomDataProcessor`
+- `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
+- `IViewportSensitiveProjection` -> `IVisibleDomainSensitiveProjection`
+- `ViewportSensitiveProjection` -> `VisibleDomainSensitiveProjection`
+- `IVisibleTableRegion` -> `IVisibleDomainRegion`
+- `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
+- `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
+- `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
+
 ## SDK
 
 The following are required if you are using the `ProcessingSource` base class and
@@ -31,14 +47,6 @@ may also provide their own implementations.
 
 `DataProcessor`s have been removed. Note that these are not the same as
 `CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
-
-## Renamed Classes
-The following references must be changed:
-- `BaseSourceDataCooker` -> `SourceDataCooker`
-- `SourceParserBase` -> `SourceParser`
-- `BaseDataColumn` -> `DataColumn`
-- `CustomDataProcessorBase` -> `CustomDataProcessor`
-- `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
 
 ## IApplicationEnvironment
 
@@ -136,6 +144,26 @@ catch (UnsupportedDataSourceException)
 ### Engine Execution Results
 
 A new parameter has been added to the constructor.
+
+## IViewportSensitiveProjection
+
+In addition to this interface being renamed to `IVisibleDomainSensitiveProjection`, the following properties and methods are renamed:
+- `DependsOnViewport` -> `DependsOnVisibleDomain`
+- `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
+
+## ViewportSensitiveProjection
+In addition to this class being renamed to `VisibleDomainSensitiveProjection`, the following properties and methods are renamed:
+- `DependsOnViewport` -> `DependsOnVisibleDomain`
+- `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
+- `CloneIfViewportSensitive` -> `CloneIfVisibleDomainSensitive`
+
+## IVisibleTableRegion
+
+In addition to this class being renamed to `IVisibleDomainRegion`, the following properties and method are renamed:
+- `Viewport` -> `Domain`
+- `AggregateRowsInViewport` -> `AggregateVisibleRows`
+
+Additionally, the properties `TableRowStart ` and `TableRowCount` are removed.
 
 # Suggested Changes
 
