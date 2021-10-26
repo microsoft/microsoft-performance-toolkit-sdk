@@ -24,14 +24,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         public void Create_NullParameters_Throw()
         {
             Assert.ThrowsException<ArgumentNullException>(() => DependencyDag.Create(null, new TestDataExtensionRepository()));
-            Assert.ThrowsException<ArgumentNullException>(() => DependencyDag.Create(new TestPluginCatalog(), null));
+            Assert.ThrowsException<ArgumentNullException>(() => DependencyDag.Create(new TestProcessingSourceCatalog(), null));
         }
 
         [TestMethod]
         [UnitTest]
         public void Create_UnloadedCatalog_Throws()
         {
-            var catalog = new TestPluginCatalog { IsLoaded = false, };
+            var catalog = new TestProcessingSourceCatalog { IsLoaded = false, };
             var repo = new DataExtensionRepository();
             repo.FinalizeDataExtensions();
 
@@ -59,9 +59,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             repo.AddTableExtensionReference(table);
             repo.FinalizeDataExtensions();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
-            catalog.PlugIns = new[] { cds1, };
+            catalog.ProcessingSources = new[] { cds1, };
 
             var allReferences = new[]
             {
@@ -126,7 +126,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     r2d1,
                 }.Select(DependencyDag.Reference.Create)).ToSet();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -232,7 +232,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     r2d1,
                 }.Select(DependencyDag.Reference.Create)).ToSet();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -345,7 +345,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     r2d2,
                 }.Select(DependencyDag.Reference.Create)).ToSet();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -453,7 +453,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 }.Select(DependencyDag.Reference.Create))
                 .ToSet();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -526,7 +526,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             r0d1.requiredDataCookers.Add(r0d3.Path);
             r0d3.requiredDataCookers.Add(r0.Path);
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -569,7 +569,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             r0d1.requiredDataCookers.Add(r0d3.Path);
             r0d3.requiredDataCookers.Add(r0d1.Path);
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -636,9 +636,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             cc1.requiredDataCookers.Add(sc1.Path);
             cc1.requiredDataCookers.Add(sc2.Path);
 
-            var catalog = new TestPluginCatalog
+            var catalog = new TestProcessingSourceCatalog
             {
-                PlugIns = new[] { r, },
+                ProcessingSources = new[] { r, },
                 IsLoaded = true,
             };
 
@@ -750,7 +750,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     r2d1,
                 }.Select(DependencyDag.Reference.Create)).ToSet();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -855,7 +855,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     r2d1,
                 }.Select(DependencyDag.Reference.Create)).ToSet();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();
@@ -961,7 +961,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     r2d1,
                 }.Select(DependencyDag.Reference.Create)).ToSet();
 
-            var catalog = new TestPluginCatalog();
+            var catalog = new TestProcessingSourceCatalog();
             catalog.IsLoaded = true;
 
             var repo = new DataExtensionRepository();

@@ -94,7 +94,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
 
             this.subscribers = new HashSet<IPluginsConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
-            var catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
+            var catalog = new ReflectionProcessingSourceCatalog(this.extensionDiscovery);
             var extensionRepository = new DataExtensionFactory().CreateDataExtensionRepository();
             this.extensionRoot = new ExtensionRoot(catalog, extensionRepository);
 
@@ -135,7 +135,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 IEnumerable<ProcessingSourceReference> copy;
                 lock (this.mutex)
                 {
-                    copy = new HashSet<ProcessingSourceReference>(this.extensionRoot.PlugIns);
+                    copy = new HashSet<ProcessingSourceReference>(this.extensionRoot.ProcessingSources);
                 }
                 return copy;
             }
@@ -232,7 +232,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             lock (this.mutex)
             {
                 failed = new Dictionary<string, ErrorInfo>();
-                var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.PlugIns);
+                var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.ProcessingSources);
                 foreach (var dir in directories)
                 {
                     if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
@@ -247,7 +247,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 // should get refactored to avoid this redundant work.
                 this.extensionRoot.FinalizeDataExtensions();
 
-                foreach (var source in this.extensionRoot.PlugIns.Except(oldPlugins))
+                foreach (var source in this.extensionRoot.ProcessingSources.Except(oldPlugins))
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     this.NotifyProcessingSourceLoaded(name, version, source);
@@ -303,7 +303,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 }
 
                 // Manually send all the already loaded plugins to this consumer
-                foreach (var source in this.extensionRoot.PlugIns)
+                foreach (var source in this.extensionRoot.ProcessingSources)
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     consumer.OnProcessingSourceLoaded(name, version, source);

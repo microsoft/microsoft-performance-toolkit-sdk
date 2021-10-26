@@ -104,7 +104,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<ProcessingSourceReference> ProcessingSourceReferences => this.Extensions.PlugIns;
+        public IEnumerable<ProcessingSourceReference> ProcessingSourceReferences => this.Extensions.ProcessingSources;
 
         /// <summary>
         ///     Gets the paths of all loaded Source Cookers.
@@ -260,7 +260,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(extensionDirectories, nameof(extensionDirectories));
             Guard.Any(extensionDirectories, nameof(extensionDirectories));
 
-            IPlugInCatalog catalog = null;
+            IProcessingSourceCatalog catalog = null;
             IDataExtensionRepositoryBuilder repo = null;
             ExtensionRoot extensionRoot = null;
 
@@ -298,7 +298,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
 
-                catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
+                catalog = new ReflectionProcessingSourceCatalog(assemblyDiscovery);
 
                 var factory = new DataExtensionFactory();
                 repo = factory.CreateDataExtensionRepository();

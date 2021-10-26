@@ -86,7 +86,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         ///     <paramref name="repository"/> is disposed.
         /// </exception>
         public static DependencyDag Create(
-            IPlugInCatalog catalog,
+            IProcessingSourceCatalog catalog,
             IDataExtensionRepository repository)
         {
             Guard.NotNull(catalog, nameof(catalog));
@@ -97,7 +97,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                 throw new ArgumentException("The catalog must be loaded.", nameof(catalog));
             }
 
-            if (!catalog.PlugIns.Any() &&
+            if (!catalog.ProcessingSources.Any() &&
                 !repository.GetAllReferences().Any())
             {
                 return new DependencyDag(Enumerable.Empty<Node>(), Enumerable.Empty<Node>());
@@ -109,7 +109,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             // chain and link the nodes to eachother as appropriate.
             //
 
-            var allNodes = catalog.PlugIns
+            var allNodes = catalog.ProcessingSources
                 .Select(x => new Node(x))
                 .Concat(repository.GetAllReferences().Select(x => new Node(x)))
                 .ToSet();
