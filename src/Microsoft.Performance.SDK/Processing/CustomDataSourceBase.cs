@@ -1,10 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -18,19 +15,6 @@ namespace Microsoft.Performance.SDK.Processing
     {
         protected CustomDataSourceBase()
             : base()
-        {
-        }
-
-        protected CustomDataSourceBase(
-            Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider)
-            : base(additionalTablesProvider)
-        {
-        }
-
-        protected CustomDataSourceBase(
-            Func<IDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>> additionalTablesProvider,
-            Func<Assembly> tableAssemblyProvider)
-            : base(additionalTablesProvider, tableAssemblyProvider)
         {
         }
     }
