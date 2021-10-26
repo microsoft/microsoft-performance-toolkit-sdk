@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -44,7 +45,6 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
         ///     Initializes a new instance of the <see cref="SourceDataCooker{T, TContext, TKey}"/>
         ///     class for the given cooker.
         /// </summary>
-        /// </param>
         /// <param name="dataCookerPath">
         ///     This cooker's path.
         /// </param>

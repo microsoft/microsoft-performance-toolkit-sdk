@@ -970,17 +970,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             string cookerId = split[1];
             string outputId = split[2];
 
-            DataCookerPath dataCookerPath;
             if (string.IsNullOrWhiteSpace(parserId))
             {
-                dataCookerPath = DataCookerPath.ForComposite(cookerId);
-            }
-            else
-            {
-                dataCookerPath = DataCookerPath.ForSource(parserId, cookerId);
+                return DataOutputPath.ForComposite(cookerId, outputId);
             }
 
-            return new DataOutputPath(dataCookerPath, outputId);
+            return DataOutputPath.ForSource(parserId, cookerId, outputId);
         }
     }
 }

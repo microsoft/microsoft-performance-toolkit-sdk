@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Processing
     {
         private readonly HashSet<TableDescriptor> enabledTables;
 
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> 
+        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
 
         /// <summary>
@@ -162,33 +162,6 @@ namespace Microsoft.Performance.SDK.Processing
             return true;
         }
 
-        /// <summary>
-        /// This method is deprecated. Please overwrite ProcessAsyncCore instead. The logger is now available through
-        /// the <see cref="Logger"/> property.
-        /// </summary>
-        /// <param name="logger">
-        ///     The logger.
-        /// </param>
-        /// <param name="progress">
-        ///     Provides a method of updating the application as to this
-        ///     processor's progress.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     A means of the application signalling to the processor that
-        ///     it should abort processing.
-        /// </param>
-        /// <returns>
-        ///     A <see cref="Task"/> representing the asynchronous operation.
-        /// </returns>
-        [Obsolete("This method will be removed by release 1.0. Please use ProcessAsyncCore instead.", false)]
-        public virtual Task ProcessAsync(
-            ILogger logger, 
-            IProgress<int> progress,
-            CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
         /// <inheritdoc />
         public Task ProcessAsync(
             IProgress<int> progress,
@@ -211,16 +184,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        protected virtual Task ProcessAsyncCore(
+        protected abstract Task ProcessAsyncCore(
             IProgress<int> progress,
-            CancellationToken cancellationToken)
-        {
-            // todo: make this abstract
-            // todo: remove this call to the old method, and throw NotImplementedException instead.
-            // temporarily call the old method to give some breathing room to developers
-            // these changes should be made when the original ProcessAsync obsolescence is made into an error
-            return ProcessAsync(this.Logger, progress, cancellationToken);
-        }
+            CancellationToken cancellationToken);
 
         /// <summary>
         ///     When overridden in a derived class, builds the requested
@@ -258,7 +224,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableDescriptor">Descriptor for the generated table.</param>
         /// <param name="buildAction">Action called to create the requested table.</param>
         protected void AddTableGeneratedFromDataProcessing(
-            TableDescriptor tableDescriptor, 
+            TableDescriptor tableDescriptor,
             Action<ITableBuilder, IDataExtensionRetrieval> buildAction)
         {
             // the buildAction may be null because the custom data processor may have a special way to handle

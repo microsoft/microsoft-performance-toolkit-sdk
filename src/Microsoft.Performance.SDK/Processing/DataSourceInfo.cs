@@ -28,33 +28,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Initializes a new instance of the <see cref="DataSourceInfo"/>
         ///     class.
         ///     <para />
-        ///     The timestamps are relative to the data source, and are not actual
-        ///     times (e.g. UTC).
-        /// </summary>
-        /// <param name="firstEventTimestampNanoseconds">
-        ///     The timestamp, in nanoseconds, at which data in the source begins.
-        /// </param>
-        /// <param name="lastEventTimestampNanoseconds">
-        ///     The timestamp, in nanoseconds, at which data in the source ends.
-        /// </param>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        ///     <paramref name="firstEventTimestampNanoseconds"/> is less than zero (0.)
-        ///     - or -
-        ///     <paramref name="lastEventTimestampNanoseconds"/> is less than
-        ///     <paramref name="firstEventTimestampNanoseconds"/>.
-        /// </exception>
-        [Obsolete("Wall clock is be required. Please use the constructor that takes a wall clock.", true)]
-        public DataSourceInfo(
-            long firstEventTimestampNanoseconds,
-            long lastEventTimestampNanoseconds)
-            : this(firstEventTimestampNanoseconds, lastEventTimestampNanoseconds, Epoch)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="DataSourceInfo"/>
-        ///     class.
-        ///     <para />
         ///     The timestamps are relative to the beginning of the wallclock
         ///     time spanned by this data source, and are not actual times (e.g. UTC).
         ///     For more information, see remarks below.
