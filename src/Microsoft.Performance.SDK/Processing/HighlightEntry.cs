@@ -6,6 +6,9 @@ using System.Drawing;
 
 namespace Microsoft.Performance.SDK.Processing
 {
+    /// <summary>
+    ///     Defines information for highlighting data.
+    /// </summary>
     public sealed class HighlightEntry
     {
         /// <summary>

@@ -39,6 +39,15 @@ namespace Microsoft.Performance.SDK.Processing
 
         int IReadOnlyCollection<T>.Count => (int)this.Count;
 
+        /// <summary>
+        ///     Gets the value at the specified index.
+        /// </summary>
+        /// <param name="index">
+        ///     The index of the value to retrieve.
+        /// </param>
+        /// <returns>
+        ///     The value at the specified <paramref name="index"/>.
+        /// </returns>
         public T this[int index] => this[(uint)index];
 
         /// <summary>
@@ -118,6 +127,7 @@ namespace Microsoft.Performance.SDK.Processing
             return this.currentEventsBuilderList.Count == BuilderListSize;
         }
 
+        /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
         {
             for(uint i = 0; i < this.Count; ++i)

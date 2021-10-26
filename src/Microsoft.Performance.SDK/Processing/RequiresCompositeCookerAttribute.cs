@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// </summary>
     [AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public sealed class RequiresCompositeCookerAttribute
-        : RequiresCookerAttribute
+        : Attribute
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="RequiresCompositeCookerAttribute"/>
@@ -32,5 +32,10 @@ namespace Microsoft.Performance.SDK.Processing
         {
             this.RequiredDataCookerPath = DataCookerPath.ForComposite(dataCookerId);
         }
+
+        /// <summary>
+        ///     Gets the path to a required data cooker for the given table.
+        /// </summary>
+        public DataCookerPath RequiredDataCookerPath { get; }
     }
 }

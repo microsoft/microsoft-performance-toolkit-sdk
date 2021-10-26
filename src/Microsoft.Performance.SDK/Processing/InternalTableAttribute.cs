@@ -21,7 +21,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The name of the static class method which builds a table.
         ///     BuildTable(Action&lt;ITableBuilder, object&gt;)
         /// </param>
-        /// <param name="isDataAvailableMethodName">
+        /// <param name="isDataAvailableFuncMethodName">
         ///     The name of the static class method which checks if the table has data.
         ///     IsDataAvailable(IDataExtensionRetrieval)
         /// </param>

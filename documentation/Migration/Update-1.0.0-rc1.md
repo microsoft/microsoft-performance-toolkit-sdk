@@ -10,6 +10,72 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
+## Obsolete Members
+
+All code decorated with the 'Obsolete' attribute has been removed.
+
+### DataCookerPath
+
+The following members have been removed from `DataCookerPath`:
+
+- field `DataCookerPath.Format`
+- constant `DataCookerPath.EmptySourceParserId`
+- constructor `public DataCookerPath(string)`
+- constructor `public DataCookerPath(string, string)`
+- property `DataCookerPath.CookerPath`
+- method `DataCookerPath.Parse(string)`
+- method `DataCookerPath.Create(string, string)`
+- method `DataCookerPath.GetSourceParserId(string)`
+- method `DataCookerPath.GetdataCookerId(string)`
+- method `DataCookerPath.IsWellFormed(string)`
+- method `DataCookerPath.SplitPath(string)`
+
+### DataOutputPath
+
+The following members have been removed from `DataOutputPath`:
+
+- field `DataOutputPath.Format`
+- method `DataOutputPath.Create(string)`
+- method `DataOutputPath.Create(string, string, string)`
+- property `DataOutputPath.Path`
+- method `DataOutputPath.Combine(string, string, string)`
+- method `DataOutputPath.GetSourceId(string)`
+- method `DataOutputPath.GetDataCookerId(string)`
+- method `DataOutputPath.GetDataOutputId(string)`
+- method `DataOutputPath.GetDataCookerPath(string)`
+- method `DataOutputPath.TryGetConstituents(string, out string, out string, out string)`
+- method `DataOutputPath.IsWellFormed(string)`
+- method `DataOutputPath.SplitPath(string)`
+
+### CustomDataProcessor
+
+The following members have been removed from `CustomDataProcessor`:
+
+- method `CustomDataProcessor.ProcessAsync(ILogger, IProgress<int>, CancellationToken)`
+
+### RequiresCookerAttribute
+
+This class has been removed. Please use `RequiresSourceCookerAttribute` or
+`RequiresCompositCookerAttribute`.
+
+### TableConfiguration
+
+The following members have been removed from `TableConfiguration`:
+
+- property `TableConfiguration.Layout`
+
+### CustomDataSourceBase
+
+This class has been removed. Please use `ProcessingSource`.
+
+### CustomDataSourceAttribute
+
+This class has been removed. Please use `ProcessingSourceAttribute`.
+
+### CustomDataSourceInfo
+
+This class has been removed. Please use `ProcessingSourceInfo`.
+
 ## SDK
 
 The following are required if you are using the `ProcessingSource` base class and
@@ -33,12 +99,29 @@ may also provide their own implementations.
 `CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
 
 ## Renamed Classes
+
 The following references must be changed:
 - `BaseSourceDataCooker` -> `SourceDataCooker`
 - `SourceParserBase` -> `SourceParser`
 - `BaseDataColumn` -> `DataColumn`
 - `CustomDataProcessorBase` -> `CustomDataProcessor`
 - `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
+- `CustomDataSourceBase` -> `ProcessingSource`
+- `CustomDataSourceAttribute` -> `ProcessingSourceAttribute`
+- `CustomDataSourceInfo` -> `ProcessingSourceInfo`
+
+## Inheritance
+
+The following classes have been sealed:
+
+- `ProcessingSourceInfo`
+- `ProcessingSourceAttribute`
+
+## Virtuality
+
+The following methods are no longer `virtual` and are now `abstract`:
+
+- `CustomDataProcessor.ProcessAsyncCore(IProgress<int>, CancellationToken)`
 
 ## IApplicationEnvironment
 

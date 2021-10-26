@@ -7,7 +7,6 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
-using DataCookerPath = Microsoft.Performance.SDK.Extensibility.DataCookerPath;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 {
@@ -34,7 +33,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public DataCookerPath Path { get; set; }
 
-        public override string Name => this.Path.CookerPath;
+        public override string Name => this.Path.ToString();
 
         protected override void Dispose(bool disposing)
         {

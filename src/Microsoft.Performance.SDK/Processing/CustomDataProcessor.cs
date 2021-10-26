@@ -131,6 +131,16 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
 
+        /// <summary>
+        ///     When overridden in a derived class, creates an instance of the service defined by the
+        ///     given table's <see cref="TableDescriptor.ServiceInterface"/>.
+        /// </summary>
+        /// <param name="table">
+        ///     The table whose service is to be created.
+        /// </param>
+        /// <returns>
+        ///     The created service, if the table specifies a service; <c>null</c> otherwise.
+        /// </returns>
         public virtual ITableService CreateTableService(TableDescriptor table)
         {
             if (table is null)
@@ -162,33 +172,6 @@ namespace Microsoft.Performance.SDK.Processing
             return true;
         }
 
-        /// <summary>
-        /// This method is deprecated. Please overwrite ProcessAsyncCore instead. The logger is now available through
-        /// the <see cref="Logger"/> property.
-        /// </summary>
-        /// <param name="logger">
-        ///     The logger.
-        /// </param>
-        /// <param name="progress">
-        ///     Provides a method of updating the application as to this
-        ///     processor's progress.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     A means of the application signalling to the processor that
-        ///     it should abort processing.
-        /// </param>
-        /// <returns>
-        ///     A <see cref="Task"/> representing the asynchronous operation.
-        /// </returns>
-        [Obsolete("This method will be removed by release 1.0. Please use ProcessAsyncCore instead.", false)]
-        public virtual Task ProcessAsync(
-            ILogger logger, 
-            IProgress<int> progress,
-            CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
         /// <inheritdoc />
         public Task ProcessAsync(
             IProgress<int> progress,
@@ -211,16 +194,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        protected virtual Task ProcessAsyncCore(
+        protected abstract Task ProcessAsyncCore(
             IProgress<int> progress,
-            CancellationToken cancellationToken)
-        {
-            // todo: make this abstract
-            // todo: remove this call to the old method, and throw NotImplementedException instead.
-            // temporarily call the old method to give some breathing room to developers
-            // these changes should be made when the original ProcessAsync obsolescence is made into an error
-            return ProcessAsync(this.Logger, progress, cancellationToken);
-        }
+            CancellationToken cancellationToken);
 
         /// <summary>
         ///     When overridden in a derived class, builds the requested

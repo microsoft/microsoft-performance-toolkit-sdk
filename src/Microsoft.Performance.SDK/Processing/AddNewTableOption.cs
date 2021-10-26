@@ -4,7 +4,7 @@
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Used with <see cref="IProcessorEnvironment.AddNewTable"/> to specify where
+    ///     Used with <see cref="IDynamicTableBuilder.AddDynamicTable(AddNewTableOption)"/> to specify where
     ///     the new table should be added.
     /// </summary>
     public enum AddNewTableOption

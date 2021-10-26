@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="category">
         ///     The category into which this table belongs. This parameter
         ///     may be null, at which point the table is assumed to be in
-        ///     the <see cref="TableAttribute.DefaultCategory"/> category.
+        ///     the default category.
         /// </param>
         /// <param name="isMetadataTable">
         ///     Whether the table is a metadata table.
@@ -161,8 +161,8 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     Gets or sets the <see cref="Type" /> representing the <see cref="ITableService"/>
-        ///     used by this table, if any. This property may be <c>null</c>. See
-        ///     <see cref="ITableBuilder.SetService(ITableService)"/>.
+        ///     used by this table, if any. This property may be <c>null</c>.
+        ///     See <see cref="ICustomDataProcessor.CreateTableService(TableDescriptor)"/>.
         /// </summary>
         public Type ServiceInterface { get; set; }
 

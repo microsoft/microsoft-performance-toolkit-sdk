@@ -40,8 +40,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="repository">
         ///     The repository that was used to process the data.
         /// </param>
+        /// <param name="tableToProcessorMap">
+        ///     The map of a <see cref="TableDescriptor"/> to the <see cref="ICustomDataProcessor"/> that produces
+        ///     that table.
+        /// </param>
         /// <param name="enabledTables">
         ///     The tables that were enabled during processing.
+        /// </param>
+        /// <param name="errors">
+        ///     The collection of errors, if any, that were encountered during processing.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="cookedDataRetrieval"/> is <c>null</c>.
@@ -248,7 +255,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     If this method returns <c>null</c> and you must check if the given 
         ///     descriptor has data, you can check if the <see cref="ITableBuilder"/> 
         ///     returned from <see cref="BuildTable(TableDescriptor)"/> 
-        ///     has a <see cref="ITableBuilder.RowCount"/> greater than 0."
+        ///     has a row count greater than 0."
         /// </remarks>
         /// <exception cref="TableException">
         ///     A exception occured when calling IsDataAvailable on the specified <paramref name="tableDescriptor"/>.

@@ -8,6 +8,9 @@ namespace Microsoft.Performance.SDK.Processing
 {
     public static partial class Projection
     {
+        /// <summary>
+        ///     Creates projections that are sensitive to the current viewport.
+        /// </summary>
         public static class ClipTimeToViewport
         {
             /// <summary>
@@ -70,6 +73,15 @@ namespace Microsoft.Performance.SDK.Processing
                 return (IProjection<int, TimeRange>)instance;
             }
 
+            /// <summary>
+            ///     Creates a new percent projection that is defined by the current viewport.
+            /// </summary>
+            /// <param name="timeRangeColumn">
+            ///     Original projection.
+            /// </param>
+            /// <returns>
+            ///     A viewport sensitive projection.
+            /// </returns>
             public static IProjection<int, TimeRange> CreatePercent(IProjection<int, TimeRange> timeRangeColumn)
             {
                 Guard.NotNull(timeRangeColumn, nameof(timeRangeColumn));

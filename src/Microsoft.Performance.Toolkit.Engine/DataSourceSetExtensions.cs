@@ -58,8 +58,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="filePath">
         ///     The path to the file to process.
         /// </param>
-        /// <param name="dataSourceType">
-        ///     The data source to use to process the file.
+        /// <param name="processingSourceType">
+        ///     The processing source to use to process the file.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="filePath"/> is <c>null</c>.
@@ -79,11 +79,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="UnsupportedDataSourceException">
-        ///     The specified <paramref name="dataSourceType"/> cannot handle
+        ///     The specified <paramref name="processingSourceType"/> cannot handle
         ///     the given file.
         /// </exception>
         /// <exception cref="UnsupportedProcessingSourceException">
-        ///     The specified <paramref name="dataSourceType"/> is unknown.
+        ///     The specified <paramref name="processingSourceType"/> is unknown.
         /// </exception>
         public static void AddFile(this DataSourceSet self, string filePath, Type processingSourceType)
         {
@@ -102,8 +102,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <returns>
         ///     <c>true</c> if the file has been added for processing;
         ///     <c>false</c> if the file is not valid, cannot be processed,
-        ///     or the instance has already been processed. Note that <c>false</c>
-        ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
+        ///     or the instance has already been processed.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -128,8 +127,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         /// <returns>
         ///     <c>true</c> if the file has been added for processing by this <see cref="IProcessingSource"/>;
-        ///     <c>false</c> otherwise. Note that <c>false</c>
-        ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
+        ///     <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -142,9 +140,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Adds the given files to this instance for processing by
         ///     the specific source. All of the files will be processed
-        ///     by the same instance of data processor. Use <see cref="AddFile(string, Type)"/>
+        ///     by the same instance of data processor. Use <see cref="AddFile(DataSourceSet, string, Type)"/>
         ///     to ensure each file is processed by a different instance, or
-        ///     use multiple calls to <see cref="AddFiles(IEnumerable{string}, Type)"/>.
+        ///     use multiple calls to <see cref="AddFiles(DataSourceSet, IEnumerable{string}, Type)"/>.
         /// </summary>
         /// <param name="self">
         ///     The <see cref="Engine"/> instance.
@@ -187,7 +185,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Attempts to add the given files to this instance. All of
         ///     the files will be processed by the same instance of 
-        ///     data processor. Use <see cref="AddFile"/> to ensure
+        ///     data processor. Use <see cref="AddFile(DataSourceSet, string ,Type)"/> to ensure
         ///     each file is processed by a different instance.
         /// </summary>
         /// <param name="self">
@@ -195,6 +193,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         /// <param name="filePaths">
         ///     The paths to the files to add.
+        /// </param>
+        /// <param name="processingSourceType">
+        ///     The data source to use to process the file.
         /// </param>
         /// <returns>
         ///     <c>true</c> if the files are added;

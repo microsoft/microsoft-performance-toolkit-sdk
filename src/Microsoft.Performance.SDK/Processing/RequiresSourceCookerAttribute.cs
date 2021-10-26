@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// </summary>
     [AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public sealed class RequiresSourceCookerAttribute
-        : RequiresCookerAttribute
+        : Attribute
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="RequiresSourceCookerAttribute"/>
@@ -35,5 +35,10 @@ namespace Microsoft.Performance.SDK.Processing
         {
             this.RequiredDataCookerPath = DataCookerPath.ForSource(sourceParserId, dataCookerId);
         }
+
+        /// <summary>
+        ///     Gets the path to a required data cooker for the given table.
+        /// </summary>
+        public DataCookerPath RequiredDataCookerPath { get;  }
     }
 }

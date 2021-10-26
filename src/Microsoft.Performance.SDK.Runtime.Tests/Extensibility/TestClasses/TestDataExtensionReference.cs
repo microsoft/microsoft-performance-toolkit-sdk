@@ -36,7 +36,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public DataExtensionAvailability InitialAvailability { get; set; }
 
-        public Action<IDataExtensionDependencyStateSupport, IDataExtensionReference> performAdditionalDataExtensionValidation;
+        public Action<IDataExtensionDependencyStateSupport, IDataExtensionReference> performAdditionalDataExtensionValidation = null;
         public virtual void PerformAdditionalDataExtensionValidation(
             IDataExtensionDependencyStateSupport dependencyStateSupport,
             IDataExtensionReference requiredDataExtension)
@@ -73,7 +73,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             }
         }
 
-        public Action<IDataExtensionRepository> processDependencies;
+        public Action<IDataExtensionRepository> processDependencies = null;
 
         public void ProcessDependencies(
             IDataExtensionRepository availableDataExtensions)

@@ -7,6 +7,9 @@ namespace Microsoft.Performance.SDK.Processing
 {
     public static partial class Projection
     {
+        /// <summary>
+        ///     Defines projections that project their values as percentages.
+        /// </summary>
         public static class Percent
         {
             /// <summary>

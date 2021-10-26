@@ -15,6 +15,9 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
     /// </summary>
     public static class PlugInConfigurationSerializer
     {
+        /// <summary>
+        ///     The default name of a plugin configuration file.
+        /// </summary>
         public static readonly string DefaultFileName = "PlugInConfiguration.json";
 
         /// <summary>

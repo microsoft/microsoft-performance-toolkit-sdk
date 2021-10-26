@@ -275,8 +275,12 @@ namespace Microsoft.Performance.SDK.Processing
                 isInternalTable = true;
             }
 
-            var cookerAttributes = type.GetCustomAttributes<RequiresCookerAttribute>();
-            foreach (var cooker in cookerAttributes)
+            foreach (var cooker in type.GetCustomAttributes<RequiresSourceCookerAttribute>())
+            {
+                tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
+            }
+
+            foreach (var cooker in type.GetCustomAttributes<RequiresCompositeCookerAttribute>())
             {
                 tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
             }
@@ -298,7 +302,8 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(type, nameof(type));
 
             TableDescriptor tableDescriptor = null;
-            IEnumerable<RequiresCookerAttribute> cookerAttributes = null;
+            IEnumerable<RequiresSourceCookerAttribute> sourceCookerAttributes = null;
+            IEnumerable<RequiresCompositeCookerAttribute> compositeCookerAttributes = null;
 
             var tableDescriptorPropertyInfo = type.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Static);
             if (tableDescriptorPropertyInfo != null)
@@ -321,8 +326,9 @@ namespace Microsoft.Performance.SDK.Processing
                     return null;
                 }
 
-                // Allow [RequiresCooker] attribute on the property that returns the TableDescriptor
-                cookerAttributes = tableDescriptorPropertyInfo.GetCustomAttributes<RequiresCookerAttribute>();
+                // Allow [RequiresSourceCooker] and/or [RequiresCompositeCooker] attribute on the property that returns the TableDescriptor
+                sourceCookerAttributes = tableDescriptorPropertyInfo.GetCustomAttributes<RequiresSourceCookerAttribute>();
+                compositeCookerAttributes = tableDescriptorPropertyInfo.GetCustomAttributes<RequiresCompositeCookerAttribute>();
                 tableDescriptor = (TableDescriptor)getMethodInfo.Invoke(null, null);
             }
             else
@@ -339,8 +345,9 @@ namespace Microsoft.Performance.SDK.Processing
                     return null;
                 }
 
-                // Allow [RequiresCooker] attribute on the property that returns the TableDescriptor
-                cookerAttributes = tableDescriptorFieldInfo.GetCustomAttributes<RequiresCookerAttribute>();
+                // Allow [RequiresSourceCooker] and/or [RequiresCompositeCooker] attribute on the property that returns the TableDescriptor
+                sourceCookerAttributes = tableDescriptorFieldInfo.GetCustomAttributes<RequiresSourceCookerAttribute>();
+                compositeCookerAttributes = tableDescriptorFieldInfo.GetCustomAttributes<RequiresCompositeCookerAttribute>();
                 tableDescriptor = tableDescriptorFieldInfo.GetValue(null) as TableDescriptor;
             }
 
@@ -356,7 +363,12 @@ namespace Microsoft.Performance.SDK.Processing
                 tableConfigSerializer,
                 logger);
 
-            foreach (var cooker in cookerAttributes)
+            foreach (var cooker in sourceCookerAttributes)
+            {
+                tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
+            }
+
+            foreach (var cooker in compositeCookerAttributes)
             {
                 tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
             }

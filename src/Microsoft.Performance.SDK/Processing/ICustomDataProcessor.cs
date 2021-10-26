@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     Gets information about the processed data source.
-        ///     This method will be called after <see cref="ProcessAsync(ILogger, IProgress{int}, CancellationToken)"/>
+        ///     This method will be called after <see cref="ProcessAsync(IProgress{int}, CancellationToken)"/>
         ///     has completed successfully.
         /// </summary>
         /// <returns>
@@ -99,8 +99,8 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     This method is used to communicate whether the given table has any
         ///     data to show as a result of processing. This method is never called
-        ///     before <see cref="nameof(ICustomDataProcessor.ProcessAsync)"/>. If
-        ///     this method returns <c>false</c>, then the table will not be exposed.
+        ///     before ICustomDataProcessor.ProcessAsync. If this method returns <c>false</c>,
+        ///     then the table will not be exposed.
         /// </summary>
         /// <param name="table">
         ///     The table being interrogated.

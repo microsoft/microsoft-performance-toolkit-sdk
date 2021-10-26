@@ -48,6 +48,12 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Initializes a new instance of the <see cref="DataSourceAttribute"/>
         ///     class.
         /// </summary>
+        /// <param name="type">
+        ///     The type of the <see cref="IDataSource"/> corresponding to this attribute.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="type"/> is <c>null</c>.
+        /// </exception>
         protected DataSourceAttribute(Type type)
             : this(type, "No description.")
         {
@@ -57,6 +63,9 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Initializes a new instance of the <see cref="DataSourceAttribute"/>
         ///     class.
         /// </summary>
+        /// <param name="type">
+        ///     The type of the <see cref="IDataSource"/> corresponding to this attribute.
+        /// </param>
         /// <param name="description">
         ///     A description of the Data Source denoted by this attribute.
         /// </param>
@@ -64,6 +73,8 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="description"/> is whitespace.
         /// </exception>
         /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="type"/> is <c>null</c>.
+        ///     - or -
         ///     <paramref name="description"/> is null.
         /// </exception>
         protected DataSourceAttribute(Type type, string description)
