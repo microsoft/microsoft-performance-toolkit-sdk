@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace PlugInConfigurationEditor
+namespace PluginConfigurationEditor
 {
     internal static class Logger
     {

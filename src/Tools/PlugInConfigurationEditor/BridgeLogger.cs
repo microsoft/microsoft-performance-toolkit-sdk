@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Performance.SDK.Processing;
 
-namespace PlugInConfigurationEditor
+namespace PluginConfigurationEditor
 {
     internal class BridgeLogger
         : ILogger

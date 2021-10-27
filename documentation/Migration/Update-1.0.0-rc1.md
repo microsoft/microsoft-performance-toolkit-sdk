@@ -19,6 +19,10 @@ The following references must be changed:
 - `BaseDataColumn` -> `DataColumn`
 - `CustomDataProcessorBase` -> `CustomDataProcessor`
 - `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
+- `PlugInConfiguration` -> `PluginConfiguration`
+- `PlugInConfigurationExtensions` -> `PluginConfigurationExtensions`
+- `PlugInConfigurationSerializer` -> `PluginConfigurationSerializer`
+- `PlugInConfigurationValidation` -> `PluginConfigurationValidation`
 - `IViewportSensitiveProjection` -> `IVisibleDomainSensitiveProjection`
 - `ViewportSensitiveProjection` -> `VisibleDomainSensitiveProjection`
 - `IVisibleTableRegion` -> `IVisibleDomainRegion`
@@ -230,6 +234,13 @@ In addition to this class being renamed to `IVisibleDomainRegion`, the following
 - `AggregateRowsInViewport` -> `AggregateVisibleRows`
 
 Additionally, the properties `TableRowStart ` and `TableRowCount` are removed.
+
+## Plugin Configurations
+All references to "plug-in" and "PlugIn" have been changed to lowercase "plugin." In addition to the name
+changes listed above, the follow references have been changed:
+
+- The `Microsoft.Performance.SDK.PlugInConfiguration` namespace has changed to `Microsoft.Performance.SDK.PluginConfiguration`.
+- `PlugInConfiguration.PlugInName` has beeen changed to `PluginConfiguration.PluginName`
 
 # Suggested Changes
 

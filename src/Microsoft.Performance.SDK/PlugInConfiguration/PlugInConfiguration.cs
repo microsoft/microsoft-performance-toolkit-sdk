@@ -7,25 +7,25 @@ using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using NuGet.Versioning;
 
-namespace Microsoft.Performance.SDK.PlugInConfiguration
+namespace Microsoft.Performance.SDK.PluginConfiguration
 {
     /// <summary>
-    ///     A plug-in configuration exposes a set of option and subscribers to those options.
+    ///     A plugin configuration exposes a set of option and subscribers to those options.
     /// </summary>
-    public class PlugInConfiguration
+    public class PluginConfiguration
     {
         /// <summary>
-        ///     The plug-in configuration is English and case-sensitive.
+        ///     The plugin configuration is English and case-sensitive.
         /// </summary>
         public static readonly IEqualityComparer<string> Comparer = StringComparer.InvariantCulture;
 
         private readonly List<ConfigurationOption> options;
 
         /// <summary>
-        ///     Create a plug-in configuration.
+        ///     Create a plugin configuration.
         /// </summary>
         /// <param name="name">
-        ///     Name of the plug-in.
+        ///     Name of the plugin.
         /// </param>
         /// <param name="version">
         ///     Version of the configuration.
@@ -33,29 +33,29 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         /// <param name="options">
         ///     A set of option to include in the configuration.
         /// </param>
-        public PlugInConfiguration(string name, SemanticVersion version, ISet<ConfigurationOption> options)
+        public PluginConfiguration(string name, SemanticVersion version, ISet<ConfigurationOption> options)
         {
             Guard.NotNullOrWhiteSpace(name, nameof(name));
             Guard.NotNull(version, nameof(version));
             Guard.NotNull(options, nameof(options));
 
-            if (!PlugInConfigurationValidation.ValidateElementName(name))
+            if (!PluginConfigurationValidation.ValidateElementName(name))
             {
                 throw new ArgumentException(message:
-                    "The name is invalid: " + PlugInConfigurationValidation.ValidCharactersMessage,
+                    "The name is invalid: " + PluginConfigurationValidation.ValidCharactersMessage,
                     nameof(name));
             }
 
-            this.PlugInName = name;
+            this.PluginName = name;
             this.Version = version;
             this.options = new List<ConfigurationOption>(options);
             this.Options = this.options.AsReadOnly();
         }
 
         /// <summary>
-        ///     Gets the name of the plug-in to which this configuration belongs.
+        ///     Gets the name of the plugin to which this configuration belongs.
         /// </summary>
-        public string PlugInName { get; internal set; }
+        public string PluginName { get; internal set; }
 
         /// <summary>
         /// Gets the configuration file version.
@@ -106,7 +106,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         /// </returns>
         public bool OptionEnabled(string optionName, string applicationName, string runtimeName)
         {
-            if (!PlugInConfigurationValidation.ValidateElementName(optionName))
+            if (!PluginConfigurationValidation.ValidateElementName(optionName))
             {
                 return false;
             }
@@ -117,8 +117,8 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
                 return false;
             }
 
-            if (!string.IsNullOrWhiteSpace(applicationName) && 
-                PlugInConfigurationValidation.ValidateElementName(applicationName))
+            if (!string.IsNullOrWhiteSpace(applicationName) &&
+                PluginConfigurationValidation.ValidateElementName(applicationName))
             {
                 if (option.Applications.Contains(applicationName, Comparer))
                 {
@@ -127,7 +127,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
             }
 
             if (!string.IsNullOrWhiteSpace(runtimeName) &&
-                PlugInConfigurationValidation.ValidateElementName(runtimeName))
+                PluginConfigurationValidation.ValidateElementName(runtimeName))
             {
                 return option.Runtimes.Contains(runtimeName, Comparer);
             }
@@ -137,15 +137,15 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
     }
 
     /// <summary>
-    ///     Some extensions for PlugInConfiguration objects.
+    ///     Some extensions for <see cref="PluginConfiguration"/> objects.
     /// </summary>
-    public static class PlugInConfigurationExtensions
+    public static class PluginConfigurationExtensions
     {
         /// <summary>
         ///     Check if an option is enabled for an application or a runtime.
         /// </summary>
         /// <param name="configuration">
-        ///     The plug-in configuration.
+        ///     The plugin configuration.
         /// </param>
         /// <param name="optionName">
         ///     Name of the option.
@@ -158,7 +158,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         ///     true if the option is enabled; false otherwise.
         /// </returns>
         public static bool OptionEnabled(
-            this PlugInConfiguration configuration,
+            this PluginConfiguration configuration,
             string optionName,
             IApplicationEnvironment environment)
         {

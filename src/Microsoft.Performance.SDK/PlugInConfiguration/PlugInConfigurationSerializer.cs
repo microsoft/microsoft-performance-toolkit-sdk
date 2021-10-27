@@ -8,13 +8,20 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.SDK.PlugInConfiguration
+namespace Microsoft.Performance.SDK.PluginConfiguration
 {
     /// <summary>
-    ///     Includes methods to de/serializing plug-in configurations.
+    ///     Includes methods to de/serializing plugin configurations.
     /// </summary>
-    public static class PlugInConfigurationSerializer
+    public static class PluginConfigurationSerializer
     {
+        /// <summary>
+        ///     The default file name for a plugin configuration.
+        /// </summary>
+        /// <remarks>
+        ///     This does not follow the standard lowercase "plugin" case-convention
+        ///     in order to remain backwards compatible with previous plugin configurations.
+        /// </remarks>
         public static readonly string DefaultFileName = "PlugInConfiguration.json";
 
         /// <summary>
@@ -27,9 +34,9 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         ///     Used to log any messages.
         /// </param>
         /// <returns>
-        ///     A <see cref="PlugInConfiguration"/> on success; <c>null</c> on failure.
+        ///     A <see cref="PluginConfiguration"/> on success; <c>null</c> on failure.
         /// </returns>
-        public static PlugInConfiguration ReadFromDefaultFile(Type processingSourceType, ILogger logger)
+        public static PluginConfiguration ReadFromDefaultFile(Type processingSourceType, ILogger logger)
         {
             var assemblyPath = processingSourceType.Assembly.Location;
             var directory = Path.GetDirectoryName(assemblyPath);
@@ -47,9 +54,9 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         ///     Used to log any errors.
         /// </param>
         /// <returns>
-        ///     A PlugInConfiguration on success; <c>null</c> on failure.
+        ///     A <see cref="PluginConfiguration"/> on success; <c>null</c> on failure.
         /// </returns>
-        public static PlugInConfiguration ReadFromDefaultFile(string plugInDirectory, ILogger logger)
+        public static PluginConfiguration ReadFromDefaultFile(string plugInDirectory, ILogger logger)
         {
             var pathToDefaultConfiguration = Path.Combine(plugInDirectory, DefaultFileName);
             if (!File.Exists(pathToDefaultConfiguration))
@@ -73,9 +80,9 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         ///     Used to log any errors.
         /// </param>
         /// <returns>
-        ///     A PlugInConfiguration on success; <c>null</c> on failure.
+        ///     A <see cref="PluginConfiguration"/> on success; <c>null</c> on failure.
         /// </returns>
-        public static PlugInConfiguration ReadFromStream(Stream configurationStream, ILogger logger)
+        public static PluginConfiguration ReadFromStream(Stream configurationStream, ILogger logger)
         {
             Guard.NotNull(configurationStream, nameof(configurationStream));
 
@@ -106,27 +113,27 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
                 }
             }
 
-            PlugInConfigurationDTO plugInConfigurationDTO;
+            PluginConfigurationDTO plugInConfigurationDTO;
 
             try
             {
-                var serializer = new DataContractJsonSerializer(typeof(PlugInConfigurationDTO));
+                var serializer = new DataContractJsonSerializer(typeof(PluginConfigurationDTO));
 
-                plugInConfigurationDTO = serializer.ReadObject(configurationStream) as PlugInConfigurationDTO;
+                plugInConfigurationDTO = serializer.ReadObject(configurationStream) as PluginConfigurationDTO;
                 if (plugInConfigurationDTO == null)
                 {
-                    logger?.Error("Unable to deserialize Plug-In configuration.");
+                    logger?.Error("Unable to deserialize plugin configuration.");
                     return null;
                 }
             }
             catch (InvalidDataContractException e)
             {
-                logger?.Error(e, "Invalid data contract - unable to load Plug-In configuration.");
+                logger?.Error(e, "Invalid data contract - unable to load plugin configuration.");
                 return null;
             }
             catch (SerializationException e)
             {
-                logger?.Error(e, "Exception while deserializing Plug-In configuration.");
+                logger?.Error(e, "Exception while deserializing plugin configuration.");
                 return null;
             }
 
@@ -134,7 +141,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         }
 
         /// <summary>
-        ///     Write a <see cref="PlugInConfiguration"/> to a stream.
+        ///     Write a <see cref="PluginConfiguration"/> to a stream.
         /// </summary>
         /// <param name="configuration">
         ///     Configuration to write.
@@ -148,7 +155,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         /// <returns>
         ///     <c>true</c> when written successfully; <c>false</c> otherwise.
         /// </returns>
-        public static bool WriteToStream(PlugInConfiguration configuration, Stream configurationStream, ILogger logger)
+        public static bool WriteToStream(PluginConfiguration configuration, Stream configurationStream, ILogger logger)
         {
             Guard.NotNull(configurationStream, nameof(configurationStream));
             Guard.NotNull(configuration, nameof(configuration));
@@ -156,7 +163,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
             if (!configurationStream.CanWrite)
             {
                 throw new ArgumentException(message:
-                    "Unable to write plug-in configuration. Cannot write to provided stream.",
+                    "Unable to write plugin configuration. Cannot write to provided stream.",
                     paramName: nameof(configurationStream));
             }
 
@@ -167,13 +174,13 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
                 using (var writer = JsonReaderWriterFactory.CreateJsonWriter(
                     configurationStream, Encoding.Default, false, true, "    "))
                 {
-                    var serializer = new DataContractJsonSerializer(typeof(PlugInConfigurationDTO));
+                    var serializer = new DataContractJsonSerializer(typeof(PluginConfigurationDTO));
                     serializer.WriteObject(writer, outputConfiguration);
                 }
             }
             catch (Exception e)
             {
-                logger?.Error($"Failed to write Plug-In configuration: {e.Message}");
+                logger?.Error($"Failed to write plugin configuration: {e.Message}");
                 return false;
             }
 

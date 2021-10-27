@@ -3,7 +3,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Performance.SDK.PlugInConfiguration
+namespace Microsoft.Performance.SDK.PluginConfiguration
 {
     [DataContract]
     internal class ConfigurationOptionDTO

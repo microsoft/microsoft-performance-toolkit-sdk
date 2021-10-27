@@ -37,8 +37,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     ///     This class registers to with a provider to receive Types that might be <see cref="IProcessingSource"/>s.
     ///     The types are evaluated and stored as a <see cref="ProcessingSourceReference"/> when applicable.
     /// </summary>
-    public sealed class ReflectionPlugInCatalog
-        : IPlugInCatalog,
+    public sealed class ReflectionProcessingSourceCatalog
+        : IProcessingSourceCatalog,
           IExtensionTypeObserver
     {
         private TryCreateProcessingSourceReferenceDelegate referenceFactory;
@@ -50,7 +50,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         private bool isDisposed;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ReflectionPlugInCatalog"/>
+        ///     Initializes a new instance of the <see cref="ReflectionProcessingSourceCatalog"/>
         ///     class, registering to receive extension updates with the given
         ///     discovery interface.
         /// </summary>
@@ -60,7 +60,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="extensionDiscovery"/> is <c>null</c>.
         /// </exception>
-        public ReflectionPlugInCatalog(IExtensionTypeProvider extensionDiscovery)
+        public ReflectionProcessingSourceCatalog(IExtensionTypeProvider extensionDiscovery)
             : this(
                   extensionDiscovery,
                   ProcessingSourceReference.TryCreateReference)
@@ -68,7 +68,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ReflectionPlugInCatalog"/>
+        ///     Initializes a new instance of the <see cref="ReflectionProcessingSourceCatalog"/>
         ///     class, registering to receive extension updates with the given
         ///     discovery interface.
         /// </summary>
@@ -84,7 +84,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     - or -
         ///     <paramref name="referenceFactory"/> is <c>null</c>.
         /// </exception>
-        public ReflectionPlugInCatalog(
+        public ReflectionProcessingSourceCatalog(
             IExtensionTypeProvider extensionDiscovery,
             TryCreateProcessingSourceReferenceDelegate referenceFactory)
         {
@@ -101,7 +101,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         }
 
         /// <inheritdoc />
-        public IEnumerable<ProcessingSourceReference> PlugIns
+        public IEnumerable<ProcessingSourceReference> ProcessingSources
         {
             get
             {
@@ -186,7 +186,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             if (disposing)
             {
-                foreach (var cds in this.PlugIns)
+                foreach (var cds in this.ProcessingSources)
                 {
                     cds.SafeDispose();
                 }
@@ -202,7 +202,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         {
             if (this.isDisposed)
             {
-                throw new ObjectDisposedException(nameof(ReflectionPlugInCatalog));
+                throw new ObjectDisposedException(nameof(ReflectionProcessingSourceCatalog));
             }
         }
     }
