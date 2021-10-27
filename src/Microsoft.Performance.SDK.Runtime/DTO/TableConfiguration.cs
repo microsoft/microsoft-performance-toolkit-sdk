@@ -78,10 +78,10 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         public Guid GraphFilterColumnGuid { get; set; }
 
         /// <summary>
-        ///     Gets or sets an RTF string that is used to show the help information for this table.
+        ///     Gets or sets an string that is used for information about the table configuration.
         /// </summary>
         [DataMember(Order = 12)]
-        public string HelpText { get; set; }
+        public string Description { get; set; }
 
         /// <summary>
         ///     Gets or sets the collection of query entries that are used to highlight in this table.

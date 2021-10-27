@@ -198,7 +198,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.AreEqual(preV1config.GraphFilterThresholdValue, newConfig.GraphFilterThresholdValue);
                 Assert.AreEqual(preV1config.GraphFilterColumnName, newConfig.GraphFilterColumnName);
                 Assert.AreEqual(preV1config.GraphFilterColumnGuid, newConfig.GraphFilterColumnGuid);
-                Assert.AreEqual(preV1config.HelpText, newConfig.HelpText);                
+                Assert.AreEqual(preV1config.HelpText, newConfig.Description);                
 
                 void CompareInnerValues<T, T2>(IEnumerable<T> select1, IEnumerable<T2> select2)
                 {

@@ -92,7 +92,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 GraphFilterThresholdValue = dto.GraphFilterThresholdValue,
                 GraphFilterColumnName = dto.GraphFilterColumnName,
                 GraphFilterColumnGuid = dto.GraphFilterColumnGuid,
-                HelpText = dto.HelpText,
+                Description = dto.Description,
             };
 
             if (dto.HighlightEntries != null)
@@ -141,7 +141,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 GraphFilterThresholdValue = configuration.GraphFilterThresholdValue,
                 GraphFilterColumnName = configuration.GraphFilterColumnName,
                 GraphFilterColumnGuid = configuration.GraphFilterColumnGuid,
-                HelpText = configuration.HelpText,
+                Description = configuration.Description,
                 HighlightEntries = configuration.HighlightEntries.Select(entry => entry.ConvertToDto()).ToArray(),
             };
 

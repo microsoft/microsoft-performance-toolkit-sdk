@@ -186,7 +186,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
                 GraphFilterThresholdValue = this.GraphFilterThresholdValue,
                 GraphFilterColumnName = this.GraphFilterColumnName,
                 GraphFilterColumnGuid = this.GraphFilterColumnGuid,
-                HelpText = this.HelpText,
+                Description = this.HelpText,
                 HighlightEntries = this.HighlightEntries,
                 Columns = this.Columns,
                 ColumnRoles = newColumnRoles
