@@ -180,7 +180,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             Assert.AreEqual(sourceSession.RegisteredSourceDataCookers.Count, 4);
 
-            sourceSession.ProcessSource(new NullLogger(), new TestProgress(), CancellationToken.None);
+            TestProgress progress = new TestProgress();
+            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
 
             // Make sure each cooker received a BeginDataCooking call
             Assert.AreEqual(sourceDataCooker1.BeginDataCookingCallCount, 1);
@@ -220,6 +221,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // TestRecord 500 should not ever be delivered
             int expectedReceivedCount = testRecords.Count + 2 - 1;
             Assert.AreEqual(expectedReceivedCount, dataCookerContext.CountOfTestRecordsReceived);
+
+            // Ensure progress is reported incrementally after each pass
+            for (int processPass = 0; processPass < progress.ReportedValues.Count; processPass++)
+			{
+                Assert.AreEqual(progress.ReportedValues[processPass], 100 * (processPass + 1) / progress.ReportedValues.Count);
+			}
         }
 
         [TestMethod]
@@ -252,12 +259,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             sourceParser.TestRecords = testRecords;
 
-            sourceSession.ProcessSource(new NullLogger(), new TestProgress(), CancellationToken.None);
+            TestProgress progress = new TestProgress();
+            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
 
             Assert.IsFalse(sourceParser.ReceivedAllEventsConsumed);
             Assert.IsTrue(
                 sourceParser.RequestedDataKeys.Count == 
                 sourceDataCooker1.DataKeys.Count + sourceDataCooker2.DataKeys.Count);
+
+            // Ensure progress is reported incrementally after each pass
+            for (int processPass = 0; processPass < progress.ReportedValues.Count; processPass++)
+            {
+                Assert.AreEqual(progress.ReportedValues[processPass], 100 * (processPass + 1) / progress.ReportedValues.Count);
+            }
         }
         
         [TestMethod]
@@ -291,10 +305,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             sourceParser.TestRecords = testRecords;
 
-            sourceSession.ProcessSource(new NullLogger(), new TestProgress(), CancellationToken.None);
+            TestProgress progress = new TestProgress();
+            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
 
             Assert.IsTrue(sourceParser.ReceivedAllEventsConsumed);
             Assert.IsTrue(sourceParser.RequestedDataKeys.Count == sourceDataCooker1.DataKeys.Count);
+
+            // Ensure progress is reported incrementally after each pass
+            for (int processPass = 0; processPass < progress.ReportedValues.Count; processPass++)
+            {
+                Assert.AreEqual(progress.ReportedValues[processPass], 100 * (processPass + 1) / progress.ReportedValues.Count);
+            }
         }
     }
 }

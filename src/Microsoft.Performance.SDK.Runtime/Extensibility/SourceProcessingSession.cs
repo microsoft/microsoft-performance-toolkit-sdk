@@ -58,10 +58,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public override void ProcessSource(ILogger logger, IProgress<int> progress, CancellationToken cancellationToken)
+        public override void ProcessSource(ILogger logger, IProgress<int> totalProgress, CancellationToken cancellationToken)
         {
             Guard.NotNull(logger, nameof(logger));
-            Guard.NotNull(progress, nameof(progress));
+            Guard.NotNull(totalProgress, nameof(totalProgress));
             Guard.NotNull(cancellationToken, nameof(cancellationToken));
 
             int countOfPassesToProcess = this.ScheduleSourceDataCookers();
@@ -74,7 +74,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             {
                 this.currentPassIndex = 0;
                 this.InitializeForSourceParsing();
-                this.SourceParser.ProcessSource(this, logger, progress, cancellationToken);
+                this.SourceParser.ProcessSource(this, logger, totalProgress, cancellationToken);
                 this.currentPassIndex = InvalidPass;
                 return;
             }
@@ -98,14 +98,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 }
             }
 
+            DataProcessorProgress passProgress = new DataProcessorProgress();
+            int currentPassProgress = 0;
+
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
                 this.currentPassIndex = passIndex;
 
                 this.InitializeForSourceParsing();
 
-                // todo:we'll need a different IProgress sent in when there are multiple passes
-                this.SourceParser.ProcessSource(this, logger, progress, cancellationToken);
+                this.SourceParser.ProcessSource(this, logger, passProgress, cancellationToken);
+
+                currentPassProgress += passProgress.CurrentProgress;
+                totalProgress.Report(currentPassProgress / countOfPassesToProcess);
 
                 foreach (var cooker in this.sourceCookersByPass[passIndex])
                 {
