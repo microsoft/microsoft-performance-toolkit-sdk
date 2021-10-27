@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

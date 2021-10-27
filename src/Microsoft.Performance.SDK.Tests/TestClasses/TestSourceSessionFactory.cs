@@ -5,7 +5,7 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestSourceSessionFactory
         : ISourceSessionFactory

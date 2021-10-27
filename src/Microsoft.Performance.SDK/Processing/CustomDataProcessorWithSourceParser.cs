@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
+using Microsoft.Performance.SDK.Extensibility.Exceptions;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -53,10 +54,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.SourceProcessingSession = this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this);
             this.extensibilitySupport = this.ProcessorEnvironment.CreateDataProcessorExtensibilitySupport(this);
 
-            foreach (var metadataTable in metadataTables)
-            {
-                ProcessTableForExtensibility(metadataTable);
-            }
+            EnableInternalTables(allTablesMapping.Keys);
         }
 
         /// <summary>
@@ -74,10 +72,6 @@ namespace Microsoft.Performance.SDK.Processing
                   other.TableDescriptorToBuildAction,
                   other.EnabledTables)
         {
-            foreach (var td in other.extensibilitySupport.GetAllRequiredTables())
-            {
-                EnableTable(td);
-            }
         }
 
         /// <inheritdoc cref="ICustomDataProcessorWithSourceParser{T,TContext,TKey}"/>
@@ -98,18 +92,12 @@ namespace Microsoft.Performance.SDK.Processing
             return this.SourceParser.DataSourceInfo;
         }
 
-        /// <summary>
-        /// Enables a source data cooker on the <see cref="SourceProcessingSession"/>.
-        /// </summary>
-        /// <param name="sourceDataCookerFactory">Source data cooker factory</param>
+        /// <inheritdoc/>
         public void EnableCooker(ISourceDataCookerFactory sourceDataCookerFactory)
         {
             Guard.NotNull(sourceDataCookerFactory, nameof(sourceDataCookerFactory));
 
-            if (this.SourceProcessingSession == null)
-            {
-                return;
-            }
+            Debug.Assert(this.SourceProcessingSession != null);
 
             EnableCookerCore(sourceDataCookerFactory);
 
@@ -117,7 +105,8 @@ namespace Microsoft.Performance.SDK.Processing
             {
                 if (!StringComparer.Ordinal.Equals(cooker.Path.SourceParserId, this.SourceParserId))
                 {
-                    Debug.Assert(false, "Attempting to enable a source data cooker on the wrong source parser.");
+                    throw new ArgumentException(
+                        "The given cooker is not applicable to this data processor.");
                 }
                 else
                 {
@@ -127,7 +116,7 @@ namespace Microsoft.Performance.SDK.Processing
             }
             else
             {
-                throw new ArgumentException("The given cooker reference is not applicable to this data processor.");
+                throw new ArgumentException("The given cooker is not applicable to this data processor.");
             }
         }
 
@@ -137,16 +126,26 @@ namespace Microsoft.Performance.SDK.Processing
         /// </remarks>
         /// <exception cref="ArgumentException">
         ///     <paramref name="dataOutputPath"/> does not target the data processor.
+        ///     - or -
+        ///     <paramref name="dataOutputPath"/>'s data cooker is not available.
         /// </exception>
         public TOutput QueryOutput<TOutput>(DataOutputPath dataOutputPath)
         {
             if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
             {
                 throw new ArgumentException(
-                    $"{nameof(dataOutputPath)} does not target this data processor.");
+                    message: $"{nameof(dataOutputPath)} does not target this data processor.",
+                    paramName: nameof(dataOutputPath));
             }
 
             var dataCooker = this.SourceProcessingSession.GetSourceDataCooker(dataOutputPath.CookerPath);
+            if (dataCooker == null)
+            {
+                throw new ArgumentException(
+                    message: $"Requested data cooker is not available: {dataOutputPath.CookerPath}",
+                    paramName: nameof(dataOutputPath));
+            }
+
             return dataCooker.QueryOutput<TOutput>(dataOutputPath);
         }
 
@@ -208,15 +207,21 @@ namespace Microsoft.Performance.SDK.Processing
         /// </remarks>
         public bool TryQueryOutput(DataOutputPath dataOutputPath, out object result)
         {
+            result = default;
+
             if (!StringComparer.Ordinal.Equals(dataOutputPath.SourceParserId, SourceParserId))
             {
-                result = default;
                 return false;
             }
 
             try
             {
                 var dataCooker = this.SourceProcessingSession.GetSourceDataCooker(dataOutputPath.CookerPath);
+                if (dataCooker is null)
+                {
+                    return false;
+                }
+
                 result = dataCooker.QueryOutput(dataOutputPath);
                 return true;
             }
@@ -224,8 +229,18 @@ namespace Microsoft.Performance.SDK.Processing
             {
             }
 
-            result = default;
             return false;
+        }
+
+        /// <summary>
+        ///     This implementation does nothing because this object isn't finished initializing
+        ///     when this is called by the base class.
+        /// </summary>
+        /// <param name="metadataTables">
+        ///     Metadata tables.
+        /// </param>
+        protected override void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
+        {
         }
 
         /// <inheritdoc cref="CustomDataProcessor"/>
@@ -282,12 +297,14 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
 
-        /// <inheritdoc />
-        /// <summary>
-        /// Builds on top of the functionality provided by the base class by enabling the data cookers required
-        /// by the given table descriptor.
-        /// </summary>
-        protected override void OnTableEnabled(TableDescriptor tableDescriptor)
+        /// <inheritdoc/>
+        /// <exception cref="ExtensionTableException">
+        ///     The requested table cannot be enabled.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     The <see cref="IDataProcessorExtensibilitySupport"/> has already been finalized.
+        /// </exception>
+        protected override void OnBeforeEnableTable(TableDescriptor tableDescriptor)
         {
             ProcessTableForExtensibility(tableDescriptor);
         }
@@ -328,18 +345,22 @@ namespace Microsoft.Performance.SDK.Processing
 
         private void ProcessTableForExtensibility(TableDescriptor tableDescriptor)
         {
-            if (tableDescriptor.RequiredDataCookers.Any() || tableDescriptor.RequiredDataProcessors.Any())
+            if (!tableDescriptor.RequiresDataExtensions())
             {
-                if (!this.extensibilitySupport.AddTable(tableDescriptor))
-                {
-                    throw new InvalidOperationException($"Unable to process table {tableDescriptor.Name} for dependencies.");
-                }
+                // there's nothing that needs to be done to prepare for this table by this processor
+                return;
             }
+
+            // Processors need to be able to get an IDataExtensionRetrieval object to build
+            // internal tables. Calling this here will enable this as well as any required
+            // source data cookers.
+            //
+            this.extensibilitySupport.EnableTable(tableDescriptor);
         }
 
         private void EnableRequiredSourceDataCookers()
         {
-            var requiredCookers = this.extensibilitySupport.GetAllRequiredSourceDataCookers();
+            var requiredCookers = this.extensibilitySupport.GetRequiredSourceDataCookers();
 
             foreach (var dataCookerPath in requiredCookers)
             {
@@ -349,6 +370,37 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             this.OnAllCookersEnabled();
+        }
+
+        private void EnableInternalTables(IEnumerable<TableDescriptor> tables)
+        {
+            foreach (var table in tables.Where(td => td.IsInternalTable))
+            {
+                try
+                {
+                    EnableTable(table);
+                }
+                catch (WrongProcessorTableException e)
+                {
+                    // An IProcessingSource might pass in tables that this processor doesn't handle.
+                    this.Logger?.Verbose(string.Format("{0}", e));
+                }
+                catch (InternalTableReferencesMultipleSourceParsersException e)
+                {
+                    // This invalid table should be logged but shouldn't prevent this processor from executing.
+                    this.Logger?.Warn(string.Format("{0}", e));
+                }
+                catch (Exception e)
+                {
+                    this.Logger.Warn(
+                        "Failed to enable internal table {0} on processor {1}: {2}.",
+                        table.Type,
+                        this.GetType().FullName,
+                        e);
+
+                    throw;
+                }
+            }
         }
     }
 }

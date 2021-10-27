@@ -5,7 +5,8 @@
       "id": "0001",
       "description": "Test table with 1 Source Cooker builds correctly",
       "tablesToEnable": [
-        "8BE4C87A-CC9A-441A-8173-67414D4C4F68"
+        "8BE4C87A-CC9A-441A-8173-67414D4C4F68",
+        "708B0564-F9BA-49FA-A87C-3B25C5C7C84C"
       ],
       "filePaths": [
         "TestData/source123_test_data.s123d",

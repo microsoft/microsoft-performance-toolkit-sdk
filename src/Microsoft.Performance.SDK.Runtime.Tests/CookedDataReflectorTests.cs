@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
