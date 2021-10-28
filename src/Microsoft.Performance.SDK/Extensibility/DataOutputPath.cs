@@ -11,6 +11,8 @@ namespace Microsoft.Performance.SDK.Extensibility
     /// </summary>
     public struct DataOutputPath
     {
+        private static readonly string Separator = "/";
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataOutputPath"/>
         ///     struct with the given source parser ID, data cooker ID, and
@@ -99,9 +101,9 @@ namespace Microsoft.Performance.SDK.Extensibility
         {
             Guard.NotNullOrWhiteSpace(outputId, nameof(outputId));
 
-            if (outputId.Contains("/"))
+            if (outputId.Contains(Separator))
             {
-                throw new ArgumentException("This value may not contain a '/'.", nameof(outputId));
+                throw new ArgumentException($"This value may not contain a '{Separator}'.", nameof(outputId));
             }
 
             this.CookerPath = cookerPath;
@@ -135,7 +137,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.CookerPath.CookerPath + "/" + this.OutputId;
+            return this.CookerPath.CookerPath + Separator + this.OutputId;
         }
     }
 }

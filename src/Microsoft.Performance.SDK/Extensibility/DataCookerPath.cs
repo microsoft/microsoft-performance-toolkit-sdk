@@ -13,33 +13,37 @@ namespace Microsoft.Performance.SDK.Extensibility
     public struct DataCookerPath
         : IEquatable<DataCookerPath>
     {
+        private static readonly string EmptySourceParserId = string.Empty;
+
+        private static readonly string Separator = "/";
+
         private DataCookerPath(string dataCookerId)
-            : this(string.Empty, dataCookerId)
+            : this(EmptySourceParserId, dataCookerId)
         {
         }
 
         private DataCookerPath(string sourceParserId, string dataCookerId)
         {
-            Debug.Assert((sourceParserId == string.Empty) || !string.IsNullOrWhiteSpace(sourceParserId));
+            Debug.Assert((sourceParserId == EmptySourceParserId) || !string.IsNullOrWhiteSpace(sourceParserId));
             Debug.Assert(!string.IsNullOrWhiteSpace(dataCookerId));
 
-            if (sourceParserId.Contains("/"))
+            if (sourceParserId.Contains(Separator))
             {
-                throw new ArgumentException("This value may not contain a '/'.", nameof(sourceParserId));
+                throw new ArgumentException($"This value may not contain a '{Separator}'.", nameof(sourceParserId));
             }
 
-            if (dataCookerId.Contains("/"))
+            if (dataCookerId.Contains(Separator))
             {
-                throw new ArgumentException("This value may not contain a '/'.", nameof(dataCookerId));
+                throw new ArgumentException($"This value may not contain a '{Separator}'.", nameof(dataCookerId));
             }
 
             this.SourceParserId = string.Intern(sourceParserId);
             this.DataCookerId = string.Intern(dataCookerId);
-            this.DataCookerType = string.IsNullOrWhiteSpace(sourceParserId)
+            this.DataCookerType = SourceParserId == EmptySourceParserId
                 ? DataCookerType.CompositeDataCooker
                 : DataCookerType.SourceDataCooker;
 
-            this.CookerPath = this.SourceParserId + "/" + this.DataCookerId;
+            this.CookerPath = this.SourceParserId + Separator + this.DataCookerId;
         }
 
         /// <summary>
@@ -99,7 +103,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </exception>
         public static DataCookerPath ForSource(string sourceParserId, string dataCookerId)
         {
-            if (sourceParserId != string.Empty)
+            if (sourceParserId != EmptySourceParserId)
             {
                 Guard.NotNullOrWhiteSpace(sourceParserId, nameof(sourceParserId));
             }
