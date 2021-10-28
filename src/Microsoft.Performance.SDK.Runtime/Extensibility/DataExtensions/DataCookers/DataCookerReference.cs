@@ -186,6 +186,23 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             this.Path = descriptor.Path;
             this.Description = descriptor.Description;
 
+            if (this.IsSourceDataCooker)
+            {
+                if (descriptor.Path.DataCookerType != DataCookerType.SourceDataCooker)
+                {
+                    this.AddError($"A source data cooker reference was created for a composite cooker: {this.Path}");
+                    this.InitialAvailability = DataExtensionAvailability.Error;
+                }
+            }
+            else
+            {
+                if (descriptor.Path.DataCookerType != DataCookerType.CompositeDataCooker)
+                {
+                    this.AddError($"A composite data cooker reference was created for a source cooker: {this.Path}");
+                    this.InitialAvailability = DataExtensionAvailability.Error;
+                }
+            }
+
             if (descriptor is IDataCookerDependent cookerRequirements)
             {
                 foreach (var dataCookerPath in cookerRequirements.RequiredDataCookers)
