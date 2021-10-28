@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31410.414
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.SDK", "Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj", "{D6C6BE8C-6D62-44A9-AA99-E6B1CDC835F6}"
 EndProject
@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.Toolk
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{AB9CEC9E-61E6-4FDC-912B-6848C3CD4066}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlugInConfigurationEditor", "Tools\PlugInConfigurationEditor\PlugInConfigurationEditor.csproj", "{57B0088B-7A62-480A-A6CF-2F1BFA22FBC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PluginConfigurationEditor", "Tools\PlugInConfigurationEditor\PluginConfigurationEditor.csproj", "{57B0088B-7A62-480A-A6CF-2F1BFA22FBC3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests", "Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests\Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.csproj", "{A0488905-9AA2-4CCB-BCB3-B758FF0E564A}"
 EndProject

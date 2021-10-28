@@ -218,7 +218,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             base.ValidateInstance(instance);
 
             if (instance.Path.DataCookerType != DataCookerType.CompositeDataCooker)
-            { 
+            {
                 this.AddError($"Unable to create an instance of {this.Type}");
                 this.InitialAvailability = DataExtensionAvailability.Error;
             }

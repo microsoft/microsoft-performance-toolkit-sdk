@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Processing
     {
         private readonly HashSet<TableDescriptor> enabledTables;
 
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> 
+        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
 
         /// <summary>
@@ -234,7 +234,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableDescriptor">Descriptor for the generated table.</param>
         /// <param name="buildAction">Action called to create the requested table.</param>
         protected void AddTableGeneratedFromDataProcessing(
-            TableDescriptor tableDescriptor, 
+            TableDescriptor tableDescriptor,
             Action<ITableBuilder, IDataExtensionRetrieval> buildAction)
         {
             // the buildAction may be null because the custom data processor may have a special way to handle

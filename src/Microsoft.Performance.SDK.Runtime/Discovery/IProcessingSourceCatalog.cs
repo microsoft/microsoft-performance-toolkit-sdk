@@ -7,9 +7,9 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
     /// <summary>
-    ///     Exposes SDK plug-ins.
+    ///     Exposes SDK processing sources.
     /// </summary>
-    public interface IPlugInCatalog
+    public interface IProcessingSourceCatalog
         : IDisposable
     {
         /// <summary>
@@ -21,11 +21,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         bool IsLoaded { get; }
 
         /// <summary>
-        ///     Gets an enumeration of plug-ins.
+        ///     Gets an enumeration of plugins.
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception> 
-        IEnumerable<ProcessingSourceReference> PlugIns { get; }
+        IEnumerable<ProcessingSourceReference> ProcessingSources { get; }
     }
 }

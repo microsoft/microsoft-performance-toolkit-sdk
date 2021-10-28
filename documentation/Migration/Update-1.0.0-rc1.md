@@ -98,7 +98,7 @@ may also provide their own implementations.
 `DataProcessor`s have been removed. Note that these are not the same as
 `CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
 
-## Renamed Classes
+## Renamed Classes, Interfaces and Static Methods
 
 The following references must be changed:
 - `BaseSourceDataCooker` -> `SourceDataCooker`
@@ -106,10 +106,19 @@ The following references must be changed:
 - `BaseDataColumn` -> `DataColumn`
 - `CustomDataProcessorBase` -> `CustomDataProcessor`
 - `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
-- `CustomDataSourceBase` -> `ProcessingSource`
 - `CustomDataSourceAttribute` -> `ProcessingSourceAttribute`
+- `CustomDataSourceBase` -> `ProcessingSource`
 - `CustomDataSourceInfo` -> `ProcessingSourceInfo`
-
+- `PlugInConfiguration` -> `PluginConfiguration`
+- `PlugInConfigurationExtensions` -> `PluginConfigurationExtensions`
+- `PlugInConfigurationSerializer` -> `PluginConfigurationSerializer`
+- `PlugInConfigurationValidation` -> `PluginConfigurationValidation`
+- `IViewportSensitiveProjection` -> `IVisibleDomainSensitiveProjection`
+- `ViewportSensitiveProjection` -> `VisibleDomainSensitiveProjection`
+- `IVisibleTableRegion` -> `IVisibleDomainRegion`
+- `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
+- `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
+- `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
 ## Inheritance
 
 The following classes have been sealed:
@@ -220,6 +229,100 @@ catch (UnsupportedDataSourceException)
 
 A new parameter has been added to the constructor.
 
+## DataCookerPath
+
+The following have been removed:
+- `DataCookerPath.Format`
+- `DataCookerPath.EmptySourceParserId`
+- `DataCookerPath.CookerPath`
+- `DataCookerPath.Parse`
+- `DataCookerPath.GetSourceParserId`
+- `DataCookerPath.GetDataCookerId`
+- `DataCookerPath.IsWellFormed`
+
+To prevent build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataCookerPath` that accept string arguments and `DataCookerPath.Create` 
+have been removed. 
+To prevent build breaks, replace calls to this class' constructor with either
+- `DataCookerPath.ForComposite`
+- `DataCookerPath.ForSource`
+
+depending on the type of data cooker the path is for.
+
+## DataOutputPath
+
+The following have been removed:
+- `DataOutputPath.Format`
+- `DataOutputPath.Path`
+- `DataOutputPath.Combine`
+- `DataOutputPath.GetSourceId`
+- `DataOutputPath.GetDataCookerId`
+- `DataOutputPath.GetDataCookerPath`
+- `DataOutputPath.TryGetConstituents`
+- `DataOutputPath.IsWellFormed`
+
+To prevent build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataOutputPath` that accept string arguments and `DataOutputPath.Create` 
+have been removed.
+To prevent build breaks, replace calls to this class' constructor with either
+- `DataOutputPath.ForComposite`
+- `DataOutputPath.ForSource`
+
+depending on the type of data cooker the data output path is for.
+
+## RequiresCookerAttribute
+
+This class has been made abstract. Please replace it with either
+- `RequiresSourceCookerAttribute`
+- `RequiresCompositeCookerAttribute`
+
+depending on the type of required data cooker.
+
+## Obsolete Code Removed
+
+Code that was previously attributed as obsolete is now removed. In addition to some of the elements 
+already called out in this document, this includes 
+
+- References to CustomDataSource, previously renamed to ProcessingSource
+- A constructor for `DataSourceInfo` that does not supply a wall clock value.
+
+## CustomDataProcessorBase
+
+This class has been renamed to `CustomDataProcessor`.
+
+Obsolete virtual method `ProcessAsync` has been removed and method `ProcessAsyncCore` has been made abstract.
+Please move any code from`ProcessAsync` to `ProcessAsyncCore`.
+
+## IViewportSensitiveProjection
+
+In addition to this interface being renamed to `IVisibleDomainSensitiveProjection`, the following properties and methods are renamed:
+- `DependsOnViewport` -> `DependsOnVisibleDomain`
+- `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
+
+## ViewportSensitiveProjection
+In addition to this class being renamed to `VisibleDomainSensitiveProjection`, the following properties and methods are renamed:
+- `DependsOnViewport` -> `DependsOnVisibleDomain`
+- `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
+- `CloneIfViewportSensitive` -> `CloneIfVisibleDomainSensitive`
+
+## IVisibleTableRegion
+
+In addition to this class being renamed to `IVisibleDomainRegion`, the following properties and method are renamed:
+- `Viewport` -> `Domain`
+- `AggregateRowsInViewport` -> `AggregateVisibleRows`
+
+Additionally, the properties `TableRowStart ` and `TableRowCount` are removed.
+
+## Plugin Configurations
+All references to "plug-in" and "PlugIn" have been changed to lowercase "plugin." In addition to the name
+changes listed above, the follow references have been changed:
+
+- The `Microsoft.Performance.SDK.PlugInConfiguration` namespace has changed to `Microsoft.Performance.SDK.PluginConfiguration`.
+- `PlugInConfiguration.PlugInName` has beeen changed to `PluginConfiguration.PluginName`
+
 # Suggested Changes
 
 None at this time.
+
