@@ -632,7 +632,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         {
             var assemblyLoader = new IsolationAssemblyLoader();
 
-            var loader = new PluginsLoader(assemblyLoader, _ => new FakePreloadValidator());
+            var loader = new PluginsLoader(assemblyLoader, _ => new FakePreloadValidator(), Logger.Null);
             var consumer = new MockPluginsConsumer();
             if (subscribe)
             {

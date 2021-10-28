@@ -20,11 +20,13 @@ namespace Microsoft.Performance.SDK
         : IFormatProvider,
           ICustomFormatter
     {
+        /// <inheritdoc />
         public object GetFormat(Type formatType)
         {
             return this;
         }
 
+        /// <inheritdoc />
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
             if (arg == null)

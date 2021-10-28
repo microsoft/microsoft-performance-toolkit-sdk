@@ -63,7 +63,6 @@ namespace Microsoft.Performance.SDK.Runtime
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("{0}.Dispose threw an exception: {1}", self.GetType(), ex);
                 e = ex;
             }
         }

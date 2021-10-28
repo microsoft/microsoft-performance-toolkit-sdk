@@ -19,18 +19,15 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     The default name of the static class method which builds a table.
-        ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
         /// </summary>
         protected const string DefaultTableBuilderMethodName = "BuildTable";
 
         /// <summary>
         ///     The default name of the static class method which checks if a table has data.
-        ///     bool IsDataAvailable(IDataExtensionRetrieval)
         /// </summary>
         protected const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
 
-        public TableAttribute(
-            bool internalTable = false)
+        public TableAttribute()
             : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName, internalTable)
         {
         }
@@ -44,37 +41,30 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <param name="buildTableActionMethodName">
         ///     The name of the static class method which builds a table.
-        ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
+        ///     This method must have the following signature:
+        ///     <code>
+        ///         void BuildTable(<see cref="ITableBuilder"/>, <see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
+        ///     </code>
         /// </param>
         /// <param name="isDataAvailableMethodName">
         ///     The name of the static class method which checks if the table has data.
-        ///     IsDataAvailable(IDataExtensionRetrieval)
-        /// </param>
-        /// <param name="InternalTable">
-        ///     When this is set, the table will not be exposed through the data extension repository.
-        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
-        ///     when this is set.
+        ///     IsDataAvailable(IDataExtensionRetrieval)       
+        ///     This method must have the following signature:
+        ///     <code>
+        ///         bool IsDataAvailable(<see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
+        ///     </code>
         /// </param>
         protected TableAttribute(
             string tableDescriptorPropertyName = DefaultTableDescriptorPropertyName,
             string buildTableActionMethodName = DefaultTableBuilderMethodName,
-            string isDataAvailableMethodName = DefaultIsDataAvailableMethodName,
-            bool internalTable = false)
+            string isDataAvailableMethodName = DefaultIsDataAvailableMethodName)
         {
             Guard.NotNullOrWhiteSpace(tableDescriptorPropertyName, nameof(tableDescriptorPropertyName));
 
             this.TableDescriptorPropertyName = tableDescriptorPropertyName;
             this.BuildTableActionMethodName = buildTableActionMethodName;
             this.IsDataAvailableMethodName = isDataAvailableMethodName;
-            this.InternalTable = internalTable;
         }
-
-        /// <summary>
-        ///     When this is set, the table will not be exposed through the data extension repository.
-        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
-        ///     when this is set.
-        /// </summary>
-        public bool InternalTable { get; set; }
 
         /// <summary>
         ///     The name of the static class property which returns the <see cref="TableDescriptor"/>.

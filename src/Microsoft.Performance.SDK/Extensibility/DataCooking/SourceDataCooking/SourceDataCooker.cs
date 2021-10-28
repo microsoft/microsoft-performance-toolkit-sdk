@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -11,13 +12,13 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
     ///     This abstract class provides default implementations for source data cookers.
     /// </summary>
     /// <typeparam name="T">
-    ///     <see cref="Type"/> of the data element from the source parser.
+    ///     <see cref="System.Type"/> of the data element from the source parser.
     /// </typeparam>
     /// <typeparam name="TContext">
-    ///     <see cref="Type"/> of contextual information for the data element.
+    ///     <see cref="System.Type"/> of contextual information for the data element.
     /// </typeparam>
     /// <typeparam name="TKey">
-    ///     Identifier for the <see cref="Type"/> of data element.
+    ///     Identifier for the <see cref="System.Type"/> of data element.
     /// </typeparam>
     public abstract class SourceDataCooker<T, TContext, TKey>
         : CookedDataReflector,
@@ -44,7 +45,6 @@ namespace Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking
         ///     Initializes a new instance of the <see cref="SourceDataCooker{T, TContext, TKey}"/>
         ///     class for the given cooker.
         /// </summary>
-        /// </param>
         /// <param name="dataCookerPath">
         ///     This cooker's path.
         /// </param>

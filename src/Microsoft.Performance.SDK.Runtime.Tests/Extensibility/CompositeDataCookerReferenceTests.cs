@@ -4,11 +4,13 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -43,7 +45,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 // Redesign Data Processor API
                 // Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataProcessors);
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.GetOrCreateInstance(new FakeRetrieval()));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateInstance(new FakeRetrieval()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.PerformAdditionalDataExtensionValidation(new FakeSupport(), new FakeReference()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
             }
@@ -78,29 +80,23 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
         [TestMethod]
         [UnitTest]
-        public void WhenDisposed_InstanceDisposed()
+        public void CreateInstance()
         {
-            ICompositeDataCookerReference sut = null;
-            try
-            {
-                var result = CompositeDataCookerReference.TryCreateReference(
-                    typeof(DisposableCompositeDataCooker),
-                    out sut);
+            var result = CompositeDataCookerReference.TryCreateReference(
+                typeof(TestCompositeDataCooker),
+                out var sut);
 
-                Assert.IsTrue(result);
+            Assert.IsTrue(result);
 
-                var instance = sut.GetOrCreateInstance(new FakeRetrieval()) as DisposableCompositeDataCooker;
-                Assert.IsNotNull(instance);
-                Assert.AreEqual(0, instance.DisposeCalls);
+            var requiredData = new FakeRetrieval();
+            IDataCooker instance = sut.CreateInstance(requiredData);
 
-                sut.Dispose();
+            Assert.IsNotNull(instance);
 
-                Assert.AreEqual(1, instance.DisposeCalls);
-            }
-            finally
-            {
-                sut?.Dispose();
-            }
+            var testCompositeCooker = instance as TestCompositeDataCooker;
+            Assert.IsNotNull(testCompositeCooker);
+
+            Assert.AreEqual(requiredData, testCompositeCooker.RequiredData);
         }
 
         private sealed class FakeRetrieval

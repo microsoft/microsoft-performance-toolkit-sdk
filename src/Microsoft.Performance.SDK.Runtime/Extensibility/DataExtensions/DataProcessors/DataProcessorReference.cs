@@ -16,11 +16,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataPro
     ///////     instance of their target type. Instead, <see cref="GetOrCreateInstance"/>
     ///////     should be called to create an instance based on input data.
     /////// </summary>
-    ////internal sealed class DataProcessorReference
-    ////    : DataExtensionReference<DataProcessorReference>,
-    ////      IDataProcessorReference
-    ////{
-    ////    private object instanceLock = new object();
+    //// internal sealed class DataProcessorReference
+    ////     : TypeBoundDataExtensionReference<DataProcessorReference>,
+    ////       IDataProcessorReference
+    //// {
+    ////     private object instanceLock = new object();
 
     ////    private string id;
     ////    private string description;

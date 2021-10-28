@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
@@ -41,7 +42,17 @@ namespace Microsoft.Performance.Testing.SDK
             throw new NotImplementedException();
         }
 
+        public IEnumerable<TableDescriptor> GetEnabledTables()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task ProcessAsync(IProgress<int> progress, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TryEnableTable(TableDescriptor tableDescriptor)
         {
             throw new NotImplementedException();
         }

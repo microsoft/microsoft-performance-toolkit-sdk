@@ -26,6 +26,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public string Description { get; set; }
 
+        /// <inheritdoc />
         public bool Equals(OptionExample other)
         {
             return (other != null) &&
@@ -33,11 +34,13 @@ namespace Microsoft.Performance.SDK.Processing
                 string.Equals(this.Description, other.Description);
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return this.Equals(obj as OptionExample);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(

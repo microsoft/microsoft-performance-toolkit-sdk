@@ -4,18 +4,19 @@
 using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 {
     /// <summary>
     ///     This class adds data cooker specific functionality on top of the base
-    ///     <see cref="DataExtensionReference{TDerived}"/>.
+    ///     <see cref="TypeBoundDataExtensionReference{TDerived}"/>.
     /// </summary>
     /// <typeparam name="TDerived">
     ///     The class deriving from this type.
     /// </typeparam>
     internal abstract class DataCookerReference<TDerived>
-        : DataExtensionReference<TDerived>
+        : TypeBoundDataExtensionReference<TDerived>
           where TDerived : DataCookerReference<TDerived>
     {
         private DataCookerPath path;
@@ -30,12 +31,22 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// </summary>
         /// <param name="type">
         ///     The <see cref="Type"/> of cooker referenced by this instance.
-        ///     It is expected that <see cref="Type"/>is a calid cooker <see cref="Type"/>.
+        ///     It is expected that <see cref="Type"/>is a valid cooker <see cref="Type"/>.
         /// </param>
-        protected DataCookerReference(Type type)
+        /// <param name="logger">
+        ///     Logs messages from this reference.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="logger"/> is <c>null</c>.
+        /// </exception>
+        protected DataCookerReference(Type type, ILogger logger)
             : base(type)
         {
+            Guard.NotNull(logger, nameof(logger));
+
             this.isDisposed = false;
+
+            this.Logger = logger;
         }
 
         /// <summary>
@@ -48,7 +59,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
-        protected DataCookerReference(DataExtensionReference<TDerived> other)
+        protected DataCookerReference(TypeBoundDataExtensionReference<TDerived> other)
             : base(other)
         {
         }
@@ -128,6 +139,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             }
         }
 
+        /// <summary>
+        ///     Gets the interface for logging messages from this instance.
+        /// </summary>
+        protected ILogger Logger { get; }
+
         /// <inheritdoc/>
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
@@ -158,7 +174,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             {
                 this.AddError($"Unable to create an instance of {this.Type}");
                 this.InitialAvailability = DataExtensionAvailability.Error;
-                return;
             }
 
             if (string.IsNullOrWhiteSpace(instance.Path.DataCookerId))
@@ -188,38 +203,41 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
             if (this.IsSourceDataCooker)
             {
-                if (string.IsNullOrEmpty(descriptor.Path.SourceParserId))
+                if (descriptor.Path.DataCookerType != DataCookerType.SourceDataCooker)
                 {
-                    this.AddError($"A source data cooker's source Id must not be {nameof(DataCookerPath.EmptySourceParserId)}.");
+                    this.AddError($"A source data cooker reference was created for a composite cooker: {this.Path}");
                     this.InitialAvailability = DataExtensionAvailability.Error;
                 }
             }
             else
             {
-                if (descriptor.Path.SourceParserId != DataCookerPath.EmptySourceParserId)
+                if (descriptor.Path.DataCookerType != DataCookerType.CompositeDataCooker)
                 {
-                    this.AddError($"A composite data cooker's source Id must be {nameof(DataCookerPath.EmptySourceParserId)}.");
+                    this.AddError($"A composite data cooker reference was created for a source cooker: {this.Path}");
                     this.InitialAvailability = DataExtensionAvailability.Error;
                 }
             }
 
-            if (descriptor is IDataCookerDependent cookerRequirements)
+            if (this.InitialAvailability != DataExtensionAvailability.Error)
             {
-                foreach (var dataCookerPath in cookerRequirements.RequiredDataCookers)
+                if (descriptor is IDataCookerDependent cookerRequirements)
                 {
-                    this.AddRequiredDataCooker(dataCookerPath);
+                    foreach (var dataCookerPath in cookerRequirements.RequiredDataCookers)
+                    {
+                        this.AddRequiredDataCooker(dataCookerPath);
+                    }
                 }
-            }
 
-            // TODO: __SDK_DP__
-            // Redesign Data Processor API
-            ////if (descriptor is IDataProcessorDependent processorRequirements)
-            ////{
-            ////    foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
-            ////    {
-            ////        this.AddRequiredDataProcessor(dataProcessorId);
-            ////    }
-            ////}
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                //// if (descriptor is IDataProcessorDependent processorRequirements)
+                //// {
+                ////     foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
+                ////     {
+                ////         this.AddRequiredDataProcessor(dataProcessorId);
+                ////     }
+                //// }
+            }
         }
 
         /// <inheritdoc />

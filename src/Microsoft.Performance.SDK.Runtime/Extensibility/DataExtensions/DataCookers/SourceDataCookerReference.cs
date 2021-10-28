@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 
@@ -43,8 +44,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             this.InitializeDescriptorData(other);
         }
 
-        private SourceDataCookerReference(Type type)
-            : base(type)
+        private SourceDataCookerReference(Type type, ILogger logger)
+            : base(type, logger)
         {
             Guard.NotNull(type, nameof(type));
 
@@ -119,8 +120,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
-        ///         <item>must implement IDataCooker somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
-        ///         <item>must implement ISourceDataCooker<,,> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="IDataCooker"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ISourceDataCooker{T, TContext, TKey}"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>
@@ -136,6 +137,43 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// </returns>
         internal static bool TryCreateReference(
             Type candidateType,
+            out ISourceDataCookerReference reference)
+        {
+            return TryCreateReference(
+                candidateType,
+                Runtime.Logger.Create<SourceDataCookerReference>(),
+                out reference);
+        }
+
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ISourceDataCookerReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>must be concrete.</item>
+        ///         <item>must implement <see cref="IDataCooker"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ISourceDataCooker{T, TContext, TKey}"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must have a public parameterless constructor.</item>
+        ///     </list>
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ISourceDataCookerReference"/>
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ISourceDataCookerReference"/>
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        internal static bool TryCreateReference(
+            Type candidateType,
+            ILogger logger,
             out ISourceDataCookerReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
@@ -172,12 +210,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
             try
             {
-                reference = new SourceDataCookerReference(candidateType);
+                reference = new SourceDataCookerReference(candidateType, logger);
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine($"Cooker Disabled: {candidateType}.");
-                Console.Error.WriteLine($"{e.Message}");
+                logger.Warn($"Cooker Disabled: {candidateType}.");
+                logger.Warn($"{e.Message}");
                 return false;
             }
 

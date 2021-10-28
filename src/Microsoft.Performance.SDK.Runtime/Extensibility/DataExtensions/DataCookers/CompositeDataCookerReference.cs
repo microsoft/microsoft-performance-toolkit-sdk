@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 {
@@ -15,17 +15,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         : DataCookerReference<CompositeDataCookerReference>,
           ICompositeDataCookerReference
     {
-        /// <summary>
-        ///     This object is used to create synchronized regions
-        ///     within the instance.
-        /// </summary>
-        private object instanceLock = new object();
-
-        private bool initialized = false;
-        private ICompositeDataCookerDescriptor instance = null;
-
-        private bool isDisposed = false;
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="CompositeDataCookerReference"/>
         ///     class as a copy of the given instance.
@@ -40,27 +29,20 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             : base(other)
         {
             this.InitializeDescriptorData(other);
-
-            lock (other.instanceLock)
-            {
-                this.Instance = other.Instance;
-                this.InstanceInitialized = other.InstanceInitialized;
-            }
         }
 
-        private CompositeDataCookerReference(Type type)
-            : base(type)
+        private CompositeDataCookerReference(Type type, ILogger logger)
+            : base(type, logger)
         {
-            this.initialized = false;
+            ICompositeDataCookerDescriptor instance = this.CreateInstance();
+            this.ValidateInstance(instance);
 
-            this.CreateInstance();
-            this.ValidateInstance(this.Instance);
-            if (this.Instance != null)
+            if (instance != null)
             {
-                this.InitializeDescriptorData(this.instance);
+                this.InitializeDescriptorData(instance);
             }
-        }
-
+        }       
+        
         /// <summary>
         ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
         ///     <paramref name="candidateType"/>.
@@ -69,7 +51,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
-        ///         <item>must implement ICompositeDataCookerDescriptor somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ICompositeDataCookerDescriptor"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>
@@ -87,7 +69,44 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
+            return TryCreateReference(
+                candidateType,
+                Runtime.Logger.Create<CompositeDataCookerReference>(),
+                out reference);
+        }
+
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>must be concrete.</item>
+        ///         <item>must implement <see cref="ICompositeDataCookerDescriptor"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must have a public parameterless constructor.</item>
+        ///     </list>
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ICompositeDataCookerReference"/>
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ICompositeDataCookerReference"/>
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        internal static bool TryCreateReference(
+            Type candidateType,
+            ILogger logger,
+            out ICompositeDataCookerReference reference)
+        {
             Guard.NotNull(candidateType, nameof(candidateType));
+            Guard.NotNull(logger, nameof(logger));
 
             reference = null;
 
@@ -98,12 +117,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 {
                     try
                     {
-                        reference = new CompositeDataCookerReference(candidateType);
+                        reference = new CompositeDataCookerReference(candidateType, logger);
                     }
                     catch (InvalidOperationException e)
                     {
-                        Console.Error.WriteLine($"Cooker Disabled: {candidateType}.");
-                        Console.Error.WriteLine($"{e.Message}");
+                        logger.Warn($"Cooker Disabled: {candidateType}.");
+                        logger.Warn($"{e.Message}");
                         return false;
                     }
                 }
@@ -112,77 +131,19 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             return reference != null;
         }
 
-        /// <summary>
-        ///     Gets or sets the instance of the cooker referenced
-        ///     by this instance. Please use <see cref="InstanceInitialized"/>
-        ///     to determine whether the instance reference by this property
-        ///     has been initialized, even if the value is not <c>null</c>.
-        /// </summary>
-        /// <exception cref="System.ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        private ICompositeDataCookerDescriptor Instance
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.instance;
-            }
-            set
-            {
-                this.ThrowIfDisposed();
-                this.instance = value;
-            }
-        }
-
-        /// <summary>
-        ///     Gets or sets a value indicating whethr the <see cref="Instance"/>
-        ///     has been initialized.
-        /// </summary>
-        /// <exception cref="System.ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        private bool InstanceInitialized
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.initialized;
-            }
-            set
-            {
-                this.ThrowIfDisposed();
-                this.initialized = value;
-            }
-        }
-
         /// <inheritdoc />
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData)
+        public IDataCooker CreateInstance(IDataExtensionRetrieval requiredData)
         {
             Guard.NotNull(requiredData, nameof(requiredData));
             this.ThrowIfDisposed();
 
-            if (this.Instance == null)
-            {
-                return null;
-            }
+            ICompositeDataCookerDescriptor compositeCooker = CreateInstance();
+            compositeCooker.OnDataAvailable(requiredData);
 
-            if (!this.InstanceInitialized)
-            {
-                lock (this.instanceLock)
-                {
-                    if (!this.InstanceInitialized)
-                    {
-                        this.Instance.OnDataAvailable(requiredData);
-                        this.InstanceInitialized = true;
-                    }
-                }
-            }
-
-            return this.Instance;
+            return compositeCooker;
         }
 
         /// <inheritdoc />
@@ -193,41 +154,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         }
 
         /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            if (this.isDisposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                this.instance.TryDispose();
-                this.instance = null;
-                this.instanceLock = null;
-            }
-
-            this.isDisposed = true;
-            base.Dispose(disposing);
-        }
-
-        /// <inheritdoc />
         protected override void ValidateInstance(IDataCookerDescriptor instance)
         {
             this.ThrowIfDisposed();
             base.ValidateInstance(instance);
 
-            if (!StringComparer.Ordinal.Equals(instance.Path.SourceParserId, DataCookerPath.EmptySourceParserId))
+            if (instance.Path.DataCookerType != DataCookerType.CompositeDataCooker)
             {
                 this.AddError($"Unable to create an instance of {this.Type}");
                 this.InitialAvailability = DataExtensionAvailability.Error;
             }
         }
 
-        private void CreateInstance()
+        private ICompositeDataCookerDescriptor CreateInstance()
         {
-            this.Instance = Activator.CreateInstance(this.Type) as ICompositeDataCookerDescriptor;
-            Debug.Assert(this.Instance != null);
+            return Activator.CreateInstance(this.Type) as ICompositeDataCookerDescriptor;
         }
     }
 }

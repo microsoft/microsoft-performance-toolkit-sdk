@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime
     ///     Provides the root of all loaded extensions.
     /// </summary>
     public sealed class ExtensionRoot
-        : IPlugInCatalog,
+        : IProcessingSourceCatalog,
           IDataExtensionRepositoryBuilder
     {
         private DependencyDag dependencyGraph;
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <paramref name="repository"/> is <c>null</c>.
         /// </exception>
         public ExtensionRoot(
-            IPlugInCatalog catalog,
+            IProcessingSourceCatalog catalog,
             IDataExtensionRepositoryBuilder repository)
         {
             Guard.NotNull(catalog, nameof(catalog));
@@ -61,7 +61,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IPlugInCatalog Catalog { get; }
+        public IProcessingSourceCatalog Catalog { get; }
 
         /// <summary>
         ///     Gets the repository exposing data extensions.
@@ -75,7 +75,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public bool IsLoaded => this.Catalog.IsLoaded;
 
         /// <inheritdoc />
-        public IEnumerable<ProcessingSourceReference> PlugIns => this.Catalog.PlugIns;
+        public IEnumerable<ProcessingSourceReference> ProcessingSources => this.Catalog.ProcessingSources;
 
         /// <inheritdoc />
         public IEnumerable<DataCookerPath> SourceDataCookers => this.Repository.SourceDataCookers;

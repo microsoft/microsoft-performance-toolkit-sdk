@@ -21,11 +21,11 @@ namespace Microsoft.Performance.SDK.Processing
         ///     This is a multi-step process to ensure data read from tables is synchronized with changes:
         ///     1. Lock tables affected by the change (based on <paramref name="columns"/>) and wait
         ///        for all existing operations on those tables to complete.
-        ///     2. Execute <param name="onReadyForChange"/> on a background thread.
+        ///     2. Execute <paramref name="onReadyForChange"/> on a background thread.
         ///     3. On UI-thread, notify all affected columns that data has changed and re-apply the preset.
         ///        Note that this may result in work on background threads for sorting/grouping.
         ///     4. Mark table as ready.
-        ///     5. Execute <param name="onChangeComplete"/>.
+        ///     5. Execute <paramref name="onChangeComplete"/>.
         /// </remarks>
         /// <param name="columns">
         ///     Identifiers for the columns that are changing.
@@ -56,11 +56,11 @@ namespace Microsoft.Performance.SDK.Processing
         ///     This is a multi-step process to ensure data read from tables is synchronized with changes:
         ///     1. Lock tables affected by the change (based on <paramref name="predicate"/>) and wait
         ///        for all existing operations on those tables to complete.
-        ///     2. Execute <param name="onReadyForChange"/> on a background thread.
+        ///     2. Execute <paramref name="onReadyForChange"/> on a background thread.
         ///     3. On UI-thread, notify all affected columns that data has changed and re-apply the preset.
         ///        Note that this may result in work on background threads for sorting/grouping.
         ///     4. Mark table as ready.
-        ///     5. Execute <param name="onChangeComplete"/>.
+        ///     5. Execute <paramref name="onChangeComplete"/>.
         /// </remarks>
         /// <param name="predicate">
         ///     A predicate used to decide which projections are changing.

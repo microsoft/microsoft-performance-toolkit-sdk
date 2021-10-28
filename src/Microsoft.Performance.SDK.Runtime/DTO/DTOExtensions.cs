@@ -83,7 +83,6 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             var tableConfiguration = new Microsoft.Performance.SDK.Processing.TableConfiguration(dto.Name)
             {
                 ChartType = dto.ChartType.ConvertToSdk(),
-                Layout = dto.Layout.ConvertToSdk(),
                 AggregationOverTime = dto.AggregationOverTime.ConvertToSDK(),
                 InitialFilterQuery = dto.InitialFilterQuery,
                 InitialExpansionQuery = dto.InitialExpansionQuery,
@@ -130,7 +129,6 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             var dto = new TableConfiguration
             {
                 ChartType = configuration.ChartType.ConvertToDto(),
-                Layout = configuration.Layout.ConvertToDto(),
                 AggregationOverTime = configuration.AggregationOverTime.ConvertToDto(),
                 Columns = configuration.Columns.Select(column => column.ConvertToDto()).ToArray(),
                 ColumnRoles = convertColumnRoles(configuration),

@@ -126,7 +126,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <returns>
         ///     A new <see cref="ITableProvider"/> that discovers tables in the
-        ///     specified <paramref name="tableNamespace"/> in the specified <paramref name="assembly"/>.
+        ///     specified <paramref name="tableNamespace"/> in the specified <paramref name="assemblies"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="assemblies"/> is <c>null</c>.
@@ -161,9 +161,13 @@ namespace Microsoft.Performance.SDK.Processing
             var s = new HashSet<DiscoveredTable>(DiscoveredTableEqualityComparer.ByTableDescriptor);
             foreach (var t in assemblies.SelectMany(x => x.GetTypes()).Where(typeFilter))
             {
-                if (TableDescriptorFactory.TryCreate(t, tableConfigSerializer, out var isInternal, out var td, out var buildTable))
+                if (TableDescriptorFactory.TryCreate(
+                    t,
+                    tableConfigSerializer,
+                    out TableDescriptor td,
+                    out Action<ITableBuilder, Extensibility.IDataExtensionRetrieval> buildTable))
                 {
-                    s.Add(new DiscoveredTable(td, buildTable, isInternal));
+                    s.Add(new DiscoveredTable(td, buildTable));
                 }
             }
 
