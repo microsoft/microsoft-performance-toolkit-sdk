@@ -47,8 +47,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     </code>
         /// </param>
         /// <param name="isDataAvailableMethodName">
-        ///     The name of the static class method which checks if the table has data.
-        ///     IsDataAvailable(IDataExtensionRetrieval)       
+        ///     The name of the static class method which checks if the table has data.     
         ///     This method must have the following signature:
         ///     <code>
         ///         bool IsDataAvailable(<see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
