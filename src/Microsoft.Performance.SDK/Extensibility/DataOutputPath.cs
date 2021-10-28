@@ -135,7 +135,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.CookerPath.CookerPath + "/" + this.DataCookerId;
+            return this.CookerPath.CookerPath + "/" + this.OutputId;
         }
     }
 }
