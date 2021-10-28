@@ -109,7 +109,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.AreEqual(sourceDataCooker, returnedSourceDataCooker);
         }
 
-
         [TestMethod]
         [UnitTest]
         public void ProcessSession()
@@ -159,7 +158,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
                 // sourceDataCooker2: Pass=1, Block=1
                 sourceDataCooker2.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
-                    new[]
+                    new []
                     {
                         sourceDataCooker4.Path,
                         sourceDataCooker1.Path
@@ -550,7 +549,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.IsTrue(sourceParser.RequestedDataKeys.Count == sourceDataCooker1.DataKeys.Count);
 
             CheckProgressReports(progress, testRecords.Count);
-
         }
     }
 }
