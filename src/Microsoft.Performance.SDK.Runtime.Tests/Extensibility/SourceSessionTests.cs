@@ -22,7 +22,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         /// <summary>
         ///     Ensure progress is reported incrementally
         /// </summary>
-        /// <returns>True if Progress is as expected. False otherwise. </returns>
         public void CheckProgressReports(TestProgress progress, int numRecords)
         {
             // Additional 100 reported at the end.
