@@ -22,10 +22,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         /// <summary>
         ///     Ensure progress is reported incrementally
         /// </summary>
-        public void CheckProgressReports(TestProgress progress, int numRecords)
+        private void CheckProgressReports(TestProgress progress, int numRecords)
         {
-            // Additional 100 reported at the end.
-            int numPasses = (progress.ReportedValues.Count - 1) / numRecords;
+            int numPasses = (progress.ReportedValues.Count) / numRecords;
             int numIter = numRecords * numPasses;
 
             int pass = 0;
@@ -44,8 +43,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     pass++;
                 }
             }
-
-            Assert.AreEqual(100, progress.ReportedValues[progress.ReportedValues.Count - 1]);
         }
 
         [TestMethod]
@@ -329,11 +326,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                         sourceDataCooker4.Path,
                         sourceDataCooker1.Path
                     });
-                sourceDataCooker2.DependencyTypes = new ReadOnlyDictionary<DataCookerPath, DataCookerDependencyType>(
-                    new Dictionary<DataCookerPath, DataCookerDependencyType>()
-                    {
-                        {sourceDataCooker4.Path, DataCookerDependencyType.AsConsumed }
-                    });
 
                 // sourceDataCooker7: Pass=2, Block=0
                 sourceDataCooker7.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
@@ -352,14 +344,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     new[] { sourceDataCooker6.Path });
             }
 
-            // data cooker order should be: { cooker1, cooker3 }, { cooker4, cooker2 }, { cooker7 }, { cooker6 }, { cooker5 }
+            // data cooker order should be: { cooker1, cooker3 }, { cooker4 }, { cooker2 }, { cooker7 }, { cooker6 }, { cooker5 }
             // cooker1 and cooker3 could be in any order in pass 0.
-            // but cooker4 and cooker2 are ordered as such in pass 1.
 
             // setup data for the TestParser to "parse"
             var testRecords = new List<TestRecord>
             {
-                // delivered to cooker4 first and then cooker2 in Pass1
+                // delivered to cooker4 in Pass1 and then cooker2 in Pass2
                 new TestRecord {Key = 145, Value = "145"},
 
                 // shouldn't be delivered to any cooker
@@ -371,7 +362,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 // delivered to cooker1 in Pass0
                 new TestRecord {Key = 67, Value = "67"},
 
-                // delivered to cooker3 in Pass0 and cooker2 in Pass1
+                // delivered to cooker3 in Pass0 and cooker2 in Pass2
                 new TestRecord {Key = 1000, Value = "1000"},
 
                 // delivered to cooker3 in Pass0
@@ -386,16 +377,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 // delivered to cooker4 in Pass1
                 new TestRecord {Key = 315, Value = "315"},
 
-                // delivered to cooker2 in Pass0, cooker7 in Pass3, cooker6 in Pass4
+                // delivered to cooker2 in Pass2, cooker7 in Pass4, cooker6 in Pass5
                 new TestRecord {Key = 167, Value="167"},
 
-                // delivered to cooker6 in Pass4, cooker5 in Pass5
+                // delivered to cooker6 in Pass5, cooker5 in Pass6
                 new TestRecord {Key = 369, Value="369"},
 
-                // delivered to cooker7 in Pass3, cooker6 in Pass4
+                // delivered to cooker7 in Pass4, cooker6 in Pass5
                 new TestRecord {Key = 1207, Value="1207"},
 
-                // shouldn't be dlivered to any cooker
+                // shouldn't be delivered to any cooker
                 new TestRecord {Key = 1001, Value="1001"}
 
             };
@@ -452,9 +443,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.IsTrue(sourceDataCooker6.ReceivedRecords.ContainsKey(testRecords[11]));
             Assert.IsTrue(sourceDataCooker7.ReceivedRecords.ContainsKey(testRecords[9]));
             Assert.IsTrue(sourceDataCooker7.ReceivedRecords.ContainsKey(testRecords[11]));
-
-            // Make sure that cooker4 received test record 0 before cooker2
-            Assert.IsTrue(sourceDataCooker4.ReceivedRecords[testRecords[0]] < sourceDataCooker2.ReceivedRecords[testRecords[0]]);
 
             // TestRecord 145 should be delivered twice
             // TestRecord 1207 should be delivered twice
