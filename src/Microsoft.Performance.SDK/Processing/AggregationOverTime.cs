@@ -8,6 +8,11 @@ namespace Microsoft.Performance.SDK.Processing
     /// </summary>
     public enum AggregationOverTime
     {
+        //
+        // TODO: the documentation of these values needs to have additional detail
+        //       added.
+        //
+
         /// <summary>
         ///     Aggregates the current values.
         /// </summary>
