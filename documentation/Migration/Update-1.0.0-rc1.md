@@ -147,6 +147,8 @@ The following classes have been sealed:
 - `ProcessingSourceInfo`
 - `ProcessingSourceAttribute`
 
+## Virtuality
+
 The following methods are no longer `virtual` and are now `abstract`:
 
 - `CustomDataProcessor.ProcessAsyncCore(IProgress<int>, CancellationToken)`
