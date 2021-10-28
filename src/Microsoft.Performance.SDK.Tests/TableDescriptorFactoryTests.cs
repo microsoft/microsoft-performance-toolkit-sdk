@@ -133,7 +133,7 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
-        [Table(buildTableActionMethodName: "Builder")]
+        [TestTable(buildTableActionMethodName: "Builder")]
         [PrebuiltConfigurationsEmbeddedResource("Microsoft.Performance.SDK.Tests.Resources.TestTableConfigurations.json")]
         private sealed class TableWithPrebuiltConfiguration
         {
