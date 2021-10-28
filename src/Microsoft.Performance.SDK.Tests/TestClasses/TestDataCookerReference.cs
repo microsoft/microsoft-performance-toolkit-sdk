@@ -8,7 +8,6 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
-using DataCookerPath = Microsoft.Performance.SDK.Extensibility.DataCookerPath;
 
 namespace Microsoft.Performance.SDK.Tests.TestClasses
 {

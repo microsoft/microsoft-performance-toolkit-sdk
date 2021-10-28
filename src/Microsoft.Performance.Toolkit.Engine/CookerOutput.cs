@@ -36,10 +36,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <returns>
         ///     The uniquely identified data.
         /// </returns>
-        /// <exception cref="InvalidOperationException">
+        /// <exception cref="System.InvalidOperationException">
         ///     <paramref name="name"/> references data that does not exist.
         /// </exception>
-        /// <exception cref="InvalidCastException">
+        /// <exception cref="System.InvalidCastException">
         ///     The value at <paramref name="name"/> cannot be cast to <typeparamref name="T"/>.
         /// </exception>
         public T QueryOutput<T>(string name)
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <returns>
         ///     The uniquely identified data, as an <see cref="object"/>.
         /// </returns>
-        /// <exception cref="InvalidOperationException">
+        /// <exception cref="System.InvalidOperationException">
         ///     <paramref name="name"/> references data that does not exist.
         /// </exception>
         public object QueryOutput(string name)

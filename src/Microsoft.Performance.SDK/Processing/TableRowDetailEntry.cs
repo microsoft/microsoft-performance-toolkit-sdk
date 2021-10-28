@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Processing
         private readonly List<TableRowDetailEntry> children;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="TableRowDetailEntry">
+        ///     Initializes a new instance of the <see cref="TableRowDetailEntry" />
         /// </summary>
         /// <param name="name">
         ///     The name of the top level property of this entry.
@@ -33,7 +33,7 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///      Initializes a new instance of the <see cref="TableRowDetailEntry"/>
+        ///      Initializes a new instance of the <see cref="TableRowDetailEntry" />
         /// </summary>
         /// <param name="name">
         ///      The name of the top level property of this entry.

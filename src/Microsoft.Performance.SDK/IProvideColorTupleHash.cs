@@ -5,6 +5,9 @@ using System;
 
 namespace Microsoft.Performance.SDK
 {
+    /// <summary>
+    ///     Provides a hash value for a primary and secondary color.
+    /// </summary>
     public interface IProvideColorTupleHash
     {
         /// <summary>

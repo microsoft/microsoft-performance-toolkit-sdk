@@ -22,6 +22,9 @@ namespace Microsoft.Performance.SDK
     {
         private static readonly BytesFormatProvider singleton = new BytesFormatProvider();
 
+        /// <summary>
+        ///     Gets the single instance of the <see cref="BytesFormatProvider"/> class.
+        /// </summary>
         public static BytesFormatProvider Singleton
         {
             get
@@ -30,11 +33,13 @@ namespace Microsoft.Performance.SDK
             }
         }
 
+        /// <inheritdoc />
         public object GetFormat(Type formatType)
         {
             return this;
         }
 
+        /// <inheritdoc />
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
             if (arg == null)
