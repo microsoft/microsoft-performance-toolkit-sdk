@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Testing;
-using Microsoft.Performance.Testing.SDK;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Tests
 {
@@ -134,6 +134,38 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
+        public void EnableMetaTableThrows()
+        {
+            this.Options = new ProcessorOptions(
+                new[]
+                {
+                    new OptionInstance(
+                        new Option('r', "test"),
+                        "face"),
+                });
+
+            this.ApplicationEnvironment = new StubApplicationEnvironment();
+            this.ProcessorEnvironment = Any.ProcessorEnvironment();
+            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
+            {
+                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
+                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
+                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
+                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
+                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
+            };
+
+            this.MetadataTables = this.TableDescriptorToBuildAction.Keys.Where(x => x.IsMetadataTable).ToList();
+
+            this.Sut = new MockProcessor(
+                this.Options,
+                this.ApplicationEnvironment,
+                this.ProcessorEnvironment,
+                this.TableDescriptorToBuildAction,
+                this.MetadataTables);
+
+        }
+
         private sealed class MockProcessor
             : CustomDataProcessor
         {
@@ -228,5 +260,29 @@ namespace Microsoft.Performance.SDK.Tests
                 return builder;
             }
         }
+
+        [Table]
+        public class TestTable1
+        {
+            public static readonly string SourceParserId = "SourceId1";
+
+            public static readonly DataCookerPath RequiredDataCooker =
+                DataCookerPath.ForSource(SourceParserId, "CookerId1");
+
+            public static TableDescriptor TableDescriptor = new TableDescriptor(
+                    Guid.Parse("{C2AC873F-B88E-46A1-A08B-0CDF1D0C9F18}"),
+                    "Test Table with Requirements",
+                    "This table has required data extensions",
+                    "Other",
+                    isMetadataTable: true,
+                    requiredDataCookers: new List<DataCookerPath> { RequiredDataCooker })
+            { Type = typeof(TestTable1) };
+
+            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
+            {
+            }
+        }
+
+
     }
 }

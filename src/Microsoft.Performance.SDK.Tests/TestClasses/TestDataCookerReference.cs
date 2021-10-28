@@ -4,14 +4,15 @@
 using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using DataCookerPath = Microsoft.Performance.SDK.Extensibility.DataCookerPath;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
-    internal abstract class TestDataCookerReference
+    public abstract class TestDataCookerReference
         : TestDataExtensionReference,
           IDataCookerReference
     {
@@ -23,9 +24,26 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         protected TestDataCookerReference(bool useDataExtensionDependencyState)
             : base(useDataExtensionDependencyState)
         {
-            this.Path = DataCookerPath.ForComposite(
+            Path = DataCookerPath.ForComposite(
                 string.Concat(
-                    this.GetType().Name,
+                    GetType().Name,
+                    " ",
+                    Guid.NewGuid().ToString()));
+        }
+
+        protected TestDataCookerReference(Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+            : this(true, createDependencyState)
+        {
+        }
+
+        protected TestDataCookerReference(
+            bool useDataExtensionDependencyState,
+            Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+            : base(useDataExtensionDependencyState, createDependencyState)
+        {
+            Path = DataCookerPath.ForComposite(
+                string.Concat(
+                    GetType().Name,
                     " ",
                     Guid.NewGuid().ToString()));
         }
@@ -34,7 +52,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public DataCookerPath Path { get; set; }
 
-        public override string Name => this.Path.CookerPath;
+        public override string Name => Path.CookerPath;
 
         protected override void Dispose(bool disposing)
         {
@@ -42,7 +60,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         }
     }
 
-    internal class TestSourceDataCookerReference
+    public class TestSourceDataCookerReference
         : TestDataCookerReference,
           ISourceDataCookerReference
     {
@@ -56,10 +74,23 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
         }
 
+        public TestSourceDataCookerReference(
+            Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+            : this(true, createDependencyState)
+        {
+        }
+
+        public TestSourceDataCookerReference(
+            bool useDataExtensionDependencyState,
+            Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+            : base(useDataExtensionDependencyState, createDependencyState)
+        {
+        }
+
         public Func<IDataCookerDescriptor> createInstance;
         public IDataCookerDescriptor CreateInstance()
         {
-            return this.createInstance?.Invoke();
+            return createInstance?.Invoke();
         }
 
         public bool UseDefaultValidation { get; set; } = true;
@@ -68,14 +99,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             IDataExtensionDependencyStateSupport dependencyStateSupport,
             IDataExtensionReference requiredDataExtension)
         {
-            if (this.UseDefaultValidation)
+            if (UseDefaultValidation)
             {
-                this.DefaultAdditionalValidation(dependencyStateSupport, requiredDataExtension);
+                DefaultAdditionalValidation(dependencyStateSupport, requiredDataExtension);
             }
             else
             {
                 base.PerformAdditionalDataExtensionValidation(
-                    dependencyStateSupport, 
+                    dependencyStateSupport,
                     requiredDataExtension);
             }
         }
@@ -89,7 +120,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
             if (reference is IDataCookerReference dataCookerReference)
             {
-                if (!StringComparer.Ordinal.Equals(dataCookerReference.Path.SourceParserId, this.Path.SourceParserId))
+                if (!StringComparer.Ordinal.Equals(dataCookerReference.Path.SourceParserId, Path.SourceParserId))
                 {
                     dependencyStateSupport.AddError(
                         new ErrorInfo(
@@ -124,7 +155,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         }
     }
 
-    internal class TestCompositeDataCookerReference
+    public class TestCompositeDataCookerReference
         : TestDataCookerReference,
           ICompositeDataCookerReference
     {
@@ -138,13 +169,30 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
         }
 
-        public IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData)
+        public TestCompositeDataCookerReference(
+            Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+            : this(true, createDependencyState)
         {
-            throw new NotImplementedException();
         }
+
+        public TestCompositeDataCookerReference(
+            bool useDataExtensionDependencyState,
+            Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+            : base(useDataExtensionDependencyState, createDependencyState)
+        {
+        }
+
+        public Func<IDataCooker> createInstance;
+        public IDataCooker CreateInstance(IDataExtensionRetrieval requiredData)
+        {
+            return createInstance?.Invoke();
+        }
+
+        public bool DisposeWasCalled { get; private set; }
 
         protected override void Dispose(bool disposing)
         {
+            DisposeWasCalled = true;
             base.Dispose(disposing);
         }
     }

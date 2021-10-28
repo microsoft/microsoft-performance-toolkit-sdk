@@ -2,14 +2,16 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Extensibility.Exceptions;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
-using System.Diagnostics;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility
 {
@@ -21,7 +23,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
     {
         private readonly ICustomDataProcessorWithSourceParser dataProcessor;
         private readonly IDataExtensionRepository dataExtensionRepository;
-        private readonly Dictionary<TableDescriptor, ITableExtensionReference> tableReferences;
+        private readonly ProcessingSystemCompositeCookers compositeCookers;
+        private readonly ConcurrentDictionary<TableDescriptor, ITableExtensionReference> tableReferences;
 
         private DataExtensionRetrievalFactory dataExtensionRetrievalFactory;
         private bool finalizedData;
@@ -37,33 +40,97 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         /// <param name="dataExtensionRepository">
         ///     Provides access to a set of data extensions.
         /// </param>
+        /// <param name="compositeCookers">
+        ///     The composite cooker repository for a system of data processors.
+        /// </param>
         public CustomDataProcessorExtensibilitySupport(
             ICustomDataProcessorWithSourceParser dataProcessor,
-            IDataExtensionRepository dataExtensionRepository)
+            IDataExtensionRepository dataExtensionRepository,
+            ProcessingSystemCompositeCookers compositeCookers)
         {
             this.dataProcessor = dataProcessor;
             this.dataExtensionRepository = dataExtensionRepository;
-            this.tableReferences = new Dictionary<TableDescriptor, ITableExtensionReference>();
+            this.compositeCookers = compositeCookers;
+            this.tableReferences = new ConcurrentDictionary<TableDescriptor, ITableExtensionReference>();
         }
 
         /// <inheritdoc />
-        public bool AddTable(TableDescriptor tableDescriptor)
+        public void EnableTable(TableDescriptor tableDescriptor)
         {
             lock (this.dataProcessor)
             {
-                if (this.dataExtensionRetrievalFactory != null)
+                if (this.finalizedData)
                 {
-                    throw new InvalidOperationException($"Cannot add tables after calling {nameof(FinalizeTables)}.");
+                    throw new InvalidOperationException(
+                        $"Tables cannot be enabled after finalizing the {nameof(IDataProcessorExtensibilitySupport)}.");
                 }
             }
 
-            if (tableDescriptor.RequiredDataCookers.Any() || tableDescriptor.RequiredDataProcessors.Any())
+            if (!tableDescriptor.RequiresDataExtensions())
             {
-                if (TableExtensionReference.TryCreateReference(tableDescriptor.Type, true, out var tableReference))
+                return;
+            }
+
+            ITableExtensionReference tableReference = TableExtensionReference.CreateReference(
+                tableDescriptor,
+                tableBuildAction: null,
+                tableIsDataAvailableFunc: null);
+
+            if (tableReference.Availability == DataExtensionAvailability.Undetermined)
+            {
+                tableReference.ProcessDependencies(this.dataExtensionRepository);
+            }
+
+            if (tableReference.Availability != DataExtensionAvailability.Available)
+            {
+                throw new ExtensionTableException($"The table is not available: {tableReference.Availability}");
+            }
+
+            if (!tableReference.IsInternalTable)
+            {
+                EnableRequiredSourceDataCookers(tableReference);
+                return;
+            }
+
+            // Get all unique source parsers that are required by this table.
+            var uniqueParserIds = tableReference.DependencyReferences.RequiredSourceDataCookerPaths
+                .Select(p => p.SourceParserId)
+                .Distinct(DataCookerPath.EqualityComparer).ToList();
+
+            // Internal table should only reference data from the source parser to which it belongs, so there should
+            // only be one unique source parser.
+            //
+            if (uniqueParserIds.Count > 1)
+            {
+                throw new InternalTableReferencesMultipleSourceParsersException(tableDescriptor);
+            }
+
+            if (uniqueParserIds.Any())
+            {
+                // Make sure that the table's required source parser matches that of the data processor associated with
+                // this class.
+                var requiredParserId = uniqueParserIds.First();
+                if (!DataCookerPath.EqualityComparer.Equals(requiredParserId, this.dataProcessor.SourceParserId))
                 {
-                    this.tableReferences[tableDescriptor] = tableReference;
-                    return true;
+                    throw new WrongProcessorTableException(
+                        $"The internal table {tableReference.TableDescriptor.Type} references source parser " +
+                        $"{requiredParserId} and cannot be enabled on {this.dataProcessor.SourceParserId}.");
                 }
+            }
+
+            this.tableReferences[tableDescriptor] = tableReference;
+        }
+
+        /// <inheritdoc />
+        public bool TryEnableTable(TableDescriptor tableDescriptor)
+        {
+            try
+            {
+                EnableTable(tableDescriptor);
+                return true;
+            }
+            catch (Exception)
+            {
             }
 
             return false;
@@ -82,48 +149,37 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 this.finalizedData = true;
             }
 
-            // When a plugin has multiple source parsers, then it's possible that the list of table references has some
-            // tables associated with a source parser other than the one associated with the data source that was
-            // opened. so just remove these tables and proceed - this is not an error case
-            //
-            var tablesToRemove = new List<TableDescriptor>();
-
             foreach (var kvp in this.tableReferences)
             {
                 var tableReference = kvp.Value;
 
-                tableReference.ProcessDependencies(this.dataExtensionRepository);
+                // this should have been checked when enabling the table
+                Debug.Assert(tableReference.Availability == DataExtensionAvailability.Available);
 
-                if (tableReference.Availability != DataExtensionAvailability.Available)
-                {
-                    tablesToRemove.Add(kvp.Key);
-                    continue;
-                }
-
-                // check that there are no external sources required
+                // just double check that we didn't allow any tables with external references in
                 foreach (var cookerPath in tableReference.DependencyReferences.RequiredSourceDataCookerPaths)
                 {
-                    if (!StringComparer.Ordinal.Equals(cookerPath.SourceParserId, this.dataProcessor.SourceParserId))
-                    {
-                        tablesToRemove.Add(kvp.Key);
-                        break;
-                    }
-
-                    Debug.Assert(!string.IsNullOrWhiteSpace(cookerPath.SourceParserId));
+                    Debug.Assert(StringComparer.Ordinal.Equals(cookerPath.SourceParserId, this.dataProcessor.SourceParserId));
                 }
-            }
-
-            foreach (var tableDescriptor in tablesToRemove)
-            {
-                this.tableReferences.Remove(tableDescriptor);
             }
 
             lock (this.dataProcessor)
             {
                 if (this.dataExtensionRetrievalFactory == null)
                 {
-                    this.dataExtensionRetrievalFactory =
-                        new DataExtensionRetrievalFactory(this.dataProcessor, dataExtensionRepository);
+                    // Data processors can use composite cookers for internal extensions, and those cookers should be
+                    // maintained by the compositoe cooker respository associated with this data processor, avoiding
+                    // mutiple instances of those composite cookers.
+                    //
+
+                    var filteredRetrievalFactory = this.compositeCookers.CreateFilteredRepository();
+
+                    this.dataExtensionRetrievalFactory = new DataExtensionRetrievalFactory(
+                        this.dataProcessor,
+                        filteredRetrievalFactory,
+                        dataExtensionRepository);
+
+                    filteredRetrievalFactory.Initialize(this.dataExtensionRetrievalFactory);
                 }
             }
         }
@@ -146,14 +202,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 return null;
             }
 
-            ITableExtensionReference reference = this.tableReferences[tableDescriptor];
-            Debug.Assert(reference != null);
-
-            return this.dataExtensionRetrievalFactory.CreateDataRetrievalForTable(reference);
+            return this.dataExtensionRetrievalFactory.CreateDataRetrievalForTable(this.tableReferences[tableDescriptor]);
         }
 
         /// <inheritdoc />
-        public ISet<DataCookerPath> GetAllRequiredSourceDataCookers()
+        public ISet<DataCookerPath> GetRequiredSourceDataCookers()
         {
             var sourceCookerPaths = new HashSet<DataCookerPath>();
 
@@ -163,7 +216,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 {
                     throw new InvalidOperationException(
                         $"{nameof(FinalizeTables)} must be called before calling " +
-                        $"{nameof(GetAllRequiredSourceDataCookers)}.");
+                        $"{nameof(GetRequiredSourceDataCookers)}.");
                 }
             }
 
@@ -182,9 +235,23 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public IEnumerable<TableDescriptor> GetAllRequiredTables()
+        public IEnumerable<TableDescriptor> GetEnabledInternalTables()
         {
             return this.tableReferences.Keys;
+        }
+
+        private void EnableRequiredSourceDataCookers(ITableExtensionReference tableReference)
+        {
+            Debug.Assert(tableReference != null);
+
+            var cookerFactories = tableReference.DependencyReferences.RequiredSourceDataCookerPaths
+                .Where(path => StringComparer.Ordinal.Equals(path.SourceParserId, this.dataProcessor.SourceParserId))
+                .Select(path => this.dataExtensionRepository.GetSourceDataCookerFactory(path));
+
+            foreach (var cookerFactory in cookerFactories)
+            {
+                this.dataProcessor.EnableCooker(cookerFactory);
+            }
         }
     }
 }
