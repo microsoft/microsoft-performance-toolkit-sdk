@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
@@ -78,7 +79,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 this.currentPassIndex = InvalidPass;
                 return;
             }
-
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
                 var sourceDataCookers = this.sourceCookersByPass[passIndex];
@@ -98,19 +98,36 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 }
             }
 
-            DataProcessorProgress passProgress = new DataProcessorProgress();
-            int currentPassProgress = 0;
+            // populate progresstrackers for each pass
+            List<DataProcessorProgress> dataProcessorProgresses = new List<DataProcessorProgress>(countOfPassesToProcess);
+            for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
+			{
+                dataProcessorProgresses.Add(new DataProcessorProgress());
+            }
 
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
                 this.currentPassIndex = passIndex;
-
                 this.InitializeForSourceParsing();
 
-                this.SourceParser.ProcessSource(this, logger, passProgress, cancellationToken);
+                dataProcessorProgresses[passIndex].PropertyChanged += (s, e) =>
+                {
+                    if (!e.PropertyName.Equals(nameof(DataProcessorProgress.CurrentProgress)))  {
+                        return;
+					}
+                    var progress = s as DataProcessorProgress;
+                    Debug.Assert(progress != null);
 
-                currentPassProgress += passProgress.CurrentProgress;
-                totalProgress.Report(currentPassProgress / countOfPassesToProcess);
+                    var currentTotal = ((passIndex) * 100) / countOfPassesToProcess;
+                    var currProgress = progress.CurrentProgress / countOfPassesToProcess;
+
+                    totalProgress.Report(currentTotal + currProgress);
+                };
+
+                this.SourceParser.ProcessSource(this, logger, dataProcessorProgresses[passIndex], cancellationToken);
+
+                // Ensure to report finished tracking after each completed pass
+                dataProcessorProgresses[passIndex].Report(100);
 
                 foreach (var cooker in this.sourceCookersByPass[passIndex])
                 {
@@ -118,6 +135,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 }
             }
 
+            totalProgress.Report(100);
             this.currentPassIndex = InvalidPass;
         }
 

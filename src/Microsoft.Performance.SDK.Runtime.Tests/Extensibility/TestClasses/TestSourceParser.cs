@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
@@ -50,12 +51,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
                 return;
             }
 
-            foreach (var testRecord in this.TestRecords)
+            var totalNumTestRecords = this.TestRecords.Count();
+            for (int testRecordIdx = 0; testRecordIdx < totalNumTestRecords; testRecordIdx++)
             {
+                var testRecord = this.TestRecords.ElementAt(testRecordIdx);
                 dataProcessor.ProcessDataElement(testRecord, new TestParserContext(), cancellationToken);
-            }
 
-            progress.Report(100);
+                progress.Report( 100 * (testRecordIdx + 1) / totalNumTestRecords);
+            }
         }
 
         /// <inheritdoc />

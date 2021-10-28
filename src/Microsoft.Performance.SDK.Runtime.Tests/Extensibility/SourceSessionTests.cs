@@ -19,6 +19,29 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     [TestClass]
     public class SourceSessionTests
     {
+        /// <summary>
+        ///     Ensure progress is reported incrementally
+        /// </summary>
+        /// <returns>True if Progress is as expected. False otherwise. </returns>
+        public void CheckProgressReports(TestProgress progress, int numRecords)
+		{
+            int numPasses = (progress.ReportedValues.Count - 1) / numRecords;
+            int recordIdx = 0;
+            int numIter = numRecords * numPasses;
+            for (int pass = 0; pass < numPasses; pass++)
+            {
+                for (int record = 0; record < numRecords; record++)
+				{
+                    int expectedVal = 100 * (recordIdx + 1) / numIter;
+                    int actualVal = progress.ReportedValues[recordIdx];
+                    recordIdx++;
+                    Assert.AreEqual(expectedVal, actualVal);
+				}
+            }
+
+            Assert.AreEqual(100, progress.ReportedValues[progress.ReportedValues.Count - 1]);
+        }
+
         [TestMethod]
         [UnitTest]
         public void Constructor_NullSourceParser_Throws()
@@ -222,11 +245,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             int expectedReceivedCount = testRecords.Count + 2 - 1;
             Assert.AreEqual(expectedReceivedCount, dataCookerContext.CountOfTestRecordsReceived);
 
-            // Ensure progress is reported incrementally after each pass
-            for (int processPass = 0; processPass < progress.ReportedValues.Count; processPass++)
-			{
-                Assert.AreEqual(progress.ReportedValues[processPass], 100 * (processPass + 1) / progress.ReportedValues.Count);
-			}
+            CheckProgressReports(progress, testRecords.Count);
         }
 
         [TestMethod]
@@ -267,13 +286,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 sourceParser.RequestedDataKeys.Count == 
                 sourceDataCooker1.DataKeys.Count + sourceDataCooker2.DataKeys.Count);
 
-            // Ensure progress is reported incrementally after each pass
-            for (int processPass = 0; processPass < progress.ReportedValues.Count; processPass++)
-            {
-                Assert.AreEqual(progress.ReportedValues[processPass], 100 * (processPass + 1) / progress.ReportedValues.Count);
-            }
+            CheckProgressReports(progress, testRecords.Count);
         }
-        
+
         [TestMethod]
         [UnitTest]
         public void RegisteredDataKeysAreSentToSourceParserWithAllEventsTrue()
@@ -311,11 +326,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.IsTrue(sourceParser.ReceivedAllEventsConsumed);
             Assert.IsTrue(sourceParser.RequestedDataKeys.Count == sourceDataCooker1.DataKeys.Count);
 
-            // Ensure progress is reported incrementally after each pass
-            for (int processPass = 0; processPass < progress.ReportedValues.Count; processPass++)
-            {
-                Assert.AreEqual(progress.ReportedValues[processPass], 100 * (processPass + 1) / progress.ReportedValues.Count);
-            }
+            CheckProgressReports(progress, testRecords.Count);
+
         }
     }
 }
