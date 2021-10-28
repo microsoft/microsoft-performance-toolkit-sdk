@@ -63,32 +63,32 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var sources = new[]
             {
-                new TestSourceDataCookerReference(),
-                new TestSourceDataCookerReference(),
-                new TestSourceDataCookerReference(),
+                new TestRuntimeSourceCookerReference(),
+                new TestRuntimeSourceCookerReference(),
+                new TestRuntimeSourceCookerReference(),
             };
 
             var composites = new[]
             {
-                new TestCompositeDataCookerReference(),
-                new TestCompositeDataCookerReference(),
-                new TestCompositeDataCookerReference(),
+                new TestRuntimeCompositeCookerReference(),
+                new TestRuntimeCompositeCookerReference(),
+                new TestRuntimeCompositeCookerReference(),
             };
 
             // TODO: __SDK_DP__
             // Redesign Data Processor API
-            ////var processors = new[]
-            ////{
-            ////    new TestDataProcessorReference(),
-            ////    new TestDataProcessorReference(),
-            ////    new TestDataProcessorReference(),
-            ////};
+            //// var processors = new[]
+            //// {
+            ////     new TestRuntimeDataProcessorReference(),
+            ////     new TestRuntimeDataProcessorReference(),
+            ////     new TestRuntimeDataProcessorReference(),
+            //// };
 
             var tables = new[]
             {
-                new TestTableExtensionReference(),
-                new TestTableExtensionReference(),
-                new TestTableExtensionReference(),
+                new TestRuntimeTableExtensionReference(),
+                new TestRuntimeTableExtensionReference(),
+                new TestRuntimeTableExtensionReference(),
             };
 
             sources.ForEach(x => this.Sut.AddSourceDataCookerReference(x));

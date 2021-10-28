@@ -145,6 +145,36 @@ catch (UnsupportedDataSourceException)
 }
 ````
 
+## Interfaces implemented in the SDK or SDK.Runtime
+
+There are some changes made to interfaces that generally don't need to be implemented by plugins. Those changes are documented in this section.
+
+### ICustomDataProcessor
+
+- Adds `TryEnableTable` method. This is similar to `EnableTable`, but catches most exceptions and returns a `bool`.
+
+### IDataProcessorExtensibilitySupport
+
+- The `AddTable` method becomes `EnableTable` or `TryEnableTable`.
+
+- The `GetAllRequiredSourceDataCookers` was renamed to `GetRequiredSourceDataCookers`.
+
+- The `GetAllRequiredTables was renamed to `GetEnabledInternalTables`.
+
+### IDataExtensionRetrievalFactory
+
+This was moved from the SDK namespace to SDK.Runtime.
+
+## TableAttribute and InternalTableAttribute
+
+- The `InternalTableAttribute` was removed.
+
+- Internal table constructor arguments and properties have been removed from `TableAttribute`.
+
+- An `isInternalTable` constructor argument and an `IsInternalTable` property were added to `TableDescriptor`.
+
+Internal tables provide processing sources a way to create tables that require data cookers but do not declare build table actions. If using internal tables today, please update the table attribute and table descriptor appropriately.
+
 ### Engine Execution Results
 
 A new parameter has been added to the constructor.

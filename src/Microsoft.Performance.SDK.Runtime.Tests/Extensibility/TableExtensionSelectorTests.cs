@@ -9,6 +9,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,17 +19,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     public class TableExtensionSelectorTests
     {
         // Source Cookers
-        private static TestSourceDataCookerReference[] SourceCookers;
+        private static TestRuntimeSourceCookerReference[] SourceCookers;
 
-        private static readonly IDictionary<DataCookerPath, TestSourceDataCookerReference> SourceCookersByPath 
-            = new Dictionary<DataCookerPath, TestSourceDataCookerReference>();
+        private static readonly IDictionary<DataCookerPath, TestRuntimeSourceCookerReference> SourceCookersByPath
+            = new Dictionary<DataCookerPath, TestRuntimeSourceCookerReference>();
 
         // Composite cookers
 
-        private static TestCompositeDataCookerReference[] CompositeCookers;
+        private static TestRuntimeCompositeCookerReference[] CompositeCookers;
 
-        private static readonly IDictionary<DataCookerPath, TestCompositeDataCookerReference> CompositeCookersByPath
-            = new Dictionary<DataCookerPath, TestCompositeDataCookerReference>();
+        private static readonly IDictionary<DataCookerPath, TestRuntimeCompositeCookerReference> CompositeCookersByPath
+            = new Dictionary<DataCookerPath, TestRuntimeCompositeCookerReference>();
 
         private static readonly DataCookerPath Source1Cooker1Path = DataCookerPath.ForSource("Source1", "SourceCooker1");
 
@@ -42,31 +43,31 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             SourceCookers = new[]
             {
-                new TestSourceDataCookerReference
+                new TestRuntimeSourceCookerReference
                 {
                     Path = DataCookerPath.ForSource("Source1", "SourceCooker1"),
                 },
-                new TestSourceDataCookerReference
+                new TestRuntimeSourceCookerReference
                 {
                     Path = DataCookerPath.ForSource("Source2", "SourceCooker0"),
                 },
-                new TestSourceDataCookerReference
+                new TestRuntimeSourceCookerReference
                 {
                     Path = DataCookerPath.ForSource("Source2", "SourceCooker10"),
                 },
-                new TestSourceDataCookerReference
+                new TestRuntimeSourceCookerReference
                 {
                     Path = DataCookerPath.ForSource("Source2", "SourceCooker13"),
                 },
-                new TestSourceDataCookerReference
+                new TestRuntimeSourceCookerReference
                 {
                     Path = DataCookerPath.ForSource("Source1", "SourceCooker41"),
                 },
-                new TestSourceDataCookerReference
+                new TestRuntimeSourceCookerReference
                 {
                     Path = DataCookerPath.ForSource("Source1", "SourceCooker356"),
                 },
-                new TestSourceDataCookerReference
+                new TestRuntimeSourceCookerReference
                 {
                     Path = DataCookerPath.ForSource("Source4", "SourceCooker_Woah!"),
                 },
@@ -82,19 +83,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             CompositeCookers = new[]
             {
-                new TestCompositeDataCookerReference
+                new TestRuntimeCompositeCookerReference
                 {
                     Path = DataCookerPath.ForComposite("CompositeCooker1"),
                 },
-                new TestCompositeDataCookerReference
+                new TestRuntimeCompositeCookerReference
                 {
                     Path = DataCookerPath.ForComposite("CompositeCooker2"),
                 },
-                new TestCompositeDataCookerReference
+                new TestRuntimeCompositeCookerReference
                 {
                     Path = DataCookerPath.ForComposite("CompositeCooker3"),
                 },
-                new TestCompositeDataCookerReference
+                new TestRuntimeCompositeCookerReference
                 {
                     Path = DataCookerPath.ForComposite("CompositeCooker33"),
                 },
@@ -145,7 +146,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     false,
                     TableLayoutStyle.GraphAndTable,
                     new[] { Source1Cooker1Path }),
-                BuildTableAction = (tableBuilder, dataRetrieval) => {},
+                BuildTableAction = (tableBuilder, dataRetrieval) => { },
                 availability = DataExtensionAvailability.Available,
             };
 
@@ -177,7 +178,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                     false,
                     TableLayoutStyle.GraphAndTable,
                     new[] { Source1Cooker1Path }),
-                BuildTableAction = (tableBuilder, dataRetrieval) => {},
+                BuildTableAction = (tableBuilder, dataRetrieval) => { },
                 availability = DataExtensionAvailability.MissingRequirement,
             };
 
@@ -267,7 +268,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 Source1Cooker1Path,
             };
 
-            var table1 = new TestTableExtensionReference
+            var table1 = new TestRuntimeTableExtensionReference
             {
                 TableDescriptor = new TableDescriptor(
                     Guid.Parse("{ADE569AF-4460-4DCC-A7C8-9748737AE592}"),
@@ -289,7 +290,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             Assert.AreEqual(tableSelector.Tables.Count, 1);
 
-            var requiredSourceDataCookers = tableSelector.GetSourceDataCookersForTables(new [] {table1.TableDescriptor.Guid });
+            var requiredSourceDataCookers = tableSelector.GetSourceDataCookersForTables(new[] { table1.TableDescriptor.Guid });
 
             Assert.AreEqual(requiredSourceDataCookers.Count, 1);
 

@@ -19,13 +19,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
     internal class DataExtensionRepository
         : IDataExtensionRepositoryBuilder
     {
-        private Dictionary<string, HashSet<ISourceDataCookerFactory>> dataCookerReferencesBySource 
+        private Dictionary<string, HashSet<ISourceDataCookerFactory>> dataCookerReferencesBySource
             = new Dictionary<string, HashSet<ISourceDataCookerFactory>>(StringComparer.Ordinal);
 
-        private HashSet<ICompositeDataCookerReference> compositeDataCookerReferences 
+        private HashSet<ICompositeDataCookerReference> compositeDataCookerReferences
             = new HashSet<ICompositeDataCookerReference>();
 
-        private Dictionary<DataCookerPath, ISourceDataCookerReference> sourceDataCookerReferencesByPath 
+        private Dictionary<DataCookerPath, ISourceDataCookerReference> sourceDataCookerReferencesByPath
             = new Dictionary<DataCookerPath, ISourceDataCookerReference>();
 
         private Dictionary<DataCookerPath, ICompositeDataCookerReference> compositeDataCookerReferencesByPath
@@ -36,8 +36,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         ////private ConcurrentSet<IDataProcessorReference> dataProcessors
         ////    = new ConcurrentSet<IDataProcessorReference>();
 
-        private ConcurrentDictionary<Guid, ITableExtensionReference> tablesById 
-            =  new ConcurrentDictionary<Guid, ITableExtensionReference>();
+        private ConcurrentDictionary<Guid, ITableExtensionReference> tablesById
+            = new ConcurrentDictionary<Guid, ITableExtensionReference>();
 
         private bool isDisposed = false;
 

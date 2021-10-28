@@ -3,32 +3,50 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
-using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
+using Microsoft.Performance.SDK.Tests.DataTypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestCustomDataProcessor
         : CustomDataProcessorWithSourceParser<TestRecord, TestParserContext, int>
     {
-        internal static TestCustomDataProcessor CreateTestCustomDataProcessor(
+        public static TestCustomDataProcessor CreateTestCustomDataProcessor(
             string sourceParserId = "TestSourceParser")
+        {
+            return CreateTestCustomDataProcessor(
+                sourceParserId,
+                new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>());
+        }
+
+        public static TestCustomDataProcessor CreateTestCustomDataProcessor(
+            string sourceParserId,
+            Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> internalTables,
+            TestDataExtensionRepository extensionRepo = null)
         {
             var sourceParser = new TestSourceParser() { Id = sourceParserId };
             var applicationEnvironment = new TestApplicationEnvironment();
-            var processorEnvironment = new TestProcessorEnvironment();
-            var dataExtensionRepo = new TestDataExtensionRepository();
+            var processorEnvironment = CreateProcessorEnvironment();
+            var dataExtensionRepo = extensionRepo ?? new TestDataExtensionRepository();
 
             CustomDataProcessorExtensibilitySupport extensibilitySupport = null;
+            var compositeCookers = new ProcessingSystemCompositeCookers(dataExtensionRepo);
 
             applicationEnvironment.SourceSessionFactory = new TestSourceSessionFactory();
             processorEnvironment.CreateDataProcessorExtensibilitySupportFunc = (processor) =>
             {
-                extensibilitySupport = new CustomDataProcessorExtensibilitySupport(processor, dataExtensionRepo);
+                extensibilitySupport = new CustomDataProcessorExtensibilitySupport(
+                    processor,
+                    dataExtensionRepo,
+                    compositeCookers);
+
                 return extensibilitySupport;
             };
 
@@ -38,7 +56,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
                 ProcessorOptions.Default,
                 applicationEnvironment,
                 processorEnvironment,
-                new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(),
+                internalTables,
                 new List<TableDescriptor>());
 
             Assert.IsNotNull(extensibilitySupport);
@@ -60,8 +78,27 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
         }
 
+        public List<ISourceDataCooker<TestRecord, TestParserContext, int>> EnabledCookers { get; }
+            = new List<ISourceDataCooker<TestRecord, TestParserContext, int>>();
+        protected override void OnDataCookerEnabled(ISourceDataCooker<TestRecord, TestParserContext, int> sourceDataCooker)
+        {
+            Debug.Assert(sourceDataCooker != null);
+            EnabledCookers.Add(sourceDataCooker);
+        }
+
         public CustomDataProcessorExtensibilitySupport ExtensibilitySupport { get; set; }
 
         public TestDataExtensionRepository ExtensionRepository { get; set; }
+
+        public ReadOnlyHashSet<TableDescriptor> EnabledTableDescriptors => this.EnabledTables;
+
+        public TestLogger TestLogger => this.Logger as TestLogger;
+
+        private static TestProcessorEnvironment CreateProcessorEnvironment()
+        {
+            var processorEnvironment = new TestProcessorEnvironment();
+            processorEnvironment.TestLoggers.Add(typeof(TestCustomDataProcessor), new TestLogger());
+            return processorEnvironment;
+        }
     }
 }

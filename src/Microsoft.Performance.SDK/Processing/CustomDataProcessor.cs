@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.Processing
         : ICustomDataProcessor,
           IDataDerivedTables
     {
-        private readonly HashSet<TableDescriptor> enabledTables;
+        private readonly HashSet<TableDescriptor> enabledTables = new HashSet<TableDescriptor>();
 
         private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
@@ -42,14 +42,15 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(metadataTables, nameof(metadataTables));
             Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
 
-            this.enabledTables = new HashSet<TableDescriptor>(metadataTables);
+            this.Logger = processorEnvironment.CreateLogger(this.GetType());
 
             this.ApplicationEnvironment = applicationEnvironment;
             this.ProcessorEnvironment = processorEnvironment;
             this.EnabledTables = new ReadOnlyHashSet<TableDescriptor>(this.enabledTables);
             this.Options = options;
             this.TableDescriptorToBuildAction = allTablesMapping;
-            this.Logger = processorEnvironment.CreateLogger(this.GetType());
+
+            EnableMetadataTables(metadataTables);
         }
 
         /// <inheritdoc />
@@ -104,9 +105,32 @@ namespace Microsoft.Performance.SDK.Processing
         {
             lock (this.enabledTables)
             {
+                if (this.enabledTables.Contains(tableDescriptor))
+                {
+                    return;
+                }
+
+                OnBeforeEnableTable(tableDescriptor);
                 this.enabledTables.Add(tableDescriptor);
-                OnTableEnabled(tableDescriptor);
+                OnAfterEnableTable(tableDescriptor);
             }
+        }
+
+        /// <inheritdoc />
+        public bool TryEnableTable(TableDescriptor tableDescriptor)
+        {
+            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
+
+            try
+            {
+                EnableTable(tableDescriptor);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -170,6 +194,32 @@ namespace Microsoft.Performance.SDK.Processing
             return ProcessAsyncCore(progress, cancellationToken);
         }
 
+        /// <inheritdoc/>
+        public IEnumerable<TableDescriptor> GetEnabledTables()
+        {
+            lock (this.enabledTables)
+            {
+                return this.enabledTables.ToList();
+            }
+        }
+
+        /// <summary>
+        ///     Enable metadata tables.
+        /// </summary>
+        /// <remarks>
+        ///     The default implementation just adds the tables to <see cref="EnabledTables"/>.
+        /// </remarks>
+        /// <param name="metadataTables">
+        ///     Metadata tables to process.
+        /// </param>
+        protected virtual void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
+        {
+            foreach (var table in metadataTables)
+            {
+                this.enabledTables.Add(table);
+            }
+        }
+
         /// <summary>
         ///     Asynchronously processes the data source.
         /// </summary>
@@ -209,11 +259,23 @@ namespace Microsoft.Performance.SDK.Processing
             ITableBuilder tableBuilder);
 
         /// <summary>
-        /// This is called when a table has been enabled on this data processor. The default implementation does
-        /// nothing.
+        ///     This is called before a table has been enabled on this data processor.
         /// </summary>
-        /// <param name="tableDescriptor">Table that was enabled.</param>
-        protected virtual void OnTableEnabled(TableDescriptor tableDescriptor)
+        /// <param name="tableDescriptor">
+        ///     Table that was enabled.
+        /// </param>
+        protected virtual void OnBeforeEnableTable(TableDescriptor tableDescriptor)
+        {
+        }
+
+        /// <summary>
+        ///     This is called after a table has been enabled on this data processor. The default implementation does
+        ///     nothing.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     Table that was enabled.
+        /// </param>
+        protected virtual void OnAfterEnableTable(TableDescriptor tableDescriptor)
         {
         }
 
