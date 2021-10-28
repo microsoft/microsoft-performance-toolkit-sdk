@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         {
             Guard.NotNull(logger, nameof(logger));
 
-            this.Log = logger;
+            this.Logger = logger;
         }
 
         /// <inheritdoc />
@@ -37,7 +37,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <summary>
         ///     Gets the interface for logging messages from this instance.
         /// </summary>
-        protected ILogger Log { get; }
+        protected ILogger Logger { get; }
 
         /// <inheritdoc />
         public bool IsAssembly(string path)
@@ -91,7 +91,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
             catch (FileLoadException e)
             {
-                this.Log.Warn(
+                this.Logger.Warn(
                     "[warn]: managed assembly `{0}` cannot be loaded - {1}.",
                     assemblyPath,
                     e.FusionLog);

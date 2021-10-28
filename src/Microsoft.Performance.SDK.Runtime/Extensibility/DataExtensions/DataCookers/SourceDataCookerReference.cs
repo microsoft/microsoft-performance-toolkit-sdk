@@ -120,8 +120,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
-        ///         <item>must implement IDataCooker somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
-        ///         <item>must implement ISourceDataCooker<,,> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="IDataCooker"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ISourceDataCooker{T, TContext, TKey}"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>
@@ -141,7 +141,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             return TryCreateReference(
                 candidateType,
-                Logger.Create<SourceDataCookerReference>(),
+                Runtime.Logger.Create<SourceDataCookerReference>(),
                 out reference);
         }
 
@@ -153,8 +153,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
-        ///         <item>must implement IDataCooker somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
-        ///         <item>must implement ISourceDataCooker<,,> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="IDataCooker"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ISourceDataCooker{T, TContext, TKey}"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>

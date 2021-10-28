@@ -70,7 +70,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
-        ///         <item>must implement ICompositeDataCookerDescriptor somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ICompositeDataCookerDescriptor"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>
@@ -90,7 +90,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             return TryCreateReference(
                 candidateType,
-                Logger.Create<CompositeDataCookerReference>(),
+                Runtime.Logger.Create<CompositeDataCookerReference>(),
                 out reference);
         }
 
@@ -102,7 +102,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
-        ///         <item>must implement ICompositeDataCookerDescriptor somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ICompositeDataCookerDescriptor"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>

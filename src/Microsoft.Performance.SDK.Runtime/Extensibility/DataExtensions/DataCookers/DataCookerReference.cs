@@ -46,7 +46,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 
             this.isDisposed = false;
 
-            this.Log = logger;
+            this.Logger = logger;
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// <summary>
         ///     Gets the interface for logging messages from this instance.
         /// </summary>
-        protected ILogger Log { get; }
+        protected ILogger Logger { get; }
 
         /// <inheritdoc/>
         /// <exception cref="System.ObjectDisposedException">

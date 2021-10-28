@@ -55,7 +55,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
         ///     class.
         /// </summary>
         public IsolationAssemblyLoader()
-            : this(new Dictionary<string, string>(), Logger.Create<IsolationAssemblyLoader>())
+            : this(new Dictionary<string, string>(), Runtime.Logger.Create<IsolationAssemblyLoader>())
         {
         }
 

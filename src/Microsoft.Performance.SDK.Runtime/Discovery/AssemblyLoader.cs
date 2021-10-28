@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     class.
         /// </summary>
         public AssemblyLoader()
-            : this(Logger.Create<AssemblyLoader>())
+            : this(Runtime.Logger.Create<AssemblyLoader>())
         {
         }
 
