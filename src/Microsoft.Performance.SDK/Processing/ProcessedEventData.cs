@@ -37,8 +37,10 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public uint Count { get; private set; }
 
+        /// <inheritdoc />
         int IReadOnlyCollection<T>.Count => (int)this.Count;
 
+        /// <inheritdoc />
         public T this[int index] => this[(uint)index];
 
         /// <summary>
@@ -118,6 +120,7 @@ namespace Microsoft.Performance.SDK.Processing
             return this.currentEventsBuilderList.Count == BuilderListSize;
         }
 
+        /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
         {
             for(uint i = 0; i < this.Count; ++i)

@@ -155,6 +155,16 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
 
+        /// <summary>
+        ///     When overridden in a derived class, creates an instance of the service defined by the
+        ///     given table's <see cref="TableDescriptor.ServiceInterface"/>.
+        /// </summary>
+        /// <param name="table">
+        ///     The table whose service is to be created.
+        /// </param>
+        /// <returns>
+        ///     The created service, if the table specifies a service; <c>null</c> otherwise.
+        /// </returns>
         public virtual ITableService CreateTableService(TableDescriptor table)
         {
             if (table is null)

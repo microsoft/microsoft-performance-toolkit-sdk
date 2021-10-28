@@ -126,7 +126,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <returns>
         ///     A new <see cref="ITableProvider"/> that discovers tables in the
-        ///     specified <paramref name="tableNamespace"/> in the specified <paramref name="assembly"/>.
+        ///     specified <paramref name="tableNamespace"/> in the specified <paramref name="assemblies"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="assemblies"/> is <c>null</c>.

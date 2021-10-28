@@ -271,7 +271,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The created engine environment.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="dataSources"/> is <c>null</c>.
+        ///     <paramref name="dataSource"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
@@ -408,7 +408,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         /// <exception cref="CookerNotFoundException">
         ///     <paramref name="dataCookerPath"/> is not known by this instance.
-        ///     See <see cref="AllCookers"/>.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
@@ -509,10 +508,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="TableException">
-        ///     A table is not available for the given <paramref name="tableDescriptor"/>.
+        ///     A table is not available for the given <paramref name="descriptor"/>.
         /// </exception>
         /// <exception cref="TableNotFoundException">
-        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
+        ///     A table cannot be found for the given <paramref name="descriptor"/>.
         /// </exception>
         public void EnableTable(TableDescriptor descriptor)
         {

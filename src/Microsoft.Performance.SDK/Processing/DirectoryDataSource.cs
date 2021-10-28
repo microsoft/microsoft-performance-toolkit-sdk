@@ -30,7 +30,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public string FullPath { get; }
 
-        /// <inheritdoc cref="System.Object.Equals(object)"/>
+        /// <inheritdoc cref="object.Equals(object)"/>
         public override bool Equals(object other)
         {
             if (other is null)
@@ -48,7 +48,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         }
 
-        /// <inheritdoc cref="System.Object.GetHashCode(object)"/>
+        /// <inheritdoc cref="object.GetHashCode()"/>
         public override int GetHashCode()
         {
             return this.FullPath.GetHashCode();
