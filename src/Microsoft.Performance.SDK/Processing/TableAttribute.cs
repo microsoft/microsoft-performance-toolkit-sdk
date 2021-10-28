@@ -27,6 +27,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         protected const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableAttribute"/> class.
+        /// </summary>
         public TableAttribute()
             : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName)
         {
