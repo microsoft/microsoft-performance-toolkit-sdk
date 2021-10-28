@@ -15,17 +15,25 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     The default name of the static class property which returns the <see cref="TableDescriptor"/>.
         /// </summary>
-        public const string DefaultTableDescriptorPropertyName = "TableDescriptor";
+        protected const string DefaultTableDescriptorPropertyName = "TableDescriptor";
 
         /// <summary>
         ///     The default name of the static class method which builds a table.
         /// </summary>
-        public const string DefaultTableBuilderMethodName = "BuildTable";
+        protected const string DefaultTableBuilderMethodName = "BuildTable";
 
         /// <summary>
         ///     The default name of the static class method which checks if a table has data.
         /// </summary>
-        public const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
+        protected const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="TableAttribute"/> class.
+        /// </summary>
+        public TableAttribute()
+            : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName)
+        {
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TableAttribute"/> class.
@@ -48,7 +56,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///         bool IsDataAvailable(<see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
         ///     </code>
         /// </param>
-        public TableAttribute(
+        protected TableAttribute(
             string tableDescriptorPropertyName = DefaultTableDescriptorPropertyName,
             string buildTableActionMethodName = DefaultTableBuilderMethodName,
             string isDataAvailableMethodName = DefaultIsDataAvailableMethodName)
@@ -63,18 +71,18 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     The name of the static class property which returns the <see cref="TableDescriptor"/>.
         /// </summary>
-        public string TableDescriptorPropertyName { get; }
+        protected internal string TableDescriptorPropertyName { get; }
 
         /// <summary>
         ///     The name of the static class method which builds a table.
         ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
         /// </summary>
-        public string BuildTableActionMethodName { get; }
+        protected internal string BuildTableActionMethodName { get; }
 
         /// <summary>
         ///     The name of the static class method which checks if the table has data.
         ///     IsDataAvailable(IDataExtensionRetrieval)
         /// </summary>
-        public string IsDataAvailableMethodName { get; }
+        protected internal string IsDataAvailableMethodName { get; }
     }
 }
