@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.Discovery;
-using Microsoft.Performance.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Discovery;
+using Microsoft.Performance.Testing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 {
     [TestClass]
-    public class ReflectionPlugInCatalogTests
+    public class ReflectionProcessingSourceCatalogTests
     {
         private FakeReferenceFactory ReferenceFactory { get; set; }
-        private ReflectionPlugInCatalog Sut { get; set; }
+        private ReflectionProcessingSourceCatalog Sut { get; set; }
         private TestExtensionProvider ExtensionProvider { get; set; }
 
         [TestInitialize]
@@ -24,7 +24,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             this.ReferenceFactory = new FakeReferenceFactory();
             this.ExtensionProvider = new TestExtensionProvider();
-            this.Sut = new ReflectionPlugInCatalog(
+            this.Sut = new ReflectionProcessingSourceCatalog(
                 this.ExtensionProvider,
                 this.ReferenceFactory.TryCreateProcessingSourceReference);
         }
@@ -33,7 +33,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         [UnitTest]
         public void AddInsEmptyOnConstruction()
         {
-            Assert.IsFalse(this.Sut.PlugIns.Any());
+            Assert.IsFalse(this.Sut.ProcessingSources.Any());
         }
 
         [TestMethod]
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             var testType = typeof(CdsWithoutCdsAttribute);
             this.Sut.ProcessType(testType, testType.FullName);
-            Assert.IsFalse(this.Sut.PlugIns.Any());
+            Assert.IsFalse(this.Sut.ProcessingSources.Any());
         }
 
         [TestMethod]
@@ -59,13 +59,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             this.ReferenceFactory.SetupReference(testType2);
 
             this.Sut.ProcessType(testType1, testType1.FullName);
-            Assert.AreEqual(1, this.Sut.PlugIns.Count());
+            Assert.AreEqual(1, this.Sut.ProcessingSources.Count());
 
             this.Sut.ProcessType(testType2, testType2.FullName);
-            Assert.AreEqual(2, this.Sut.PlugIns.Count());
+            Assert.AreEqual(2, this.Sut.ProcessingSources.Count());
 
-            Assert.IsTrue(this.Sut.PlugIns.Any(cds => cds.Guid == testType1Guid));
-            Assert.IsTrue(this.Sut.PlugIns.Any(cds => cds.Guid == testType2Guid));
+            Assert.IsTrue(this.Sut.ProcessingSources.Any(cds => cds.Guid == testType1Guid));
+            Assert.IsTrue(this.Sut.ProcessingSources.Any(cds => cds.Guid == testType2Guid));
         }
 
         private sealed class FakeReferenceFactory

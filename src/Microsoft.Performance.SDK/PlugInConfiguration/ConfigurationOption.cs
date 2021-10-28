@@ -4,17 +4,17 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Performance.SDK.PlugInConfiguration
+namespace Microsoft.Performance.SDK.PluginConfiguration
 {
     /// <summary>
-    ///     A plug-in configuration option allows a plug-in to change behavior based on requirements of an application
+    ///     A plugin configuration option allows a plugin to change behavior based on requirements of an application
     ///     or runtime without coding directly to either one.
     /// </summary>
     public class ConfigurationOption
         : IEquatable<ConfigurationOption>
     {
-        private readonly HashSet<string> _applications = new HashSet<string>(PlugInConfiguration.Comparer);
-        private readonly HashSet<string> _runtimes = new HashSet<string>(PlugInConfiguration.Comparer);
+        private readonly HashSet<string> _applications = new HashSet<string>(PluginConfiguration.Comparer);
+        private readonly HashSet<string> _runtimes = new HashSet<string>(PluginConfiguration.Comparer);
 
         /// <summary>
         ///     Create an configuration option.
@@ -27,10 +27,10 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
         /// </param>
         public ConfigurationOption(string name, string description)
         {
-            if (!PlugInConfigurationValidation.ValidateElementName(name))
+            if (!PluginConfigurationValidation.ValidateElementName(name))
             {
                 throw new ArgumentException(message:
-                    string.Format("The name is invalid '{0}': {1}", name, PlugInConfigurationValidation.ValidCharactersMessage),
+                    string.Format("The name is invalid '{0}': {1}", name, PluginConfigurationValidation.ValidCharactersMessage),
                     nameof(name));
             }
 

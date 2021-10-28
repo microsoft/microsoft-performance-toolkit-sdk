@@ -31,7 +31,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         /// This constructor will setup the data processor so that it can use the data extension framework - allowing
-        /// table and data cookers both internally and external to this plug-in.
+        /// table and data cookers both internally and external to this plugin.
         /// </summary>
         /// <param name="sourceParser">The source data parser</param>
         /// <param name="options">Processor options</param>

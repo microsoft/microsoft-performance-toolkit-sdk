@@ -4,7 +4,7 @@
 using System.CommandLine.Invocation;
 using System.Threading.Tasks;
 
-namespace PlugInConfigurationEditor
+namespace PluginConfigurationEditor
 {
     internal class CreateCommandHandler
         : ICommandHandler

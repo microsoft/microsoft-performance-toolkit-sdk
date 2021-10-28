@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void DependentWalk_NullParameters_Throw()
         {
-            var catalog = new TestPluginCatalog { IsLoaded = true, };
+            var catalog = new TestProcessingSourceCatalog { IsLoaded = true, };
             var repo = new DataExtensionRepository();
             repo.FinalizeDataExtensions();
 
@@ -66,7 +66,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             n2.requiredDataCookers.Add(n6.Path);
             n2.requiredDataCookers.Add(n4.Path);
 
-            var catalog = new TestPluginCatalog { IsLoaded = true, };
+            var catalog = new TestProcessingSourceCatalog { IsLoaded = true, };
 
             var repo = new DataExtensionRepository();
             repo.TryAddReference(r0);

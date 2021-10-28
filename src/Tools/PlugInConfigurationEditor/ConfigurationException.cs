@@ -3,7 +3,7 @@
 
 using System;
 
-namespace PlugInConfigurationEditor
+namespace PluginConfigurationEditor
 {
     internal class ConfigurationException
         : Exception
