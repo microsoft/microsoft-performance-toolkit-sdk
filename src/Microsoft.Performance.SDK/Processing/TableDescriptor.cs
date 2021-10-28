@@ -63,7 +63,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="requiredDataProcessors">
         ///     Identifiers for data processors required to instantiate this table.
         /// </param>
-        /// <param name="isMetadataTable">
+        /// <param name="isInternalTable">
         ///     Whether the table is an internal table.
         /// </param>
         /// <exception cref="ArgumentException">
