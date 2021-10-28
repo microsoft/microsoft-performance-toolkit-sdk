@@ -52,6 +52,16 @@ The following members have been removed from `DataCookerPath`:
 - method `DataCookerPath.IsWellFormed(string)`
 - method `DataCookerPath.SplitPath(string)`
 
+To prevent build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataCookerPath` that accept string arguments and `DataCookerPath.Create` 
+have been removed. 
+To prevent build breaks, replace calls to this class' constructor with either
+- `DataCookerPath.ForComposite`
+- `DataCookerPath.ForSource`
+
+depending on the type of data cooker the path is for.
+
 ### DataOutputPath
 
 The following members have been removed from `DataOutputPath`:
@@ -68,6 +78,16 @@ The following members have been removed from `DataOutputPath`:
 - method `DataOutputPath.TryGetConstituents(string, out string, out string, out string)`
 - method `DataOutputPath.IsWellFormed(string)`
 - method `DataOutputPath.SplitPath(string)`
+
+To prevent build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataOutputPath` that accept string arguments and `DataOutputPath.Create` 
+have been removed.
+To prevent build breaks, replace calls to this class' constructor with either
+- `DataOutputPath.ForComposite`
+- `DataOutputPath.ForSource`
+
+depending on the type of data cooker the data output path is for.
 
 ### CustomDataProcessor
 
@@ -228,49 +248,6 @@ catch (UnsupportedDataSourceException)
 
 A new parameter has been added to the constructor.
 
-## DataCookerPath
-
-The following have been removed:
-- `DataCookerPath.Format`
-- `DataCookerPath.EmptySourceParserId`
-- `DataCookerPath.CookerPath`
-- `DataCookerPath.Parse`
-- `DataCookerPath.GetSourceParserId`
-- `DataCookerPath.GetDataCookerId`
-- `DataCookerPath.IsWellFormed`
-
-To prevent build breaks, remove references to these methods and properties.
-
-Both the constructors for `DataCookerPath` that accept string arguments and `DataCookerPath.Create` 
-have been removed. 
-To prevent build breaks, replace calls to this class' constructor with either
-- `DataCookerPath.ForComposite`
-- `DataCookerPath.ForSource`
-
-depending on the type of data cooker the path is for.
-
-## DataOutputPath
-
-The following have been removed:
-- `DataOutputPath.Format`
-- `DataOutputPath.Path`
-- `DataOutputPath.Combine`
-- `DataOutputPath.GetSourceId`
-- `DataOutputPath.GetDataCookerId`
-- `DataOutputPath.GetDataCookerPath`
-- `DataOutputPath.TryGetConstituents`
-- `DataOutputPath.IsWellFormed`
-
-To prevent build breaks, remove references to these methods and properties.
-
-Both the constructors for `DataOutputPath` that accept string arguments and `DataOutputPath.Create` 
-have been removed.
-To prevent build breaks, replace calls to this class' constructor with either
-- `DataOutputPath.ForComposite`
-- `DataOutputPath.ForSource`
-
-depending on the type of data cooker the data output path is for.
-
 ## RequiresCookerAttribute
 
 This class has been made abstract. Please replace it with either
@@ -301,6 +278,7 @@ In addition to this interface being renamed to `IVisibleDomainSensitiveProjectio
 - `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
 
 ## ViewportSensitiveProjection
+
 In addition to this class being renamed to `VisibleDomainSensitiveProjection`, the following properties and methods are renamed:
 - `DependsOnViewport` -> `DependsOnVisibleDomain`
 - `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
