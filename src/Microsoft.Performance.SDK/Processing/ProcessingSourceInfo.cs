@@ -6,11 +6,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Represents information about an <see cref="IProcessingSource"/>.
     /// </summary>
-    /// <remarks>
-    ///     This class will be sealed prior to SDK v1.0.0 release candidate 1. It is
-    ///     currently not sealed to maintain backwards compatability with <see cref="CustomDataSourceInfo"/>
-    /// </remarks>
-    public class ProcessingSourceInfo
+    public sealed class ProcessingSourceInfo
     {
         /// <summary>
         ///     Gets or sets the contact information of the owners
