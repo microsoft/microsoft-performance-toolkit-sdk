@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     class.
         /// </summary>
         /// <param name="type">
-        ///     The type of the <see cref="IDataSource"/> corresponding to this attribute.
+        ///     The <see cref="System.Type"/> of the <see cref="IDataSource"/> corresponding to this attribute.
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="type"/> is <c>null</c>.
@@ -64,7 +64,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     class.
         /// </summary>
         /// <param name="type">
-        ///     The type of the <see cref="IDataSource"/> corresponding to this attribute.
+        ///     The <see cref="System.Type"/> of the <see cref="IDataSource"/> corresponding to this attribute.
         /// </param>
         /// <param name="description">
         ///     A description of the Data Source denoted by this attribute.

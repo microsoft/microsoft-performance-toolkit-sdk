@@ -7,9 +7,9 @@ using System;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    /// This attribute is used on a class with static properties that return <see cref="TableDescriptor"/>
-    /// or on individual <see cref="TableDescriptor"/> static properties to indicate that a 
-    /// table described by the <see cref="TableDescriptor"/> requires the identified source data cooker.
+    ///     This attribute is used on a class with static properties that return <see cref="TableDescriptor"/>
+    ///     or on individual <see cref="TableDescriptor"/> static properties to indicate that a 
+    ///     table described by the <see cref="TableDescriptor"/> requires the identified source data cooker.
     /// </summary>
     [AttributeUsage(System.AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public sealed class RequiresSourceCookerAttribute

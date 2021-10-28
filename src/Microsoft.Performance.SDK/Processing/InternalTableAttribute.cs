@@ -19,11 +19,17 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <param name="buildTableActionMethodName">
         ///     The name of the static class method which builds a table.
-        ///     BuildTable(Action&lt;ITableBuilder, object&gt;)
+        ///     This method must have the following signature:
+        ///     <code>
+        ///         void BuildTable(<see cref="ITableBuilder"/>, <see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
+        ///     </code>
         /// </param>
         /// <param name="isDataAvailableFuncMethodName">
         ///     The name of the static class method which checks if the table has data.
-        ///     IsDataAvailable(IDataExtensionRetrieval)
+        ///     This method must have the following signature:
+        ///     <code>
+        ///         bool IsDataAvailable(<see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
+        ///     </code>
         /// </param>
         public InternalTableAttribute(
             string tableDescriptorPropertyName = DefaultTableDescriptorPropertyName,

@@ -48,6 +48,10 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     The value at the specified <paramref name="index"/>.
         /// </returns>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        ///     <paramref name="index"/> is less than zero or greater than or
+        ///     equal to <see cref="Count"/>.
+        /// </exception>
         public T this[int index] => this[(uint)index];
 
         /// <summary>

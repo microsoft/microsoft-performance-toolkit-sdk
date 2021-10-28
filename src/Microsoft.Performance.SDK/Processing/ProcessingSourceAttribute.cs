@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     This attribute is used to mark a concrete class as an <see cref="IProcessingSource"/>
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public sealed class ProcessingSourceAttribute
+    public class ProcessingSourceAttribute
         : Attribute,
           IEquatable<ProcessingSourceAttribute>
     {

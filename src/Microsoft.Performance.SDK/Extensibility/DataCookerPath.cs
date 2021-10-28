@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 
 namespace Microsoft.Performance.SDK.Extensibility
 {
@@ -12,8 +13,6 @@ namespace Microsoft.Performance.SDK.Extensibility
     public struct DataCookerPath
         : IEquatable<DataCookerPath>
     {
-        private readonly string asString;
-
         private DataCookerPath(string dataCookerId)
             : this(string.Empty, dataCookerId)
         {
@@ -21,8 +20,8 @@ namespace Microsoft.Performance.SDK.Extensibility
 
         private DataCookerPath(string sourceParserId, string dataCookerId)
         {
-            Guard.NotNull(sourceParserId, nameof(sourceParserId));
-            Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
+            Debug.Assert((sourceParserId == string.Empty) || !string.IsNullOrWhiteSpace(sourceParserId));
+            Debug.Assert(!string.IsNullOrWhiteSpace(dataCookerId));
 
             if (sourceParserId.Contains("/"))
             {
@@ -40,7 +39,7 @@ namespace Microsoft.Performance.SDK.Extensibility
                 ? DataCookerType.CompositeDataCooker
                 : DataCookerType.SourceDataCooker;
 
-            this.asString = this.SourceParserId + "/" + this.DataCookerId;
+            this.CookerPath = this.SourceParserId + "/" + this.DataCookerId;
         }
 
         /// <summary>
@@ -56,9 +55,13 @@ namespace Microsoft.Performance.SDK.Extensibility
             this.SourceParserId = other.SourceParserId;
             this.DataCookerId = other.DataCookerId;
             this.DataCookerType = other.DataCookerType;
-
-            this.asString = other.asString;
+            this.CookerPath = other.CookerPath;
         }
+
+        /// <summary>
+        ///     Gets the path of this cooker.
+        /// </summary>
+        internal string CookerPath { get; }
 
         /// <summary>
         ///     Creates a new <see cref="DataCookerType.CompositeDataCooker"/> path.
@@ -74,6 +77,8 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </exception>
         public static DataCookerPath ForComposite(string dataCookerId)
         {
+            Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
+
             return new DataCookerPath(dataCookerId);
         }
 
@@ -94,6 +99,13 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </exception>
         public static DataCookerPath ForSource(string sourceParserId, string dataCookerId)
         {
+            if (sourceParserId != string.Empty)
+            {
+                Guard.NotNullOrWhiteSpace(sourceParserId, nameof(sourceParserId));
+            }
+
+            Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
+
             return new DataCookerPath(sourceParserId, dataCookerId);
         }
 
@@ -156,22 +168,19 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.asString;
+            return this.CookerPath;
         }
 
         /// <inheritdoc />
         public bool Equals(DataCookerPath other)
         {
-            return string.Equals(this.SourceParserId, other.SourceParserId) &&
-                   string.Equals(this.DataCookerId, other.DataCookerId);
+            return string.Equals(this.CookerPath, other.CookerPath);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return HashCodeUtils.CombineHashCodeValues(
-                this.SourceParserId?.GetHashCode() ?? 0,
-                this.DataCookerId?.GetHashCode() ?? 0);
+            return this.CookerPath?.GetHashCode() ?? 0;
         }
 
         /// <inheritdoc />

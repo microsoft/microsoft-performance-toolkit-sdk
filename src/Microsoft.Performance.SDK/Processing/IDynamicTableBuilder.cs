@@ -4,7 +4,10 @@
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Defines the interface for adding dynamic tables.
+    ///     Defines the interface for building dynamic tables.
+    ///     <para />
+    ///     For more information on dynamic tables, please refer to
+    ///     <see cref="IProcessorEnvironment.RequestDynamicTableBuilder(TableDescriptor)"/>.
     /// </summary>
     public interface IDynamicTableBuilder
         : ITableBuilder

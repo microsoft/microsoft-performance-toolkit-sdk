@@ -19,13 +19,11 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     The default name of the static class method which builds a table.
-        ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
         /// </summary>
         public const string DefaultTableBuilderMethodName = "BuildTable";
 
         /// <summary>
         ///     The default name of the static class method which checks if a table has data.
-        ///     bool IsDataAvailable(IDataExtensionRetrieval)
         /// </summary>
         public const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
 
@@ -38,11 +36,17 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         /// <param name="buildTableActionMethodName">
         ///     The name of the static class method which builds a table.
-        ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
+        ///     This method must have the following signature:
+        ///     <code>
+        ///         void BuildTable(<see cref="ITableBuilder"/>, <see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
+        ///     </code>
         /// </param>
         /// <param name="isDataAvailableMethodName">
         ///     The name of the static class method which checks if the table has data.
-        ///     IsDataAvailable(IDataExtensionRetrieval)
+        ///     This method must have the following signature:
+        ///     <code>
+        ///         bool IsDataAvailable(<see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
+        ///     </code>
         /// </param>
         /// <param name="internalTable">
         ///     When this is set, the table will not be exposed through the data extension repository.

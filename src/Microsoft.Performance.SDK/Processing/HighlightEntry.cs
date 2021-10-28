@@ -7,7 +7,8 @@ using System.Drawing;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Defines information for highlighting data.
+    ///     Provides information to SDK drivers that allow highlighting/selecting 
+    ///     regions of time.
     /// </summary>
     public sealed class HighlightEntry
     {

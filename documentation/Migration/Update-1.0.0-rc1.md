@@ -10,6 +10,28 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
+## Renamed Classes, Interfaces and Static Methods
+
+The following references must be changed:
+- `BaseSourceDataCooker` -> `SourceDataCooker`
+- `SourceParserBase` -> `SourceParser`
+- `BaseDataColumn` -> `DataColumn`
+- `CustomDataProcessorBase` -> `CustomDataProcessor`
+- `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
+- `CustomDataSourceAttribute` -> `ProcessingSourceAttribute`
+- `CustomDataSourceBase` -> `ProcessingSource`
+- `CustomDataSourceInfo` -> `ProcessingSourceInfo`
+- `PlugInConfiguration` -> `PluginConfiguration`
+- `PlugInConfigurationExtensions` -> `PluginConfigurationExtensions`
+- `PlugInConfigurationSerializer` -> `PluginConfigurationSerializer`
+- `PlugInConfigurationValidation` -> `PluginConfigurationValidation`
+- `IViewportSensitiveProjection` -> `IVisibleDomainSensitiveProjection`
+- `ViewportSensitiveProjection` -> `VisibleDomainSensitiveProjection`
+- `IVisibleTableRegion` -> `IVisibleDomainRegion`
+- `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
+- `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
+- `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
+
 ## Obsolete Members
 
 All code decorated with the 'Obsolete' attribute has been removed.
@@ -98,27 +120,6 @@ may also provide their own implementations.
 `DataProcessor`s have been removed. Note that these are not the same as
 `CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
 
-## Renamed Classes, Interfaces and Static Methods
-
-The following references must be changed:
-- `BaseSourceDataCooker` -> `SourceDataCooker`
-- `SourceParserBase` -> `SourceParser`
-- `BaseDataColumn` -> `DataColumn`
-- `CustomDataProcessorBase` -> `CustomDataProcessor`
-- `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
-- `CustomDataSourceAttribute` -> `ProcessingSourceAttribute`
-- `CustomDataSourceBase` -> `ProcessingSource`
-- `CustomDataSourceInfo` -> `ProcessingSourceInfo`
-- `PlugInConfiguration` -> `PluginConfiguration`
-- `PlugInConfigurationExtensions` -> `PluginConfigurationExtensions`
-- `PlugInConfigurationSerializer` -> `PluginConfigurationSerializer`
-- `PlugInConfigurationValidation` -> `PluginConfigurationValidation`
-- `IViewportSensitiveProjection` -> `IVisibleDomainSensitiveProjection`
-- `ViewportSensitiveProjection` -> `VisibleDomainSensitiveProjection`
-- `IVisibleTableRegion` -> `IVisibleDomainRegion`
-- `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
-- `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
-- `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
 ## Inheritance
 
 The following classes have been sealed:

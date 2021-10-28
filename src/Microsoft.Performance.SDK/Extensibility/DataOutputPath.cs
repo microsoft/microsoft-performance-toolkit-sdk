@@ -135,9 +135,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <inheritdoc />
         public override string ToString()
         {
-            return string.IsNullOrWhiteSpace(this.SourceParserId)
-                ? this.DataCookerId
-                : this.SourceParserId + "/" + this.DataCookerId; 
+            return this.CookerPath.CookerPath + "/" + this.DataCookerId;
         }
     }
 }
