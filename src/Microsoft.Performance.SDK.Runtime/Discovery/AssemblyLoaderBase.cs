@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
@@ -13,8 +14,30 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     public abstract class AssemblyLoaderBase
         : IAssemblyLoader
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="AssemblyLoaderBase"/>
+        ///     class.
+        /// </summary>
+        /// <param name="logger">
+        ///     Logs messages during loading.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="logger"/> is <c>null</c>.
+        /// </exception>
+        protected AssemblyLoaderBase(ILogger logger)
+        {
+            Guard.NotNull(logger, nameof(logger));
+
+            this.Log = logger;
+        }
+
         /// <inheritdoc />
         public abstract bool SupportsIsolation { get; }
+
+        /// <summary>
+        ///     Gets the interface for logging messages from this instance.
+        /// </summary>
+        protected ILogger Log { get; }
 
         /// <inheritdoc />
         public bool IsAssembly(string path)
@@ -68,7 +91,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
             catch (FileLoadException e)
             {
-                Console.Error.WriteLine(
+                this.Log.Warn(
                     "[warn]: managed assembly `{0}` cannot be loaded - {1}.",
                     assemblyPath,
                     e.FusionLog);

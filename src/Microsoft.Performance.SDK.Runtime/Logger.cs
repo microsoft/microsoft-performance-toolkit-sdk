@@ -17,9 +17,22 @@ namespace Microsoft.Performance.SDK.Runtime
     public abstract class Logger
         : ILogger
     {
+        /// <summary>
+        ///     Gets the instance of the <see cref="ILogger"/> that logs nothing.
+        /// </summary>
+        public static readonly ILogger Null;
+
         private static Func<Type, ILogger> factoryField = ConsoleLogger.Create;
 
         private readonly Type type;
+
+        /// <summary>
+        ///     Initializes the static members of the <see cref="Logger"/> class.
+        /// </summary>
+        static Logger()
+        {
+            Null = new NullLogger();
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="Logger"/>
@@ -316,6 +329,50 @@ namespace Microsoft.Performance.SDK.Runtime
             ///     message is being logged.
             /// </summary>
             Fatal,
+        }
+
+        private sealed class NullLogger
+            : ILogger
+        {
+            public void Error(string fmt, params object[] args)
+            {
+            }
+
+            public void Error(Exception e, string fmt, params object[] args)
+            {
+            }
+
+            public void Fatal(string fmt, params object[] args)
+            {
+            }
+
+            public void Fatal(Exception e, string fmt, params object[] args)
+            {
+            }
+
+            public void Info(string fmt, params object[] args)
+            {
+            }
+
+            public void Info(Exception e, string fmt, params object[] args)
+            {
+            }
+
+            public void Verbose(string fmt, params object[] args)
+            {
+            }
+
+            public void Verbose(Exception e, string fmt, params object[] args)
+            {
+            }
+
+            public void Warn(string fmt, params object[] args)
+            {
+            }
+
+            public void Warn(Exception e, string fmt, params object[] args)
+            {
+            }
         }
     }
 }
