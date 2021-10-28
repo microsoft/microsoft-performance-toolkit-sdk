@@ -46,9 +46,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="compositeCookerData">
         ///     The retrieval interface for getting to composite cooker data.
         /// </param>
-        /// <param name="tableToProcessorMap">
-        ///     Provides access to tables.
-        /// </param>
         /// <param name="retrievalFactory">
         ///     The factory for creating retrievals for composite cookers.
         /// </param>
@@ -58,9 +55,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="tableToProcessorMap">
         ///     The map of a <see cref="TableDescriptor"/> to the <see cref="ICustomDataProcessor"/> that produces
         ///     that table.
-        /// </param>
-        /// <param name="enabledTables">
-        ///     The tables that were enabled during processing.
         /// </param>
         /// <param name="errors">
         ///     The collection of errors, if any, that were encountered during processing.
