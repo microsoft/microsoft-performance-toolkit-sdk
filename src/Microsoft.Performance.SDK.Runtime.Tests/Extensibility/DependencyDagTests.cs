@@ -10,6 +10,7 @@ using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,12 +43,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void Create_NoDependencies_EverythingIsRoot()
         {
-            var sourceCooker1 = new TestSourceDataCookerReference();
-            var sourceCooker2 = new TestSourceDataCookerReference();
+            var sourceCooker1 = new TestRuntimeSourceCookerReference();
+            var sourceCooker2 = new TestRuntimeSourceCookerReference();
             // TODO: __SDK_DP__
             // Redesign Data Processor API
-            ////var dataProcessor = new TestDataProcessorReference();
-            var table = new TestTableExtensionReference();
+            ////var dataProcessor = new TestRuntimeDataProcessorReference();
+            var table = new TestRuntimeTableExtensionReference();
 
             var cds1 = new ProcessingSourceReference(
                 typeof(FakeProcessingSource),
@@ -102,13 +103,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //  d1   d2    d1
             //
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1"), };
-            var r2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r2"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1"), };
+            var r2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r2"), };
 
-            var r0d1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r1d1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r1d1"), };
+            var r0d1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d1"), };
+            var r0d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d2"), };
+            var r1d1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r1d1"), };
             var r2d1 = r1d1;
 
             r0.requiredDataCookers.Add(r0d1.Path);
@@ -205,14 +206,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //  |
             //  d3
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1"), };
-            var r2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r2"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1"), };
+            var r2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r2"), };
 
-            var r0d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r0d1d3 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d1d3"), };
-            var r1d1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r1d1"), };
+            var r0d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
+            var r0d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d2"), };
+            var r0d1d3 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d1d3"), };
+            var r1d1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r1d1"), };
             var r2d1 = r1d1;
 
             r0.requiredDataCookers.Add(r0d1.Path);
@@ -318,14 +319,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //            |/
             //           d2
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1"), };
-            var r2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r2"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1"), };
+            var r2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r2"), };
 
-            var r0d1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r1d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1d1"), };
-            var r1d1d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r1d1d2"), };
+            var r0d1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d1"), };
+            var r0d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d2"), };
+            var r1d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1d1"), };
+            var r1d1d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r1d1d2"), };
             var r2d2 = r1d1d2;
 
             r0.requiredDataCookers.Add(r0d1.Path);
@@ -429,11 +430,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // d3 -+--/      d3
             //
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r0d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r0d3 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d3"), };
-            var r0d4 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d4"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r0d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
+            var r0d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d2"), };
+            var r0d3 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d3"), };
+            var r0d4 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d4"), };
 
             r0.requiredDataCookers.Add(r0d1.Path);
             r0.requiredDataCookers.Add(r0d2.Path);
@@ -522,10 +523,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //  d2 d3 ->
             //
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r0d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r0d3 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d3"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r0d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
+            var r0d2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
+            var r0d3 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d3"), };
 
             r0.requiredDataCookers.Add(r0d1.Path);
             r0d1.requiredDataCookers.Add(r0d2.Path);
@@ -565,10 +566,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //  d2 d3 ->
             //
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r0d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r0d3 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d3"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r0d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
+            var r0d2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
+            var r0d3 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d3"), };
 
             r0.requiredDataCookers.Add(r0d1.Path);
             r0d1.requiredDataCookers.Add(r0d2.Path);
@@ -619,9 +620,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var cds = new FakeProcessingSource();
             var r = new ProcessingSourceReference(
-                typeof(FakeProcessingSource), 
-                () => cds, 
-                Any.ProcessingSourceAttribute(), 
+                typeof(FakeProcessingSource),
+                () => cds,
+                Any.ProcessingSourceAttribute(),
                 new HashSet<Processing.DataSourceAttribute>());
 
             cds.CreateProcessorReturnValue = p;
@@ -630,14 +631,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 {
                     Any.DataSource(),
                 },
-                Any.ProcessorEnvironment(), 
+                Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
 
-            var sc1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForSource(p.SourceParserId, "sc1"), };
-            var sc2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForSource(p.SourceParserId, "sc2"), };
-            var sc3 = new TestSourceDataCookerReference { Path = DataCookerPath.ForSource(p.SourceParserId, "sc3"), };
-            var sc4 = new TestSourceDataCookerReference { Path = DataCookerPath.ForSource("not-there", "sc4"), };
-            var cc1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("cc1"), };
+            var sc1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource(p.SourceParserId, "sc1"), };
+            var sc2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource(p.SourceParserId, "sc2"), };
+            var sc3 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource(p.SourceParserId, "sc3"), };
+            var sc4 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("not-there", "sc4"), };
+            var cc1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("cc1"), };
 
             cc1.requiredDataCookers.Add(sc1.Path);
             cc1.requiredDataCookers.Add(sc2.Path);
@@ -725,14 +726,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //  |
             //  d3
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1"), };
-            var r2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r2"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1"), };
+            var r2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r2"), };
 
-            var r0d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r0d1d3 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d1d3"), };
-            var r1d1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r1d1"), };
+            var r0d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
+            var r0d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d2"), };
+            var r0d1d3 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d1d3"), };
+            var r1d1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r1d1"), };
             var r2d1 = r1d1;
 
             r0.requiredDataCookers.Add(r0d1.Path);
@@ -829,14 +830,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //  |
             //  d3 (X)
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1"), };
-            var r2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r2"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1"), };
+            var r2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r2"), };
 
-            var r0d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r0d1d3 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d1d3"), };
-            var r1d1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r1d1"), };
+            var r0d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
+            var r0d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d2"), };
+            var r0d1d3 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d1d3"), };
+            var r1d1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r1d1"), };
             var r2d1 = r1d1;
 
             r0.requiredDataCookers.Add(r0d1.Path);
@@ -935,14 +936,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             //  d3
             //
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1"), };
-            var r2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r2"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1"), };
+            var r2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r2"), };
 
-            var r0d1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
-            var r0d2 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d2"), };
-            var r0d1d3 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r0d1d3"), };
-            var r1d1 = new TestSourceDataCookerReference { Path = DataCookerPath.ForComposite("r1d1"), };
+            var r0d1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0d1"), };
+            var r0d2 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d2"), };
+            var r0d1d3 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r0d1d3"), };
+            var r1d1 = new TestRuntimeSourceCookerReference { Path = DataCookerPath.ForSource("SourceParser", "r1d1"), };
             var r2d1 = r1d1;
 
             r0.requiredDataCookers.Add(r0d1.Path);

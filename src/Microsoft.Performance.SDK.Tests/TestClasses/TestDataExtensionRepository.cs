@@ -9,7 +9,7 @@ using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestDataExtensionRepository
         : IDataExtensionRepository
@@ -17,46 +17,46 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public HashSet<ISourceDataCookerFactory> sourceDataCookerReferences = new HashSet<ISourceDataCookerFactory>();
         public IReadOnlyCollection<ISourceDataCookerFactory> GetSourceDataCookers(string sourceParserId)
         {
-            return this.sourceDataCookerReferences;
+            return sourceDataCookerReferences;
         }
 
         public ISourceDataCookerFactory GetSourceDataCookerFactory(DataCookerPath dataCookerPath)
         {
-            return this.GetSourceDataCookerReference(dataCookerPath);
+            return GetSourceDataCookerReference(dataCookerPath);
         }
 
         public Dictionary<DataCookerPath, ISourceDataCookerReference> sourceCookersByPath = new Dictionary<DataCookerPath, ISourceDataCookerReference>();
         public Func<DataCookerPath, ISourceDataCookerReference> getSourceDataCooker;
         public ISourceDataCookerReference GetSourceDataCookerReference(DataCookerPath dataCookerPath)
         {
-            if (this.sourceCookersByPath.TryGetValue(dataCookerPath, out var sourceCookerReference))
+            if (sourceCookersByPath.TryGetValue(dataCookerPath, out var sourceCookerReference))
             {
                 return sourceCookerReference;
             }
 
-            return this.getSourceDataCooker?.Invoke(dataCookerPath);
+            return getSourceDataCooker?.Invoke(dataCookerPath);
         }
 
-        public Dictionary<DataCookerPath, ICompositeDataCookerReference> compositeCookersByPath 
+        public Dictionary<DataCookerPath, ICompositeDataCookerReference> compositeCookersByPath
             = new Dictionary<DataCookerPath, ICompositeDataCookerReference>();
         public Func<DataCookerPath, ICompositeDataCookerReference> getCompositeDataCooker;
         public ICompositeDataCookerReference GetCompositeDataCookerReference(DataCookerPath dataCookerPath)
         {
-            if (this.compositeCookersByPath.TryGetValue(dataCookerPath, out var cookerReference))
+            if (compositeCookersByPath.TryGetValue(dataCookerPath, out var cookerReference))
             {
                 return cookerReference;
             }
 
-            if (this.getCompositeDataCooker != null)
+            if (getCompositeDataCooker != null)
             {
-                return this.getCompositeDataCooker.Invoke(dataCookerPath);
+                return getCompositeDataCooker.Invoke(dataCookerPath);
             }
 
             return null;
         }
 
         public Dictionary<Guid, ITableExtensionReference> tablesById = new Dictionary<Guid, ITableExtensionReference>();
-        public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById => this.tablesById;
+        public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById => tablesById;
 
         public IEnumerable<DataCookerPath> SourceDataCookers => throw new NotImplementedException();
 
@@ -66,38 +66,38 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         // TODO: __SDK_DP__
         // Redesign Data Processor API
-        ////public Dictionary<DataProcessorId, IDataProcessorReference> dataProcessorsById = new Dictionary<DataProcessorId, IDataProcessorReference>();
-        ////public Func<DataProcessorId, IDataProcessorReference> getDataProcessor;
-        ////public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
-        ////{
-        ////    if (this.dataProcessorsById.TryGetValue(dataProcessorId, out var processorReference))
-        ////    {
-        ////        return processorReference;
-        ////    }
+        //// public Dictionary<DataProcessorId, IDataProcessorReference> dataProcessorsById = new Dictionary<DataProcessorId, IDataProcessorReference>();
+        //// public Func<DataProcessorId, IDataProcessorReference> getDataProcessor;
+        //// public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
+        //// {
+        ////     if (dataProcessorsById.TryGetValue(dataProcessorId, out var processorReference))
+        ////     {
+        ////         return processorReference;
+        ////     }
 
-        ////    return this.getDataProcessor?.Invoke(dataProcessorId);
-        ////}
+        ////     return getDataProcessor?.Invoke(dataProcessorId);
+        //// }
 
         public void FinalizeDataExtensions()
         {
-            foreach (var dataCookerReference in this.sourceCookersByPath)
+            foreach (var dataCookerReference in sourceCookersByPath)
             {
                 dataCookerReference.Value.ProcessDependencies(this);
             }
 
-            foreach (var dataCookerReference in this.compositeCookersByPath)
+            foreach (var dataCookerReference in compositeCookersByPath)
             {
                 dataCookerReference.Value.ProcessDependencies(this);
             }
 
             // TODO: __SDK_DP__
             // Redesign Data Processor API
-            ////foreach (var dataProcessorReference in this.dataProcessorsById)
-            ////{
-            ////    dataProcessorReference.Value.ProcessDependencies(this);
-            ////}
+            //// foreach (var dataProcessorReference in dataProcessorsById)
+            //// {
+            ////     dataProcessorReference.Value.ProcessDependencies(this);
+            //// }
 
-            foreach (var tableReferenceBuilder in this.TablesById)
+            foreach (var tableReferenceBuilder in TablesById)
             {
                 tableReferenceBuilder.Value.ProcessDependencies(this);
             }

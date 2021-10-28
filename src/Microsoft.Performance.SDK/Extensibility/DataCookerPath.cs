@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Extensibility
 {
@@ -22,7 +23,13 @@ namespace Microsoft.Performance.SDK.Extensibility
         private const string EmptySourceParserId = "";
 
         /// <summary>
-        ///     Creates a new <see cref="DataCookerType.CompositeDataCooker"/> path.
+        ///     This is used by data cooker paths to compare elements.
+        /// </summary>
+        public static IEqualityComparer<string> EqualityComparer = StringComparer.Ordinal;
+
+        /// <summary>
+        ///     Constructor without an empty source parser id.
+        ///     Used for composite data cookers.
         /// </summary>
         /// <param name="dataCookerId">
         ///     The ID of the data cooker.
@@ -210,7 +217,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <inheritdoc />
         public bool Equals(DataCookerPath other)
         {
-            return string.Equals(this.CookerPath, other.CookerPath);
+            return DataCookerPath.EqualityComparer.Equals(this.CookerPath, other.CookerPath);
         }
 
         /// <inheritdoc />

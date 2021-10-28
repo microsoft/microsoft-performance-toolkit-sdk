@@ -19,8 +19,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
     ///     This may be any type of extension: data cooker, data processor, table... as
     ///     long as it implements IDataExtensionDependencyTarget.
     ///
-    ///     The base class <see cref="DataExtensionReference&lt;TDerived&gt;"/> implements
-    ///     IDataExtensionDependencyTarget.
+    ///     The base class <see cref="DataExtensionReference"/> implements
+    ///     <see cref="IDataExtensionDependencyTarget"/>.
     ///
     ///     Maintains all data associated with dependencies for the target, including
     ///     status, error messages, and missing dependencies - as well as the data extension
@@ -410,7 +410,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
                     {
                         this.AddError(
                             new ErrorInfo(
-                                ErrorCodes.EXTENSION_Error, 
+                                ErrorCodes.EXTENSION_Error,
                                 ErrorCodes.EXTENSION_Error.Description)
                             {
                                 Target = extensionId,

@@ -7,7 +7,7 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Tests
 {
-    [Table(InternalTable = true)]
+    [Table]
     internal sealed class StubDataTableOne
     {
         public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -19,7 +19,8 @@ namespace Microsoft.Performance.SDK.Tests
             Guid.Parse("{F3F7B534-5DC5-40FB-93D9-07FDAC073A13}"),
             "Name0",
             "Description",
-            "Category");
+            "Category",
+            isInternalTable: true);
 
         public static bool BuildTableWasCalled { get; private set; }
 
@@ -29,7 +30,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
     }
 
-    [Table(InternalTable = true)]
+    [Table]
     internal sealed class StubDataTableTwo
     {
         public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -41,7 +42,8 @@ namespace Microsoft.Performance.SDK.Tests
             Guid.Parse("{677CA54E-45D2-46B1-80BE-6DBA96597435}"),
             "Name1",
             "Description",
-            "Category");
+            "Category",
+            isInternalTable: true);
 
         public static bool BuildTableWasCalled { get; private set; }
 
@@ -51,7 +53,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
     }
 
-    [Table(InternalTable = true)]
+    [Table]
     internal sealed class StubDataTableThree
     {
         public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -63,7 +65,8 @@ namespace Microsoft.Performance.SDK.Tests
             Guid.Parse("{96D8DD5E-C0FC-4681-85E2-CFAFD1A0803C}"),
             "Name2",
             "Description",
-            "Category");
+            "Category",
+            isInternalTable: true);
 
         public static bool BuildTableWasCalled { get; private set; }
 
@@ -73,7 +76,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
     }
 
-    [Table(InternalTable = true)]
+    [Table]
     internal sealed class StubMetadataTableOne
     {
         public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -86,7 +89,8 @@ namespace Microsoft.Performance.SDK.Tests
             "Metadata1",
             "Description",
             TableDescriptor.DefaultCategory,
-            true);
+            true,
+            isInternalTable: true);
 
         public static bool BuildTableWasCalled { get; private set; }
 
@@ -96,7 +100,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
     }
 
-    [Table(InternalTable = true)]
+    [Table]
     internal sealed class StubMetadataTableTwo
     {
         public bool TryCreateTable(ITableBuilder tableBuilder)
@@ -109,7 +113,8 @@ namespace Microsoft.Performance.SDK.Tests
             "Metadata2",
             "Description",
             TableDescriptor.DefaultCategory,
-            true);
+            true,
+            isInternalTable: true);
 
         public static bool BuildTableWasCalled { get; private set; }
 

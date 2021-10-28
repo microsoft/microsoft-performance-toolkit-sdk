@@ -6,7 +6,7 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestApplicationEnvironment
         : IApplicationEnvironment
