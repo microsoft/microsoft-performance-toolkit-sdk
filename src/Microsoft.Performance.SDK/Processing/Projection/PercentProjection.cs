@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Processing
     public static partial class Projection
     {
         /// <summary>
-        ///     Defines <see cref="IProjection{TSource, TResult}"/> that project their values as percentages.
+        ///     Creates instances of <see cref="IProjection{TSource, TResult}"/> that project their values as percentages.
         /// </summary>
         public static class Percent
         {

@@ -248,14 +248,6 @@ catch (UnsupportedDataSourceException)
 
 A new parameter has been added to the constructor.
 
-## RequiresCookerAttribute
-
-This class has been made abstract. Please replace it with either
-- `RequiresSourceCookerAttribute`
-- `RequiresCompositeCookerAttribute`
-
-depending on the type of required data cooker.
-
 ## Obsolete Code Removed
 
 Code that was previously attributed as obsolete is now removed. In addition to some of the elements 
