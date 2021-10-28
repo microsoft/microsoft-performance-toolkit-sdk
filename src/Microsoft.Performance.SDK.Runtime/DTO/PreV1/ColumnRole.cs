@@ -1,15 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.SDK.Runtime.DTO.Enums
+namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
 {
     internal enum ColumnRole
     {
         Invalid = -1,
-        StartTime = 0,
+        StartThreadId = 0,
+        EndThreadId,
+        StartTime,
         EndTime,
         Duration,
+        HierarchicalTimeTree,
         ResourceId,
+        WaitDuration,
+        WaitEndTime,
         RecLeft,
         RecTop,
         RecHeight,

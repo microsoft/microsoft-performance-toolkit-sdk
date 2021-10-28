@@ -7,18 +7,16 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 {
     [DataContract]
     internal class PrebuiltConfigurations
+        : PrebuiltConfigurationsBase
     {
-        internal static readonly double DTOVersion = 0.1;
+        internal static readonly double DTOVersion = 1.0;
 
         public PrebuiltConfigurations()
         {
             this.Version = DTOVersion;
         }
 
-        [DataMember(Order = 1)]
-        public double Version { get; set; }
-
         [DataMember(Order = 2)]
         public TableConfigurations[] Tables { get; set; }
-    }
+    }    
 }

@@ -79,7 +79,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             this.columnsRO = new ReadOnlyCollection<ColumnConfiguration>(EmptyArray<ColumnConfiguration>.Instance);
             this.columnRoles = new Dictionary<ColumnRole, Guid>();
-
+          
             this.ColumnRoles = new ReadOnlyDictionary<ColumnRole, Guid>(this.columnRoles);
 
             this.highlightEntriesRO = new ReadOnlyCollection<HighlightEntry>(EmptyArray<HighlightEntry>.Instance);
@@ -141,9 +141,9 @@ namespace Microsoft.Performance.SDK.Processing
         public Guid GraphFilterColumnGuid { get; set; }
 
         /// <summary>
-        ///     Gets or sets an RTF string that is used to show the help information for this table.
+        ///     Gets or sets an string that is used for information about the table configuration.
         /// </summary>
-        public string HelpText { get; set; }
+        public string Description { get; set; }
 
         /// <summary>
         ///     Gets or sets the collection of query entries that are used to highlight in this table.

@@ -20,6 +20,16 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
     {
         private const string indentChars = "    ";
 
+        private static Lazy<(double Version, Type PrebuiltConfigType)[]> versionToTypeLazy 
+            = new Lazy<(double Version, Type PrebuiltConfigType)[]>(() =>
+            {
+                var assembly = typeof(PrebuiltConfigurationsBase).Assembly;
+
+                return assembly.GetTypes()
+                               .Where(type => type.IsSubclassOf(typeof(PrebuiltConfigurationsBase)))
+                               .Select(type => (((PrebuiltConfigurationsBase)Activator.CreateInstance(type)).Version, type)).ToArray();
+            });
+
         /// <inheritdoc/>
         public IEnumerable<Processing.TableConfigurations> DeserializeTableConfigurations(Stream stream)
         {
@@ -57,14 +67,42 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             {
                 stream.Position = startingPosition;
             }
+            else
+            {
+                startingPosition = stream.Position;
+            }
 
             PrebuiltConfigurations prebuiltConfigurations = null;
 
             try
             {
-                var serializer = new DataContractJsonSerializer(typeof(PrebuiltConfigurations));
+                var baseSerializer = new DataContractJsonSerializer(typeof(PrebuiltConfigurationsBase));
 
-                prebuiltConfigurations = serializer.ReadObject(stream) as PrebuiltConfigurations;
+                var baseObject = baseSerializer.ReadObject(stream) as PrebuiltConfigurationsBase;
+
+                var deserailzeType = TableConfigurationsSerializer.versionToTypeLazy.Value.SingleOrDefault(x => x.Version == baseObject.Version);
+
+                if (deserailzeType.PrebuiltConfigType == null)
+                {
+                    logger?.Warn($"Unsupported version: {baseObject.Version}");
+                    return Enumerable.Empty<Processing.TableConfigurations>();
+                }
+
+                stream.Position = startingPosition;
+
+                var serializer = new DataContractJsonSerializer(deserailzeType.PrebuiltConfigType);
+
+                var desrailizedObject = serializer.ReadObject(stream);
+
+                if (desrailizedObject is ISupportUpgrade<PrebuiltConfigurations> supportUpgrade)
+                {
+                    prebuiltConfigurations = supportUpgrade.Upgrade();
+                }
+                else if (desrailizedObject is PrebuiltConfigurations latestConfigs)
+                {
+                    prebuiltConfigurations = latestConfigs;
+                }
+
                 if (prebuiltConfigurations == null)
                 {
                     return Enumerable.Empty<Processing.TableConfigurations>();
@@ -83,9 +121,6 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                     $"{e.Message}");
                 return Enumerable.Empty<Processing.TableConfigurations>();
             }
-
-            // _CDS_
-            // todo:validate the version
 
             return ConvertDataTransferObjectsToTableConfigurations(prebuiltConfigurations.Tables);
         }
@@ -137,10 +172,11 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             SerializeTableConfigurations(stream, prebuiltConfigurations, logger);
         }
 
-        private static void SerializeTableConfigurations(
+        internal static void SerializeTableConfigurations<T>(
             Stream stream,
-            PrebuiltConfigurations dtoPrebuiltConfigurations,
+            T dtoPrebuiltConfigurations,
             ILogger logger)
+            where T : PrebuiltConfigurationsBase
         {
             if (stream == null)
             {
@@ -152,7 +188,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 using (var writer = JsonReaderWriterFactory.CreateJsonWriter(
                         stream, Encoding.Default, false, true, indentChars))
                 {
-                    var serializer = new DataContractJsonSerializer(typeof(PrebuiltConfigurations));
+                    var serializer = new DataContractJsonSerializer(typeof(T));
                     serializer.WriteObject(writer, dtoPrebuiltConfigurations);
                 }
             }
