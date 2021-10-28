@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
@@ -24,6 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     {
         private readonly IAssemblyLoader assemblyLoader;
         private readonly Func<IEnumerable<string>, IPreloadValidator> validatorFactory;
+        private readonly ILogger logger;
         private readonly List<IExtensionTypeObserver> observers = new List<IExtensionTypeObserver>();
 
         /// <summary>
@@ -39,12 +41,17 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         ///     a new <see cref="IPreloadValidator"/> instance. This function
         ///     should never return <c>null</c>.
         /// </param>
+        /// <param name="logger">
+        ///     Use to log messages during discovery.
+        /// </param>
         public AssemblyExtensionDiscovery(
             IAssemblyLoader assemblyLoader,
-            Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
+            Func<IEnumerable<string>, IPreloadValidator> validatorFactory,
+            ILogger logger)
         {
             this.assemblyLoader = assemblyLoader;
             this.validatorFactory = validatorFactory;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -296,7 +303,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
 
             watch.Stop();
-            Console.Error.WriteLine("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
+            this.logger.Info("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
 
             if (directoryErrors.Count > 0)
             {
