@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
     internal class PrebuiltConfigurations
         : PrebuiltConfigurationsBase
     {
-        internal static readonly double DTOVersion = 1;
+        internal static readonly double DTOVersion = 1.0;
 
         public PrebuiltConfigurations()
         {
