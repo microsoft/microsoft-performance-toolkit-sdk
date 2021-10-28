@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 {
@@ -30,12 +31,22 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// </summary>
         /// <param name="type">
         ///     The <see cref="Type"/> of cooker referenced by this instance.
-        ///     It is expected that <see cref="Type"/>is a calid cooker <see cref="Type"/>.
+        ///     It is expected that <see cref="Type"/>is a valid cooker <see cref="Type"/>.
         /// </param>
-        protected DataCookerReference(Type type)
+        /// <param name="logger">
+        ///     Logs messages from this reference.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="logger"/> is <c>null</c>.
+        /// </exception>
+        protected DataCookerReference(Type type, ILogger logger)
             : base(type)
         {
+            Guard.NotNull(logger, nameof(logger));
+
             this.isDisposed = false;
+
+            this.Logger = logger;
         }
 
         /// <summary>
@@ -127,6 +138,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 this.isSourceDataCooker = value;
             }
         }
+
+        /// <summary>
+        ///     Gets the interface for logging messages from this instance.
+        /// </summary>
+        protected ILogger Logger { get; }
 
         /// <inheritdoc/>
         /// <exception cref="System.ObjectDisposedException">

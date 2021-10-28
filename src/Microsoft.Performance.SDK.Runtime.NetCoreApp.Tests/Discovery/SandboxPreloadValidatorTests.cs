@@ -114,7 +114,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests.Discovery
 
             var pluginLoader = new PluginsLoader(
                 new IsolationAssemblyLoader(),
-                x => new SandboxPreloadValidator(x, checker));
+                x => new SandboxPreloadValidator(x, checker),
+                Logger.Null);
             var pluginsLoaded = pluginLoader.TryLoadPlugins(
                 new[] { Path.GetDirectoryName(path), },
                 out var errors);

@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
 {
@@ -30,8 +31,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             this.InitializeDescriptorData(other);
         }
 
-        private CompositeDataCookerReference(Type type)
-            : base(type)
+        private CompositeDataCookerReference(Type type, ILogger logger)
+            : base(type, logger)
         {
             ICompositeDataCookerDescriptor instance = this.CreateInstance();
             this.ValidateInstance(instance);
@@ -40,8 +41,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             {
                 this.InitializeDescriptorData(instance);
             }
-        }
-
+        }       
+        
         /// <summary>
         ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
         ///     <paramref name="candidateType"/>.
@@ -50,7 +51,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
-        ///         <item>must implement ICompositeDataCookerDescriptor somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must implement <see cref="ICompositeDataCookerDescriptor"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
         ///         <item>must have a public parameterless constructor.</item>
         ///     </list>
         /// </summary>
@@ -68,7 +69,44 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
+            return TryCreateReference(
+                candidateType,
+                Runtime.Logger.Create<CompositeDataCookerReference>(),
+                out reference);
+        }
+
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>must be concrete.</item>
+        ///         <item>must implement <see cref="ICompositeDataCookerDescriptor"/> somewhere in the inheritance hierarchy (either directly or indirectly.)</item>
+        ///         <item>must have a public parameterless constructor.</item>
+        ///     </list>
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ICompositeDataCookerReference"/>
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ICompositeDataCookerReference"/>
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        internal static bool TryCreateReference(
+            Type candidateType,
+            ILogger logger,
+            out ICompositeDataCookerReference reference)
+        {
             Guard.NotNull(candidateType, nameof(candidateType));
+            Guard.NotNull(logger, nameof(logger));
 
             reference = null;
 
@@ -79,12 +117,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 {
                     try
                     {
-                        reference = new CompositeDataCookerReference(candidateType);
+                        reference = new CompositeDataCookerReference(candidateType, logger);
                     }
                     catch (InvalidOperationException e)
                     {
-                        Console.Error.WriteLine($"Cooker Disabled: {candidateType}.");
-                        Console.Error.WriteLine($"{e.Message}");
+                        logger.Warn($"Cooker Disabled: {candidateType}.");
+                        logger.Warn($"{e.Message}");
                         return false;
                     }
                 }
