@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Processing
         protected const string DefaultIsDataAvailableMethodName = "IsDataAvailable";
 
         public TableAttribute()
-            : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName, internalTable)
+            : this(DefaultTableDescriptorPropertyName, DefaultTableBuilderMethodName, DefaultIsDataAvailableMethodName)
         {
         }
 
