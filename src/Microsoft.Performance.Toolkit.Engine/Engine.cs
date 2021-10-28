@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -17,12 +18,17 @@ using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
+// TODO::support concurrency in the Engine
+
 namespace Microsoft.Performance.Toolkit.Engine
 {
     /// <summary>
     ///     Provides the entry point for programmatically manipulating, cooking,
     ///     and accessing data.
     /// </summary>
+    /// <remarks>
+    ///     This class is not thread safe.
+    /// </remarks>
     public abstract class Engine
         : IDisposable
     {
@@ -32,9 +38,6 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly List<DataCookerPath> enabledCookers;
         private readonly ReadOnlyCollection<DataCookerPath> enabledCookersRO;
-
-        private readonly List<TableDescriptor> enabledTables;
-        private readonly ReadOnlyCollection<TableDescriptor> enabledTablesRO;
 
         private readonly Func<Type, ILogger> loggerFactory;
 
@@ -50,6 +53,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         private bool isProcessed;
 
         private IApplicationEnvironment applicationEnvironment;
+
+        private RuntimeExecutionResults runtimeExecutionResult;
+
+        private ProcessingSystemCompositeCookers compositeCookers;
+
+        private Dictionary<TableDescriptor, ICustomDataProcessor> tablesToProcessors;
+
         private bool isDisposed;
 
         internal Engine(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
@@ -77,10 +87,18 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.enabledCookers = new List<DataCookerPath>();
             this.enabledCookersRO = new ReadOnlyCollection<DataCookerPath>(this.enabledCookers);
 
-            this.enabledTables = new List<TableDescriptor>();
-            this.enabledTablesRO = new ReadOnlyCollection<TableDescriptor>(this.enabledTables);
-
             this.createInfo = createInfo;
+
+            // This contains the set of composite cookers that will be used by the system of data processors available
+            // to this RuntimeExecutionResults.
+            this.compositeCookers = new ProcessingSystemCompositeCookers(this.Extensions);
+
+            // Scenario: A processing source supports multiple data processors, and a TableDescriptor is valid for
+            // multiple data processors. To support this, we'll need to update this data structure, the way we enable
+            // tables, as well as the way we query for enabled tables.
+            // TODO: can we add telemetry for this scenario so we know how often this happens so we can prioritize it?
+            // TODO: support the above scenario
+            this.tablesToProcessors = new Dictionary<TableDescriptor, ICustomDataProcessor>();
 
             this.isDisposed = false;
         }
@@ -156,7 +174,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             get
             {
                 this.ThrowIfDisposed();
-                return this.enabledTablesRO;
+                return this.tablesToProcessors.Keys.AsEnumerable();
             }
         }
 
@@ -253,7 +271,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The created engine environment.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="dataSources"/> is <c>null</c>.
+        ///     <paramref name="dataSource"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="processingSourceType"/> is <c>null</c>.
         /// </exception>
@@ -390,7 +408,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         /// <exception cref="CookerNotFoundException">
         ///     <paramref name="dataCookerPath"/> is not known by this instance.
-        ///     See <see cref="AllCookers"/>.
         /// </exception>
         /// <exception cref="InstanceAlreadyProcessedException">
         ///     This instance has already been processed.
@@ -416,6 +433,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 throw new NoDataSourceException(dataCookerPath);
             }
+
+            this.Extensions.EnableDataCookers(
+                GetExtensibleProcessors(),
+                new HashSet<DataCookerPath>() { dataCookerPath });
 
             this.enabledCookers.Add(dataCookerPath);
         }
@@ -453,8 +474,17 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            this.enabledCookers.Add(dataCookerPath);
-            return true;
+            try
+            {
+                EnableCooker(dataCookerPath);
+
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -478,10 +508,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="TableException">
-        ///     A table is not available for the given <paramref name="tableDescriptor"/>.
+        ///     A table is not available for the given <paramref name="descriptor"/>.
         /// </exception>
         /// <exception cref="TableNotFoundException">
-        ///     A table cannot be found for the given <paramref name="tableDescriptor"/>.
+        ///     A table cannot be found for the given <paramref name="descriptor"/>.
         /// </exception>
         public void EnableTable(TableDescriptor descriptor)
         {
@@ -489,7 +519,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ThrowIfProcessed();
             Guard.NotNull(descriptor, nameof(descriptor));
 
-            if (this.enabledTables.Contains(descriptor))
+            if (this.tablesToProcessors.ContainsKey(descriptor))
             {
                 return;
             }
@@ -499,37 +529,36 @@ namespace Microsoft.Performance.Toolkit.Engine
                 throw new TableNotFoundException(descriptor);
             }
 
-            if (this.Extensions.TablesById.TryGetValue(descriptor.Guid, out ITableExtensionReference reference))
+            ITableExtensionReference tableReference = null;
+            IEnumerable<ProcessingSourceExecutor> executorsWithTable = null;
+
+            if (!descriptor.IsInternalTable && this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
             {
-                if (!this.Extensions.TablesById.TryGetValue(descriptor.Guid, out var tableReference))
-                {
-                    Debug.Assert(
-                        false,
-                        "If allTables contains the descriptor, then it should be found or there's a bug.");
-                }
+                Debug.Assert(
+                    tableReference != null,
+                    "If ExtensionRoot.TablesById contains the table descriptor, then it should also contain a " +
+                    "non-null table reference.");
 
                 if (tableReference.Availability != DataExtensionAvailability.Available)
                 {
                     throw new TableException($"The requested table is not available: {tableReference.Availability}.");
                 }
-
-                this.enabledTables.Add(descriptor);
             }
             else
             {
-                var executor = this.executors.FirstOrDefault(
+                executorsWithTable = this.executors.Where(
                     x => x.Context.ProcessingSource.AvailableTables.Contains(descriptor));
-                if (executor == default)
+
+                if (!executorsWithTable.Any())
                 {
                     throw new ArgumentException(
                         "No data source found for the given table.",
                         paramName: nameof(descriptor));
                 }
-                else
-                {
-                    this.enabledTables.Add(descriptor);
-                }
+
             }
+
+            EnableTableCore(descriptor, tableReference, executorsWithTable);
         }
 
         /// <summary>
@@ -565,7 +594,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            if (this.enabledTables.Contains(descriptor))
+            if (this.tablesToProcessors.ContainsKey(descriptor))
             {
                 return true;
             }
@@ -643,11 +672,17 @@ namespace Microsoft.Performance.Toolkit.Engine
                 //
 
                 this.internalDataSourceSet.SafeDispose();
+
+                this.compositeCookers.SafeDispose();
+
+                this.runtimeExecutionResult.SafeDispose();
             }
 
+            this.applicationEnvironment = null;
             this.workingDataSourceSet = null;
             this.internalDataSourceSet = null;
             this.applicationEnvironment = null;
+            this.tablesToProcessors = null;
             this.isDisposed = true;
         }
 
@@ -726,7 +761,9 @@ namespace Microsoft.Performance.Toolkit.Engine
                     new TableConfigurationsSerializer(),
                     instance.Extensions,
                     instance.Factory.CreateSourceSessionFactory(),
-                    new RuntimeMessageBox(instance.logger));
+                    createInfo.IsInteractive
+                        ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
+                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger));
 
                 foreach (var cds in instance.ProcessingSourceReferences)
                 {
@@ -774,6 +811,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        private IEnumerable<ICustomDataProcessorWithSourceParser> GetExtensibleProcessors()
+        {
+            Debug.Assert(this.executors != null);
+            return this.executors.Select(e => e.Processor).OfType<ICustomDataProcessorWithSourceParser>();
+        }
+
         private bool CouldCookerHaveData(DataCookerPath dataCookerPath)
         {
             if (dataCookerPath.DataCookerType == DataCookerType.CompositeDataCooker)
@@ -808,44 +851,124 @@ namespace Microsoft.Performance.Toolkit.Engine
             return sourceParsers.Count > 0;
         }
 
+        private void EnableTableCore(
+            TableDescriptor descriptor,
+            ITableExtensionReference tableReference,
+            IEnumerable<ProcessingSourceExecutor> executorsWithTable)
+        {
+            Debug.Assert(!this.IsProcessed);
+            Debug.Assert(!this.isDisposed);
+
+            Debug.Assert(descriptor != null);
+
+            if (this.tablesToProcessors.ContainsKey(descriptor))
+            {
+                // this table has already been enabled
+                return;
+            }
+
+            if (tableReference != null)
+            {
+                // extended tables generally aren't tied to a processor
+                this.tablesToProcessors.Add(descriptor, null);
+
+                this.Extensions.EnableSourceDataCookersForTables(
+                    GetExtensibleProcessors(),
+                    new HashSet<ITableExtensionReference>() { tableReference });
+            }
+            else
+            {
+                foreach (var executor in executorsWithTable)
+                {
+                    if (this.tablesToProcessors.TryGetValue(descriptor, out var processor))
+                    {
+                        if (processor != executor.Processor)
+                        {
+                            var message = string.Format(
+                                "Unable to map table {0} to processor {1}: " +
+                                "The SDK.Engine does not support tables used by multiple data processors.",
+                                descriptor.Guid,
+                                executor.Context.ProcessingSource);
+
+                            this.logger.Warn("{0}", message);
+
+                            continue;
+                        }
+
+                        // this table was already added for this processor
+                        continue;
+                    }
+
+                    try
+                    {
+                        // TODO: Because a source processor can support multiple custom data processors, would it be better
+                        // to add a SupportsTable method to each processor? This code is awkward. If there was a
+                        // SupportsTable method, we could throw an exception for support by multiple processors before
+                        // enabling the table on any processor.
+                        //
+
+                        executor.Processor.EnableTable(descriptor);
+                        this.tablesToProcessors.Add(descriptor, executor.Processor);
+                    }
+                    catch (Exception e)
+                    {
+                        var message = string.Format("Unable to enable table {0} on processor {1}: {2}",
+                            descriptor.Guid,
+                            executor.Context.ProcessingSource,
+                            e);
+
+                        this.logger.Warn("{0}", message);
+
+                        throw new TableException(message, e);
+                    }
+                }
+            }
+
+            Debug.Assert(this.tablesToProcessors.ContainsKey(descriptor));
+        }
+
+        private void MapInternalTablesToProcessor(ProcessingSourceExecutor executor)
+        {
+            var internalTables = executor.Processor.GetEnabledTables().Where(td => td.IsInternalTable);
+            foreach (var internalTable in internalTables)
+            {
+                try
+                {
+                    if (this.tablesToProcessors.TryGetValue(internalTable, out var processor))
+                    {
+                        if (processor != executor.Processor)
+                        {
+                            this.logger.Warn(
+                                "Unable to map internal table {0} to processor {1}: " +
+                                "The SDK.Engine does not support internal tables used by multiple data processors.",
+                                internalTable.Guid,
+                                executor.Context.ProcessingSource);
+                            continue;
+                        }
+
+                        // this table was already added for this processor
+                        continue;
+                    }
+
+                    this.tablesToProcessors.Add(internalTable, executor.Processor);
+                }
+                catch (Exception e)
+                {
+                    this.logger.Warn(
+                        "Unable to enable table {0} on processor {1}: {2}",
+                        internalTable.Guid,
+                        executor.Context.ProcessingSource,
+                        e);
+                }
+            }
+        }
+
         private RuntimeExecutionResults ProcessCore()
         {
             this.IsProcessed = true;
 
-            var extendedTables = new HashSet<ITableExtensionReference>();
-            var processorTables = new Dictionary<TableDescriptor, ICustomDataProcessor>();
-
-            foreach (var table in this.enabledTables)
-            {
-                if (this.Extensions.TablesById.TryGetValue(table.Guid, out ITableExtensionReference reference))
-                {
-                    extendedTables.Add(reference);
-                }
-                else
-                {
-                    var executor = this.executors.Single(
-                        x => x.Context.ProcessingSource.AvailableTables.Contains(table));
-                    executor.Processor.EnableTable(table);
-                    processorTables.Add(table, executor.Processor);
-                }
-            }
-
-            var processors = this.Extensions.EnableDataCookers(
-                this.executors.Select(
-                    x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
-                new HashSet<DataCookerPath>(this.enabledCookers));
-
-            if (extendedTables.Any())
-            {
-                var processorForTable = this.Extensions.EnableSourceDataCookersForTables(
-                this.executors.Select(
-                    x => x.Processor as ICustomDataProcessorWithSourceParser).Where(x => !(x is null)),
-                extendedTables);
-
-                processors.UnionWith(processorForTable);
-            }
-
             var executionResults = new List<ExecutionResult>(this.executors.Count);
+            var errors = new List<ProcessingError>(this.executors.Count);
             foreach (var executor in this.executors)
             {
                 try
@@ -855,6 +978,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                         .GetAwaiter()
                         .GetResult();
                     executionResults.Add(executionResult);
+                    if (executionResult.ProcessorFault != null)
+                    {
+                        errors.Add(new ProcessingError(executionResult));
+                    }
                 }
                 catch (Exception e)
                 {
@@ -862,21 +989,35 @@ namespace Microsoft.Performance.Toolkit.Engine
                     // todo: better error message
                     //
 
+                    errors.Add(
+                        new ProcessingError(
+                            executor.Context.ProcessingSource.Guid,
+                            executor.Processor,
+                            executor.Context.DataSources,
+                            e));
+
                     this.logger.Error($"Failed to process: {e}");
                 }
             }
 
-            var retrieval = this.Factory.CreateCrossParserSourceDataCookerRetrieval(processors);
-            var retrievalFactory = new DataExtensionRetrievalFactory(retrieval, this.Extensions);
+            var sourceCookerDataRetrieval = this.Factory.CreateCrossParserSourceDataCookerRetrieval(
+                GetExtensibleProcessors());
+            var dataRetrievalFactory = new DataExtensionRetrievalFactory(
+                sourceCookerDataRetrieval,
+                this.compositeCookers,
+                this.Extensions);
 
-            var results = new RuntimeExecutionResults(
-                retrieval,
-                retrievalFactory,
+            this.compositeCookers.Initialize(dataRetrievalFactory);
+
+            this.runtimeExecutionResult = new RuntimeExecutionResults(
+                sourceCookerDataRetrieval,
+                this.compositeCookers,
+                dataRetrievalFactory,
                 this.Extensions,
-                processorTables,
-                this.enabledTables);
+                this.tablesToProcessors,
+                errors);
 
-            return results;
+            return this.runtimeExecutionResult;
         }
 
         private List<ProcessingSourceExecutor> CreateExecutors(
@@ -885,31 +1026,36 @@ namespace Microsoft.Performance.Toolkit.Engine
             var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
             {
-                try
-                {
-                    var cds = kvp.Key;
-                    var dataSourceLists = kvp.Value;
+                var processingSource = kvp.Key;
+                var dataSourceLists = kvp.Value;
 
-                    foreach (var dataSources in dataSourceLists)
+                foreach (var dataSources in dataSourceLists)
+                {
+                    try
                     {
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
                             x => ConsoleLogger.Create(x.GetType()),
-                            cds,
+                            processingSource,
                             dataSources,
-                            cds.Instance.DataTables.Concat(cds.Instance.MetadataTables),
-                            new RuntimeProcessorEnvironment(this.Extensions, this.CreateLogger),
+                            processingSource.Instance.MetadataTables,
+                            new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
                             ProcessorOptions.Default);
 
                         var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
+                        MapInternalTablesToProcessor(executor);
 
                         executors.Add(executor);
                     }
-                }
-                catch (Exception e)
-                {
-                    this.logger.Error($"Failed to initialize data processor in '{kvp.Key.Name}': {e}");
+                    catch (Exception e)
+                    {
+                        this.logger.Error(
+                           "Error processing dataSources {0} on processing source {1}: {2}",
+                           dataSources.ToString(),
+                           processingSource.Name,
+                           e);
+                    }
                 }
             }
 
@@ -995,6 +1141,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private sealed class RuntimeProcessorEnvironment
             : IProcessorEnvironment
         {
+            private readonly ProcessingSystemCompositeCookers compositeCookers;
             private readonly IDataExtensionRepository repository;
             private readonly Func<Type, ILogger> loggerFactory;
             private readonly object loggerLock = new object();
@@ -1004,11 +1151,14 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public RuntimeProcessorEnvironment(
                 IDataExtensionRepository repository,
+                ProcessingSystemCompositeCookers compositeCookers,
                 Func<Type, ILogger> loggerFactory)
             {
                 Debug.Assert(repository != null);
+                Debug.Assert(compositeCookers != null);
                 Debug.Assert(loggerFactory != null);
 
+                this.compositeCookers = compositeCookers;
                 this.repository = repository;
                 this.loggerFactory = loggerFactory;
             }
@@ -1016,7 +1166,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(
                 ICustomDataProcessorWithSourceParser processor)
             {
-                return new CustomDataProcessorExtensibilitySupport(processor, this.repository);
+                return new CustomDataProcessorExtensibilitySupport(
+                    processor,
+                    this.repository,
+                    this.compositeCookers);
             }
 
             public ILogger CreateLogger(Type processorType)
@@ -1074,17 +1227,16 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
-        private sealed class RuntimeMessageBox
+        private abstract class RuntimeMessageBox
             : IMessageBox
         {
-            private readonly ILogger logger;
-
-            public RuntimeMessageBox(ILogger logger)
+            internal RuntimeMessageBox(
+                ILogger logger)
             {
-                Debug.Assert(logger != null);
-
-                this.logger = logger;
+                this.Logger = logger;
             }
+
+            protected ILogger Logger { get; }
 
             public void Show(
                 MessageBoxIcon icon,
@@ -1092,48 +1244,194 @@ namespace Microsoft.Performance.Toolkit.Engine
                 string format,
                 params object[] args)
             {
-                var message = string.Format(formatProvider, format, args);
-
-                // todo: use the logger here too
-
-                this.logger.Error(
-                    string.Concat("[", icon.ToString(), "]: ", message));
+                var message = FormatMessage(icon, formatProvider, format, args);
+                this.Logger.Error(message);
             }
 
-            public ButtonResult Show(
+            public abstract ButtonResult Show(
                 MessageBoxIcon icon,
                 IFormatProvider formatProvider,
-                Buttons buttons, 
+                Buttons buttons,
                 string caption,
+                string format,
+                params object[] args);
+
+            protected static string FormatMessage(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
                 string format,
                 params object[] args)
             {
                 var message = string.Format(formatProvider, format, args);
+                return string.Concat("[", icon.ToString("G"), "]: ", message);
+            }
+        }
 
+        private sealed class NonInteractiveMessageBox
+            : RuntimeMessageBox
+        {
+            internal NonInteractiveMessageBox(ILogger logger)
+                : base(logger)
+            {
+            }
+
+            public override ButtonResult Show(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
+                Buttons buttons,
+                string caption,
+                string format,
+                params object[] args)
+            {
+                throw new InvalidOperationException("This engine was created with IsInteractive set to false. User interaction with plugins is no allowed in this mode.");
+            }
+        }
+
+        private sealed class InteractiveRuntimeMessageBox
+           : RuntimeMessageBox
+        {
+            internal InteractiveRuntimeMessageBox(ILogger logger)
+                : base(logger)
+            {
+            }
+
+            public override ButtonResult Show(
+                MessageBoxIcon icon,
+                IFormatProvider formatProvider,
+                Buttons buttons,
+                string caption,
+                string format,
+                params object[] args)
+            {
+                var message = FormatMessage(icon, formatProvider, format, args);
                 switch (icon)
                 {
                     case MessageBoxIcon.Error:
-                        this.logger.Error("{0}", message);
+                        this.Logger.Error("{0}", message);
                         break;
 
                     case MessageBoxIcon.Information:
-                        this.logger.Info("{0}", message);
+                        this.Logger.Info("{0}", message);
                         break;
 
                     case MessageBoxIcon.Warning:
-                        this.logger.Warn("{0}", message);
+                        this.Logger.Warn("{0}", message);
                         break;
 
                     default:
-                        // todo: not sure if this is the 'best' approach
-                        this.logger.Info(
-                            string.Concat("[", icon.ToString(), "]: ", message));
+                        this.Logger.Info(message);
                         break;
                 }
 
-                // todo: how do we want to handle this?
-                // User prompts? Default?
-                return ButtonResult.None;
+                return GetUserInput(buttons);
+            }
+
+            private static ButtonResult GetUserInput(Buttons buttons)
+            {
+                switch (buttons)
+                {
+                    case Buttons.OK:
+                        {
+                            Console.Out.WriteLine("Press [Enter] to Continue.");
+                            Console.In.ReadLine();
+                            return ButtonResult.OK;
+                        }
+
+                    case Buttons.OKCancel:
+                        {
+                            var c = GetCharFromUser(
+                                "O(kay) / C(ancel) ? ",
+                                'O', 'o', 'C', 'c');
+                            switch (c)
+                            {
+                                case 'O':
+                                case 'o':
+                                    return ButtonResult.OK;
+
+                                case 'C':
+                                case 'c':
+                                    return ButtonResult.Cancel;
+
+                                default:
+                                    Debug.Assert(false);
+                                    throw new InvalidOperationException();
+                            }
+                        }
+
+                    case Buttons.YesNo:
+                        {
+                            var c = GetCharFromUser(
+                                "Y(es) / N(o) ? ",
+                                'Y', 'y', 'N', 'n');
+                            switch (c)
+                            {
+                                case 'Y':
+                                case 'y':
+                                    return ButtonResult.Yes;
+
+                                case 'N':
+                                case 'n':
+                                    return ButtonResult.No;
+
+                                default:
+                                    Debug.Assert(false);
+                                    throw new InvalidOperationException();
+                            }
+                        }
+
+                    case Buttons.YesNoCancel:
+                        {
+                            var c = GetCharFromUser(
+                               "Y(es) / N(o) / C(ancel) ? ",
+                               'Y', 'y', 'N', 'n', 'C', 'c');
+                            switch (c)
+                            {
+                                case 'Y':
+                                case 'y':
+                                    return ButtonResult.Yes;
+
+                                case 'N':
+                                case 'n':
+                                    return ButtonResult.No;
+
+                                case 'C':
+                                case 'c':
+                                    return ButtonResult.Cancel;
+
+                                default:
+                                    Debug.Assert(false);
+                                    throw new InvalidOperationException();
+                            }
+                        }
+
+                    default:
+                        {
+                            throw new InvalidEnumArgumentException(
+                                nameof(buttons),
+                                (int)buttons,
+                                typeof(Buttons));
+                        }
+                }
+            }
+
+            private static char GetCharFromUser(
+                string prompt,
+                params char[] valid)
+            {
+
+                char c = '\0';
+                do
+                {
+                    Console.Out.Write(prompt);
+
+                    var line = Console.In.ReadLine();
+                    if (line.Length > 0)
+                    {
+                        c = line[0];
+                    }
+                } while (!valid.Contains(c));
+
+                return c;
             }
         }
     }

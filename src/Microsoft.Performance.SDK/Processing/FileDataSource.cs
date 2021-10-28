@@ -55,7 +55,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         }
 
-        /// <inheritdoc cref="System.Object.GetHashCode(object)"/>
+        /// <inheritdoc cref="object.GetHashCode()"/>
         public override int GetHashCode()
         {
             return this.FullPath.GetHashCode();

@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime
     ///     Provides the root of all loaded extensions.
     /// </summary>
     public sealed class ExtensionRoot
-        : IPlugInCatalog,
+        : IProcessingSourceCatalog,
           IDataExtensionRepositoryBuilder
     {
         private DependencyDag dependencyGraph;
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     <paramref name="repository"/> is <c>null</c>.
         /// </exception>
         public ExtensionRoot(
-            IPlugInCatalog catalog,
+            IProcessingSourceCatalog catalog,
             IDataExtensionRepositoryBuilder repository)
         {
             Guard.NotNull(catalog, nameof(catalog));
@@ -61,7 +61,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IPlugInCatalog Catalog { get; }
+        public IProcessingSourceCatalog Catalog { get; }
 
         /// <summary>
         ///     Gets the repository exposing data extensions.
@@ -75,7 +75,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public bool IsLoaded => this.Catalog.IsLoaded;
 
         /// <inheritdoc />
-        public IEnumerable<ProcessingSourceReference> PlugIns => this.Catalog.PlugIns;
+        public IEnumerable<ProcessingSourceReference> ProcessingSources => this.Catalog.ProcessingSources;
 
         /// <inheritdoc />
         public IEnumerable<DataCookerPath> SourceDataCookers => this.Repository.SourceDataCookers;
@@ -86,8 +86,10 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById => this.Repository.TablesById;
 
-        /// <inheritdoc />
-        public IEnumerable<DataProcessorId> DataProcessors => this.Repository.DataProcessors;
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public IEnumerable<DataProcessorId> DataProcessors => this.Repository.DataProcessors;
 
         /// <inheritdoc />
         public bool AddCompositeDataCookerReference(ICompositeDataCookerReference dataCooker)
@@ -95,11 +97,13 @@ namespace Microsoft.Performance.SDK.Runtime
             return this.Repository.AddCompositeDataCookerReference(dataCooker);
         }
 
-        /// <inheritdoc />
-        public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
-        {
-            return this.Repository.AddDataProcessorReference(dataProcessorReference);
-        }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference)
+        ////{
+        ////    return this.Repository.AddDataProcessorReference(dataProcessorReference);
+        ////}
 
         /// <inheritdoc />
         public bool AddSourceDataCookerReference(ISourceDataCookerReference dataCooker)
@@ -133,11 +137,13 @@ namespace Microsoft.Performance.SDK.Runtime
             return this.Repository.GetCompositeDataCookerReference(dataCookerPath);
         }
 
-        /// <inheritdoc />
-        public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
-        {
-            return this.Repository.GetDataProcessorReference(dataProcessorId);
-        }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <inheritdoc />
+        ////public IDataProcessorReference GetDataProcessorReference(DataProcessorId dataProcessorId)
+        ////{
+        ////    return this.Repository.GetDataProcessorReference(dataProcessorId);
+        ////}
 
         /// <inheritdoc />
         public ISourceDataCookerFactory GetSourceDataCookerFactory(DataCookerPath dataCookerPath)

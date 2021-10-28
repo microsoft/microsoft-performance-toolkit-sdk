@@ -14,6 +14,7 @@ using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataCookers;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -164,7 +165,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.PerformAdditionalDataExtensionValidation(new FakeSupport(), new FakeReference()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataCookers);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataProcessors);
+
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                // Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataProcessors);
             }
             finally
             {

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 
 namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
@@ -54,7 +55,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
         ///     class.
         /// </summary>
         public IsolationAssemblyLoader()
-            : this(new Dictionary<string, string>())
+            : this(new Dictionary<string, string>(), Runtime.Logger.Create<IsolationAssemblyLoader>())
         {
         }
 
@@ -69,9 +70,19 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
         ///     the name of the assembly. For example, { "Microsoft.Performance.SDK.dll", "Microsoft.Performance.SDK" }
         ///     This parameter may be <c>null</c>.
         /// </param>
+        /// <param name="logger">
+        ///     Logs messages during loading.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="logger"/> is <c>null</c>.
+        /// </exception>
         public IsolationAssemblyLoader(
-            IDictionary<string, string> additionalSharedAssembliesFileNameToName)
+            IDictionary<string, string> additionalSharedAssembliesFileNameToName,
+            ILogger logger)
+            : base(logger)
         {
+            Guard.NotNull(logger, nameof(logger));
+
             this.alwaysSharedAssembliesFileNameToName = new Dictionary<string, string>(AlwaysSharedAssembliesFileNameToName);
 
             if (!(additionalSharedAssembliesFileNameToName is null))

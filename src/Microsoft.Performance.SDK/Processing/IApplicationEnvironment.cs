@@ -24,14 +24,14 @@ namespace Microsoft.Performance.SDK.Processing
         string RuntimeName { get; }
 
         /// <summary>
-        ///     Gets a value indicating whether a GUI is present in the
-        ///     current process.
+        ///     Gets a value indicating whether the current process supports
+        ///     user interaction.
         /// </summary>
         /// <remarks>
         ///     This flag is useful to determine whether the code is
-        ///     running in a UI or CLI tool.
+        ///     running in context where user interaction is available.
         /// </remarks>
-        bool GraphicalUserEnvironment { get; }
+        bool IsInteractive { get; }
 
         /// <summary>
         ///     Gets the serializer to use for deserializing table configurations.

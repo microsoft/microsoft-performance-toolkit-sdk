@@ -47,13 +47,17 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
         protected SourceProcessingSessionBase(
             ISourceParser<T, TContext, TKey> sourceParser, 
-            IEqualityComparer<TKey> comparer)
+            IEqualityComparer<TKey> comparer,
+            ILogger logger)
         {
             Guard.NotNull(sourceParser, nameof(sourceParser));
             Guard.NotNull(comparer, nameof(comparer));
+            Guard.NotNull(logger, nameof(logger));
 
             this.SourceParser = sourceParser;
             this.keyEqualityComparer = comparer;
+
+            this.Log = logger;
         }
 
         public ISourceParser<T, TContext, TKey> SourceParser { get; }
@@ -72,6 +76,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         public int MaxSourceParseCount => this.SourceParser.MaxSourceParseCount;
 
         protected IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredCookers => this.registeredCookers;
+
+        protected ILogger Log { get; }
 
         public void RegisterSourceDataCooker(ISourceDataCooker<T, TContext, TKey> dataCooker)
         {

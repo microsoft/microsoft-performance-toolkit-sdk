@@ -79,7 +79,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             this.columnsRO = new ReadOnlyCollection<ColumnConfiguration>(EmptyArray<ColumnConfiguration>.Instance);
             this.columnRoles = new Dictionary<ColumnRole, Guid>();
-            
+          
             this.ColumnRoles = new ReadOnlyDictionary<ColumnRole, Guid>(this.columnRoles);
 
             this.highlightEntriesRO = new ReadOnlyCollection<HighlightEntry>(EmptyArray<HighlightEntry>.Instance);
@@ -224,9 +224,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="columnGuid">
         ///     The guid of column to place into the role.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="column"/> is <c>null</c>.
-        /// </exception>
         /// <exception cref="InvalidEnumArgumentException">
         ///     <paramref name="columnRole"/> is not a valid member of the
         ///     <see cref="ColumnRole"/> enumeration.

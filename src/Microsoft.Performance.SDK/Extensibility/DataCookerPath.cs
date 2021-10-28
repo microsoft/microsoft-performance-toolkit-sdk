@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Extensibility
 {
@@ -13,72 +15,53 @@ namespace Microsoft.Performance.SDK.Extensibility
         : IEquatable<DataCookerPath>
     {
         /// <summary>
-        ///     Describes the format of a data cooker path.
-        /// </summary>
-        [Obsolete("Fully qualified data cooker paths will no longer be supported in SDK v1.0.0 release candidate 1")]
-        public static string Format => "SourceId/CookerId";
-
-        /// <summary>
         ///     If the data cooker is not a source data cooker, this is the source parser Id.
         /// </summary>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public const string EmptySourceParserId = "";
+        /// <remarks>
+        ///    This must match 
+        ///    Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers.DataCookerPathInternal.EmptySourceParserId.
+        /// </remarks>
+        private static readonly string EmptySourceParserId = string.Empty;
 
         /// <summary>
-        ///     Constructor without an empty source parser id.
-        ///     Used for composite data cookers.
+        ///     Separates the consituent parts of the data cooker path in the full string representation. This character is not
+        ///     allowed in path components. If this path is changed, please update the exception comments in <see cref="ForSource(string, string)"/>
+        ///     and <see cref="ForComposite(string)"/>.
         /// </summary>
-        /// <param name="dataCookerId">
-        ///     The ID of the data cooker.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        ///     <paramref name="dataCookerId"/> is empty or composed only of whitespace.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="dataCookerId"/> is null.
-        /// </exception>
-        [Obsolete("This constructor will be removed by SDK v1.0.0 release candidate 1. Please use DataCookerPath.ForComposite or DataCookerPath.ForSource instead.")]
-        public DataCookerPath(string dataCookerId)
+        private static readonly string Separator = "/";
+
+        /// <summary>
+        ///     This is used by data cooker paths to compare elements.
+        /// </summary>
+        public static IEqualityComparer<string> EqualityComparer = StringComparer.Ordinal;
+
+        private DataCookerPath(string dataCookerId)
             : this(EmptySourceParserId, dataCookerId)
         {
         }
 
-        /// <summary>
-        ///     Constructor that takes a source parser id. If that ID is not empty, this
-        ///     is used for source data cookers. If it is empty, this is used with composite data cookers.
-        /// </summary>
-        /// <param name="sourceParserId">
-        ///     Source parser Id.
-        /// </param>
-        /// <param name="dataCookerId">
-        ///     Data cooker Id.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        ///     One or more of the parameters is empty or composed only of whitespace.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        ///     One or more of the parameters is null.
-        /// </exception>
-        [Obsolete("This constructor will be removed by SDK v1.0.0 release candidate 1. Please use DataCookerPath.ForComposite or DataCookerPath.ForSource instead.")]
-        public DataCookerPath(string sourceParserId, string dataCookerId)
+        private DataCookerPath(string sourceParserId, string dataCookerId)
         {
-            Guard.NotNull(sourceParserId, nameof(sourceParserId));
-            Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
+            Debug.Assert((sourceParserId == EmptySourceParserId) || !string.IsNullOrWhiteSpace(sourceParserId));
+            Debug.Assert(!string.IsNullOrWhiteSpace(dataCookerId));
 
-            if (sourceParserId.Contains("/"))
+            if (sourceParserId.Contains(Separator))
             {
-                throw new ArgumentException("This value may not contain a '/'.", nameof(sourceParserId));
+                throw new ArgumentException($"This value may not contain a '{Separator}'.", nameof(sourceParserId));
             }
 
-            if (dataCookerId.Contains("/"))
+            if (dataCookerId.Contains(Separator))
             {
-                throw new ArgumentException("This value may not contain a '/'.", nameof(dataCookerId));
+                throw new ArgumentException($"This value may not contain a '{Separator}'.", nameof(dataCookerId));
             }
 
             this.SourceParserId = string.Intern(sourceParserId);
             this.DataCookerId = string.Intern(dataCookerId);
-            this.CookerPath = Create(sourceParserId, dataCookerId);
-            this.DataCookerType = string.IsNullOrWhiteSpace(sourceParserId) ? DataCookerType.CompositeDataCooker : DataCookerType.SourceDataCooker;
+            this.DataCookerType = SourceParserId == EmptySourceParserId
+                ? DataCookerType.CompositeDataCooker
+                : DataCookerType.SourceDataCooker;
+
+            this.CookerPath = this.SourceParserId + Separator + this.DataCookerId;
         }
 
         /// <summary>
@@ -93,9 +76,14 @@ namespace Microsoft.Performance.SDK.Extensibility
 
             this.SourceParserId = other.SourceParserId;
             this.DataCookerId = other.DataCookerId;
-            this.CookerPath = other.CookerPath;
             this.DataCookerType = other.DataCookerType;
+            this.CookerPath = other.CookerPath;
         }
+
+        /// <summary>
+        ///     Gets the path of this cooker.
+        /// </summary>
+        internal string CookerPath { get; }
 
         /// <summary>
         ///     Creates a new <see cref="DataCookerType.CompositeDataCooker"/> path.
@@ -104,13 +92,16 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     The ID of the data cooker.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="dataCookerId"/> is empty or composed only of whitespace.
+        ///     One or more of the parameters is empty, composed only of whitespace, 
+        ///     or contains the '/' character.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataCookerId"/> is null.
         /// </exception>
         public static DataCookerPath ForComposite(string dataCookerId)
         {
+            Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
+
             return new DataCookerPath(dataCookerId);
         }
 
@@ -124,13 +115,21 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     The ID of the data cooker.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     One or more of the parameters is empty or composed only of whitespace.
+        ///     One or more of the parameters is empty, composed only of whitespace, 
+        ///     or contains the '/' character.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     One or more of the parameters is null.
         /// </exception>
         public static DataCookerPath ForSource(string sourceParserId, string dataCookerId)
         {
+            if (sourceParserId != EmptySourceParserId)
+            {
+                Guard.NotNullOrWhiteSpace(sourceParserId, nameof(sourceParserId));
+            }
+
+            Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
+
             return new DataCookerPath(sourceParserId, dataCookerId);
         }
 
@@ -153,15 +152,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     Gets the Data cooker Id.
         /// </summary>
         public string DataCookerId { get; }
-
-        /// <summary>
-        /// Gets the combination of the source parser Id and the data cooker Id.
-        /// </summary>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public string CookerPath
-        {
-            get;
-        }
 
         /// <summary>
         ///     Compares two instance of <see cref="DataCookerPath"/> for equality.
@@ -208,13 +198,13 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <inheritdoc />
         public bool Equals(DataCookerPath other)
         {
-            return string.Equals(this.CookerPath, other.CookerPath);
+            return DataCookerPath.EqualityComparer.Equals(this.CookerPath, other.CookerPath);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            return (this.CookerPath != null ? this.CookerPath.GetHashCode() : 0);
+            return this.CookerPath?.GetHashCode() ?? 0;
         }
 
         /// <inheritdoc />
@@ -226,133 +216,6 @@ namespace Microsoft.Performance.SDK.Extensibility
             }
 
             return obj is DataCookerPath other && Equals(other);
-        }
-
-        /// <summary>
-        ///     Generates a data cooker path given a full cooker path.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     The full cooker path. See <see cref="Format"/> for details.
-        /// </param>
-        /// <returns>
-        ///     The parsed <see cref="DataCookerPath"/>.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static DataCookerPath Parse(string cookerPath)
-        {
-            Guard.NotNullOrWhiteSpace(cookerPath, nameof(cookerPath));
-
-            var split = cookerPath.Split('/');
-            if (split.Length == 1)
-            {
-                return DataCookerPath.ForComposite(split[0]);
-            }
-
-            if (split.Length == 2)
-            {
-                return DataCookerPath.ForSource(split[0], split[1]);
-            }
-
-            throw new FormatException();
-        }
-
-        /// <summary>
-        ///     Generates a data cooker path given a source parser Id and a data cooker Id.
-        /// </summary>
-        /// <param name="sourceParserId">
-        ///     Source parser Id.
-        /// </param>
-        /// <param name="dataCookerId">
-        ///     Data cooker Id.
-        /// </param>
-        /// <returns>
-        ///     The created data cooker path.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. Please use ForSource or ForComposite.")]
-        public static string Create(string sourceParserId, string dataCookerId)
-        {
-            Guard.NotNull(sourceParserId, nameof(sourceParserId));
-            Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
-
-            return sourceParserId + "/" + dataCookerId;
-        }
-
-        /// <summary>
-        ///     Returns the source parser Id from a data cooker path.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     Data cooker path.
-        /// </param>
-        /// <returns>
-        ///     Source parser Id.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static string GetSourceParserId(string cookerPath)
-        {
-            Guard.NotNullOrWhiteSpace(cookerPath, nameof(cookerPath));
-
-            var tokens = SplitPath(cookerPath);
-            if (tokens != null)
-            {
-                return tokens[0];
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        ///     Returns the data cooker Id from a data cooker path.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     Data cooker path.
-        /// </param>
-        /// <returns>
-        ///     Data cooker Id.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static string GetDataCookerId(string cookerPath)
-        {
-            Guard.NotNullOrWhiteSpace(cookerPath, nameof(cookerPath));
-
-            var tokens = SplitPath(cookerPath);
-            if (tokens != null)
-            {
-                return tokens[1];
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        ///     Determines if a data cooker path has a proper form.
-        /// </summary>
-        /// <param name="cookerPath">
-        ///     Data cooker path.
-        /// </param>
-        /// <returns>
-        ///     True for a well formed path, false otherwise.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static bool IsWellFormed(string cookerPath)
-        {
-            if (string.IsNullOrWhiteSpace(cookerPath))
-            {
-                return false;
-            }
-
-            return SplitPath(cookerPath) != null;
-        }
-
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        private static string[] SplitPath(string cookerPath)
-        {
-            var tokens = cookerPath.Split('/');
-            if (tokens.Length == 2)
-            {
-                return tokens;
-            }
-
-            return null;
         }
     }
 }

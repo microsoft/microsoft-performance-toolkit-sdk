@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -20,9 +20,9 @@ namespace Microsoft.Performance.SDK.Processing
         : ICustomDataProcessor,
           IDataDerivedTables
     {
-        private readonly HashSet<TableDescriptor> enabledTables;
+        private readonly HashSet<TableDescriptor> enabledTables = new HashSet<TableDescriptor>();
 
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> 
+        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
 
         /// <summary>
@@ -42,14 +42,15 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(metadataTables, nameof(metadataTables));
             Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
 
-            this.enabledTables = new HashSet<TableDescriptor>(metadataTables);
+            this.Logger = processorEnvironment.CreateLogger(this.GetType());
 
             this.ApplicationEnvironment = applicationEnvironment;
             this.ProcessorEnvironment = processorEnvironment;
             this.EnabledTables = new ReadOnlyHashSet<TableDescriptor>(this.enabledTables);
             this.Options = options;
             this.TableDescriptorToBuildAction = allTablesMapping;
-            this.Logger = processorEnvironment.CreateLogger(this.GetType());
+
+            EnableMetadataTables(metadataTables);
         }
 
         /// <inheritdoc />
@@ -104,9 +105,32 @@ namespace Microsoft.Performance.SDK.Processing
         {
             lock (this.enabledTables)
             {
+                if (this.enabledTables.Contains(tableDescriptor))
+                {
+                    return;
+                }
+
+                OnBeforeEnableTable(tableDescriptor);
                 this.enabledTables.Add(tableDescriptor);
-                OnTableEnabled(tableDescriptor);
+                OnAfterEnableTable(tableDescriptor);
             }
+        }
+
+        /// <inheritdoc />
+        public bool TryEnableTable(TableDescriptor tableDescriptor)
+        {
+            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
+
+            try
+            {
+                EnableTable(tableDescriptor);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -131,6 +155,16 @@ namespace Microsoft.Performance.SDK.Processing
             }
         }
 
+        /// <summary>
+        ///     When overridden in a derived class, creates an instance of the service defined by the
+        ///     given table's <see cref="TableDescriptor.ServiceInterface"/>.
+        /// </summary>
+        /// <param name="table">
+        ///     The table whose service is to be created.
+        /// </param>
+        /// <returns>
+        ///     The created service, if the table specifies a service; <c>null</c> otherwise.
+        /// </returns>
         public virtual ITableService CreateTableService(TableDescriptor table)
         {
             if (table is null)
@@ -162,39 +196,38 @@ namespace Microsoft.Performance.SDK.Processing
             return true;
         }
 
-        /// <summary>
-        /// This method is deprecated. Please overwrite ProcessAsyncCore instead. The logger is now available through
-        /// the <see cref="Logger"/> property.
-        /// </summary>
-        /// <param name="logger">
-        ///     The logger.
-        /// </param>
-        /// <param name="progress">
-        ///     Provides a method of updating the application as to this
-        ///     processor's progress.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     A means of the application signalling to the processor that
-        ///     it should abort processing.
-        /// </param>
-        /// <returns>
-        ///     A <see cref="Task"/> representing the asynchronous operation.
-        /// </returns>
-        [Obsolete("This method will be removed by release 1.0. Please use ProcessAsyncCore instead.", false)]
-        public virtual Task ProcessAsync(
-            ILogger logger, 
-            IProgress<int> progress,
-            CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
         /// <inheritdoc />
         public Task ProcessAsync(
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
             return ProcessAsyncCore(progress, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<TableDescriptor> GetEnabledTables()
+        {
+            lock (this.enabledTables)
+            {
+                return this.enabledTables.ToList();
+            }
+        }
+
+        /// <summary>
+        ///     Enable metadata tables.
+        /// </summary>
+        /// <remarks>
+        ///     The default implementation just adds the tables to <see cref="EnabledTables"/>.
+        /// </remarks>
+        /// <param name="metadataTables">
+        ///     Metadata tables to process.
+        /// </param>
+        protected virtual void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
+        {
+            foreach (var table in metadataTables)
+            {
+                this.enabledTables.Add(table);
+            }
         }
 
         /// <summary>
@@ -211,16 +244,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        protected virtual Task ProcessAsyncCore(
+        protected abstract Task ProcessAsyncCore(
             IProgress<int> progress,
-            CancellationToken cancellationToken)
-        {
-            // todo: make this abstract
-            // todo: remove this call to the old method, and throw NotImplementedException instead.
-            // temporarily call the old method to give some breathing room to developers
-            // these changes should be made when the original ProcessAsync obsolescence is made into an error
-            return ProcessAsync(this.Logger, progress, cancellationToken);
-        }
+            CancellationToken cancellationToken);
 
         /// <summary>
         ///     When overridden in a derived class, builds the requested
@@ -243,11 +269,23 @@ namespace Microsoft.Performance.SDK.Processing
             ITableBuilder tableBuilder);
 
         /// <summary>
-        /// This is called when a table has been enabled on this data processor. The default implementation does
-        /// nothing.
+        ///     This is called before a table has been enabled on this data processor.
         /// </summary>
-        /// <param name="tableDescriptor">Table that was enabled.</param>
-        protected virtual void OnTableEnabled(TableDescriptor tableDescriptor)
+        /// <param name="tableDescriptor">
+        ///     Table that was enabled.
+        /// </param>
+        protected virtual void OnBeforeEnableTable(TableDescriptor tableDescriptor)
+        {
+        }
+
+        /// <summary>
+        ///     This is called after a table has been enabled on this data processor. The default implementation does
+        ///     nothing.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     Table that was enabled.
+        /// </param>
+        protected virtual void OnAfterEnableTable(TableDescriptor tableDescriptor)
         {
         }
 
@@ -258,7 +296,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableDescriptor">Descriptor for the generated table.</param>
         /// <param name="buildAction">Action called to create the requested table.</param>
         protected void AddTableGeneratedFromDataProcessing(
-            TableDescriptor tableDescriptor, 
+            TableDescriptor tableDescriptor,
             Action<ITableBuilder, IDataExtensionRetrieval> buildAction)
         {
             // the buildAction may be null because the custom data processor may have a special way to handle

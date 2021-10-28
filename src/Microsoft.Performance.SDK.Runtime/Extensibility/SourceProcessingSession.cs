@@ -47,9 +47,17 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         }
 
         internal SourceProcessingSession(
+           ISourceParser<T, TContext, TKey> sourceParser,
+           IEqualityComparer<TKey> comparer)
+            : this(sourceParser, comparer, Logger.Create<SourceProcessingSession<T, TContext, TKey>>())
+        {
+        }
+
+        internal SourceProcessingSession(
             ISourceParser<T, TContext, TKey> sourceParser,
-            IEqualityComparer<TKey> comparer)
-            : base(sourceParser, comparer)
+            IEqualityComparer<TKey> comparer,
+            ILogger logger)
+            : base(sourceParser, comparer, logger)
         {
             Debug.Assert(sourceParser != null, nameof(sourceParser));
 
@@ -161,8 +169,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             {
                 foreach (var cooker in cookersByPass[passIndex])
                 {
-                    Console.Error.WriteLine(
-                        $"Source data cooker {cooker.Path} is disabled as it would require too many passes through the source.");
+                    this.Log.Warn($"Source data cooker {cooker.Path} is disabled as it would require too many passes through the source.");
                 }
             }
 

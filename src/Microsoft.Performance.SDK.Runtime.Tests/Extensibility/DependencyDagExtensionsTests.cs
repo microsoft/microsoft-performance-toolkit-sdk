@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void DependentWalk_NullParameters_Throw()
         {
-            var catalog = new TestPluginCatalog { IsLoaded = true, };
+            var catalog = new TestProcessingSourceCatalog { IsLoaded = true, };
             var repo = new DataExtensionRepository();
             repo.FinalizeDataExtensions();
 
@@ -49,14 +49,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // 2: n5 n4
             // 3: n6
 
-            var r0 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r0"), };
-            var r1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("r1"), };
-            var n1 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("n1"), };
-            var n2 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("n2"), };
-            var n3 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("n3"), };
-            var n4 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("n4"), };
-            var n5 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("n5"), };
-            var n6 = new TestCompositeDataCookerReference { Path = DataCookerPath.ForComposite("n6"), };
+            var r0 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r0"), };
+            var r1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("r1"), };
+            var n1 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("n1"), };
+            var n2 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("n2"), };
+            var n3 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("n3"), };
+            var n4 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("n4"), };
+            var n5 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("n5"), };
+            var n6 = new TestRuntimeCompositeCookerReference { Path = DataCookerPath.ForComposite("n6"), };
 
             r0.requiredDataCookers.Add(n1.Path);
             r0.requiredDataCookers.Add(n2.Path);
@@ -66,7 +66,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             n2.requiredDataCookers.Add(n6.Path);
             n2.requiredDataCookers.Add(n4.Path);
 
-            var catalog = new TestPluginCatalog { IsLoaded = true, };
+            var catalog = new TestProcessingSourceCatalog { IsLoaded = true, };
 
             var repo = new DataExtensionRepository();
             repo.TryAddReference(r0);

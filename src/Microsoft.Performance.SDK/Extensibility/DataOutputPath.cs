@@ -11,66 +11,7 @@ namespace Microsoft.Performance.SDK.Extensibility
     /// </summary>
     public struct DataOutputPath
     {
-        /// <summary>
-        ///     Describes the format of a data output path.
-        /// </summary>
-        [Obsolete("Fully qualified data output paths will no longer be supported in SDK v1.0.0")]
-        public static string Format => "[DataCookerPath]/OutputId";
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="DataOutputPath"/>
-        ///     with the given path.
-        /// </summary>
-        /// <param name="path">
-        ///     Well formatted data output path.
-        /// </param>
-        /// <returns>
-        ///     DataOutputPath object which represents the provided string path.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. Please use ForSource or ForComposite.")]
-        public static DataOutputPath Create(
-            string path)
-        {
-            Guard.NotNullOrWhiteSpace(path, nameof(path));
-
-            var success = TryGetConstituents(path, out var sourceId, out var cookerId, out var outputId);
-            if (!success)
-            {
-                throw new ArgumentException("Invalid data output path", nameof(path));
-            }
-
-            return Create(sourceId, cookerId, outputId);
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="DataOutputPath"/>
-        ///     struct with the given source parser ID, data cooker ID, and
-        ///     output ID.
-        /// </summary>
-        /// <param name="sourceParserId">
-        ///     Source parser Id.
-        /// </param>
-        /// <param name="dataCookerId">
-        ///     Data cooker Id.
-        /// </param>
-        /// <param name="dataOutputId">
-        ///     Data output Id.
-        /// </param>
-        /// <returns>
-        ///     DataOutputPath object combined from the given parameters.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. Please use ForSource or ForComposite.")]
-        public static DataOutputPath Create(
-            string sourceParserId,
-            string dataCookerId,
-            string dataOutputId)
-        {
-            Guard.NotNullOrWhiteSpace(dataOutputId, nameof(dataOutputId));
-
-            var dataCookerPath = new DataCookerPath(sourceParserId, dataCookerId);
-
-            return new DataOutputPath(dataCookerPath, dataOutputId);
-        }
+        private static readonly string Separator = "/";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataOutputPath"/>
@@ -160,9 +101,9 @@ namespace Microsoft.Performance.SDK.Extensibility
         {
             Guard.NotNullOrWhiteSpace(outputId, nameof(outputId));
 
-            if (outputId.Contains("/"))
+            if (outputId.Contains(Separator))
             {
-                throw new ArgumentException("This value may not contain a '/'.", nameof(outputId));
+                throw new ArgumentException($"This value may not contain a '{Separator}'.", nameof(outputId));
             }
 
             this.CookerPath = cookerPath;
@@ -193,205 +134,10 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </summary>
         public string DataCookerId => CookerPath.DataCookerId;
 
-        /// <summary>
-        ///     The complete path to the data output.
-        /// </summary>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public string Path => this.CookerPath.CookerPath + "/" + this.OutputId;
-
-        /// <summary>
-        ///     Generates a data cooker path given a source parser Id and a data cooker Id.
-        /// </summary>
-        /// <param name="sourceParserId">
-        ///     Source parser Id.
-        /// </param>
-        /// <param name="dataCookerId">
-        ///     Data cooker Id.
-        /// </param>
-        /// <param name="dataOutputId">
-        ///     Data output identifier.
-        /// </param>
-        /// <returns>
-        ///     The path.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static string Combine(string sourceParserId, string dataCookerId, string dataOutputId)
-        {
-            Guard.NotNullOrWhiteSpace(dataOutputId, nameof(dataOutputId));
-
-            return DataCookerPath.Create(sourceParserId, dataCookerId) + "/" + dataOutputId;
-        }
-
-        /// <summary>
-        ///     Returns the source parser Id from a data output path.
-        /// </summary>
-        /// <param name="dataOutputPath">
-        ///     Data output path.
-        /// </param>
-        /// <returns>
-        ///     Source parser Id.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static string GetSourceId(string dataOutputPath)
-        {
-            Guard.NotNullOrWhiteSpace(dataOutputPath, nameof(dataOutputPath));
-
-            var tokens = SplitPath(dataOutputPath);
-            if (tokens != null)
-            {
-                return tokens[0];
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        ///     Returns the data cooker Id from a data output path.
-        /// </summary>
-        /// <param name="dataOutputPath">
-        ///     Data output path.
-        /// </param>
-        /// <returns>
-        ///     Data cooker Id.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static string GetDataCookerId(string dataOutputPath)
-        {
-            Guard.NotNullOrWhiteSpace(dataOutputPath, nameof(dataOutputPath));
-
-            var tokens = SplitPath(dataOutputPath);
-            if (tokens != null)
-            {
-                return tokens[1];
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        ///     Returns the data output Id from a data output path.
-        /// </summary>
-        /// <param name="dataOutputPath">
-        ///     Data output path.
-        /// </param>
-        /// <returns>
-        ///     Data output Id.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static string GetDataOutputId(string dataOutputPath)
-        {
-            Guard.NotNullOrWhiteSpace(dataOutputPath, nameof(dataOutputPath));
-
-            var tokens = SplitPath(dataOutputPath);
-            if (tokens != null)
-            {
-                return tokens[2];
-            }
-
-            return string.Empty;
-        }
-
-        /// <summary>
-        ///     Returns the data cooker path from a data output path.
-        /// </summary>
-        /// <param name="dataOutputPath">
-        ///     Data output path.
-        /// </param>
-        /// <returns>
-        ///     Data cooker path.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static DataCookerPath GetDataCookerPath(string dataOutputPath)
-        {
-            Guard.NotNullOrWhiteSpace(dataOutputPath, nameof(dataOutputPath));
-
-            var tokens = SplitPath(dataOutputPath);
-            if (tokens != null)
-            {
-                return DataCookerPath.ForSource(tokens[0], tokens[1]);
-            }
-
-            throw new ArgumentException("Not a valid data output path.", nameof(dataOutputPath));
-        }
-
-        /// <summary>
-        ///     Splits a data output path into individual identifiers.
-        /// </summary>
-        /// <param name="dataOutputPath">
-        ///     Data output path.
-        /// </param>
-        /// <param name="sourceParserId">
-        ///     Source parser identifier.
-        /// </param>
-        /// <param name="dataCookerId">
-        ///     Data cooker identifier.
-        /// </param>
-        /// <param name="dataOutputId">
-        ///     Data output identifier.
-        /// </param>
-        /// <returns>
-        ///     true if the path was parsed; false otherwise.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static bool TryGetConstituents(
-            string dataOutputPath,
-            out string sourceParserId,
-            out string dataCookerId,
-            out string dataOutputId)
-        {
-            sourceParserId = string.Empty;
-            dataCookerId = string.Empty;
-            dataOutputId = string.Empty;
-
-            var tokens = SplitPath(dataOutputPath);
-            if (tokens != null)
-            {
-                sourceParserId = tokens[0];
-                dataCookerId = tokens[1];
-                dataOutputId = tokens[2];
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        ///     Determines if a data output path has a proper form.
-        /// </summary>
-        /// <param name="dataOutputPath">
-        ///     Data output path.
-        /// </param>
-        /// <returns>
-        ///     True for a well formed path, false otherwise.
-        /// </returns>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        public static bool IsWellFormed(string dataOutputPath)
-        {
-            if (string.IsNullOrWhiteSpace(dataOutputPath))
-            {
-                return false;
-            }
-
-            return SplitPath(dataOutputPath) != null;
-        }
-
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.Path;
-        }
-
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1")]
-        private static string[] SplitPath(string outputPath)
-        {
-            var tokens = outputPath.Split('/');
-            if (tokens.Length == 3)
-            {
-                return tokens;
-            }
-
-            return null;
+            return this.CookerPath.CookerPath + Separator + this.OutputId;
         }
     }
 }

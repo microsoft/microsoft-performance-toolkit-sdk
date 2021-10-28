@@ -26,29 +26,34 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
     {
         private readonly DataRetrievalCache dataRetrievalCache = new DataRetrievalCache();
 
+        private readonly ICookedDataRetrieval sourceCookerData;
+        private readonly ICompositeCookerRepository compositeCookers;
+        private readonly IDataExtensionRepository dataExtensionRepository;
+
         /// <summary>
-        ///     Creates an instance.
+        ///     Initialize an instance of this class.
         /// </summary>
         /// <param name="sourceCookerData">
-        ///     Provides access to source data cooker output.
+        ///     Provides access to source cooker data.
+        /// </param>
+        /// <param name="compositeCookers">
+        ///     Provides access to composite cookers.
         /// </param>
         /// <param name="dataExtensionRepository">
-        ///     Provides a way to generate data extensions other than source data cookers.
+        ///     Provides access to extension references and extension tables.
         /// </param>
         public DataExtensionRetrievalFactory(
             ICookedDataRetrieval sourceCookerData,
+            ICompositeCookerRepository compositeCookers,
             IDataExtensionRepository dataExtensionRepository)
         {
             Guard.NotNull(sourceCookerData, nameof(sourceCookerData));
+            Guard.NotNull(compositeCookers, nameof(compositeCookers));
             Guard.NotNull(dataExtensionRepository, nameof(dataExtensionRepository));
-
-            this.CookedSourceData = sourceCookerData;
-            this.DataExtensionRepository = dataExtensionRepository;
+            this.sourceCookerData = sourceCookerData;
+            this.compositeCookers = compositeCookers;
+            this.dataExtensionRepository = dataExtensionRepository;
         }
-
-        internal ICookedDataRetrieval CookedSourceData { get; }
-
-        internal IDataExtensionRepository DataExtensionRepository { get; }
 
         /// <summary>
         ///     A composite cooker has access to source data cookers, as well as other composite data cookers.
@@ -68,7 +73,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 return filteredData;
             }
 
-            var compositeDataCookerReference = this.DataExtensionRepository.GetCompositeDataCookerReference(dataCookerPath);
+            var compositeDataCookerReference = this.dataExtensionRepository.GetCompositeDataCookerReference(dataCookerPath);
 
             if (compositeDataCookerReference == null)
             {
@@ -80,50 +85,64 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 throw new ArgumentException("Data retrieval requested for data cooker that is not available.");
             }
 
-            filteredData = new FilteredDataRetrieval(this, compositeDataCookerReference.DependencyReferences);
+            filteredData = new FilteredDataRetrieval(
+                this.sourceCookerData,
+                this.compositeCookers,
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                //this.dataExtensionRepository,
+                //this.CreateDataRetrievalForDataProcessor,
+                compositeDataCookerReference.DependencyReferences);
 
             this.dataRetrievalCache.AddCompositeDataCookerFilteredData(dataCookerPath, filteredData);
 
             return filteredData;
         }
 
-        /// <summary>
-        ///     A data processor has access to source data cookers, composite data cookers, as well as other
-        ///     data processors.
-        /// </summary>
-        /// <param name="dataProcessorId">
-        ///     Identifies the data processor.
-        /// </param>
-        /// <returns>
-        ///     A set of data uniquely tailored to this data processor.
-        /// </returns>
-        public IDataExtensionRetrieval CreateDataRetrievalForDataProcessor(
-            DataProcessorId dataProcessorId)
-        {
-            var filteredData = this.dataRetrievalCache.GetDataProcessorFilteredData(dataProcessorId);
-            if (filteredData != null)
-            {
-                return filteredData;
-            }
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     A data processor has access to source data cookers, composite data cookers, as well as other
+        ///////     data processors.
+        /////// </summary>
+        /////// <param name="dataProcessorId">
+        ///////     Identifies the data processor.
+        /////// </param>
+        /////// <returns>
+        ///////     A set of data uniquely tailored to this data processor.
+        /////// </returns>
+        ////public IDataExtensionRetrieval CreateDataRetrievalForDataProcessor(
+        ////    DataProcessorId dataProcessorId)
+        ////{
+        ////    var filteredData = this.dataRetrievalCache.GetDataProcessorFilteredData(dataProcessorId);
+        ////    if (filteredData != null)
+        ////    {
+        ////        return filteredData;
+        ////    }
 
-            var dataProcessorReference = this.DataExtensionRepository.GetDataProcessorReference(dataProcessorId);
+        ////    var dataProcessorReference = this.dataExtensionRepository.GetDataProcessorReference(dataProcessorId);
 
-            if (dataProcessorReference == null)
-            {
-                throw new ArgumentException("Data retrieval requested for data processor not found in repository.");
-            }
+        ////    if (dataProcessorReference == null)
+        ////    {
+        ////        throw new ArgumentException("Data retrieval requested for data processor not found in repository.");
+        ////    }
 
-            if (dataProcessorReference.Availability != DataExtensionAvailability.Available)
-            {
-                throw new ArgumentException("Data retrieval requested for data processor that is not available.");
-            }
+        ////    if (dataProcessorReference.Availability != DataExtensionAvailability.Available)
+        ////    {
+        ////        throw new ArgumentException("Data retrieval requested for data processor that is not available.");
+        ////    }
 
-            filteredData = new FilteredDataRetrieval(this, dataProcessorReference.DependencyReferences);
+        ////    filteredData = new FilteredDataRetrieval(
+        ////        this.sourceCookerData,
+        ////        this.compositeCookers,
+        ////        this.dataExtensionRepository,
+        ////        this.CreateDataRetrievalForDataProcessor,
+        ////        dataProcessorReference.DependencyReferences);
 
-            this.dataRetrievalCache.AddDataProcessorFilteredData(dataProcessorId, filteredData);
+        ////    this.dataRetrievalCache.AddDataProcessorFilteredData(dataProcessorId, filteredData);
 
-            return filteredData;
-        }
+        ////    return filteredData;
+        ////}
 
         /// <summary>
         ///     A table has access to source data cookers, composite data cookers, and data processors.
@@ -148,7 +167,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 return filteredData;
             }
 
-            if (!this.DataExtensionRepository.TablesById.TryGetValue(tableId, out var tableExtensionReference))
+            if (!this.dataExtensionRepository.TablesById.TryGetValue(tableId, out var tableExtensionReference))
             {
                 throw new ArgumentException(
                     $"The table Id reference was not found in the data extension repository.",
@@ -173,7 +192,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <returns>
         ///     A set of data uniquely tailored to this table.
         /// </returns>
-        public IDataExtensionRetrieval CreateDataRetrievalForTable(
+        internal IDataExtensionRetrieval CreateDataRetrievalForTable(
             ITableExtensionReference tableExtensionReference)
         {
             Guard.NotNull(tableExtensionReference, nameof(tableExtensionReference));
@@ -183,7 +202,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 throw new ArgumentException("Data retrieval requested for table that is not available.");
             }
 
-            var filteredData = new FilteredDataRetrieval(this, tableExtensionReference.DependencyReferences);
+            var filteredData = new FilteredDataRetrieval(
+                this.sourceCookerData,
+                this.compositeCookers,
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                //this.dataExtensionRepository,
+                //this.CreateDataRetrievalForDataProcessor,
+                tableExtensionReference.DependencyReferences);
 
             return filteredData;
         }
