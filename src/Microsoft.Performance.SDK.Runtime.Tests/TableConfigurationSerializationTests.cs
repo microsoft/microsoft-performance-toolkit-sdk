@@ -112,64 +112,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void PreV1_ValidValuesSerialize()
         {
-            Func<string> testStr = () => Guid.NewGuid().ToString();
+            var preV1config = BuildPreV1TableConfig();
 
-            var preV1config = new DTO.PreV1.TableConfiguration()
-            {
-                Name = testStr(),
-                Layout = DTO.PreV1.TableLayoutStyle.GraphAndTable,
-                ChartType = DTO.Enums.ChartType.Flame,
-                AggregationOverTime = DTO.Enums.AggregationOverTime.Current,
-                InitialFilterQuery = testStr(),
-                InitialExpansionQuery = testStr(),
-                InitialSelectionQuery = testStr(),
-                InitialFilterShouldKeep = true,
-                GraphFilterTopValue = -1,
-                GraphFilterThresholdValue = -1,
-                GraphFilterColumnName = testStr(),
-                GraphFilterColumnGuid = Guid.NewGuid(),
-                HelpText = testStr(),
-                HighlightEntries = Enumerable.Repeat(new DTO.HighlightEntry()
-                {
-                    DurationColumnGuid = Guid.NewGuid(),
-                    DurationColumnName = testStr(),
-                    EndTimeColumnGuid = Guid.NewGuid(),
-                    EndTimeColumnName = testStr(),
-                    HighlightColor = System.Drawing.Color.Red,
-                    HighlightQuery = testStr(),
-                    StartTimeColumnGuid = Guid.NewGuid(),
-                    StartTimeColumnName = testStr()
-                }, 3).ToArray(),
-                Columns = Enumerable.Repeat(new DTO.ColumnConfiguration()
-                {
-                    Metadata = new DTO.ColumnMetadata()
-                    {
-                        Name = testStr(),
-                        Guid = Guid.NewGuid(),
-                        Description = testStr(),
-                        ShortDescription = testStr()
-                    },
-                    DisplayHints = new DTO.UIHints()
-                    {
-                        AggregationMode = DTO.Enums.AggregationMode.Count,
-                        CellFormat = testStr(),
-                        IsVisible = true,
-                        SortOrder = DTO.Enums.SortOrder.Ascending,
-                        SortPriority = -1,
-                        TextAlignment = DTO.Enums.TextAlignment.Center,
-                        Width = -1
-                    }
-                }, 3).ToArray(),
-                ColumnRoles =
-                new Dictionary<DTO.PreV1.ColumnRole, ColumnRoleEntry>(
-                    Enum.GetValues(typeof(DTO.PreV1.ColumnRole))
-                        .Cast<DTO.PreV1.ColumnRole>()
-                        .Where(role => role != DTO.PreV1.ColumnRole.CountColumnMetadata)
-                        .Select(role => new KeyValuePair<DTO.PreV1.ColumnRole, ColumnRoleEntry>(role, new ColumnRoleEntry() { ColumnName = testStr(), ColumnGuid = Guid.NewGuid() })))
-
-            };
-
-            var prebuiltConfigs = new DTO.PreV1.PrebuiltConfigurations() { Tables = new[] { new DTO.PreV1.TableConfigurations() { Configurations = new[] { preV1config }, DefaultConfigurationName = testStr(), TableId = Guid.NewGuid() } } };
+            var prebuiltConfigs = new DTO.PreV1.PrebuiltConfigurations() { Tables = new[] { new DTO.PreV1.TableConfigurations() { Configurations = new[] { preV1config }, DefaultConfigurationName =preV1config.Name, TableId = Guid.NewGuid() } } };
 
             using (var stream = new MemoryStream())
             {
@@ -293,6 +238,66 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                     Assert.AreEqual(newRole.Value, newConfigPair.Key);
                 }
             }
+        }
+
+        private DTO.PreV1.TableConfiguration BuildPreV1TableConfig()
+        {
+            Func<string> testStr = () => Guid.NewGuid().ToString();
+
+            return new DTO.PreV1.TableConfiguration()
+            {
+                Name = testStr(),
+                Layout = DTO.PreV1.TableLayoutStyle.GraphAndTable,
+                ChartType = DTO.Enums.ChartType.Flame,
+                AggregationOverTime = DTO.Enums.AggregationOverTime.Current,
+                InitialFilterQuery = testStr(),
+                InitialExpansionQuery = testStr(),
+                InitialSelectionQuery = testStr(),
+                InitialFilterShouldKeep = true,
+                GraphFilterTopValue = -1,
+                GraphFilterThresholdValue = -1,
+                GraphFilterColumnName = testStr(),
+                GraphFilterColumnGuid = Guid.NewGuid(),
+                HelpText = testStr(),
+                HighlightEntries = Enumerable.Repeat(new DTO.HighlightEntry()
+                {
+                    DurationColumnGuid = Guid.NewGuid(),
+                    DurationColumnName = testStr(),
+                    EndTimeColumnGuid = Guid.NewGuid(),
+                    EndTimeColumnName = testStr(),
+                    HighlightColor = System.Drawing.Color.Red,
+                    HighlightQuery = testStr(),
+                    StartTimeColumnGuid = Guid.NewGuid(),
+                    StartTimeColumnName = testStr()
+                }, 3).ToArray(),
+                Columns = Enumerable.Repeat(new DTO.ColumnConfiguration()
+                {
+                    Metadata = new DTO.ColumnMetadata()
+                    {
+                        Name = testStr(),
+                        Guid = Guid.NewGuid(),
+                        Description = testStr(),
+                        ShortDescription = testStr()
+                    },
+                    DisplayHints = new DTO.UIHints()
+                    {
+                        AggregationMode = DTO.Enums.AggregationMode.Count,
+                        CellFormat = testStr(),
+                        IsVisible = true,
+                        SortOrder = DTO.Enums.SortOrder.Ascending,
+                        SortPriority = -1,
+                        TextAlignment = DTO.Enums.TextAlignment.Center,
+                        Width = -1
+                    }
+                }, 3).ToArray(),
+                ColumnRoles =
+                new Dictionary<DTO.PreV1.ColumnRole, ColumnRoleEntry>(
+                    Enum.GetValues(typeof(DTO.PreV1.ColumnRole))
+                        .Cast<DTO.PreV1.ColumnRole>()
+                        .Where(role => role != DTO.PreV1.ColumnRole.CountColumnMetadata)
+                        .Select(role => new KeyValuePair<DTO.PreV1.ColumnRole, ColumnRoleEntry>(role, new ColumnRoleEntry() { ColumnName = testStr(), ColumnGuid = Guid.NewGuid() })))
+
+            };
         }
     }
 }
