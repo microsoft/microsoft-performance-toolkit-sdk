@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
-using System;
-using System.Diagnostics;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
 {
@@ -13,8 +13,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
     ///     References a table extension.
     /// </summary>
     internal class TableExtensionReference
-        : DataExtensionReference<TableExtensionReference>,
-          ITableExtensionReference
+        : DataExtensionReference,
+          ITableExtensionReference,
+          IEquatable<TableExtensionReference>
     {
         private static ISerializer tableConfigSerializer = new TableConfigurationsSerializer();
 
@@ -45,12 +46,12 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         }
 
         private TableExtensionReference(
-            Type type,
+            string tableName,
             TableDescriptor tableDescriptor,
             Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             Func<IDataExtensionRetrieval, bool> isDataAvailableFunc,
             bool isInternalTable)
-            : base(type)
+            : base(tableName)
         {
             Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
 
@@ -125,7 +126,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        internal bool IsInternalTable
+        public bool IsInternalTable
         {
             get
             {
@@ -183,6 +184,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
         ///     <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="candidateType"/> is <c>null</c>.
+        /// </exception>
         internal static bool TryCreateReference(
             Type candidateType,
             bool allowInternalTables,
@@ -195,43 +199,83 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             if (TableDescriptorFactory.TryCreate(
                     candidateType,
                     tableConfigSerializer,
-                    out var isInternalTable,
                     out var tableDescriptor,
                     out var tableBuildAction,
                     out var tableIsDataAvailableFunc))
             {
-                if (isInternalTable)
+                if (tableDescriptor.IsInternalTable)
                 {
                     if (!allowInternalTables)
                     {
                         return false;
                     }
-
-                    Debug.Assert(tableBuildAction != null);
                 }
 
-                var tableReference = new TableExtensionReference(
-                    candidateType,
-                    tableDescriptor,
-                    tableBuildAction,
-                    tableIsDataAvailableFunc,
-                    isInternalTable);
-
-                reference = tableReference;
+                try
+                {
+                    reference = CreateReference(
+                        tableDescriptor,
+                        tableBuildAction,
+                        tableIsDataAvailableFunc);
+                }
+                catch (Exception)
+                {
+                    Debug.Assert(false, "What threw in this method?");
+                }
             }
 
             return reference != null;
         }
 
-        /// <inheritdoc />
-        public override TableExtensionReference CloneT()
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ITableExtensionReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             must expose a valid <see cref="TableDescriptor"/>.
+        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ISerializer, out TableDescriptor)"/>
+        ///             for details on how a table is to expose a descriptor.
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The table's <see cref="Processing.TableDescriptor"/>.
+        /// </param>
+        /// <param name="tableBuildAction">
+        ///     The action used to build the table. May be <c>null</c>.
+        /// </param>
+        /// <param name="tableIsDataAvailableFunc">
+        ///     A function used to determine if the table has data. May be <c>null</c>.
+        /// </param>
+        /// <returns>
+        ///     The <see cref="ITableExtensionReference"/> for the given <see cref="Processing.TableDescriptor"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="tableDescriptor"/> is <c>null</c>.
+        /// </exception>
+        internal static ITableExtensionReference CreateReference(
+            TableDescriptor tableDescriptor,
+            Action<ITableBuilder, IDataExtensionRetrieval> tableBuildAction,
+            Func<IDataExtensionRetrieval, bool> tableIsDataAvailableFunc)
         {
-            this.ThrowIfDisposed();
-            return new TableExtensionReference(this);
+            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
+
+            var tableName = tableDescriptor.Type?.FullName
+                ?? tableDescriptor.Name + "{" + tableDescriptor.Guid.ToString() + "}";
+
+            return new TableExtensionReference(
+                tableName,
+                tableDescriptor,
+                tableBuildAction,
+                tableIsDataAvailableFunc,
+                tableDescriptor.IsInternalTable);
         }
 
         /// <inheritdoc />
-        public override bool Equals(TableExtensionReference other)
+        public bool Equals(TableExtensionReference other)
         {
             return base.Equals(other) &&
                    (this.TableDescriptor.Guid == other.TableDescriptor.Guid);

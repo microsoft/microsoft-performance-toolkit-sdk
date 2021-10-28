@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -16,14 +16,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
     ///     This class provides functionality for determining availability by examining availability of required data
     ///     extensions.
     /// </summary>
-    /// <typeparam name="TDerived">
-    ///     The type of class derived from this abstract class.
-    /// </typeparam>
-    internal abstract class DataExtensionReference<TDerived>
-        : AssemblyTypeReference<TDerived>,
-          IDataExtensionReference
-        where TDerived : DataExtensionReference<TDerived>
+    internal class DataExtensionReference
+        : IDataExtensionReference
     {
+        private readonly string name;
+
         private List<ErrorInfo> errors;
         private ReadOnlyCollection<ErrorInfo> errorsRO;
 
@@ -37,16 +34,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         private bool isDisposed = false;
 
         /// <summary>
-        ///     Constructor
+        ///     Initializes an instance of this class.
         /// </summary>
-        /// <param name="type">
-        ///     The data extension type.
+        /// <param name="name">
+        ///     A display name for the data extension.
         /// </param>
-        protected DataExtensionReference(Type type)
-            : base(type)
+        internal DataExtensionReference(string name)
         {
+            Debug.Assert(!string.IsNullOrWhiteSpace(name));
+
             this.errors = new List<ErrorInfo>();
             this.errorsRO = new ReadOnlyCollection<ErrorInfo>(this.errors);
+            this.name = name;
         }
 
         /// <summary>
@@ -58,8 +57,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
-        protected DataExtensionReference(DataExtensionReference<TDerived> other)
-            : base(other)
+        internal DataExtensionReference(DataExtensionReference other)
         {
             this.extensionDependencyState = null;
             if (other.extensionDependencyState != null)
@@ -69,6 +67,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 
             this.errors = new List<ErrorInfo>(other.errors);
             this.errorsRO = new ReadOnlyCollection<ErrorInfo>(this.errors);
+            this.name = other.name;
         }
 
         /// <inheritdoc />
@@ -85,9 +84,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         ///     Gets the name of this extension.
         ///     <para />
         ///     The name is a mechanism to identify the data extension when referencing it 
-        ///     in messages. This property defaults to the full name of the Type.
+        ///     in messages.
         /// </summary>
-        /// <exception cref="System.ObjectDisposedException">
+        /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
         public virtual string Name
@@ -95,7 +94,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             get
             {
                 this.ThrowIfDisposed();
-                return this.Type.FullName;
+                return this.name;
             }
         }
 
@@ -158,12 +157,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// </exception>
         public DataExtensionAvailability InitialAvailability
         {
+            // todo: it seems like this is only ever set to or compared to DataExtensionAvailability.Error
+            //       given this, should it just be made into a bool?
+
             get
             {
                 this.ThrowIfDisposed();
                 return this.initializeAvailability;
             }
-            protected set
+            internal set
             {
                 this.ThrowIfDisposed();
                 this.initializeAvailability = value;
@@ -216,7 +218,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         }
 
         /// <inheritdoc />
-        protected override void Dispose(bool disposing)
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <inheritdoc />
+        protected virtual void Dispose(bool disposing)
         {
             if (this.isDisposed)
             {
@@ -225,15 +235,16 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 
             if (disposing)
             {
-                this.errors = null;
-                this.errorsRO = null;
-                this.requiredDataCookers = null;
-                this.requiredDataProcessors = null;
-                this.extensionDependencyState = null;
+                // nothing here to dispose
             }
 
+            this.errors = null;
+            this.errorsRO = null;
+            this.requiredDataCookers = null;
+            this.requiredDataProcessors = null;
+            this.extensionDependencyState = null;
+
             this.isDisposed = true;
-            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -246,7 +257,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        protected void AddRequiredDataCooker(DataCookerPath cookerPath)
+        internal void AddRequiredDataCooker(DataCookerPath cookerPath)
         {
             this.ThrowIfDisposed();
             this.requiredDataCookers.Add(cookerPath);
@@ -262,7 +273,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        protected void AddRequiredDataProcessor(DataProcessorId processorId)
+        internal void AddRequiredDataProcessor(DataProcessorId processorId)
         {
             this.ThrowIfDisposed();
             this.requiredDataProcessors.Add(processorId);
@@ -279,7 +290,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        protected void AddError(string error)
+        internal void AddError(string error)
         {
             this.AddError(
                 new ErrorInfo(
@@ -305,12 +316,26 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <exception cref="System.ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        protected void AddError(ErrorInfo error)
+        internal void AddError(ErrorInfo error)
         {
             Debug.Assert(error != null);
 
             this.ThrowIfDisposed();
             this.errors.Add(error);
+        }
+
+        /// <summary>
+        ///     Throws an exception if this instance has been disposed.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">
+        ///     This instance is disposed.
+        /// </exception>
+        protected void ThrowIfDisposed()
+        {
+            if (this.isDisposed)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
         }
     }
 }

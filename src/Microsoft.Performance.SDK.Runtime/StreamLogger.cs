@@ -68,20 +68,40 @@ namespace Microsoft.Performance.SDK.Runtime
             string fmt,
             params object[] args)
         {
-            var message = new StringBuilder();
-            message.Append("[").Append(type.FullName).Append("]: ")
-                .AppendFormat("{0:G}", level).Append(" - ")
-                .AppendFormat(fmt, args);
-            if (e != null)
-            {
-                // todo: inner exceptions
-                message.AppendLine()
-                    .Append("Exception detail: ").Append(e.GetType()).AppendLine()
-                    .Append("    Message: ").Append(e.Message)
-                    .Append("    Stack: ").Append(e.StackTrace);
-            }
 
-            this.stream.WriteLine(message);
+            try
+            {
+                var message = new StringBuilder();
+                message.Append("[").Append(type.FullName).Append("]: ")
+                    .AppendFormat("{0:G}", level).Append(" - ");
+
+                if (!string.IsNullOrWhiteSpace(fmt))
+                {
+                    if (args != null && args.Length > 0)
+                    {
+                        // minimize chance of FormatException by only formatting when there are arguments
+                        message.AppendFormat(fmt, args);
+                    }
+                    else
+                    {
+                        message.Append(fmt);
+                    }
+                }
+                if (e != null)
+                {
+                    // todo: inner exceptions
+                    message.AppendLine()
+                        .Append("Exception detail: ").Append(e.GetType().Name).AppendLine()
+                        .Append("    Message: ").Append(e.Message)
+                        .Append("    Stack: ").Append(e.StackTrace);
+                }
+
+                this.stream.WriteLine(message);
+            }
+            catch (FormatException formatException)
+            {
+                this.stream.WriteLine("Unable to log message: {0}", formatException);
+            }
         }
     }
 }

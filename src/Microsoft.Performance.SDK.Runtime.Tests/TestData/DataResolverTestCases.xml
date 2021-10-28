@@ -174,7 +174,7 @@
       </Expected>
     </TestCase>
 
-    <TestCase Debug="True"
+    <TestCase Debug="False"
               Description="Multiple Processing Sources each supporting a Data Source."
               Id="6">
       <Parameters>

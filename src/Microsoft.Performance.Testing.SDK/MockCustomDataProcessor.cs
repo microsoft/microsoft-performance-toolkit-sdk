@@ -66,8 +66,8 @@ namespace Microsoft.Performance.Testing.SDK
 
         public Dictionary<TableDescriptor, Exception> EnableFailures { get; }
         public List<TableDescriptor> EnableTableCalls { get; }
-        public void EnableTable(
-            TableDescriptor tableDescriptor)
+
+        public void EnableTable(TableDescriptor tableDescriptor)
         {
             this.EnableTableCalls.Add(tableDescriptor);
 
@@ -75,6 +75,22 @@ namespace Microsoft.Performance.Testing.SDK
             {
                 throw e;
             }
+        }
+
+
+        public bool TryEnableTable(
+            TableDescriptor tableDescriptor)
+        {
+            try
+            {
+                EnableTable(tableDescriptor);
+                return true;
+            }
+            catch (Exception)
+            {
+            }
+
+            return false;
         }
 
         public Exception DataSourceInfoFailure { get; set; }
@@ -119,6 +135,11 @@ namespace Microsoft.Performance.Testing.SDK
         public ITableService CreateTableService(TableDescriptor table)
         {
             return null;
+        }
+
+        public IEnumerable<TableDescriptor> GetEnabledTables()
+        {
+            throw new NotImplementedException();
         }
     }
 }

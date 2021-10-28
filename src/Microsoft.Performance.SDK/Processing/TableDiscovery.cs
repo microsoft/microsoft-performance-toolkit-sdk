@@ -161,9 +161,13 @@ namespace Microsoft.Performance.SDK.Processing
             var s = new HashSet<DiscoveredTable>(DiscoveredTableEqualityComparer.ByTableDescriptor);
             foreach (var t in assemblies.SelectMany(x => x.GetTypes()).Where(typeFilter))
             {
-                if (TableDescriptorFactory.TryCreate(t, tableConfigSerializer, out var isInternal, out var td, out var buildTable))
+                if (TableDescriptorFactory.TryCreate(
+                    t,
+                    tableConfigSerializer,
+                    out TableDescriptor td,
+                    out Action<ITableBuilder, Extensibility.IDataExtensionRetrieval> buildTable))
                 {
-                    s.Add(new DiscoveredTable(td, buildTable, isInternal));
+                    s.Add(new DiscoveredTable(td, buildTable));
                 }
             }
 

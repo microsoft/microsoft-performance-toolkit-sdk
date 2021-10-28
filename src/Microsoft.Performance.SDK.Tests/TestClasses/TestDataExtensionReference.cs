@@ -8,9 +8,9 @@ using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
-    internal abstract class TestDataExtensionReference
+    public abstract class TestDataExtensionReference
         : IDataExtensionReference
     {
         private readonly bool useDataExtensionDependencyState;
@@ -23,14 +23,27 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         protected TestDataExtensionReference(bool useDataExtensionDependencyState)
         {
             this.useDataExtensionDependencyState = useDataExtensionDependencyState;
-            this.DependencyState = new DataExtensionDependencyState(this);
+            DependencyState = new TestDataExtensionDependencyState(this);
+        }
+
+        protected TestDataExtensionReference(Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+            : this(true, createDependencyState)
+        {
+        }
+
+        protected TestDataExtensionReference(
+            bool useDataExtensionDependencyState,
+            Func<IDataExtensionDependencyTarget, IDataExtensionDependencyState> createDependencyState)
+        {
+            this.useDataExtensionDependencyState = useDataExtensionDependencyState;
+            DependencyState = createDependencyState(this);
         }
 
         public HashSet<DataCookerPath> requiredDataCookers = new HashSet<DataCookerPath>();
-        public virtual IReadOnlyCollection<DataCookerPath> RequiredDataCookers => this.requiredDataCookers;
+        public virtual IReadOnlyCollection<DataCookerPath> RequiredDataCookers => requiredDataCookers;
 
         public HashSet<DataProcessorId> requiredDataProcessors = new HashSet<DataProcessorId>();
-        public virtual IReadOnlyCollection<DataProcessorId> RequiredDataProcessors => this.requiredDataProcessors;
+        public virtual IReadOnlyCollection<DataProcessorId> RequiredDataProcessors => requiredDataProcessors;
 
         public virtual string Name { get; }
 
@@ -41,7 +54,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             IDataExtensionDependencyStateSupport dependencyStateSupport,
             IDataExtensionReference requiredDataExtension)
         {
-            this.performAdditionalDataExtensionValidation?.Invoke(dependencyStateSupport, requiredDataExtension);
+            performAdditionalDataExtensionValidation?.Invoke(dependencyStateSupport, requiredDataExtension);
         }
 
         public DataExtensionAvailability availability = DataExtensionAvailability.Undetermined;
@@ -49,13 +62,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
             get
             {
-                if (this.useDataExtensionDependencyState &&
-                    this.UseDependencyState())
+                if (useDataExtensionDependencyState &&
+                    UseDependencyState())
                 {
-                    return this.DependencyState.Availability;
+                    return DependencyState.Availability;
                 }
 
-                return this.availability;
+                return availability;
             }
         }
 
@@ -64,12 +77,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         {
             get
             {
-                if (this.UseDependencyState())
+                if (UseDependencyState())
                 {
-                    return this.DependencyState.DependencyReferences;
+                    return DependencyState.DependencyReferences;
                 }
 
-                return this.dependencyRetrieval;
+                return dependencyRetrieval;
             }
         }
 
@@ -78,13 +91,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public void ProcessDependencies(
             IDataExtensionRepository availableDataExtensions)
         {
-            if (this.processDependencies != null)
+            if (processDependencies != null)
             {
-                this.processDependencies.Invoke(availableDataExtensions);
+                processDependencies.Invoke(availableDataExtensions);
             }
-            else if (this.UseDependencyState())
+            else if (UseDependencyState())
             {
-                this.DependencyState.ProcessDependencies(availableDataExtensions);
+                DependencyState.ProcessDependencies(availableDataExtensions);
             }
         }
 
@@ -94,24 +107,24 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
         public override string ToString()
         {
-            return this.Name;
+            return Name;
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            ++this.DisposeCalls;
+            ++DisposeCalls;
         }
 
         protected bool UseDependencyState()
         {
-            return this.useDataExtensionDependencyState &&
-                this.DependencyState != null;
+            return useDataExtensionDependencyState &&
+                DependencyState != null;
         }
     }
 }

@@ -2,8 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Extensibility.Exceptions;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -16,7 +19,7 @@ namespace Microsoft.Performance.SDK.Processing
     public interface ICustomDataProcessor
     {
         /// <summary>
-        ///     Instructs the processor to that a table is being
+        ///     Instructs the processor that a table is being
         ///     requested by the user. This means that the processor
         ///     should do whatever is necessary in <see cref="ProcessAsync(IProgress{int}, CancellationToken)"/>
         ///     to make sure the table can be used.
@@ -27,7 +30,31 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The <see cref="TableDescriptor"/> that instructs the
         ///     processor as to which table is being requested.
         /// </param>
+        /// <exception cref="ExtensionTableException">
+        ///     The requested table cannot be enabled.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     The <see cref="IDataProcessorExtensibilitySupport"/> has already been finalized.
+        /// </exception>
+
         void EnableTable(TableDescriptor tableDescriptor);
+
+        /// <summary>
+        ///     Instructs the processor that a table is being
+        ///     requested by the user. This means that the processor
+        ///     should do whatever is necessary in ProcessAsync to
+        ///     make sure the table can be used.
+        ///     <para />
+        ///     This method must be thread-safe.
+        /// </summary>
+        /// <param name="tableDescriptor">
+        ///     The <see cref="TableDescriptor"/> that instructs the
+        ///     processor as to which table is being requested.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the table was enabled; <c>false</c> otherwise.
+        /// </returns>
+        bool TryEnableTable(TableDescriptor tableDescriptor);
 
         /// <summary>
         ///     Asynchronously processes the data source.
@@ -110,5 +137,13 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <c>false</c> otherwise.
         /// </returns>
         bool DoesTableHaveData(TableDescriptor table);
+
+        /// <summary>
+        ///     Gets the tables that have been enabled on this processor.
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="TableDescriptor"/> of tables that have been enabled on this processor.
+        /// </returns>
+        IEnumerable<TableDescriptor> GetEnabledTables();
     }
 }

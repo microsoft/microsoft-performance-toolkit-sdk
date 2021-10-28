@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Extensibility
 {
@@ -28,6 +29,11 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     and <see cref="ForComposite(string)"/>.
         /// </summary>
         private static readonly string Separator = "/";
+
+        /// <summary>
+        ///     This is used by data cooker paths to compare elements.
+        /// </summary>
+        public static IEqualityComparer<string> EqualityComparer = StringComparer.Ordinal;
 
         private DataCookerPath(string dataCookerId)
             : this(EmptySourceParserId, dataCookerId)
@@ -192,7 +198,7 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// <inheritdoc />
         public bool Equals(DataCookerPath other)
         {
-            return string.Equals(this.CookerPath, other.CookerPath);
+            return DataCookerPath.EqualityComparer.Equals(this.CookerPath, other.CookerPath);
         }
 
         /// <inheritdoc />

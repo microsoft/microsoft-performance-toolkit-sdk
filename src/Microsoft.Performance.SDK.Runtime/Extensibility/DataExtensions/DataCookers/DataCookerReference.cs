@@ -9,13 +9,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
 {
     /// <summary>
     ///     This class adds data cooker specific functionality on top of the base
-    ///     <see cref="DataExtensionReference{TDerived}"/>.
+    ///     <see cref="TypeBoundDataExtensionReference{TDerived}"/>.
     /// </summary>
     /// <typeparam name="TDerived">
     ///     The class deriving from this type.
     /// </typeparam>
     internal abstract class DataCookerReference<TDerived>
-        : DataExtensionReference<TDerived>
+        : TypeBoundDataExtensionReference<TDerived>
           where TDerived : DataCookerReference<TDerived>
     {
         private DataCookerPath path;
@@ -48,7 +48,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         /// <exception cref="System.ObjectDisposedException">
         ///     <paramref name="other"/> is disposed.
         /// </exception>
-        protected DataCookerReference(DataExtensionReference<TDerived> other)
+        protected DataCookerReference(TypeBoundDataExtensionReference<TDerived> other)
             : base(other)
         {
         }
@@ -158,7 +158,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             {
                 this.AddError($"Unable to create an instance of {this.Type}");
                 this.InitialAvailability = DataExtensionAvailability.Error;
-                return;
             }
 
             if (string.IsNullOrWhiteSpace(instance.Path.DataCookerId))
@@ -203,23 +202,26 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 }
             }
 
-            if (descriptor is IDataCookerDependent cookerRequirements)
+            if (this.InitialAvailability != DataExtensionAvailability.Error)
             {
-                foreach (var dataCookerPath in cookerRequirements.RequiredDataCookers)
+                if (descriptor is IDataCookerDependent cookerRequirements)
                 {
-                    this.AddRequiredDataCooker(dataCookerPath);
+                    foreach (var dataCookerPath in cookerRequirements.RequiredDataCookers)
+                    {
+                        this.AddRequiredDataCooker(dataCookerPath);
+                    }
                 }
-            }
 
-            // TODO: __SDK_DP__
-            // Redesign Data Processor API
-            ////if (descriptor is IDataProcessorDependent processorRequirements)
-            ////{
-            ////    foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
-            ////    {
-            ////        this.AddRequiredDataProcessor(dataProcessorId);
-            ////    }
-            ////}
+                // TODO: __SDK_DP__
+                // Redesign Data Processor API
+                //// if (descriptor is IDataProcessorDependent processorRequirements)
+                //// {
+                ////     foreach (var dataProcessorId in processorRequirements.RequiredDataProcessors)
+                ////     {
+                ////         this.AddRequiredDataProcessor(dataProcessorId);
+                ////     }
+                //// }
+            }
         }
 
         /// <inheritdoc />

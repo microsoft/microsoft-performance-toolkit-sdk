@@ -3,7 +3,7 @@
 
 using Microsoft.Performance.SDK.Extensibility;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes
+namespace Microsoft.Performance.SDK.Tests.DataTypes
 {
     public class TestRecord
         : IKeyedDataType<int>
@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes
 
         public int CompareTo(int otherKey)
         {
-            return this.Key.CompareTo(otherKey);
+            return Key.CompareTo(otherKey);
         }
 
         public int GetKey()

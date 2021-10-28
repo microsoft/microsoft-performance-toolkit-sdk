@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Performance.SDK.Extensibility;
 
@@ -54,7 +55,7 @@ namespace Microsoft.Performance.SDK.Processing
             ISerializer tableConfigSerializer,
             out TableDescriptor tableDescriptor)
         {
-            return TryCreate(type, tableConfigSerializer, out bool internalTable, out tableDescriptor, out var buildTableAction);
+            return TryCreate(type, tableConfigSerializer, out tableDescriptor, out var buildTableAction);
         }
 
         /// <summary>
@@ -82,9 +83,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableConfigSerializer">
         ///     The serializer object that is used to deserialize the 
         ///     pre-built table configuration JSON files.
-        /// </param>
-        /// <param name="isInternalTable">
-        ///     This table is private to the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="tableDescriptor">
         ///     If <paramref name="type"/> is a valid table type, then this is
@@ -101,11 +99,10 @@ namespace Microsoft.Performance.SDK.Processing
         public static bool TryCreate(
             Type type,
             ISerializer tableConfigSerializer,
-            out bool isInternalTable,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction)
         {
-            return TryCreate(type, tableConfigSerializer, out isInternalTable, out tableDescriptor, out buildTableAction, out var isDataAvailableFunc);
+            return TryCreate(type, tableConfigSerializer, out tableDescriptor, out buildTableAction, out var isDataAvailableFunc);
         }
 
         /// <summary>
@@ -133,9 +130,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableConfigSerializer">
         ///     The serializer object that is used to deserialize the 
         ///     pre-built table configuration JSON files.
-        /// </param>
-        /// <param name="isInternalTable">
-        ///     This table is private to the <see cref="IProcessingSource"/>.
         /// </param>
         /// <param name="tableDescriptor">
         ///     If <paramref name="type"/> is a valid table type, then this is
@@ -155,7 +149,6 @@ namespace Microsoft.Performance.SDK.Processing
         public static bool TryCreate(
             Type type,
             ISerializer tableConfigSerializer,
-            out bool isInternalTable,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             out Func<IDataExtensionRetrieval, bool> isDataAvailableFunc)
@@ -164,7 +157,6 @@ namespace Microsoft.Performance.SDK.Processing
                 type,
                 tableConfigSerializer,
                 null,
-                out isInternalTable,
                 out tableDescriptor,
                 out buildTableAction,
                 out isDataAvailableFunc);
@@ -199,9 +191,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="logger">
         ///     Used to log any relevant messages.
         /// </param>
-        /// <param name="isInternalTable">
-        ///     This table is private to the <see cref="IProcessingSource"/>.
-        /// </param>
         /// <param name="tableDescriptor">
         ///     If <paramref name="type"/> is a valid table type, then this is
         ///     populated with the created <see cref="TableDescriptor"/>.
@@ -221,7 +210,6 @@ namespace Microsoft.Performance.SDK.Processing
             Type type,
             ISerializer tableConfigSerializer,
             ILogger logger,
-            out bool isInternalTable,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             out Func<IDataExtensionRetrieval, bool> isDataAvailableFunc)
@@ -229,7 +217,6 @@ namespace Microsoft.Performance.SDK.Processing
             tableDescriptor = null;
             buildTableAction = null;
             isDataAvailableFunc = null;
-            isInternalTable = false;
 
             if (type is null)
             {
@@ -247,7 +234,6 @@ namespace Microsoft.Performance.SDK.Processing
                 return false;
             }
 
-            isInternalTable = tableAttribute.InternalTable;
             buildTableAction = GetTableBuildAction(type, tableAttribute.BuildTableActionMethodName);
             isDataAvailableFunc = GetIsDataAvailableFunc(type, tableAttribute.IsDataAvailableMethodName);
             tableDescriptor = GetTableDescriptor(
@@ -261,18 +247,12 @@ namespace Microsoft.Performance.SDK.Processing
                 return false;
             }
 
-            // I'm looking at this for the first time in months, and the certain tables aren't showing up because they're not specifically marked as internal
-            // and they don't have build actions on them either. So for now, I'm going to try marking any table that doesn't have a build action as internal
-            // to see if that will fix the issue.
-            // todo:revisit this
-            if (buildTableAction == null)
+            if (buildTableAction == null && !tableDescriptor.IsInternalTable)
             {
-                isInternalTable = true;
-            }
-
-            if (tableDescriptor.IsMetadataTable)
-            {
-                isInternalTable = true;
+                logger?.Error(
+                    "The table {0} must add a buld table method or be marked Internal.",
+                    type.FullName);
+                return false;
             }
 
             foreach (var cooker in type.GetCustomAttributes<RequiresSourceCookerAttribute>())
@@ -299,7 +279,9 @@ namespace Microsoft.Performance.SDK.Processing
             ISerializer tableConfigSerializer,
             ILogger logger)
         {
-            Guard.NotNull(type, nameof(type));
+            Debug.Assert(type != null, $"Parameter {nameof(type)} cannot be null.");
+            Debug.Assert(!string.IsNullOrEmpty(propertyName), $"Parameter {nameof(propertyName)} cannot be null or empty.");
+            Debug.Assert(tableConfigSerializer != null, $"Parameter {nameof(tableConfigSerializer)} cannot be null.");
 
             TableDescriptor tableDescriptor = null;
             IEnumerable<RequiresSourceCookerAttribute> sourceCookerAttributes = null;

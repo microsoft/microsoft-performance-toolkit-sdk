@@ -48,23 +48,16 @@ namespace Microsoft.Performance.SDK.Processing
         ///         bool IsDataAvailable(<see cref="SDK.Extensibility.IDataExtensionRetrieval"/>)
         ///     </code>
         /// </param>
-        /// <param name="internalTable">
-        ///     When this is set, the table will not be exposed through the data extension repository.
-        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
-        ///     when this is set.
-        /// </param>
         public TableAttribute(
             string tableDescriptorPropertyName = DefaultTableDescriptorPropertyName,
             string buildTableActionMethodName = DefaultTableBuilderMethodName,
-            string isDataAvailableMethodName = DefaultIsDataAvailableMethodName,
-            bool internalTable = false)
+            string isDataAvailableMethodName = DefaultIsDataAvailableMethodName)
         {
             Guard.NotNullOrWhiteSpace(tableDescriptorPropertyName, nameof(tableDescriptorPropertyName));
 
             this.TableDescriptorPropertyName = tableDescriptorPropertyName;
             this.BuildTableActionMethodName = buildTableActionMethodName;
             this.IsDataAvailableMethodName = isDataAvailableMethodName;
-            this.InternalTable = internalTable;
         }
 
         /// <summary>
@@ -77,13 +70,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     BuildTable(Action&lt;ITableBuilder, IDataExtensionRetrieval&gt;)
         /// </summary>
         public string BuildTableActionMethodName { get; }
-
-        /// <summary>
-        ///     When this is set, the table will not be exposed through the data extension repository.
-        ///     Note that the <see cref="IProcessingSource"/> that owns this will be required to create this table
-        ///     when this is set.
-        /// </summary>
-        public bool InternalTable { get; set; }
 
         /// <summary>
         ///     The name of the static class method which checks if the table has data.

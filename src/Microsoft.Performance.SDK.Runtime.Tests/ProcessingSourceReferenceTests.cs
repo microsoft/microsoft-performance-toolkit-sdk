@@ -791,12 +791,22 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
+            public bool TryEnableTable(TableDescriptor tableDescriptor)
+            {
+                return false;
+            }
+
             public DataSourceInfo GetDataSourceInfo()
             {
                 throw new NotImplementedException();
             }
 
             public Task ProcessAsync(IProgress<int> progress, CancellationToken cancellationToken)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerable<TableDescriptor> GetEnabledTables()
             {
                 throw new NotImplementedException();
             }

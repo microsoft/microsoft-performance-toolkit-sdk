@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime.NetCoreApp\Microsoft.Performance.SDK.Runtime.NetCoreApp.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.SDK.Runtime\Microsoft.Performance.SDK.Runtime.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.SDK.Tests\Microsoft.Performance.SDK.Tests.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Testing\Microsoft.Performance.Testing.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Testing.SDK\Microsoft.Performance.Testing.SDK.csproj" />
