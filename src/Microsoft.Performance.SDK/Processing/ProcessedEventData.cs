@@ -37,21 +37,10 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public uint Count { get; private set; }
 
+        /// <inheritdoc />
         int IReadOnlyCollection<T>.Count => (int)this.Count;
 
-        /// <summary>
-        ///     Gets the value at the specified index.
-        /// </summary>
-        /// <param name="index">
-        ///     The index of the value to retrieve.
-        /// </param>
-        /// <returns>
-        ///     The value at the specified <paramref name="index"/>.
-        /// </returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        ///     <paramref name="index"/> is not valid based on the size
-        ///     of the collection (see <see cref="Count"/>).
-        /// </exception>
+        /// <inheritdoc />
         public T this[int index] => this[(uint)index];
 
         /// <summary>
