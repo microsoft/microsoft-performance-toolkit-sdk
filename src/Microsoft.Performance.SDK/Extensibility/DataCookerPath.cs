@@ -13,8 +13,20 @@ namespace Microsoft.Performance.SDK.Extensibility
     public struct DataCookerPath
         : IEquatable<DataCookerPath>
     {
+        /// <summary>
+        ///     If the data cooker is not a source data cooker, this is the source parser Id.
+        /// </summary>
+        /// <remarks>
+        ///    This must match 
+        ///    Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers.DataCookerPathInternal.EmptySourceParserId.
+        /// </remarks>
         private static readonly string EmptySourceParserId = string.Empty;
 
+        /// <summary>
+        ///     Separates the consituent parts of the data cooker path in the full string representation. This character is not
+        ///     allowed in path components. If this path is changed, please update the exception comments in <see cref="ForSource(string, string)"/>
+        ///     and <see cref="ForComposite(string)"/>.
+        /// </summary>
         private static readonly string Separator = "/";
 
         private DataCookerPath(string dataCookerId)
@@ -74,7 +86,8 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     The ID of the data cooker.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="dataCookerId"/> is empty or composed only of whitespace.
+        ///     One or more of the parameters is empty, composed only of whitespace, 
+        ///     or contains the '/' character.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataCookerId"/> is null.
@@ -96,7 +109,8 @@ namespace Microsoft.Performance.SDK.Extensibility
         ///     The ID of the data cooker.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     One or more of the parameters is empty or composed only of whitespace.
+        ///     One or more of the parameters is empty, composed only of whitespace, 
+        ///     or contains the '/' character.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     One or more of the parameters is null.
