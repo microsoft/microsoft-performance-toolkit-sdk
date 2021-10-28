@@ -9,19 +9,9 @@ namespace Microsoft.Performance.SDK.Processing
     public enum ColumnRole
     {
         /// <summary>
-        ///     Indicates the thread ID of the row at the same point as the start time.
-        /// </summary>
-        StartThreadId = 0,
-
-        /// <summary>
-        ///     The thread ID of the row at the same point as end time.
-        /// </summary>
-        EndThreadId,
-
-        /// <summary>
         ///     Indicates the start timestamp for the x-axis.
         /// </summary>
-        StartTime,
+        StartTime = 0,
 
         /// <summary>
         ///     Indicates the end timestamp for the x-axis.
@@ -34,24 +24,9 @@ namespace Microsoft.Performance.SDK.Processing
         Duration,
 
         /// <summary>
-        ///     Hierarchical Time Tree. Used for Wait Analysis.
-        /// </summary>
-        HierarchicalTimeTree,
-
-        /// <summary>
         ///     How to partition the data across physical resources.
         /// </summary>
         ResourceId,
-
-        /// <summary>
-        ///     Indicates how long each row waited on the time line.
-        /// </summary>
-        WaitDuration,
-
-        /// <summary>
-        ///     Indicates the end timestamp for waiting on the x-axis.
-        /// </summary>
-        WaitEndTime,
 
         /// <summary>
         ///     Indicates the X Left Top of the Rec.

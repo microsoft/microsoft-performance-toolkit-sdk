@@ -92,7 +92,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 GraphFilterThresholdValue = dto.GraphFilterThresholdValue,
                 GraphFilterColumnName = dto.GraphFilterColumnName,
                 GraphFilterColumnGuid = dto.GraphFilterColumnGuid,
-                HelpText = dto.HelpText,
+                Description = dto.Description,
             };
 
             if (dto.HighlightEntries != null)
@@ -141,7 +141,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 GraphFilterThresholdValue = configuration.GraphFilterThresholdValue,
                 GraphFilterColumnName = configuration.GraphFilterColumnName,
                 GraphFilterColumnGuid = configuration.GraphFilterColumnGuid,
-                HelpText = configuration.HelpText,
+                Description = configuration.Description,
                 HighlightEntries = configuration.HighlightEntries.Select(entry => entry.ConvertToDto()).ToArray(),
             };
 
@@ -246,43 +246,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                     // This needs to be updated to support the new enum option.
                     throw new InvalidOperationException();
             }
-        }
-
-        private static Microsoft.Performance.SDK.Processing.TableLayoutStyle ConvertToSdk(this TableLayoutStyle dtoEnum)
-        {
-            switch (dtoEnum)
-            {
-                case TableLayoutStyle.None:
-                    return Microsoft.Performance.SDK.Processing.TableLayoutStyle.None;
-                case TableLayoutStyle.Graph:
-                    return Microsoft.Performance.SDK.Processing.TableLayoutStyle.Graph;
-                case TableLayoutStyle.Table:
-                    return Microsoft.Performance.SDK.Processing.TableLayoutStyle.Table;
-                case TableLayoutStyle.GraphAndTable:
-                    return Microsoft.Performance.SDK.Processing.TableLayoutStyle.GraphAndTable;
-                default:
-                    //Looks like an unsupported version of the DTO, we shouldn't have got here
-                    throw new InvalidOperationException();
-            }
-        }
-
-        private static TableLayoutStyle ConvertToDto(this Microsoft.Performance.SDK.Processing.TableLayoutStyle tableStyleLayout)
-        {
-            switch (tableStyleLayout)
-            {
-                case Microsoft.Performance.SDK.Processing.TableLayoutStyle.None:
-                    return TableLayoutStyle.None;
-                case Microsoft.Performance.SDK.Processing.TableLayoutStyle.Graph:
-                    return TableLayoutStyle.Graph;
-                case Microsoft.Performance.SDK.Processing.TableLayoutStyle.Table:
-                    return TableLayoutStyle.Table;
-                case Microsoft.Performance.SDK.Processing.TableLayoutStyle.GraphAndTable:
-                    return TableLayoutStyle.GraphAndTable;
-                default:
-                    // This needs to be updated to support the new enum option.
-                    throw new InvalidOperationException();
-            }
-        }
+        }        
 
         private static Microsoft.Performance.SDK.Processing.AggregationOverTime ConvertToSDK(this AggregationOverTime dtoEnum)
         {
@@ -493,24 +457,14 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         {
             switch (self)
             {
-                case Processing.ColumnRole.StartThreadId:
-                    return ColumnRole.StartThreadId;
-                case Processing.ColumnRole.EndThreadId:
-                    return ColumnRole.EndThreadId;
                 case Processing.ColumnRole.StartTime:
                     return ColumnRole.StartTime;
                 case Processing.ColumnRole.EndTime:
                     return ColumnRole.EndTime;
                 case Processing.ColumnRole.Duration:
                     return ColumnRole.Duration;
-                case Processing.ColumnRole.HierarchicalTimeTree:
-                    return ColumnRole.HierarchicalTimeTree;
                 case Processing.ColumnRole.ResourceId:
                     return ColumnRole.ResourceId;
-                case Processing.ColumnRole.WaitDuration:
-                    return ColumnRole.WaitDuration;
-                case Processing.ColumnRole.WaitEndTime:
-                    return ColumnRole.WaitEndTime;
                 case Processing.ColumnRole.RecLeft:
                     return ColumnRole.RecLeft;
                 case Processing.ColumnRole.RecTop:
@@ -530,24 +484,14 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         {
             switch (dto)
             {
-                case ColumnRole.StartThreadId:
-                    return Processing.ColumnRole.StartThreadId;
-                case ColumnRole.EndThreadId:
-                    return Processing.ColumnRole.EndThreadId;
                 case ColumnRole.StartTime:
                     return Processing.ColumnRole.StartTime;
                 case ColumnRole.EndTime:
                     return Processing.ColumnRole.EndTime;
                 case ColumnRole.Duration:
                     return Processing.ColumnRole.Duration;
-                case ColumnRole.HierarchicalTimeTree:
-                    return Processing.ColumnRole.HierarchicalTimeTree;
                 case ColumnRole.ResourceId:
                     return Processing.ColumnRole.ResourceId;
-                case ColumnRole.WaitDuration:
-                    return Processing.ColumnRole.WaitDuration;
-                case ColumnRole.WaitEndTime:
-                    return Processing.ColumnRole.WaitEndTime;
                 case ColumnRole.RecLeft:
                     return Processing.ColumnRole.RecLeft;
                 case ColumnRole.RecTop:
@@ -573,7 +517,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 EndTimeColumnName = dto.EndTimeColumnName,
                 EndTimeColumnGuid = dto.EndTimeColumnGuid,
                 DurationColumnName = dto.DurationColumnName,
-                DurationColumnGuid = dto.EndTimeColumnGuid,
+                DurationColumnGuid = dto.DurationColumnGuid,
                 HighlightQuery = dto.HighlightQuery,
                 HighlightColor = dto.HighlightColor,
             };
@@ -591,7 +535,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 EndTimeColumnName = highlightEntry.EndTimeColumnName,
                 EndTimeColumnGuid = highlightEntry.EndTimeColumnGuid,
                 DurationColumnName = highlightEntry.DurationColumnName,
-                DurationColumnGuid = highlightEntry.EndTimeColumnGuid,
+                DurationColumnGuid = highlightEntry.DurationColumnGuid,
                 HighlightQuery = highlightEntry.HighlightQuery,
                 HighlightColor = highlightEntry.HighlightColor,
             };
