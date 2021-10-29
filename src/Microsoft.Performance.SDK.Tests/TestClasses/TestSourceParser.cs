@@ -8,12 +8,11 @@ using System.Threading;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Tests.DataTypes;
-using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
 
 namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
-    /// <inheritdoc />
-    public class TestSourceParser
+	/// <inheritdoc />
+	public class TestSourceParser
         : ISourceParser<TestRecord, TestParserContext, int>
     {
         /// <inheritdoc />
