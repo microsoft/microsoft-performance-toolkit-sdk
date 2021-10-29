@@ -21,9 +21,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     public class SourceSessionTests
     {
         /// <summary>
-        ///     Ensure that progress is reported incrementally based off of the number of passes and records.
-        ///     After each pass or record has finished the progress should've reported a value closer to 100.
-        ///     The final report should be 100 to signify progress is complete.
+        ///     Each report should be after each record has been processed or all records have been processed in a pass.
+        ///     Thus, each report should be incrementing up to and including 100. This depends on the total number of iterations of each record.
+        ///     
+        ///     For example: If there are 3 passes on 7 records, the first progress report should be 4 = 100 ( 1 / 21), the second 9 = 100 (2 / 21), and so on
         /// </summary>
         private void CheckProgressReports(TestProgress progress, int numRecords)
         {
@@ -405,8 +406,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             sourceParser.TestRecords = testRecords;
 
-            TestProgress progress = new TestProgress();
-            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
+            sourceSession.ProcessSource(new NullLogger(), new TestProgress(), CancellationToken.None);
 
             Assert.IsFalse(sourceParser.ReceivedAllEventsConsumed);
             Assert.IsTrue(
@@ -445,8 +445,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             sourceParser.TestRecords = testRecords;
 
-            TestProgress progress = new TestProgress();
-            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
+            sourceSession.ProcessSource(new NullLogger(), new TestProgress(), CancellationToken.None);
 
             Assert.IsTrue(sourceParser.ReceivedAllEventsConsumed);
             Assert.IsTrue(sourceParser.RequestedDataKeys.Count == sourceDataCooker1.DataKeys.Count);
