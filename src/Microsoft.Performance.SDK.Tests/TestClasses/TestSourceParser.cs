@@ -11,8 +11,8 @@ using Microsoft.Performance.SDK.Tests.DataTypes;
 
 namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
-	/// <inheritdoc />
-	public class TestSourceParser
+    /// <inheritdoc />
+    public class TestSourceParser
         : ISourceParser<TestRecord, TestParserContext, int>
     {
         /// <inheritdoc />
