@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
@@ -66,10 +68,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public override void ProcessSource(ILogger logger, IProgress<int> progress, CancellationToken cancellationToken)
+        public override void ProcessSource(ILogger logger, IProgress<int> totalProgress, CancellationToken cancellationToken)
         {
             Guard.NotNull(logger, nameof(logger));
-            Guard.NotNull(progress, nameof(progress));
+            Guard.NotNull(totalProgress, nameof(totalProgress));
             Guard.NotNull(cancellationToken, nameof(cancellationToken));
 
             int countOfPassesToProcess = this.ScheduleSourceDataCookers();
@@ -82,11 +84,10 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             {
                 this.currentPassIndex = 0;
                 this.InitializeForSourceParsing();
-                this.SourceParser.ProcessSource(this, logger, progress, cancellationToken);
+                this.SourceParser.ProcessSource(this, logger, totalProgress, cancellationToken);
                 this.currentPassIndex = InvalidPass;
                 return;
             }
-
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
                 var sourceDataCookers = this.sourceCookersByPass[passIndex];
@@ -106,14 +107,41 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 }
             }
 
+            // Create a progressTracker for each pass
+            List<DataProcessorProgress> progressTrackers = new List<DataProcessorProgress>(countOfPassesToProcess);
+            for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
+            {
+                progressTrackers.Add(new DataProcessorProgress());
+            }
+
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
                 this.currentPassIndex = passIndex;
-
                 this.InitializeForSourceParsing();
+                var prevProgress = 100 * passIndex;
+                var progressTracker = progressTrackers[passIndex];
 
-                // todo:we'll need a different IProgress sent in when there are multiple passes
-                this.SourceParser.ProcessSource(this, logger, progress, cancellationToken);
+                PropertyChangedEventHandler propChangedCallback = (s, e) =>
+                {
+                    if (!e.PropertyName.Equals(nameof(DataProcessorProgress.CurrentProgress)))
+                    {
+                        return;
+                    }
+
+                    var progress = s as DataProcessorProgress;
+                    Debug.Assert(progress != null);
+
+                    var currProgress = (prevProgress + progress.CurrentProgress) / countOfPassesToProcess;
+                    totalProgress.Report(currProgress);
+                };
+
+                progressTracker.PropertyChanged += propChangedCallback;
+
+                this.SourceParser.ProcessSource(this, logger, progressTrackers[passIndex], cancellationToken);
+
+                // Ensure to report 100 to signify finished and deregister callback.
+                progressTracker.Report(100);
+                progressTracker.PropertyChanged -= propChangedCallback;
 
                 foreach (var cooker in this.sourceCookersByPass[passIndex])
                 {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
@@ -50,12 +51,14 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
                 return;
             }
 
-            foreach (var testRecord in TestRecords)
+            var totalNumTestRecords = this.TestRecords.Count();
+            for (int testRecordIdx = 0; testRecordIdx < totalNumTestRecords; testRecordIdx++)
             {
+                var testRecord = this.TestRecords.ElementAt(testRecordIdx);
                 dataProcessor.ProcessDataElement(testRecord, new TestParserContext(), cancellationToken);
-            }
 
-            progress.Report(100);
+                progress.Report(100 * (testRecordIdx + 1) / totalNumTestRecords);
+            }
         }
 
         /// <inheritdoc />

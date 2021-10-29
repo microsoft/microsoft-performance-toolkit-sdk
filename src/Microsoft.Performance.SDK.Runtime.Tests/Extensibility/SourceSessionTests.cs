@@ -20,6 +20,45 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     [TestClass]
     public class SourceSessionTests
     {
+        /// <summary>
+        ///     Each report should be after each record has been processed or all records have been processed in a pass.
+        ///     Thus, each report should be incrementing up to and including 100. This depends on the total number of iterations of each record.
+        ///     
+        ///     For example: If there are 3 passes on 7 records, the first progress report should be 4 = 100 ( 1 / 21), the second 9 = 100 (2 / 21), and so on
+        /// </summary>
+        private void CheckProgressReports(TestProgress progress, int numRecords)
+        {
+            int numPasses = (progress.ReportedValues.Count) / numRecords;
+            int numIter = numRecords * numPasses;
+
+            for (int recordIdx = 0; recordIdx < progress.ReportedValues.Count - 1; recordIdx++)
+            {
+                int expectedVal = 100 * (recordIdx + 1) / numIter;
+                int actualVal = progress.ReportedValues[recordIdx];
+                Assert.AreEqual(expectedVal, actualVal);
+            }
+
+            Assert.AreEqual(100, progress.ReportedValues[progress.ReportedValues.Count - 1]);
+        }
+
+        /// <summary>
+        ///     Create and register cooker with session.
+        /// </summary>
+        private TestSourceDataCooker CreateCooker(
+            SourceProcessingSession<TestRecord, TestParserContext, int> session,
+            string id,
+            string name,
+            ReadOnlyHashSet<int> keys)
+        {
+            TestSourceDataCooker cooker = new TestSourceDataCooker()
+            {
+                Path = DataCookerPath.ForSource(id, name),
+                DataKeys = keys,
+            };
+            session.RegisterSourceDataCooker(cooker);
+            return cooker;
+        }
+
         [TestMethod]
         [UnitTest]
         public void Constructor_NullSourceParser_Throws()
@@ -181,7 +220,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             Assert.AreEqual(sourceSession.RegisteredSourceDataCookers.Count, 4);
 
-            sourceSession.ProcessSource(new NullLogger(), new TestProgress(), CancellationToken.None);
+            TestProgress progress = new TestProgress();
+            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
 
             // Make sure each cooker received a BeginDataCooking call
             Assert.AreEqual(sourceDataCooker1.BeginDataCookingCallCount, 1);
@@ -221,6 +261,119 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             // TestRecord 500 should not ever be delivered
             int expectedReceivedCount = testRecords.Count + 2 - 1;
             Assert.AreEqual(expectedReceivedCount, dataCookerContext.CountOfTestRecordsReceived);
+
+            CheckProgressReports(progress, testRecords.Count);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void ProgressReportsTest()
+        {
+            var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
+            var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
+            var dataCookerContext = new TestSourceDataCookerContext();
+
+            // Create and populate cookers
+            List<TestSourceDataCooker> cookers = new List<TestSourceDataCooker>();
+            List<ReadOnlyHashSet<int>> cookerKeys = new List<ReadOnlyHashSet<int>>() {
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 113, 145, 167, 1000 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 200, 250, 286, 1000 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 145, 316, 315, 301 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 111, 222, 369 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 369, 1207 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 420, 1207 })}
+            };
+
+            for (int i = 0; i < cookerKeys.Count; i++)
+            {
+                string name = "TestSourceDataCooker" + (i + 1).ToString();
+                cookers.Add(CreateCooker(sourceSession, sourceParser.Id, name, cookerKeys[i]));
+            }
+
+            // data cooker order should be: { cooker1, cooker3 }, { cooker4 }, { cooker2 }, { cooker7 }, { cooker6 }, { cooker5 }
+            // cooker1 and cooker3 could be in any order in pass 0.
+            {
+                // sourceDataCooker4: Pass=1, Block=0
+                cookers[3].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[] { cookers[2].Path });
+
+                // sourceDataCooker2: Pass=2, Block=0
+                cookers[1].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[]
+                    {
+                        cookers[3].Path,
+                        cookers[0].Path
+                    });
+
+                // sourceDataCooker7: Pass=3, Block=0
+                cookers[6].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[] { cookers[1].Path });
+
+                // sourceDataCooker6: Pass=4, Block=0
+                cookers[5].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[]
+                    {
+                        cookers[1].Path,
+                        cookers[6].Path
+                    });
+
+                // sourceDataCooker5: Pass=5, Block=0
+                cookers[4].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[] { cookers[5].Path });
+            }
+
+            // setup data for the TestParser to "parse"
+            var testRecords = new List<TestRecord>
+            {
+                // delivered to cooker4 in Pass1 and then cooker2 in Pass2
+                new TestRecord {Key = 145, Value = "145"},
+
+                // shouldn't be delivered to any cooker
+                new TestRecord {Key = 500, Value = "500"},
+
+                // delivered to cooker3 in Pass0
+                new TestRecord {Key = 250, Value = "250:1"},
+
+                // delivered to cooker1 in Pass0
+                new TestRecord {Key = 67, Value = "67"},
+
+                // delivered to cooker3 in Pass0 and cooker2 in Pass2
+                new TestRecord {Key = 1000, Value = "1000"},
+
+                // delivered to cooker3 in Pass0
+                new TestRecord {Key = 250, Value = "250:2"},
+
+                // delivered to cooker4 in Pass1
+                new TestRecord {Key = 301, Value = "301"},
+
+                // delivered to cooker3 in Pass0
+                new TestRecord {Key = 286, Value = "286"},
+
+                // delivered to cooker4 in Pass1
+                new TestRecord {Key = 315, Value = "315"},
+
+                // delivered to cooker2 in Pass2, cooker7 in Pass4, cooker6 in Pass5
+                new TestRecord {Key = 167, Value="167"},
+
+                // delivered to cooker6 in Pass5, cooker5 in Pass6
+                new TestRecord {Key = 369, Value="369"},
+
+                // delivered to cooker7 in Pass4, cooker6 in Pass5
+                new TestRecord {Key = 1207, Value="1207"},
+
+                // shouldn't be delivered to any cooker
+                new TestRecord {Key = 1001, Value="1001"}
+
+            };
+
+            sourceParser.TestRecords = testRecords;
+            Assert.AreEqual(sourceSession.RegisteredSourceDataCookers.Count, cookers.Count);
+
+            TestProgress progress = new TestProgress();
+            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
+
+            CheckProgressReports(progress, testRecords.Count);
         }
 
         [TestMethod]
