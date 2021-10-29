@@ -39,9 +39,8 @@ namespace Microsoft.Performance.SDK.Tests
                     TableDescriptorFactory.TryCreate(
                         types[i],
                         serializer,
-                        out var isInternalTable,
-                        out var expected,
-                        out var buildTableAction),
+                        out TableDescriptor expected,
+                        out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction),
                     "Unable to create table descriptor for type `{0}`",
                     types[i]);
 
@@ -52,7 +51,7 @@ namespace Microsoft.Performance.SDK.Tests
 
                 descriptors.Add(expected);
                 buildActions.Add(buildTableAction);
-                isInternal.Add(isInternalTable);
+                isInternal.Add(expected.IsInternalTable);
             }
         }
     }

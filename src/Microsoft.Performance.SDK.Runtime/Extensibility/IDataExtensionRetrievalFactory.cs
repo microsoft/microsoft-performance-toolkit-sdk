@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK.Extensibility;
 
-namespace Microsoft.Performance.SDK.Extensibility
+namespace Microsoft.Performance.SDK.Runtime.Extensibility
 {
     /// <summary>
-    ///     Exposes methods used to generate data required by a data extension. This data will be limited to
-    ///     the data extensions marked as required by the given data extension.
+    ///     Used to generate an <see cref="IDataExtensionRetrieval"/> unique to a given data extension. The
+    ///     <see cref="IDataExtensionRetrieval"/> has access only to data that the data extension has identified as
+    ///     required.
     /// </summary>
     public interface IDataExtensionRetrievalFactory
     {

@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="category">
         ///     The category into which this table belongs. This parameter
         ///     may be null, at which point the table is assumed to be in
-        ///     the <see cref="TableAttribute.DefaultCategory"/> category.
+        ///     the default category.
         /// </param>
         /// <param name="isMetadataTable">
         ///     Whether the table is a metadata table.
@@ -63,7 +63,10 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="requiredDataProcessors">
         ///     Identifiers for data processors required to instantiate this table.
         /// </param>
-        /// <exception cref="System.ArgumentException">
+        /// <param name="isInternalTable">
+        ///     Whether the table is an internal table.
+        /// </param>
+        /// <exception cref="ArgumentException">
         ///     <paramref name="guid"/> is whitespace.
         ///     - or -
         ///     <paramref name="guid"/> parsed to a value
@@ -75,7 +78,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     - or -
         ///     <paramref name="category"/> is whitespace.
         /// </exception>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         ///     <paramref name="guid"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="name"/> is <c>null</c>.
@@ -92,7 +95,8 @@ namespace Microsoft.Performance.SDK.Processing
             bool isMetadataTable = false,
             TableLayoutStyle defaultLayout = TableLayoutStyle.GraphAndTable,
             IEnumerable<DataCookerPath> requiredDataCookers = null,
-            IEnumerable<DataProcessorId> requiredDataProcessors = null)
+            IEnumerable<DataProcessorId> requiredDataProcessors = null,
+            bool isInternalTable = false)
         {
             Guard.NotDefault(guid, nameof(guid));
             Guard.NotNullOrWhiteSpace(name, nameof(name));
@@ -106,6 +110,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.DefaultLayout = defaultLayout;
             this.IsMetadataTable = isMetadataTable;
             this.ExtendedData = new Dictionary<string, object>();
+            this.IsInternalTable = isInternalTable || this.IsMetadataTable;
 
             this.dataCookers = requiredDataCookers != null ? new HashSet<DataCookerPath>(requiredDataCookers) : new HashSet<DataCookerPath>();
             this.dataProcessors = requiredDataProcessors != null ? new HashSet<DataProcessorId>(requiredDataProcessors) : new HashSet<DataProcessorId>();
@@ -140,7 +145,23 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets a value indicating whether this instance describes a
         ///     metadata table.
         /// </summary>
+        /// <remarks>
+        ///     Metadata tables are automatically marked as internal (<see cref="IsInternalTable"/>).
+        /// </remarks>
         public bool IsMetadataTable { get; }
+
+        /// <summary>
+        ///     Gets a value indicating whether this instance describes an internal table.
+        /// </summary>
+        /// <remarks>
+        ///     Internal tables are not required to have a static build method.
+        ///     <para/>
+        ///     Note that the <see cref="ICustomDataProcessor"/> that owns this must enable and create this table.
+        ///     <para/>
+        ///     Because this is built by a given <see cref="ICustomDataProcessor"/>, the table may not reference
+        ///     data outside of the data processor.
+        /// </remarks>
+        public bool IsInternalTable { get; internal set; }
 
         /// <summary>
         ///     Provides a means of storing Data Source specific information
@@ -161,21 +182,21 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <summary>
         ///     Gets or sets the <see cref="Type" /> representing the <see cref="ITableService"/>
-        ///     used by this table, if any. This property may be <c>null</c>. See
-        ///     <see cref="ITableBuilder.SetService(ITableService)"/>.
+        ///     used by this table, if any. This property may be <c>null</c>.
+        ///     See <see cref="ICustomDataProcessor.CreateTableService(TableDescriptor)"/>.
         /// </summary>
         public Type ServiceInterface { get; set; }
 
         /// <summary>
         ///     Identifiers for data cookers necessary to create this table.
         /// </summary>
-        public IReadOnlyCollection<DataCookerPath> RequiredDataCookers => 
+        public IReadOnlyCollection<DataCookerPath> RequiredDataCookers =>
             new ReadOnlyCollection<DataCookerPath>(this.dataCookers.ToList());
 
         /// <summary>
         ///     Identifiers for data processors necessary to create this table.
         /// </summary>
-        public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors => 
+        public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors =>
             new ReadOnlyCollection<DataProcessorId>(this.dataProcessors.ToList());
 
         /// <inheritdoc />
@@ -200,6 +221,11 @@ namespace Microsoft.Performance.SDK.Processing
         /// <inheritdoc />
         public override string ToString()
         {
+            if (this.Type != null)
+            {
+                return $"{this.Type.Name} [{this.Guid} - {this.Name}]";
+            }
+
             return $"{this.Guid} - {this.Name}";
         }
 

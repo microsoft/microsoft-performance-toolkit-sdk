@@ -7,7 +7,8 @@ using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
-using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
+using Microsoft.Performance.SDK.Tests.DataTypes;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 {
@@ -124,9 +125,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public TestSourceDataCookerContext Context { get; set; }
 
 
-        internal TestCookedDataReflector Reflector { get; private set; }
+        public TestCookedDataReflector Reflector { get; private set; }
 
-        internal void SetCookedDataReflector(TestCookedDataReflector reflector)
+        public void SetCookedDataReflector(TestCookedDataReflector reflector)
         {
             Reflector = reflector;
             OutputIdentifiers = reflector.OutputIdentifiers;

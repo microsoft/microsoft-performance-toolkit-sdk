@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Runtime.Extensibility;
-using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
-using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
-using Microsoft.Performance.Testing;
-using Microsoft.Performance.Testing.SDK;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
+using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Runtime.Extensibility;
+using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
+using Microsoft.Performance.SDK.Tests.DataTypes;
+using Microsoft.Performance.SDK.Tests.TestClasses;
+using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 {
@@ -172,7 +173,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
                 // sourceDataCooker2: Pass=1, Block=1
                 sourceDataCooker2.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
-                    new []
+                    new[]
                     {
                         sourceDataCooker4.Path,
                         sourceDataCooker1.Path

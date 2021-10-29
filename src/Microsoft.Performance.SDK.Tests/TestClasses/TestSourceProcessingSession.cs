@@ -9,7 +9,7 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestSourceProcessingSession<T, TContext, TKey>
         : ISourceProcessingSession<T, TContext, TKey>
@@ -30,14 +30,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public List<ISourceDataCooker<T, TContext, TKey>> SourceDataCookers = new List<ISourceDataCooker<T, TContext, TKey>>();
 
         public IReadOnlyCollection<ISourceDataCooker<T, TContext, TKey>> RegisteredSourceDataCookers =>
-            this.SourceDataCookers;
+            SourceDataCookers;
 
         public Func<DataCookerPath, ISourceDataCooker<T, TContext, TKey>> GetSourceDataCookerFunc { get; set; }
         public ISourceDataCooker<T, TContext, TKey> GetSourceDataCooker(DataCookerPath cookerPath)
         {
-            if (this.GetSourceDataCookerFunc != null)
+            if (GetSourceDataCookerFunc != null)
             {
-                return this.GetSourceDataCookerFunc.Invoke(cookerPath);
+                return GetSourceDataCookerFunc.Invoke(cookerPath);
             }
 
             foreach (var cooker in SourceDataCookers)
@@ -55,25 +55,25 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public DataProcessingResult ProcessDataElementResult { get; set; } = DataProcessingResult.Ignored;
         public DataProcessingResult ProcessDataElement(T data, TContext context, CancellationToken cancellationToken)
         {
-            return ProcessDataElementFunc?.Invoke(data, context, cancellationToken) ?? this.ProcessDataElementResult;
+            return ProcessDataElementFunc?.Invoke(data, context, cancellationToken) ?? ProcessDataElementResult;
         }
 
         public Action<ILogger, IProgress<int>, CancellationToken> ProcessSourceAction { get; set; }
         public void ProcessSource(ILogger logger, IProgress<int> progress, CancellationToken cancellationToken)
         {
-            this.ProcessSourceAction?.Invoke(logger, progress, cancellationToken);
+            ProcessSourceAction?.Invoke(logger, progress, cancellationToken);
         }
 
         public Action<ISourceDataCooker<T, TContext, TKey>> RegisterSourceDataCookerAction { get; set; }
         public void RegisterSourceDataCooker(ISourceDataCooker<T, TContext, TKey> dataCooker)
         {
-            if (this.RegisterSourceDataCookerAction != null)
+            if (RegisterSourceDataCookerAction != null)
             {
-                this.RegisterSourceDataCookerAction.Invoke(dataCooker);
+                RegisterSourceDataCookerAction.Invoke(dataCooker);
             }
             else
             {
-                this.SourceDataCookers.Add(dataCooker);
+                SourceDataCookers.Add(dataCooker);
             }
         }
     }

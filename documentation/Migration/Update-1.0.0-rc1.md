@@ -10,7 +10,6 @@ into two sections: [Breaking Changes](#breaking-changes) and
 
 There are a number of breaking changes in this version; please see the release notes for a list of these changes.
 
-
 ## Renamed Classes, Interfaces and Static Methods
 
 The following references must be changed:
@@ -19,6 +18,9 @@ The following references must be changed:
 - `BaseDataColumn` -> `DataColumn`
 - `CustomDataProcessorBase` -> `CustomDataProcessor`
 - `CustomDataProcessorBaseWithSourceParser` -> `CustomDataProcessorWithSourceParser`
+- `CustomDataSourceAttribute` -> `ProcessingSourceAttribute`
+- `CustomDataSourceBase` -> `ProcessingSource`
+- `CustomDataSourceInfo` -> `ProcessingSourceInfo`
 - `PlugInConfiguration` -> `PluginConfiguration`
 - `PlugInConfigurationExtensions` -> `PluginConfigurationExtensions`
 - `PlugInConfigurationSerializer` -> `PluginConfigurationSerializer`
@@ -29,6 +31,92 @@ The following references must be changed:
 - `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
 - `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
 - `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
+
+## Obsolete Members
+
+All code decorated with the 'Obsolete' attribute has been removed.
+
+### DataCookerPath
+
+The following members have been removed from `DataCookerPath`:
+
+- field `DataCookerPath.Format`
+- constant `DataCookerPath.EmptySourceParserId`
+- constructor `public DataCookerPath(string)`
+- constructor `public DataCookerPath(string, string)`
+- property `DataCookerPath.CookerPath`
+- method `DataCookerPath.Parse(string)`
+- method `DataCookerPath.Create(string, string)`
+- method `DataCookerPath.GetSourceParserId(string)`
+- method `DataCookerPath.GetdataCookerId(string)`
+- method `DataCookerPath.IsWellFormed(string)`
+- method `DataCookerPath.SplitPath(string)`
+
+To prevent build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataCookerPath` that accept string arguments and `DataCookerPath.Create` 
+have been removed. 
+To prevent build breaks, replace calls to this class' constructor with either
+- `DataCookerPath.ForComposite`
+- `DataCookerPath.ForSource`
+
+depending on the type of data cooker the path is for.
+
+### DataOutputPath
+
+The following members have been removed from `DataOutputPath`:
+
+- field `DataOutputPath.Format`
+- method `DataOutputPath.Create(string)`
+- method `DataOutputPath.Create(string, string, string)`
+- property `DataOutputPath.Path`
+- method `DataOutputPath.Combine(string, string, string)`
+- method `DataOutputPath.GetSourceId(string)`
+- method `DataOutputPath.GetDataCookerId(string)`
+- method `DataOutputPath.GetDataOutputId(string)`
+- method `DataOutputPath.GetDataCookerPath(string)`
+- method `DataOutputPath.TryGetConstituents(string, out string, out string, out string)`
+- method `DataOutputPath.IsWellFormed(string)`
+- method `DataOutputPath.SplitPath(string)`
+
+To prevent build breaks, remove references to these methods and properties.
+
+Both the constructors for `DataOutputPath` that accept string arguments and `DataOutputPath.Create` 
+have been removed.
+To prevent build breaks, replace calls to this class' constructor with either
+- `DataOutputPath.ForComposite`
+- `DataOutputPath.ForSource`
+
+depending on the type of data cooker the data output path is for.
+
+### CustomDataProcessor
+
+The following members have been removed from `CustomDataProcessor`:
+
+- method `CustomDataProcessor.ProcessAsync(ILogger, IProgress<int>, CancellationToken)`
+
+### RequiresCookerAttribute
+
+This class has been removed. Please use `RequiresSourceCookerAttribute` or
+`RequiresCompositCookerAttribute`.
+
+### TableConfiguration
+
+The following members have been removed from `TableConfiguration`:
+
+- property `TableConfiguration.Layout`
+
+### CustomDataSourceBase
+
+This class has been removed. Please use `ProcessingSource`.
+
+### CustomDataSourceAttribute
+
+This class has been removed. Please use `ProcessingSourceAttribute`.
+
+### CustomDataSourceInfo
+
+This class has been removed. Please use `ProcessingSourceInfo`.
 
 ## SDK
 
@@ -51,6 +139,17 @@ may also provide their own implementations.
 
 `DataProcessor`s have been removed. Note that these are not the same as
 `CustomDataProcessor`s; `CustomDataProcessor`s are still present as they were.
+
+## Inheritance
+
+The following classes have been sealed:
+
+- `ProcessingSourceInfo`
+- `ProcessingSourceAttribute`
+
+The following methods are no longer `virtual` and are now `abstract`:
+
+- `CustomDataProcessor.ProcessAsyncCore(IProgress<int>, CancellationToken)`
 
 ## IApplicationEnvironment
 
@@ -145,60 +244,39 @@ catch (UnsupportedDataSourceException)
 }
 ````
 
+## Interfaces implemented in the SDK or SDK.Runtime
+
+There are some changes made to interfaces that generally don't need to be implemented by plugins. Those changes are documented in this section.
+
+### ICustomDataProcessor
+
+- Adds `TryEnableTable` method. This is similar to `EnableTable`, but catches most exceptions and returns a `bool`.
+
+### IDataProcessorExtensibilitySupport
+
+- The `AddTable` method becomes `EnableTable` or `TryEnableTable`.
+
+- The `GetAllRequiredSourceDataCookers` was renamed to `GetRequiredSourceDataCookers`.
+
+- The `GetAllRequiredTables was renamed to `GetEnabledInternalTables`.
+
+### IDataExtensionRetrievalFactory
+
+This was moved from the SDK namespace to SDK.Runtime.
+
+## TableAttribute and InternalTableAttribute
+
+- The `InternalTableAttribute` was removed.
+
+- Internal table constructor arguments and properties have been removed from `TableAttribute`.
+
+- An `isInternalTable` constructor argument and an `IsInternalTable` property were added to `TableDescriptor`.
+
+Internal tables provide processing sources a way to create tables that require data cookers but do not declare build table actions. If using internal tables today, please update the table attribute and table descriptor appropriately.
+
 ### Engine Execution Results
 
 A new parameter has been added to the constructor.
-
-## DataCookerPath
-
-The following have been removed:
-- `DataCookerPath.Format`
-- `DataCookerPath.EmptySourceParserId`
-- `DataCookerPath.CookerPath`
-- `DataCookerPath.Parse`
-- `DataCookerPath.GetSourceParserId`
-- `DataCookerPath.GetDataCookerId`
-- `DataCookerPath.IsWellFormed`
-
-To prevent build breaks, remove references to these methods and properties.
-
-Both the constructors for `DataCookerPath` that accept string arguments and `DataCookerPath.Create` 
-have been removed. 
-To prevent build breaks, replace calls to this class' constructor with either
-- `DataCookerPath.ForComposite`
-- `DataCookerPath.ForSource`
-
-depending on the type of data cooker the path is for.
-
-## DataOutputPath
-
-The following have been removed:
-- `DataOutputPath.Format`
-- `DataOutputPath.Path`
-- `DataOutputPath.Combine`
-- `DataOutputPath.GetSourceId`
-- `DataOutputPath.GetDataCookerId`
-- `DataOutputPath.GetDataCookerPath`
-- `DataOutputPath.TryGetConstituents`
-- `DataOutputPath.IsWellFormed`
-
-To prevent build breaks, remove references to these methods and properties.
-
-Both the constructors for `DataOutputPath` that accept string arguments and `DataOutputPath.Create` 
-have been removed.
-To prevent build breaks, replace calls to this class' constructor with either
-- `DataOutputPath.ForComposite`
-- `DataOutputPath.ForSource`
-
-depending on the type of data cooker the data output path is for.
-
-## RequiresCookerAttribute
-
-This class has been made abstract. Please replace it with either
-- `RequiresSourceCookerAttribute`
-- `RequiresCompositeCookerAttribute`
-
-depending on the type of required data cooker.
 
 ## Obsolete Code Removed
 
@@ -222,6 +300,7 @@ In addition to this interface being renamed to `IVisibleDomainSensitiveProjectio
 - `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
 
 ## ViewportSensitiveProjection
+
 In addition to this class being renamed to `VisibleDomainSensitiveProjection`, the following properties and methods are renamed:
 - `DependsOnViewport` -> `DependsOnVisibleDomain`
 - `NotifyViewportChanged` -> `NotifyVisibleDomainChanged`
@@ -245,3 +324,4 @@ changes listed above, the follow references have been changed:
 # Suggested Changes
 
 None at this time.
+

@@ -5,7 +5,7 @@ using System;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestCookedDataReflector : CookedDataReflector
     {

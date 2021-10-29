@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Extensibility.SourceParsing;
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Microsoft.Performance.SDK.Extensibility.SourceParsing;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Tests.DataTypes;
+using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.DataTypes;
 
-namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     /// <inheritdoc />
     public class TestSourceParser
@@ -35,8 +36,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         /// <inheritdoc/>
         public virtual void PrepareForProcessing(bool allEventsConsumed, IReadOnlyCollection<int> requestedDataKeys)
         {
-            this.ReceivedAllEventsConsumed = allEventsConsumed;
-            this.RequestedDataKeys = requestedDataKeys;
+            ReceivedAllEventsConsumed = allEventsConsumed;
+            RequestedDataKeys = requestedDataKeys;
         }
 
         /// <inheritdoc />
@@ -46,7 +47,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
-            if (this.TestRecords == null)
+            if (TestRecords == null)
             {
                 return;
             }

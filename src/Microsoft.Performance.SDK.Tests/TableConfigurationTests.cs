@@ -180,7 +180,7 @@ namespace Microsoft.Performance.SDK.Tests
         public void AddColumnRole_DifferentRoleSameColumnThrows()
         {
             var r1 = ColumnRole.Duration;
-            var r2 = ColumnRole.EndThreadId;
+            var r2 = ColumnRole.ResourceId;
             var c = Any.ColumnConfiguration();
             this.Sut.Columns = new[] { c, };
 
@@ -215,7 +215,7 @@ namespace Microsoft.Performance.SDK.Tests
             this.Sut.Columns = new[] { c1, c2, };
 
             var r1 = ColumnRole.Duration;
-            var r2 = ColumnRole.EndThreadId;
+            var r2 = ColumnRole.ResourceId;
             this.Sut.AddColumnRole(r1, c1.Metadata.Guid);
 
             Assert.AreEqual(1, this.Sut.ColumnRoles.Count);
@@ -273,7 +273,7 @@ namespace Microsoft.Performance.SDK.Tests
             this.Sut.Columns = new[] { c1, c2, };
 
             var r1 = ColumnRole.Duration;
-            var r2 = ColumnRole.EndThreadId;
+            var r2 = ColumnRole.ResourceId;
             this.Sut.AddColumnRole(r1, c1.Metadata.Guid);
             this.Sut.AddColumnRole(r2, c2.Metadata.Guid);
 
