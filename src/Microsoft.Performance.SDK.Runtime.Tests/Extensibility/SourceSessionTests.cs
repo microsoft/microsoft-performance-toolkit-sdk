@@ -45,6 +45,25 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             }
         }
 
+        /// <summary>
+        ///     Create and register cooker with session.
+        /// </summary>
+        /// <returns>cooker</returns>
+        private TestSourceDataCooker CreateCooker(
+            SourceProcessingSession<TestRecord, TestParserContext, int> session,
+            string id,
+            string name,
+            ReadOnlyHashSet<int> keys)
+        {
+            TestSourceDataCooker cooker = new TestSourceDataCooker()
+            {
+                Path = DataCookerPath.ForSource(id, name),
+                DataKeys = keys,
+            };
+            session.RegisterSourceDataCooker(cooker);
+            return cooker;
+        }
+
         [TestMethod]
         [UnitTest]
         public void Constructor_NullSourceParser_Throws()
@@ -253,99 +272,61 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
         [TestMethod]
         [UnitTest]
-        public void ProcessSession2()
+        public void ProgressReportsTest()
         {
             var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
             var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
-
             var dataCookerContext = new TestSourceDataCookerContext();
 
-            var sourceDataCooker1 = new TestSourceDataCooker(dataCookerContext)
-            {
-                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker1"),
-                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 }),
+            // Create and populate cookers
+            List<TestSourceDataCooker> cookers = new List<TestSourceDataCooker>();
+            Dictionary<int, ReadOnlyHashSet<int>> cookerKeys = new Dictionary<int, ReadOnlyHashSet<int>>() {
+                { 1, new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 })},
+                { 2, new ReadOnlyHashSet<int>(new HashSet<int>() { 113, 145, 167, 1000 })},
+                { 3, new ReadOnlyHashSet<int>(new HashSet<int>() { 200, 250, 286, 1000 })},
+                { 4, new ReadOnlyHashSet<int>(new HashSet<int>() { 145, 316, 315, 301 })},
+                { 5, new ReadOnlyHashSet<int>(new HashSet<int>() { 111, 222, 369 })},
+                { 6, new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 369, 1207 })},
+                { 7, new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 420, 1207 })}
             };
-            sourceSession.RegisterSourceDataCooker(sourceDataCooker1);
 
-            var sourceDataCooker2 = new TestSourceDataCooker(dataCookerContext)
+            for (int i = 1; i < 8; i++)
             {
-                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker2"),
-                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 113, 145, 167, 1000 }),
-            };
-            sourceSession.RegisterSourceDataCooker(sourceDataCooker2);
-
-            var sourceDataCooker3 = new TestSourceDataCooker(dataCookerContext)
-            {
-                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker3"),
-                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 200, 250, 286, 1000 }),
-            };
-            sourceSession.RegisterSourceDataCooker(sourceDataCooker3);
-
-            var sourceDataCooker4 = new TestSourceDataCooker(dataCookerContext)
-            {
-                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker4"),
-                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 145, 316, 315, 301 }),
-            };
-            sourceSession.RegisterSourceDataCooker(sourceDataCooker4);
-
-            var sourceDataCooker5 = new TestSourceDataCooker(dataCookerContext)
-            {
-                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker5"),
-                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 111, 222, 369 }),
-            };
-            sourceSession.RegisterSourceDataCooker(sourceDataCooker5);
-
-            var sourceDataCooker6 = new TestSourceDataCooker(dataCookerContext)
-            {
-                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker6"),
-                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 369, 1207 }),
-            };
-            sourceSession.RegisterSourceDataCooker(sourceDataCooker6);
-
-            var sourceDataCooker7 = new TestSourceDataCooker(dataCookerContext)
-            {
-                Path = DataCookerPath.ForSource(sourceParser.Id, "TestSourceDataCooker7"),
-                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 420, 1207 }),
-            };
-            sourceSession.RegisterSourceDataCooker(sourceDataCooker7);
-
-            // Setup some dependencies so that not all cookers are in the same pass/block
-            // Note that changing the required cookers after registering with the source
-            // session should be fine, as the cookers aren't scheduled until ProcessSource
-            // is called on the source session.
-            //
-            {
-                // sourceDataCooker4: Pass=1, Block=0
-                sourceDataCooker4.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
-                    new[] { sourceDataCooker3.Path });
-
-                // sourceDataCooker2: Pass=1, Block=1
-                sourceDataCooker2.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
-                    new[]
-                    {
-                        sourceDataCooker4.Path,
-                        sourceDataCooker1.Path
-                    });
-
-                // sourceDataCooker7: Pass=2, Block=0
-                sourceDataCooker7.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
-                    new[] { sourceDataCooker2.Path });
-
-                // sourceDataCooker6: Pass=3, Block=0
-                sourceDataCooker6.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
-                    new[]
-                    {
-                        sourceDataCooker2.Path,
-                        sourceDataCooker7.Path
-                    });
-
-                // sourceDataCooker5: Pass=4, Block=0
-                sourceDataCooker5.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
-                    new[] { sourceDataCooker6.Path });
+                string name = "TestSourceDataCooker" + i.ToString();
+                cookers.Add(CreateCooker(sourceSession, sourceParser.Id, name, cookerKeys[i]));
             }
 
             // data cooker order should be: { cooker1, cooker3 }, { cooker4 }, { cooker2 }, { cooker7 }, { cooker6 }, { cooker5 }
             // cooker1 and cooker3 could be in any order in pass 0.
+            {
+                // sourceDataCooker4: Pass=1, Block=0
+                cookers[3].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[] { cookers[2].Path });
+
+                // sourceDataCooker2: Pass=2, Block=0
+                cookers[1].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[]
+                    {
+                        cookers[3].Path,
+                        cookers[0].Path
+                    });
+
+                // sourceDataCooker7: Pass=3, Block=0
+                cookers[6].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[] { cookers[1].Path });
+
+                // sourceDataCooker6: Pass=4, Block=0
+                cookers[5].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[]
+                    {
+                        cookers[1].Path,
+                        cookers[6].Path
+                    });
+
+                // sourceDataCooker5: Pass=5, Block=0
+                cookers[4].RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[] { cookers[5].Path });
+            }
 
             // setup data for the TestParser to "parse"
             var testRecords = new List<TestRecord>
@@ -392,67 +373,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             };
 
             sourceParser.TestRecords = testRecords;
-
-            Assert.AreEqual(sourceSession.RegisteredSourceDataCookers.Count, 7);
+            Assert.AreEqual(sourceSession.RegisteredSourceDataCookers.Count, cookers.Count);
 
             TestProgress progress = new TestProgress();
             sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
-
-            // Make sure each cooker received a BeginDataCooking call
-            Assert.AreEqual(sourceDataCooker1.BeginDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker2.BeginDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker3.BeginDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker4.BeginDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker5.BeginDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker6.BeginDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker7.BeginDataCookingCallCount, 1);
-
-            // Make sure each cooker received a EndDataCooking call
-            Assert.AreEqual(sourceDataCooker1.EndDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker2.EndDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker3.EndDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker4.EndDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker5.EndDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker6.EndDataCookingCallCount, 1);
-            Assert.AreEqual(sourceDataCooker7.EndDataCookingCallCount, 1);
-
-            // Check that each cooker received the proper number of data records
-            Assert.AreEqual(sourceDataCooker1.CookDataElementCallCount, 1);
-            Assert.AreEqual(sourceDataCooker2.CookDataElementCallCount, 3);
-            Assert.AreEqual(sourceDataCooker3.CookDataElementCallCount, 4);
-            Assert.AreEqual(sourceDataCooker4.CookDataElementCallCount, 3);
-            Assert.AreEqual(sourceDataCooker5.CookDataElementCallCount, 1);
-            Assert.AreEqual(sourceDataCooker6.CookDataElementCallCount, 3);
-            Assert.AreEqual(sourceDataCooker7.CookDataElementCallCount, 2);
-
-            // Check that each cooker received the expected data records
-            Assert.IsTrue(sourceDataCooker1.ReceivedRecords.ContainsKey(testRecords[3]));
-            Assert.IsTrue(sourceDataCooker2.ReceivedRecords.ContainsKey(testRecords[0]));
-            Assert.IsTrue(sourceDataCooker2.ReceivedRecords.ContainsKey(testRecords[4]));
-            Assert.IsTrue(sourceDataCooker2.ReceivedRecords.ContainsKey(testRecords[9]));
-            Assert.IsTrue(sourceDataCooker3.ReceivedRecords.ContainsKey(testRecords[2]));
-            Assert.IsTrue(sourceDataCooker3.ReceivedRecords.ContainsKey(testRecords[4]));
-            Assert.IsTrue(sourceDataCooker3.ReceivedRecords.ContainsKey(testRecords[5]));
-            Assert.IsTrue(sourceDataCooker3.ReceivedRecords.ContainsKey(testRecords[7]));
-            Assert.IsTrue(sourceDataCooker4.ReceivedRecords.ContainsKey(testRecords[0]));
-            Assert.IsTrue(sourceDataCooker4.ReceivedRecords.ContainsKey(testRecords[6]));
-            Assert.IsTrue(sourceDataCooker4.ReceivedRecords.ContainsKey(testRecords[8]));
-            Assert.IsTrue(sourceDataCooker5.ReceivedRecords.ContainsKey(testRecords[10]));
-            Assert.IsTrue(sourceDataCooker6.ReceivedRecords.ContainsKey(testRecords[9]));
-            Assert.IsTrue(sourceDataCooker6.ReceivedRecords.ContainsKey(testRecords[10]));
-            Assert.IsTrue(sourceDataCooker6.ReceivedRecords.ContainsKey(testRecords[11]));
-            Assert.IsTrue(sourceDataCooker7.ReceivedRecords.ContainsKey(testRecords[9]));
-            Assert.IsTrue(sourceDataCooker7.ReceivedRecords.ContainsKey(testRecords[11]));
-
-            // TestRecord 145 should be delivered twice
-            // TestRecord 1207 should be delivered twice
-            // TestRecord 369 should be delivered twice
-            // TestRecord 1000 should be delivered twice
-            // TestRecord 167 should be delivered thrice
-            // TestRecord 500 should not ever be delivered
-            // TestRecord 1001 should not ever be delivered
-            int expectedReceivedCount = testRecords.Count + 6 - 2;
-            Assert.AreEqual(expectedReceivedCount, dataCookerContext.CountOfTestRecordsReceived);
 
             CheckProgressReports(progress, testRecords.Count);
         }
