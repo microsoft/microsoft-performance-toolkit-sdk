@@ -21,29 +21,23 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
     public class SourceSessionTests
     {
         /// <summary>
-        ///     Ensure progress is reported incrementally
+        ///     Ensure that progress is reported incrementally based off of the number of passes and records.
+        ///     After each pass or record has finished the progress should've reported a value closer to 100.
+        ///     The final report should be 100 to signify progress is complete.
         /// </summary>
         private void CheckProgressReports(TestProgress progress, int numRecords)
         {
             int numPasses = (progress.ReportedValues.Count) / numRecords;
             int numIter = numRecords * numPasses;
 
-            int pass = 0;
-            int record = 0;
             for (int recordIdx = 0; recordIdx < progress.ReportedValues.Count - 1; recordIdx++)
             {
                 int expectedVal = 100 * (recordIdx + 1) / numIter;
                 int actualVal = progress.ReportedValues[recordIdx];
                 Assert.AreEqual(expectedVal, actualVal);
-
-                // iterate record and pass
-                record++;
-                if (record == numRecords)
-                {
-                    record = 0;
-                    pass++;
-                }
             }
+
+            Assert.AreEqual(100, progress.ReportedValues[progress.ReportedValues.Count - 1]);
         }
 
         /// <summary>
@@ -280,19 +274,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             // Create and populate cookers
             List<TestSourceDataCooker> cookers = new List<TestSourceDataCooker>();
-            Dictionary<int, ReadOnlyHashSet<int>> cookerKeys = new Dictionary<int, ReadOnlyHashSet<int>>() {
-                { 1, new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 })},
-                { 2, new ReadOnlyHashSet<int>(new HashSet<int>() { 113, 145, 167, 1000 })},
-                { 3, new ReadOnlyHashSet<int>(new HashSet<int>() { 200, 250, 286, 1000 })},
-                { 4, new ReadOnlyHashSet<int>(new HashSet<int>() { 145, 316, 315, 301 })},
-                { 5, new ReadOnlyHashSet<int>(new HashSet<int>() { 111, 222, 369 })},
-                { 6, new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 369, 1207 })},
-                { 7, new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 420, 1207 })}
+            List<ReadOnlyHashSet<int>> cookerKeys = new List<ReadOnlyHashSet<int>>() {
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 13, 45, 67 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 113, 145, 167, 1000 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 200, 250, 286, 1000 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 145, 316, 315, 301 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 111, 222, 369 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 369, 1207 })},
+                { new ReadOnlyHashSet<int>(new HashSet<int>() { 167, 420, 1207 })}
             };
 
-            for (int i = 1; i < 8; i++)
+            for (int i = 0; i < cookerKeys.Count; i++)
             {
-                string name = "TestSourceDataCooker" + i.ToString();
+                string name = "TestSourceDataCooker" + (i + 1).ToString();
                 cookers.Add(CreateCooker(sourceSession, sourceParser.Id, name, cookerKeys[i]));
             }
 
@@ -418,8 +412,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.IsTrue(
                 sourceParser.RequestedDataKeys.Count ==
                 sourceDataCooker1.DataKeys.Count + sourceDataCooker2.DataKeys.Count);
-
-            CheckProgressReports(progress, testRecords.Count);
         }
 
         [TestMethod]
@@ -458,8 +450,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             Assert.IsTrue(sourceParser.ReceivedAllEventsConsumed);
             Assert.IsTrue(sourceParser.RequestedDataKeys.Count == sourceDataCooker1.DataKeys.Count);
-
-            CheckProgressReports(progress, testRecords.Count);
         }
     }
 }
