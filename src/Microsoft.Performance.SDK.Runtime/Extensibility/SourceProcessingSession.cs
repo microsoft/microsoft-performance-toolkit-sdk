@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -106,35 +107,41 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 }
             }
 
-            // populate progresstrackers for each pass
-            List<DataProcessorProgress> dataProcessorProgresses = new List<DataProcessorProgress>(countOfPassesToProcess);
+            // Create a progressTracker for each pass
+            List<DataProcessorProgress> progressTrackers = new List<DataProcessorProgress>(countOfPassesToProcess);
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
-                dataProcessorProgresses.Add(new DataProcessorProgress());
+                progressTrackers.Add(new DataProcessorProgress());
             }
 
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
                 this.currentPassIndex = passIndex;
                 this.InitializeForSourceParsing();
+                var prevProgress = 100 * passIndex;
+                var progressTracker = progressTrackers[passIndex];
 
-                dataProcessorProgresses[passIndex].PropertyChanged += (s, e) =>
+                PropertyChangedEventHandler propChangedCallback = (s, e) =>
                 {
                     if (!e.PropertyName.Equals(nameof(DataProcessorProgress.CurrentProgress)))
                     {
                         return;
                     }
+
                     var progress = s as DataProcessorProgress;
                     Debug.Assert(progress != null);
 
-                    var currProgress = dataProcessorProgresses.Select(p => p.CurrentProgress).Sum() / countOfPassesToProcess;
+                    var currProgress = (prevProgress + progress.CurrentProgress) / countOfPassesToProcess;
                     totalProgress.Report(currProgress);
                 };
 
-                this.SourceParser.ProcessSource(this, logger, dataProcessorProgresses[passIndex], cancellationToken);
+                progressTracker.PropertyChanged += propChangedCallback;
 
-                // Ensure to report finished tracking after each completed pass
-                dataProcessorProgresses[passIndex].Report(100);
+                this.SourceParser.ProcessSource(this, logger, progressTrackers[passIndex], cancellationToken);
+
+                // Ensure to report 100 to signify finished and deregister callback.
+                progressTracker.Report(100);
+                progressTracker.PropertyChanged -= propChangedCallback;
 
                 foreach (var cooker in this.sourceCookersByPass[passIndex])
                 {
