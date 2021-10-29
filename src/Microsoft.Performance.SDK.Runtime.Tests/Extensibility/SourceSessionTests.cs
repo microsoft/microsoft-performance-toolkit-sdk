@@ -48,7 +48,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         /// <summary>
         ///     Create and register cooker with session.
         /// </summary>
-        /// <returns>cooker</returns>
         private TestSourceDataCooker CreateCooker(
             SourceProcessingSession<TestRecord, TestParserContext, int> session,
             string id,
