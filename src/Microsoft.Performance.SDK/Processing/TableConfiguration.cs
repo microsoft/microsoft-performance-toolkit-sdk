@@ -79,8 +79,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             this.columnsRO = new ReadOnlyCollection<ColumnConfiguration>(EmptyArray<ColumnConfiguration>.Instance);
             this.columnRoles = new Dictionary<ColumnRole, Guid>();
-
-            this.Layout = TableDescriptor.DefaultLayoutStyle;
+          
             this.ColumnRoles = new ReadOnlyDictionary<ColumnRole, Guid>(this.columnRoles);
 
             this.highlightEntriesRO = new ReadOnlyCollection<HighlightEntry>(EmptyArray<HighlightEntry>.Instance);
@@ -90,12 +89,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets or sets the name of this configuration.
         /// </summary>
         public string Name { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the layout style for the table.
-        /// </summary>
-        [Obsolete("This will be removed by SDK v1.0.0 release candidate 1. TableLayoutStyles should only be set on TableDescriptors.")]
-        public TableLayoutStyle Layout { get; set; }
 
         /// <summary>
         ///     Gets or sets the type of chart displayed for this table.
@@ -148,9 +141,9 @@ namespace Microsoft.Performance.SDK.Processing
         public Guid GraphFilterColumnGuid { get; set; }
 
         /// <summary>
-        ///     Gets or sets an RTF string that is used to show the help information for this table.
+        ///     Gets or sets an string that is used for information about the table configuration.
         /// </summary>
-        public string HelpText { get; set; }
+        public string Description { get; set; }
 
         /// <summary>
         ///     Gets or sets the collection of query entries that are used to highlight in this table.
@@ -231,9 +224,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="columnGuid">
         ///     The guid of column to place into the role.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="column"/> is <c>null</c>.
-        /// </exception>
         /// <exception cref="InvalidEnumArgumentException">
         ///     <paramref name="columnRole"/> is not a valid member of the
         ///     <see cref="ColumnRole"/> enumeration.

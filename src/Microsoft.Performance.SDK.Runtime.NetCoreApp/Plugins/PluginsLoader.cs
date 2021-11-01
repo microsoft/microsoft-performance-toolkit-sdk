@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
@@ -53,7 +54,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         private readonly HashSet<IPluginsConsumer> subscribers;
 
         private readonly ExtensionRoot extensionRoot;
-
+        private readonly ILogger logger;
         private bool isDisposed;
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     class.
         /// </summary>
         public PluginsLoader()
-            : this(new IsolationAssemblyLoader(), x => new SandboxPreloadValidator(x, VersionChecker.Create()))
+            : this(new IsolationAssemblyLoader(), x => new SandboxPreloadValidator(x, VersionChecker.Create()), Logger.Create<PluginsLoader>())
         {
         }
 
@@ -80,21 +81,28 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         ///     a new <see cref="IPreloadValidator"/> instance. This function
         ///     should never return <c>null</c>.
         /// </param>
+        /// <param name="logger">
+        ///     Logs messages during loading.
+        /// </param>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="assemblyLoader"/> is <c>null</c>.
         ///     - or -
         ///     <paramref name="validatorFactory"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="logger"/> is <c>null</c>.
         /// </exception>
         public PluginsLoader(
             IAssemblyLoader assemblyLoader,
-            Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
+            Func<IEnumerable<string>, IPreloadValidator> validatorFactory,
+            ILogger logger)
         {
             Guard.NotNull(assemblyLoader, nameof(assemblyLoader));
             Guard.NotNull(validatorFactory, nameof(validatorFactory));
+            Guard.NotNull(logger, nameof(logger));
 
             this.subscribers = new HashSet<IPluginsConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
-            var catalog = new ReflectionPlugInCatalog(this.extensionDiscovery);
+            var catalog = new ReflectionProcessingSourceCatalog(this.extensionDiscovery);
             var extensionRepository = new DataExtensionFactory().CreateDataExtensionRepository();
             this.extensionRoot = new ExtensionRoot(catalog, extensionRepository);
 
@@ -104,6 +112,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             new DataExtensionReflector(this.extensionDiscovery, extensionRepository);
 
             this.isDisposed = false;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -135,7 +144,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 IEnumerable<ProcessingSourceReference> copy;
                 lock (this.mutex)
                 {
-                    copy = new HashSet<ProcessingSourceReference>(this.extensionRoot.PlugIns);
+                    copy = new HashSet<ProcessingSourceReference>(this.extensionRoot.ProcessingSources);
                 }
                 return copy;
             }
@@ -232,7 +241,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             lock (this.mutex)
             {
                 failed = new Dictionary<string, ErrorInfo>();
-                var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.PlugIns);
+                var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.ProcessingSources);
                 foreach (var dir in directories)
                 {
                     if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
@@ -247,7 +256,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 // should get refactored to avoid this redundant work.
                 this.extensionRoot.FinalizeDataExtensions();
 
-                foreach (var source in this.extensionRoot.PlugIns.Except(oldPlugins))
+                foreach (var source in this.extensionRoot.ProcessingSources.Except(oldPlugins))
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     this.NotifyProcessingSourceLoaded(name, version, source);
@@ -303,7 +312,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 }
 
                 // Manually send all the already loaded plugins to this consumer
-                foreach (var source in this.extensionRoot.PlugIns)
+                foreach (var source in this.extensionRoot.ProcessingSources)
                 {
                     var (name, version) = this.GetPluginNameAndVersion(source);
                     consumer.OnProcessingSourceLoaded(name, version, source);
@@ -400,7 +409,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        protected void ThrowIfDisposed()
+        private void ThrowIfDisposed()
         {
             if (this.isDisposed)
             {

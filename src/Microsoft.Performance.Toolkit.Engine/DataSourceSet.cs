@@ -215,14 +215,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Attempts to add the given Data Source to this instance for processing.
         /// </summary>
-        /// <param name="filePath">
+        /// <param name="dataSource">
         ///     The Data Source to process.
         /// </param>
         /// <returns>
         ///     <c>true</c> if the Data Source has been added for processing;
         ///     <c>false</c> if the Data Source is not valid, cannot be processed,
-        ///     or the instance has already been processed. Note that <c>false</c>
-        ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
+        ///     or the instance has already been processed.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
@@ -301,8 +300,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         /// <returns>
         ///     <c>true</c> if the <see cref="IDataSource"/> has been added for processing by the <see cref="IProcessingSource"/>;
-        ///     <c>false</c> otherwise. Note that <c>false</c>
-        ///     is always returned when <see cref="IsProcessed"/> is <c>true</c>.
+        ///     <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.

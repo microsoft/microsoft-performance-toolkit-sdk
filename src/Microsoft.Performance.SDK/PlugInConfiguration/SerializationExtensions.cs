@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using NuGet.Versioning;
 
-namespace Microsoft.Performance.SDK.PlugInConfiguration
+namespace Microsoft.Performance.SDK.PluginConfiguration
 {
     internal static class SerializationExtensions
     {
@@ -32,7 +32,7 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
             return result;
         }
 
-        internal static PlugInConfiguration ConfigurationFromDTO(this PlugInConfigurationDTO source, ILogger logger)
+        internal static PluginConfiguration ConfigurationFromDTO(this PluginConfigurationDTO source, ILogger logger)
         {
             var options = new HashSet<ConfigurationOption>();
             foreach (var configurationOption in source.Options)
@@ -42,16 +42,16 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
 
             if (!SemanticVersion.TryParse(source.Version, out var version))
             {
-                logger?.Error("Unable to parse PlugInConfiguration version: {0}", source.Version);
+                logger?.Error("Unable to parse {0} version: {1}", nameof(PluginConfiguration), source.Version);
                 return null;
             }
 
-            var result = new PlugInConfiguration(source.PlugInName, version, options);
+            var result = new PluginConfiguration(source.PluginName, version, options);
 
             return result;
         }
 
-        internal static PlugInConfigurationDTO ConfigurationToDTO(this PlugInConfiguration source)
+        internal static PluginConfigurationDTO ConfigurationToDTO(this PluginConfiguration source)
         {
             var options = new List<ConfigurationOptionDTO>();
             foreach (var configurationOption in source.Options)
@@ -59,9 +59,9 @@ namespace Microsoft.Performance.SDK.PlugInConfiguration
                 options.Add(configurationOption.ConfigurationOptionsToDTO());
             }
 
-            var result = new PlugInConfigurationDTO
+            var result = new PluginConfigurationDTO
             {
-                PlugInName = source.PlugInName,
+                PluginName = source.PluginName,
                 Version = source.Version.ToString(),
                 Options = options.ToArray(),
             };

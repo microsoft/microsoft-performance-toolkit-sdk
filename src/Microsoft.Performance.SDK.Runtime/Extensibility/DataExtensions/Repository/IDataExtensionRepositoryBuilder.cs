@@ -64,22 +64,24 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Reposit
         /// </exception>
         bool AddTableExtensionReference(ITableExtensionReference tableExtensionReference);
 
-        /// <summary>
-        ///     Add a data processor extension.
-        /// </summary>
-        /// <param name="dataProcessorReference">
-        ///     Data processor reference.
-        /// </param>
-        /// <returns>
-        ///     true if success.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="dataProcessorReference"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="System.ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference);
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     Add a data processor extension.
+        /////// </summary>
+        /////// <param name="dataProcessorReference">
+        ///////     Data processor reference.
+        /////// </param>
+        /////// <returns>
+        ///////     true if success.
+        /////// </returns>
+        /////// <exception cref="System.ArgumentNullException">
+        ///////     <paramref name="dataProcessorReference"/> is <c>null</c>.
+        /////// </exception>
+        /////// <exception cref="System.ObjectDisposedException">
+        ///////     This instance is disposed.
+        /////// </exception>
+        ////bool AddDataProcessorReference(IDataProcessorReference dataProcessorReference);
 
         /// <summary>
         ///     Called after all data extensions have been added to the repository to perform additional processing.

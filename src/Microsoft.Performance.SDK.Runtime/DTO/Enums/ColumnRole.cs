@@ -6,15 +6,10 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.Enums
     internal enum ColumnRole
     {
         Invalid = -1,
-        StartThreadId = 0,
-        EndThreadId,
-        StartTime,
+        StartTime = 0,
         EndTime,
         Duration,
-        HierarchicalTimeTree,
         ResourceId,
-        WaitDuration,
-        WaitEndTime,
         RecLeft,
         RecTop,
         RecHeight,

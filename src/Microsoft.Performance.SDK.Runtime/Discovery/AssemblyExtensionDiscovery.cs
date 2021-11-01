@@ -12,6 +12,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
@@ -24,6 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     {
         private readonly IAssemblyLoader assemblyLoader;
         private readonly Func<IEnumerable<string>, IPreloadValidator> validatorFactory;
+        private readonly ILogger logger;
         private readonly List<IExtensionTypeObserver> observers = new List<IExtensionTypeObserver>();
 
         /// <summary>
@@ -42,9 +44,45 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         public AssemblyExtensionDiscovery(
             IAssemblyLoader assemblyLoader,
             Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
+            : this(assemblyLoader, validatorFactory, Logger.Create<AssemblyExtensionDiscovery>())
         {
+        }
+
+        /// <summary>
+        ///     Constructor takes an <see cref="IAssemblyLoader"/> which is used to do the actual assembly loading.
+        /// </summary>
+        /// <param name="assemblyLoader">
+        ///     This is used to load individual assemblies.
+        /// </param>
+        /// <param name="validatorFactory">
+        ///     Creates <see cref="IPreloadValidator"/> instances to make
+        ///     sure candidate assemblies are valid to even try to load.
+        ///     The function takes a collection of file names and returns
+        ///     a new <see cref="IPreloadValidator"/> instance. This function
+        ///     should never return <c>null</c>.
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during loading.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="assemblyLoader" /> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="validatorFactory" /> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="logger" /> is <c>null</c>.
+        /// </exception>
+        public AssemblyExtensionDiscovery(
+            IAssemblyLoader assemblyLoader,
+            Func<IEnumerable<string>, IPreloadValidator> validatorFactory,
+            ILogger logger)
+        {
+            Guard.NotNull(assemblyLoader, nameof(assemblyLoader));
+            Guard.NotNull(validatorFactory, nameof(validatorFactory));
+            Guard.NotNull(logger, nameof(logger));
+
             this.assemblyLoader = assemblyLoader;
             this.validatorFactory = validatorFactory;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -296,7 +334,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
 
             watch.Stop();
-            Console.Error.WriteLine("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
+            this.logger.Info("Loaded {0} in {1}ms", allLoaded ? "all" : "some", watch.ElapsedMilliseconds);
 
             if (directoryErrors.Count > 0)
             {

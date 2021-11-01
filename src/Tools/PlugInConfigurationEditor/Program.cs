@@ -10,10 +10,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Performance.SDK.PlugInConfiguration;
+using Microsoft.Performance.SDK.PluginConfiguration;
 using NuGet.Versioning;
 
-namespace PlugInConfigurationEditor
+namespace PluginConfigurationEditor
 {
     internal class Program
     {
@@ -51,7 +51,7 @@ namespace PlugInConfigurationEditor
             var rootCommand = new RootCommand
             {
                 Description =
-                    "Create or modify a PerfToolkit plug-in configuration file. If a directory is not " +
+                    "Create or modify a PerfToolkit plugin configuration file. If a directory is not " +
                     "specified, the current directory is assumed."
             };
 
@@ -88,7 +88,7 @@ namespace PlugInConfigurationEditor
 
         private Command CreateCommandCreate(Argument dirArgument)
         {
-            var command = new Command("Create", "Create a plug-in configuration file.")
+            var command = new Command("Create", "Create a plugin configuration file.")
             {
                 Handler = GetCommandHandler(nameof(ProcessCommandCreate)),
             };
@@ -254,10 +254,10 @@ namespace PlugInConfigurationEditor
                     return;
                 }
 
-                var configuration = new PlugInConfiguration(name, version, new HashSet<ConfigurationOption>());
+                var configuration = new PluginConfiguration(name, version, new HashSet<ConfigurationOption>());
 
                 using var stream = File.Create(file);
-                PlugInConfigurationSerializer.WriteToStream(configuration, stream, new BridgeLogger());
+                PluginConfigurationSerializer.WriteToStream(configuration, stream, new BridgeLogger());
                 stream.Flush(true);
 
                 Logger.Information($"New configuration logged to {file}.");
@@ -282,13 +282,13 @@ namespace PlugInConfigurationEditor
                 string file = GetFileName(dir);
                 using var fileStream = File.Open(file, FileMode.Open, FileAccess.ReadWrite);
 
-                var existingConfiguration = PlugInConfigurationSerializer.ReadFromStream(fileStream, new BridgeLogger());
+                var existingConfiguration = PluginConfigurationSerializer.ReadFromStream(fileStream, new BridgeLogger());
                 if (existingConfiguration == null)
                 {
                     return;
                 }
 
-                Logger.Information($"Plug-In:\t{existingConfiguration.PlugInName}");
+                Logger.Information($"Plugin:\t{existingConfiguration.PluginName}");
                 Logger.Information($"Version:\t{existingConfiguration.Version}");
 
                 foreach (var option in existingConfiguration.Options)
@@ -331,10 +331,10 @@ namespace PlugInConfigurationEditor
                     Logger.EnableVerbose();
                 }
 
-                if (!PlugInConfigurationValidation.ValidateElementName(name))
+                if (!PluginConfigurationValidation.ValidateElementName(name))
                 {
                     Logger.Error(
-                        "The name is invalid '{0}'- " + PlugInConfigurationValidation.ValidCharactersMessage,
+                        "The name is invalid '{0}'- " + PluginConfigurationValidation.ValidCharactersMessage,
                         name);
                     return;
                 }
@@ -343,7 +343,7 @@ namespace PlugInConfigurationEditor
                 using var fileStream = File.Open(file, FileMode.Open, FileAccess.ReadWrite);
 
                 var logger = new BridgeLogger();
-                var existingConfiguration = PlugInConfigurationSerializer.ReadFromStream(fileStream, logger);
+                var existingConfiguration = PluginConfigurationSerializer.ReadFromStream(fileStream, logger);
                 if (existingConfiguration == null)
                 {
                     return;
@@ -359,12 +359,12 @@ namespace PlugInConfigurationEditor
 
                 fileStream.Position = 0;
 
-                var configuration = new PlugInConfiguration(
-                    existingConfiguration.PlugInName,
+                var configuration = new PluginConfiguration(
+                    existingConfiguration.PluginName,
                     existingConfiguration.Version,
                     options);
 
-                PlugInConfigurationSerializer.WriteToStream(configuration, fileStream, logger);
+                PluginConfigurationSerializer.WriteToStream(configuration, fileStream, logger);
 
                 Logger.Information($"Added option {name}.");
             }
@@ -390,7 +390,7 @@ namespace PlugInConfigurationEditor
                 using var fileStream = File.Open(file, FileMode.Open, FileAccess.ReadWrite);
 
                 var logger = new BridgeLogger();
-                var existingConfiguration = PlugInConfigurationSerializer.ReadFromStream(fileStream, logger);
+                var existingConfiguration = PluginConfigurationSerializer.ReadFromStream(fileStream, logger);
                 if (existingConfiguration == null)
                 {
                     return;
@@ -413,12 +413,12 @@ namespace PlugInConfigurationEditor
 
                 fileStream.Position = 0;
 
-                var configuration = new PlugInConfiguration(
-                    existingConfiguration.PlugInName,
+                var configuration = new PluginConfiguration(
+                    existingConfiguration.PluginName,
                     existingConfiguration.Version,
                     options);
 
-                PlugInConfigurationSerializer.WriteToStream(configuration, fileStream, logger);
+                PluginConfigurationSerializer.WriteToStream(configuration, fileStream, logger);
 
                 Logger.Information($"Deleted option {name}.");
             }
@@ -434,10 +434,10 @@ namespace PlugInConfigurationEditor
             string option,
             string name)
         {
-            if (!PlugInConfigurationValidation.ValidateElementName(name))
+            if (!PluginConfigurationValidation.ValidateElementName(name))
             {
                 Logger.Error(
-                    "The application name is invalid '{0}'- " + PlugInConfigurationValidation.ValidCharactersMessage,
+                    "The application name is invalid '{0}'- " + PluginConfigurationValidation.ValidCharactersMessage,
                     option);
                 return;
             }
@@ -468,10 +468,10 @@ namespace PlugInConfigurationEditor
             string option,
             string name)
         {
-            if (!PlugInConfigurationValidation.ValidateElementName(name))
+            if (!PluginConfigurationValidation.ValidateElementName(name))
             {
                 Logger.Error(
-                    "The runtime name is invalid '{0}'- " + PlugInConfigurationValidation.ValidCharactersMessage,
+                    "The runtime name is invalid '{0}'- " + PluginConfigurationValidation.ValidCharactersMessage,
                     option);
                 return;
             }
@@ -503,10 +503,10 @@ namespace PlugInConfigurationEditor
             string option,
             string name)
         {
-            if (!PlugInConfigurationValidation.ValidateElementName(name))
+            if (!PluginConfigurationValidation.ValidateElementName(name))
             {
                 Logger.Error(
-                    "The application name is invalid '{0}'- " + PlugInConfigurationValidation.ValidCharactersMessage,
+                    "The application name is invalid '{0}'- " + PluginConfigurationValidation.ValidCharactersMessage,
                     option);
                 return;
             }
@@ -537,10 +537,10 @@ namespace PlugInConfigurationEditor
             string option,
             string name)
         {
-            if (!PlugInConfigurationValidation.ValidateElementName(name))
+            if (!PluginConfigurationValidation.ValidateElementName(name))
             {
                 Logger.Error(
-                    "The runtime name is invalid '{0}'- " + PlugInConfigurationValidation.ValidCharactersMessage,
+                    "The runtime name is invalid '{0}'- " + PluginConfigurationValidation.ValidCharactersMessage,
                     option);
                 return;
             }
@@ -579,10 +579,10 @@ namespace PlugInConfigurationEditor
                     Logger.EnableVerbose();
                 }
 
-                if (!PlugInConfigurationValidation.ValidateElementName(option))
+                if (!PluginConfigurationValidation.ValidateElementName(option))
                 {
                     Logger.Error(
-                        "The option name is invalid '{0}'- " + PlugInConfigurationValidation.ValidCharactersMessage,
+                        "The option name is invalid '{0}'- " + PluginConfigurationValidation.ValidCharactersMessage,
                         option);
                     return false;
                 }
@@ -591,7 +591,7 @@ namespace PlugInConfigurationEditor
                 using var fileStream = File.Open(file, FileMode.Open, FileAccess.ReadWrite);
 
                 var logger = new BridgeLogger();
-                var existingConfiguration = PlugInConfigurationSerializer.ReadFromStream(fileStream, logger);
+                var existingConfiguration = PluginConfigurationSerializer.ReadFromStream(fileStream, logger);
                 if (existingConfiguration == null)
                 {
                     return false;
@@ -612,12 +612,12 @@ namespace PlugInConfigurationEditor
 
                 fileStream.Position = 0;
 
-                var configuration = new PlugInConfiguration(
-                    existingConfiguration.PlugInName,
+                var configuration = new PluginConfiguration(
+                    existingConfiguration.PluginName,
                     existingConfiguration.Version,
                     options);
 
-                PlugInConfigurationSerializer.WriteToStream(configuration, fileStream, logger);
+                PluginConfigurationSerializer.WriteToStream(configuration, fileStream, logger);
             }
             catch (Exception e)
             {
@@ -664,7 +664,7 @@ namespace PlugInConfigurationEditor
                 directory = Directory.GetCurrentDirectory();
             }
 
-            string file = Path.Combine(directory, PlugInConfigurationSerializer.DefaultFileName);
+            string file = Path.Combine(directory, PluginConfigurationSerializer.DefaultFileName);
 
             if (checkExists && !File.Exists(file))
             {

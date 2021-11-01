@@ -104,7 +104,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public IEnumerable<ProcessingSourceReference> ProcessingSourceReferences => this.Extensions.PlugIns;
+        public IEnumerable<ProcessingSourceReference> ProcessingSourceReferences => this.Extensions.ProcessingSources;
 
         /// <summary>
         ///     Gets the paths of all loaded Source Cookers.
@@ -138,13 +138,15 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         public IReadOnlyDictionary<Guid, ITableExtensionReference> TablesById => this.Extensions.TablesById;
 
-        /// <summary>
-        ///     Gets the paths of all loaded Data Processors.
-        /// </summary>
-        /// <exception cref="ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public IEnumerable<DataProcessorId> DataProcessors => this.Extensions.DataProcessors;
+        // TODO: __SDK_DP__
+        // Redesign Data Processor API
+        /////// <summary>
+        ///////     Gets the paths of all loaded Data Processors.
+        /////// </summary>
+        /////// <exception cref="ObjectDisposedException">
+        ///////     This instance is disposed.
+        /////// </exception>
+        ////public IEnumerable<DataProcessorId> DataProcessors => this.Extensions.DataProcessors;
 
         internal ExtensionRoot Extensions
         {
@@ -260,7 +262,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(extensionDirectories, nameof(extensionDirectories));
             Guard.Any(extensionDirectories, nameof(extensionDirectories));
 
-            IPlugInCatalog catalog = null;
+            IProcessingSourceCatalog catalog = null;
             IDataExtensionRepositoryBuilder repo = null;
             ExtensionRoot extensionRoot = null;
 
@@ -298,7 +300,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
 
-                catalog = new ReflectionPlugInCatalog(assemblyDiscovery);
+                catalog = new ReflectionProcessingSourceCatalog(assemblyDiscovery);
 
                 var factory = new DataExtensionFactory();
                 repo = factory.CreateDataExtensionRepository();

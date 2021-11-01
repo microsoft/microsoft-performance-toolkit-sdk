@@ -17,6 +17,33 @@ namespace Microsoft.Performance.SDK.Runtime
     {
         private List<TableDescriptor> enabledTables;
         private Dictionary<TableDescriptor, Exception> failedToEnableTables;
+        private readonly ILogger logger;
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ProcessingSourceExecutor"/>
+        ///     class.
+        /// </summary>
+        public ProcessingSourceExecutor()
+            : this(Logger.Create<ProcessingSourceExecutor>())
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ProcessingSourceExecutor"/>
+        ///     class.
+        /// </summary>
+        /// <param name="logger">
+        ///     Logs messages about the state of executing a processing source.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="logger"/> is <c>null</c>.
+        /// </exception>
+        public ProcessingSourceExecutor(ILogger logger)
+        {
+            Guard.NotNull(logger, nameof(logger));
+
+            this.logger = logger;
+        }
 
         /// <summary>
         ///     The custom data processor created by this object.
@@ -69,7 +96,7 @@ namespace Microsoft.Performance.SDK.Runtime
                         lock (this.failedToEnableTables)
                         {
                             this.failedToEnableTables[table] = e;
-                            Console.Error.WriteLine("Unable to enable {0}: {1}", table, e);
+                            this.logger.Warn("Unable to enable {0}: {1}", table, e);
                         }
                     }
                 });
@@ -122,7 +149,7 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 metadataTables.Clear();
                 metadataFailure = e;
-                Console.Error.WriteLine("Unable to build metadata tables for {0}: {1}", this.Processor, e);
+                this.logger.Warn("Unable to build metadata tables for {0}: {1}", this.Processor, e);
             }
 
             DataSourceInfo info;
@@ -136,7 +163,7 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 info = DataSourceInfo.Default;
                 infoFailure = e;
-                Console.Error.WriteLine("Unable to get data source info for {0}: {1}", this.Processor, e);
+                this.logger.Warn("Unable to get data source info for {0}: {1}", this.Processor, e);
             }
 
             var metadataName = this.Context.ProcessingSource.Name;

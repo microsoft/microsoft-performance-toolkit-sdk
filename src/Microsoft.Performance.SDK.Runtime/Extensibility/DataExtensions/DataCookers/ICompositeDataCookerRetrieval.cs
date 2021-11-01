@@ -12,18 +12,17 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
     public interface ICompositeDataCookerRetrieval
     {
         /// <summary>
-        ///     Create an instance of the described data cooker, or use an
-        ///     existing object if it has already been created.
+        ///     Create an instance of the described data cooker.
         /// </summary>
         /// <param name="requiredData">
         ///     Data required by the data cooker.
         /// </param>
         /// <returns>
-        ///     A data cooker.
+        ///     A composite data cooker.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="requiredData"/> is <c>null</c>.
         /// </exception>
-        IDataCooker GetOrCreateInstance(IDataExtensionRetrieval requiredData);
+        IDataCooker CreateInstance(IDataExtensionRetrieval requiredData);
     }
 }

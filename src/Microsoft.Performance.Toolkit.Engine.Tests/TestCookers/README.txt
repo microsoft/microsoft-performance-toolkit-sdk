@@ -18,3 +18,6 @@ Composite cooker for one source
 Composite cooker that uses two sources
 Composite cooker that uses a composite and a source
 Composite cooker that uses composite cookers
+
+Note that Source5InternalTable is marked as internal, and will always be enabled whenever Source5Processor is created.
+    This table requires Composite2 cooker, and so Source5DataCooker will always be enabled in this scenario.

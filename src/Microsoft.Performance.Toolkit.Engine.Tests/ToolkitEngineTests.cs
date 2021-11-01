@@ -13,6 +13,7 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
+using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestData;
@@ -478,7 +479,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
             if (testCase.DebugBreak)
             {
-                System.Diagnostics.Debugger.Break();
+                Debugger.Break();
             }
 
             using var plugins = PluginSet.Load(
@@ -529,8 +530,72 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var throwingTable in testCase.ThrowingTables)
             {
-                // TODO: Re-enable when the following issue is fixed: https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/55
-                //Assert.ThrowsException<TableNotBuiltException>(() => result.BuildTable(sut.AllTables.Single(x => x.Guid == Guid.Parse(throwingTable))));
+                Assert.ThrowsException<TableNotEnabledException>(() => result.BuildTable(sut.AvailableTables.Single(x => x.Guid == Guid.Parse(throwingTable))));
+            }
+        }
+
+        [TestMethod]
+        [FunctionalTest]
+        [DeploymentItem(@"TestData/source123_test_data.s123d")]
+        [DeploymentItem(@"TestData/source4_test_data.s4d")]
+        [DeploymentItem(@"TestData/source5_test_data.s5d")]
+        [DeploymentItem(@"TestData/BuildTableTestSuite.json")]
+        [DynamicData(nameof(BuildTableTestData), DynamicDataSourceType.Method)]
+        public void BuildTable_InternalTables(EngineBuildTableTestCaseDto testCase)
+        {
+            if (testCase.DebugBreak)
+            {
+                Debugger.Break();
+            }
+
+            using var plugins = PluginSet.Load(
+                new[]
+                {
+                    Environment.CurrentDirectory,
+                },
+                new IsolationAssemblyLoader());
+            using var dataSources = DataSourceSet.Create(plugins);
+
+            foreach (var file in testCase.FilePaths)
+            {
+                dataSources.AddFile(file);
+            }
+
+            using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
+
+            Assert.IsTrue(sut.TryEnableTable(Source5InternalTable.TableDescriptor));
+            Assert.IsFalse(sut.TryEnableTable(InvalidInternalTable.TableDescriptor));
+
+            var result = sut.Process();
+
+            var builtTable1 = result.BuildTable(Source5InternalTable.TableDescriptor);
+
+            Assert.AreEqual(1, builtTable1.RowCount);
+            Assert.AreEqual(2, builtTable1.Columns.Count());
+            Assert.AreEqual(0, builtTable1.BuiltInTableConfigurations.Count());
+            Assert.AreEqual(0, builtTable1.TableCommands.Count());
+            Assert.IsNull(builtTable1.DefaultConfiguration);
+            Assert.IsNull(builtTable1.TableRowDetailsGenerator);
+
+            for (int i = 0; i < builtTable1.Columns.Count; i++)
+            {
+                Assert.AreEqual(5, builtTable1.Columns.ElementAt(i).Project(0));
+            }
+
+            // This table was not explicitly enabled, but it's an internal table and should be available
+            var builtTable2 = result.BuildTable(Source5InternalTableNoBuildAction.TableDescriptor);
+
+            Assert.AreEqual(5, builtTable2.RowCount);
+            Assert.AreEqual(2, builtTable2.Columns.Count());
+            Assert.AreEqual(0, builtTable2.BuiltInTableConfigurations.Count());
+            Assert.AreEqual(0, builtTable2.TableCommands.Count());
+            Assert.IsNull(builtTable2.DefaultConfiguration);
+            Assert.IsNull(builtTable2.TableRowDetailsGenerator);
+
+            for (int i = 0; i < builtTable2.RowCount; i++)
+            {
+                Assert.AreEqual(i + 1, builtTable2.Columns.ElementAt(0).Project(i));
+                Assert.AreEqual($"Source5Row{i + 1}", builtTable2.Columns.ElementAt(1).Project(i));
             }
         }
 
@@ -769,7 +834,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
             if (testCase.DebugBreak)
             {
-                System.Diagnostics.Debugger.Break();
+                Debugger.Break();
             }
 
             using var plugins = PluginSet.Load(
@@ -931,6 +996,36 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         #endregion
 
+        #region Interactive
+
+        [TestMethod]
+        [FunctionalTest]
+        [DeploymentItem(@"TestData/interactive.ips")]
+        public void NonInteractive_ProcessThrows()
+        {
+            using var set = DataSourceSet.Create();
+
+            var file = new FileDataSource(@"TestData\interactive.ips");
+            set.AddDataSource(file);
+
+            using var sut = Engine.Create(
+                new EngineCreateInfo(set.AsReadOnly())
+                {
+                    IsInteractive = false,
+                });
+
+            var rer = sut.Process();
+
+            Assert.AreEqual(1, rer.ProcessingErrors.Count);
+            var error = rer.ProcessingErrors.Single();
+
+            Assert.IsInstanceOfType(error.Processor, typeof(InteractiveProcessor));
+            Assert.AreEqual(file, error.DataSources.Single());
+            Assert.IsInstanceOfType(error.ProcessFault, typeof(InvalidOperationException));
+        }
+
+        #endregion
+
         public static DataOutputPath Parse(string dataCookerOutputPath)
         {
             var split = dataCookerOutputPath.Split('/');
@@ -940,17 +1035,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             string cookerId = split[1];
             string outputId = split[2];
 
-            DataCookerPath dataCookerPath;
             if (string.IsNullOrWhiteSpace(parserId))
             {
-                dataCookerPath = DataCookerPath.ForComposite(cookerId);
-            }
-            else
-            {
-                dataCookerPath = DataCookerPath.ForSource(parserId, cookerId);
+                return DataOutputPath.ForComposite(cookerId, outputId);
             }
 
-            return new DataOutputPath(dataCookerPath, outputId);
+            return DataOutputPath.ForSource(parserId, cookerId, outputId);
         }
     }
 }
