@@ -281,9 +281,9 @@ This was moved from the SDK namespace to SDK.Runtime.
 
 - Internal table constructor arguments and properties have been removed from `TableAttribute`.
 
-- An `isInternalTable` constructor argument and an `IsInternalTable` property were added to `TableDescriptor`.
+- The runtime will now determine if a table needs to be marked as internal.
 
-Internal tables provide processing sources a way to create tables that require data cookers but do not declare build table actions. If using internal tables today, please update the table attribute and table descriptor appropriately.
+- Extensions tables, those that require data cookers, must provide a build table method.
 
 ### Engine Execution Results
 
