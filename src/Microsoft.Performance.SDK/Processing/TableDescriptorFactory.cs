@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Performance.SDK.Extensibility;
 
@@ -247,14 +248,6 @@ namespace Microsoft.Performance.SDK.Processing
                 return false;
             }
 
-            if (buildTableAction == null && !tableDescriptor.IsInternalTable)
-            {
-                logger?.Error(
-                    "The table {0} must add a buld table method or be marked Internal.",
-                    type.FullName);
-                return false;
-            }
-
             foreach (var cooker in type.GetCustomAttributes<RequiresSourceCookerAttribute>())
             {
                 tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
@@ -263,6 +256,24 @@ namespace Microsoft.Performance.SDK.Processing
             foreach (var cooker in type.GetCustomAttributes<RequiresCompositeCookerAttribute>())
             {
                 tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
+            }
+
+            if (tableDescriptor.RequiredDataCookers.Any())
+            {
+                if (buildTableAction == null)
+                {
+                    logger?.Error(
+                        "The table {0} must add a buld table method since it is an extension table.",
+                        type.FullName);
+                    return false;
+                }
+            }
+
+            // Non-extended tables must be marked as internal so that drivers/the engine
+            // know to call its associated Processor's BuildTable method
+            if (buildTableAction == null)
+            {
+                tableDescriptor.IsInternalTable = true;
             }
 
             // todo:should we make this optional, or does it makes sense to always include this?

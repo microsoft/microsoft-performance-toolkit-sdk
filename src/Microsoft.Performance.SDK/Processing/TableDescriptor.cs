@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Extensibility.DataProcessing;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -16,8 +15,8 @@ namespace Microsoft.Performance.SDK.Processing
     public sealed class TableDescriptor
         : IEquatable<TableDescriptor>,
           IDataCookerDependent //,
-          // TODO: __SDK_DP__
-          // IDataProcessorDependent
+                               // TODO: __SDK_DP__
+                               // IDataProcessorDependent
     {
         /// <summary>
         ///     The default table category name.
@@ -95,8 +94,7 @@ namespace Microsoft.Performance.SDK.Processing
             bool isMetadataTable = false,
             TableLayoutStyle defaultLayout = TableLayoutStyle.GraphAndTable,
             IEnumerable<DataCookerPath> requiredDataCookers = null,
-            IEnumerable<DataProcessorId> requiredDataProcessors = null,
-            bool isInternalTable = false)
+            IEnumerable<DataProcessorId> requiredDataProcessors = null)
         {
             Guard.NotDefault(guid, nameof(guid));
             Guard.NotNullOrWhiteSpace(name, nameof(name));
@@ -110,7 +108,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.DefaultLayout = defaultLayout;
             this.IsMetadataTable = isMetadataTable;
             this.ExtendedData = new Dictionary<string, object>();
-            this.IsInternalTable = isInternalTable || this.IsMetadataTable;
+            this.IsInternalTable = this.IsMetadataTable;
 
             this.dataCookers = requiredDataCookers != null ? new HashSet<DataCookerPath>(requiredDataCookers) : new HashSet<DataCookerPath>();
             this.dataProcessors = requiredDataProcessors != null ? new HashSet<DataProcessorId>(requiredDataProcessors) : new HashSet<DataProcessorId>();
