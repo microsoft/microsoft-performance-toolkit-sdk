@@ -12,15 +12,15 @@ namespace Microsoft.Performance.SDK.Tests
     {
         public FakeTableProvider()
         {
-            this.DiscoverCalls = new List<ISerializer>();
+            this.DiscoverCalls = new List<ITableConfigurationsSerializer>();
             this.DiscoverReturnValue = Array.Empty<DiscoveredTable>();
         }
 
-        public List<ISerializer> DiscoverCalls { get; }
+        public List<ITableConfigurationsSerializer> DiscoverCalls { get; }
 
         public IEnumerable<DiscoveredTable> DiscoverReturnValue { get; set; }
 
-        public IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+        public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
         {
             this.DiscoverCalls.Add(tableConfigSerializer);
             return this.DiscoverReturnValue;

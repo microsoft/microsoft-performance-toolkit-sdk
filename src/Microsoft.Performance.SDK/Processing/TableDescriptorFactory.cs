@@ -52,7 +52,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             out TableDescriptor tableDescriptor)
         {
             return TryCreate(type, tableConfigSerializer, out tableDescriptor, out var buildTableAction);
@@ -98,7 +98,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction)
         {
@@ -148,7 +148,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             out Func<IDataExtensionRetrieval, bool> isDataAvailableFunc)
@@ -208,7 +208,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             ILogger logger,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
@@ -276,7 +276,7 @@ namespace Microsoft.Performance.SDK.Processing
         private static TableDescriptor GetTableDescriptor(
             Type type,
             string propertyName,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             ILogger logger)
         {
             Debug.Assert(type != null, $"Parameter {nameof(type)} cannot be null.");

@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Tests
     [TestClass]
     public class ProcessingSourceTests
     {
-        private ISerializer serializer = new FakeSerializer();
+        private ITableConfigurationsSerializer serializer = new FakeSerializer();
         private IApplicationEnvironment applicationEnvironment = new StubApplicationEnvironment() { Serializer = new FakeSerializer() };
 
         [TestCleanup]

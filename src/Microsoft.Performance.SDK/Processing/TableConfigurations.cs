@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Processing
         public static TableConfigurations GetPrebuiltTableConfigurations(
             Type tableType,
             Guid tableId,
-            ISerializer serializer)
+            ITableConfigurationsSerializer serializer)
         {
             return GetPrebuiltTableConfigurations(tableType, tableId, serializer, null);
         }
@@ -106,7 +106,7 @@ namespace Microsoft.Performance.SDK.Processing
         public static TableConfigurations GetPrebuiltTableConfigurations(
             Type tableType,
             Guid tableId,
-            ISerializer serializer,
+            ITableConfigurationsSerializer serializer,
             ILogger logger)
         {
             Guard.NotNull(serializer, nameof(serializer));
@@ -136,7 +136,7 @@ namespace Microsoft.Performance.SDK.Processing
         private static TableConfigurations GetPrebuiltConfigurationFromExternalFile(
             Type tableType,
             Guid tableId,
-            ISerializer serializer,
+            ITableConfigurationsSerializer serializer,
             ILogger logger)
         {
             var tableAttribute = tableType.GetCustomAttribute<PrebuiltConfigurationsFilePathAttribute>();
@@ -203,7 +203,7 @@ namespace Microsoft.Performance.SDK.Processing
         private static TableConfigurations GetPrebuiltConfigurationFromEmbeddedResource(
             Type tableType,
             Guid tableId,
-            ISerializer serializer,
+            ITableConfigurationsSerializer serializer,
             ILogger logger)
         {
             var tableAttribute = tableType.GetCustomAttribute<PrebuiltConfigurationsEmbeddedResourceAttribute>();

@@ -69,7 +69,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
             private static readonly ITableProvider DefaultProvider
                 = TableDiscovery.CreateForAssembly(typeof(Source5DataSource).Assembly);
 
-            public IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
             {
                 var tables = new HashSet<DiscoveredTable>(DefaultProvider.Discover(tableConfigSerializer));
                 tables.Add(
