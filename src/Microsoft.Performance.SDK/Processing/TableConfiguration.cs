@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.Name = name;
 
             this.columnsRO = new ReadOnlyCollection<ColumnConfiguration>(EmptyArray<ColumnConfiguration>.Instance);
-            this.columnRoles = new Dictionary<string, Guid>();
+            this.columnRoles = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
           
             this.ColumnRoles = new ReadOnlyDictionary<string, Guid>(this.columnRoles);
 
@@ -195,7 +195,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The column to place into the role.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="columnRole"/> is null.
+        ///     <paramref name="columnRole"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="column"/> is <c>null</c>.
@@ -224,7 +224,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The guid of column to place into the role.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="columnRole"/> is null.
+        ///     <paramref name="columnRole"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
         ///     <paramref name="columnGuid"/> is a metadata column (see <see cref="AllMetadataColumns"/>).

@@ -155,7 +155,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
                         break;
                 }
 
-                if (!string.IsNullOrEmpty(newEntry))
+                if (newEntry != null)
                 {
                     newColumnRoles.Add(newEntry, entry);
                 }                
