@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestTables;
 
@@ -18,8 +17,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
     public sealed class Source5DataSource
         : ProcessingSource
     {
-        internal static readonly int BuildActionInt = 2600;
-
         public const string Extension = ".s5d";
 
         public Source5DataSource()
@@ -50,19 +47,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
                 Path.GetExtension(dataSource.Uri.LocalPath));
         }
 
-        /// <inheritdoc/>
-        /// This is used to establish the build action for internal table <see cref="Source5InternalTableNoBuildAction"/>.
-        protected override Action<ITableBuilder, IDataExtensionRetrieval> GetTableBuildAction(
-            Type type)
-        {
-            if (type == typeof(Source5InternalTableNoBuildAction))
-            {
-                return (builder, data) => Source5InternalTableNoBuildAction.BuildTableAction(builder, data, Source5DataSource.BuildActionInt);
-            }
-
-            return null;
-        }
-
         private sealed class Discovery
             : ITableProvider
         {
@@ -73,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
             {
                 var tables = new HashSet<DiscoveredTable>(DefaultProvider.Discover(tableConfigSerializer));
                 tables.Add(
-                    new DiscoveredTable(Source5InternalTable.TableDescriptor, Source5InternalTable.BuildTableAction));
+                    new DiscoveredTable(Source5MetadataTable.TableDescriptor, Source5MetadataTable.BuildTableAction));
                 return tables;
             }
         }

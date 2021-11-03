@@ -91,6 +91,34 @@ namespace Microsoft.Performance.SDK.Tests
             AssertAttributeTranslated(TableWithSubAttribute.Descriptor, descriptor);
         }
 
+        [TestMethod]
+        [UnitTest]
+        public void TryCreateExtensionTableDescriptor()
+        {
+            var result = TableDescriptorFactory.TryCreate
+                (typeof(ExtensionTable),
+                serializer,
+                out TableDescriptor descriptor);
+
+            Assert.IsTrue(result);
+            Assert.IsNotNull(descriptor);
+
+            AssertAttributeTranslated(ExtensionTable.TableDescriptor, descriptor);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryCreateExtensionTableDescriptorWithNoBuildMethod()
+        {
+            var result = TableDescriptorFactory.TryCreate
+                (typeof(ExtensionTableNoBuildMethod),
+                serializer,
+                out TableDescriptor descriptor);
+
+            Assert.IsFalse(result);
+            Assert.IsNull(descriptor);
+        }
+
         private static void AssertAttributeTranslated(
             TableDescriptor original,
             TableDescriptor returned)
@@ -279,6 +307,32 @@ namespace Microsoft.Performance.SDK.Tests
                 "Name",
                 "Description",
                 "Category");
+        }
+
+        [Table]
+        public sealed class ExtensionTable
+        {
+            public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
+                Guid.Parse("{DEC27D7E-D77F-4D64-B055-2A5AAE44E2F9}"),
+                "Name",
+                "Description",
+                "Category",
+                requiredDataCookers: new DataCookerPath[] { DataCookerPath.ForSource("SourceParser1", "CookerA") });
+
+            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
+            {
+            }
+        }
+
+        [Table]
+        public sealed class ExtensionTableNoBuildMethod
+        {
+            public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
+                Guid.Parse("{F2237762-AE04-4E2D-924B-AC381FFD3E26}"),
+                "Name",
+                "Description",
+                "Category",
+                requiredDataCookers: new DataCookerPath[] { DataCookerPath.ForSource("SourceParser1", "CookerB") });
         }
     }
 }

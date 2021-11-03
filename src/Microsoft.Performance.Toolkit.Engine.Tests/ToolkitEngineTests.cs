@@ -563,12 +563,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
 
-            Assert.IsTrue(sut.TryEnableTable(Source5InternalTable.TableDescriptor));
-            Assert.IsFalse(sut.TryEnableTable(InvalidInternalTable.TableDescriptor));
+            Assert.IsTrue(sut.TryEnableTable(Source5MetadataTable.TableDescriptor));
+            Assert.IsFalse(sut.TryEnableTable(InvalidMetadataTable.TableDescriptor));
 
             var result = sut.Process();
 
-            var builtTable1 = result.BuildTable(Source5InternalTable.TableDescriptor);
+            var builtTable1 = result.BuildTable(Source5MetadataTable.TableDescriptor);
 
             Assert.AreEqual(1, builtTable1.RowCount);
             Assert.AreEqual(2, builtTable1.Columns.Count());
@@ -582,8 +582,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 Assert.AreEqual(5, builtTable1.Columns.ElementAt(i).Project(0));
             }
 
-            // This table was not explicitly enabled, but it's an internal table and should be available
-            var builtTable2 = result.BuildTable(Source5InternalTableNoBuildAction.TableDescriptor);
+            // This table was not explicitly enabled, but it's an metadata (internal) table and should be available
+            var builtTable2 = result.BuildTable(Source5MetadataTable2.TableDescriptor);
 
             Assert.AreEqual(5, builtTable2.RowCount);
             Assert.AreEqual(2, builtTable2.Columns.Count());
