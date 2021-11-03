@@ -82,21 +82,5 @@ namespace Microsoft.Performance.SDK.Processing
                 self,
                 ColumnConfigurationEqualityComparer.Default);
         }
-
-        /// <summary>
-        ///     Determines whether the given value is valid as a <see cref="ColumnRole"/>.
-        /// </summary>
-        /// <param name="self">
-        ///     The value to check.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the given <see cref="ColumnRole"/> is valid;
-        ///     <c>false</c> otherwise.
-        /// </returns>
-        public static bool IsValidColumnRole(this ColumnRole self)
-        {
-            return Enum.IsDefined(typeof(ColumnRole), self) &&
-                self != ColumnRole.CountColumnMetadata;
-        }
     }
 }

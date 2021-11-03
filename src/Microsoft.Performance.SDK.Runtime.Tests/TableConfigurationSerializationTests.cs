@@ -68,9 +68,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             var config = new TableConfiguration("test");
 
-            var roles = Enum.GetValues(typeof(ColumnRole))
-                .Cast<ColumnRole>()
-                .Where(x => x.IsValidColumnRole())
+            var roles = typeof(ColumnRole).GetProperties()
+                .Select(x => x.GetConstantValue())
+                .Cast<string>()
                 .ToList();
             var columns = Enumerable.Range(0, roles.Count).Select(_ => Any.ColumnConfiguration()).ToList();
             config.Columns = columns;
@@ -177,12 +177,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 {
                     switch (role)
                     {
-                        case DTO.PreV1.ColumnRole.StartThreadId:
-                        case DTO.PreV1.ColumnRole.EndThreadId:
-                        case DTO.PreV1.ColumnRole.HierarchicalTimeTree:
-                        case DTO.PreV1.ColumnRole.WaitDuration:
-                        case DTO.PreV1.ColumnRole.WaitEndTime:
                         case DTO.PreV1.ColumnRole.Invalid:
+                        case DTO.PreV1.ColumnRole.CountColumnMetadata:
                             return false;
                     }
 
@@ -195,7 +191,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.AreEqual(validRoles.Count, newConfig.ColumnRoles.Count);
                 foreach (var kvp in validRoles)
                 {
-                    ColumnRole? newRole = null;
+                    string newRole = null;
 
                     switch (kvp.Key)
                     {
@@ -216,26 +212,46 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                             break;
 
                         case DTO.PreV1.ColumnRole.RecLeft:
-                            newRole = ColumnRole.RecLeft;
+                            newRole = DTO.PreV1.ColumnRole.RecLeft.ToString();
                             break;
 
                         case DTO.PreV1.ColumnRole.RecTop:
-                            newRole = ColumnRole.RecTop;
+                            newRole = DTO.PreV1.ColumnRole.RecTop.ToString();
                             break;
 
                         case DTO.PreV1.ColumnRole.RecHeight:
-                            newRole = ColumnRole.RecHeight;
+                            newRole = DTO.PreV1.ColumnRole.RecHeight.ToString();
                             break;
 
                         case DTO.PreV1.ColumnRole.RecWidth:
-                            newRole = ColumnRole.RecWidth;
+                            newRole = DTO.PreV1.ColumnRole.RecWidth.ToString();
+                            break;
+
+                        case DTO.PreV1.ColumnRole.StartThreadId:
+                            newRole = DTO.PreV1.ColumnRole.StartThreadId.ToString();
+                            break;
+
+                        case DTO.PreV1.ColumnRole.EndThreadId:
+                            newRole = DTO.PreV1.ColumnRole.EndThreadId.ToString();
+                            break;
+
+                        case DTO.PreV1.ColumnRole.HierarchicalTimeTree:
+                            newRole = DTO.PreV1.ColumnRole.HierarchicalTimeTree.ToString();
+                            break;
+
+                        case DTO.PreV1.ColumnRole.WaitDuration:
+                            newRole = DTO.PreV1.ColumnRole.WaitDuration.ToString();
+                            break;
+
+                        case DTO.PreV1.ColumnRole.WaitEndTime:
+                            newRole = DTO.PreV1.ColumnRole.WaitEndTime.ToString();
                             break;
                     }
 
-                    Assert.IsTrue(newRole.HasValue);
+                    Assert.IsFalse(string.IsNullOrEmpty(newRole));
 
                     var newConfigPair = newConfig.ColumnRoles.First(x => x.Value == kvp.Value.ColumnGuid);
-                    Assert.AreEqual(newRole.Value, newConfigPair.Key);
+                    Assert.AreEqual(newRole, newConfigPair.Key);
                 }
             }
         }

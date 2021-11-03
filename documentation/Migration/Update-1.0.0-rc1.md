@@ -101,11 +101,21 @@ The following members have been removed from `CustomDataProcessor`:
 This class has been removed. Please use `RequiresSourceCookerAttribute` or
 `RequiresCompositCookerAttribute`.
 
+### ColumnRole
+
+This enum has been removed. Please use `ColumnRole` static class for defined Column Roles.
+
 ### TableConfiguration
 
 The following members have been removed from `TableConfiguration`:
 
 - property `TableConfiguration.Layout`
+
+The following members have been changed from `TableCofiguration`:
+
+- property `ColumnRoles` dictionary has been updated to use `IDictionary<string, Guid>` instead of `IDictionary<ColumnRole, Guid>`.
+
+- AddColumnRole and RemoveColumnRole methods now take in case sensitive strings. Plese see `ColumnRoles` static class for string options.
 
 ### CustomDataSourceBase
 
