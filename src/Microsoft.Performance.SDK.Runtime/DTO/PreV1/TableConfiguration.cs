@@ -126,6 +126,8 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
                         newEntry = null;
                         break;
 
+                    // These column roles are no longer defined, converting to a string for backwards compatibility.
+                    // See ColumnRole summary for details.
                     case ColumnRole.StartThreadId:
                     case ColumnRole.EndThreadId:
                     case ColumnRole.HierarchicalTimeTree:
