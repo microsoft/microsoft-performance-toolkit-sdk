@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.Name = name;
 
             this.columnsRO = new ReadOnlyCollection<ColumnConfiguration>(EmptyArray<ColumnConfiguration>.Instance);
-            this.columnRoles = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+            this.columnRoles = new Dictionary<string, Guid>(StringComparer.Ordinal);
           
             this.ColumnRoles = new ReadOnlyDictionary<string, Guid>(this.columnRoles);
 
@@ -189,7 +189,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Places the given column into the given column role.
         /// </summary>
         /// <param name="columnRole">
-        ///     The role into which to place the column.
+        ///     The case sensitive role into which to place the column.
         /// </param>
         /// <param name="column">
         ///     The column to place into the role.
@@ -218,7 +218,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Places the given column into the given column role.
         /// </summary>
         /// <param name="columnRole">
-        ///     The role into which to place the column.
+        ///     The case sensitive role into which to place the column.
         /// </param>
         /// <param name="columnGuid">
         ///     The guid of column to place into the role.
