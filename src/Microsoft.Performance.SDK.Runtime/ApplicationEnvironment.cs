@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using System;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -27,9 +28,6 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="tableDataSynchronizer">
         ///     Used to synchronize table data changes with the user interface.
         /// </param>
-        /// <param name="serializer">
-        ///     Used to serialize/deserialize data (e.g. table configurations).
-        /// </param>
         /// <param name="dataCookers">
         ///     A repository of source data cookers.
         /// </param>
@@ -43,7 +41,6 @@ namespace Microsoft.Performance.SDK.Runtime
             string applicationName,
             string runtimeName,
             ITableDataSynchronization tableDataSynchronizer,
-            ISerializer serializer,
             ISourceDataCookerRepository dataCookers,
             ISourceSessionFactory sourceSessionFactory,
             IMessageBox messageBox)
@@ -51,7 +48,6 @@ namespace Microsoft.Performance.SDK.Runtime
             // application and runtime names may be null
 
             Guard.NotNull(tableDataSynchronizer, nameof(tableDataSynchronizer));
-            Guard.NotNull(serializer, nameof(serializer));
             Guard.NotNull(dataCookers, nameof(dataCookers));
             Guard.NotNull(sourceSessionFactory, nameof(sourceSessionFactory));
             Guard.NotNull(messageBox, nameof(messageBox));
@@ -64,7 +60,7 @@ namespace Microsoft.Performance.SDK.Runtime
             // _CDS_
             // todo:when tests are ready, consider checking that columnController is not null
 
-            this.Serializer = serializer;
+            this.Serializer = new TableConfigurationsSerializer();
             this.TableDataSynchronizer = tableDataSynchronizer;
             this.SourceDataCookerFactoryRetrieval = dataCookers;
             this.SourceSessionFactory = sourceSessionFactory;
@@ -80,7 +76,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public bool IsInteractive { get; set; }
 
         /// <inheritdoc />
-        public ISerializer Serializer { get; }
+        public ITableConfigurationsSerializer Serializer { get; }
 
         /// <inheritdoc />
         public ITableDataSynchronization TableDataSynchronizer { get; }

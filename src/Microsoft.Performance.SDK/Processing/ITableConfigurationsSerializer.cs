@@ -7,10 +7,10 @@ using System.IO;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Used to perform serialization operations against <see cref="TableConfiguration"/>
+    ///     Used to perform serialization operations against <see cref="TableConfigurations"/>
     ///     instances.
     /// </summary>
-    public interface ISerializer
+    public interface ITableConfigurationsSerializer
     {
         /// <summary>
         ///     Deserializes the content of a <see cref="Stream"/> into a collection

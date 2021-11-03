@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Tests
     [TestClass]
     public class TableDescriptorFactoryTests
     {
-        private static ISerializer serializer = new FakeSerializer();
+        private static ITableConfigurationsSerializer serializer = new FakeSerializer();
 
         [TestMethod]
         [UnitTest]

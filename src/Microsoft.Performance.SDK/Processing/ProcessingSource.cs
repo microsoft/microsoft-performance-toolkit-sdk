@@ -296,7 +296,7 @@ namespace Microsoft.Performance.SDK.Processing
             return null;
         }
 
-        private void InitializeAllTables(ISerializer tableConfigSerializer)
+        private void InitializeAllTables(ITableConfigurationsSerializer tableConfigSerializer)
         {
             Debug.Assert(tableConfigSerializer != null);
 

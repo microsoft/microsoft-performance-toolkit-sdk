@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Tests
     internal static class TableDescriptorUtils
     {
         internal static List<TableDescriptor> CreateTableDescriptors(
-            ISerializer serializer,
+            ITableConfigurationsSerializer serializer,
             params Type[] types)
         {
             CreateTableDescriptors(serializer, out var descriptors, out _, out _, types);
@@ -21,7 +21,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
 
         internal static void CreateTableDescriptors(
-            ISerializer serializer,
+            ITableConfigurationsSerializer serializer,
             out List<TableDescriptor> descriptors,
             out List<Action<ITableBuilder, IDataExtensionRetrieval>> buildActions,
             out List<bool> isInternal,
