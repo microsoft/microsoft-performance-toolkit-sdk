@@ -53,7 +53,7 @@ namespace Microsoft.Performance.SDK.Processing
                 RightFreezeColumn,
             }.AsReadOnly();
 
-        private readonly IDictionary<ColumnRole, Guid> columnRoles;
+        private readonly IDictionary<string, Guid> columnRoles;
 
         private ReadOnlyCollection<ColumnConfiguration> columnsRO;
 
@@ -78,9 +78,9 @@ namespace Microsoft.Performance.SDK.Processing
             this.Name = name;
 
             this.columnsRO = new ReadOnlyCollection<ColumnConfiguration>(EmptyArray<ColumnConfiguration>.Instance);
-            this.columnRoles = new Dictionary<ColumnRole, Guid>();
+            this.columnRoles = new Dictionary<string, Guid>();
           
-            this.ColumnRoles = new ReadOnlyDictionary<ColumnRole, Guid>(this.columnRoles);
+            this.ColumnRoles = new ReadOnlyDictionary<string, Guid>(this.columnRoles);
 
             this.highlightEntriesRO = new ReadOnlyCollection<HighlightEntry>(EmptyArray<HighlightEntry>.Instance);
         }
@@ -183,7 +183,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     If there are no column roles, then this dictionary will
         ///     be empty.
         /// </summary>
-        public IReadOnlyDictionary<ColumnRole, Guid> ColumnRoles { get; }
+        public IReadOnlyDictionary<string, Guid> ColumnRoles { get; }
 
         /// <summary>
         ///     Places the given column into the given column role.
@@ -197,16 +197,10 @@ namespace Microsoft.Performance.SDK.Processing
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="column"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="InvalidEnumArgumentException">
-        ///     <paramref name="columnRole"/> is not a valid member of the
-        ///     <see cref="ColumnRole"/> enumeration.
-        ///     - or -
-        ///     <paramref name="columnRole"/> is equal to <see cref="ColumnRole.CountColumnMetadata"/>.
-        /// </exception>
         /// <exception cref="System.InvalidOperationException">
         ///     <paramref name="column"/> is a metadata column (see <see cref="AllMetadataColumns"/>.
         /// </exception>
-        public void AddColumnRole(ColumnRole columnRole, ColumnConfiguration column)
+        public void AddColumnRole(string columnRole, ColumnConfiguration column)
         {
             Guard.NotNull(column, nameof(column));
 
@@ -224,30 +218,11 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="columnGuid">
         ///     The guid of column to place into the role.
         /// </param>
-        /// <exception cref="InvalidEnumArgumentException">
-        ///     <paramref name="columnRole"/> is not a valid member of the
-        ///     <see cref="ColumnRole"/> enumeration.
-        ///     - or -
-        ///     <paramref name="columnRole"/> is equal to <see cref="ColumnRole.CountColumnMetadata"/>.
-        /// </exception>
         /// <exception cref="System.InvalidOperationException">
         ///     <paramref name="columnGuid"/> is a metadata column (see <see cref="AllMetadataColumns"/>.
         /// </exception>
-        public void AddColumnRole(ColumnRole columnRole, Guid columnGuid)
+        public void AddColumnRole(string columnRole, Guid columnGuid)
         {
-            if (columnRole == ColumnRole.CountColumnMetadata)
-            {
-                throw new InvalidEnumArgumentException(
-                    $"The `{ColumnRole.CountColumnMetadata}' is not a valid role.");
-            }
-
-            if (!Enum.IsDefined(typeof(ColumnRole), columnRole))
-            {
-                throw new InvalidEnumArgumentException(nameof(columnRole), (int)columnRole, typeof(ColumnRole));
-            }
-
-            Debug.Assert(columnRole.IsValidColumnRole());
-
             if (AllMetadataColumns.Any(column => column.Metadata.Guid == columnGuid))
             {
                 throw new InvalidOperationException($"Metadata columns may not be assigned a role.");
@@ -262,7 +237,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="columnRole">
         ///     The role to be removed.
         /// </param>
-        public void RemoveColumnRole(ColumnRole columnRole)
+        public void RemoveColumnRole(string columnRole)
         {
             this.columnRoles.Remove(columnRole);
         }

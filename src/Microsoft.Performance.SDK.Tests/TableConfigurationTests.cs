@@ -126,21 +126,7 @@ namespace Microsoft.Performance.SDK.Tests
                 var r = ColumnRole.Duration;
                 Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddColumnRole(r, c.Metadata.Guid));
             }
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void AddColumnRole_InvalidRoleThrows()
-        {
-            var c = Any.ColumnConfiguration();
-            this.Sut.Columns = new[] { c, };
-
-            Assert.ThrowsException<InvalidEnumArgumentException>(
-                () => this.Sut.AddColumnRole(ColumnRole.CountColumnMetadata, c.Metadata.Guid));
-            Assert.ThrowsException<InvalidEnumArgumentException>(
-                () => this.Sut.AddColumnRole(
-                    (ColumnRole)((int)ColumnRole.CountColumnMetadata + 1), c.Metadata.Guid));
-        }
+        }        
 
         [TestMethod]
         [UnitTest]
@@ -236,7 +222,7 @@ namespace Microsoft.Performance.SDK.Tests
             this.Sut.Columns = new[] { c1, c2, };
 
             var r1 = ColumnRole.Duration;
-            var r2 = ColumnRole.CountColumnMetadata;
+            var r2 = ColumnRole.ResourceId;
             this.Sut.AddColumnRole(r1, c1.Metadata.Guid);
 
             Assert.AreEqual(1, this.Sut.ColumnRoles.Count);

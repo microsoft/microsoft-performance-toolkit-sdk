@@ -4,55 +4,48 @@
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Defines the role of a column in a graph.
+    ///     Defines known string values of column roles.
     /// </summary>
-    public enum ColumnRole
+    public static class ColumnRole
     {
         /// <summary>
-        ///     Indicates the start timestamp for the x-axis.
+        ///     Indicates the start timestamp.
         /// </summary>
-        StartTime = 0,
+        public const string StartTime = "StartTime";
 
         /// <summary>
-        ///     Indicates the end timestamp for the x-axis.
+        ///     Indicates the end timestamp.
         /// </summary>
-        EndTime,
+        public const string EndTime = "EndTime";
 
         /// <summary>
-        ///     Indicates how long each row takes on the time line.
+        ///     Indicates duration in time.
         /// </summary>
-        Duration,
+        public const string Duration = "Duration";
 
         /// <summary>
         ///     How to partition the data across physical resources.
         /// </summary>
-        ResourceId,
+        public const string ResourceId = "ResourceId";
 
         /// <summary>
-        ///     Indicates the X Left Top of the Rec.
+        ///     Indicates the X Left Top of the Rectangle.
         /// </summary>
-        RecLeft,
+        public const string RecLeft = "RecLeft";
 
         /// <summary>
-        ///     Indicates the Y Left Top of the Rec.
+        ///     Indicates the Y Left Top of the Rectangle.
         /// </summary>
-        RecTop,
+        public const string RecTop = "RecTop";
 
         /// <summary>
-        ///     Indicates the Height of the Rec.
+        ///     Indicates the Height of the Rectangle.
         /// </summary>
-        RecHeight,
+        public const string RecHeight = "RecHeight";
 
         /// <summary>
-        ///     Indicates the Width of the Rec.
+        ///     Indicates the Width of the Rectangle.
         /// </summary>
-        RecWidth,
-
-        /// <summary>
-        ///     The count of the number of roles in this enumeration.
-        ///     This value is always last in the enumeration and should
-        ///     not actually be used.
-        /// </summary>
-        CountColumnMetadata
+        public const string RecWidth = "RecWidth";
     }
 }

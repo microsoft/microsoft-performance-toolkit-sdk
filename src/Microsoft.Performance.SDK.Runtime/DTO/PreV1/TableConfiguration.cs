@@ -110,64 +110,65 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
 
         public DTO.TableConfiguration Upgrade()
         {
-            var newColumnRoles = new Dictionary<DTO.Enums.ColumnRole, ColumnRoleEntry>(this.ColumnRoles.Count);
+            var newColumnRoles = new Dictionary<string, ColumnRoleEntry>(this.ColumnRoles.Count);
 
             foreach (var columnRolePair in this.ColumnRoles)
             {
                 var role = columnRolePair.Key;
                 var entry = columnRolePair.Value;
 
-                var newEntry = DTO.Enums.ColumnRole.Invalid;
+                string newEntry = null;
 
                 switch(role)
                 {
                     case ColumnRole.Invalid:
+                    case ColumnRole.CountColumnMetadata:
+                        newEntry = null;
+                        break;
+
+
                     case ColumnRole.StartThreadId:
                     case ColumnRole.EndThreadId:
                     case ColumnRole.HierarchicalTimeTree:
                     case ColumnRole.WaitDuration:
                     case ColumnRole.WaitEndTime:
-                        newEntry = Enums.ColumnRole.Invalid;
+                        newEntry = role.ToString();
                         break;
 
                     case ColumnRole.StartTime:
-                        newEntry = Enums.ColumnRole.StartTime;
+                        newEntry = Processing.ColumnRole.StartTime;
                         break;
 
                     case ColumnRole.EndTime:
-                        newEntry = Enums.ColumnRole.EndTime;
+                        newEntry = Processing.ColumnRole.EndTime;
                         break;
 
                     case ColumnRole.Duration:
-                        newEntry = Enums.ColumnRole.Duration;
+                        newEntry = Processing.ColumnRole.Duration;
                         break;
 
                     case ColumnRole.ResourceId:
-                        newEntry = Enums.ColumnRole.ResourceId;
+                        newEntry = Processing.ColumnRole.ResourceId;
                         break;
 
                     case ColumnRole.RecLeft:
-                        newEntry = Enums.ColumnRole.RecLeft;
+                        newEntry = Processing.ColumnRole.RecLeft;
                         break;
 
                     case ColumnRole.RecTop:
-                        newEntry = Enums.ColumnRole.RecTop;
+                        newEntry = Processing.ColumnRole.RecTop;
                         break;
 
                     case ColumnRole.RecHeight:
-                        newEntry = Enums.ColumnRole.RecHeight;
+                        newEntry = Processing.ColumnRole.RecHeight;
                         break;
 
                     case ColumnRole.RecWidth:
-                        newEntry = Enums.ColumnRole.RecWidth;
-                        break;
-
-                    case ColumnRole.CountColumnMetadata:
-                        newEntry = Enums.ColumnRole.CountColumnMetadata;
+                        newEntry = Processing.ColumnRole.RecWidth;
                         break;
                 }
 
-                if (newEntry != Enums.ColumnRole.Invalid)
+                if (!string.IsNullOrEmpty(newEntry))
                 {
                     newColumnRoles.Add(newEntry, entry);
                 }                
