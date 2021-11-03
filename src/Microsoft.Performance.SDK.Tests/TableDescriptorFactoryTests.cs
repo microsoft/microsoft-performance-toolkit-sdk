@@ -317,7 +317,7 @@ namespace Microsoft.Performance.SDK.Tests
                 "Name",
                 "Description",
                 "Category",
-                requiredDataCookers: new DataCookerPath[] { DataCookerPath.ForSource("blah", "blahblah") });
+                requiredDataCookers: new DataCookerPath[] { DataCookerPath.ForSource("SourceParser1", "CookerA") });
 
             public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
             {
@@ -332,7 +332,7 @@ namespace Microsoft.Performance.SDK.Tests
                 "Name",
                 "Description",
                 "Category",
-                requiredDataCookers: new DataCookerPath[] { DataCookerPath.ForSource("blah", "blahblah") });
+                requiredDataCookers: new DataCookerPath[] { DataCookerPath.ForSource("SourceParser1", "CookerB") });
         }
     }
 }

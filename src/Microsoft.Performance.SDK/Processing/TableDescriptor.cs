@@ -14,9 +14,9 @@ namespace Microsoft.Performance.SDK.Processing
     /// </summary>
     public sealed class TableDescriptor
         : IEquatable<TableDescriptor>,
-          IDataCookerDependent //,
-                               // TODO: __SDK_DP__
-                               // IDataProcessorDependent
+          IDataCookerDependent
+    // TODO: __SDK_DP__
+    // IDataProcessorDependent
     {
         /// <summary>
         ///     The default table category name.
