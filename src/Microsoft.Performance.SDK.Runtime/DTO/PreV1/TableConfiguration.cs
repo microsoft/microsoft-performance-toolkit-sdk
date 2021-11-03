@@ -126,12 +126,15 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
                         newEntry = null;
                         break;
 
-
                     case ColumnRole.StartThreadId:
                     case ColumnRole.EndThreadId:
                     case ColumnRole.HierarchicalTimeTree:
                     case ColumnRole.WaitDuration:
                     case ColumnRole.WaitEndTime:
+                    case ColumnRole.RecLeft:
+                    case ColumnRole.RecTop:
+                    case ColumnRole.RecHeight:
+                    case ColumnRole.RecWidth:
                         newEntry = role.ToString();
                         break;
 
@@ -149,22 +152,6 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
 
                     case ColumnRole.ResourceId:
                         newEntry = Processing.ColumnRole.ResourceId;
-                        break;
-
-                    case ColumnRole.RecLeft:
-                        newEntry = Processing.ColumnRole.RecLeft;
-                        break;
-
-                    case ColumnRole.RecTop:
-                        newEntry = Processing.ColumnRole.RecTop;
-                        break;
-
-                    case ColumnRole.RecHeight:
-                        newEntry = Processing.ColumnRole.RecHeight;
-                        break;
-
-                    case ColumnRole.RecWidth:
-                        newEntry = Processing.ColumnRole.RecWidth;
                         break;
                 }
 

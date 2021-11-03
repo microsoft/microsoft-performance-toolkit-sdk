@@ -194,17 +194,22 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="column">
         ///     The column to place into the role.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="columnRole"/> is null.
+        /// </exception>
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="column"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="System.InvalidOperationException">
-        ///     <paramref name="column"/> is a metadata column (see <see cref="AllMetadataColumns"/>.
+        ///     <paramref name="column"/> is a metadata column (see <see cref="AllMetadataColumns"/>).
         /// </exception>
         public void AddColumnRole(string columnRole, ColumnConfiguration column)
         {
             Guard.NotNull(column, nameof(column));
 
             Guard.NotNull(column.Metadata, nameof(column.Metadata));
+
+            Guard.NotNullOrWhiteSpace(columnRole, nameof(columnRole));
 
             AddColumnRole(columnRole, column.Metadata.Guid);
         }
@@ -218,8 +223,11 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="columnGuid">
         ///     The guid of column to place into the role.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="columnRole"/> is null.
+        /// </exception>
         /// <exception cref="System.InvalidOperationException">
-        ///     <paramref name="columnGuid"/> is a metadata column (see <see cref="AllMetadataColumns"/>.
+        ///     <paramref name="columnGuid"/> is a metadata column (see <see cref="AllMetadataColumns"/>).
         /// </exception>
         public void AddColumnRole(string columnRole, Guid columnGuid)
         {
@@ -227,6 +235,8 @@ namespace Microsoft.Performance.SDK.Processing
             {
                 throw new InvalidOperationException($"Metadata columns may not be assigned a role.");
             }
+
+            Guard.NotNullOrWhiteSpace(columnRole, nameof(columnRole));
 
             this.columnRoles[columnRole] = columnGuid;
         }

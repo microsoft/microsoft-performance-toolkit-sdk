@@ -212,19 +212,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                             break;
 
                         case DTO.PreV1.ColumnRole.RecLeft:
-                            newRole = ColumnRole.RecLeft;
+                            newRole = DTO.PreV1.ColumnRole.RecLeft.ToString();
                             break;
 
                         case DTO.PreV1.ColumnRole.RecTop:
-                            newRole = ColumnRole.RecTop;
+                            newRole = DTO.PreV1.ColumnRole.RecTop.ToString();
                             break;
 
                         case DTO.PreV1.ColumnRole.RecHeight:
-                            newRole = ColumnRole.RecHeight;
+                            newRole = DTO.PreV1.ColumnRole.RecHeight.ToString();
                             break;
 
                         case DTO.PreV1.ColumnRole.RecWidth:
-                            newRole = ColumnRole.RecWidth;
+                            newRole = DTO.PreV1.ColumnRole.RecWidth.ToString();
                             break;
 
                         case DTO.PreV1.ColumnRole.StartThreadId:
