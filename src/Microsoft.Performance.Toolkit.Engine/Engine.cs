@@ -12,7 +12,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -758,7 +757,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                     applicationName: applicationName,
                     runtimeName: runtimeName,
                     new RuntimeTableSynchronizer(),
-                    new TableConfigurationsSerializer(),
                     instance.Extensions,
                     instance.Factory.CreateSourceSessionFactory(),
                     createInfo.IsInteractive

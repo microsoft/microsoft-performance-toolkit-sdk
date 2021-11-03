@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
-using System;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -34,9 +34,9 @@ namespace Microsoft.Performance.SDK.Processing
         bool IsInteractive { get; }
 
         /// <summary>
-        ///     Gets the serializer to use for deserializing table configurations.
+        ///     Gets the serializer to use for deserializing <see cref="TableConfiguration"/> instances.
         /// </summary>
-        ISerializer Serializer { get; }
+        ITableConfigurationsSerializer Serializer { get; }
 
         /// <summary>
         ///     Provides the interface to be used to notify that data in

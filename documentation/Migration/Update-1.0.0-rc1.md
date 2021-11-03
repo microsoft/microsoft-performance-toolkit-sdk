@@ -31,6 +31,7 @@ The following references must be changed:
 - `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
 - `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
 - `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
+- `ISerializer` -> `ITableConfigurationsSerializer`
 
 ## Obsolete Members
 

@@ -49,7 +49,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         private sealed class Discovery
             : ITableProvider
         {
-            public IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
             {
                 return new HashSet<DiscoveredTable>
                 {
