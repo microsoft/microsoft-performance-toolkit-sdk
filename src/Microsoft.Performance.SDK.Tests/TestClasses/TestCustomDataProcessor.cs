@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
@@ -28,7 +29,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
 
         public static TestCustomDataProcessor CreateTestCustomDataProcessor(
             string sourceParserId,
-            Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> internalTables,
+            Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> metadataTables,
             TestDataExtensionRepository extensionRepo = null)
         {
             var sourceParser = new TestSourceParser() { Id = sourceParserId };
@@ -56,8 +57,8 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
                 ProcessorOptions.Default,
                 applicationEnvironment,
                 processorEnvironment,
-                internalTables,
-                new List<TableDescriptor>());
+                metadataTables,
+                metadataTables.Select(kvp => kvp.Key));
 
             Assert.IsNotNull(extensibilitySupport);
 

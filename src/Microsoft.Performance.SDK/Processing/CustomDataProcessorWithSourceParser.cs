@@ -54,7 +54,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.SourceProcessingSession = this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this);
             this.extensibilitySupport = this.ProcessorEnvironment.CreateDataProcessorExtensibilitySupport(this);
 
-            EnableInternalTables(allTablesMapping.Keys);
+            EnableExtensionMetadataTables(metadataTables);
         }
 
         /// <summary>
@@ -372,9 +372,13 @@ namespace Microsoft.Performance.SDK.Processing
             this.OnAllCookersEnabled();
         }
 
-        private void EnableInternalTables(IEnumerable<TableDescriptor> tables)
+        /// <summary>
+        ///     This method enabled the source data cookers required by extension internal tables, only metadata tables for now.
+        /// </summary>
+        /// <param name="tables"></param>
+        private void EnableExtensionMetadataTables(IEnumerable<TableDescriptor> tables)
         {
-            foreach (var table in tables.Where(td => td.IsInternalTable && td.RequiresDataExtensions()))
+            foreach (var table in tables.Where(td => td.RequiresDataExtensions()))
             {
                 try
                 {
