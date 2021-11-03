@@ -62,9 +62,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="requiredDataProcessors">
         ///     Identifiers for data processors required to instantiate this table.
         /// </param>
-        /// <param name="isInternalTable">
-        ///     Whether the table is an internal table.
-        /// </param>
         /// <exception cref="ArgumentException">
         ///     <paramref name="guid"/> is whitespace.
         ///     - or -
