@@ -152,7 +152,7 @@ namespace Microsoft.Performance.SDK.Processing
         private static IEnumerable<DiscoveredTable> DoAssemblyDiscovery(
             IEnumerable<Assembly> assemblies,
             Func<Type, bool> typeFilter,
-            ISerializer tableConfigSerializer)
+            ITableConfigurationsSerializer tableConfigSerializer)
         {
             Debug.Assert(assemblies != null);
             Debug.Assert(typeFilter != null);
@@ -186,7 +186,7 @@ namespace Microsoft.Performance.SDK.Processing
                 this.assembly = assembly;
             }
 
-            public IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
             {
                 return DoAssemblyDiscovery(new[] { assembly, }, _ => true, tableConfigSerializer);
             }
@@ -208,7 +208,7 @@ namespace Microsoft.Performance.SDK.Processing
                 this.assemblies = assemblies;
             }
 
-            public IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer)
+            public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
             {
                 return DoAssemblyDiscovery(
                     this.assemblies,

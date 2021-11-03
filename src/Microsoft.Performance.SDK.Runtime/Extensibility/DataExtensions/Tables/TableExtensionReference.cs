@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
           ITableExtensionReference,
           IEquatable<TableExtensionReference>
     {
-        private static ISerializer tableConfigSerializer = new TableConfigurationsSerializer();
+        private static ITableConfigurationsSerializer tableConfigSerializer = new TableConfigurationsSerializer();
 
         private TableDescriptor tableDescriptor;
         private Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction;
@@ -169,7 +169,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         ///     <list type="bullet">
         ///         <item>
         ///             must expose a valid <see cref="TableDescriptor"/>.
-        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ISerializer, out TableDescriptor)"/>
+        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ITableConfigurationsSerializer, out TableDescriptor)"/>
         ///             for details on how a table is to expose a descriptor.
         ///         </item>
         ///     </list>
@@ -236,7 +236,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         ///     <list type="bullet">
         ///         <item>
         ///             must expose a valid <see cref="TableDescriptor"/>.
-        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ISerializer, out TableDescriptor)"/>
+        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ITableConfigurationsSerializer, out TableDescriptor)"/>
         ///             for details on how a table is to expose a descriptor.
         ///         </item>
         ///     </list>

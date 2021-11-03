@@ -13,14 +13,14 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
     /// <summary>
-    ///     Used to de/serialize table configurations from/to a stream.
+    ///     Used to de/serialize <see cref="TableConfigurations"/> instances from/to a stream.
     /// </summary>
     public class TableConfigurationsSerializer
-        : ISerializer
+        : ITableConfigurationsSerializer
     {
         private const string indentChars = "    ";
 
-        private static Lazy<(double Version, Type PrebuiltConfigType)[]> versionToTypeLazy 
+        private static Lazy<(double Version, Type PrebuiltConfigType)[]> versionToTypeLazy
             = new Lazy<(double Version, Type PrebuiltConfigType)[]>(() =>
             {
                 var assembly = typeof(PrebuiltConfigurationsBase).Assembly;
