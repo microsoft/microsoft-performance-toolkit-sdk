@@ -54,13 +54,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.SourceProcessingSession = this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this);
             this.extensibilitySupport = this.ProcessorEnvironment.CreateDataProcessorExtensibilitySupport(this);
 
-            //
-            // TODO (160): InternalTables
-            // Commenting this out because we don't want to enable all tables by default. Tables should
-            // be enabled by manually calling EnableTable
-            //
-
-            //EnableInternalTables(allTablesMapping.Keys);
+            EnableInternalTables(allTablesMapping.Keys);
         }
 
         /// <summary>
@@ -380,7 +374,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         private void EnableInternalTables(IEnumerable<TableDescriptor> tables)
         {
-            foreach (var table in tables.Where(td => td.IsInternalTable))
+            foreach (var table in tables.Where(td => td.IsInternalTable && td.RequiresDataExtensions()))
             {
                 try
                 {

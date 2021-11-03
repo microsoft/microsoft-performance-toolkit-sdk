@@ -91,7 +91,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             Guard.NotNull(metadataTableBuilderFactory, nameof(metadataTableBuilderFactory));
 
-            foreach (var kvp in this.TableDescriptorToBuildAction.Where(x => x.Key.IsMetadataTable))
+            foreach (var kvp in this.TableDescriptorToBuildAction.Where(x => x.Key.IsMetadataTable && !x.Key.RequiresDataExtensions()))
             {
                 var builder = metadataTableBuilderFactory.Create(kvp.Key);
                 Debug.Assert(builder != null);
