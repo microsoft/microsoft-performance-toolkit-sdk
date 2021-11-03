@@ -265,6 +265,7 @@ namespace Microsoft.Performance.SDK.Processing
                     logger?.Error(
                         "The table {0} must add a buld table method since it is an extension table.",
                         type.FullName);
+                    tableDescriptor = null;
                     return false;
                 }
             }
