@@ -226,7 +226,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             foreach (var table in metadataTables)
             {
-                this.enabledTables.Add(table);
+                EnableTable(table);
             }
         }
 
@@ -272,7 +272,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     This is called before a table has been enabled on this data processor.
         /// </summary>
         /// <param name="tableDescriptor">
-        ///     Table that was enabled.
+        ///     Table that will be enabled.
         /// </param>
         protected virtual void OnBeforeEnableTable(TableDescriptor tableDescriptor)
         {

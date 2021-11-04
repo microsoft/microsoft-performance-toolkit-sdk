@@ -241,6 +241,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         protected override void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
         {
+            base.EnableMetadataTables(metadataTables.Where(td => !td.RequiresDataExtensions()));
         }
 
         /// <inheritdoc cref="CustomDataProcessor"/>
