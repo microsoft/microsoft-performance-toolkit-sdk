@@ -6,10 +6,6 @@ using System.Text;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
-	/// <summary>
-	///		This Progress reporter will update a listener everytime it is updated.
-	///		It is provided the number of components that must finish for total progress to be completed
-	/// </summary>
 	public sealed class ProgressReporter
 		: IProgress<int>,
 		  IProgressUpdate
@@ -21,8 +17,13 @@ namespace Microsoft.Performance.SDK.Runtime
 		private readonly IProgress<int> listener;
 		private readonly int numberOfParts;
 
+		private int rawProgress;
+		private int currentProgress;
+		private ProcessorStatus currentStatus;
+
 		/// <summary>
-		/// 
+		///		Creates IProgress object which will update a listener everytime it is updated.
+		///		It is provided the number of components that must finish for total progress to be completed
 		/// </summary>
 		/// <param name="listener">Update this listener everytime this.currentProgress updates</param>
 		/// <param name="numberOfParts">Number of times that this.currentProgress will reach 100 due to subcomp</param>
@@ -33,10 +34,6 @@ namespace Microsoft.Performance.SDK.Runtime
 			rawProgress = 0;
 		}
 
-
-		private int rawProgress;
-
-		private int currentProgress;
 		public int CurrentProgress
 		{
 			get
@@ -69,7 +66,6 @@ namespace Microsoft.Performance.SDK.Runtime
 			}
 		}
 
-		private ProcessorStatus currentStatus;
 		public ProcessorStatus CurrentStatus
 		{
 			get
