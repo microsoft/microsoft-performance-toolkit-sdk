@@ -8,8 +8,7 @@ namespace Microsoft.Performance.SDK.Runtime
 {
 	/// <summary>
 	///		This Progress reporter will update a listener everytime it is updated.
-	///		It is provided the number of components it relies on.
-	///		For example, if 
+	///		It is provided the number of components that must finish for total progress to be completed
 	/// </summary>
 	public sealed class ProgressReporter
 		: IProgress<int>,
