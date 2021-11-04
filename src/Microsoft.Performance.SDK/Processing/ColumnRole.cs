@@ -4,55 +4,32 @@
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Defines the role of a column in a graph.
+    ///     Defines a common set of column roles that that are guaranteed to be successfully saved/restored in a serialized <see cref="TableConfiguration" />.
+    ///     <br/>Plugins may use any string value defined in this class to communicate column roles to any SDK driver. 
+    ///     <br/><br/>If a <see cref="TableConfiguration" /> includes a column role value that is not defined here, it is not guaranteed to:
+    ///     <br/>- Be de/serialized correctly
+    ///     <br/>- Be understood by an SDK driver
     /// </summary>
-    public enum ColumnRole
+    public static class ColumnRole
     {
         /// <summary>
-        ///     Indicates the start timestamp for the x-axis.
+        ///     Indicates the start timestamp.
         /// </summary>
-        StartTime = 0,
+        public const string StartTime = "StartTime";
 
         /// <summary>
-        ///     Indicates the end timestamp for the x-axis.
+        ///     Indicates the end timestamp.
         /// </summary>
-        EndTime,
+        public const string EndTime = "EndTime";
 
         /// <summary>
-        ///     Indicates how long each row takes on the time line.
+        ///     Indicates duration in time.
         /// </summary>
-        Duration,
+        public const string Duration = "Duration";
 
         /// <summary>
         ///     How to partition the data across physical resources.
         /// </summary>
-        ResourceId,
-
-        /// <summary>
-        ///     Indicates the X Left Top of the Rec.
-        /// </summary>
-        RecLeft,
-
-        /// <summary>
-        ///     Indicates the Y Left Top of the Rec.
-        /// </summary>
-        RecTop,
-
-        /// <summary>
-        ///     Indicates the Height of the Rec.
-        /// </summary>
-        RecHeight,
-
-        /// <summary>
-        ///     Indicates the Width of the Rec.
-        /// </summary>
-        RecWidth,
-
-        /// <summary>
-        ///     The count of the number of roles in this enumeration.
-        ///     This value is always last in the enumeration and should
-        ///     not actually be used.
-        /// </summary>
-        CountColumnMetadata
+        public const string ResourceId = "ResourceId";
     }
 }

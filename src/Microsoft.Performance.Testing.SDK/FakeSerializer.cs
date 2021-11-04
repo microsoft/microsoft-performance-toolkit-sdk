@@ -9,7 +9,7 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.Testing.SDK
 {
     public sealed class FakeSerializer
-        : ISerializer
+        : ITableConfigurationsSerializer
     {
         public IEnumerable<TableConfigurations> DeserializeTableConfigurations(Stream stream)
         {

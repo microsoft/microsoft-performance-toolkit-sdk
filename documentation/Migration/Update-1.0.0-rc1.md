@@ -31,6 +31,7 @@ The following references must be changed:
 - `ViewportRelativePercent` -> `VisibleDomainRelativePercent`
 - `Projection.ClipTimeToViewport` -> `Projection.ClipTimeToVisibleDomain`
 - `Projection.AggregateInViewport` -> `Projection.AggregateInVisibleDomain`
+- `ISerializer` -> `ITableConfigurationsSerializer`
 
 ## Obsolete Members
 
@@ -100,11 +101,21 @@ The following members have been removed from `CustomDataProcessor`:
 This class has been removed. Please use `RequiresSourceCookerAttribute` or
 `RequiresCompositCookerAttribute`.
 
+### ColumnRole
+
+This enum has been removed. Please use `ColumnRole` static class for defined Column Roles.
+
 ### TableConfiguration
 
 The following members have been removed from `TableConfiguration`:
 
 - property `TableConfiguration.Layout`
+
+The following members have been changed from `TableCofiguration`:
+
+- property `ColumnRoles` dictionary has been updated to use `IDictionary<string, Guid>` instead of `IDictionary<ColumnRole, Guid>`.
+
+- AddColumnRole and RemoveColumnRole methods now take in case sensitive strings. Plese see `ColumnRoles` static class for string options.
 
 ### CustomDataSourceBase
 
@@ -270,9 +281,9 @@ This was moved from the SDK namespace to SDK.Runtime.
 
 - Internal table constructor arguments and properties have been removed from `TableAttribute`.
 
-- An `isInternalTable` constructor argument and an `IsInternalTable` property were added to `TableDescriptor`.
+- The runtime will now determine if a table needs to be marked as internal.
 
-Internal tables provide processing sources a way to create tables that require data cookers but do not declare build table actions. If using internal tables today, please update the table attribute and table descriptor appropriately.
+- Extensions tables, those that require data cookers, must provide a build table method.
 
 ### Engine Execution Results
 

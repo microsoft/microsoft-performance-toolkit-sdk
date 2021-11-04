@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
 
         public bool IsInteractive { get; set; }
 
-        public ISerializer Serializer { get; set; }
+        public ITableConfigurationsSerializer Serializer { get; set; }
 
         public ITableDataSynchronization TableDataSynchronizer { get; set; }
 

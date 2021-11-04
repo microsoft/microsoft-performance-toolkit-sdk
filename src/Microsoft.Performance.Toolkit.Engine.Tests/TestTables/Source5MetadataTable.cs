@@ -13,14 +13,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
     // Rather than using a TableAttribute, this is "discovered" by Source5Source and passed into the base class as
     // an additional table. This provides some additional test coverage.
     //
-    public static class Source5InternalTable
+    public static class Source5MetadataTable
     {
         public static TableDescriptor TableDescriptor => new TableDescriptor(
             Guid.Parse("{708B0564-F9BA-49FA-A87C-3B25C5C7C84C}"),
             "Source5 Internal Table",
             "Used by the Engine Tests to test an internal table",
             "Engine",
-            isInternalTable: true,
+            isMetadataTable: true,
             requiredDataCookers: new[] { Composite2Cooker.DataCookerPath });
 
         public static readonly ColumnConfiguration ColumnOne =

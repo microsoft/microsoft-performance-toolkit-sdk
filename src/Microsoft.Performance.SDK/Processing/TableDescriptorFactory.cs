@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Performance.SDK.Extensibility;
 
@@ -52,7 +53,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             out TableDescriptor tableDescriptor)
         {
             return TryCreate(type, tableConfigSerializer, out tableDescriptor, out var buildTableAction);
@@ -98,7 +99,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction)
         {
@@ -148,7 +149,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             out Func<IDataExtensionRetrieval, bool> isDataAvailableFunc)
@@ -208,7 +209,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public static bool TryCreate(
             Type type,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             ILogger logger,
             out TableDescriptor tableDescriptor,
             out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
@@ -247,14 +248,6 @@ namespace Microsoft.Performance.SDK.Processing
                 return false;
             }
 
-            if (buildTableAction == null && !tableDescriptor.IsInternalTable)
-            {
-                logger?.Error(
-                    "The table {0} must add a buld table method or be marked Internal.",
-                    type.FullName);
-                return false;
-            }
-
             foreach (var cooker in type.GetCustomAttributes<RequiresSourceCookerAttribute>())
             {
                 tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
@@ -263,6 +256,25 @@ namespace Microsoft.Performance.SDK.Processing
             foreach (var cooker in type.GetCustomAttributes<RequiresCompositeCookerAttribute>())
             {
                 tableDescriptor.AddRequiredDataCooker(cooker.RequiredDataCookerPath);
+            }
+
+            if (tableDescriptor.RequiredDataCookers.Any())
+            {
+                if (buildTableAction == null)
+                {
+                    logger?.Error(
+                        "The table {0} must add a buld table method since it is an extension table.",
+                        type.FullName);
+                    tableDescriptor = null;
+                    return false;
+                }
+            }
+
+            // Non-extended tables must be marked as internal so that drivers/the engine
+            // know to call its associated Processor's BuildTable method
+            if (buildTableAction == null)
+            {
+                tableDescriptor.IsInternalTable = true;
             }
 
             // todo:should we make this optional, or does it makes sense to always include this?
@@ -276,7 +288,7 @@ namespace Microsoft.Performance.SDK.Processing
         private static TableDescriptor GetTableDescriptor(
             Type type,
             string propertyName,
-            ISerializer tableConfigSerializer,
+            ITableConfigurationsSerializer tableConfigSerializer,
             ILogger logger)
         {
             Debug.Assert(type != null, $"Parameter {nameof(type)} cannot be null.");

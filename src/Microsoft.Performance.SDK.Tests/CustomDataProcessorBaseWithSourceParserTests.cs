@@ -30,48 +30,9 @@ namespace Microsoft.Performance.SDK.Tests
                     "Test Table with Requirements",
                     "This table has required data extensions",
                     "Other",
-                    isMetadataTable: false,
-                    isInternalTable: true,
+                    isMetadataTable: true,
                     requiredDataCookers: new List<DataCookerPath> { RequiredDataCooker })
             { Type = typeof(TestTable1) };
-
-            public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
-            {
-            }
-        }
-
-        [Table]
-        public static class NoBuildActionInternalTestTable1
-        {
-            public static readonly string SourceParserId = "SourceId1";
-
-            public static TableDescriptor TableDescriptor = new TableDescriptor(
-                    Guid.Parse("{CFBE73E8-DBC6-4A76-9F98-B4F2C1D4816D}"),
-                    "Test Table without a build method.",
-                    "This table has no required data extensions",
-                    "Other",
-                    isMetadataTable: false,
-                    isInternalTable: true)
-            { Type = typeof(NoBuildActionInternalTestTable1) };
-        }
-
-        [Table]
-        public static class NoBuildActionInternalTestTable2
-        {
-            public static readonly string SourceParserId = "SourceId1";
-
-            public static readonly DataCookerPath RequiredDataCooker =
-                DataCookerPath.ForSource(SourceParserId, "CookerId1");
-
-            public static TableDescriptor TableDescriptor = new TableDescriptor(
-                    Guid.Parse("{87C11CDF-5D35-49AC-8FFD-6E34D1930A35}"),
-                    "Test Table without a build method",
-                    "This table has required data extensions",
-                    "Other",
-                    isMetadataTable: false,
-                    isInternalTable: true,
-                    requiredDataCookers: new List<DataCookerPath> { RequiredDataCooker })
-            { Type = typeof(NoBuildActionInternalTestTable2) };
 
             public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval dataRetrieval)
             {
@@ -93,8 +54,7 @@ namespace Microsoft.Performance.SDK.Tests
                     "Test Table with Requirements",
                     "This table has required data extensions",
                     "Other",
-                    isMetadataTable: false,
-                    isInternalTable: true,
+                    isMetadataTable: true,
                     requiredDataCookers: new List<DataCookerPath> { RequiredDataCooker1, RequiredDataCooker2 })
             { Type = typeof(InvalidInternalTestTable) };
 
@@ -133,43 +93,6 @@ namespace Microsoft.Performance.SDK.Tests
             var enabledTables = cdp.ExtensibilitySupport.GetEnabledInternalTables();
             Assert.AreEqual(1, enabledTables.Count());
             Assert.AreEqual(typeof(TestTable1), enabledTables.First().Type);
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void InternalTableWithNoBuildMethodIsEnabled()
-        {
-            var sourceCooker = new TestSourceDataCooker()
-            { Path = TestTable1.RequiredDataCooker };
-
-            var sourceCookerReference = new TestSourceDataCookerReference(false)
-            {
-                Path = sourceCooker.Path,
-                availability = DataExtensionAvailability.Available,
-                createInstance = () => sourceCooker,
-            };
-
-            var internalTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
-            internalTables.Add(TestTable1.TableDescriptor, TestTable1.BuildTable);
-            internalTables.Add(NoBuildActionInternalTestTable1.TableDescriptor, null);
-            internalTables.Add(NoBuildActionInternalTestTable2.TableDescriptor, null);
-
-            var extensions = new TestDataExtensionRepository();
-            extensions.sourceCookersByPath.Add(sourceCookerReference.Path, sourceCookerReference);
-
-            var cdp = TestCustomDataProcessor.CreateTestCustomDataProcessor(TestTable1.SourceParserId, internalTables, extensions);
-
-            // Make sure the table is marked as registered in the base class
-            Assert.AreEqual(3, cdp.EnabledTableDescriptors.Count);
-            Assert.IsTrue(cdp.EnabledTableDescriptors.Select(t => t.Type).Contains(typeof(TestTable1)));
-            Assert.IsTrue(cdp.EnabledTableDescriptors.Select(t => t.Type).Contains(typeof(NoBuildActionInternalTestTable1)));
-            Assert.IsTrue(cdp.EnabledTableDescriptors.Select(t => t.Type).Contains(typeof(NoBuildActionInternalTestTable2)));
-
-            // NoBuildActionInternalTestTable1 doesn't have any required cookers, so it won't show up here
-            var enabledTables = cdp.ExtensibilitySupport.GetEnabledInternalTables();
-            Assert.AreEqual(2, enabledTables.Count());
-            Assert.IsTrue(enabledTables.Select(t => t.Type).Contains(typeof(TestTable1)));
-            Assert.IsTrue(enabledTables.Select(t => t.Type).Contains(typeof(NoBuildActionInternalTestTable2)));
         }
 
         [TestMethod]

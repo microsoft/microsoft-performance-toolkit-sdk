@@ -99,6 +99,6 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         ///     The roles and their associated column entries.
         /// </summary>
         [DataMember(Order = 15)]
-        public IDictionary<ColumnRole, ColumnRoleEntry> ColumnRoles { get; set; }
+        public IDictionary<string, ColumnRoleEntry> ColumnRoles { get; set; }
     }
 }

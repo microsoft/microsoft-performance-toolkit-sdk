@@ -21,6 +21,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     A collection of tables. Each <see cref="DiscoveredTable"/> in the collection must have
         ///     a unique <see cref="TableDescriptor"/>.
         /// </returns>
-        IEnumerable<DiscoveredTable> Discover(ISerializer tableConfigSerializer);
+        IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer);
     }
 }

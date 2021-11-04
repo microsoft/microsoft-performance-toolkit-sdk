@@ -10,13 +10,13 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 {
     internal static class DTOExtensions
     {
-        private static Func<Processing.TableConfiguration, IDictionary<ColumnRole, ColumnRoleEntry>> defaultColumnRolesConverter = 
+        private static Func<Processing.TableConfiguration, IDictionary<string, ColumnRoleEntry>> defaultColumnRolesConverter = 
             (configuration) =>
             {
-                var columnRoles = new Dictionary<ColumnRole, ColumnRoleEntry>();
+                var columnRoles = new Dictionary<string, ColumnRoleEntry>();
                 foreach (var kvp in configuration.ColumnRoles)
                 {
-                    columnRoles[kvp.Key.ConvertToDto()] = new ColumnRoleEntry()
+                    columnRoles[kvp.Key] = new ColumnRoleEntry()
                     {
                         ColumnGuid = kvp.Value,
                         ColumnName = configuration.Columns.FirstOrDefault(column => column.Metadata.Guid == kvp.Value)?.Metadata.Name,
@@ -34,7 +34,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
         internal static PrebuiltConfigurations ConvertToDto(
             this Processing.TableConfigurations tableConfigurations,
-            Func<Processing.TableConfiguration, IDictionary<ColumnRole, ColumnRoleEntry>> convertColumnRoles)
+            Func<Processing.TableConfiguration, IDictionary<string, ColumnRoleEntry>> convertColumnRoles)
         {
             var dtoTableConfigurations = new PrebuiltConfigurations()
             {
@@ -109,13 +109,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             {
                 foreach (var kvp in dto.ColumnRoles)
                 {
-                    var role = kvp.Key.ConvertToSdk();
-                    if (!role.HasValue)
-                    {
-                        continue;
-                    }
-                    
-                    tableConfiguration.AddColumnRole(role.Value, kvp.Value.ColumnGuid);
+                    tableConfiguration.AddColumnRole(kvp.Key, kvp.Value.ColumnGuid);
                 }
             }
 
@@ -124,7 +118,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
         internal static TableConfiguration ConvertToDto(
             this Microsoft.Performance.SDK.Processing.TableConfiguration configuration,
-            Func<Processing.TableConfiguration, IDictionary<ColumnRole, ColumnRoleEntry>> convertColumnRoles)
+            Func<Processing.TableConfiguration, IDictionary<string, ColumnRoleEntry>> convertColumnRoles)
         {
             var dto = new TableConfiguration
             {
@@ -451,61 +445,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             };
 
             return dto;
-        }
-
-        internal static ColumnRole ConvertToDto(this Processing.ColumnRole self)
-        {
-            switch (self)
-            {
-                case Processing.ColumnRole.StartTime:
-                    return ColumnRole.StartTime;
-                case Processing.ColumnRole.EndTime:
-                    return ColumnRole.EndTime;
-                case Processing.ColumnRole.Duration:
-                    return ColumnRole.Duration;
-                case Processing.ColumnRole.ResourceId:
-                    return ColumnRole.ResourceId;
-                case Processing.ColumnRole.RecLeft:
-                    return ColumnRole.RecLeft;
-                case Processing.ColumnRole.RecTop:
-                    return ColumnRole.RecTop;
-                case Processing.ColumnRole.RecHeight:
-                    return ColumnRole.RecHeight;
-                case Processing.ColumnRole.RecWidth:
-                    return ColumnRole.RecWidth;
-                case Processing.ColumnRole.CountColumnMetadata:
-                    return ColumnRole.CountColumnMetadata;
-                default:
-                    return ColumnRole.Invalid;
-            }
-        }
-
-        private static Processing.ColumnRole? ConvertToSdk(this ColumnRole dto)
-        {
-            switch (dto)
-            {
-                case ColumnRole.StartTime:
-                    return Processing.ColumnRole.StartTime;
-                case ColumnRole.EndTime:
-                    return Processing.ColumnRole.EndTime;
-                case ColumnRole.Duration:
-                    return Processing.ColumnRole.Duration;
-                case ColumnRole.ResourceId:
-                    return Processing.ColumnRole.ResourceId;
-                case ColumnRole.RecLeft:
-                    return Processing.ColumnRole.RecLeft;
-                case ColumnRole.RecTop:
-                    return Processing.ColumnRole.RecTop;
-                case ColumnRole.RecHeight:
-                    return Processing.ColumnRole.RecHeight;
-                case ColumnRole.RecWidth:
-                    return Processing.ColumnRole.RecWidth;
-                case ColumnRole.CountColumnMetadata:
-                    return Processing.ColumnRole.CountColumnMetadata;
-                default:
-                    return null;
-            }
-        }
+        }        
 
         private static Microsoft.Performance.SDK.Processing.HighlightEntry ConvertToSdk(
             this HighlightEntry dto)
