@@ -117,7 +117,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
                 this.SourceParser.ProcessSource(this, logger, progressTracker, cancellationToken);
 
-                // Ensure to report 100 to signify finished and deregister callback.
+                // Ensure to report 100 to signify finished
                 progressTracker.Report(100);
 
                 foreach (var cooker in this.sourceCookersByPass[passIndex])
