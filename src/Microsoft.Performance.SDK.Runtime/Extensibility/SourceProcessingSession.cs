@@ -107,41 +107,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 }
             }
 
-            // Create a progressTracker for each pass
-            List<DataProcessorProgress> progressTrackers = new List<DataProcessorProgress>(countOfPassesToProcess);
-            for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
-            {
-                progressTrackers.Add(new DataProcessorProgress());
-            }
+            // wrapper progressTracker to notify totalProgress on granular updates
+            IProgress<int> progressTracker = new ProgressReporter(totalProgress, countOfPassesToProcess);
 
             for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
             {
                 this.currentPassIndex = passIndex;
                 this.InitializeForSourceParsing();
-                var prevProgress = 100 * passIndex;
-                var progressTracker = progressTrackers[passIndex];
 
-                PropertyChangedEventHandler propChangedCallback = (s, e) =>
-                {
-                    if (!e.PropertyName.Equals(nameof(DataProcessorProgress.CurrentProgress)))
-                    {
-                        return;
-                    }
-
-                    var progress = s as DataProcessorProgress;
-                    Debug.Assert(progress != null);
-
-                    var currProgress = (prevProgress + progress.CurrentProgress) / countOfPassesToProcess;
-                    totalProgress.Report(currProgress);
-                };
-
-                progressTracker.PropertyChanged += propChangedCallback;
-
-                this.SourceParser.ProcessSource(this, logger, progressTrackers[passIndex], cancellationToken);
+                this.SourceParser.ProcessSource(this, logger, progressTracker, cancellationToken);
 
                 // Ensure to report 100 to signify finished and deregister callback.
                 progressTracker.Report(100);
-                progressTracker.PropertyChanged -= propChangedCallback;
 
                 foreach (var cooker in this.sourceCookersByPass[passIndex])
                 {
