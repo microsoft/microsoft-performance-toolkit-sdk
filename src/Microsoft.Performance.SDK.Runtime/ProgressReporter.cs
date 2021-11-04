@@ -6,92 +6,92 @@ using System.Text;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
-	public sealed class ProgressReporter
-		: IProgress<int>,
-		  IProgressUpdate
+    public sealed class ProgressReporter
+        : IProgress<int>,
+          IProgressUpdate
 
-	{
+    {
 
-		public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
-		private readonly IProgress<int> listener;
-		private readonly int numberOfParts;
+        private readonly IProgress<int> listener;
+        private readonly int numberOfParts;
 
-		private int rawProgress;
-		private int currentProgress;
-		private ProcessorStatus currentStatus;
+        private int rawProgress;
+        private int currentProgress;
+        private ProcessorStatus currentStatus;
 
-		/// <summary>
-		///		Creates IProgress object which will update a listener everytime it is updated.
-		///		It is provided the number of components that must finish for total progress to be completed
-		/// </summary>
-		/// <param name="listener">Update this listener everytime this.currentProgress updates</param>
-		/// <param name="numberOfParts">Number of times that this.currentProgress will reach 100 due to subcomp</param>
-		public ProgressReporter(IProgress<int> listener, int numberOfParts = 1)
-		{
-			this.listener = listener;
-			this.numberOfParts = numberOfParts;
-			rawProgress = 0;
-		}
+        /// <summary>
+        ///		Creates IProgress object which will update a listener everytime it is updated.
+        ///		It is provided the number of components that must finish for total progress to be completed
+        /// </summary>
+        /// <param name="listener">Update this listener everytime this.currentProgress updates</param>
+        /// <param name="numberOfParts">Number of times that this.currentProgress will reach 100 due to subcomp</param>
+        public ProgressReporter(IProgress<int> listener, int numberOfParts = 1)
+        {
+            this.listener = listener;
+            this.numberOfParts = numberOfParts;
+            rawProgress = 0;
+        }
 
-		public int CurrentProgress
-		{
-			get
-			{
-				return this.currentProgress;
-			}
-			set
-			{
-				if (value != this.currentProgress)
-				{
-					var prevProgres = this.currentProgress;
-					this.currentProgress = value;
+        public int CurrentProgress
+        {
+            get
+            {
+                return this.currentProgress;
+            }
+            set
+            {
+                if (value != this.currentProgress)
+                {
+                    var prevProgres = this.currentProgress;
+                    this.currentProgress = value;
 
-					// this makes an assumption that progress must always increase
-					// progress only decreases once the next component beings
-					if (this.currentProgress < prevProgres)
-					{
-						rawProgress += this.currentProgress;
-					} else
-					{
-						rawProgress += this.currentProgress - prevProgres;
-					}
+                    // this makes an assumption that progress must always increase
+                    // progress only decreases once the next component beings
+                    if (this.currentProgress < prevProgres)
+                    {
+                        rawProgress += this.currentProgress;
+                    } else
+                    {
+                        rawProgress += this.currentProgress - prevProgres;
+                    }
 
-					// update listener
-					this.listener.Report(rawProgress / numberOfParts);
-					
-					this.RaisePropertyChanged();
-					this.RaisePropertyChanged(nameof(CurrentProgressString));
-				}
-			}
-		}
+                    // update listener
+                    this.listener.Report(rawProgress / numberOfParts);
+                    
+                    this.RaisePropertyChanged();
+                    this.RaisePropertyChanged(nameof(CurrentProgressString));
+                }
+            }
+        }
 
-		public ProcessorStatus CurrentStatus
-		{
-			get
-			{
-				return this.currentStatus;
-			}
-			set
-			{
-				if (value != this.currentStatus)
-				{
-					this.currentStatus = value;
-					this.RaisePropertyChanged();
-				}
-			}
-		}
+        public ProcessorStatus CurrentStatus
+        {
+            get
+            {
+                return this.currentStatus;
+            }
+            set
+            {
+                if (value != this.currentStatus)
+                {
+                    this.currentStatus = value;
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
 
-		public string CurrentProgressString => this.CurrentProgress.ToString() + "%";
+        public string CurrentProgressString => this.CurrentProgress.ToString() + "%";
 
-		public void Report(int progress)
-		{
-			this.CurrentProgress = progress;
-		}
+        public void Report(int progress)
+        {
+            this.CurrentProgress = progress;
+        }
 
-		private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
-	}
+        private void RaisePropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
 }
