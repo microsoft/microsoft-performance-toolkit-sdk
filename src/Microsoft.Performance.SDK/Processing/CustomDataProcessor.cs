@@ -33,13 +33,11 @@ namespace Microsoft.Performance.SDK.Processing
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(applicationEnvironment, nameof(applicationEnvironment));
             Guard.NotNull(allTablesMapping, nameof(allTablesMapping));
-            Guard.NotNull(metadataTables, nameof(metadataTables));
             Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
 
             this.Logger = processorEnvironment.CreateLogger(this.GetType());
@@ -49,8 +47,6 @@ namespace Microsoft.Performance.SDK.Processing
             this.EnabledTables = new ReadOnlyHashSet<TableDescriptor>(this.enabledTables);
             this.Options = options;
             this.TableDescriptorToBuildAction = allTablesMapping;
-
-            EnableMetadataTables(metadataTables);
         }
 
         /// <inheritdoc />

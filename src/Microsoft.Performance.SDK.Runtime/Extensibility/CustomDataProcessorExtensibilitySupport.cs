@@ -86,24 +86,25 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 throw new ExtensionTableException($"The table is not available: {tableReference.Availability}");
             }
 
-            if (!tableReference.IsInternalTable)
-            {
-                EnableRequiredSourceDataCookers(tableReference);
-                return;
-            }
+            // todo: remove this class entirely?
+            //if (!tableReference.IsInternalTable)
+            //{
+            //    EnableRequiredSourceDataCookers(tableReference);
+            //    return;
+            //}
 
             // Get all unique source parsers that are required by this table.
             var uniqueParserIds = tableReference.DependencyReferences.RequiredSourceDataCookerPaths
                 .Select(p => p.SourceParserId)
                 .Distinct(DataCookerPath.EqualityComparer).ToList();
 
-            // Internal table should only reference data from the source parser to which it belongs, so there should
-            // only be one unique source parser.
-            //
-            if (uniqueParserIds.Count > 1)
-            {
-                throw new InternalTableReferencesMultipleSourceParsersException(tableDescriptor);
-            }
+            //// Internal table should only reference data from the source parser to which it belongs, so there should
+            //// only be one unique source parser.
+            ////
+            //if (uniqueParserIds.Count > 1)
+            //{
+            //    throw new InternalTableReferencesMultipleSourceParsersException(tableDescriptor);
+            //}
 
             if (uniqueParserIds.Any())
             {

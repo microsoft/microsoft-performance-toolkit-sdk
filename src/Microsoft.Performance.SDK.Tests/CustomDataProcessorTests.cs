@@ -79,12 +79,13 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        public void MetadataTablesEnabledByDefault()
+        public void MetadataTablesNotEnabledByDefault()
         {
-            Assert.AreEqual(this.MetadataTables.Count, this.Sut.ExposedEnabledTables.Count);
+            Assert.IsTrue(this.MetadataTables.Count != 0);
+            Assert.AreEqual(0, this.Sut.ExposedEnabledTables.Count);
             foreach (var table in this.MetadataTables)
             {
-                Assert.IsTrue(this.Sut.ExposedEnabledTables.Contains(table));
+                Assert.IsFalse(this.Sut.ExposedEnabledTables.Contains(table));
             }
         }
 
@@ -96,7 +97,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             this.Sut.EnableTable(tableToEnable);
 
-            Assert.AreEqual(this.MetadataTables.Count + 1, this.Sut.ExposedEnabledTables.Count);
+            Assert.AreEqual(1, this.Sut.ExposedEnabledTables.Count);
             Assert.IsTrue(this.Sut.ExposedEnabledTables.Contains(tableToEnable));
         }
 
@@ -175,7 +176,7 @@ namespace Microsoft.Performance.SDK.Tests
                 IProcessorEnvironment processorEnvironment,
                 IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
                 IEnumerable<TableDescriptor> metadataTables)
-                : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+                : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
             {
                 this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>, ITableBuilder>>();
             }

@@ -100,46 +100,15 @@
                         "id": 2,
                         "data": "Source123Row2"
                     }
-                ],
-                "Source5Parser/Source5DataCooker/Objects": [
-                    {
-                      "key": 1,
-                      "id": 1,
-                      "data": "Source5Row1"
-                    },
-                    {
-                      "key": 2,
-                      "id": 2,
-                      "data": "Source5Row2"
-                    },
-                    {
-                      "key": 3,
-                      "id": 3,
-                      "data": "Source5Row3"
-                    },
-                    {
-                      "key": 4,
-                      "id": 4,
-                      "data": "Source5Row4"
-                    },
-                    {
-                      "key": 5,
-                      "id": 5,
-                      "data": "Source5Row5"
-                    }
-                ],
-                "/Composite2Cooker/Output": [
-                  {
-                    "key": 5,
-                    "source5Count": 5
-                  }
                 ]
             },
             "throwingOutputs": [
                 "Source4Parser/Source4DataCooker/Objects",
                 "/Composite1Cooker/Output",
                 "/Composite3Cooker/Output",
-                "/Composite4Cooker/Output"
+                "/Composite4Cooker/Output",
+                "Source5Parser/Source5DataCooker/Objects",
+                "/Composite2Cooker/Output"
             ]
         },
       {
@@ -423,39 +392,6 @@
                         "id": 2,
                         "data": "Source123Row2"
                     }
-                ],
-                "Source5Parser/Source5DataCooker/Objects": [
-                    {
-                      "key": 1,
-                      "id": 1,
-                      "data": "Source5Row1"
-                    },
-                    {
-                      "key": 2,
-                      "id": 2,
-                      "data": "Source5Row2"
-                    },
-                    {
-                      "key": 3,
-                      "id": 3,
-                      "data": "Source5Row3"
-                    },
-                    {
-                      "key": 4,
-                      "id": 4,
-                      "data": "Source5Row4"
-                    },
-                    {
-                      "key": 5,
-                      "id": 5,
-                      "data": "Source5Row5"
-                    }
-                ],
-                "/Composite2Cooker/Output": [
-                  {
-                    "key": 5,
-                    "source5Count": 5
-                  }
                 ]
             },
             "throwingOutputs": [
@@ -465,7 +401,9 @@
                 "Source4Parser/Source4DataCooker/Objects",
                 "/Composite1Cooker/Output",
                 "/Composite3Cooker/Output",
-                "/Composite4Cooker/Output"
+                "/Composite4Cooker/Output",
+                "Source5Parser/Source5DataCooker/Objects",
+                "/Composite2Cooker/Output"
             ]
         },
         {

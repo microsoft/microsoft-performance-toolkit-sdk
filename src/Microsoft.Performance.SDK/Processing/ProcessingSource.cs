@@ -303,7 +303,7 @@ namespace Microsoft.Performance.SDK.Processing
             var tables = this.tableDiscoverer.Discover(tableConfigSerializer);
 
             var tableSet = new HashSet<DiscoveredTable>(DiscoveredTableEqualityComparer.ByTableDescriptor);
-            foreach (var table in tables)
+            foreach (var table in tables.Where(dt => !dt.Descriptor.RequiresDataExtensions()))
             {
                 if (!tableSet.Add(table))
                 {

@@ -531,7 +531,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             ITableExtensionReference tableReference = null;
             IEnumerable<ProcessingSourceExecutor> executorsWithTable = null;
 
-            if (!descriptor.IsInternalTable && this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
+            if (this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
             {
                 Debug.Assert(
                     tableReference != null,
@@ -925,42 +925,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(this.tablesToProcessors.ContainsKey(descriptor));
         }
 
-        private void MapInternalTablesToProcessor(ProcessingSourceExecutor executor)
-        {
-            var internalTables = executor.Processor.GetEnabledTables().Where(td => td.IsInternalTable);
-            foreach (var internalTable in internalTables)
-            {
-                try
-                {
-                    if (this.tablesToProcessors.TryGetValue(internalTable, out var processor))
-                    {
-                        if (processor != executor.Processor)
-                        {
-                            this.logger.Warn(
-                                "Unable to map internal table {0} to processor {1}: " +
-                                "The SDK.Engine does not support internal tables used by multiple data processors.",
-                                internalTable.Guid,
-                                executor.Context.ProcessingSource);
-                            continue;
-                        }
-
-                        // this table was already added for this processor
-                        continue;
-                    }
-
-                    this.tablesToProcessors.Add(internalTable, executor.Processor);
-                }
-                catch (Exception e)
-                {
-                    this.logger.Warn(
-                        "Unable to enable table {0} on processor {1}: {2}",
-                        internalTable.Guid,
-                        executor.Context.ProcessingSource,
-                        e);
-                }
-            }
-        }
-
         private RuntimeExecutionResults ProcessCore()
         {
             this.IsProcessed = true;
@@ -1042,7 +1006,6 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                         var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
-                        MapInternalTablesToProcessor(executor);
 
                         executors.Add(executor);
                     }

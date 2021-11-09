@@ -270,13 +270,6 @@ namespace Microsoft.Performance.SDK.Processing
                 }
             }
 
-            // Non-extended tables must be marked as internal so that drivers/the engine
-            // know to call its associated Processor's BuildTable method
-            if (buildTableAction == null)
-            {
-                tableDescriptor.IsInternalTable = true;
-            }
-
             // todo:should we make this optional, or does it makes sense to always include this?
             // we could add an "IncludeType" bool or something on the table attribute if we don't want
             // this to always be set.

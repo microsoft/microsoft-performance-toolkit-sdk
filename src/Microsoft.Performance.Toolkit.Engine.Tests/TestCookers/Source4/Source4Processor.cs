@@ -13,13 +13,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
         : CustomDataProcessorWithSourceParser<Source4DataObject, EngineTestContext, int>
     {
         public Source4Processor(
-            ISourceParser<Source4DataObject, EngineTestContext, int> sourceParser, 
+            ISourceParser<Source4DataObject, EngineTestContext, int> sourceParser,
             ProcessorOptions options,
-            IApplicationEnvironment applicationEnvironment, 
-            IProcessorEnvironment processorEnvironment, 
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables) 
-            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+            IApplicationEnvironment applicationEnvironment,
+            IProcessorEnvironment processorEnvironment,
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
         }
     }

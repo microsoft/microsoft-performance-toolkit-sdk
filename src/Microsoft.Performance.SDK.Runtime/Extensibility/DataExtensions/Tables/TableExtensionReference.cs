@@ -22,7 +22,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         private TableDescriptor tableDescriptor;
         private Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction;
         private Func<IDataExtensionRetrieval, bool> isDataAvailableFunc;
-        private bool isInternalTable;
 
         private bool isDisposed;
 
@@ -42,15 +41,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             this.tableDescriptor = other.tableDescriptor;
             this.buildTableAction = other.buildTableAction;
             this.isDataAvailableFunc = other.isDataAvailableFunc;
-            this.isInternalTable = other.isInternalTable;
         }
 
         private TableExtensionReference(
             string tableName,
             TableDescriptor tableDescriptor,
             Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
-            Func<IDataExtensionRetrieval, bool> isDataAvailableFunc,
-            bool isInternalTable)
+            Func<IDataExtensionRetrieval, bool> isDataAvailableFunc)
             : base(tableName)
         {
             Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
@@ -58,7 +55,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             this.tableDescriptor = tableDescriptor;
             this.buildTableAction = buildTableAction;
             this.isDataAvailableFunc = isDataAvailableFunc;
-            this.isInternalTable = isInternalTable;
 
             foreach (var dataCookerPath in tableDescriptor.RequiredDataCookers)
             {
@@ -116,22 +112,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             {
                 this.ThrowIfDisposed();
                 return this.isDataAvailableFunc;
-            }
-        }
-
-        /// <summary>
-        ///     Gets a value indicating whether this table is
-        ///     an internal table.
-        /// </summary>
-        /// <exception cref="System.ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public bool IsInternalTable
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.isInternalTable;
             }
         }
 
@@ -203,14 +183,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
                     out var tableBuildAction,
                     out var tableIsDataAvailableFunc))
             {
-                if (tableDescriptor.IsInternalTable)
-                {
-                    if (!allowInternalTables)
-                    {
-                        return false;
-                    }
-                }
-
                 try
                 {
                     reference = CreateReference(
@@ -270,8 +242,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
                 tableName,
                 tableDescriptor,
                 tableBuildAction,
-                tableIsDataAvailableFunc,
-                tableDescriptor.IsInternalTable);
+                tableIsDataAvailableFunc);
         }
 
         /// <inheritdoc />

@@ -64,11 +64,6 @@ namespace Microsoft.Performance.SDK.Processing
         public Action<ITableBuilder, IDataExtensionRetrieval> BuildTable { get; }
 
         /// <summary>
-        ///     Gets a value indicating whether this table is internal to the plugin.
-        /// </summary>
-        public bool IsInternal => this.Descriptor.IsInternalTable;
-
-        /// <summary>
         ///     Gets a value indicating whether this table is a metadata table.
         /// </summary>
         public bool IsMetadata => this.Descriptor.IsMetadataTable;

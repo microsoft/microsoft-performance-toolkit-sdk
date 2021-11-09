@@ -151,7 +151,6 @@ namespace Microsoft.Performance.SDK.Tests
                 serializer,
                 out var expectedDescriptors,
                 out var buildActions,
-                out _,
                 typeof(StubDataTableOne),
                 typeof(StubDataTableTwo),
                 typeof(StubDataTableThree),
@@ -194,7 +193,6 @@ namespace Microsoft.Performance.SDK.Tests
                 serializer,
                 out var expectedDescriptors,
                 out var buildActions,
-                out _,
                 typeof(StubDataTableOne),
 
                 typeof(StubDataTableTwo),
@@ -226,7 +224,6 @@ namespace Microsoft.Performance.SDK.Tests
                    serializer,
                    out var expectedDescriptors,
                    out var buildActions,
-                   out _,
                    typeof(StubDataTableOne));
 
             var discovery = new FakeTableProvider();

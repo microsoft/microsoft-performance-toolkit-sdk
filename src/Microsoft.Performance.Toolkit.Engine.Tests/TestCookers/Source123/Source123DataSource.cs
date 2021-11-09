@@ -24,8 +24,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         }
 
         protected override ICustomDataProcessor CreateProcessorCore(
-            IEnumerable<IDataSource> dataSources, 
-            IProcessorEnvironment processorEnvironment, 
+            IEnumerable<IDataSource> dataSources,
+            IProcessorEnvironment processorEnvironment,
             ProcessorOptions options)
         {
             var parser = new Source123Parser(dataSources);
@@ -35,8 +35,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                 options,
                 this.ApplicationEnvironment,
                 processorEnvironment,
-                this.AllTables,
-                this.MetadataTables);
+                this.AllTables);
         }
 
         protected override bool IsDataSourceSupportedCore(IDataSource dataSource)

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
@@ -29,7 +28,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
 
         public static TestCustomDataProcessor CreateTestCustomDataProcessor(
             string sourceParserId,
-            Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> metadataTables,
+            Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTables,
             TestDataExtensionRepository extensionRepo = null)
         {
             var sourceParser = new TestSourceParser() { Id = sourceParserId };
@@ -57,8 +56,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
                 ProcessorOptions.Default,
                 applicationEnvironment,
                 processorEnvironment,
-                metadataTables,
-                metadataTables.Select(kvp => kvp.Key));
+                allTables);
 
             Assert.IsNotNull(extensibilitySupport);
 
@@ -73,9 +71,8 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables)
-            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
         }
 

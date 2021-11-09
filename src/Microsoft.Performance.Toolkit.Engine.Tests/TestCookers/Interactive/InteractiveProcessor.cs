@@ -18,9 +18,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables)
-            : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
         }
 

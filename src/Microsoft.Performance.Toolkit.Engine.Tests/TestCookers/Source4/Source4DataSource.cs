@@ -19,8 +19,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
         public const string Extension = ".s4d";
 
         protected override ICustomDataProcessor CreateProcessorCore(
-            IEnumerable<IDataSource> dataSources, 
-            IProcessorEnvironment processorEnvironment, 
+            IEnumerable<IDataSource> dataSources,
+            IProcessorEnvironment processorEnvironment,
             ProcessorOptions options)
         {
             var parser = new Source4Parser(dataSources);
@@ -30,8 +30,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
                 options,
                 this.ApplicationEnvironment,
                 processorEnvironment,
-                this.AllTables,
-                this.MetadataTables);
+                this.AllTables);
         }
 
         protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
