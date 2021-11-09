@@ -34,8 +34,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                 parser,
                 options,
                 this.ApplicationEnvironment,
-                processorEnvironment,
-                this.AllTables);
+                processorEnvironment);
         }
 
         protected override bool IsDataSourceSupportedCore(IDataSource dataSource)

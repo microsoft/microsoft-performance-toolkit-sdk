@@ -614,8 +614,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
                 sp,
                 ProcessorOptions.Default,
                 new TestApplicationEnvironment { SourceSessionFactory = new TestSourceSessionFactory(), },
-                new TestProcessorEnvironment(),
-                new TableDescriptor[] { });
+                new TestProcessorEnvironment());
 
             var cds = new FakeProcessingSource();
             var r = new ProcessingSourceReference(

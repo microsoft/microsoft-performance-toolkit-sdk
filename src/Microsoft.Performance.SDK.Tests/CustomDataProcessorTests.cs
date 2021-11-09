@@ -51,8 +51,7 @@ namespace Microsoft.Performance.SDK.Tests
             this.Sut = new MockProcessor(
                 this.Options,
                 this.ApplicationEnvironment,
-                this.ProcessorEnvironment,
-                this.Tables);
+                this.ProcessorEnvironment);
         }
 
         [TestMethod]
@@ -67,17 +66,6 @@ namespace Microsoft.Performance.SDK.Tests
         public void ApplicationEnvironmentHydratedCorrectly()
         {
             Assert.AreEqual(this.ApplicationEnvironment, this.Sut.ExposedApplicationEnvironment);
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void TableDescriptorToTypeHydratedCorrectly()
-        {
-            Assert.AreEqual(this.Tables.Count, this.Sut.ExposedTables.Count);
-            foreach (var td in this.Tables)
-            {
-                Assert.IsTrue(this.Sut.ExposedTables.Contains(td));
-            }
         }
 
         [TestMethod]
@@ -144,8 +132,7 @@ namespace Microsoft.Performance.SDK.Tests
             this.Sut = new MockProcessor(
                 this.Options,
                 this.ApplicationEnvironment,
-                this.ProcessorEnvironment,
-                this.Tables);
+                this.ProcessorEnvironment);
 
         }
 
@@ -155,9 +142,8 @@ namespace Microsoft.Performance.SDK.Tests
             public MockProcessor(
                 ProcessorOptions options,
                 IApplicationEnvironment applicationEnvironment,
-                IProcessorEnvironment processorEnvironment,
-                IEnumerable<TableDescriptor> allTables)
-                : base(options, applicationEnvironment, processorEnvironment, allTables)
+                IProcessorEnvironment processorEnvironment)
+                : base(options, applicationEnvironment, processorEnvironment)
             {
                 this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, ITableBuilder>>();
             }
@@ -165,8 +151,6 @@ namespace Microsoft.Performance.SDK.Tests
             public ProcessorOptions ExposedOptions => this.Options;
 
             public IApplicationEnvironment ExposedApplicationEnvironment => this.ApplicationEnvironment;
-
-            public HashSet<TableDescriptor> ExposedTables => new HashSet<TableDescriptor>(this.Tables);
 
             public ReadOnlyHashSet<TableDescriptor> ExposedEnabledTables => this.EnabledTables;
 

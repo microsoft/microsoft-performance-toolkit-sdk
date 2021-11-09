@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,9 +15,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
         public InteractiveProcessor(
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IEnumerable<TableDescriptor> allTablesMapping)
-            : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
+            IProcessorEnvironment processorEnvironment)
+            : base(options, applicationEnvironment, processorEnvironment)
         {
         }
 

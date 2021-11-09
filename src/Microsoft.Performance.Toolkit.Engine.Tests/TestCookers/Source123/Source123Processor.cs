@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
@@ -14,9 +13,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             ISourceParser<Source123DataObject, EngineTestContext, int> sourceParser,
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IEnumerable<TableDescriptor> allTables)
-            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTables)
+            IProcessorEnvironment processorEnvironment)
+            : base(sourceParser, options, applicationEnvironment, processorEnvironment)
         {
         }
 

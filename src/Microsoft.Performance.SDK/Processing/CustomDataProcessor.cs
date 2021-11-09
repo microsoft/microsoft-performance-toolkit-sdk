@@ -20,7 +20,6 @@ namespace Microsoft.Performance.SDK.Processing
           IDataDerivedTables
     {
         private readonly HashSet<TableDescriptor> enabledTables = new HashSet<TableDescriptor>();
-        private readonly HashSet<TableDescriptor> allTables;
 
         private readonly Dictionary<TableDescriptor, Action<ITableBuilder>>
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
@@ -31,12 +30,10 @@ namespace Microsoft.Performance.SDK.Processing
         protected CustomDataProcessor(
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IEnumerable<TableDescriptor> allTables)
+            IProcessorEnvironment processorEnvironment)
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(applicationEnvironment, nameof(applicationEnvironment));
-            Guard.NotNull(allTables, nameof(allTables));
             Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
 
             this.Logger = processorEnvironment.CreateLogger(this.GetType());
@@ -45,7 +42,6 @@ namespace Microsoft.Performance.SDK.Processing
             this.ProcessorEnvironment = processorEnvironment;
             this.EnabledTables = new ReadOnlyHashSet<TableDescriptor>(this.enabledTables);
             this.Options = options;
-            this.allTables = new HashSet<TableDescriptor>(allTables);
         }
 
         /// <inheritdoc />
@@ -70,11 +66,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets the command line options that have been passed to this processor.
         /// </summary>
         protected ProcessorOptions Options { get; }
-
-        /// <summary>
-        ///     Gets a mapping of table descriptors to their resolved table builder actions.
-        /// </summary>
-        protected IEnumerable<TableDescriptor> Tables => this.allTables;
 
         /// <summary>
         ///     Used to log data specific to this data processor.
@@ -120,7 +111,7 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(table, nameof(table));
             Guard.NotNull(tableBuilder, nameof(tableBuilder));
 
-            if (this.allTables.Contains(table))
+            if (this.enabledTables.Contains(table))
             {
                 this.BuildTableCore(table, tableBuilder);
             }
@@ -298,7 +289,7 @@ namespace Microsoft.Performance.SDK.Processing
                     nameof(tableDescriptor));
             }
 
-            if (this.allTables.Contains(tableDescriptor))
+            if (this.enabledTables.Contains(tableDescriptor))
             {
                 throw new ArgumentException(
                     $"The data derived table already exists in the processor as a static table: {tableDescriptor}",

@@ -17,13 +17,11 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             string sourceParserId = "TestSourceParser")
         {
             return CreateTestCustomDataProcessor(
-                sourceParserId,
-                new TableDescriptor[] { });
+                sourceParserId);
         }
 
         public static TestCustomDataProcessor CreateTestCustomDataProcessor(
             string sourceParserId,
-            IEnumerable<TableDescriptor> allTables,
             TestDataExtensionRepository extensionRepo = null)
         {
             var sourceParser = new TestSourceParser() { Id = sourceParserId };
@@ -38,8 +36,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
                 sourceParser,
                 ProcessorOptions.Default,
                 applicationEnvironment,
-                processorEnvironment,
-                allTables);
+                processorEnvironment);
 
             cdp.ExtensionRepository = dataExtensionRepo;
 
@@ -50,9 +47,8 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             ISourceParser<TestRecord, TestParserContext, int> sourceParser,
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IEnumerable<TableDescriptor> allTables)
-            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTables)
+            IProcessorEnvironment processorEnvironment)
+            : base(sourceParser, options, applicationEnvironment, processorEnvironment)
         {
         }
 

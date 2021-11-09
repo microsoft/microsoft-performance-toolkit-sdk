@@ -34,14 +34,12 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="options">Processor options</param>
         /// <param name="applicationEnvironment">Application environment</param>
         /// <param name="processorEnvironment">Processor environment</param>
-        /// <param name="allTables">Table descriptors that can be built by this data processor</param>
         protected CustomDataProcessorWithSourceParser(
             ISourceParser<T, TContext, TKey> sourceParser,
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IEnumerable<TableDescriptor> allTables)
-            : base(options, applicationEnvironment, processorEnvironment, allTables)
+            IProcessorEnvironment processorEnvironment)
+            : base(options, applicationEnvironment, processorEnvironment)
         {
             Guard.NotNull(sourceParser, nameof(sourceParser));
 
@@ -60,8 +58,7 @@ namespace Microsoft.Performance.SDK.Processing
                   other.SourceParser,
                   other.Options,
                   other.ApplicationEnvironment,
-                  other.ProcessorEnvironment,
-                  other.Tables)
+                  other.ProcessorEnvironment)
         {
         }
 
