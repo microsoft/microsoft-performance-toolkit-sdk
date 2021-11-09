@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -19,8 +18,7 @@ namespace Microsoft.Performance.SDK.Processing
     public abstract class ProcessingSource
         : IProcessingSource
     {
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder>> allTables;
-        private readonly ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesRO;
+        private readonly HashSet<TableDescriptor> allTables;
 
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
@@ -33,8 +31,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         protected ProcessingSource()
         {
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>>(this.allTables);
+            this.allTables = new HashSet<TableDescriptor>();
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
@@ -62,8 +59,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             Guard.NotNull(tableDiscoverer, nameof(tableDiscoverer));
 
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>>(this.allTables);
+            this.allTables = new HashSet<TableDescriptor>();
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
@@ -71,8 +67,7 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
-        public IEnumerable<TableDescriptor> DataTables => this.allTables.Keys
-            .Except(this.metadataTablesRO);
+        public IEnumerable<TableDescriptor> DataTables => this.allTables.Except(this.metadataTablesRO);
 
         /// <inheritdoc />
         public IEnumerable<TableDescriptor> MetadataTables => this.metadataTablesRO;
@@ -85,7 +80,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <see cref="Type" /> of Table described by the descriptor. This
         ///     mapping includes the data and metadata tables.
         /// </summary>
-        protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> AllTables => this.allTablesRO;
+        protected IEnumerable<TableDescriptor> AllTables => this.allTables.AsEnumerable();
 
         /// <summary>
         ///     This is set by default when the <see cref="SetApplicationEnvironment"/> is called by the runtime.
@@ -283,18 +278,6 @@ namespace Microsoft.Performance.SDK.Processing
         {
         }
 
-        /// <summary>
-        ///     If a internal table does not provide a TableFactoryAttribute, this method may be implemented
-        ///     to generate an Action to create the table.
-        /// </summary>
-        /// <param name="type">Type associated with the table</param>
-        /// <returns>An action to build the table, or null</returns>
-        protected virtual Action<ITableBuilder> GetTableBuildAction(
-            Type type)
-        {
-            return null;
-        }
-
         private void InitializeAllTables(ITableConfigurationsSerializer tableConfigSerializer)
         {
             Debug.Assert(tableConfigSerializer != null);
@@ -319,9 +302,7 @@ namespace Microsoft.Performance.SDK.Processing
                     this.metadataTables.Add(table.Descriptor);
                 }
 
-                this.allTables[table.Descriptor] = table.BuildTable != null
-                    ? tb => table.BuildTable(tb, null)
-                    : GetTableBuildAction(table.Descriptor.Type);
+                this.allTables.Add(table.Descriptor);
             }
         }
     }

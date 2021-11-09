@@ -34,14 +34,14 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="options">Processor options</param>
         /// <param name="applicationEnvironment">Application environment</param>
         /// <param name="processorEnvironment">Processor environment</param>
-        /// <param name="allTablesMapping">Maps table descriptors to possible build actions</param>
+        /// <param name="allTables">Table descriptors that can be built by this data processor</param>
         protected CustomDataProcessorWithSourceParser(
             ISourceParser<T, TContext, TKey> sourceParser,
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
-            : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
+            IEnumerable<TableDescriptor> allTables)
+            : base(options, applicationEnvironment, processorEnvironment, allTables)
         {
             Guard.NotNull(sourceParser, nameof(sourceParser));
 
@@ -61,7 +61,7 @@ namespace Microsoft.Performance.SDK.Processing
                   other.Options,
                   other.ApplicationEnvironment,
                   other.ProcessorEnvironment,
-                  other.TableDescriptorToBuildAction)
+                  other.Tables)
         {
         }
 
@@ -268,15 +268,14 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        ///     This implementation does nothing. To build a table that does not provide
+        ///     <c>BuildTable&lt;<see cref="ITableBuilder"/>, <see cref="IDataExtensionRetrieval"/>&gt;</c>, override this method.
+        /// </remarks>
         protected override void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder> buildTable,
             ITableBuilder tableBuilder)
         {
-            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
-            Guard.NotNull(tableBuilder, nameof(tableBuilder));
-
-            buildTable(tableBuilder);
         }
 
         /// <summary>

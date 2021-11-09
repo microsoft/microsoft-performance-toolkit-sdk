@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
@@ -16,21 +15,21 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
-            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping)
+            IEnumerable<TableDescriptor> allTables)
+            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTables)
         {
         }
 
-        protected override void BuildTableCore(TableDescriptor tableDescriptor, Action<ITableBuilder> createTable, ITableBuilder tableBuilder)
+        protected override void BuildTableCore(TableDescriptor tableDescriptor, ITableBuilder tableBuilder)
         {
-            if (tableDescriptor.Equals(Source123Table.TableDescriptor) && createTable == null)
+            if (tableDescriptor.Equals(Source123Table.TableDescriptor))
             {
                 var table = new Source123Table();
                 table.Build(tableBuilder);
             }
             else
             {
-                base.BuildTableCore(tableDescriptor, createTable, tableBuilder);
+                base.BuildTableCore(tableDescriptor, tableBuilder);
             }
         }
     }

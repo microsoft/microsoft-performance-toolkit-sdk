@@ -17,7 +17,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
+            IEnumerable<TableDescriptor> allTablesMapping)
             : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
         }
@@ -29,7 +29,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
 
         protected override void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder> createTable,
             ITableBuilder tableBuilder)
         {
         }

@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Tests
     {
         private ProcessorOptions Options { get; set; }
         private IApplicationEnvironment ApplicationEnvironment { get; set; }
-        private Dictionary<TableDescriptor, Action<ITableBuilder>> TableDescriptorToBuildAction { get; set; }
+        private HashSet<TableDescriptor> Tables { get; set; }
         private IProcessorEnvironment ProcessorEnvironment { get; set; }
         private List<TableDescriptor> MetadataTables { get; set; }
 
@@ -37,23 +37,22 @@ namespace Microsoft.Performance.SDK.Tests
                 });
             this.ApplicationEnvironment = new StubApplicationEnvironment();
             this.ProcessorEnvironment = Any.ProcessorEnvironment();
-            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder>>
+            this.Tables = new HashSet<TableDescriptor>
             {
-                [Any.TableDescriptor()] = (tableBuilder) => { },
-                [Any.TableDescriptor()] = (tableBuilder) => { },
-                [Any.TableDescriptor()] = (tableBuilder) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+                Any.MetadataTableDescriptor(),
+                Any.MetadataTableDescriptor(),
             };
 
-            this.MetadataTables = this.TableDescriptorToBuildAction.Keys.Where(x => x.IsMetadataTable).ToList();
+            this.MetadataTables = this.Tables.Where(x => x.IsMetadataTable).ToList();
 
             this.Sut = new MockProcessor(
                 this.Options,
                 this.ApplicationEnvironment,
                 this.ProcessorEnvironment,
-                this.TableDescriptorToBuildAction,
-                this.MetadataTables);
+                this.Tables);
         }
 
         [TestMethod]
@@ -74,7 +73,11 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void TableDescriptorToTypeHydratedCorrectly()
         {
-            Assert.AreEqual(this.TableDescriptorToBuildAction, this.Sut.ExposedTableDescriptorToBuildAction);
+            Assert.AreEqual(this.Tables.Count, this.Sut.ExposedTables.Count);
+            foreach (var td in this.Tables)
+            {
+                Assert.IsTrue(this.Sut.ExposedTables.Contains(td));
+            }
         }
 
         [TestMethod]
@@ -105,15 +108,14 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void BuildTableDelegatesCorrectly()
         {
-            var tableToBuild = this.TableDescriptorToBuildAction.First();
+            var tableToBuild = this.Tables.First();
             var tableBuilder = new FakeTableBuilder();
 
-            this.Sut.BuildTable(tableToBuild.Key, tableBuilder);
+            this.Sut.BuildTable(tableToBuild, tableBuilder);
 
             Assert.AreEqual(1, this.Sut.BuildTableCoreCalls.Count);
-            Assert.AreEqual(tableToBuild.Key, this.Sut.BuildTableCoreCalls[0].Item1);
-            Assert.AreEqual(tableToBuild.Value, this.Sut.BuildTableCoreCalls[0].Item2);
-            Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item3);
+            Assert.AreEqual(tableToBuild, this.Sut.BuildTableCoreCalls[0].Item1);
+            Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item2);
         }
 
         public void EnableMetaTableThrows()
@@ -128,23 +130,22 @@ namespace Microsoft.Performance.SDK.Tests
 
             this.ApplicationEnvironment = new StubApplicationEnvironment();
             this.ProcessorEnvironment = Any.ProcessorEnvironment();
-            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder>>
+            this.Tables = new HashSet<TableDescriptor>
             {
-                [Any.TableDescriptor()] = (tableBuilder) => { },
-                [Any.TableDescriptor()] = (tableBuilder) => { },
-                [Any.TableDescriptor()] = (tableBuilder) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+                Any.MetadataTableDescriptor(),
+                Any.MetadataTableDescriptor(),
             };
 
-            this.MetadataTables = this.TableDescriptorToBuildAction.Keys.Where(x => x.IsMetadataTable).ToList();
+            this.MetadataTables = this.Tables.Where(x => x.IsMetadataTable).ToList();
 
             this.Sut = new MockProcessor(
                 this.Options,
                 this.ApplicationEnvironment,
                 this.ProcessorEnvironment,
-                this.TableDescriptorToBuildAction,
-                this.MetadataTables);
+                this.Tables);
 
         }
 
@@ -155,18 +156,17 @@ namespace Microsoft.Performance.SDK.Tests
                 ProcessorOptions options,
                 IApplicationEnvironment applicationEnvironment,
                 IProcessorEnvironment processorEnvironment,
-                IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping,
-                IEnumerable<TableDescriptor> metadataTables)
-                : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
+                IEnumerable<TableDescriptor> allTables)
+                : base(options, applicationEnvironment, processorEnvironment, allTables)
             {
-                this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, Action<ITableBuilder>, ITableBuilder>>();
+                this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, ITableBuilder>>();
             }
 
             public ProcessorOptions ExposedOptions => this.Options;
 
             public IApplicationEnvironment ExposedApplicationEnvironment => this.ApplicationEnvironment;
 
-            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> ExposedTableDescriptorToBuildAction => this.TableDescriptorToBuildAction;
+            public HashSet<TableDescriptor> ExposedTables => new HashSet<TableDescriptor>(this.Tables);
 
             public ReadOnlyHashSet<TableDescriptor> ExposedEnabledTables => this.EnabledTables;
 
@@ -180,13 +180,12 @@ namespace Microsoft.Performance.SDK.Tests
                 return Task.CompletedTask;
             }
 
-            public List<Tuple<TableDescriptor, Action<ITableBuilder>, ITableBuilder>> BuildTableCoreCalls { get; }
+            public List<Tuple<TableDescriptor, ITableBuilder>> BuildTableCoreCalls { get; }
             protected override void BuildTableCore(
                 TableDescriptor tableDescriptor,
-                Action<ITableBuilder> createTable,
                 ITableBuilder tableBuilder)
             {
-                this.BuildTableCoreCalls.Add(Tuple.Create(tableDescriptor, createTable, tableBuilder));
+                this.BuildTableCoreCalls.Add(Tuple.Create(tableDescriptor, tableBuilder));
             }
         }
 

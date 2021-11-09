@@ -56,18 +56,10 @@ namespace Microsoft.Performance.SDK.Tests
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.AreEqual(5, sut.AllTablesExposed.Count);
-
-            // call the build action of each of our tables
-            foreach (var kvp in sut.AllTablesExposed)
+            foreach (var td in expectedDescriptors)
             {
-                kvp.Value.Invoke(null);
+                Assert.IsTrue(sut.AllTablesExposed.Contains(td));
             }
-
-            Assert.IsTrue(StubDataTableOne.BuildTableWasCalled);
-            Assert.IsTrue(StubDataTableTwo.BuildTableWasCalled);
-            Assert.IsTrue(StubDataTableThree.BuildTableWasCalled);
-            Assert.IsTrue(StubMetadataTableOne.BuildTableWasCalled);
-            Assert.IsTrue(StubMetadataTableTwo.BuildTableWasCalled);
         }
 
         [TestMethod]
@@ -171,17 +163,10 @@ namespace Microsoft.Performance.SDK.Tests
 
             Assert.AreEqual(5, sut.AllTablesExposed.Count);
 
-            // call the build action of each of our tables
-            foreach (var kvp in sut.AllTablesExposed)
+            foreach (var td in expectedDescriptors)
             {
-                kvp.Value.Invoke(null);
+                Assert.IsTrue(sut.AllTablesExposed.Contains(td));
             }
-
-            Assert.IsTrue(StubDataTableOne.BuildTableWasCalled);
-            Assert.IsTrue(StubDataTableTwo.BuildTableWasCalled);
-            Assert.IsTrue(StubDataTableThree.BuildTableWasCalled);
-            Assert.IsTrue(StubMetadataTableOne.BuildTableWasCalled);
-            Assert.IsTrue(StubMetadataTableTwo.BuildTableWasCalled);
         }
 
         [TestMethod]
@@ -215,50 +200,6 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
-        [TestMethod]
-        [UnitTest]
-        public void WhenBuildActionIsNull_DelegatesToOverriddenGetBuildTable()
-        {
-            TableDescriptorUtils.CreateTableDescriptors(
-                   serializer,
-                   out var expectedDescriptors,
-                   out var buildActions,
-                   typeof(StubDataTableOne));
-
-            var discovery = new FakeTableProvider();
-            discovery.DiscoverReturnValue = new HashSet<DiscoveredTable>
-            {
-                //
-                // Ignore the discovered build action, if any, as we are explciitly testing
-                // that missing build actions cause a delegation to the processing source.
-                //
-
-                new DiscoveredTable(expectedDescriptors[0]),
-            };
-
-            Assert.IsNull(discovery.DiscoverReturnValue.Single().BuildTable);
-
-            var sut = new GetBuildTableActionDataSource(discovery);
-
-            //
-            // When we invoke build table later in the test, in the GetBuildTableAction method was called, then our
-            // delegate would have been assigned, and thus invoked when BuildTable is invoked. This is how we can
-            // sense that our override is being respected in the null case.
-            //
-
-            var processingSourceGetBuildTableCalled = false;
-            sut.GetBuildTableActionReturnValues[expectedDescriptors.Single().Type] = (_) => processingSourceGetBuildTableCalled = true;
-
-            sut.SetApplicationEnvironment(applicationEnvironment);
-
-            foreach (var kvp in sut.AllTablesExposed)
-            {
-                kvp.Value.Invoke(null);
-            }
-
-            Assert.IsTrue(processingSourceGetBuildTableCalled);
-        }
-
         [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
         [FileDataSource(".csv")]
         private sealed class StubDataSource
@@ -286,7 +227,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             public static Assembly Assembly { get; set; }
 
-            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> AllTablesExposed => this.AllTables;
+            public HashSet<TableDescriptor> AllTablesExposed => new HashSet<TableDescriptor>(this.AllTables);
 
             public List<Option> CommandLineOptionsToReturn { get; set; }
             public override IEnumerable<Option> CommandLineOptions => this.CommandLineOptionsToReturn ?? Enumerable.Empty<Option>();
@@ -316,80 +257,6 @@ namespace Microsoft.Performance.SDK.Tests
             protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return true;
-            }
-        }
-
-        [ProcessingSource("{293DA3BE-7ED2-4FD7-B5E4-8BCCAADD23AD}", "Two", "Two")]
-        [FileDataSource(".csv")]
-        private sealed class GetBuildTableActionDataSource
-            : ProcessingSource
-        {
-            static GetBuildTableActionDataSource()
-            {
-                Assembly = typeof(GetBuildTableActionDataSource).Assembly;
-            }
-
-            public GetBuildTableActionDataSource()
-                : this(TableDiscovery.CreateForAssembly(Assembly))
-            {
-            }
-
-            public GetBuildTableActionDataSource(ITableProvider discovery)
-               : base(discovery)
-            {
-                this.CommandLineOptionsToReturn = new List<Option>();
-                this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
-                this.ProcessorToReturn = new MockCustomDataProcessor();
-                this.CreateProcessorCoreCalls =
-                    new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
-
-                this.GetBuildTableActionReturnValues = new Dictionary<Type, Action<ITableBuilder>>();
-            }
-
-            public static Assembly Assembly { get; set; }
-
-            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> AllTablesExposed => this.AllTables;
-
-            public List<Option> CommandLineOptionsToReturn { get; set; }
-            public override IEnumerable<Option> CommandLineOptions => this.CommandLineOptionsToReturn ?? Enumerable.Empty<Option>();
-
-            public List<IApplicationEnvironment> SetApplicationEnvironmentCalls { get; }
-            protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
-            {
-                this.SetApplicationEnvironmentCalls.Add(applicationEnvironment);
-            }
-
-            public ICustomDataProcessor ProcessorToReturn { get; set; }
-            public List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>> CreateProcessorCoreCalls { get; }
-            protected override ICustomDataProcessor CreateProcessorCore(
-                IEnumerable<IDataSource> dataSources,
-                IProcessorEnvironment processorEnvironment,
-                ProcessorOptions options)
-            {
-                this.CreateProcessorCoreCalls.Add(
-                    Tuple.Create(
-                        dataSources,
-                        processorEnvironment,
-                        options));
-
-                return this.ProcessorToReturn;
-            }
-
-            protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
-            {
-                return true;
-            }
-
-            public Dictionary<Type, Action<ITableBuilder>> GetBuildTableActionReturnValues { get; }
-
-            protected override Action<ITableBuilder> GetTableBuildAction(Type type)
-            {
-                if (this.GetBuildTableActionReturnValues.TryGetValue(type, out var v))
-                {
-                    return v;
-                }
-
-                return base.GetTableBuildAction(type);
             }
         }
     }

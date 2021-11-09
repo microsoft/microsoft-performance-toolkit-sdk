@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
@@ -19,12 +18,12 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
         {
             return CreateTestCustomDataProcessor(
                 sourceParserId,
-                new Dictionary<TableDescriptor, Action<ITableBuilder>>());
+                new TableDescriptor[] { });
         }
 
         public static TestCustomDataProcessor CreateTestCustomDataProcessor(
             string sourceParserId,
-            Dictionary<TableDescriptor, Action<ITableBuilder>> allTables,
+            IEnumerable<TableDescriptor> allTables,
             TestDataExtensionRepository extensionRepo = null)
         {
             var sourceParser = new TestSourceParser() { Id = sourceParserId };
@@ -52,8 +51,8 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
-            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping)
+            IEnumerable<TableDescriptor> allTables)
+            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTables)
         {
         }
 
