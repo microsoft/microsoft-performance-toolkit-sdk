@@ -61,10 +61,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
                 this.AddRequiredDataCooker(dataCookerPath);
             }
 
-            foreach (var dataProcessorId in tableDescriptor.RequiredDataProcessors)
-            {
-                this.AddRequiredDataProcessor(dataProcessorId);
-            }
+            // TODO: __SDK_DP__
+            //foreach (var dataProcessorId in tableDescriptor.RequiredDataProcessors)
+            //{
+            //    this.AddRequiredDataProcessor(dataProcessorId);
+            //}
 
             this.isDisposed = false;
         }
