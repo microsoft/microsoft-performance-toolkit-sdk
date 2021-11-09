@@ -15,8 +15,6 @@ namespace Microsoft.Performance.Testing.SDK
     {
         public MockCustomDataProcessor()
         {
-            this.MetadataTablesToBuild = new List<TableDescriptor>();
-            this.BuildMetadataTablesCalls = new List<IMetadataTableBuilderFactory>();
             this.BuildTableFailures = new Dictionary<TableDescriptor, Exception>();
             this.BuildTableCalls = new ConcurrentDictionary<TableDescriptor, List<ITableBuilder>>();
             this.EnableFailures = new Dictionary<TableDescriptor, Exception>();
@@ -26,26 +24,9 @@ namespace Microsoft.Performance.Testing.SDK
             this.IsDataAvailableReturnValue = true;
         }
 
-        public Exception BuildMetadataTableFailure { get; set; }
-        public IEnumerable<TableDescriptor> MetadataTablesToBuild { get; set; }
-        public List<IMetadataTableBuilderFactory> BuildMetadataTablesCalls { get; }
-        public void BuildMetadataTables(
-            IMetadataTableBuilderFactory metadataTableBuilderFactory)
-        {
-            this.BuildMetadataTablesCalls.Add(metadataTableBuilderFactory);
-            if (this.BuildMetadataTableFailure != null)
-            {
-                throw this.BuildMetadataTableFailure;
-            }
-
-            foreach (var table in this.MetadataTablesToBuild)
-            {
-                var builder = metadataTableBuilderFactory.Create(table);
-            }
-        }
-
         public Dictionary<TableDescriptor, Exception> BuildTableFailures { get; }
         public ConcurrentDictionary<TableDescriptor, List<ITableBuilder>> BuildTableCalls { get; }
+
         public void BuildTable(
             TableDescriptor table,
             ITableBuilder tableBuilder)

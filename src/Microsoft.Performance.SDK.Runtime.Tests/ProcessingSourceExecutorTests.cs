@@ -379,71 +379,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public async Task ExecuteBuiltMetadataTablesReturned()
-        {
-            var progress = new DataProcessorProgress();
-
-            var mockProcessor = new MockCustomDataProcessor
-            {
-                MetadataTablesToBuild = new[]
-                {
-                    Any.TableDescriptor(),
-                    Any.TableDescriptor(),
-                    Any.TableDescriptor(),
-                }
-            };
-
-            var fakeProcessingSource = new MockProcessingSource()
-            {
-                DataProcessor = mockProcessor,
-            };
-
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
-
-            var tablesToEnable = new[]
-            {
-                Any.TableDescriptor(),
-                Any.TableDescriptor(),
-                Any.TableDescriptor(),
-            };
-
-            var executionContext = new ExecutionContext(
-                progress,
-                _ => new NullLogger(),
-                CreateReference(fakeProcessingSource),
-                dataSources,
-                tablesToEnable,
-                Any.ProcessorEnvironment(),
-                ProcessorOptions.Default);
-
-            this.Sut.InitializeCustomDataProcessor(executionContext);
-            var result = await this.Sut.ExecuteAsync(CancellationToken.None);
-
-            Assert.AreEqual(mockProcessor.MetadataTablesToBuild.Count(), result.BuiltMetadataTables.Count);
-            foreach (var table in mockProcessor.MetadataTablesToBuild)
-            {
-                Assert.IsTrue(result.BuiltMetadataTables.Select(x => x.TableDescriptor).Contains(table));
-            }
-        }
-
-        [TestMethod]
-        [UnitTest]
         public async Task ExecuteFailureToBuildMetadataTablesNoted()
         {
             var progress = new DataProcessorProgress();
 
             var mockProcessor = new MockCustomDataProcessor
             {
-                MetadataTablesToBuild = new[]
-                {
-                    Any.TableDescriptor(),
-                    Any.TableDescriptor(),
-                    Any.TableDescriptor(),
-                },
-                BuildMetadataTableFailure = new Exception(),
             };
 
             var fakeProcessingSource = new MockProcessingSource()
@@ -474,9 +415,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             this.Sut.InitializeCustomDataProcessor(executionContext);
             var result = await this.Sut.ExecuteAsync(CancellationToken.None);
-
-            Assert.AreEqual(0, result.BuiltMetadataTables.Count);
-            Assert.AreEqual(mockProcessor.BuildMetadataTableFailure, result.MetadataTableFailure);
         }
 
         [TestMethod]

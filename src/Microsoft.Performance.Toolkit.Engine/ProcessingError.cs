@@ -82,7 +82,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ProcessingSourceGuid = executionResult.Context.ProcessingSource.Guid;
             this.DataSourceInfoFault = executionResult.DataSourceInfoFailure;
             this.EnableTableFaults = executionResult.EnableFailures;
-            this.MetadataFault = executionResult.MetadataTableFailure;
             this.ProcessFault = executionResult.ProcessorFault;
         }
 

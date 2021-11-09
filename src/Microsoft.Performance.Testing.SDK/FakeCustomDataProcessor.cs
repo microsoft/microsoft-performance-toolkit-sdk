@@ -12,11 +12,6 @@ namespace Microsoft.Performance.Testing.SDK
     public sealed class FakeCustomDataProcessor
         : ICustomDataProcessor
     {
-        public void BuildMetadataTables(IMetadataTableBuilderFactory metadataTableBuilderFactory)
-        {
-            throw new NotImplementedException();
-        }
-
         public void BuildTable(TableDescriptor table, ITableBuilder tableBuilder)
         {
             throw new NotImplementedException();

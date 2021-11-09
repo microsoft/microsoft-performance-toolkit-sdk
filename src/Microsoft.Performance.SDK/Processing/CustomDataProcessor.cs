@@ -82,20 +82,6 @@ namespace Microsoft.Performance.SDK.Processing
         protected ILogger Logger { get; }
 
         /// <inheritdoc />
-        public void BuildMetadataTables(IMetadataTableBuilderFactory metadataTableBuilderFactory)
-        {
-            Guard.NotNull(metadataTableBuilderFactory, nameof(metadataTableBuilderFactory));
-
-            foreach (var kvp in this.TableDescriptorToBuildAction.Where(x => x.Key.IsMetadataTable && !x.Key.RequiresDataExtensions()))
-            {
-                var builder = metadataTableBuilderFactory.Create(kvp.Key);
-                Debug.Assert(builder != null);
-
-                this.BuildTableCore(kvp.Key, kvp.Value, builder);
-            }
-        }
-
-        /// <inheritdoc />
         public void EnableTable(TableDescriptor tableDescriptor)
         {
             lock (this.enabledTables)

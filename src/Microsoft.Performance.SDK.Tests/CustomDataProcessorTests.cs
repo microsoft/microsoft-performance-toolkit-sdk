@@ -116,25 +116,6 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item3);
         }
 
-        [TestMethod]
-        [UnitTest]
-        public void BuildMetadataTablesDelegatesCorrectly()
-        {
-            var factory = new FakeMetadataTableBuilderFactory();
-
-            this.Sut.BuildMetadataTables(factory);
-
-            Assert.AreEqual(this.MetadataTables.Count, factory.CreatedBuilders.Count);
-
-            Assert.AreEqual(this.MetadataTables.Count, this.Sut.BuildTableCoreCalls.Count);
-            for (var i = 0; i < this.MetadataTables.Count; ++i)
-            {
-                Assert.AreEqual(this.MetadataTables[i], this.Sut.BuildTableCoreCalls[i].Item1);
-                Assert.AreEqual(this.TableDescriptorToBuildAction[this.MetadataTables[i]], this.Sut.BuildTableCoreCalls[i].Item2);
-                Assert.AreEqual(factory.CreatedBuilders[i], this.Sut.BuildTableCoreCalls[i].Item3);
-            }
-        }
-
         public void EnableMetaTableThrows()
         {
             this.Options = new ProcessorOptions(
@@ -241,24 +222,6 @@ namespace Microsoft.Performance.SDK.Tests
             public ITableBuilder SetService(ITableService service)
             {
                 throw new NotImplementedException();
-            }
-        }
-
-        private sealed class FakeMetadataTableBuilderFactory
-            : IMetadataTableBuilderFactory
-        {
-            public FakeMetadataTableBuilderFactory()
-            {
-                this.CreatedBuilders = new List<FakeTableBuilder>();
-            }
-
-            public List<FakeTableBuilder> CreatedBuilders { get; }
-
-            public ITableBuilder Create(TableDescriptor tableDescriptor)
-            {
-                var builder = new FakeTableBuilder();
-                this.CreatedBuilders.Add(builder);
-                return builder;
             }
         }
 
