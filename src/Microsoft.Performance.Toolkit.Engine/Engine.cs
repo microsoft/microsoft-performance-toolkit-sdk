@@ -530,30 +530,30 @@ namespace Microsoft.Performance.Toolkit.Engine
             ITableExtensionReference tableReference = null;
             IEnumerable<ProcessingSourceExecutor> executorsWithTable = null;
 
-            if (this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
-            {
-                Debug.Assert(
-                    tableReference != null,
-                    "If ExtensionRoot.TablesById contains the table descriptor, then it should also contain a " +
-                    "non-null table reference.");
+            executorsWithTable = this.executors.Where(
+                x => x.Context.ProcessingSource.AvailableTables.Contains(descriptor));
 
-                if (tableReference.Availability != DataExtensionAvailability.Available)
+            if (!executorsWithTable.Any())
+            {
+                if (this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
                 {
-                    throw new TableException($"The requested table is not available: {tableReference.Availability}.");
-                }
-            }
-            else
-            {
-                executorsWithTable = this.executors.Where(
-                    x => x.Context.ProcessingSource.AvailableTables.Contains(descriptor));
+                    Debug.Assert(tableReference.BuildTableAction != null);
+                    Debug.Assert(
+                        tableReference != null,
+                        "If ExtensionRoot.TablesById contains the table descriptor, then it should also contain a " +
+                        "non-null table reference.");
 
-                if (!executorsWithTable.Any())
+                    if (tableReference.Availability != DataExtensionAvailability.Available)
+                    {
+                        throw new TableException($"The requested table is not available: {tableReference.Availability}.");
+                    }
+                }
+                else
                 {
                     throw new ArgumentException(
                         "No data source found for the given table.",
                         paramName: nameof(descriptor));
                 }
-
             }
 
             EnableTableCore(descriptor, tableReference, executorsWithTable);

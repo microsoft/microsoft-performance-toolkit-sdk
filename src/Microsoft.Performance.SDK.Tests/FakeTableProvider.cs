@@ -8,19 +8,19 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.SDK.Tests
 {
     public class FakeTableProvider
-        : ITableProvider
+        : IProcessingSourceTableProvider
     {
         public FakeTableProvider()
         {
             this.DiscoverCalls = new List<ITableConfigurationsSerializer>();
-            this.DiscoverReturnValue = Array.Empty<DiscoveredTable>();
+            this.DiscoverReturnValue = Array.Empty<TableDescriptor>();
         }
 
         public List<ITableConfigurationsSerializer> DiscoverCalls { get; }
 
-        public IEnumerable<DiscoveredTable> DiscoverReturnValue { get; set; }
+        public IEnumerable<TableDescriptor> DiscoverReturnValue { get; set; }
 
-        public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
+        public IEnumerable<TableDescriptor> Discover(ITableConfigurationsSerializer tableConfigSerializer)
         {
             this.DiscoverCalls.Add(tableConfigSerializer);
             return this.DiscoverReturnValue;

@@ -141,7 +141,6 @@ namespace Microsoft.Performance.SDK.Tests
             TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 out var expectedDescriptors,
-                out var buildActions,
                 typeof(StubDataTableOne),
                 typeof(StubDataTableTwo),
                 typeof(StubDataTableThree),
@@ -149,13 +148,13 @@ namespace Microsoft.Performance.SDK.Tests
                 typeof(StubMetadataTableTwo));
 
             var discovery = new FakeTableProvider();
-            discovery.DiscoverReturnValue = new HashSet<DiscoveredTable>
+            discovery.DiscoverReturnValue = new HashSet<TableDescriptor>
             {
-                new DiscoveredTable(expectedDescriptors[0], buildActions[0]),
-                new DiscoveredTable(expectedDescriptors[1], buildActions[1]),
-                new DiscoveredTable(expectedDescriptors[2], buildActions[2]),
-                new DiscoveredTable(expectedDescriptors[3], buildActions[3]),
-                new DiscoveredTable(expectedDescriptors[4], buildActions[4]),
+                expectedDescriptors[0],
+                expectedDescriptors[1],
+                expectedDescriptors[2],
+                expectedDescriptors[3],
+                expectedDescriptors[4],
             };
 
             var sut = new StubDataSource(discovery);
@@ -176,7 +175,6 @@ namespace Microsoft.Performance.SDK.Tests
             TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 out var expectedDescriptors,
-                out var buildActions,
                 typeof(StubDataTableOne),
 
                 typeof(StubDataTableTwo),
@@ -186,13 +184,13 @@ namespace Microsoft.Performance.SDK.Tests
                 typeof(StubMetadataTableTwo));
 
             var discovery = new FakeTableProvider();
-            discovery.DiscoverReturnValue = new HashSet<DiscoveredTable>
+            discovery.DiscoverReturnValue = new HashSet<TableDescriptor>
             {
-                new DiscoveredTable(expectedDescriptors[0], buildActions[0]),
-                new DiscoveredTable(expectedDescriptors[1], buildActions[1]),
-                new DiscoveredTable(expectedDescriptors[2], buildActions[2]),
-                new DiscoveredTable(expectedDescriptors[3], buildActions[3]),
-                new DiscoveredTable(expectedDescriptors[4], buildActions[4]),
+                expectedDescriptors[0],
+                expectedDescriptors[1],
+                expectedDescriptors[2],
+                expectedDescriptors[3],
+                expectedDescriptors[4],
             };
 
             var sut = new StubDataSource(discovery);
@@ -215,7 +213,7 @@ namespace Microsoft.Performance.SDK.Tests
             {
             }
 
-            public StubDataSource(ITableProvider discovery)
+            public StubDataSource(IProcessingSourceTableProvider discovery)
                : base(discovery)
             {
                 this.CommandLineOptionsToReturn = new List<Option>();

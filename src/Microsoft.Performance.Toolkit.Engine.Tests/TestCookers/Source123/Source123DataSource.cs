@@ -46,13 +46,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         }
 
         private sealed class Discovery
-            : ITableProvider
+            : IProcessingSourceTableProvider
         {
-            public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
+            public IEnumerable<TableDescriptor> Discover(ITableConfigurationsSerializer tableConfigSerializer)
             {
-                return new HashSet<DiscoveredTable>
+                return new HashSet<TableDescriptor>
                 {
-                    new DiscoveredTable(Source123Table.TableDescriptor),
+                    Source123Table.TableDescriptor,
                 };
             }
         }

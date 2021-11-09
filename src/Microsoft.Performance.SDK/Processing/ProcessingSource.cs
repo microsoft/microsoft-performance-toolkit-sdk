@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Processing
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
 
-        private readonly ITableProvider tableDiscoverer;
+        private readonly IProcessingSourceTableProvider tableDiscoverer;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSource"/>
@@ -52,10 +52,18 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableDiscoverer">
         ///     Object used to provide the tables that are exposed by this <see cref="ProcessingSource"/>.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <remarks>
+        ///     All discovered tables will be associated with this <see cref="ProcessingSource"/>. When a consumer
+        ///     requests the Engine to enable or build a <see cref="TableDescriptor"/> that is in this list, the
+        ///     <see cref="TableDescriptor"/> will be passed into
+        ///     <see cref="ICustomDataProcessor.EnableTable(TableDescriptor)"/> or
+        ///     <see cref="ICustomDataProcessor.BuildTable(TableDescriptor, ITableBuilder)"/> for the 
+        ///     <see cref="ICustomDataProcessor"/> returned from <see cref="CreateProcessor"/>.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
         ///     <paramref name="tableDiscoverer"/> is <c>null</c>.
         /// </exception>
-        protected ProcessingSource(ITableProvider tableDiscoverer)
+        protected ProcessingSource(IProcessingSourceTableProvider tableDiscoverer)
         {
             Guard.NotNull(tableDiscoverer, nameof(tableDiscoverer));
 
@@ -284,25 +292,25 @@ namespace Microsoft.Performance.SDK.Processing
 
             var tables = this.tableDiscoverer.Discover(tableConfigSerializer);
 
-            var tableSet = new HashSet<DiscoveredTable>(DiscoveredTableEqualityComparer.ByTableDescriptor);
-            foreach (var table in tables.Where(dt => !dt.Descriptor.RequiresDataExtensions()))
+            var tableSet = new HashSet<TableDescriptor>();
+            foreach (var table in tables)
             {
                 if (!tableSet.Add(table))
                 {
                     var error = string.Format(
                         CultureInfo.InvariantCulture,
                         "The table descriptor `{0}` appeared on more than one table in the ProcessingSource `{1}`. Tables must be unique according to their table descriptors.",
-                        table.Descriptor,
+                        table,
                         this.GetType());
                     throw new InvalidOperationException(error);
                 }
 
-                if (table.IsMetadata)
+                if (table.IsMetadataTable)
                 {
-                    this.metadataTables.Add(table.Descriptor);
+                    this.metadataTables.Add(table);
                 }
 
-                this.allTables.Add(table.Descriptor);
+                this.allTables.Add(table);
             }
         }
     }
