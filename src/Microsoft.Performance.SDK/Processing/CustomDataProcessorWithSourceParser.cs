@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
-using Microsoft.Performance.SDK.Extensibility.Exceptions;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -27,8 +26,6 @@ namespace Microsoft.Performance.SDK.Processing
           ICustomDataProcessorWithSourceParser<T, TContext, TKey>
           where T : IKeyedDataType<TKey>
     {
-        private readonly IDataProcessorExtensibilitySupport extensibilitySupport;
-
         /// <summary>
         /// This constructor will setup the data processor so that it can use the data extension framework - allowing
         /// table and data cookers both internally and external to this plugin.
@@ -43,14 +40,13 @@ namespace Microsoft.Performance.SDK.Processing
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
             : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
             Guard.NotNull(sourceParser, nameof(sourceParser));
 
             this.SourceParser = sourceParser;
             this.SourceProcessingSession = this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this);
-            this.extensibilitySupport = this.ProcessorEnvironment.CreateDataProcessorExtensibilitySupport(this);
         }
 
         /// <summary>
@@ -266,10 +262,6 @@ namespace Microsoft.Performance.SDK.Processing
                     $"ProcessAsync may not be called on this class without a valid {nameof(this.SourceProcessingSession)}.");
             }
 
-            this.extensibilitySupport.FinalizeTables();
-
-            EnableRequiredSourceDataCookers();
-
             this.SourceProcessingSession.ProcessSource(this.Logger, progress, cancellationToken);
 
             return Task.CompletedTask;
@@ -278,42 +270,13 @@ namespace Microsoft.Performance.SDK.Processing
         /// <inheritdoc />
         protected override void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> createTable,
+            Action<ITableBuilder> buildTable,
             ITableBuilder tableBuilder)
         {
             Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
-            Guard.NotNull(createTable, nameof(createTable));
             Guard.NotNull(tableBuilder, nameof(tableBuilder));
 
-            var dataRetrieval = GetDataExtensionRetrieval(tableDescriptor);
-
-            if (dataRetrieval != null)
-            {
-                createTable(tableBuilder, dataRetrieval);
-            }
-        }
-
-        /// <inheritdoc/>
-        /// <exception cref="ExtensionTableException">
-        ///     The requested table cannot be enabled.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        ///     The <see cref="IDataProcessorExtensibilitySupport"/> has already been finalized.
-        /// </exception>
-        protected override void OnBeforeEnableTable(TableDescriptor tableDescriptor)
-        {
-            ProcessTableForExtensibility(tableDescriptor);
-        }
-
-        /// <summary>
-        /// This returns an instance of <see cref="IDataExtensionRetrieval"/> that is specific to a given
-        /// <see cref="TableDescriptor"/>.
-        /// </summary>
-        /// <param name="tableDescriptor">Table descriptor</param>
-        /// <returns>This can be used to retrieve data with which to build the given table.</returns>
-        protected IDataExtensionRetrieval GetDataExtensionRetrieval(TableDescriptor tableDescriptor)
-        {
-            return this.extensibilitySupport.GetDataExtensionRetrieval(tableDescriptor);
+            buildTable(tableBuilder);
         }
 
         /// <summary>
@@ -337,35 +300,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         protected virtual void OnAllCookersEnabled()
         {
-        }
-
-        private void ProcessTableForExtensibility(TableDescriptor tableDescriptor)
-        {
-            if (!tableDescriptor.RequiresDataExtensions())
-            {
-                // there's nothing that needs to be done to prepare for this table by this processor
-                return;
-            }
-
-            // Processors need to be able to get an IDataExtensionRetrieval object to build
-            // internal tables. Calling this here will enable this as well as any required
-            // source data cookers.
-            //
-            this.extensibilitySupport.EnableTable(tableDescriptor);
-        }
-
-        private void EnableRequiredSourceDataCookers()
-        {
-            var requiredCookers = this.extensibilitySupport.GetRequiredSourceDataCookers();
-
-            foreach (var dataCookerPath in requiredCookers)
-            {
-                ISourceDataCookerFactory cookerFactory
-                    = this.ApplicationEnvironment.SourceDataCookerFactoryRetrieval.GetSourceDataCookerFactory(dataCookerPath);
-                EnableCooker(cookerFactory);
-            }
-
-            this.OnAllCookersEnabled();
         }
     }
 }

@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -22,8 +21,8 @@ namespace Microsoft.Performance.SDK.Processing
     {
         private readonly HashSet<TableDescriptor> enabledTables = new HashSet<TableDescriptor>();
 
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
-            dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
+        private readonly Dictionary<TableDescriptor, Action<ITableBuilder>>
+            dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="CustomDataProcessor"/>
@@ -33,7 +32,7 @@ namespace Microsoft.Performance.SDK.Processing
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(applicationEnvironment, nameof(applicationEnvironment));
@@ -75,7 +74,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Gets a mapping of table descriptors to their resolved table builder actions.
         /// </summary>
-        protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> TableDescriptorToBuildAction { get; }
+        protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> TableDescriptorToBuildAction { get; }
 
         /// <summary>
         ///     Used to log data specific to this data processor.
@@ -135,7 +134,7 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(table, nameof(table));
             Guard.NotNull(tableBuilder, nameof(tableBuilder));
 
-            if (this.TableDescriptorToBuildAction.TryGetValue(table, out var buildTable))
+            if (this.TableDescriptorToBuildAction.TryGetValue(table, out Action<ITableBuilder> buildTable))
             {
                 this.BuildTableCore(table, buildTable, tableBuilder);
             }
@@ -261,7 +260,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </param>
         protected abstract void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> createTable,
+            Action<ITableBuilder> buildTable,
             ITableBuilder tableBuilder);
 
         /// <summary>
@@ -293,7 +292,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="buildAction">Action called to create the requested table.</param>
         protected void AddTableGeneratedFromDataProcessing(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> buildAction)
+            Action<ITableBuilder> buildAction)
         {
             // the buildAction may be null because the custom data processor may have a special way to handle
             // these data derived tables - and that can be done through BuildTableCore

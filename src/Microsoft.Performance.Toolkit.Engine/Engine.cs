@@ -12,7 +12,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
@@ -1122,15 +1121,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.compositeCookers = compositeCookers;
                 this.repository = repository;
                 this.loggerFactory = loggerFactory;
-            }
-
-            public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(
-                ICustomDataProcessorWithSourceParser processor)
-            {
-                return new CustomDataProcessorExtensibilitySupport(
-                    processor,
-                    this.repository,
-                    this.compositeCookers);
             }
 
             public ILogger CreateLogger(Type processorType)

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
@@ -17,12 +16,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
             : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
         }
 
-        protected override void BuildTableCore(TableDescriptor tableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval> createTable, ITableBuilder tableBuilder)
+        protected override void BuildTableCore(TableDescriptor tableDescriptor, Action<ITableBuilder> createTable, ITableBuilder tableBuilder)
         {
             if (tableDescriptor.Equals(Source123Table.TableDescriptor) && createTable == null)
             {

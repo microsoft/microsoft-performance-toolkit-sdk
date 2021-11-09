@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
@@ -61,7 +60,7 @@ namespace Microsoft.Performance.SDK.Tests
             // call the build action of each of our tables
             foreach (var kvp in sut.AllTablesExposed)
             {
-                kvp.Value.Invoke(null, null);
+                kvp.Value.Invoke(null);
             }
 
             Assert.IsTrue(StubDataTableOne.BuildTableWasCalled);
@@ -175,7 +174,7 @@ namespace Microsoft.Performance.SDK.Tests
             // call the build action of each of our tables
             foreach (var kvp in sut.AllTablesExposed)
             {
-                kvp.Value.Invoke(null, null);
+                kvp.Value.Invoke(null);
             }
 
             Assert.IsTrue(StubDataTableOne.BuildTableWasCalled);
@@ -248,13 +247,13 @@ namespace Microsoft.Performance.SDK.Tests
             //
 
             var processingSourceGetBuildTableCalled = false;
-            sut.GetBuildTableActionReturnValues[expectedDescriptors.Single().Type] = (_, __) => processingSourceGetBuildTableCalled = true;
+            sut.GetBuildTableActionReturnValues[expectedDescriptors.Single().Type] = (_) => processingSourceGetBuildTableCalled = true;
 
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             foreach (var kvp in sut.AllTablesExposed)
             {
-                kvp.Value.Invoke(null, null);
+                kvp.Value.Invoke(null);
             }
 
             Assert.IsTrue(processingSourceGetBuildTableCalled);
@@ -287,7 +286,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             public static Assembly Assembly { get; set; }
 
-            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> AllTablesExposed => this.AllTables;
+            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> AllTablesExposed => this.AllTables;
 
             public List<Option> CommandLineOptionsToReturn { get; set; }
             public override IEnumerable<Option> CommandLineOptions => this.CommandLineOptionsToReturn ?? Enumerable.Empty<Option>();
@@ -344,12 +343,12 @@ namespace Microsoft.Performance.SDK.Tests
                 this.CreateProcessorCoreCalls =
                     new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
 
-                this.GetBuildTableActionReturnValues = new Dictionary<Type, Action<ITableBuilder, IDataExtensionRetrieval>>();
+                this.GetBuildTableActionReturnValues = new Dictionary<Type, Action<ITableBuilder>>();
             }
 
             public static Assembly Assembly { get; set; }
 
-            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> AllTablesExposed => this.AllTables;
+            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> AllTablesExposed => this.AllTables;
 
             public List<Option> CommandLineOptionsToReturn { get; set; }
             public override IEnumerable<Option> CommandLineOptions => this.CommandLineOptionsToReturn ?? Enumerable.Empty<Option>();
@@ -381,9 +380,9 @@ namespace Microsoft.Performance.SDK.Tests
                 return true;
             }
 
-            public Dictionary<Type, Action<ITableBuilder, IDataExtensionRetrieval>> GetBuildTableActionReturnValues { get; }
+            public Dictionary<Type, Action<ITableBuilder>> GetBuildTableActionReturnValues { get; }
 
-            protected override Action<ITableBuilder, IDataExtensionRetrieval> GetTableBuildAction(Type type)
+            protected override Action<ITableBuilder> GetTableBuildAction(Type type)
             {
                 if (this.GetBuildTableActionReturnValues.TryGetValue(type, out var v))
                 {

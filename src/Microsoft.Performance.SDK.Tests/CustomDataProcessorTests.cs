@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Tests
     {
         private ProcessorOptions Options { get; set; }
         private IApplicationEnvironment ApplicationEnvironment { get; set; }
-        private Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> TableDescriptorToBuildAction { get; set; }
+        private Dictionary<TableDescriptor, Action<ITableBuilder>> TableDescriptorToBuildAction { get; set; }
         private IProcessorEnvironment ProcessorEnvironment { get; set; }
         private List<TableDescriptor> MetadataTables { get; set; }
 
@@ -37,13 +37,13 @@ namespace Microsoft.Performance.SDK.Tests
                 });
             this.ApplicationEnvironment = new StubApplicationEnvironment();
             this.ProcessorEnvironment = Any.ProcessorEnvironment();
-            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
+            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder>>
             {
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
+                [Any.TableDescriptor()] = (tableBuilder) => { },
+                [Any.TableDescriptor()] = (tableBuilder) => { },
+                [Any.TableDescriptor()] = (tableBuilder) => { },
+                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
+                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
             };
 
             this.MetadataTables = this.TableDescriptorToBuildAction.Keys.Where(x => x.IsMetadataTable).ToList();
@@ -147,13 +147,13 @@ namespace Microsoft.Performance.SDK.Tests
 
             this.ApplicationEnvironment = new StubApplicationEnvironment();
             this.ProcessorEnvironment = Any.ProcessorEnvironment();
-            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
+            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder>>
             {
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
+                [Any.TableDescriptor()] = (tableBuilder) => { },
+                [Any.TableDescriptor()] = (tableBuilder) => { },
+                [Any.TableDescriptor()] = (tableBuilder) => { },
+                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
+                [Any.MetadataTableDescriptor()] = (tableBuilder) => { },
             };
 
             this.MetadataTables = this.TableDescriptorToBuildAction.Keys.Where(x => x.IsMetadataTable).ToList();
@@ -174,18 +174,18 @@ namespace Microsoft.Performance.SDK.Tests
                 ProcessorOptions options,
                 IApplicationEnvironment applicationEnvironment,
                 IProcessorEnvironment processorEnvironment,
-                IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
+                IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping,
                 IEnumerable<TableDescriptor> metadataTables)
                 : base(options, applicationEnvironment, processorEnvironment, allTablesMapping)
             {
-                this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>, ITableBuilder>>();
+                this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, Action<ITableBuilder>, ITableBuilder>>();
             }
 
             public ProcessorOptions ExposedOptions => this.Options;
 
             public IApplicationEnvironment ExposedApplicationEnvironment => this.ApplicationEnvironment;
 
-            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> ExposedTableDescriptorToBuildAction => this.TableDescriptorToBuildAction;
+            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> ExposedTableDescriptorToBuildAction => this.TableDescriptorToBuildAction;
 
             public ReadOnlyHashSet<TableDescriptor> ExposedEnabledTables => this.EnabledTables;
 
@@ -199,10 +199,10 @@ namespace Microsoft.Performance.SDK.Tests
                 return Task.CompletedTask;
             }
 
-            public List<Tuple<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>, ITableBuilder>> BuildTableCoreCalls { get; }
+            public List<Tuple<TableDescriptor, Action<ITableBuilder>, ITableBuilder>> BuildTableCoreCalls { get; }
             protected override void BuildTableCore(
                 TableDescriptor tableDescriptor,
-                Action<ITableBuilder, IDataExtensionRetrieval> createTable,
+                Action<ITableBuilder> createTable,
                 ITableBuilder tableBuilder)
             {
                 this.BuildTableCoreCalls.Add(Tuple.Create(tableDescriptor, createTable, tableBuilder));

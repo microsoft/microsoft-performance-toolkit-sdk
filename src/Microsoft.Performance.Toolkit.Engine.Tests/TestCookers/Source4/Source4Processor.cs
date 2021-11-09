@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
@@ -17,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
             : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
         }

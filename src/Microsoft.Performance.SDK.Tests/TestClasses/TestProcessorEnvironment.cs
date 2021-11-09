@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing.SDK;
@@ -15,14 +14,6 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
     {
         public void AddNewTable(IDynamicTableBuilder dynamicTableBuilder)
         {
-        }
-
-        public Func<ICustomDataProcessorWithSourceParser, IDataProcessorExtensibilitySupport> CreateDataProcessorExtensibilitySupportFunc
-        { get; set; }
-
-        public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(ICustomDataProcessorWithSourceParser processor)
-        {
-            return CreateDataProcessorExtensibilitySupportFunc?.Invoke(processor);
         }
 
         public Dictionary<Type, TestLogger> TestLoggers = new Dictionary<Type, TestLogger>();

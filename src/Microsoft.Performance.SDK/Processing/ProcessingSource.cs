@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -20,8 +19,8 @@ namespace Microsoft.Performance.SDK.Processing
     public abstract class ProcessingSource
         : IProcessingSource
     {
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTables;
-        private readonly ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesRO;
+        private readonly Dictionary<TableDescriptor, Action<ITableBuilder>> allTables;
+        private readonly ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesRO;
 
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
@@ -34,8 +33,8 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         protected ProcessingSource()
         {
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(this.allTables);
+            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
+            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>>(this.allTables);
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
@@ -63,8 +62,8 @@ namespace Microsoft.Performance.SDK.Processing
         {
             Guard.NotNull(tableDiscoverer, nameof(tableDiscoverer));
 
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(this.allTables);
+            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
+            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>>(this.allTables);
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
@@ -86,7 +85,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <see cref="Type" /> of Table described by the descriptor. This
         ///     mapping includes the data and metadata tables.
         /// </summary>
-        protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> AllTables => this.allTablesRO;
+        protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> AllTables => this.allTablesRO;
 
         /// <summary>
         ///     This is set by default when the <see cref="SetApplicationEnvironment"/> is called by the runtime.
@@ -290,7 +289,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         /// <param name="type">Type associated with the table</param>
         /// <returns>An action to build the table, or null</returns>
-        protected virtual Action<ITableBuilder, IDataExtensionRetrieval> GetTableBuildAction(
+        protected virtual Action<ITableBuilder> GetTableBuildAction(
             Type type)
         {
             return null;
@@ -320,7 +319,9 @@ namespace Microsoft.Performance.SDK.Processing
                     this.metadataTables.Add(table.Descriptor);
                 }
 
-                this.allTables[table.Descriptor] = table.BuildTable ?? GetTableBuildAction(table.Descriptor.Type);
+                this.allTables[table.Descriptor] = table.BuildTable != null
+                    ? tb => table.BuildTable(tb, null)
+                    : GetTableBuildAction(table.Descriptor.Type);
             }
         }
     }

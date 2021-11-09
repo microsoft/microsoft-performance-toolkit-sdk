@@ -4,14 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.Extensibility;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Tests.DataTypes;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
@@ -23,12 +19,12 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
         {
             return CreateTestCustomDataProcessor(
                 sourceParserId,
-                new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>());
+                new Dictionary<TableDescriptor, Action<ITableBuilder>>());
         }
 
         public static TestCustomDataProcessor CreateTestCustomDataProcessor(
             string sourceParserId,
-            Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTables,
+            Dictionary<TableDescriptor, Action<ITableBuilder>> allTables,
             TestDataExtensionRepository extensionRepo = null)
         {
             var sourceParser = new TestSourceParser() { Id = sourceParserId };
@@ -36,19 +32,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             var processorEnvironment = CreateProcessorEnvironment();
             var dataExtensionRepo = extensionRepo ?? new TestDataExtensionRepository();
 
-            CustomDataProcessorExtensibilitySupport extensibilitySupport = null;
-            var compositeCookers = new ProcessingSystemCompositeCookers(dataExtensionRepo);
-
             applicationEnvironment.SourceSessionFactory = new TestSourceSessionFactory();
-            processorEnvironment.CreateDataProcessorExtensibilitySupportFunc = (processor) =>
-            {
-                extensibilitySupport = new CustomDataProcessorExtensibilitySupport(
-                    processor,
-                    dataExtensionRepo,
-                    compositeCookers);
-
-                return extensibilitySupport;
-            };
 
             // this will create the CustomDataProcessorExtensibilitySupport
             var cdp = new TestCustomDataProcessor(
@@ -58,9 +42,6 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
                 processorEnvironment,
                 allTables);
 
-            Assert.IsNotNull(extensibilitySupport);
-
-            cdp.ExtensibilitySupport = extensibilitySupport;
             cdp.ExtensionRepository = dataExtensionRepo;
 
             return cdp;
@@ -71,7 +52,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping)
+            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder>> allTablesMapping)
             : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping)
         {
         }
@@ -83,8 +64,6 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             Debug.Assert(sourceDataCooker != null);
             EnabledCookers.Add(sourceDataCooker);
         }
-
-        public CustomDataProcessorExtensibilitySupport ExtensibilitySupport { get; set; }
 
         public TestDataExtensionRepository ExtensionRepository { get; set; }
 

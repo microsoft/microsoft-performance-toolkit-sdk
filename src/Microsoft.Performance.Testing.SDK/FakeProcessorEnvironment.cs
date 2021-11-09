@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 
@@ -13,11 +12,6 @@ namespace Microsoft.Performance.Testing.SDK
     {
         public void AddNewTable(IDynamicTableBuilder dynamicTableBuilder)
         {
-        }
-
-        public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(ICustomDataProcessorWithSourceParser processor)
-        {
-            throw new System.NotImplementedException();
         }
 
         public ILogger CreateLogger(Type processorType)

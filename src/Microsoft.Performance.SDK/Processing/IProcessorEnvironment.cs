@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -44,20 +43,5 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The services are not in a state that allows for requesting new tables.
         /// </exception>
         IDynamicTableBuilder RequestDynamicTableBuilder(TableDescriptor descriptor);
-
-        /// <summary>
-        ///     Creates an instance of <see cref="IDataProcessorExtensibilitySupport"/> that is specific to this custom 
-        ///     data processor. This is only used by custom data processors that support data extensions, implementing
-        ///     <see cref="ICustomDataProcessorWithSourceParser"/>. This support object is used for internal data 
-        ///     extension tables, such as a metadata table that requires a source data cooker.
-        /// </summary>
-        /// <param name="processor">
-        ///     Custom data processor that supports data extensions. This should be the data processor to which this 
-        ///     <see cref="IProcessorEnvironment"/> was passed.
-        /// </param>
-        /// <returns>
-        ///     An instance of <see cref="IDataProcessorExtensibilitySupport"/>.
-        /// </returns>
-        IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(ICustomDataProcessorWithSourceParser processor);
     }
 }
