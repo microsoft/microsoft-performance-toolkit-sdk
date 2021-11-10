@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Tests
             ITableConfigurationsSerializer serializer,
             params Type[] types)
         {
-            CreateTableDescriptors(serializer, out var descriptors, out var _, types);
+            CreateTableDescriptors(serializer, out var descriptors, out _, types);
 
             return descriptors;
         }
