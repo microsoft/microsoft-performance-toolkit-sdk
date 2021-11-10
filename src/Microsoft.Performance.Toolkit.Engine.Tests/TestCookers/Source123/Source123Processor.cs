@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
@@ -27,7 +28,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             }
             else
             {
-                base.BuildTableCore(tableDescriptor, tableBuilder);
+                throw new InvalidOperationException("Asked to build a table that isn't known to this processor.");
             }
         }
     }
