@@ -210,23 +210,6 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Enable metadata tables.
-        /// </summary>
-        /// <remarks>
-        ///     The default implementation just adds the tables to <see cref="EnabledTables"/>.
-        /// </remarks>
-        /// <param name="metadataTables">
-        ///     Metadata tables to process.
-        /// </param>
-        protected virtual void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
-        {
-            foreach (var table in metadataTables)
-            {
-                EnableTable(table);
-            }
-        }
-
-        /// <summary>
         ///     Asynchronously processes the data source.
         /// </summary>
         /// <param name="progress">

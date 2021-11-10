@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Extensibility;
@@ -218,18 +216,6 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             return false;
-        }
-
-        /// <summary>
-        ///     This implementation does nothing because this object isn't finished initializing
-        ///     when this is called by the base class.
-        /// </summary>
-        /// <param name="metadataTables">
-        ///     Metadata tables.
-        /// </param>
-        protected override void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
-        {
-            base.EnableMetadataTables(metadataTables.Where(td => !td.RequiresDataExtensions()));
         }
 
         /// <inheritdoc cref="CustomDataProcessor"/>
