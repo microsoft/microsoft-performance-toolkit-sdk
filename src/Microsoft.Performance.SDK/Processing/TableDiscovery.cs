@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -92,7 +93,8 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Creates a new <see cref="IProcessingSourceTableProvider"/> instance that will
         ///     discover tables in the given namespace in the given assembly.
         ///     <para/>
-        ///     No tables that require <see cref="IDataCooker"/>s or implements a static BuildTable
+        ///     No table that requires <see cref="IDataCooker"/>s or implements a static
+        ///     <c>BuildTable&lt;<see cref="ITableBuilder"/>, <see cref="IDataExtensionRetrieval"/>&gt;</c>
         ///     will be returned from this <see cref="IProcessingSourceTableProvider"/>.
         /// </summary>
         /// <param name="tableNamespace">
@@ -120,7 +122,8 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Creates a new <see cref="IProcessingSourceTableProvider"/> instance that will
         ///     discover tables in the given namespace in the given assemblies.
         ///     <para/>
-        ///     No tables that require <see cref="IDataCooker"/>s or implements a static BuildTable
+        ///     No table that requires <see cref="IDataCooker"/>s or implements a static
+        ///     <c>BuildTable&lt;<see cref="ITableBuilder"/>, <see cref="IDataExtensionRetrieval"/>&gt;</c>
         ///     will be returned from this <see cref="IProcessingSourceTableProvider"/>.
         /// </summary>
         /// <param name="tableNamespace">
