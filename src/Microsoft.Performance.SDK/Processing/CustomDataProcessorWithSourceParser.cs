@@ -259,6 +259,8 @@ namespace Microsoft.Performance.SDK.Processing
                     $"ProcessAsync may not be called on this class without a valid {nameof(this.SourceProcessingSession)}.");
             }
 
+            OnAllCookersEnabled();
+
             this.SourceProcessingSession.ProcessSource(this.Logger, progress, cancellationToken);
 
             return Task.CompletedTask;
