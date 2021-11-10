@@ -74,11 +74,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker);
         }
 
-        internal FilteredCompositeCookers CreateFilteredRepository()
-        {
-            return new FilteredCompositeCookers(this);
-        }
-
         private ICookedDataRetrieval GetOrCreateCompositeCooker(
             DataCookerPath cookerPath,
             Func<DataCookerPath, IDataExtensionRetrieval> createDataRetrieval)
@@ -161,77 +156,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
                 this.dataExtensionRepository = null;
                 this.retrievalFactory = null;
                 this.disposedValue = true;
-            }
-        }
-
-        /// <summary>
-        ///     This class uses <see cref="ProcessingSystemCompositeCookers"/> to create and store composite
-        ///     cookers, but uses a its own <see cref="IDataExtensionRetrievalFactory"/> which has access
-        ///     to a subset of source data cookers.
-        /// </summary>
-        internal sealed class FilteredCompositeCookers
-            : ICompositeCookerRepository
-        {
-            private bool disposedValue;
-
-            private ProcessingSystemCompositeCookers compositeCookers;
-            private IDataExtensionRetrievalFactory retrievalFactory;
-
-            internal FilteredCompositeCookers(
-                ProcessingSystemCompositeCookers compositeCookers)
-            {
-                this.compositeCookers = compositeCookers;
-            }
-
-            public ICookedDataRetrieval GetCookerOutput(DataCookerPath cookerPath)
-            {
-                this.ThrowIfDisposed();
-
-                if (this.retrievalFactory == null)
-                {
-                    Debug.Assert(false, $"{nameof(Initialize)} needs to be called before accessing composite cookers.");
-                    throw new InvalidOperationException(
-                        $"{nameof(ProcessingSystemCompositeCookers.Initialize)} hasn't been called.");
-                }
-
-                return this.compositeCookers.GetOrCreateCompositeCooker(
-                    cookerPath,
-                    this.retrievalFactory.CreateDataRetrievalForCompositeDataCooker);
-            }
-
-            public void Dispose()
-            {
-                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-                Dispose(disposing: true);
-                GC.SuppressFinalize(this);
-            }
-
-            internal void Initialize(IDataExtensionRetrievalFactory retrievalFactory)
-            {
-                this.retrievalFactory = retrievalFactory;
-            }
-
-            private void Dispose(bool disposing)
-            {
-                if (!disposedValue)
-                {
-                    if (disposing)
-                    {
-                        // nothing to do, this class doesn't own anything
-                    }
-
-                    this.compositeCookers = null;
-                    this.retrievalFactory = null;
-                    disposedValue = true;
-                }
-            }
-
-            private void ThrowIfDisposed()
-            {
-                if (this.disposedValue)
-                {
-                    throw new ObjectDisposedException(this.GetType().Name);
-                }
             }
         }
     }

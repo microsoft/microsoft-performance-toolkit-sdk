@@ -24,9 +24,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
             return new InteractiveProcessor(
                 options,
                 this.ApplicationEnvironment,
-                processorEnvironment,
-                this.AllTables,
-                this.MetadataTables);
+                processorEnvironment);
         }
 
         protected override bool IsDataSourceSupportedCore(

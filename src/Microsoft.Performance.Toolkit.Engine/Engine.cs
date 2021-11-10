@@ -12,7 +12,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
@@ -531,30 +530,30 @@ namespace Microsoft.Performance.Toolkit.Engine
             ITableExtensionReference tableReference = null;
             IEnumerable<ProcessingSourceExecutor> executorsWithTable = null;
 
-            if (!descriptor.IsInternalTable && this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
-            {
-                Debug.Assert(
-                    tableReference != null,
-                    "If ExtensionRoot.TablesById contains the table descriptor, then it should also contain a " +
-                    "non-null table reference.");
+            executorsWithTable = this.executors.Where(
+                x => x.Context.ProcessingSource.AvailableTables.Contains(descriptor));
 
-                if (tableReference.Availability != DataExtensionAvailability.Available)
+            if (!executorsWithTable.Any())
+            {
+                if (this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
                 {
-                    throw new TableException($"The requested table is not available: {tableReference.Availability}.");
-                }
-            }
-            else
-            {
-                executorsWithTable = this.executors.Where(
-                    x => x.Context.ProcessingSource.AvailableTables.Contains(descriptor));
+                    Debug.Assert(
+                        tableReference != null,
+                        "If ExtensionRoot.TablesById contains the table descriptor, then it should also contain a " +
+                        "non-null table reference.");
+                    Debug.Assert(tableReference.BuildTableAction != null);
 
-                if (!executorsWithTable.Any())
+                    if (tableReference.Availability != DataExtensionAvailability.Available)
+                    {
+                        throw new TableException($"The requested table is not available: {tableReference.Availability}.");
+                    }
+                }
+                else
                 {
                     throw new ArgumentException(
                         "No data source found for the given table.",
                         paramName: nameof(descriptor));
                 }
-
             }
 
             EnableTableCore(descriptor, tableReference, executorsWithTable);
@@ -925,42 +924,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(this.tablesToProcessors.ContainsKey(descriptor));
         }
 
-        private void MapInternalTablesToProcessor(ProcessingSourceExecutor executor)
-        {
-            var internalTables = executor.Processor.GetEnabledTables().Where(td => td.IsInternalTable);
-            foreach (var internalTable in internalTables)
-            {
-                try
-                {
-                    if (this.tablesToProcessors.TryGetValue(internalTable, out var processor))
-                    {
-                        if (processor != executor.Processor)
-                        {
-                            this.logger.Warn(
-                                "Unable to map internal table {0} to processor {1}: " +
-                                "The SDK.Engine does not support internal tables used by multiple data processors.",
-                                internalTable.Guid,
-                                executor.Context.ProcessingSource);
-                            continue;
-                        }
-
-                        // this table was already added for this processor
-                        continue;
-                    }
-
-                    this.tablesToProcessors.Add(internalTable, executor.Processor);
-                }
-                catch (Exception e)
-                {
-                    this.logger.Warn(
-                        "Unable to enable table {0} on processor {1}: {2}",
-                        internalTable.Guid,
-                        executor.Context.ProcessingSource,
-                        e);
-                }
-            }
-        }
-
         private RuntimeExecutionResults ProcessCore()
         {
             this.IsProcessed = true;
@@ -1042,7 +1005,6 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                         var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
-                        MapInternalTablesToProcessor(executor);
 
                         executors.Add(executor);
                     }
@@ -1159,15 +1121,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.compositeCookers = compositeCookers;
                 this.repository = repository;
                 this.loggerFactory = loggerFactory;
-            }
-
-            public IDataProcessorExtensibilitySupport CreateDataProcessorExtensibilitySupport(
-                ICustomDataProcessorWithSourceParser processor)
-            {
-                return new CustomDataProcessorExtensibilitySupport(
-                    processor,
-                    this.repository,
-                    this.compositeCookers);
             }
 
             public ILogger CreateLogger(Type processorType)

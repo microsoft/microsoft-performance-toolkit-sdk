@@ -15,9 +15,5 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
           IDataExtensionDependency,
           IDisposable
     {
-        /// <summary>
-        ///     Gets a value indicating whether this table is an internal table.
-        /// </summary>
-        bool IsInternalTable { get; }
     }
 }

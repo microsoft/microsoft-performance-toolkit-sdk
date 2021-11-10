@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -131,27 +131,6 @@ namespace Microsoft.Performance.SDK.Runtime
                 return new ExecutionResult(this.Context, this.Processor, e);
             }
 
-            //_CDS_ Should we "delayload" metadata tables?
-            var metadataTables = new List<MetadataTableBuilder>();
-            Exception metadataFailure;
-            try
-            {
-                var factory = new MetadataTableBuilderFactory();
-                this.Processor.BuildMetadataTables(factory);
-                foreach (var table in factory.CreatedTables)
-                {
-                    metadataTables.Add(table);
-                }
-
-                metadataFailure = null;
-            }
-            catch (Exception e)
-            {
-                metadataTables.Clear();
-                metadataFailure = e;
-                this.logger.Warn("Unable to build metadata tables for {0}: {1}", this.Processor, e);
-            }
-
             DataSourceInfo info;
             Exception infoFailure;
             try
@@ -174,9 +153,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 infoFailure,
                 this.Processor,
                 this.failedToEnableTables,
-                metadataName,
-                metadataTables,
-                metadataFailure);
+                metadataName);
         }
     }
 }

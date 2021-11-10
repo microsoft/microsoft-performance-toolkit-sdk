@@ -29,7 +29,14 @@ namespace Microsoft.Performance.SDK.Processing
         public const TableLayoutStyle DefaultLayoutStyle = TableLayoutStyle.GraphAndTable;
 
         private readonly HashSet<DataCookerPath> dataCookers;
-        private readonly HashSet<DataProcessorId> dataProcessors;
+
+        // TODO: __SDK_DP__
+        //private readonly HashSet<DataProcessorId> dataProcessors;
+
+        ///// TODO: __SDK_DP__
+        ///// <param name="requiredDataProcessors">
+        /////     Identifiers for data processors required to instantiate this table.
+        ///// </param>
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TableDescriptor"/>
@@ -59,9 +66,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="requiredDataCookers">
         ///     Identifiers for data cookers required to instantiate this table.
         /// </param>
-        /// <param name="requiredDataProcessors">
-        ///     Identifiers for data processors required to instantiate this table.
-        /// </param>
         /// <exception cref="ArgumentException">
         ///     <paramref name="guid"/> is whitespace.
         ///     - or -
@@ -90,8 +94,9 @@ namespace Microsoft.Performance.SDK.Processing
             string category = DefaultCategory,
             bool isMetadataTable = false,
             TableLayoutStyle defaultLayout = TableLayoutStyle.GraphAndTable,
-            IEnumerable<DataCookerPath> requiredDataCookers = null,
-            IEnumerable<DataProcessorId> requiredDataProcessors = null)
+            IEnumerable<DataCookerPath> requiredDataCookers = null)
+        // TODO: __SDK_DP__
+        //IEnumerable<DataProcessorId> requiredDataProcessors = null)
         {
             Guard.NotDefault(guid, nameof(guid));
             Guard.NotNullOrWhiteSpace(name, nameof(name));
@@ -105,10 +110,11 @@ namespace Microsoft.Performance.SDK.Processing
             this.DefaultLayout = defaultLayout;
             this.IsMetadataTable = isMetadataTable;
             this.ExtendedData = new Dictionary<string, object>();
-            this.IsInternalTable = this.IsMetadataTable;
 
             this.dataCookers = requiredDataCookers != null ? new HashSet<DataCookerPath>(requiredDataCookers) : new HashSet<DataCookerPath>();
-            this.dataProcessors = requiredDataProcessors != null ? new HashSet<DataProcessorId>(requiredDataProcessors) : new HashSet<DataProcessorId>();
+
+            // TODO: __SDK_DP__
+            //this.dataProcessors = requiredDataProcessors != null ? new HashSet<DataProcessorId>(requiredDataProcessors) : new HashSet<DataProcessorId>();
         }
 
         /// <summary>
@@ -140,23 +146,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets a value indicating whether this instance describes a
         ///     metadata table.
         /// </summary>
-        /// <remarks>
-        ///     Metadata tables are automatically marked as internal (<see cref="IsInternalTable"/>).
-        /// </remarks>
         public bool IsMetadataTable { get; }
-
-        /// <summary>
-        ///     Gets a value indicating whether this instance describes an internal table.
-        /// </summary>
-        /// <remarks>
-        ///     Internal tables are not required to have a static build method.
-        ///     <para/>
-        ///     Note that the <see cref="ICustomDataProcessor"/> that owns this must enable and create this table.
-        ///     <para/>
-        ///     Because this is built by a given <see cref="ICustomDataProcessor"/>, the table may not reference
-        ///     data outside of the data processor.
-        /// </remarks>
-        public bool IsInternalTable { get; internal set; }
 
         /// <summary>
         ///     Provides a means of storing Data Source specific information
@@ -188,11 +178,12 @@ namespace Microsoft.Performance.SDK.Processing
         public IReadOnlyCollection<DataCookerPath> RequiredDataCookers =>
             new ReadOnlyCollection<DataCookerPath>(this.dataCookers.ToList());
 
-        /// <summary>
-        ///     Identifiers for data processors necessary to create this table.
-        /// </summary>
-        public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors =>
-            new ReadOnlyCollection<DataProcessorId>(this.dataProcessors.ToList());
+        // TODO: __SDK_DP__
+        ///// <summary>
+        /////     Identifiers for data processors necessary to create this table.
+        ///// </summary>
+        //public IReadOnlyCollection<DataProcessorId> RequiredDataProcessors =>
+        //    new ReadOnlyCollection<DataProcessorId>(this.dataProcessors.ToList());
 
         /// <inheritdoc />
         public bool Equals(TableDescriptor other)

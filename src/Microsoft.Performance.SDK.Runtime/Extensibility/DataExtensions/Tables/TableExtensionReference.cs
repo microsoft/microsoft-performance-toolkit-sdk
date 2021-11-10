@@ -22,7 +22,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         private TableDescriptor tableDescriptor;
         private Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction;
         private Func<IDataExtensionRetrieval, bool> isDataAvailableFunc;
-        private bool isInternalTable;
 
         private bool isDisposed;
 
@@ -42,33 +41,32 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             this.tableDescriptor = other.tableDescriptor;
             this.buildTableAction = other.buildTableAction;
             this.isDataAvailableFunc = other.isDataAvailableFunc;
-            this.isInternalTable = other.isInternalTable;
         }
 
         private TableExtensionReference(
             string tableName,
             TableDescriptor tableDescriptor,
             Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
-            Func<IDataExtensionRetrieval, bool> isDataAvailableFunc,
-            bool isInternalTable)
+            Func<IDataExtensionRetrieval, bool> isDataAvailableFunc)
             : base(tableName)
         {
-            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
+            Debug.Assert(tableDescriptor != null);
+            Debug.Assert(buildTableAction != null);
 
             this.tableDescriptor = tableDescriptor;
             this.buildTableAction = buildTableAction;
             this.isDataAvailableFunc = isDataAvailableFunc;
-            this.isInternalTable = isInternalTable;
 
             foreach (var dataCookerPath in tableDescriptor.RequiredDataCookers)
             {
                 this.AddRequiredDataCooker(dataCookerPath);
             }
 
-            foreach (var dataProcessorId in tableDescriptor.RequiredDataProcessors)
-            {
-                this.AddRequiredDataProcessor(dataProcessorId);
-            }
+            // TODO: __SDK_DP__
+            //foreach (var dataProcessorId in tableDescriptor.RequiredDataProcessors)
+            //{
+            //    this.AddRequiredDataProcessor(dataProcessorId);
+            //}
 
             this.isDisposed = false;
         }
@@ -120,47 +118,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         }
 
         /// <summary>
-        ///     Gets a value indicating whether this table is
-        ///     an internal table.
-        /// </summary>
-        /// <exception cref="System.ObjectDisposedException">
-        ///     This instance is disposed.
-        /// </exception>
-        public bool IsInternalTable
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.isInternalTable;
-            }
-        }
-
-        /// <summary>
-        ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
-        ///     <paramref name="candidateType"/>.
-        ///     <para/>
-        ///     See <see cref="TryCreateReference(Type, bool, out ITableExtensionReference)"/>
-        ///     for additional details about the requirements <paramref name="candidateType"/> must
-        ///     satisfy in order to be considered eligibile as a reference.
-        /// </summary>
-        /// <param name="candidateType">
-        ///     Candidate <see cref="Type"/> for the <see cref="ISourceDataCookerReference"/>
-        /// </param>
-        /// <param name="reference">
-        ///     Out <see cref="ISourceDataCookerReference"/>
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
-        ///     <c>false</c> otherwise.
-        /// </returns>
-        internal static bool TryCreateReference(
-            Type candidateType,
-            out ITableExtensionReference reference)
-        {
-            return TryCreateReference(candidateType, false, out reference);
-        }
-
-        /// <summary>
         ///     Tries to create an instance of <see cref="ITableExtensionReference"/> based on the
         ///     <paramref name="candidateType"/>.
         ///     <para/>
@@ -189,7 +146,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         /// </exception>
         internal static bool TryCreateReference(
             Type candidateType,
-            bool allowInternalTables,
             out ITableExtensionReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
@@ -203,24 +159,23 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
                     out var tableBuildAction,
                     out var tableIsDataAvailableFunc))
             {
-                if (tableDescriptor.IsInternalTable)
-                {
-                    if (!allowInternalTables)
-                    {
-                        return false;
-                    }
-                }
+                Debug.Assert(tableDescriptor != null);
 
-                try
+                // Extension tables must have a build action
+
+                if (tableBuildAction != null)
                 {
-                    reference = CreateReference(
-                        tableDescriptor,
-                        tableBuildAction,
-                        tableIsDataAvailableFunc);
-                }
-                catch (Exception)
-                {
-                    Debug.Assert(false, "What threw in this method?");
+                    try
+                    {
+                        reference = CreateReference(
+                            tableDescriptor,
+                            tableBuildAction,
+                            tableIsDataAvailableFunc);
+                    }
+                    catch (Exception)
+                    {
+                        Debug.Assert(false, "What threw in this method?");
+                    }
                 }
             }
 
@@ -255,6 +210,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="tableDescriptor"/> is <c>null</c>.
+        ///     -- or --
+        ///     <paramref name="tableBuildAction"/> is <c>null</c>.
         /// </exception>
         internal static ITableExtensionReference CreateReference(
             TableDescriptor tableDescriptor,
@@ -262,6 +219,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             Func<IDataExtensionRetrieval, bool> tableIsDataAvailableFunc)
         {
             Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
+            Guard.NotNull(tableBuildAction, nameof(tableBuildAction));
 
             var tableName = tableDescriptor.Type?.FullName
                 ?? tableDescriptor.Name + "{" + tableDescriptor.Guid.ToString() + "}";
@@ -270,8 +228,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
                 tableName,
                 tableDescriptor,
                 tableBuildAction,
-                tableIsDataAvailableFunc,
-                tableDescriptor.IsInternalTable);
+                tableIsDataAvailableFunc);
         }
 
         /// <inheritdoc />

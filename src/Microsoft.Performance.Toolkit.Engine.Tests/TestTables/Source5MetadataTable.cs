@@ -10,9 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
 {
-    // Rather than using a TableAttribute, this is "discovered" by Source5Source and passed into the base class as
-    // an additional table. This provides some additional test coverage.
-    //
+    [Table]
     public static class Source5MetadataTable
     {
         public static TableDescriptor TableDescriptor => new TableDescriptor(
@@ -29,8 +27,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
         public static readonly ColumnConfiguration ColumnTwo =
             new ColumnConfiguration(new ColumnMetadata(Guid.NewGuid(), "Source5Count"));
 
-        // This name is not the default to ensure that the build action won't be found automatically.
-        public static void BuildTableAction(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
+        public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
         {
             Assert.IsTrue(tableData.TryQueryOutput(Composite2Cooker.DataOutputPath, out List<Composite2Output> result));
 

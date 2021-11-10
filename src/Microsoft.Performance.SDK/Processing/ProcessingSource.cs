@@ -3,12 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -20,13 +18,12 @@ namespace Microsoft.Performance.SDK.Processing
     public abstract class ProcessingSource
         : IProcessingSource
     {
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTables;
-        private readonly ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesRO;
+        private readonly HashSet<TableDescriptor> allTables;
 
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
 
-        private readonly ITableProvider tableDiscoverer;
+        private readonly IProcessingSourceTableProvider tableDiscoverer;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSource"/>
@@ -34,8 +31,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         protected ProcessingSource()
         {
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(this.allTables);
+            this.allTables = new HashSet<TableDescriptor>();
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
@@ -56,15 +52,25 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableDiscoverer">
         ///     Object used to provide the tables that are exposed by this <see cref="ProcessingSource"/>.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <remarks>
+        ///     All discovered tables will be associated with this <see cref="ProcessingSource"/>. When a consumer
+        ///     requests the Engine to enable or build a <see cref="TableDescriptor"/> that is in this list, the
+        ///     <see cref="TableDescriptor"/> will be passed into
+        ///     <see cref="ICustomDataProcessor.EnableTable(TableDescriptor)"/> or
+        ///     <see cref="ICustomDataProcessor.BuildTable(TableDescriptor, ITableBuilder)"/> for the 
+        ///     <see cref="ICustomDataProcessor"/> returned from
+        ///     <see cref="ProcessingSource.CreateProcessor(IDataSource, IProcessorEnvironment, ProcessorOptions)"/>
+        ///     or
+        ///     <see cref="ProcessingSource.CreateProcessor(IEnumerable{IDataSource}, IProcessorEnvironment, ProcessorOptions)"/>.
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
         ///     <paramref name="tableDiscoverer"/> is <c>null</c>.
         /// </exception>
-        protected ProcessingSource(ITableProvider tableDiscoverer)
+        protected ProcessingSource(IProcessingSourceTableProvider tableDiscoverer)
         {
             Guard.NotNull(tableDiscoverer, nameof(tableDiscoverer));
 
-            this.allTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
-            this.allTablesRO = new ReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>(this.allTables);
+            this.allTables = new HashSet<TableDescriptor>();
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
@@ -72,8 +78,7 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
-        public IEnumerable<TableDescriptor> DataTables => this.allTables.Keys
-            .Except(this.metadataTablesRO);
+        public IEnumerable<TableDescriptor> DataTables => this.allTables.Except(this.metadataTablesRO);
 
         /// <inheritdoc />
         public IEnumerable<TableDescriptor> MetadataTables => this.metadataTablesRO;
@@ -86,7 +91,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <see cref="Type" /> of Table described by the descriptor. This
         ///     mapping includes the data and metadata tables.
         /// </summary>
-        protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> AllTables => this.allTablesRO;
+        protected IEnumerable<TableDescriptor> AllTables => this.allTables.AsEnumerable();
 
         /// <summary>
         ///     This is set by default when the <see cref="SetApplicationEnvironment"/> is called by the runtime.
@@ -284,25 +289,13 @@ namespace Microsoft.Performance.SDK.Processing
         {
         }
 
-        /// <summary>
-        ///     If a internal table does not provide a TableFactoryAttribute, this method may be implemented
-        ///     to generate an Action to create the table.
-        /// </summary>
-        /// <param name="type">Type associated with the table</param>
-        /// <returns>An action to build the table, or null</returns>
-        protected virtual Action<ITableBuilder, IDataExtensionRetrieval> GetTableBuildAction(
-            Type type)
-        {
-            return null;
-        }
-
         private void InitializeAllTables(ITableConfigurationsSerializer tableConfigSerializer)
         {
             Debug.Assert(tableConfigSerializer != null);
 
             var tables = this.tableDiscoverer.Discover(tableConfigSerializer);
 
-            var tableSet = new HashSet<DiscoveredTable>(DiscoveredTableEqualityComparer.ByTableDescriptor);
+            var tableSet = new HashSet<TableDescriptor>();
             foreach (var table in tables)
             {
                 if (!tableSet.Add(table))
@@ -310,17 +303,17 @@ namespace Microsoft.Performance.SDK.Processing
                     var error = string.Format(
                         CultureInfo.InvariantCulture,
                         "The table descriptor `{0}` appeared on more than one table in the ProcessingSource `{1}`. Tables must be unique according to their table descriptors.",
-                        table.Descriptor,
+                        table,
                         this.GetType());
                     throw new InvalidOperationException(error);
                 }
 
-                if (table.IsMetadata)
+                if (table.IsMetadataTable)
                 {
-                    this.metadataTables.Add(table.Descriptor);
+                    this.metadataTables.Add(table);
                 }
 
-                this.allTables[table.Descriptor] = table.BuildTable ?? GetTableBuildAction(table.Descriptor.Type);
+                this.allTables.Add(table);
             }
         }
     }

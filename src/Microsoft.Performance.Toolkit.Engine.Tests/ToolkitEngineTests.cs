@@ -564,11 +564,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
 
             Assert.IsTrue(sut.TryEnableTable(Source5MetadataTable.TableDescriptor));
-            Assert.IsFalse(sut.TryEnableTable(InvalidMetadataTable.TableDescriptor));
+            Assert.IsTrue(sut.TryEnableTable(CrossParserMetadataTable.TableDescriptor));
 
             var result = sut.Process();
 
             var builtTable1 = result.BuildTable(Source5MetadataTable.TableDescriptor);
+            result.BuildTable(CrossParserMetadataTable.TableDescriptor);
 
             Assert.AreEqual(1, builtTable1.RowCount);
             Assert.AreEqual(2, builtTable1.Columns.Count());
@@ -582,21 +583,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 Assert.AreEqual(5, builtTable1.Columns.ElementAt(i).Project(0));
             }
 
-            // This table was not explicitly enabled, but it's an metadata (internal) table and should be available
-            var builtTable2 = result.BuildTable(Source5MetadataTable2.TableDescriptor);
-
-            Assert.AreEqual(5, builtTable2.RowCount);
-            Assert.AreEqual(2, builtTable2.Columns.Count());
-            Assert.AreEqual(0, builtTable2.BuiltInTableConfigurations.Count());
-            Assert.AreEqual(0, builtTable2.TableCommands.Count());
-            Assert.IsNull(builtTable2.DefaultConfiguration);
-            Assert.IsNull(builtTable2.TableRowDetailsGenerator);
-
-            for (int i = 0; i < builtTable2.RowCount; i++)
-            {
-                Assert.AreEqual(i + 1, builtTable2.Columns.ElementAt(0).Project(i));
-                Assert.AreEqual($"Source5Row{i + 1}", builtTable2.Columns.ElementAt(1).Project(i));
-            }
+            // Metadata tables are no longer enabled by default and this should fail as it was not explicitly enabled
+            Assert.IsFalse(result.TryBuildTable(Source5MetadataTable2.TableDescriptor, out var builtTable2));
         }
 
         private static IEnumerable<object[]> BuildTableTestData()

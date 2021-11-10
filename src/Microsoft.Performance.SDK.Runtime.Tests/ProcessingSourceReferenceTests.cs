@@ -760,11 +760,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             : ICustomDataProcessor,
               IDisposable
         {
-            public void BuildMetadataTables(IMetadataTableBuilderFactory metadataTableBuilderFactory)
-            {
-                throw new NotImplementedException();
-            }
-
             public void BuildTable(TableDescriptor table, ITableBuilder tableBuilder)
             {
                 throw new NotImplementedException();

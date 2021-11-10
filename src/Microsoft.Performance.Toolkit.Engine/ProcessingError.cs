@@ -68,7 +68,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ProcessingSourceGuid = processingSourceGuid;
             this.DataSourceInfoFault = null;
             this.EnableTableFaults = new Dictionary<TableDescriptor, Exception>();
-            this.MetadataFault = null;
             this.ProcessFault = null;
         }
 
@@ -82,7 +81,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ProcessingSourceGuid = executionResult.Context.ProcessingSource.Guid;
             this.DataSourceInfoFault = executionResult.DataSourceInfoFailure;
             this.EnableTableFaults = executionResult.EnableFailures;
-            this.MetadataFault = executionResult.MetadataTableFailure;
             this.ProcessFault = executionResult.ProcessorFault;
         }
 
@@ -114,12 +112,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This property may be empty.
         /// </summary>
         public IReadOnlyDictionary<TableDescriptor, Exception> EnableTableFaults { get; }
-
-        /// <summary>
-        ///     Gets the error that occurred while retreiving metadata table information,
-        ///     if any occurred. This property may be <c>null</c>.
-        /// </summary>
-        public Exception MetadataFault { get; }
 
         /// <summary>
         ///     Gets the error that was thrown by <see cref="Processor"/> while processing.

@@ -58,9 +58,9 @@ namespace Microsoft.Performance.SDK.Tests
             var tables = sut.Discover(new FakeSerializer()).ToList();
 
             Assert.AreEqual(3, tables.Count);
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[1])));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[2])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[0])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[1])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[2])));
         }
 
         [TestMethod]
@@ -79,7 +79,7 @@ namespace Microsoft.Performance.SDK.Tests
             };
 
             var serializer = new FakeSerializer();
-            
+
 
             var expectedDescriptors = TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
@@ -90,8 +90,8 @@ namespace Microsoft.Performance.SDK.Tests
             var tables = sut.Discover(new FakeSerializer()).ToList();
 
             Assert.AreEqual(2, tables.Count);
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[1])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[0])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[1])));
         }
 
         [TestMethod]
@@ -126,11 +126,11 @@ namespace Microsoft.Performance.SDK.Tests
             var tables = sut.Discover(new FakeSerializer()).ToList();
 
             Assert.AreEqual(5, tables.Count);
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[0])));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[1])));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[2])));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[3])));
-            Assert.IsNotNull(tables.Single(x => x.Descriptor.Equals(expectedDescriptors[4])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[0])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[1])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[2])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[3])));
+            Assert.IsNotNull(tables.Single(x => x.Equals(expectedDescriptors[4])));
         }
     }
 }

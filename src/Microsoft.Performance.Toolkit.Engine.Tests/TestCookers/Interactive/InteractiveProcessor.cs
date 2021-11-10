@@ -2,11 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
@@ -17,10 +15,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
         public InteractiveProcessor(
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables)
-            : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+            IProcessorEnvironment processorEnvironment)
+            : base(options, applicationEnvironment, processorEnvironment)
         {
         }
 
@@ -31,7 +27,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Interactive
 
         protected override void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> createTable,
             ITableBuilder tableBuilder)
         {
         }

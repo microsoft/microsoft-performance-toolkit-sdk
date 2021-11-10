@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -22,24 +20,22 @@ namespace Microsoft.Performance.SDK.Processing
     {
         private readonly HashSet<TableDescriptor> enabledTables = new HashSet<TableDescriptor>();
 
-        private readonly Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
-            dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>();
+        private readonly Dictionary<TableDescriptor, Action<ITableBuilder>>
+            dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
+
+        // Access to processAsyncCalled is synchronized by locking enabledTables.
+        private bool processAsyncCalled = false;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CustomDataProcessor"/>
-        ///     class.
+        ///     Initializes a new instance of the <see cref="CustomDataProcessor"/> class.
         /// </summary>
         protected CustomDataProcessor(
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables)
+            IProcessorEnvironment processorEnvironment)
         {
             Guard.NotNull(options, nameof(options));
             Guard.NotNull(applicationEnvironment, nameof(applicationEnvironment));
-            Guard.NotNull(allTablesMapping, nameof(allTablesMapping));
-            Guard.NotNull(metadataTables, nameof(metadataTables));
             Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
 
             this.Logger = processorEnvironment.CreateLogger(this.GetType());
@@ -48,9 +44,6 @@ namespace Microsoft.Performance.SDK.Processing
             this.ProcessorEnvironment = processorEnvironment;
             this.EnabledTables = new ReadOnlyHashSet<TableDescriptor>(this.enabledTables);
             this.Options = options;
-            this.TableDescriptorToBuildAction = allTablesMapping;
-
-            EnableMetadataTables(metadataTables);
         }
 
         /// <inheritdoc />
@@ -77,34 +70,21 @@ namespace Microsoft.Performance.SDK.Processing
         protected ProcessorOptions Options { get; }
 
         /// <summary>
-        ///     Gets a mapping of table descriptors to their resolved table builder actions.
-        /// </summary>
-        protected IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> TableDescriptorToBuildAction { get; }
-
-        /// <summary>
         ///     Used to log data specific to this data processor.
         /// </summary>
         protected ILogger Logger { get; }
-
-        /// <inheritdoc />
-        public void BuildMetadataTables(IMetadataTableBuilderFactory metadataTableBuilderFactory)
-        {
-            Guard.NotNull(metadataTableBuilderFactory, nameof(metadataTableBuilderFactory));
-
-            foreach (var kvp in this.TableDescriptorToBuildAction.Where(x => x.Key.IsMetadataTable && !x.Key.RequiresDataExtensions()))
-            {
-                var builder = metadataTableBuilderFactory.Create(kvp.Key);
-                Debug.Assert(builder != null);
-
-                this.BuildTableCore(kvp.Key, kvp.Value, builder);
-            }
-        }
 
         /// <inheritdoc />
         public void EnableTable(TableDescriptor tableDescriptor)
         {
             lock (this.enabledTables)
             {
+                if (this.processAsyncCalled)
+                {
+                    throw new InvalidOperationException(
+                        $"Tables may not be enabled after {nameof(ProcessAsync)} has been called.");
+                }
+
                 if (this.enabledTables.Contains(tableDescriptor))
                 {
                     return;
@@ -139,19 +119,25 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(table, nameof(table));
             Guard.NotNull(tableBuilder, nameof(tableBuilder));
 
-            if (this.TableDescriptorToBuildAction.TryGetValue(table, out var buildTable))
+            if (this.enabledTables.Contains(table))
             {
-                this.BuildTableCore(table, buildTable, tableBuilder);
+                this.BuildTableCore(table, tableBuilder);
             }
-            else if (this.dataDerivedTables.TryGetValue(table, out buildTable))
+            else if (this.dataDerivedTables.TryGetValue(table, out Action<ITableBuilder> buildTable))
             {
-                this.BuildTableCore(table, buildTable, tableBuilder);
+                if (buildTable is null)
+                {
+                    this.BuildTableCore(table, tableBuilder);
+                }
+                else
+                {
+                    buildTable(tableBuilder);
+                }
             }
             else
             {
-                Debug.Assert(false, "A table was requested that is not known by the data source.");
                 throw new InvalidOperationException(
-                    "Table " + table + " was requested to be built but is not supported by " + this.GetType());
+                    $"Table {table} was requested to be built but has not been enabled on processor {this.GetType()}");
             }
         }
 
@@ -201,6 +187,16 @@ namespace Microsoft.Performance.SDK.Processing
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
+            lock (this.enabledTables)
+            {
+                if (this.processAsyncCalled)
+                {
+                    throw new InvalidOperationException($"{nameof(ProcessAsync)} has already been called.");
+                }
+
+                this.processAsyncCalled = true;
+            }
+
             return ProcessAsyncCore(progress, cancellationToken);
         }
 
@@ -210,23 +206,6 @@ namespace Microsoft.Performance.SDK.Processing
             lock (this.enabledTables)
             {
                 return this.enabledTables.ToList();
-            }
-        }
-
-        /// <summary>
-        ///     Enable metadata tables.
-        /// </summary>
-        /// <remarks>
-        ///     The default implementation just adds the tables to <see cref="EnabledTables"/>.
-        /// </remarks>
-        /// <param name="metadataTables">
-        ///     Metadata tables to process.
-        /// </param>
-        protected virtual void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
-        {
-            foreach (var table in metadataTables)
-            {
-                EnableTable(table);
             }
         }
 
@@ -255,17 +234,11 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="tableDescriptor">
         ///     The descriptor of the requested table.
         /// </param>
-        /// <param name="createTable">
-        ///     Called to create the requested table.
-        ///     The object parameter of the Action may be used by the
-        ///     CustomDataProcessor to pass context.
-        /// </param>
         /// <param name="tableBuilder">
         ///     The builder to use to build the table.
         /// </param>
         protected abstract void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> createTable,
             ITableBuilder tableBuilder);
 
         /// <summary>
@@ -290,36 +263,59 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        /// When a custom data processor needs to generate tables dynamically based on data content, call this
-        /// method to register the table with the runtime.
+        ///     When a custom data processor needs to generate tables dynamically based on data content, call this
+        ///     method to register the table with the runtime.
         /// </summary>
-        /// <param name="tableDescriptor">Descriptor for the generated table.</param>
-        /// <param name="buildAction">Action called to create the requested table.</param>
+        /// <remarks>
+        ///     If the build action is not <c>null</c>, it will be called directly to build the table. Otherwise, it
+        ///     will be built through <see cref="BuildTableCore(TableDescriptor, ITableBuilder)"/>.
+        /// </remarks>
+        /// <param name="tableDescriptor">
+        ///     Descriptor for the generated table.
+        /// </param>
+        /// <param name="buildAction">
+        ///     Action called to create the requested table. This may be <c>null</c>.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        ///     A data derived table with the same table id has already been added.
+        ///     - or -
+        ///     A static table with the same id has already been enabled.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     
+        /// </exception>
         protected void AddTableGeneratedFromDataProcessing(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> buildAction)
+            Action<ITableBuilder> buildAction)
         {
-            // the buildAction may be null because the custom data processor may have a special way to handle
-            // these data derived tables - and that can be done through BuildTableCore
-            //
-
             Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
 
-            if (this.dataDerivedTables.ContainsKey(tableDescriptor))
+            lock (this.dataDerivedTables)
             {
-                throw new ArgumentException(
-                    $"The data derived table already exists in the processor: {tableDescriptor}",
-                    nameof(tableDescriptor));
-            }
+                if (this.dataDerivedTables.ContainsKey(tableDescriptor))
+                {
+                    throw new ArgumentException(
+                        $"The data derived table already exists in the processor: {tableDescriptor}",
+                        nameof(tableDescriptor));
+                }
 
-            if (this.TableDescriptorToBuildAction.ContainsKey(tableDescriptor))
-            {
-                throw new ArgumentException(
-                    $"The data derived table already exists in the processor as a static table: {tableDescriptor}",
-                    nameof(tableDescriptor));
-            }
+                lock (this.enabledTables)
+                {
+                    if (!this.processAsyncCalled)
+                    {
+                        throw new InvalidOperationException($"{nameof(ProcessAsync)} has not been called.");
+                    }
+                }
 
-            this.dataDerivedTables.Add(tableDescriptor, buildAction);
+                if (this.enabledTables.Contains(tableDescriptor))
+                {
+                    throw new ArgumentException(
+                        $"The data derived table already exists in the processor as a static table: {tableDescriptor}",
+                        nameof(tableDescriptor));
+                }
+
+                this.dataDerivedTables.Add(tableDescriptor, buildAction);
+            }
         }
     }
 }

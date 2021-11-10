@@ -27,7 +27,10 @@ namespace Microsoft.Performance.SDK.Processing
         {
             Guard.NotNull(self, nameof(self));
 
-            return self.RequiredDataCookers.Any() || self.RequiredDataProcessors.Any();
+            return self.RequiredDataCookers.Any();
+
+            // TODO: __SDK_DP__
+            //|| self.RequiredDataProcessors.Any();
         }
     }
 }

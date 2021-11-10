@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Tests
             ITableConfigurationsSerializer serializer,
             params Type[] types)
         {
-            CreateTableDescriptors(serializer, out var descriptors, out _, out _, types);
+            CreateTableDescriptors(serializer, out var descriptors, out _, types);
 
             return descriptors;
         }
@@ -24,7 +24,6 @@ namespace Microsoft.Performance.SDK.Tests
             ITableConfigurationsSerializer serializer,
             out List<TableDescriptor> descriptors,
             out List<Action<ITableBuilder, IDataExtensionRetrieval>> buildActions,
-            out List<bool> isInternal,
             params Type[] types)
         {
             Assert.IsNotNull(serializer);
@@ -32,7 +31,6 @@ namespace Microsoft.Performance.SDK.Tests
 
             descriptors = new List<TableDescriptor>(types.Length);
             buildActions = new List<Action<ITableBuilder, IDataExtensionRetrieval>>(types.Length);
-            isInternal = new List<bool>(types.Length);
             for (var i = 0; i < types.Length; ++i)
             {
                 Assert.IsTrue(
@@ -51,7 +49,6 @@ namespace Microsoft.Performance.SDK.Tests
 
                 descriptors.Add(expected);
                 buildActions.Add(buildTableAction);
-                isInternal.Add(expected.IsInternalTable);
             }
         }
     }

@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 
@@ -13,27 +11,25 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         : CustomDataProcessorWithSourceParser<Source123DataObject, EngineTestContext, int>
     {
         public Source123Processor(
-            ISourceParser<Source123DataObject, EngineTestContext, int> sourceParser, 
+            ISourceParser<Source123DataObject, EngineTestContext, int> sourceParser,
             ProcessorOptions options,
-            IApplicationEnvironment applicationEnvironment, 
-            IProcessorEnvironment processorEnvironment, 
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables) 
-            : base(sourceParser, options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+            IApplicationEnvironment applicationEnvironment,
+            IProcessorEnvironment processorEnvironment)
+            : base(sourceParser, options, applicationEnvironment, processorEnvironment)
         {
         }
 
-        protected override void BuildTableCore(TableDescriptor tableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval> createTable, ITableBuilder tableBuilder)
-        {           
-            if (tableDescriptor.Equals(Source123Table.TableDescriptor) && createTable == null)
+        protected override void BuildTableCore(TableDescriptor tableDescriptor, ITableBuilder tableBuilder)
+        {
+            if (tableDescriptor.Equals(Source123Table.TableDescriptor))
             {
                 var table = new Source123Table();
                 table.Build(tableBuilder);
             }
             else
             {
-                base.BuildTableCore(tableDescriptor, createTable, tableBuilder);
-            }            
+                throw new InvalidOperationException("Asked to build a table that isn't known to this processor.");
+            }
         }
     }
 }

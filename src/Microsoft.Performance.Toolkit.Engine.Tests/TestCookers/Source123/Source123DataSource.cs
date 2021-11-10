@@ -24,8 +24,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         }
 
         protected override ICustomDataProcessor CreateProcessorCore(
-            IEnumerable<IDataSource> dataSources, 
-            IProcessorEnvironment processorEnvironment, 
+            IEnumerable<IDataSource> dataSources,
+            IProcessorEnvironment processorEnvironment,
             ProcessorOptions options)
         {
             var parser = new Source123Parser(dataSources);
@@ -34,9 +34,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                 parser,
                 options,
                 this.ApplicationEnvironment,
-                processorEnvironment,
-                this.AllTables,
-                this.MetadataTables);
+                processorEnvironment);
         }
 
         protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
@@ -47,13 +45,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         }
 
         private sealed class Discovery
-            : ITableProvider
+            : IProcessingSourceTableProvider
         {
-            public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
+            public IEnumerable<TableDescriptor> Discover(ITableConfigurationsSerializer tableConfigSerializer)
             {
-                return new HashSet<DiscoveredTable>
+                return new HashSet<TableDescriptor>
                 {
-                    new DiscoveredTable(Source123Table.TableDescriptor),
+                    Source123Table.TableDescriptor,
                 };
             }
         }

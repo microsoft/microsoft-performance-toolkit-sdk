@@ -2,15 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
-using Microsoft.Performance.SDK.Extensibility.Exceptions;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -27,8 +24,6 @@ namespace Microsoft.Performance.SDK.Processing
           ICustomDataProcessorWithSourceParser<T, TContext, TKey>
           where T : IKeyedDataType<TKey>
     {
-        private readonly IDataProcessorExtensibilitySupport extensibilitySupport;
-
         /// <summary>
         /// This constructor will setup the data processor so that it can use the data extension framework - allowing
         /// table and data cookers both internally and external to this plugin.
@@ -37,24 +32,17 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="options">Processor options</param>
         /// <param name="applicationEnvironment">Application environment</param>
         /// <param name="processorEnvironment">Processor environment</param>
-        /// <param name="allTablesMapping">Maps table descriptors to possible build actions</param>
-        /// <param name="metadataTables">Metadata tables</param>
         protected CustomDataProcessorWithSourceParser(
             ISourceParser<T, TContext, TKey> sourceParser,
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
-            IProcessorEnvironment processorEnvironment,
-            IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-            IEnumerable<TableDescriptor> metadataTables)
-            : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+            IProcessorEnvironment processorEnvironment)
+            : base(options, applicationEnvironment, processorEnvironment)
         {
             Guard.NotNull(sourceParser, nameof(sourceParser));
 
             this.SourceParser = sourceParser;
             this.SourceProcessingSession = this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this);
-            this.extensibilitySupport = this.ProcessorEnvironment.CreateDataProcessorExtensibilitySupport(this);
-
-            EnableExtensionMetadataTables(metadataTables);
         }
 
         /// <summary>
@@ -68,9 +56,7 @@ namespace Microsoft.Performance.SDK.Processing
                   other.SourceParser,
                   other.Options,
                   other.ApplicationEnvironment,
-                  other.ProcessorEnvironment,
-                  other.TableDescriptorToBuildAction,
-                  other.EnabledTables)
+                  other.ProcessorEnvironment)
         {
         }
 
@@ -232,18 +218,6 @@ namespace Microsoft.Performance.SDK.Processing
             return false;
         }
 
-        /// <summary>
-        ///     This implementation does nothing because this object isn't finished initializing
-        ///     when this is called by the base class.
-        /// </summary>
-        /// <param name="metadataTables">
-        ///     Metadata tables.
-        /// </param>
-        protected override void EnableMetadataTables(IEnumerable<TableDescriptor> metadataTables)
-        {
-            base.EnableMetadataTables(metadataTables.Where(td => !td.RequiresDataExtensions()));
-        }
-
         /// <inheritdoc cref="CustomDataProcessor"/>
         /// <summary>
         /// Adds to the base class functionality, validating that the <see cref="SourceParser"/> and
@@ -271,9 +245,10 @@ namespace Microsoft.Performance.SDK.Processing
                     $"ProcessAsync may not be called on this class without a valid {nameof(this.SourceProcessingSession)}.");
             }
 
-            this.extensibilitySupport.FinalizeTables();
+            // Note: this class used to enable tables here to support "internal tables". That no longer happens, but
+            // some derived classes were using this OnAllCookersEnabled notification, so we're leaving it here.
 
-            EnableRequiredSourceDataCookers();
+            OnAllCookersEnabled();
 
             this.SourceProcessingSession.ProcessSource(this.Logger, progress, cancellationToken);
 
@@ -281,44 +256,14 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
+        /// <remarks>
+        ///     This implementation does nothing. To build a table that does not provide
+        ///     <c>BuildTable&lt;<see cref="ITableBuilder"/>, <see cref="IDataExtensionRetrieval"/>&gt;</c>, override this method.
+        /// </remarks>
         protected override void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> createTable,
             ITableBuilder tableBuilder)
         {
-            Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
-            Guard.NotNull(createTable, nameof(createTable));
-            Guard.NotNull(tableBuilder, nameof(tableBuilder));
-
-            var dataRetrieval = GetDataExtensionRetrieval(tableDescriptor);
-
-            if (dataRetrieval != null)
-            {
-                createTable(tableBuilder, dataRetrieval);
-            }
-        }
-
-        /// <inheritdoc/>
-        /// <exception cref="ExtensionTableException">
-        ///     The requested table cannot be enabled.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        ///     The <see cref="IDataProcessorExtensibilitySupport"/> has already been finalized.
-        /// </exception>
-        protected override void OnBeforeEnableTable(TableDescriptor tableDescriptor)
-        {
-            ProcessTableForExtensibility(tableDescriptor);
-        }
-
-        /// <summary>
-        /// This returns an instance of <see cref="IDataExtensionRetrieval"/> that is specific to a given
-        /// <see cref="TableDescriptor"/>.
-        /// </summary>
-        /// <param name="tableDescriptor">Table descriptor</param>
-        /// <returns>This can be used to retrieve data with which to build the given table.</returns>
-        protected IDataExtensionRetrieval GetDataExtensionRetrieval(TableDescriptor tableDescriptor)
-        {
-            return this.extensibilitySupport.GetDataExtensionRetrieval(tableDescriptor);
         }
 
         /// <summary>
@@ -342,70 +287,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         protected virtual void OnAllCookersEnabled()
         {
-        }
-
-        private void ProcessTableForExtensibility(TableDescriptor tableDescriptor)
-        {
-            if (!tableDescriptor.RequiresDataExtensions())
-            {
-                // there's nothing that needs to be done to prepare for this table by this processor
-                return;
-            }
-
-            // Processors need to be able to get an IDataExtensionRetrieval object to build
-            // internal tables. Calling this here will enable this as well as any required
-            // source data cookers.
-            //
-            this.extensibilitySupport.EnableTable(tableDescriptor);
-        }
-
-        private void EnableRequiredSourceDataCookers()
-        {
-            var requiredCookers = this.extensibilitySupport.GetRequiredSourceDataCookers();
-
-            foreach (var dataCookerPath in requiredCookers)
-            {
-                ISourceDataCookerFactory cookerFactory
-                    = this.ApplicationEnvironment.SourceDataCookerFactoryRetrieval.GetSourceDataCookerFactory(dataCookerPath);
-                EnableCooker(cookerFactory);
-            }
-
-            this.OnAllCookersEnabled();
-        }
-
-        /// <summary>
-        ///     This method enabled the source data cookers required by extension internal tables, only metadata tables for now.
-        /// </summary>
-        /// <param name="tables"></param>
-        private void EnableExtensionMetadataTables(IEnumerable<TableDescriptor> tables)
-        {
-            foreach (var table in tables.Where(td => td.RequiresDataExtensions()))
-            {
-                try
-                {
-                    EnableTable(table);
-                }
-                catch (WrongProcessorTableException e)
-                {
-                    // An IProcessingSource might pass in tables that this processor doesn't handle.
-                    this.Logger?.Verbose(string.Format("{0}", e));
-                }
-                catch (InternalTableReferencesMultipleSourceParsersException e)
-                {
-                    // This invalid table should be logged but shouldn't prevent this processor from executing.
-                    this.Logger?.Warn(string.Format("{0}", e));
-                }
-                catch (Exception e)
-                {
-                    this.Logger.Warn(
-                        "Failed to enable internal table {0} on processor {1}: {2}.",
-                        table.Type,
-                        this.GetType().FullName,
-                        e);
-
-                    throw;
-                }
-            }
         }
     }
 }

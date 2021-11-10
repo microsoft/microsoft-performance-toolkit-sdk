@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Tests
     {
         private ProcessorOptions Options { get; set; }
         private IApplicationEnvironment ApplicationEnvironment { get; set; }
-        private Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> TableDescriptorToBuildAction { get; set; }
+        private HashSet<TableDescriptor> Tables { get; set; }
         private IProcessorEnvironment ProcessorEnvironment { get; set; }
         private List<TableDescriptor> MetadataTables { get; set; }
 
@@ -37,23 +37,21 @@ namespace Microsoft.Performance.SDK.Tests
                 });
             this.ApplicationEnvironment = new StubApplicationEnvironment();
             this.ProcessorEnvironment = Any.ProcessorEnvironment();
-            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
+            this.Tables = new HashSet<TableDescriptor>
             {
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+                Any.TableDescriptor(),
+                Any.MetadataTableDescriptor(),
+                Any.MetadataTableDescriptor(),
             };
 
-            this.MetadataTables = this.TableDescriptorToBuildAction.Keys.Where(x => x.IsMetadataTable).ToList();
+            this.MetadataTables = this.Tables.Where(x => x.IsMetadataTable).ToList();
 
             this.Sut = new MockProcessor(
                 this.Options,
                 this.ApplicationEnvironment,
-                this.ProcessorEnvironment,
-                this.TableDescriptorToBuildAction,
-                this.MetadataTables);
+                this.ProcessorEnvironment);
         }
 
         [TestMethod]
@@ -72,19 +70,13 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        public void TableDescriptorToTypeHydratedCorrectly()
+        public void MetadataTablesNotEnabledByDefault()
         {
-            Assert.AreEqual(this.TableDescriptorToBuildAction, this.Sut.ExposedTableDescriptorToBuildAction);
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void MetadataTablesEnabledByDefault()
-        {
-            Assert.AreEqual(this.MetadataTables.Count, this.Sut.ExposedEnabledTables.Count);
+            Assert.IsTrue(this.MetadataTables.Count != 0);
+            Assert.AreEqual(0, this.Sut.ExposedEnabledTables.Count);
             foreach (var table in this.MetadataTables)
             {
-                Assert.IsTrue(this.Sut.ExposedEnabledTables.Contains(table));
+                Assert.IsFalse(this.Sut.ExposedEnabledTables.Contains(table));
             }
         }
 
@@ -96,7 +88,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             this.Sut.EnableTable(tableToEnable);
 
-            Assert.AreEqual(this.MetadataTables.Count + 1, this.Sut.ExposedEnabledTables.Count);
+            Assert.AreEqual(1, this.Sut.ExposedEnabledTables.Count);
             Assert.IsTrue(this.Sut.ExposedEnabledTables.Contains(tableToEnable));
         }
 
@@ -104,66 +96,30 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void BuildTableDelegatesCorrectly()
         {
-            var tableToBuild = this.TableDescriptorToBuildAction.First();
+            var tableToBuild = this.Tables.First();
             var tableBuilder = new FakeTableBuilder();
 
-            this.Sut.BuildTable(tableToBuild.Key, tableBuilder);
+            this.Sut.EnableTable(tableToBuild);
+            this.Sut.BuildTable(tableToBuild, tableBuilder);
 
             Assert.AreEqual(1, this.Sut.BuildTableCoreCalls.Count);
-            Assert.AreEqual(tableToBuild.Key, this.Sut.BuildTableCoreCalls[0].Item1);
-            Assert.AreEqual(tableToBuild.Value, this.Sut.BuildTableCoreCalls[0].Item2);
-            Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item3);
+            Assert.AreEqual(tableToBuild, this.Sut.BuildTableCoreCalls[0].Item1);
+            Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item2);
         }
 
         [TestMethod]
         [UnitTest]
-        public void BuildMetadataTablesDelegatesCorrectly()
+        public void BuildMetaTableDelegatesCorrectly()
         {
-            var factory = new FakeMetadataTableBuilderFactory();
+            var tableToBuild = this.MetadataTables.First();
+            var tableBuilder = new FakeTableBuilder();
 
-            this.Sut.BuildMetadataTables(factory);
+            this.Sut.EnableTable(tableToBuild);
+            this.Sut.BuildTable(tableToBuild, tableBuilder);
 
-            Assert.AreEqual(this.MetadataTables.Count, factory.CreatedBuilders.Count);
-
-            Assert.AreEqual(this.MetadataTables.Count, this.Sut.BuildTableCoreCalls.Count);
-            for (var i = 0; i < this.MetadataTables.Count; ++i)
-            {
-                Assert.AreEqual(this.MetadataTables[i], this.Sut.BuildTableCoreCalls[i].Item1);
-                Assert.AreEqual(this.TableDescriptorToBuildAction[this.MetadataTables[i]], this.Sut.BuildTableCoreCalls[i].Item2);
-                Assert.AreEqual(factory.CreatedBuilders[i], this.Sut.BuildTableCoreCalls[i].Item3);
-            }
-        }
-
-        public void EnableMetaTableThrows()
-        {
-            this.Options = new ProcessorOptions(
-                new[]
-                {
-                    new OptionInstance(
-                        new Option('r', "test"),
-                        "face"),
-                });
-
-            this.ApplicationEnvironment = new StubApplicationEnvironment();
-            this.ProcessorEnvironment = Any.ProcessorEnvironment();
-            this.TableDescriptorToBuildAction = new Dictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>
-            {
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.TableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
-                [Any.MetadataTableDescriptor()] = (tableBuilder, cookedData) => { },
-            };
-
-            this.MetadataTables = this.TableDescriptorToBuildAction.Keys.Where(x => x.IsMetadataTable).ToList();
-
-            this.Sut = new MockProcessor(
-                this.Options,
-                this.ApplicationEnvironment,
-                this.ProcessorEnvironment,
-                this.TableDescriptorToBuildAction,
-                this.MetadataTables);
-
+            Assert.AreEqual(1, this.Sut.BuildTableCoreCalls.Count);
+            Assert.AreEqual(tableToBuild, this.Sut.BuildTableCoreCalls[0].Item1);
+            Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item2);
         }
 
         private sealed class MockProcessor
@@ -172,19 +128,15 @@ namespace Microsoft.Performance.SDK.Tests
             public MockProcessor(
                 ProcessorOptions options,
                 IApplicationEnvironment applicationEnvironment,
-                IProcessorEnvironment processorEnvironment,
-                IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-                IEnumerable<TableDescriptor> metadataTables)
-                : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+                IProcessorEnvironment processorEnvironment)
+                : base(options, applicationEnvironment, processorEnvironment)
             {
-                this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>, ITableBuilder>>();
+                this.BuildTableCoreCalls = new List<Tuple<TableDescriptor, ITableBuilder>>();
             }
 
             public ProcessorOptions ExposedOptions => this.Options;
 
             public IApplicationEnvironment ExposedApplicationEnvironment => this.ApplicationEnvironment;
-
-            public IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> ExposedTableDescriptorToBuildAction => this.TableDescriptorToBuildAction;
 
             public ReadOnlyHashSet<TableDescriptor> ExposedEnabledTables => this.EnabledTables;
 
@@ -198,13 +150,12 @@ namespace Microsoft.Performance.SDK.Tests
                 return Task.CompletedTask;
             }
 
-            public List<Tuple<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>, ITableBuilder>> BuildTableCoreCalls { get; }
+            public List<Tuple<TableDescriptor, ITableBuilder>> BuildTableCoreCalls { get; }
             protected override void BuildTableCore(
                 TableDescriptor tableDescriptor,
-                Action<ITableBuilder, IDataExtensionRetrieval> createTable,
                 ITableBuilder tableBuilder)
             {
-                this.BuildTableCoreCalls.Add(Tuple.Create(tableDescriptor, createTable, tableBuilder));
+                this.BuildTableCoreCalls.Add(Tuple.Create(tableDescriptor, tableBuilder));
             }
         }
 
@@ -240,24 +191,6 @@ namespace Microsoft.Performance.SDK.Tests
             public ITableBuilder SetService(ITableService service)
             {
                 throw new NotImplementedException();
-            }
-        }
-
-        private sealed class FakeMetadataTableBuilderFactory
-            : IMetadataTableBuilderFactory
-        {
-            public FakeMetadataTableBuilderFactory()
-            {
-                this.CreatedBuilders = new List<FakeTableBuilder>();
-            }
-
-            public List<FakeTableBuilder> CreatedBuilders { get; }
-
-            public ITableBuilder Create(TableDescriptor tableDescriptor)
-            {
-                var builder = new FakeTableBuilder();
-                this.CreatedBuilders.Add(builder);
-                return builder;
             }
         }
 

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.Exceptions;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -34,9 +33,8 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The requested table cannot be enabled.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        ///     The <see cref="IDataProcessorExtensibilitySupport"/> has already been finalized.
+        ///     <see cref="ProcessAsync(IProgress{int}, CancellationToken)"/> has already been called.
         /// </exception>
-
         void EnableTable(TableDescriptor tableDescriptor);
 
         /// <summary>
@@ -70,6 +68,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     <see cref="ProcessAsync(IProgress{int}, CancellationToken)"/> has already been called.
+        /// </exception>
         Task ProcessAsync(
             IProgress<int> progress,
             CancellationToken cancellationToken);
@@ -109,19 +110,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The created service, if the table has a service. <c>null</c> otherwise.
         /// </returns>
         ITableService CreateTableService(TableDescriptor table);
-
-        /// <summary>
-        ///     Instructs the processor to build all (if any) tables
-        ///     that contain metadata about the data that has been processed.
-        ///     <para />
-        ///     This method must be thread-safe.
-        /// </summary>
-        /// <param name="metadataTableBuilderFactory">
-        ///     A factory that the processor can use to get <see cref="ITableBuilder"/>s
-        ///     to build metadata tables.
-        /// </param>
-        void BuildMetadataTables(
-            IMetadataTableBuilderFactory metadataTableBuilderFactory);
 
         /// <summary>
         ///     This method is used to communicate whether the given table has any

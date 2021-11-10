@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Engine.Tests.TestTables;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
 {
@@ -20,7 +19,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
         public const string Extension = ".s5d";
 
         public Source5DataSource()
-            : base(new Discovery())
+            : base()
         {
         }
 
@@ -35,9 +34,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
                 parser,
                 options,
                 this.ApplicationEnvironment,
-                processorEnvironment,
-                this.AllTables,
-                this.MetadataTables);
+                processorEnvironment);
         }
 
         protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
@@ -45,21 +42,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
             return StringComparer.OrdinalIgnoreCase.Equals(
                 Extension,
                 Path.GetExtension(dataSource.Uri.LocalPath));
-        }
-
-        private sealed class Discovery
-            : ITableProvider
-        {
-            private static readonly ITableProvider DefaultProvider
-                = TableDiscovery.CreateForAssembly(typeof(Source5DataSource).Assembly);
-
-            public IEnumerable<DiscoveredTable> Discover(ITableConfigurationsSerializer tableConfigSerializer)
-            {
-                var tables = new HashSet<DiscoveredTable>(DefaultProvider.Discover(tableConfigSerializer));
-                tables.Add(
-                    new DiscoveredTable(Source5MetadataTable.TableDescriptor, Source5MetadataTable.BuildTableAction));
-                return tables;
-            }
         }
     }
 }
