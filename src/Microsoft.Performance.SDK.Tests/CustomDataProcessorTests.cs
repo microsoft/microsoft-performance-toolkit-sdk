@@ -107,34 +107,19 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item2);
         }
 
-        public void EnableMetaTableThrows()
+        [TestMethod]
+        [UnitTest]
+        public void BuildMetaTableDelegatesCorrectly()
         {
-            this.Options = new ProcessorOptions(
-                new[]
-                {
-                    new OptionInstance(
-                        new Option('r', "test"),
-                        "face"),
-                });
+            var tableToBuild = this.MetadataTables.First();
+            var tableBuilder = new FakeTableBuilder();
 
-            this.ApplicationEnvironment = new StubApplicationEnvironment();
-            this.ProcessorEnvironment = Any.ProcessorEnvironment();
-            this.Tables = new HashSet<TableDescriptor>
-            {
-                Any.TableDescriptor(),
-                Any.TableDescriptor(),
-                Any.TableDescriptor(),
-                Any.MetadataTableDescriptor(),
-                Any.MetadataTableDescriptor(),
-            };
+            this.Sut.EnableTable(tableToBuild);
+            this.Sut.BuildTable(tableToBuild, tableBuilder);
 
-            this.MetadataTables = this.Tables.Where(x => x.IsMetadataTable).ToList();
-
-            this.Sut = new MockProcessor(
-                this.Options,
-                this.ApplicationEnvironment,
-                this.ProcessorEnvironment);
-
+            Assert.AreEqual(1, this.Sut.BuildTableCoreCalls.Count);
+            Assert.AreEqual(tableToBuild, this.Sut.BuildTableCoreCalls[0].Item1);
+            Assert.AreEqual(tableBuilder, this.Sut.BuildTableCoreCalls[0].Item2);
         }
 
         private sealed class MockProcessor
