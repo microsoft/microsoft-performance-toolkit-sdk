@@ -22,6 +22,10 @@ namespace Microsoft.Performance.SDK.Processing
         ///     given <see cref="IProcessingSource"/>. Tables are discovered in the
         ///     assembly by being a type decorated with the <see cref="TableAttribute"/>
         ///     attribute.
+        ///     <para/>
+        ///     No table that requires <see cref="IDataCooker"/>s or implements a static
+        ///     <c>BuildTable&lt;<see cref="ITableBuilder"/>, <see cref="IDataExtensionRetrieval"/>&gt;</c>
+        ///     will be returned from this <see cref="IProcessingSourceTableProvider"/>.
         /// </summary>
         /// <param name="processingSource">
         ///     The <see cref="IProcessingSource"/> whose <see cref="Assembly"/> is to
@@ -46,6 +50,10 @@ namespace Microsoft.Performance.SDK.Processing
         ///     discover tables in the given <see cref="Assembly"/>. Tables are
         ///     discovered in the assembly by being a type decorated with the
         ///     <see cref="TableAttribute"/> attribute.
+        ///     <para/>
+        ///     No table that requires <see cref="IDataCooker"/>s or implements a static
+        ///     <c>BuildTable&lt;<see cref="ITableBuilder"/>, <see cref="IDataExtensionRetrieval"/>&gt;</c>
+        ///     will be returned from this <see cref="IProcessingSourceTableProvider"/>.
         /// </summary>
         /// <param name="assembly">
         ///     The <see cref="Assembly"/> to search for tables.
@@ -65,6 +73,10 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Creates a new <see cref="IProcessingSourceTableProvider"/> instance that will
         ///     discover tables in the given namespace in the <see cref="Assembly"/>
         ///     containing the specified <see cref="IProcessingSource"/>.
+        ///     <para/>
+        ///     No table that requires <see cref="IDataCooker"/>s or implements a static
+        ///     <c>BuildTable&lt;<see cref="ITableBuilder"/>, <see cref="IDataExtensionRetrieval"/>&gt;</c>
+        ///     will be returned from this <see cref="IProcessingSourceTableProvider"/>.
         /// </summary>
         /// <param name="tableNamespace">
         ///     The namespace to search for tables. This parameter may be <c>null</c> to
