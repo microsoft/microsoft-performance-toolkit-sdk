@@ -39,23 +39,24 @@ namespace Microsoft.Performance.SDK.Tests
                     typeof(StubMetadataTableOne),
                     typeof(StubMetadataTableTwo),
                     typeof(Exception),
+                    typeof(StubMetadataTableNoBuildMethod),
+                    typeof(StubDataTableOneNoBuildMethod),
+                    typeof(StubDataTableTwoNoBuildMethod),
                 }
             };
 
             var expectedDescriptors = TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
-                typeof(StubDataTableOne),
-                typeof(StubDataTableTwo),
-                typeof(StubDataTableThree),
-                typeof(StubMetadataTableOne),
-                typeof(StubMetadataTableTwo));
+                typeof(StubMetadataTableNoBuildMethod),
+                typeof(StubDataTableOneNoBuildMethod),
+                typeof(StubDataTableTwoNoBuildMethod));
 
             StubDataSource.Assembly = assembly;
 
             var sut = new StubDataSource();
             sut.SetApplicationEnvironment(applicationEnvironment);
 
-            Assert.AreEqual(5, sut.AllTablesExposed.Count);
+            Assert.AreEqual(expectedDescriptors.Count, sut.AllTablesExposed.Count);
             foreach (var td in expectedDescriptors)
             {
                 Assert.IsTrue(sut.AllTablesExposed.Contains(td));
@@ -141,6 +142,7 @@ namespace Microsoft.Performance.SDK.Tests
             TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
                 out var expectedDescriptors,
+                out var _,
                 typeof(StubDataTableOne),
                 typeof(StubDataTableTwo),
                 typeof(StubDataTableThree),
@@ -174,24 +176,31 @@ namespace Microsoft.Performance.SDK.Tests
         {
             TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
-                out var expectedDescriptors,
+                out var allDescriptors,
+                out var buildTableActions,
                 typeof(StubDataTableOne),
 
                 typeof(StubDataTableTwo),
-                typeof(StubDataTableTwo),
 
                 typeof(StubMetadataTableOne),
-                typeof(StubMetadataTableTwo));
+                typeof(StubMetadataTableTwo),
+
+                typeof(StubMetadataTableNoBuildMethod),
+                typeof(StubDataTableOneNoBuildMethod),
+                typeof(StubDataTableOneNoBuildMethod),
+                typeof(StubDataTableTwoNoBuildMethod));
+
+            var expectedDescriptors = new List<TableDescriptor>();
+            for (int x = 0; x < allDescriptors.Count; x++)
+            {
+                if (buildTableActions[x] is null && !allDescriptors[x].RequiresDataExtensions())
+                {
+                    expectedDescriptors.Add(allDescriptors[x]);
+                }
+            }
 
             var discovery = new FakeTableProvider();
-            discovery.DiscoverReturnValue = new HashSet<TableDescriptor>
-            {
-                expectedDescriptors[0],
-                expectedDescriptors[1],
-                expectedDescriptors[2],
-                expectedDescriptors[3],
-                expectedDescriptors[4],
-            };
+            discovery.DiscoverReturnValue = expectedDescriptors;
 
             var sut = new StubDataSource(discovery);
 

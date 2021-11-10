@@ -99,6 +99,7 @@ namespace Microsoft.Performance.SDK.Tests
             var tableToBuild = this.Tables.First();
             var tableBuilder = new FakeTableBuilder();
 
+            this.Sut.EnableTable(tableToBuild);
             this.Sut.BuildTable(tableToBuild, tableBuilder);
 
             Assert.AreEqual(1, this.Sut.BuildTableCoreCalls.Count);

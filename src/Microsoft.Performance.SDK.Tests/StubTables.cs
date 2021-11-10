@@ -118,4 +118,37 @@ namespace Microsoft.Performance.SDK.Tests
             BuildTableWasCalled = true;
         }
     }
+
+    [Table]
+    internal sealed class StubMetadataTableNoBuildMethod
+    {
+        public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
+            Guid.Parse("{DCE1C3DB-0522-48A1-B0B8-C04D95FA93FC}"),
+            "MetadataNoBuildMethod",
+            "Description",
+            TableDescriptor.DefaultCategory,
+            true);
+    }
+
+    [Table]
+    internal sealed class StubDataTableOneNoBuildMethod
+    {
+        public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
+            Guid.Parse("{025EE14C-E4CC-40C4-9367-B56BE17D3D63}"),
+            "DataTableOneNoBuildMethod",
+            "Description",
+            TableDescriptor.DefaultCategory,
+            true);
+    }
+
+    [Table]
+    internal sealed class StubDataTableTwoNoBuildMethod
+    {
+        public static TableDescriptor TableDescriptor { get; } = new TableDescriptor(
+            Guid.Parse("{4AD12D02-5733-46D4-9CEB-A66E44F58D88}"),
+            "DataTableTwoNoBuildMethod",
+            "Description",
+            TableDescriptor.DefaultCategory,
+            true);
+    }
 }

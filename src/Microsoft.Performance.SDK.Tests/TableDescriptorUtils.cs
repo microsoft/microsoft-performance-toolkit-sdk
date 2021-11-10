@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Tests
             ITableConfigurationsSerializer serializer,
             params Type[] types)
         {
-            CreateTableDescriptors(serializer, out var descriptors, types);
+            CreateTableDescriptors(serializer, out var descriptors, out var _, types);
 
             return descriptors;
         }
@@ -23,12 +23,14 @@ namespace Microsoft.Performance.SDK.Tests
         internal static void CreateTableDescriptors(
             ITableConfigurationsSerializer serializer,
             out List<TableDescriptor> descriptors,
+            out List<Action<ITableBuilder, IDataExtensionRetrieval>> buildActions,
             params Type[] types)
         {
             Assert.IsNotNull(serializer);
             Assert.IsNotNull(types);
 
             descriptors = new List<TableDescriptor>(types.Length);
+            buildActions = new List<Action<ITableBuilder, IDataExtensionRetrieval>>(types.Length);
             for (var i = 0; i < types.Length; ++i)
             {
                 Assert.IsTrue(
@@ -46,6 +48,7 @@ namespace Microsoft.Performance.SDK.Tests
                     types[i]);
 
                 descriptors.Add(expected);
+                buildActions.Add(buildTableAction);
             }
         }
     }
