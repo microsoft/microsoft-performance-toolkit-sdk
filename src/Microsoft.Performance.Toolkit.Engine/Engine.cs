@@ -537,11 +537,11 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 if (this.Extensions.TablesById.TryGetValue(descriptor.Guid, out tableReference))
                 {
-                    Debug.Assert(tableReference.BuildTableAction != null);
                     Debug.Assert(
                         tableReference != null,
                         "If ExtensionRoot.TablesById contains the table descriptor, then it should also contain a " +
                         "non-null table reference.");
+                    Debug.Assert(tableReference.BuildTableAction != null);
 
                     if (tableReference.Availability != DataExtensionAvailability.Available)
                     {
