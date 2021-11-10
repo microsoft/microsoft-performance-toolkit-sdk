@@ -259,6 +259,9 @@ namespace Microsoft.Performance.SDK.Processing
                     $"ProcessAsync may not be called on this class without a valid {nameof(this.SourceProcessingSession)}.");
             }
 
+            // Note: this class used to enable tables here to support "internal tables". That no longer happens, but
+            // some derived classes were using this OnAllCookersEnabled notification, so we're leaving it here.
+
             OnAllCookersEnabled();
 
             this.SourceProcessingSession.ProcessSource(this.Logger, progress, cancellationToken);
