@@ -32,7 +32,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <exception cref="ExtensionTableException">
         ///     The requested table cannot be enabled.
         /// </exception>
-
+        /// <exception cref="InvalidOperationException">
+        ///     <see cref="ProcessAsync(IProgress{int}, CancellationToken)"/> has already been called.
+        /// </exception>
         void EnableTable(TableDescriptor tableDescriptor);
 
         /// <summary>
@@ -66,6 +68,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     <see cref="ProcessAsync(IProgress{int}, CancellationToken)"/> has already been called.
+        /// </exception>
         Task ProcessAsync(
             IProgress<int> progress,
             CancellationToken cancellationToken);

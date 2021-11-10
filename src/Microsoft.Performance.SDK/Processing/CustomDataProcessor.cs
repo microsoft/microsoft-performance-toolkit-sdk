@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +22,9 @@ namespace Microsoft.Performance.SDK.Processing
 
         private readonly Dictionary<TableDescriptor, Action<ITableBuilder>>
             dataDerivedTables = new Dictionary<TableDescriptor, Action<ITableBuilder>>();
+
+        // Access to processAsyncCalled is synchronized by locking enabledTables.
+        private bool processAsyncCalled = false;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="CustomDataProcessor"/> class.
@@ -77,6 +79,12 @@ namespace Microsoft.Performance.SDK.Processing
         {
             lock (this.enabledTables)
             {
+                if (this.processAsyncCalled)
+                {
+                    throw new InvalidOperationException(
+                        $"Tables may not be enabled after {nameof(ProcessAsync)} has been called.");
+                }
+
                 if (this.enabledTables.Contains(tableDescriptor))
                 {
                     return;
@@ -128,9 +136,8 @@ namespace Microsoft.Performance.SDK.Processing
             }
             else
             {
-                Debug.Assert(false, "A table was requested that is not known by the data source.");
                 throw new InvalidOperationException(
-                    "Table " + table + " was requested to be built but is not supported by " + this.GetType());
+                    $"Table {table} was requested to be built but has not been enabled on processor {this.GetType()}");
             }
         }
 
@@ -180,6 +187,16 @@ namespace Microsoft.Performance.SDK.Processing
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
+            lock (this.enabledTables)
+            {
+                if (this.processAsyncCalled)
+                {
+                    throw new InvalidOperationException($"{nameof(ProcessAsync)} has already been called.");
+                }
+
+                this.processAsyncCalled = true;
+            }
+
             return ProcessAsyncCore(progress, cancellationToken);
         }
 
@@ -267,36 +284,55 @@ namespace Microsoft.Performance.SDK.Processing
         ///     method to register the table with the runtime.
         /// </summary>
         /// <remarks>
-        ///     If the build action is not <c>null</c>, it will be called directly. Otherwise, it will be built through
-        ///     <see cref="BuildTableCore(TableDescriptor, ITableBuilder)"/>.
+        ///     If the build action is not <c>null</c>, it will be called directly to build the table. Otherwise, it
+        ///     will be built through <see cref="BuildTableCore(TableDescriptor, ITableBuilder)"/>.
         /// </remarks>
-        /// <param name="tableDescriptor">Descriptor for the generated table.</param>
-        /// <param name="buildAction">Action called to create the requested table.</param>
+        /// <param name="tableDescriptor">
+        ///     Descriptor for the generated table.
+        /// </param>
+        /// <param name="buildAction">
+        ///     Action called to create the requested table. This may be <c>null</c>.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        ///     A data derived table with the same table id has already been added.
+        ///     - or -
+        ///     A static table with the same id has already been enabled.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     
+        /// </exception>
         protected void AddTableGeneratedFromDataProcessing(
             TableDescriptor tableDescriptor,
             Action<ITableBuilder> buildAction)
         {
-            // the buildAction may be null because the custom data processor may have a special way to handle
-            // these data derived tables - and that can be done through BuildTableCore
-            //
-
             Guard.NotNull(tableDescriptor, nameof(tableDescriptor));
 
-            if (this.dataDerivedTables.ContainsKey(tableDescriptor))
+            lock (this.dataDerivedTables)
             {
-                throw new ArgumentException(
-                    $"The data derived table already exists in the processor: {tableDescriptor}",
-                    nameof(tableDescriptor));
-            }
+                if (this.dataDerivedTables.ContainsKey(tableDescriptor))
+                {
+                    throw new ArgumentException(
+                        $"The data derived table already exists in the processor: {tableDescriptor}",
+                        nameof(tableDescriptor));
+                }
 
-            if (this.enabledTables.Contains(tableDescriptor))
-            {
-                throw new ArgumentException(
-                    $"The data derived table already exists in the processor as a static table: {tableDescriptor}",
-                    nameof(tableDescriptor));
-            }
+                lock (this.enabledTables)
+                {
+                    if (!this.processAsyncCalled)
+                    {
+                        throw new InvalidOperationException($"{nameof(ProcessAsync)} has not been called.");
+                    }
+                }
 
-            this.dataDerivedTables.Add(tableDescriptor, buildAction);
+                if (this.enabledTables.Contains(tableDescriptor))
+                {
+                    throw new ArgumentException(
+                        $"The data derived table already exists in the processor as a static table: {tableDescriptor}",
+                        nameof(tableDescriptor));
+                }
+
+                this.dataDerivedTables.Add(tableDescriptor, buildAction);
+            }
         }
     }
 }
