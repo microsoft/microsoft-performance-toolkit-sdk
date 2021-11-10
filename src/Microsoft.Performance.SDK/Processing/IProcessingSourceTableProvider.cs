@@ -20,8 +20,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The serializer used to deserialize table configurations.
         /// </param>
         /// <returns>
-        ///     A collection of tables. Each <see cref="DiscoveredTable"/> in the collection must have
-        ///     a unique <see cref="TableDescriptor"/>.
+        ///     A collection of <see cref="TableDescriptor"/>s.
         /// </returns>
         IEnumerable<TableDescriptor> Discover(ITableConfigurationsSerializer tableConfigSerializer);
     }

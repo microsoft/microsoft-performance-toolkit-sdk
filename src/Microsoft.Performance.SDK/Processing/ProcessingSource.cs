@@ -58,7 +58,10 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <see cref="TableDescriptor"/> will be passed into
         ///     <see cref="ICustomDataProcessor.EnableTable(TableDescriptor)"/> or
         ///     <see cref="ICustomDataProcessor.BuildTable(TableDescriptor, ITableBuilder)"/> for the 
-        ///     <see cref="ICustomDataProcessor"/> returned from <see cref="CreateProcessor"/>.
+        ///     <see cref="ICustomDataProcessor"/> returned from
+        ///     <see cref="ProcessingSource.CreateProcessor(IDataSource, IProcessorEnvironment, ProcessorOptions)"/>
+        ///     or
+        ///     <see cref="ProcessingSource.CreateProcessor(IEnumerable{IDataSource}, IProcessorEnvironment, ProcessorOptions)"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="tableDiscoverer"/> is <c>null</c>.

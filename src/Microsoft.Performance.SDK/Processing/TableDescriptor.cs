@@ -33,6 +33,11 @@ namespace Microsoft.Performance.SDK.Processing
         // TODO: __SDK_DP__
         //private readonly HashSet<DataProcessorId> dataProcessors;
 
+        ///// TODO: __SDK_DP__
+        ///// <param name="requiredDataProcessors">
+        /////     Identifiers for data processors required to instantiate this table.
+        ///// </param>
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="TableDescriptor"/>
         ///     class.
@@ -61,10 +66,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="requiredDataCookers">
         ///     Identifiers for data cookers required to instantiate this table.
         /// </param>
-        ///// TODO: __SDK_DP__
-        ///// <param name="requiredDataProcessors">
-        /////     Identifiers for data processors required to instantiate this table.
-        ///// </param>
         /// <exception cref="ArgumentException">
         ///     <paramref name="guid"/> is whitespace.
         ///     - or -

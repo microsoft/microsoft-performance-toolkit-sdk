@@ -32,9 +32,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <exception cref="ExtensionTableException">
         ///     The requested table cannot be enabled.
         /// </exception>
-        /// <exception cref="InvalidOperationException">
-        ///     The <see cref="IDataProcessorExtensibilitySupport"/> has already been finalized.
-        /// </exception>
 
         void EnableTable(TableDescriptor tableDescriptor);
 
