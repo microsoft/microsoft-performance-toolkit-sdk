@@ -150,16 +150,6 @@ This obsolete class has been removed. Please use `ProcessingSourceAttribute`.
 
 This obsolete class has been removed. Please use `ProcessingSourceInfo`.
 
-## ColumnRole
-
-This enum has been removed. Please use the new `ColumnRole` static class for defined column roles.
-
-## TableConfiguration
-
-- The `ColumnRoles` property now is an `IDictionary<string, Guid>` instead of an `IDictionary<ColumnRole, Guid>`.
-
-- The `AddColumnRole` and `RemoveColumnRole` methods now take in case sensitive strings. Plese see `ColumnRoles` static class for string options.
-
 ## ProcessingSource
 
 - `ProcessingSource.AllTables` has changed from being an `IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>>` to an `IEnumerable<TableDescriptor>`
@@ -169,6 +159,16 @@ This enum has been removed. Please use the new `ColumnRole` static class for def
 
 - The constructors that take an `additionalTablesProvider` and/or a `tableAssemblyProvider` have been removed. Please see the 
   Table Discovery section for more details.
+
+## ColumnRole
+
+This enum has been removed. Please use the new `ColumnRole` static class for defined column roles.
+
+## TableConfiguration
+
+- The `ColumnRoles` property now is an `IDictionary<string, Guid>` instead of an `IDictionary<ColumnRole, Guid>`.
+
+- The `AddColumnRole` and `RemoveColumnRole` methods now take in case sensitive strings. Plese see `ColumnRoles` static class for string options.
 
 ## Data Processors (NOT CustomDataProcessors)
 
