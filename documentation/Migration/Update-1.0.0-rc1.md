@@ -1,7 +1,52 @@
-# Abstract
+# Abstract and Table of Contents
 
 This document outlines major code changes that might be needed when updating from 
-Preview Version 0.109.\* to 1.0.0 Relase Candidate 1\*.
+Preview Version 0.109.\* to 1.0.0 Relase Candidate 1.
+
+Table of Contents
+- [Abstract and Table of Contents](#abstract-and-table-of-contents)
+- [Conceptual Changes](#conceptual-changes)
+  - [Table Discovery](#table-discovery)
+  - [Internal Tables](#internal-tables)
+  - [Metadata Tables](#metadata-tables)
+- [Breaking Changes](#breaking-changes)
+  - [Renamed Classes, Interfaces and Static Methods](#renamed-classes-interfaces-and-static-methods)
+  - [Obsolete Members](#obsolete-members)
+    - [DataSourceInfo](#datasourceinfo)
+    - [DataCookerPath](#datacookerpath)
+    - [DataOutputPath](#dataoutputpath)
+    - [CustomDataProcessor](#customdataprocessor)
+    - [RequiresCookerAttribute](#requirescookerattribute)
+    - [TableConfiguration](#tableconfiguration)
+    - [CustomDataSourceBase](#customdatasourcebase)
+    - [CustomDataSourceAttribute](#customdatasourceattribute)
+    - [CustomDataSourceInfo](#customdatasourceinfo)
+  - [ProcessingSource](#processingsource)
+  - [ColumnRole](#columnrole)
+  - [TableConfiguration](#tableconfiguration-1)
+  - [Data Processors (NOT CustomDataProcessors)](#data-processors-not-customdataprocessors)
+  - [ProcessingSourceInfo](#processingsourceinfo)
+  - [ProcessingSourceAttribute](#processingsourceattribute)
+  - [CustomDataProcessor](#customdataprocessor-1)
+  - [CustomDataProcessorWithSourceParser](#customdataprocessorwithsourceparser)
+  - [TableDescriptor](#tabledescriptor)
+  - [Engine](#engine)
+    - [Creation](#creation)
+  - [Interfaces implemented in the SDK or SDK.Runtime](#interfaces-implemented-in-the-sdk-or-sdkruntime)
+    - [ICustomDataProcessor](#icustomdataprocessor)
+    - [IDataProcessorExtensibilitySupport](#idataprocessorextensibilitysupport)
+    - [IDataExtensionRetrievalFactory](#idataextensionretrievalfactory)
+    - [IMetadataTableBuilderFactory](#imetadatatablebuilderfactory)
+    - [IProcessorEnvironment](#iprocessorenvironment)
+    - [IApplicationEnvironment](#iapplicationenvironment)
+  - [TableAttribute and InternalTableAttribute](#tableattribute-and-internaltableattribute)
+    - [Engine Execution Results](#engine-execution-results)
+  - [IViewportSensitiveProjection](#iviewportsensitiveprojection)
+  - [ViewportSensitiveProjection](#viewportsensitiveprojection)
+  - [IVisibleTableRegion](#ivisibletableregion)
+  - [Plugin Configurations](#plugin-configurations)
+- [Suggested Changes](#suggested-changes)
+  - [Metadata Tables](#metadata-tables-1)
 
 # Conceptual Changes
 
