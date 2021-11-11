@@ -25,14 +25,14 @@ namespace Microsoft.Performance.SDK.Processing
     public interface IProcessingSource
     {
         /// <summary>
-        ///     Gets the collection of tables exposed by this <see cref="IProcessingSource"/>
-	///     which are not marked as <see cref="TableDescriptor.IsMetadataTable"/>
+	///     Gets the collection of tables exposed by this <see cref="IProcessingSource"/>
+        ///     which are not marked as <see cref="TableDescriptor.IsMetadataTable"/>
         /// </summary>
         IEnumerable<TableDescriptor> DataTables { get; }
 
         /// <summary>
         ///     Gets the collection of tables exposed by this <see cref="IProcessingSource"/>
-	///     which are marked as <see cref="TableDescriptor.IsMetadataTable"/>
+        ///     which are marked as <see cref="TableDescriptor.IsMetadataTable"/>
         /// </summary>
         IEnumerable<TableDescriptor> MetadataTables { get; }
 

@@ -53,10 +53,7 @@ Table of Contents
 ## Table Discovery
 
 Prior to this release candidate, any tables defined in a processing source's assembly were associated with
-that processing source. The SDK runtime ensured that tables that do not provide a static build method are built
-by passing their `TableDescriptor`s to the processing source's `CustomDataProcessor`'s `BuiltTable` method.
-
-Now, a `ProcessingSource` provides an instance of an `IProcessingSourceTableProvider`. All tables returned by
+that processing source. Now, a `ProcessingSource` provides an instance of an `IProcessingSourceTableProvider`. All tables returned by
 this instance's `Discover` method are associated with that `ProcessingSource`.
 
 Note that "cooker tables" (tables which depend on data cookers and provide their own static build methods) that
@@ -381,15 +378,11 @@ There are some changes made to interfaces that generally don't need to be implem
 
 ### IDataProcessorExtensibilitySupport
 
-- The `AddTable` method becomes `EnableTable` or `TryEnableTable`.
-
-- The `GetAllRequiredSourceDataCookers` was renamed to `GetRequiredSourceDataCookers`.
-
-- The `GetAllRequiredTables was renamed to `GetEnabledInternalTables`.
+This interface has been removed.
 
 ### IDataExtensionRetrievalFactory
 
-This was moved from the SDK namespace to SDK.Runtime.
+This was moved from the `SDK` namespace to `SDK.Runtime` namespace.
 
 ### IMetadataTableBuilderFactory
 
