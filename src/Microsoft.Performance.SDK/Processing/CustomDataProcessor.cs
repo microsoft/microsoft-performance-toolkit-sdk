@@ -282,7 +282,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     A static table with the same id has already been enabled.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        ///     
+        ///    <see cref="ProcessAsync(IProgress{int}, CancellationToken)"/> has already been called. 
         /// </exception>
         protected void AddTableGeneratedFromDataProcessing(
             TableDescriptor tableDescriptor,
