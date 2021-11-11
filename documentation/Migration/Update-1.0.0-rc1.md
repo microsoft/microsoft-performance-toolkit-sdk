@@ -2,9 +2,37 @@
 
 This document outlines major code changes that might be needed when updating from 
 Preview Version 0.109.\* to 1.0.0 Relase Candidate 1\*.
-This document is divided
-into two sections: [Breaking Changes](#breaking-changes) and 
-[Suggested Changes](#suggested-changes).
+
+# Conceptual Changes
+
+## Table Discovery
+
+Prior to this release candidate, any tables defined in a processing source's assembly were associated with
+that processing source. The SDK runtime ensured that tables that do not provide a static build method are built
+by passing their `TableDescriptor`s to the processing source's `CustomDataProcessor`'s `BuiltTable` method.
+
+Now, a `ProcessingSource` provides an instance of an `IProcessingSourceTableProvider`. All tables returned by
+this instance's `Discover` method are associated with that `ProcessingSource`.
+
+Note that "cooker tables" (tables which depend on data cookers and provide their own static build methods) that
+are discovered by a `IProcessingSourceTableProvider` are also associated with the provider's `ProcessingSource`.
+This may result in tables which "build themselves" through the extensions runtime being passed into a `CustomDataProcessor.BuildTable` method. 
+**The included implementations of `IProcessingSourceTableProvider` will never "discover" a cooker table.** This ensures tables
+that depend on data cookers are only requested to be built once data is available.
+
+Custom implementations of `IProcessingSourceTableProvider` should aim to preserve this behavior. For most plugins,
+the included implementations should suffice. This release candidate introduces the static methods `TableDiscovery.CreateForAssembly` and `TableDiscovery.CreateForNamespace` to create included implementations of `IProcessingSourceTableProvider`.
+
+## Internal Tables
+
+The concept of "internal tables" has been removed. Internal tables were initially used to differentiate tables that must be
+built by a `CustomDataProcessor`. Instead, tables that must be built by a `CustomDataProcessor` are now discovered by a
+`IProcessingSourceTableProvider` (see above).
+
+## Metadata Tables
+
+Prior to this release candidate, metadata tables were conceptually separate from "normal" tables. Starting with this release
+candidate, metadata tables are treated exactly the same as all other tables.
 
 # Breaking Changes
 
@@ -141,23 +169,6 @@ This enum has been removed. Please use the new `ColumnRole` static class for def
 
 - The constructors that take an `additionalTablesProvider` and/or a `tableAssemblyProvider` have been removed. Please see the 
   Table Discovery section for more details.
-
-## Table Discovery 
-
-The following are required if you are using the `ProcessingSource` base class and
-are using the cosntructors that take `additionalTablesProvider` and/or the
-`tableAssemblyProvider` parameters.
-
-These parameters are being removed and replaced by the `IProcessingSourceTableProvider` interface.
-If you have custom logic for determining the tables exposed by a `ProcessingSource`,
-you must implement the new interface.
-
-The default behavior of using all tables found in the assembly has been preserved.
-This change only effects those `ProcessingSource`s that use custom table providers.
-
-Two helper methods have been added for use:
-`TableDiscovery.CreateForAssembly` and `TableDiscovery.CreateForNamespace.` Users
-may also provide their own implementations.
 
 ## Data Processors (NOT CustomDataProcessors)
 
