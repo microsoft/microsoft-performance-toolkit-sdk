@@ -39,13 +39,16 @@ processed by an `Engine` instance. The `DataSourceSet` will reference a
 `DataSourceSet` are able to be processed.
 
 ````cs
-using var plugins = PluginSet.Load();
-using var dataSources = DataSourceSet.Create(plugins);
+using (var plugins = PluginSet.Load())
+{
+    using (var dataSources = DataSourceSet.Create(plugins))
+    {
+        dataSources.AddDataSource(new FileDataSource("myfile.txt"));
+        dataSources.AddDataSource(new FileDataSource("yourfile.txt"));
 
-dataSources.AddDataSource(new FileDataSource("myfile.txt"));
-dataSources.AddDataSource(new FileDataSource("yourfile.txt"));
-
-// ... and so on
+        // ... and so on
+    }
+}
 
 ````
 
@@ -69,7 +72,7 @@ to pass `false` will be added in a future update.
 ````cs
 using (var plugins1 = PluginSet.Load())
 {
-    using (var dataSources = DataSourceSet.Create(plugins, true))
+    using (var dataSources = DataSourceSet.Create(plugins1, true))
     {
     }
 
@@ -108,3 +111,10 @@ using (var dataSources = DataSourceSet.Create(plugins))
 }
 ````
 
+# Reusing the DataSourceSet - Coming Soon
+
+We have plans for the future to enable reusing the `DataSourceSet` and `PluginSet`
+across `Engine` instances. However, this functionality has not been fully implemented.
+Thus, at this time, it is not supported to create a new `Engine` reusing a `DataSourceSet`.
+Once you have finished using an `Engine` instance, you should dispose the corresponding
+`DataSourceSet` and `PluginSet`
