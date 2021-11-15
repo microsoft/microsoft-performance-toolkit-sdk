@@ -61,6 +61,11 @@ You should now have a solution with one project file.
 
 [This documentation](https://docs.microsoft.com/en-us/nuget/quickstart/install-and-use-a-package-in-visual-studio) describes how to add a NuGet package to a Visual Studio project. Following these instructions, add the `Microsoft.Performance.SDK` package from [nuget.org](nuget.org) to your project.
 
+### Picking your SDK version
+The version of the SDK you add to your project will determine which versions of SDK drivers your plugin will work with. For example, a plugin that depends on SDK version 0.109.2 will not work a version of an SDK driver that uses SDK version 1.0.0.
+
+To decide which version of the SDK to use, refer to the [known SDK driver compatability lists](../Known-SDK-Driver-Compatibility/Overview.md).
+
 ## Install WPA for Debugging
 
 One way to debug an SDK plugin project is to use WPA. Before we setup our project for this, WPA will need to be installed. 
