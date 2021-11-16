@@ -6,6 +6,7 @@ on:
   # Triggers when a POST request is sent to GitHub with
   # a path of /repos/Microsoft/microsoft-performance-toolkit-sdk/dispatches
   # and event-type "update-wpa" in the payload
+  push:
   workflow_dispatch:
     inputs:
       name:
