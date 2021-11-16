@@ -23,7 +23,11 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - name: Delete old WPA versions table
+        run: |
+         chmod +x ./.github/rm-wpa-versions.sh
+         ./.github/rm-wpa-versions.sh
+        shell: bash
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Cat content
+        run: cat WPA.md
