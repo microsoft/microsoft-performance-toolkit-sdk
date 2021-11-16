@@ -23,6 +23,8 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+        with:
+          ref: refs/heads/main
       - name: Delete old WPA versions table
         run: |
          chmod +x ./.github/rm-wpa-versions.sh
@@ -30,4 +32,4 @@ jobs:
         shell: bash
 
       - name: Cat content
-        run: cat WPA.md
+        run: cat ./documentation/Known-SDK-Driver-Compatibility/WPA.md
