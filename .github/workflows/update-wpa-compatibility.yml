@@ -8,9 +8,9 @@ on:
   # and event-type "update-wpa" in the payload
   workflow_dispatch:
     inputs:
-      name:
-        description: "foo"
-        required: false 
+      new_data:
+        description: "table data"
+        required: true
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -28,6 +28,9 @@ jobs:
          chmod +x ./.github/rm-wpa-versions.sh
          ./.github/rm-wpa-versions.sh
         shell: bash
+
+      - name: Append new data
+        run: echo ${{ github.event.inputs.new_data }} >> ./documentation/Known-SDK-Driver-Compatibility/WPA.md
 
       - name: Cat content
         run: cat ./documentation/Known-SDK-Driver-Compatibility/WPA.md
