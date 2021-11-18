@@ -40,6 +40,12 @@ For help with getting started and developing SDK plugins, refer to the [document
 * `Microsoft.Performance.SDK.Testing.SDK`: *description coming soon*
 * `PluginConfigurationEditor`: *description coming soon*
 
+## Known SDK Driver Plugin Compatibility
+
+This repository tracks which versions of the SDK are compatibile with certain SDK drivers such as Windows Performance Analyzer. This information can be used to determine which version of an SDK driver should be used when loading plugins compiled against a specific SDK version.
+
+This information is listed in the [known SDK driver compatibility lists](./documentation/Known-SDK-Driver-Compatibility/Overview.md) document.
+
 ## Coming Soon
 
 Team is actively working to provide better documentation, more samples, and several in-depth tutorials.
