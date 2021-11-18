@@ -639,6 +639,19 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Returns custom data processors that derive from <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </summary>
+        /// <returns>
+        ///     Custom data processors created by the engine that derive from
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </returns>
+        public IEnumerable<ICustomDataProcessorWithSourceParser> GetExtensibleProcessors()
+        {
+            Debug.Assert(this.executors != null);
+            return this.executors.Select(e => e.Processor).OfType<ICustomDataProcessorWithSourceParser>();
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -806,12 +819,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.SafeDispose();
                 throw;
             }
-        }
-
-        private IEnumerable<ICustomDataProcessorWithSourceParser> GetExtensibleProcessors()
-        {
-            Debug.Assert(this.executors != null);
-            return this.executors.Select(e => e.Processor).OfType<ICustomDataProcessorWithSourceParser>();
         }
 
         private bool CouldCookerHaveData(DataCookerPath dataCookerPath)
