@@ -8,18 +8,25 @@ using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
-    ///     Wraps the ICustomDataProcessor with additional functionality required to operate with a
-    ///     source parser and data extensions.
+    ///     Provides access to data from a <see cref="ICustomDataProcessor"/>'s source parser cookers.
     /// </summary>
-    public interface ICustomDataProcessorWithSourceParser
-        : ICustomDataProcessor,
-          ICookedDataRetrieval
+    public interface ISourceParserRetrieval
+          : ICookedDataRetrieval
     {
         /// <summary>
         ///     Source parser identifier
         /// </summary>
         string SourceParserId { get; }
+    }
 
+    /// <summary>
+    ///     Wraps the ICustomDataProcessor with additional functionality required to operate with a
+    ///     source parser and data extensions.
+    /// </summary>
+    public interface ICustomDataProcessorWithSourceParser
+        : ICustomDataProcessor,
+          ISourceParserRetrieval
+    {
         /// <summary>
         ///     Enables a source data cooker, causing it to take part in processing the source data.
         /// </summary>

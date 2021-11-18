@@ -640,16 +640,21 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Returns custom data processors that derive from <see cref="ICustomDataProcessorWithSourceParser"/>.
+        ///     Enables retrieval of cooker data associate with source parsers.
         /// </summary>
+        /// <remarks>
+        ///     In most cases it is better to retrieve cooked data through the <see cref="RuntimeExecutionResults"/>
+        ///     returned from <see cref="Engine.Process"/>. In rare circumstances, there is some data made available
+        ///     prior to processing <see cref="IDataSource"/>s, and this provides a mechanism for retrieval.
+        /// </remarks>
         /// <returns>
-        ///     Custom data processors created by the engine that derive from
+        ///     Custom data retrieval interfaces from custom data processors created by the engine that derive from
         ///     <see cref="ICustomDataProcessorWithSourceParser"/>.
         /// </returns>
-        public IEnumerable<ICustomDataProcessorWithSourceParser> GetExtensibleProcessors()
+        public IEnumerable<ISourceParserRetrieval> GetSourceParserRetrieval()
         {
             Debug.Assert(this.executors != null);
-            return this.executors.Select(e => e.Processor).OfType<ICustomDataProcessorWithSourceParser>();
+            return this.executors.Select(e => e.Processor).OfType<ISourceParserRetrieval>();
         }
 
         /// <inheritdoc />
@@ -819,6 +824,19 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.SafeDispose();
                 throw;
             }
+        }
+
+        /// <summary>
+        ///     Returns custom data processors that derive from <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </summary>
+        /// <returns>
+        ///     Custom data processors created by the engine that derive from
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </returns>
+        private IEnumerable<ICustomDataProcessorWithSourceParser> GetExtensibleProcessors()
+        {
+            Debug.Assert(this.executors != null);
+            return this.executors.Select(e => e.Processor).OfType<ICustomDataProcessorWithSourceParser>();
         }
 
         private bool CouldCookerHaveData(DataCookerPath dataCookerPath)
