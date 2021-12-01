@@ -359,7 +359,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             return allLoaded;
         }
 
-        public bool ProcessAssembly(
+        private bool ProcessAssembly(
             Assembly assembly,
             out ErrorInfo error)
         {

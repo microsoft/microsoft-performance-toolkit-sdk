@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Runtime;
@@ -260,49 +259,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             IEnumerable<string> extensionDirectories,
             IAssemblyLoader assemblyLoader)
         {
-            return Load(extensionDirectories, assemblyLoader, null);
-        }
-        /// <summary>
-        ///     Creates a new <see cref="PluginSet"/>, loading all plugins found
-        ///     in the given directories, using the given loading function, and
-        ///     any extra direct assemblies specified
-        /// </summary>
-        /// <param name="extensionDirectories">
-        ///     The directories to search for plugins.
-        /// </param>
-        /// <param name="assemblyLoader">
-        ///     The loader to use to load plugin assemblies. This parameter may be
-        ///     <c>null</c>. If this parameter is <c>null</c>, then the default
-        ///     loader will be used.
-        ///     <remarks>
-        ///         The default loader provides no isolation.
-        ///     </remarks>
-        /// </param>
-        /// <param name="extraAssemblies">
-        ///     A list of extra assemblies to attemt to directly load plugins from.
-        ///     This parameter may be <c>null</c> or <c>empty</c>.
-        /// </param>
-        /// <returns>
-        ///     A new instance of the <see cref="PluginSet"/> class containing all
-        ///     of the successfully discovered plugins. The returned instance will
-        ///     also contain a collection of non-fatal errors that occurred when
-        ///     creating this data set (e.g. a plugin failed to load.)
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        ///     <paramref name="extensionDirectories"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="System.ArgumentException">
-        ///     <paramref name="extensionDirectories"/> is empty.
-        /// </exception>
-        /// <exception cref="InvalidExtensionDirectoryException">
-        ///     One or more directory paths in <paramref name="extensionDirectories"/>
-        ///     is invalid or does not exist.
-        /// </exception>
-        public static PluginSet Load(
-            IEnumerable<string> extensionDirectories,
-            IAssemblyLoader assemblyLoader,
-            IEnumerable<Assembly> extraAssemblies)
-        {
             Guard.NotNull(extensionDirectories, nameof(extensionDirectories));
             Guard.Any(extensionDirectories, nameof(extensionDirectories));
 
@@ -351,31 +307,13 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 var reflector = new DataExtensionReflector(assemblyDiscovery, repo);
 
-                var creationErrors = new List<ErrorInfo>();
-
                 assemblyDiscovery.ProcessAssemblies(extensionDirectoriesFullPaths, out var discoveryError);
 
-                if (discoveryError != null && discoveryError != ErrorInfo.None)
-                {
-                    creationErrors.Add(discoveryError);
-                }
-
-                if (extraAssemblies != null)
-                {
-                    foreach (var assembly in extraAssemblies)
-                    {
-                        if (assembly != null)
-                        {
-                            assemblyDiscovery.ProcessAssembly(assembly, out discoveryError);
-                            if (discoveryError != null && discoveryError != ErrorInfo.None)
-                            {
-                                creationErrors.Add(discoveryError);
-                            }
-                        }
-                    }
-                }
-
                 repo.FinalizeDataExtensions();
+
+                var creationErrors = discoveryError != null && discoveryError != ErrorInfo.None
+                    ? new[] { discoveryError, }
+                    : Array.Empty<ErrorInfo>();
 
                 extensionRoot = new ExtensionRoot(catalog, repo);
 

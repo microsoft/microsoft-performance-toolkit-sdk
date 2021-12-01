@@ -47,7 +47,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
             this.type = type;
 
-            if (!this.Type.Assembly.IsDynamic && !string.IsNullOrWhiteSpace(this.Type.Assembly.Location))
+            if (!this.Type.Assembly.IsDynamic)
             {
                 this.assemblyPath = this.Type.Assembly.Location;
                 this.version = FileVersionInfo.GetVersionInfo(this.AssemblyPath).FileVersion;
