@@ -279,7 +279,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     </remarks>
         /// </param>
         /// <param name="extraAssemblies">
-        ///     A list of extra assemblies to attempt to directly load plugins from.
+        ///     A list of extra assemblies to attemt to directly load plugins from.
         ///     This parameter may be <c>null</c> or <c>empty</c>.
         /// </param>
         /// <returns>
