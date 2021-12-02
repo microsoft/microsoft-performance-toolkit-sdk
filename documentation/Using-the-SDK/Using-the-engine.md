@@ -85,9 +85,16 @@ using (var plugins1 = PluginSet.Load())
 In order to use the `Engine`, you must first load your plugins and data sources.
 Once you have done so, you may use the `Create` method with an `EngineCreateInfo`
 instance in order to create a useable `Engine.` Similar to how the `DataSourceSet`
-can take ownership of the `PluginSet`, the `Engine` takes ownership of the
-`DataSourceSet`. Set the `OwnsDataSources` property on the `EngineCreateInfo`
-instance to suppress this behavior.
+can take ownership of the `PluginSet`, the `Engine` can take ownership of
+data sources. The `Engine` will take ownership of and safely dispose of any
+`IDataSource` instances passed to its static `Create` methods. More concretely,
+an `Engine` created by calling either
+- `Create(IDataSource, Type)`
+- `Create(IEnumerable<IDataSource>, Type)`
+
+will take ownership of the data source(s) passed in as the first parameter. **To
+suppress this behavior, you must use the `Create(EngineCreateInfo)` method**.
+
 Once your `Engine` has been created, you can enable cookers and tables to
 participate in processing. If an attempt is made to enable a cooker for which
 there is no corresponding data source in the `DataSourceSet`, then an exception
