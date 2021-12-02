@@ -1,6 +1,6 @@
 # Abstract and Table of Contents
 
-This document outlines major code changes that might be needed when updating from 
+This document outlines major code changes that might be needed when updating from
 Preview Version 0.109.\* to 1.0.0 Relase Candidate 1.
 
 Table of Contents
@@ -58,7 +58,7 @@ this instance's `Discover` method are associated with that `ProcessingSource`.
 
 Note that "cooker tables" (tables which depend on data cookers and provide their own static build methods) that
 are discovered by a `IProcessingSourceTableProvider` are also associated with the provider's `ProcessingSource`.
-This may result in tables which "build themselves" through the extensions runtime being passed into a `CustomDataProcessor.BuildTable` method. 
+This may result in tables which "build themselves" through the extensions runtime being passed into a `CustomDataProcessor.BuildTable` method.
 **The included implementations of `IProcessingSourceTableProvider` will never "discover" a cooker table.** This ensures tables
 that depend on data cookers are only requested to be built once data is available.
 
@@ -128,8 +128,8 @@ All code decorated with the 'Obsolete' attribute has been removed.
 
     To prevent build breaks, remove references to these methods and properties.
 
-- Both the obsolete constructors for `DataCookerPath` that accept string arguments and the obsolete `DataCookerPath.Create` 
-  method have been removed. 
+- Both the obsolete constructors for `DataCookerPath` that accept string arguments and the obsolete `DataCookerPath.Create`
+  method have been removed.
   To prevent build breaks, replace calls to this class' constructor with either
     - `DataCookerPath.ForComposite`
     - `DataCookerPath.ForSource`
@@ -155,7 +155,7 @@ All code decorated with the 'Obsolete' attribute has been removed.
 
     To prevent build breaks, remove references to these methods and properties.
 
-- Both the obsolete constructors for `DataOutputPath` that accept string arguments and the obsolete `DataOutputPath.Create` 
+- Both the obsolete constructors for `DataOutputPath` that accept string arguments and the obsolete `DataOutputPath.Create`
   methods have been removed.
     To prevent build breaks, replace calls to this class' constructor with either
     - `DataOutputPath.ForComposite`
@@ -199,7 +199,7 @@ This obsolete class has been removed. Please use `ProcessingSourceInfo`.
 - The following members have been removed:
     - method `ProcessingSource.GetTableBuildAction`
 
-- The constructors that take an `additionalTablesProvider` and/or a `tableAssemblyProvider` have been removed. Please see the 
+- The constructors that take an `additionalTablesProvider` and/or a `tableAssemblyProvider` have been removed. Please see the
   Table Discovery section for more details.
 
 ## ColumnRole
@@ -238,7 +238,7 @@ This class has been sealed.
     - method `CustomDataProcessor.BuildMetadataTables`
     - property `CustomDataProcessor.TableDescriptorToBuildAction`
 
-- `CustomDataProcessor.BuildTableCore` no longer receives an `Action<ITableBuilder, IDataExtensionRetrieval>` parameter.  
+- `CustomDataProcessor.BuildTableCore` no longer receives an `Action<ITableBuilder, IDataExtensionRetrieval>` parameter.
 
 - The constructor for `CustomDataProcessor` has the following parameters removed:
 
@@ -302,7 +302,7 @@ using (var dataSources = DataSourceSet.Create())
 {
     dataSources.AddDataSource(new FileDataSource("test.txt"));
 
-    var info = new EngineCreateInfo(dataSources);
+    var info = new EngineCreateInfo(dataSources.AsReadOnly());
     using (var engine = Engine.Create(info))
     {
         engine.EnableCooker(cookerPath);
@@ -442,7 +442,7 @@ A new parameter has been added to the constructor.
 
 ## Plugin Configurations
 
-- All references to "plug-in" and "PlugIn" have been changed to lowercase "plugin." 
+- All references to "plug-in" and "PlugIn" have been changed to lowercase "plugin."
 
 - The `Microsoft.Performance.SDK.PlugInConfiguration` namespace has changed to `Microsoft.Performance.SDK.PluginConfiguration`.
 
