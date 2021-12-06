@@ -118,7 +118,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Get or sets whether the initial filter should be kept in this table.
         /// </summary>
-        public bool InitialFilterShouldKeep { get; set; }
+        public bool InitialFilterShouldKeep { get; set; } = true;
 
         /// <summary>
         ///     Gets or sets the top value of the graph filter in this value.
