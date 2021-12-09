@@ -116,7 +116,9 @@ namespace Microsoft.Performance.SDK.Processing
         public string InitialSelectionQuery { get; set; }
 
         /// <summary>
-        ///     Get or sets whether the initial filter should be kept in this table.
+        ///     Get or sets whether rows that satisfy <see cref="InitialFilterQuery"/> should be
+        ///     kept or removed from the table (i.e. whether <see cref="InitialFilterQuery"/> is a
+        ///     "filter-in" or "filter-out" filter). Defaults to <c>true</c>.
         /// </summary>
         public bool InitialFilterShouldKeep { get; set; } = true;
 
