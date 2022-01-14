@@ -17,7 +17,7 @@ namespace SqlPluginWithProcessingPipeline
     {
         // XML file to be parsed. For this demo, we assume we only have one data source.
         // For a full implementation, this should be a collection of all file paths given
-        // to the Custom Data Source
+        // to the Processing Source
         private readonly string filePath;
 
         // Information about this data source the SDK requires for building tables

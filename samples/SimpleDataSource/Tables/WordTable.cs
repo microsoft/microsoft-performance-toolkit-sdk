@@ -119,7 +119,6 @@ namespace SampleCustomDataSource.Tables
                     TableConfiguration.GraphColumn,
                     TimeColumn,
                 },
-                Layout = TableLayoutStyle.GraphAndTable,
             };
 
             //

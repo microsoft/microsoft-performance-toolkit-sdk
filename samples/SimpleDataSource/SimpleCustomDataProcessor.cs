@@ -17,10 +17,10 @@ namespace SampleCustomDataSource
     //
     // This is a sample Custom Data Processor that processes simple text files.
     //
-    // Custom Data Processors are created in Custom Data Sources and are used to actually process the file(s).
-    // An instance of this Processor is created for each set of files opened whereas only one instance of the Custom Data Source is ever created.
-    // Note that CustomDataProcessorBase does not require any file(s) in its constructor, so another
-    // implementation might only store/process one file per instance.
+    // Custom Data Processors are created in Processing Source and are used to actually process the source(s).
+    // An instance of this Processor is created for each set of sources opened whereas only one instance of the Processing Source is ever created.
+    // Note that CustomDataProcessor does not require any source(s) in its constructor, so another
+    // implementation might only store/process one source per instance.
     //
     // The data processor is responsible for instantiating the proper tables based on what the user has decided to enable.
     // To receive a callback whenever a new table is enabled, implement OnTableEnabled. This sample does not implement
@@ -28,11 +28,11 @@ namespace SampleCustomDataSource
     //
 
     //
-    // Derive the CustomDataProcessorBase abstract class.
+    // Derive the CustomDataProcessor abstract class.
     //
 
     public sealed class SimpleCustomDataProcessor
-        : CustomDataProcessorBase
+        : CustomDataProcessor
     {
         // The files this custom data processor will have to process
         private readonly string[] filePaths;
@@ -51,10 +51,8 @@ namespace SampleCustomDataSource
            string[] filePaths,
            ProcessorOptions options,
            IApplicationEnvironment applicationEnvironment,
-           IProcessorEnvironment processorEnvironment,
-           IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-           IEnumerable<TableDescriptor> metadataTables)
-            : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+           IProcessorEnvironment processorEnvironment)
+            : base(options, applicationEnvironment, processorEnvironment)
         {
             this.filePaths = filePaths;
         }
@@ -78,7 +76,7 @@ namespace SampleCustomDataSource
             // In this sample, we take down the start and stop timestamps from the files
             //
             // Note: if you must do processing based on which tables are enabled, you would check the EnabledTables property
-            // (provided in the base class) on your class to see what you should do. For example, a custom data source with
+            // (provided in the base class) on your class to see what you should do. For example, a processing source with
             // many disjoint tables may look at what tables are enabled in order to turn on only specific processors to avoid
             // processing everything if it doesn't have to.
             //
@@ -188,7 +186,6 @@ namespace SampleCustomDataSource
 
         protected override void BuildTableCore(
             TableDescriptor tableDescriptor,
-            Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
             ITableBuilder tableBuilder)
         {
             //

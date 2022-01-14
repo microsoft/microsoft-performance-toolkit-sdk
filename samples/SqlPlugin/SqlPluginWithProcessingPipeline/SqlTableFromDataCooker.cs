@@ -64,8 +64,7 @@ namespace SqlPluginWithProcessingPipeline
                     TableConfiguration.GraphColumn,
                     TableConfiguration.RightFreezeColumn,
                     RelativeTimestampColumn
-                },
-                Layout = TableLayoutStyle.GraphAndTable
+                }
             };
 
             tableConfig.AddColumnRole(ColumnRole.StartTime, RelativeTimestampColumn.Metadata.Guid);

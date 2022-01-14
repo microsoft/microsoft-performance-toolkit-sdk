@@ -8,57 +8,57 @@ using System.Linq;
 namespace SampleCustomDataSource
 {
     //
-    // This is a sample Custom Data Source (CDS) that understands files with the .txt extension
+    // This is a sample Processing Source that understands files with the .txt extension
     //
 
     //
-    // In order for a CDS to be recognized, it MUST satisfy the following:
+    // In order for a processing source to be recognized, it MUST satisfy the following:
     //  a) Be a public type
     //  b) Have a public parameterless constructor
-    //  c) Implement the ICustomDataSource interface
-    //  d) Be decorated with the CustomDataSourceAttribute attribute
+    //  c) Implement the IProcessingSource interface
+    //  d) Be decorated with the ProcessingSourceAttribute attribute
     //  e) Be decorated with at least one of the derivatives of the DataSourceAttribute attribute
     //
 
-    [CustomDataSource(
-        "{F73EACD4-1AE9-4844-80B9-EB77396781D1}",  // The GUID must be unique for your Custom Data Source. You can use Visual Studio's Tools -> Create Guid… tool to create a new GUID
-        "Simple Data Source",                      // The Custom Data Source MUST have a name
-        "A data source to count words!")]          // The Custom Data Source MUST have a description
+    [ProcessingSource(
+        "{F73EACD4-1AE9-4844-80B9-EB77396781D1}",  // The GUID must be unique for your Processing Source. You can use Visual Studio's Tools -> Create Guid… tool to create a new GUID
+        "Simple Data Source",                      // The Processing Source MUST have a name
+        "A data source to count words!")]          // The Processing Source MUST have a description
     [FileDataSource(
         ".txt",                                    // A file extension is REQUIRED
         "Text files")]                             // A description is OPTIONAL. The description is what appears in the file open menu to help users understand what the file type actually is. 
 
     //
-    // There are two methods to creating a Custom Data Source that is recognized by the SDK:
+    // There are two methods to creating a Processing Source that is recognized by the SDK:
     //    1. Using the helper abstract base classes
     //    2. Implementing the raw interfaces
     // This sample demonstrates method 1 where the CustomDataSourceBase abstract class
     // helps provide a public parameterless constructor and implement the ICustomDataSource interface
     //
 
-    public class SimpleCustomDataSource
-        : CustomDataSourceBase
+    public class SimpleProcessingSource
+        : ProcessingSource
     {
         private IApplicationEnvironment applicationEnvironment;
 
         //
-        // Provides information about this Custom Data Source, such as the author,
+        // Provides information about this Processing Source, such as the author,
         // a project link, licensing, etc. This information can be used by tools
-        // to display "About" information for your Custom Data Source. For example,
+        // to display "About" information for your Processing Source. For example,
         // Windows Performance Analyzer (WPA) uses this information for Help->About.
         //
 
-        public override CustomDataSourceInfo GetAboutInfo()
+        public override ProcessingSourceInfo GetAboutInfo()
         {
-            return new CustomDataSourceInfo
+            return new ProcessingSourceInfo
             {
                 //
-                // The copyright notice for this Custom Data Source.
+                // The copyright notice for this Processing Source.
                 //
                 CopyrightNotice = "Copyright 2021 Microsoft Corporation. All Rights Reserved.",
 
                 //
-                // The license under which this Custom Data Source may be used.
+                // The license under which this Processing Source may be used.
                 //
                 LicenseInfo = new LicenseInfo
                 {
@@ -68,7 +68,7 @@ namespace SampleCustomDataSource
                 },
 
                 //
-                // A collection of the people or entities that own this Custom Data Source.
+                // A collection of the people or entities that own this Processing Source.
                 //
                 Owners = new[]
                 {
@@ -91,11 +91,11 @@ namespace SampleCustomDataSource
                 },
 
                 //
-                // Any additional information you wish your users to know about this Custom Data Source.
+                // Any additional information you wish your users to know about this Processing Source.
                 //
                 AdditionalInformation = new[]
                 {
-                    "This Custom Data Source is a sample showcasing the Performance Toolkit SDK.",
+                    "This Processing Source is a sample showcasing the Performance Toolkit SDK.",
                 }
             };
         }
@@ -121,24 +121,22 @@ namespace SampleCustomDataSource
         {
             //
             // Create a new instance of a class implementing ICustomDataProcessor here to process the specified data sources.
-            // Note that you can have more advanced logic here to create different processors if you would like based on the file, or any other criteria.
+            // Note that you can have more advanced logic here to create different processors if you would like based on the source, or any other criteria.
             // You are not restricted to always returning the same type from this method.
             //
 
             return new SimpleCustomDataProcessor(
-                dataSources.Select(x => x.GetUri().LocalPath).ToArray(),
+                dataSources.Select(x => x.Uri.LocalPath).ToArray(),
                 options,
                 this.applicationEnvironment,
-                processorEnvironment,
-                this.AllTables,
-                this.MetadataTables);
+                processorEnvironment);
         }
 
-        protected override bool IsFileSupportedCore(string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource source)
         {
             //
-            // This method is called for every file whose filetype matches the one declared in the FileDataSource attribute. It may be useful
-            // to peek inside the file to truly determine if you can support it, especially if your CDS supports a common
+            // This method is called for every data source which matches the one declared in the DataSource attribute. It may be useful
+            // to peek inside the source to truly determine if you can support it, especially if your data processor supports a common
             // filetype like .txt or .csv.
             // For this sample, we'll always return true for simplicity.
             //
