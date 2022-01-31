@@ -90,7 +90,7 @@ An entrypoint for a [Plugin](#plugin). A ProcessingSource
 
 ## Projection
 
-A function that maps a row index for a [Table](#table) to a piece of data. Conceptually, a Projection is combined with a [ColumnConfiguration](#columnconfiguration) to complete define a Table's column: the ColumnConfiguration defines the name and metadata about a column, and its associated Projection defines the column's data.
+A function that maps a row index for a [Table](#table) to a piece of data. Conceptually, a Projection is combined with a [ColumnConfiguration](#columnconfiguration) to complete define a Table's [Column](#column): the ColumnConfiguration defines the name and metadata about a Column, and its associated Projection defines the Column's data.
 
 ## Simple Table
 
@@ -98,7 +98,7 @@ A [Table](#table) variant that cannot participate in a [Processing Pipeline](#pr
 
 ## SourceDataCooker
 
-A [DataCooker](#datacooker) that receives input from a specific [SourceParser](#sourceparser). A SourceDataCooker may also receive input from other DataCookers.
+A [DataCooker](#datacooker) that receives input from a specific [SourceParser](#sourceparser). A SourceDataCooker may also receive input from other DataCookers of the same SourceParser.
 
 ## SourceParser
 
@@ -106,7 +106,7 @@ An object that a [CustomDataProcessor](#customdataprocessor) typically tasks wit
 
 ## Special Columns
 
-Columns that all [Tables](#table) may use in their [TableConfiguration](#tableconfiguration) and denote special behavior. These columns area
+Columns that all [Tables](#table) may use in their [TableConfiguration](#tableconfiguration) and denote special behavior. These columns are
 * Pivot Column: a column that marks the end of columns which should be pivoted about
 * Graph Column: a column that marks the start of columns that can/should be graphed
 * Left Freeze Column: a column that marks the end of columns that should be frozen in GUIs
