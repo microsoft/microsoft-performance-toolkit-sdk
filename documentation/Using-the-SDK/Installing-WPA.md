@@ -11,5 +11,5 @@ WPA is bundled as part of the [Windows Performance Toolkit](https://docs.microso
 - Download and run the setup program for the Windows Assessment and Deployment Kit.
 - Chose an installation path and follow installation insructions until you reach the "Select the features you want to install" screen.
   * Take note of the installation path as it will be used when debugging SDK plugin projects.
-- Make sure to select "Windows Performance Toolkit" from this screen.  ![ADK_Installation_Markup.png](/.attachments/ADK_Installation_Markup.png)
+- Make sure to select "Windows Performance Toolkit" from this screen.  ![ADK_Installation_Markup.png](./.attachments/ADK_Installation_Markup.png)
 - Click "Install and Close" when installation is complete.

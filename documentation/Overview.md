@@ -10,7 +10,7 @@ The following are required in order to develop an SDK plugin:
 * [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks)
 * A text editor (for editing your source code)
 
-It is recommended to use [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/) to develop an SDK plugin since it satisfies all three requirements. Future documentation assumes the use of Visual Studio, but the instructions may be adapted for other editors/IDEs.
+It is recommended to use [Visual Studio](https://visualstudio.microsoft.com/downloads/) to develop an SDK plugin since it satisfies all three requirements. Future documentation assumes the use of Visual Studio, but the instructions may be adapted for other editors/IDEs.
 
 # Getting the SDK
 The SDK is currently published as a NuGet package under the name [Microsoft.Performance.SDK](https://www.nuget.org/packages/Microsoft.Performance.SDK/). 

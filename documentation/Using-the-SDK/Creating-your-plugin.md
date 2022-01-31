@@ -10,46 +10,24 @@ This document will cover:
 
 
 
-For simplicity, this section will assume you are using Visual Studio 2019. The instructions may be adapted for other editors / IDEs.
+For simplicity, this section will assume you are using Visual Studio. The instructions may be adapted for other editors / IDEs.
 
 <a name="reqs"></a>
 # Requirements
 
-1. [Visual Studio 2019](https://visualstudio.microsoft.com/downloads/)
+1. [Visual Studio](https://visualstudio.microsoft.com/downloads/)
 2. [.NET SDK that supports .NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks)
    * [See .NET Standard 2.0 support options](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
-
-## Visual Studio 2019
-
-You can install Visual Studio 2019 from here: [https://visualstudio.microsoft.com/downloads/](https://visualstudio.microsoft.com/downloads/).
-Any edition is capable of creating an SDK plugin.
-
-1. Download the installer
-2. Execute the installer
-3. Make sure that the following features are selected:
-   * .NET Desktop Development (Make sure to select an appropriate .NET SDK for development option)
-4. Click "Install"
-5. You may have to restart your computer when installation finishes
-
-## .NET Standard 2.0
-
-If you installed Visual Studio 2019 based on the above instructions, then you are good to go. Otherwise,
-
-1. Execute your VS2019 installer, and choose to "Modify" the installation
-2. Make sure that the following features are selected:
-   * .NET Desktop Development (Should include an appropriate .NET SDK for .NET Standard 2.0)
-3. Click "Modify" to modify your installation
-4. You may need to restart your computer when modification finishes
 
 <a name="createproj"></a>
 # Creating Your Project
 
-1) Launch Visual Studio 2019
+1) Launch Visual Studio
 2) Click "Create new project"  
  ![VS2019_Create_New_Project.PNG](./.attachments/VS2019_CreateProject_Markup.png)
 3) Select .NET Standard on the left, and choose "Class Library (.NET Standard)." Make sure that you are using .NET Standard 2.0 
  ![VS2017_New_DotNetStandard_20_Project.PNG](./.attachments/VS2019_CreateProject_ClassLibrary_Markup.png)
-4) Give your project whatever name you want
+4) Name your project based on the name of the SDK plugin you are creating
 5) Click "Create"
 
 <a name="configure"></a>
@@ -75,10 +53,11 @@ Please see [Using the SDK/Installing WPA](./Installing-WPA.md) for more informat
 
 1) Right click your project and select "Properties"
 2) Select the "Debug" tab on the left
+   * In newer versions of Visual Studio, you may need to click "Open debug launch profiles UI"
 3) For "Launch", select "Executable"
 4) For the "Executable", place the path to the `wpa.exe` that you previously installed as part of the WPT
-  * Typically this might be: `C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\wpa.exe`
-5) For "Command line Arguments", add `-addsearchdir <bin folder for your plug-in>` (e.g. `-addsearchdir C:\MyAddIn\bin\Debug\netstandard2.1`)
+   * Typically this might be: `C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\wpa.exe`
+5) For "Command line Arguments", add `-addsearchdir <bin folder for your plugin>` (e.g. `-addsearchdir C:\MyAddIn\bin\Debug\netstandard2.1`)
 
 # Next Steps
 
