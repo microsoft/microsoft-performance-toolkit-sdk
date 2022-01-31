@@ -66,24 +66,29 @@ namespace SqlPluginWithProcessingPipeline
 
         protected override bool IsDataSourceSupportedCore(IDataSource source)
         {
-            // Peek inside the XML and make sure our XML namespace is declared and used
-
-            using (var reader = new StreamReader(source.Uri.LocalPath))
+            if (source is FileDataSource fileDataSource)
             {
-                // Skip first line since namespace should be on second
-                reader.ReadLine();
+                // Peek inside the XML and make sure our XML namespace is declared and used
 
-                var line = reader.ReadLine();
+                using (var reader = new StreamReader(fileDataSource.FullPath))
+                {
+                    // Skip first line since namespace should be on second
+                    reader.ReadLine();
 
-                if (line != null)
-                {
-                    return line.Contains(SqlPluginConstants.SqlXmlNamespace);
-                }
-                else
-                {
-                    return false;
+                    var line = reader.ReadLine();
+
+                    if (line != null)
+                    {
+                        return line.Contains(SqlPluginConstants.SqlXmlNamespace);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
+
+            return false;
         }
 
         protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)

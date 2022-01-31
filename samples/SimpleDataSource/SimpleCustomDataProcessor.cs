@@ -17,7 +17,7 @@ namespace SampleCustomDataSource
     //
     // This is a sample Custom Data Processor that processes simple text files.
     //
-    // Custom Data Processors are created in Processing Source and are used to actually process the source(s).
+    // Custom Data Processors are created by a Processing Source and are used to actually process the source(s).
     // An instance of this Processor is created for each set of sources opened whereas only one instance of the Processing Source is ever created.
     // Note that CustomDataProcessor does not require any source(s) in its constructor, so another
     // implementation might only store/process one source per instance.
