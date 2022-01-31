@@ -74,7 +74,7 @@ A [Table](#table) that is built outside of the standard [table building cycle](#
 
 ## Plugin
 
-A collection of one-or-more [ProcessingSources](#processingsource) that collectively create zero-or-more [Tables](#table). Plugins also consist of zero-or-more [DataCookers](#datacooker).
+A collection of one-or-more [ProcessingSources](#processingsource) that collectively create zero-or-more [Tables](#table) and consist of zero-or-more [DataCookers](#datacooker).
 
 ## Processing Pipeline
 
