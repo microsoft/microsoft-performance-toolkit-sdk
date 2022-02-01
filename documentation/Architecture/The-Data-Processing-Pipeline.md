@@ -1,4 +1,4 @@
-# The Data Processing Pipeline
+# The Data-Processing Pipeline
 
 Within a plugin, a `ProcessingSource` delegates the task of processing data sources to a `CustomDataProcessor`. 
 In order to minimize the overhead of accessing persistent data storage, a well-designed plugin aims to have its 
@@ -10,11 +10,11 @@ if the SDK provided a way to
 4) Allow external binaries, such as other plugins, access to the output of these transformations (as in *extend* the plugin defining the transformation)
 
 The SDK allows a plugin to achieve these goals, while minimizing the number of times data sources need to be directly accessed, 
-by facilitating and allowing the creation of a __data processing pipeline__.
+by facilitating and allowing the creation of a __data-processing pipeline__.
 
 # Pipeline Components
 
-At the highest level, when a plugin wishes to create a data processing pipeline, it will define two types of 
+At the highest level, when a plugin wishes to create a data-processing pipeline, it will define two types of 
 components: __source parsers__ and __data cookers__.
 
 ## Source Parsers
@@ -106,7 +106,7 @@ the `CompositeDataCooker` can query the `DataOutput`s it needs to perform *its* 
 # Putting Everything Together
 
 By combining `SourceParser`s, `SourceDataCooker`s, and `CompositeDataCooker`s, a plugin can create arbitrarily 
-complex and extensible data processing pipelines. For example, here is a pipeline a plugin may create to 
+complex and extensible data-processing pipelines. For example, here is a pipeline a plugin may create to 
 modularize and promote the extensibility of three tables:
 
 <img src=".attachments/complex_pipeline.svg" width="100%">
@@ -128,5 +128,5 @@ and do whatever it wishes with it.
 
 # Next Steps
 
-Now that we understand at a high level how a data processing pipeline works, we can now begin creating our own 
+Now that we understand at a high level how a data-processing pipeline works, we can now begin creating our own 
 SDK plugins. To get started, view [Using the SDK/Creating an SDK Plugin C# Project](../Using-the-SDK/Creating-your-project.md).
