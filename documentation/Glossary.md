@@ -143,7 +143,7 @@ An object that a [CustomDataProcessor](#customdataprocessor) typically tasks wit
 ## Special Columns
 
 Columns that all [Tables](#table) may use in their [TableConfiguration](#tableconfiguration) and denote special behavior. These columns are
-* `PivotColumn`: a column that marks the end of columns which should be pivoted about. All columns in a Table that appear before this Special Column are interpreted as a [Pivot Column](#pivot-column)
+* `PivotColumn`: a column that marks the end of columns which should be pivoted about. All columns in a Table that appear before this Special Column are interpreted as [Pivot Columns](#pivot-column)
 * `GraphColumn`: a column that marks the start of columns that can/should be graphed
 * `LeftFreezeColumn`: a column that marks the end of columns that should be frozen in GUIs
 * `RightFreezeColumn`: a column that marks the start of columns that should be frozen in GUIs
