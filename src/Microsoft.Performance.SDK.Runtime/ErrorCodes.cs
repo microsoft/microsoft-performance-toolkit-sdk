@@ -53,7 +53,7 @@ namespace Microsoft.Performance.SDK.Runtime
             "The given directory cannot be found.");
 
         //
-        // Compatability Errors
+        // Compatibility Errors
         //
 
         /// <summary>
