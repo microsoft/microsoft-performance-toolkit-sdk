@@ -6,10 +6,10 @@ automation, trace extractors, or viewers such as Windows Performance Analyzer.
 
 Before creating a plugin, it is recommended to read [the overview of the SDK's architecture](../Architecture/Overview.md).
 
-This document is outlined in 4 distinct steps:
-* [Creating Your Project](#creating-your-project)
+Creating a plugin can be outlined into 4 distinct steps:
+* [Creating the Project](#creating-the-project)
   * [Requirements](#requirements)
-  * [Creating Your Project](#creating-your-project-1)
+  * [Creating Your Project](#creating-your-project)
   * [Configuring Your Project](#configuring-your-project)
     * [Add the Microsoft.Performance.SDK NuGet Package](#add-the-microsoftperformancesdk-nuget-package)
     * [Picking your SDK version](#picking-your-sdk-version)
@@ -25,7 +25,7 @@ This document is outlined in 4 distinct steps:
 
 ---
 
-## Creating Your Project
+## Creating the Project
 
 Plugins are created as C# class libraries that get dynamically loaded by the SDK runtime. To begin your plugin creation, we will first walk through creating a C# project.
 
@@ -77,9 +77,11 @@ Please see [Using the SDK/Installing WPA](./Installing-WPA.md) for more informat
 3) For "Launch", select "Executable"
 4) For the "Executable", place the path to the `wpa.exe` that you previously installed as part of the WPT
    * Typically this might be: `C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\wpa.exe`
-5) For "Command line Arguments", add `-addsearchdir <bin folder for your plugin>` (e.g. `-nodefault -addsearchdir C:\MyAddIn\bin\Debug\netstandard2.1`)
+5) For "Command line Arguments", add `-nodefault -addsearchdir <bin folder for your plugin>` (e.g. `-nodefault -addsearchdir C:\MyAddIn\bin\Debug\netstandard2.1`)
 
 The above changes will cause Visual Studio to launch your installed WPA with the command line arguments listed above passed in whenever you start debugging your plugin (via `Debug` => `Start Debugging`). The commandline arguments listed above tell WPA to load plugins only from the directory provided.
+
+> :information_source: If you're developing a plugin that uses `DataCookers` from other plugins, you may wish to **not** include the `-nodefault` flag.
 
 If you encounter issues loading your plugin in WPA, please refer to [Troubleshooting documentation](../Troubleshooting.md#wpa-related-issues).
 
@@ -101,8 +103,6 @@ public class MyProcessingSource : ProcessingSource
    }
 }
 ```
-
-Each `ProcessingSource` is responsible for "discovering" the `Tables` that will be built. By default, a `ProcessingSource` will "discover" all `Tables` defined in its assembly. If you wish to override this behavior, refer to [Custom Table Discovery](./Advanced/Custom-Table-Discovery.md). _Most plugins do not need to override this behavior_.
 
 > :warning: Note that while a single assembly *can* define more than one `ProcessingSource`, __it is highly recommended that an assembly only contains 
 > a single `ProcessingSource`.__ Tables, data cookers, and custom data processors are almost always associated with a single `ProcessingSource`. 
@@ -126,7 +126,7 @@ public class MyProcessingSource : ProcessingSource
 }
 ```
 
-Now the SDK can discover your `ProcessingSource`. Sadly, is not useful in its current state. This is because your `ProcessingSource` does not advertise the `DataSource(s)` it supports. Let's add that now.
+Though your `ProcessingSource` is discoverable to the SDK, it still needs to advertise the `DataSource(s)` it supports in order to be useful.
 
 ### Decorate your ProcessingSource with a DataSourceAttribute
 
@@ -235,7 +235,7 @@ The SDK supports two distinct plugin frameworks:
    1. Data can be shared between plugins through the creation of a Data-Processing Pipeline
    2. The SDK facilities efficient processing of `DataSources` through a Data-Processing Pipeline
 
-> :warning: While the SDK fully supports "simple" plugin framework plugins, many of its features are designed with the "data-processing pipeline" framework in mind. If you choose to use the "simple" plugin framework, __you will not be able to utilize several SDK features (such as the ones listed below) in your plugin__. Going forward, the primary focus of new SDK features will be centered around data-processing pipelines.
+> :warning: While the SDK fully supports "simple" plugin framework plugins, many of its features are designed with the "data-processing pipeline" framework in mind. If you choose to use the "simple" plugin framework, __you will not be able to use several SDK features (such as the ones listed below) in your plugin__. Going forward, the primary focus of new SDK features will be centered around data-processing pipelines.
 
 It is __highly recommended__ that you use a data-processing pipeline framework when constructing your plugin. There are multiple benefits to this framework:
 1. `DataSources` are processed in an efficient manner
@@ -248,7 +248,7 @@ The simple plugin framework is primarily useful for _very rapid prototyping_ of 
 
 ## Creating a CustomDataProcessor and Tables
 
-The last high-level components we need to create for our plugin is a `CustomDataProcessor` and `Tables`. The implementation of these components depend on the plugin framework you chose above.
+The last high-level components that must be created are a `CustomDataProcessor` and `Tables`. The implementation of these components depend on the plugin framework you chose above.
 
 For a plugin following the simple plugin framework, refer to [Using the SDK/Creating a Simple SDK Plugin](./Creating-a-simple-sdk-plugin.md).
 

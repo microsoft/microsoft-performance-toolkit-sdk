@@ -134,10 +134,12 @@ Our `SimpleCustomDataProcessor` is now ready to process the `DataSources` opened
 
 ## Creating a Simple Table
 
-For our `SimpleCustomDataProcessor` to build a table, the table must first be discovered by our `ProcessingSource`. By default, a `ProcessingSource` will "discover" each class defined in its assembly that meet the following criteria:
+For our `SimpleCustomDataProcessor` to build a table, the table must first be discovered by our `ProcessingSource`. By default, a `ProcessingSource` will "discover" each `Simple Table` defined in its assembly that meet the following criteria:
  - The class is public and concrete (not `abstract`)
  - The class is decorated with `TableAttribute`
  - The class exposes a `static public` property named "TableDescriptor" of type `TableDescriptor`
+
+> :information_source: In a simple framework plugin, each `ProcessingSource` is responsible for "discovering" the `Simple Tables` that will be built by its `CustomDataProcessor`. By default, a `ProcessingSource` will "discover" all `Tables` defined in its assembly. _Most plugins do not need to override this behavior_. However, if you do wish to override this behavior, refer to [Custom Table Discovery](./Advanced/Custom-Table-Discovery.md). 
 
 Let's define a table `WordTable` that will eventually have one row for each distinct word in the `DataSources` processed.
 

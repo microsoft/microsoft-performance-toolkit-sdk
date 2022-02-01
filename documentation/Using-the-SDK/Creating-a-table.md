@@ -14,10 +14,10 @@ Creating a table involves two keys steps:
 
 ## Declaring the Table
 
-For our `Table` to work, it must be discovered by our `ProcessingSource`. By default, a `ProcessingSource` will "discover" each class defined in its assembly that meet the following criteria:
- - The class is public and concrete (not `abstract`)
- - The class is decorated with `TableAttribute`
- - The class exposes a `static public` property named "TableDescriptor" of type `TableDescriptor`
+For our `Table` to work, it must be discovered by the SDK runtime. To do this, the runtime will look for classes that:
+ - Are public and concrete (not `abstract`)
+ - Are decorated with `TableAttribute`
+ - Exposs a `static public` property named "TableDescriptor" of type `TableDescriptor`
 
 Let's define a table `WordTable` that will eventually have one row for each distinct word in the `DataSources` processed.
 
@@ -86,11 +86,7 @@ example, your `Table` can depend solely on cookers defined in the `Table`'s asse
 your `Table` can depend on cookers from multiple plugins. As long as you have cooked data, you
 can create a table.
 
-In short, as long as long as the SDK runtime has loaded
-1) Your table and
-2) All of the data cookers (and their dependencies) your table requires
-
-then your table will be available to use.
+In short, as long as the SDK runtime has loaded your table and all of the data cookers (and their dependencies) your table requires your table will be available to use.
 
 With the `WordTable` finished, our plugin is done and ready to use!
 
@@ -105,7 +101,7 @@ A video tutorial of making a data-processing pipeline and table can be found in 
 
 # Next Steps
 
-This documentation marks the end of all necessary information to begin creating extensible, well-strucutred 
+This documentation marks the end of all necessary information to begin creating extensible, well-structured 
 SDK plugins. For additional resources, you may browse our [samples folder](../../samples).
 
 For more advanced usage of the SDK, please see the following:
