@@ -241,11 +241,12 @@ public class MyProcessingSource : ProcessingSource
 }
 ```
 
+With `CreateProcessorCore` implemented, our plugin is done and ready to use!
+
 # Video Walkthrough
 
 A video tutorial of making a simple SDK plugin can be found in the [SQL plugin sample](../../samples/SqlPlugin).
 
 # Next Steps
 
-Now that we've seen how to create a simple SDK plugin, let us learn how to create a data-processing pipeline
-within the plugins you create. Continue reading at [Using the SDK/Creating a Data-Processing Pipeline](./Creating-a-pipeline.md)
+Now that we've seen how to create a simple SDK plugin, let's see how we could have created this same plugin with the data-processing pipeline framework. Continue reading at [Using the SDK/Creating a Data-Processing Pipeline](./Creating-a-pipeline.md)
