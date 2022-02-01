@@ -27,7 +27,7 @@ For simplicity, this section will assume you are using Visual Studio. The instru
  ![VS2019_Create_New_Project.PNG](./.attachments/VS2019_CreateProject_Markup.png)
 3) Select .NET Standard on the left, and choose "Class Library (.NET Standard)." Make sure that you are using .NET Standard 2.0 
  ![VS2017_New_DotNetStandard_20_Project.PNG](./.attachments/VS2019_CreateProject_ClassLibrary_Markup.png)
-4) Name your project based on the name of the SDK plugin you are creating
+4) Name your project
 5) Click "Create"
 
 <a name="configure"></a>

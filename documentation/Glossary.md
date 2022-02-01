@@ -9,6 +9,8 @@
 * [DataCooker](#datacooker)
 * [DataSource](#datasource)
 * [DynamicTable](#dynamictable)
+* [Pivot Column](#pivot-column)
+* [Pivot Table](#pivot-table)
 * [Plugin](#plugin)
 * [Processing Pipeline](#processing-pipeline)
 * [ProcessingSource](#processingsource)
@@ -17,12 +19,14 @@
 * [SourceDataCooker](#sourcedatacooker)
 * [SourceParser](#sourceparser)
 * [Special Columns](#special-columns)
+* [SDK Driver](#sdk-driver)
 * [Table](#table)
 * [TableBuilder](#tablebuilder)
 * [Table Building Cycle](#table-building-cycle)
 * [TableCommand](#tablecommand)
 * [TableConfiguration](#tableconfiguration)
 * [VisibleDomainSensitiveProjection](#visibledomainsensitiveprojection)
+* [Windows Performance Analyzer](#windows-performance-analyzer)
 
 ---
 
@@ -72,6 +76,38 @@ An input to be processed by a [CustomDataProcessor](#customdataprocessor). In mo
 
 A [Table](#table) that is built outside of the standard [table building cycle](#table-building-cycle). DynamicTables are commonly built in response to a [TableCommand](#tablecommand) being invoked.
 
+## Pivot Column
+
+NOTE: (Not to be confused with the [Special Column](#special-columns) `PivotColumn`)
+
+A special type of [Column](#column) that should be pivoted about when its [Table](#table) is interpreted as a [Pivot Table](#pivot-table). Any Column that appears in a [TableConfiguration](#tableconfiguration) before the `PivotColumn` is a Pivot Column.
+
+## Pivot Table
+
+A representation of a [Table](#table) where certain [Columns](#column) are pivoted/grouped about. For example, consider this table with 5 rows:
+
+| State        | Zip Code | Population |
+|--------------|----------|------------|
+| Washington   | 98052    | 65,558     |
+| New York     | 10023    | 60,998     |
+| Washington   | 98101    | 13,877     |
+| Washington   | 98109    | 20,715     |
+| New York     | 10025    | 94,600     |
+
+If the "State" column above is a [Pivot Column](#pivot-column), the 5 rows would be grouped into the following Pivot Table:
+
+| State        | Zip Code | Population |
+|--------------|----------|------------|
+| > Washington |          |            |
+|              | 98052    | 65,558     |
+|              | 98101    | 13,877     |
+|              | 98109    | 20,715     |
+| > New York   |          |            |
+|              | 10023    | 60,998     |
+|              | 10025    | 94,600     |
+
+NOTE: the SDK has no understanding of Pivot Tables. Tables created by a plugin are purely "flat" tables - i.e. tables similar the first one above. It is up to programs like [Windows Performance Analyzer](#windows-performance-analyzer) to use pivot information in a [Table Configuration](#tableconfiguration) to present a plugin's Table as a Pivot Table.
+
 ## Plugin
 
 A collection of one-or-more [ProcessingSources](#processingsource) that collectively create zero-or-more [Tables](#table) and consist of zero-or-more [DataCookers](#datacooker).
@@ -107,10 +143,16 @@ An object that a [CustomDataProcessor](#customdataprocessor) typically tasks wit
 ## Special Columns
 
 Columns that all [Tables](#table) may use in their [TableConfiguration](#tableconfiguration) and denote special behavior. These columns are
-* Pivot Column: a column that marks the end of columns which should be pivoted about
-* Graph Column: a column that marks the start of columns that can/should be graphed
-* Left Freeze Column: a column that marks the end of columns that should be frozen in GUIs
-* Right Freeze Column: a column that marks the start of columns that should be frozen in GUIs
+* `PivotColumn`: a column that marks the end of columns which should be pivoted about. All columns in a Table that appear before this Special Column are interpreted as a [Pivot Column](#pivot-column)
+* `GraphColumn`: a column that marks the start of columns that can/should be graphed
+* `LeftFreezeColumn`: a column that marks the end of columns that should be frozen in GUIs
+* `RightFreezeColumn`: a column that marks the start of columns that should be frozen in GUIs
+
+## SDK Driver
+
+A program that utilizes the SDK and SDK plugins to process [Data Sources](#datasource) and present information to users.
+
+See also: [Windows Performance Analyzer](#windows-performance-analyzer).
 
 ## Table
 
@@ -147,3 +189,7 @@ A pre-defined collection of properties for a [Table](#table). This includes, but
 ## VisibleDomainSensitiveProjection
 
 A [Projection](#projection) that depends upon the visible subrange of values spanned by the Projection's [Table](#table)'s domain. For example, if a Table's domain is time-based (e.g. `Timestamp`-based), a VisibleDomainSensitiveProjection could be a Projection that reports the percent of time spent inside a method call _relative to the timerange currently visible to the user_.
+
+## Windows Performance Analyzer
+
+An [SDK Driver](#sdk-driver) that can display [Tables](#table) plugins create as [Pivot Tables](#pivot-table) and graph data in various formats.
