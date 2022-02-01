@@ -17,7 +17,7 @@ Creating a table involves two keys steps:
 For our `Table` to work, it must be discovered by the SDK runtime. To do this, the runtime will look for classes that:
  - Are public and concrete (not `abstract`)
  - Are decorated with `TableAttribute`
- - Exposs a `static public` property named "TableDescriptor" of type `TableDescriptor`
+ - Exposes a `static public` property named "TableDescriptor" of type `TableDescriptor`
 
 Let's define a table `WordTable` that will eventually have one row for each distinct word in the `DataSources` processed.
 
