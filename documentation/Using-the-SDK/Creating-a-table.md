@@ -1,4 +1,4 @@
-# Creating a Data-Processing Pipeline
+# Creating a Table
 
 This document assumes you have already created a `ProcessingSource` and data-processing pipeline. For more details, refer to [Creating an SDK Plugin](./Creating-a-pipeline.md).
 
