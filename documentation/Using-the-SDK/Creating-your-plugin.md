@@ -132,7 +132,7 @@ Now the SDK can discover your `ProcessingSource`. Sadly, is not useful in its cu
 
 In order to advertise the `DataSource(s)` your `ProcessingSource` supports, we must decorate it with a `DataSourceAttribute`. `DataSourceAttribute` is an abstract class provided by the SDK, so we must decide on a concrete implementation to use. 
 
-> __The concrete implementation of the `DataSourceAttribute` you decide to use deterines what kind of inputs your `ProcessingSource` will receive from users.__
+> __The concrete implementation of the `DataSourceAttribute` you decide to use determines what kind of inputs your `ProcessingSource` will receive from users.__
 
 We can either make our own `DataSourceAttribute`, or use one of the implementations the SDK provides. The SDK provides implementations for common `DataSources`, such as the `FileDataSourceAttribute` - an attribute that tells the SDK your `ProcessingSource` should receive files opened by a user.
 
