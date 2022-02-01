@@ -15,11 +15,11 @@
 * [Processing Pipeline](#processing-pipeline)
 * [ProcessingSource](#processingsource)
 * [Projection](#projection)
+* [SDK Driver](#sdk-driver)
 * [Simple Table](#simple-table)
 * [SourceDataCooker](#sourcedatacooker)
 * [SourceParser](#sourceparser)
 * [Special Columns](#special-columns)
-* [SDK Driver](#sdk-driver)
 * [Table](#table)
 * [TableBuilder](#tablebuilder)
 * [Table Building Cycle](#table-building-cycle)
@@ -128,6 +128,12 @@ An entrypoint for a [Plugin](#plugin). A ProcessingSource
 
 A function that maps a row index for a [Table](#table) to a piece of data. Conceptually, a Projection is combined with a [ColumnConfiguration](#columnconfiguration) to complete define a Table's [Column](#column): the ColumnConfiguration defines the name and metadata about a Column, and its associated Projection defines the Column's data.
 
+## SDK Driver
+
+A program that utilizes the SDK and SDK plugins to process [Data Sources](#datasource) and present information to users.
+
+See also: [Windows Performance Analyzer](#windows-performance-analyzer).
+
 ## Simple Table
 
 A [Table](#table) variant that cannot participate in a [Processing Pipeline](#processing-pipeline) and must be built by a [CustomDataProcessor](#customdataprocessor). Simple Tables should only be used if your plugin does not use [DataCookers](#datacooker). However, since in most data-processing situations it is recommended to use DataCookers to architect your data-processing, it is recommended to use only standard [Tables](#table).
@@ -147,12 +153,6 @@ Columns that all [Tables](#table) may use in their [TableConfiguration](#tableco
 * `GraphColumn`: a column that marks the start of columns that can/should be graphed
 * `LeftFreezeColumn`: a column that marks the end of columns that should be frozen in GUIs
 * `RightFreezeColumn`: a column that marks the start of columns that should be frozen in GUIs
-
-## SDK Driver
-
-A program that utilizes the SDK and SDK plugins to process [Data Sources](#datasource) and present information to users.
-
-See also: [Windows Performance Analyzer](#windows-performance-analyzer).
 
 ## Table
 
