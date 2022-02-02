@@ -1,6 +1,6 @@
 # Building a Table
 
-Table construction happens by interacting with an instance of an `ITableBuilder`. Broadly, `Tables` consist of `TableConfigurations` and Columns. Columns can be further broken down into `ColumnConfigurations` and `Projections`. An `ITableBuilder` has methods to accept Columns and `TableConfigurations`.
+Table construction happens by interacting with an instance of an `ITableBuilder`. Broadly, `Tables` consist of `TableConfigurations` and Columns. Columns can be further broken down into `ColumnConfigurations` and `Projections`. An `ITableBuilder` has methods to add both Columns and `TableConfigurations`.
 
 * [Column](#column)
   * [ColumnConfiguration](#columnconfiguration)
@@ -58,7 +58,7 @@ var lineNumberProjection = baseProjection.Compose(lineItem => lineItem.LineNumbe
 var wordCountProjection = baseProjection.Compose(lineItem => lineItem.Words.Count());
 ```
 
-## Combining ColumnConfiguration and Projections
+### Combining ColumnConfiguration and Projections
 
 If we have the `ColumnConfigurations` and `Projections` above, we can add them to the table we're building by calling `ITableBuilder.AddColumn`:
 

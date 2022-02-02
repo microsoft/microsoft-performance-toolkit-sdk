@@ -11,15 +11,15 @@ Creating a plugin can be outlined into 4 distinct steps:
     - [Requirements](#requirements)
     - [Creating Your Project](#creating-your-project)
     - [Configuring Your Project](#configuring-your-project)
-        * [Add the Microsoft.Performance.SDK NuGet Package](#add-the-microsoftperformancesdk-nuget-package)
+        * [Adding the Microsoft.Performance.SDK NuGet Package](#adding-the-microsoftperformancesdk-nuget-package)
         * [Picking your SDK version](#picking-your-sdk-version)
-        * [Install WPA for Debugging](#install-wpa-for-debugging)
+        * [Installing WPA for Debugging](#installing-wpa-for-debugging)
         * [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
 2. [Creating a ProcessingSource](#creating-a-processingsource)
-    - [Create a ProcessingSource class](#create-a-processingsource-class)
-    - [Decorate your ProcessingSource with the ProcessingSourceAttribute](#decorate-your-processingsource-with-the-processingsourceattribute)
-    - [Decorate your ProcessingSource with a DataSourceAttribute](#decorate-your-processingsource-with-a-datasourceattribute)
-    - [Implement the required ProcessingSource methods](#implement-the-required-processingsource-methods)
+    - [Creating a ProcessingSource class](#creating-a-processingsource-class)
+    - [Decorating your ProcessingSource with the ProcessingSourceAttribute](#decorating-your-processingsource-with-the-processingsourceattribute)
+    - [Decorating your ProcessingSource with a DataSourceAttribute](#decorating-your-processingsource-with-a-datasourceattribute)
+    - [Implementing the required ProcessingSource methods](#implementing-the-required-processingsource-methods)
     - [(Optional) Adding About Information](#adding-about-information)
 3. [Choosing a Plugin Framework](#choosing-a-plugin-framework)
 4. [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
@@ -56,7 +56,7 @@ Please refer to the links above to download and install the necessary requiremen
 
 You should now have a solution with one project file.
 
-#### Add the Microsoft.Performance.SDK NuGet Package
+#### Adding the Microsoft.Performance.SDK NuGet Package
 
 [This documentation](https://docs.microsoft.com/en-us/nuget/quickstart/install-and-use-a-package-in-visual-studio) describes how to add a NuGet package to a Visual Studio project. Following these instructions, add the `Microsoft.Performance.SDK` package from [nuget.org](nuget.org) to your project.
 
@@ -65,7 +65,7 @@ The version of the SDK you add to your project will determine which versions of 
 
 To decide which version of the SDK to use, refer to the [known SDK driver compatibility lists](../Known-SDK-Driver-Compatibility/Overview.md).
 
-#### Install WPA for Debugging
+#### Installing WPA for Debugging
 
 One way to debug an SDK plugin project is to use WPA. Before we setup our project for this, WPA will need to be installed. 
 Please see [Using the SDK/Installing WPA](./Installing-WPA.md) for more information how to install WPA.
@@ -92,7 +92,7 @@ If you encounter issues loading your plugin in WPA, please refer to [Troubleshoo
 
 Every plugin, regardless of the plugin framework chosen below, requires at least one `ProcessingSource`. Each `ProcessingSource` is an entry point for your plugin; they are what the SDK looks for when your plugin loads.
 
-### Create a ProcessingSource class
+### Creating a ProcessingSource class
 
 In the project created above, replace the default `Program` class with one that extends the `ProcessingSource` class provided by the SDK.
 
@@ -109,7 +109,7 @@ public class MyProcessingSource : ProcessingSource
 > a single `ProcessingSource`.__ Tables, data cookers, and custom data processors are almost always associated with a single `ProcessingSource`. 
 > It is best therefore to package __only one__ `ProcessingSource` and all of its associated classes in a single binary. 
 
-### Decorate your ProcessingSource with the ProcessingSourceAttribute
+### Decorating your ProcessingSource with the ProcessingSourceAttribute
 
 The SDK finds your `ProcessingSource` by looking for classes with a `ProcessingSourceAttribute`. This attribute gives the SDK information about your `ProcessingSource`, such as its name, description, and globally-unique id (`GUID`).
 
@@ -129,7 +129,7 @@ public class MyProcessingSource : ProcessingSource
 
 Though your `ProcessingSource` is discoverable to the SDK, it still needs to advertise the `DataSource(s)` it supports in order to be useful.
 
-### Decorate your ProcessingSource with a DataSourceAttribute
+### Decorating your ProcessingSource with a DataSourceAttribute
 
 In order to advertise the `DataSource(s)` your `ProcessingSource` supports, we must decorate it with a `DataSourceAttribute`. `DataSourceAttribute` is an abstract class provided by the SDK, so we must decide on a concrete implementation to use. 
 
@@ -158,7 +158,7 @@ public class MyProcessingSource : ProcessingSource
 
 By specifying `".txt"`, the SDK will route any `.txt` files opened by a user to our `ProcessingSource`.
 
-### Implement the required ProcessingSource methods
+### Implementing the required ProcessingSource methods
 
 There are two methods a `ProcessingSource` is required to implement: `IsDataSourceSupportedCore` and `CreateProcessorCore`.
 
@@ -237,46 +237,13 @@ implement `GetAboutInfo`:
 
 ```cs
 [ProcessingSource(...)]
+[FileDataSource(...)]
 public class MyProcessingSource
     : ProcessingSource
 {
     // ...
 
     public override ProcessingSourceInfo GetAboutInfo()
-    {
-        return new ProcessingSourceInfo
-        {
-            Owners = new[]
-            {
-                new ContactInfo
-                {
-                    Name = "Author Name",
-                    Address = "Author Email",
-                    EmailAddresses = new[]
-                    {
-                        "owners@mycompany.com",
-                    },
-                },
-            },
-            LicenseInfo = null,
-            ProjectInfo = null,
-            CopyrightNotice = $"Copyright (C) {DateTime.Now.Year}",
-            AdditionalInformation = null,
-        };
-    }
-}
-```
-
-or
-
-```cs
-[ProcessingSource(...)]
-public class MyOtherProcessingSource
-    : IProcessingSource
-{
-    // ...
-
-    public ProcessingSourceInfo GetAboutInfo()
     {
         return new ProcessingSourceInfo
         {

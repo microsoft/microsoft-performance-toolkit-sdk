@@ -56,10 +56,9 @@ From an interface perspective, a `DataCooker` has the following properties:
 * A `DataCooker` processes (cooks) this data
 * A `DataCooker` exposes zero or more __data output__ properties
 
-`DataOutput`s are crucial to `DataCooker`s as they achieve the last two goals outlined at the beginning of this document. 
-The SDK is aware of every `DataOutput` a given `DataCooker` advertises. Any assembly with access to an instance of 
-the SDK with a `DataCooker` loaded can query that cooker for any of its `DataOutput`s. For instance, a `Table` can 
-query transformed data outputted by a `DataCooker` defined inside its own assembly:
+`DataOutput`s are the key component to `DataCooker`s as they achieve the last two goals outlined at the beginning of this document. 
+The SDK is aware of every `DataOutput` a given `DataCooker` advertises. Any assembly the SDK loads concurrently with a `DataCooker` can query that cooker for any of its `DataOutput`s. 
+For instance, a `Table` can query transformed data outputted by a `DataCooker` defined inside its own assembly:
 
 <img src=".attachments/cooker_query.svg" width="800">
 
