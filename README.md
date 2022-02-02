@@ -17,9 +17,9 @@ tabular data from arbitrary data sources such as Common Trace Format (`.ctf`) fi
 feature-rich data-processing pipeline
 
 These two functionalities are not mutually exclusive, and plugins may access data in another plugin's (or, commonly, its own) 
-data processing pipeline when creating tables for a given data source.
+data-processing pipeline when creating tables for a given data source.
 
-For help with getting started and developing SDK plugins, refer to the [documentation folder](./documentation).
+For help with getting started and developing SDK plugins, refer to our [documentation](./documentation/Overview.md).
 
 ## In this Repository
 * `devel-template`: a work-in-progress .NET template for creating SDK plugins
@@ -29,15 +29,15 @@ For help with getting started and developing SDK plugins, refer to the [document
 
 ## Projects in the SDK Solution
 * `Microsoft.Performance.SDK`: Software library for building SDK plugins
-* `Microsoft.Performance.SDK.Runtime`: Runtime for loading and processing data from plugins
-* `Microsoft.Performance.SDK.Runtime.NetCoreApp`: .NET Core version of `Microsoft.Performance.SDK.Runtime`
+* `Microsoft.Performance.SDK.Runtime`: Runtime for loading and processing data from plugins. Plugins should not depend on this library
+* `Microsoft.Performance.SDK.Runtime.NetCoreApp`: .NETCore-specific functionality of `Microsoft.Performance.SDK.Runtime`
 * `Microsoft.Performance.SDK.Toolkit.Engine`: Interface for programmatically manipulating, cooking, and accessing data from SDK plugins
 * `Microsoft.Performance.SDK.Tests`: Tests for `Microsoft.Performance.SDK`
 * `Microsoft.Performance.SDK.Runtime.Tests`: Tests for `Microsoft.Performance.SDK.Runtime`
 * `Microsoft.Performance.SDK.Runtime.NetCoreApp.Tests`: Tests for `Microsoft.Performance.SDK.Runtime.NetCoreApp`
 * `Microsoft.Performance.SDK.Toolkit.Engine.Tests`: Tests for `Microsoft.Performance.SDK.Toolkit.Engine`
-* `Microsoft.Performance.SDK.Testing`: *description coming soon*
-* `Microsoft.Performance.SDK.Testing.SDK`: *description coming soon*
+* `Microsoft.Performance.SDK.Testing`: General utilities for authoring tests
+* `Microsoft.Performance.SDK.Testing.SDK`: SDK-specific utilities for authoring tests 
 * `PluginConfigurationEditor`: *description coming soon*
 
 ## Known SDK Driver Plugin Compatibility
@@ -45,6 +45,10 @@ For help with getting started and developing SDK plugins, refer to the [document
 This repository tracks which versions of the SDK are compatibile with certain SDK drivers such as Windows Performance Analyzer. This information can be used to determine which version of an SDK driver should be used when loading plugins compiled against a specific SDK version.
 
 This information is listed in the [known SDK driver compatibility lists](./documentation/Known-SDK-Driver-Compatibility/Overview.md) document.
+
+## Getting Started
+
+Refer to the [documentation folder](./documentation/Overview.md) for help with creating SDK plugins.
 
 ## Coming Soon
 

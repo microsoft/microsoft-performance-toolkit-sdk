@@ -2,7 +2,7 @@
 
 This document outlines the architecture of the Microsoft Performance Toolkit SDK.
 
-For more detailed information on how to create your own project using the SDK, please view [Creating an SDK Plugin C# Project](../Using-the-SDK/Creating-your-project.md). 
+For more detailed information on how to create your own project using the SDK, please view [Creating an SDK Plugin](../Using-the-SDK/Creating-your-plugin.md). 
 
 
 ## High-Level Interfaces
@@ -76,9 +76,9 @@ that work together to
 A plugin is an **abstract collection of these objects** which can be bundled together for distribution and loaded as a single 
 unit by the SDK driver. *A plugin can be, and often is, made up of multiple assemblies*.
 
-:warning: Note that while a single assembly *can* define more than one `ProcessingSource`, __it is highly recommended that an assembly only contains 
-a single `ProcessingSource`.__ Tables, data cookers, and custom data processors are almost always associated with a single `ProcessingSource`. 
-It is best therefore to package __only one__ `ProcessingSource` and all of its associated classes in a single binary. 
+> :warning: Note that while a single assembly *can* define more than one `ProcessingSource`, __it is highly recommended that an assembly only contains 
+> a single `ProcessingSource`.__ Tables, data cookers, and custom data processors are almost always associated with a single `ProcessingSource`. 
+> It is best therefore to package __only one__ `ProcessingSource` and all of its associated classes in a single binary. 
 
 The diagram below demonstrates how these objects work together to acheive this high-level interface:
 
@@ -98,9 +98,9 @@ The diagram below demonstrates how these objects work together to acheive this h
 For implementation details on how to create a simple plugin containing one `ProcessingSource`, its associated `CustomDataProcessor` and a
 `Table`, please view [Using the SDK/Creating A Simple SDK Plugin](../Using-the-SDK/Creating-a-simple-sdk-plugin.md).
 
-For implementation details on how to create a plugin containing `DataCooker`s, please view [Using the SDK/Creating a Data Processing Pipeline](../Using-the-SDK/Creating-a-pipeline.md)
+For implementation details on how to create a plugin containing `DataCooker`s, please view [Using the SDK/Creating a Data-Processing Pipeline](../Using-the-SDK/Creating-a-pipeline.md)
 
 # Next Steps
 
 Now that we understand the high-level overview of the SDK architecture, the next step is to better understand how the data processing 
-pipeline works. Continue reading at [Architecture/The Data Processing Pipeline](./The-Data-Processing-Pipeline.md).
+pipeline works. Continue reading at [Architecture/The Data-Processing Pipeline](./The-Data-Processing-Pipeline.md).
