@@ -227,6 +227,84 @@ At this point, our `ProcessingSource` is almost complete. Before we continue, ho
 
 ### (Optional) Adding About Information
 
+When a plugin is used by a large and/or public audience, it is useful to 
+give users an easy way to contact its owners/maintainers. SDK Drivers such as 
+WPA look for __about information__ on a `ProcessingSource` for it to  
+present to users.
+
+To add about information to your `ProcessingSource`, simply override or 
+implement `GetAboutInfo`:
+
+```cs
+[ProcessingSource(...)]
+public class MyProcessingSource
+    : ProcessingSource
+{
+    // ...
+
+    public override ProcessingSourceInfo GetAboutInfo()
+    {
+        return new ProcessingSourceInfo
+        {
+            Owners = new[]
+            {
+                new ContactInfo
+                {
+                    Name = "Author Name",
+                    Address = "Author Email",
+                    EmailAddresses = new[]
+                    {
+                        "owners@mycompany.com",
+                    },
+                },
+            },
+            LicenseInfo = null,
+            ProjectInfo = null,
+            CopyrightNotice = $"Copyright (C) {DateTime.Now.Year}",
+            AdditionalInformation = null,
+        };
+    }
+}
+```
+
+or
+
+```cs
+[ProcessingSource(...)]
+public class MyOtherProcessingSource
+    : IProcessingSource
+{
+    // ...
+
+    public ProcessingSourceInfo GetAboutInfo()
+    {
+        return new ProcessingSourceInfo
+        {
+            Owners = new[]
+            {
+                new ContactInfo
+                {
+                    Name = "Author Name",
+                    Address = "Author Email",
+                    EmailAddresses = new[]
+                    {
+                        "owners@mycompany.com",
+                    },
+                },
+            },
+            LicenseInfo = null,
+            ProjectInfo = null,
+            CopyrightNotice = $"Copyright (C) {DateTime.Now.Year}",
+            AdditionalInformation = null,
+        };
+    }
+}
+```
+
+Where your about information is displayed depends on the SDK driver in which your plugin 
+is loaded. In Windows Performance Analyzer, your about information will appear as 
+a tab in the `Help -> About Windows Performance Analyzer` dialog.
+
 ## Choosing a Plugin Framework
 
 The SDK supports two distinct plugin frameworks:
