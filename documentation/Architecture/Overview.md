@@ -44,9 +44,9 @@ more programmatic drivers such as scripts may pass down hard-coded data sources.
 
 We recommend using the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) 
 as the SDK driver since it grants a plethora of tools for performance analysis. For more information on how to install WPA, 
-see [Using the SDK/Installing WPA](Using-the-SDK/Installing-WPA.md). 
+see [Using the SDK/Installing WPA](./Using-the-SDK/Installing-WPA.md). 
 
-Creating an SDK driver is currently outside the scope of this documentation, although it may be added in the future.
+Creating an SDK driver is currently outside the scope of this documentation.
 
 
 ## SDK
