@@ -8,11 +8,11 @@ This document assumes you have already created a `ProcessingSource` and your plu
 
 The data-processing pipeline plugin framework is centered around a `SourceParser` and one-or-more `DataCookers`. The `CustomDataProcessor` your `ProcessingSource` creates delegates the task of parsing `DataSources` off to a `SourceParser`, who in turn emits __events__ that flow through `DataCookers`. In this framework, `Tables` are responsible for "building themselves" by querying `DataCookers` for their `DataOutputs`.
 
-This document is outlined into 4 distinct steps
-* [Creating a SourceParser](#creating-a-sourceparser)
-* [Creating a CustomDataProcessorWithSourceParser](#creating-a-customdataprocessorwithsourceparser)
-* [Linking Your CustomDataProcessor to Your ProcessingSource](#linking-your-customdataprocessor-to-your-processingsource)
-* [Creating a DataCooker](#creating-a-datacooker)
+There are 4 distinct steps in creating a Data-Processing Pipeline:
+1. [Creating a SourceParser](#creating-a-sourceparser)
+2. [Creating a CustomDataProcessorWithSourceParser](#creating-a-customdataprocessorwithsourceparser)
+3. [Linking Your CustomDataProcessor to Your ProcessingSource](#linking-your-customdataprocessor-to-your-processingsource)
+4. [Creating a DataCooker](#creating-a-datacooker)
 
 ## Creating a SourceParser
 

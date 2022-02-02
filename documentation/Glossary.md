@@ -32,7 +32,7 @@
 
 ## AboutInfo
 
-Exposes information about a plugin, such as its authors, copyright, and license. See [Adding About Information](./Using-the-SDK/Advanced/Adding-About-Information.md).
+Exposes information about a plugin, such as its authors, copyright, and license. See [Adding About Information](./Using-the-SDK/Adding-About-Information.md).
 
 ## Column
 

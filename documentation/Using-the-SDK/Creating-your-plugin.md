@@ -1,13 +1,13 @@
 # Creating an SDK Plugin
 
 This document outlines how to use the Performance Toolkit SDK (SDK) to create
-an SDK plugin. A plugin can be used for processing trace files to be used by
-automation, trace extractors, or viewers such as Windows Performance Analyzer.
+an SDK plugin. Plugins can be used to expose data from `DataSource`s for
+automation, trace extractors, or viewers (e.g. Windows Performance Analyzer).
 
 Before creating a plugin, it is recommended to read [the overview of the SDK's architecture](../Architecture/Overview.md).
 
 Creating a plugin can be outlined into 4 distinct steps:
-* [Creating the Project](#creating-the-project)
+1. [Creating the Project](#creating-the-project)
   * [Requirements](#requirements)
   * [Creating Your Project](#creating-your-project)
   * [Configuring Your Project](#configuring-your-project)
@@ -15,13 +15,14 @@ Creating a plugin can be outlined into 4 distinct steps:
     * [Picking your SDK version](#picking-your-sdk-version)
     * [Install WPA for Debugging](#install-wpa-for-debugging)
     * [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
-* [Creating a ProcessingSource](#creating-a-processingsource)
+2. [Creating a ProcessingSource](#creating-a-processingsource)
   * [Create a ProcessingSource class](#create-a-processingsource-class)
   * [Decorate your ProcessingSource with the ProcessingSourceAttribute](#decorate-your-processingsource-with-the-processingsourceattribute)
   * [Decorate your ProcessingSource with a DataSourceAttribute](#decorate-your-processingsource-with-a-datasourceattribute)
   * [Implement the required ProcessingSource methods](#implement-the-required-processingsource-methods)
-* [Choosing a Plugin Framework](#choosing-a-plugin-framework)
-* [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
+  * [(Optional) Adding About Information](#(optional)adding-about-information)
+3. [Choosing a Plugin Framework](#choosing-a-plugin-framework)
+4. [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
 
 ---
 
@@ -222,8 +223,9 @@ public class MyProcessingSource : ProcessingSource
 
 Currently, `MyDataProcessor` does not exist and we do not know which arguments to pass in. This is because the implementation of `MyDataProcessor` depends on the plugin framework you choose in the [Choosing a Plugin Framework](#choosing-a-plugin-framework) step. We will revisit this method once we have created `MyDataProcessor`.
 
-At this point, our `ProcessingSource` is almost complete. Before we continue, however, we must decide on which plugin framework our plugin will use.
+At this point, our `ProcessingSource` is almost complete. Before we continue, however, we must [choose a plugin framework](#choosing-a-plugin-framework).
 
+### (Optional) Adding About Information
 
 ## Choosing a Plugin Framework
 

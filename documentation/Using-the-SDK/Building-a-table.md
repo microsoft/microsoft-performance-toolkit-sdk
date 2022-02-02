@@ -1,11 +1,11 @@
 # Building a Table
 
-Table construction happens by interacting with an instance of an `ITableBuilder`. Broadly, `Tables` consist of 3 parts: columns, which are composed of `ColumnConfigurations` and `Projections`, and `TableConfigurations`. An `ITableBuilder` has methods that accept all three of these objects.
+Table construction happens by interacting with an instance of an `ITableBuilder`. Broadly, `Tables` consist of `TableConfigurations` and Columns. Columns can be further broken down into `ColumnConfigurations` and `Projections`. An `ITableBuilder` has methods to accept Columns and `TableConfigurations`.
 
 * [Column](#column)
   * [ColumnConfiguration](#columnconfiguration)
   * [Projection](#projection)
-* [Combining ColumnConfiguration and Projections](#combining-columnconfiguration-and-projections)
+  * [Combining ColumnConfiguration and Projections](#combining-columnconfiguration-and-projections)
 * [TableConfiguration](#tableconfiguration)
   * [ColumnRole](#columnrole)
 
@@ -45,7 +45,7 @@ public sealed class WordTable
 
 ### Projection
 
-A column's `Projection` is a function that maps a row index for a column to a piece of data. Projections are normally constructed at runtime by a `Build` method, since they depend on the data inside the final table. The SDK offers many helper methods for constructing `Projections`, such as
+A column's `Projection` is a function that maps a row index for a column to a piece of data. Projections are normally constructed at runtime by a `Build` method, since they depend on the data inside the final table. The SDK offers many helper methods for constructing `Projections`, such as:
 * `Projection.Index(IReadOnlyList<T> data)`, which projects a column index `i` to `data[i]`
 * `Projection.Compose(this IProjection<T1, T2>, Func<T2, TResult>)` which composes one `IProjection` with another method
 
@@ -102,7 +102,7 @@ tableBuilder.SetDefaultTableConfiguration(tableConfig);
 
 ### ColumnRole
 
-A `ColumnRole` is metadata information about a column that defines the column's role in data presentation. For example, a column that contains a `Timestamp` whose value indicates when an event occured relative to the start of a `DataSource`](#datasource)` may be marked as a "start time" Column:
+A `ColumnRole` is metadata information about a column that defines the column's role in data presentation. For example, a column of `Timestamp` values relative to the start of a `DataSource` may be marked as a "start time" Column:
 
 ```cs
 tableConfig.AddColumnRole(ColumnRole.StartTime, relativeTimestampColumnConfiguration);
