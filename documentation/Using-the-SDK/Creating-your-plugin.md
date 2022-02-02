@@ -20,7 +20,7 @@ Creating a plugin can be outlined into 4 distinct steps:
     - [Decorate your ProcessingSource with the ProcessingSourceAttribute](#decorate-your-processingsource-with-the-processingsourceattribute)
     - [Decorate your ProcessingSource with a DataSourceAttribute](#decorate-your-processingsource-with-a-datasourceattribute)
     - [Implement the required ProcessingSource methods](#implement-the-required-processingsource-methods)
-    - [Adding About Information](#adding-about-information)
+    - [(Optional) Adding About Information](#adding-about-information)
 3. [Choosing a Plugin Framework](#choosing-a-plugin-framework)
 4. [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
 
