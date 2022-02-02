@@ -7,8 +7,8 @@ For more detailed information on how to create your own project using the SDK, p
 
 ## High-Level Interfaces
 
-The Microsoft Performance Toolkit SDK was built to empower users to analyze arbitrary data source (such as `.etl` files, `.ctf` files, SQL server logs, etc). 
-Users can develop extensible *SDK plugins* that contain logic for processing data sources into tables, which are sent to the *SDK driver* (such as 
+The Microsoft Performance Toolkit SDK was built to empower users to analyze arbitrary data sources (e.g. `.etl` files, `.ctf` files, SQL server logs, `.csv` files, etc.). 
+Users can develop extensible *SDK plugins* that contain logic for processing data sources into tables, which are sent to an *SDK driver* (such as 
 the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer)) to render. At the highest 
 level, it exposes the following interfaces:
 
@@ -17,20 +17,20 @@ level, it exposes the following interfaces:
 
 The interfaces depicted in this diagram are
 
-1) The SDK takes as input *data sources*, such as file paths, from the *SDK driver*. The SDK may receive this input when, for example, the user asks 
+1) The SDK receives *data sources* (e.g. file paths) from the *SDK driver*. For example, the SDK may receive this input when the user asks 
 the driver to open a file.
 2) The SDK passes the data sources to all *SDK plugins* which can support them. Plugins are 
 loaded dynamically at runtime by the SDK driver before the data sources are given to the SDK. In this example, 2 out of the 3 loaded plugins advertise that 
 they can handle the loaded data source.
 3) Plugins can optionally exchange data through *data cookers*, even if the two plugins do not have access to each others' source code. In this 
 example, plugin B queries for and receives data from plugin A. Note that this data can be programmatically 
-accessed by anyone - not just other plugins. See the Plugins section for more information.
+accessed by anyone - not just other plugins. See [Plugins](#Plugins) for more details.
 4) Each plugin given the data sources returns *tables* to the SDK. Note that a plugin which advertises support for a data source may return no tables, but that 
 is unlikely to happen in practice.
 5) The SDK outputs all tables created by plugins to the SDK driver.
-6) The SDK driver does whatever it wishes with the tables. For example, WPA displays the tables along with interactable and manipulable graphs.
+6) The SDK driver does whatever it wishes with the tables. For example, WPA displays the tables along with interactable and manipulatable graphs.
 
-Note that in this simplified example only *one* data source is given to the SDK. In practice, multiple data sources may be passed in simultatenously. The SDK 
+Note that in this example only *one* data source is given to the SDK. In practice, multiple data sources may be passed in simultatenously. The SDK 
 handles mapping data sources to the correct plugins, and each plugin sees as input a *list* of data sources for which it advertises support. 
 
 With these high-level interfaces defined, we will now examine each component in greater detail. 
