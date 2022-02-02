@@ -56,8 +56,8 @@ From an interface perspective, a `DataCooker` has the following properties:
 * A `DataCooker` processes (cooks) this data
 * A `DataCooker` exposes zero or more __data output__ properties
 
-`DataOutput`s are the key component of data cookers, and are what achieve the last two goals outlined at the beginning of this document. 
-The SDK is aware of every `DataOutput` a given `DataCooker` advertises, and any assembly with access to an instance of 
+`DataOutput`s are crucial to `DataCooker`s as they achieve the last two goals outlined at the beginning of this document. 
+The SDK is aware of every `DataOutput` a given `DataCooker` advertises. Any assembly with access to an instance of 
 the SDK with a `DataCooker` loaded can query that cooker for any of its `DataOutput`s. For instance, a `Table` can 
 query transformed data outputted by a `DataCooker` defined inside its own assembly:
 
@@ -87,21 +87,21 @@ The SDK handles these cases differently, so it is important to understand the di
 
 #### Source Data Cookers
 
-A `SourceDataCooker` is a `DataCooker` which consumes data from a single `SourceParser`. It must specify
-1) The `SourceParser` to consume data from and
+A `SourceDataCooker` is a `DataCooker` which must specify
+1) A single `SourceParser` to consume data from
 2) The keys of the events it wishes to receive
 
 It is helpful to think of keys as "group names" here. A `SourceDataCooker` specifies the "groups," or "types," of 
 events it wishes to receive. 
 
-Finally, a `SourceDataCooker` will consume (cook) events *one at a time* as the `SourceParser` emits them
+Finally, a `SourceDataCooker` will consume (cook) events *one at a time* as the `SourceParser` emits them.
 
 #### Composite Data Cookers
 
 A `CompositeDataCooker` is a `DataCooker` which consumes data from one or more other `DataCooker`s. It must 
 specify all of the other `DataCookerPath`s for the `DataCooker`s which it depends upon. The SDK instructs
 the `CompositeDataCooker` when *all* of its dependencies have finished processing their data, at which point 
-the `CompositeDataCooker` can query the `DataOutput`s it needs to perform *its* transformations.
+the `CompositeDataCooker` can query the `DataOutput`s it needs to perform *its own* transformations.
 
 # Putting Everything Together
 
