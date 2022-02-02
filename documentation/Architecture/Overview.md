@@ -8,7 +8,7 @@ For more detailed information on how to create your own project using the SDK, p
 ## High-Level Interfaces
 
 The Microsoft Performance Toolkit SDK was built to empower users to analyze arbitrary data sources (e.g. `.etl` files, `.ctf` files, SQL server logs, `.csv` files, etc.). 
-Users can develop extensible *SDK plugins* that contain logic for processing data sources into tables, which are sent to an *SDK driver* (such as 
+Users can develop extensible *SDK plugins* that contain logic for processing data sources into tables, which are sent to the *SDK driver* (such as 
 the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer)) to render. At the highest 
 level, it exposes the following interfaces:
 
@@ -44,7 +44,7 @@ more programmatic drivers such as scripts may pass down hard-coded data sources.
 
 We recommend using the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) 
 as the SDK driver since it grants a plethora of tools for performance analysis. For more information on how to install WPA, 
-see [Using the SDK/Installing WPA](./Using-the-SDK/Installing-WPA.md). 
+see [Using the SDK/Installing WPA](../Using-the-SDK/Installing-WPA.md). 
 
 Creating an SDK driver is currently outside the scope of this documentation.
 

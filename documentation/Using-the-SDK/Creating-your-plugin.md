@@ -8,19 +8,19 @@ Before creating a plugin, it is recommended to read [the overview of the SDK's a
 
 Creating a plugin can be outlined into 4 distinct steps:
 1. [Creating the Project](#creating-the-project)
-  * [Requirements](#requirements)
-  * [Creating Your Project](#creating-your-project)
-  * [Configuring Your Project](#configuring-your-project)
+  - [Requirements](#requirements)
+  - [Creating Your Project](#creating-your-project)
+  - [Configuring Your Project](#configuring-your-project)
     * [Add the Microsoft.Performance.SDK NuGet Package](#add-the-microsoftperformancesdk-nuget-package)
     * [Picking your SDK version](#picking-your-sdk-version)
     * [Install WPA for Debugging](#install-wpa-for-debugging)
     * [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
 2. [Creating a ProcessingSource](#creating-a-processingsource)
-  * [Create a ProcessingSource class](#create-a-processingsource-class)
-  * [Decorate your ProcessingSource with the ProcessingSourceAttribute](#decorate-your-processingsource-with-the-processingsourceattribute)
-  * [Decorate your ProcessingSource with a DataSourceAttribute](#decorate-your-processingsource-with-a-datasourceattribute)
-  * [Implement the required ProcessingSource methods](#implement-the-required-processingsource-methods)
-  * [(Optional) Adding About Information](#(optional)adding-about-information)
+  - [Create a ProcessingSource class](#create-a-processingsource-class)
+  - [Decorate your ProcessingSource with the ProcessingSourceAttribute](#decorate-your-processingsource-with-the-processingsourceattribute)
+  - [Decorate your ProcessingSource with a DataSourceAttribute](#decorate-your-processingsource-with-a-datasourceattribute)
+  - [Implement the required ProcessingSource methods](#implement-the-required-processingsource-methods)
+  - [Adding About Information](#adding-about-information)
 3. [Choosing a Plugin Framework](#choosing-a-plugin-framework)
 4. [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
 
@@ -225,12 +225,12 @@ Currently, `MyDataProcessor` does not exist and we do not know which arguments t
 
 At this point, our `ProcessingSource` is almost complete. Before we continue, however, we must [choose a plugin framework](#choosing-a-plugin-framework).
 
-### (Optional) Adding About Information
+### Adding About Information
 
 When a plugin is used by a large and/or public audience, it is useful to 
 give users an easy way to contact its owners/maintainers. SDK Drivers such as 
 WPA look for __about information__ on a `ProcessingSource` for it to  
-present to users.
+present to users. Note adding about information is optional.
 
 To add about information to your `ProcessingSource`, simply override or 
 implement `GetAboutInfo`:
