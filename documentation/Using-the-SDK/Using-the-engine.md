@@ -6,7 +6,7 @@ This document outlines using the `Engine` to programmatically process data.
 
 The `Engine` is used to programmatically process data. There are 3
 major components to be aware of when using the `Engine`:
-1. The [`PluginSet`](#Plugin Set)
+1. The [`PluginSet`](#Plugin-Set)
 2. The [`DataSourceSet`](#DataSourceSet)
 3. The [`Engine`](#Engine) itself
 
