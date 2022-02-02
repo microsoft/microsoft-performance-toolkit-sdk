@@ -17,9 +17,9 @@ tabular data from arbitrary data sources such as Common Trace Format (`.ctf`) fi
 feature-rich data-processing pipeline
 
 These two functionalities are not mutually exclusive, and plugins may access data in another plugin's (or, commonly, its own) 
-data processing pipeline when creating tables for a given data source.
+data-processing pipeline when creating tables for a given data source.
 
-For help with getting started and developing SDK plugins, refer to the [documentation folder](./documentation).
+For help with getting started and developing SDK plugins, refer to our [documentation](./documentation/Overview.md).
 
 ## In this Repository
 * `devel-template`: a work-in-progress .NET template for creating SDK plugins
