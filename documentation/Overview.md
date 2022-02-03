@@ -1,6 +1,6 @@
 # Overview
 The Microsoft Performance Toolkit SDK allows developers to create "SDK plugins" that process and interpret data. 
-These plugins can be used by performance analysis applications that use the SDK runtime - such as [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) - to process data sources into structured, tabular data. Plugins may utilize the SDK's data-processing pipeline to both facilitate the creation of these tables and expose data that can be programmatically accessed by concurrently loaded plugins (even those without access to the originating plugin's source code).
+These plugins can be used by performance analysis applications that use the SDK runtime - such as [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) - to process data sources into structured, tabular data. Plugins may use the SDK's data-processing pipeline to both facilitate the creation of these tables and expose data that can be programmatically accessed by concurrently loaded plugins (even those without access to the originating plugin's source code).
 
 This folder contains instructions for developing SDK plugins and utilizing the SDK's various features.
 

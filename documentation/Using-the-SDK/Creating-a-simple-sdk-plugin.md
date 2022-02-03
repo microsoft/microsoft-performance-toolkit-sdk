@@ -12,11 +12,11 @@ In this framework, your `CustomDataProcessor` is responsible for
 
 > :information_source: When using the simple plugin framework, a `Table` is referred to as a `Simple Table`.
 
-This document is outlined into 4 distinct steps
-* [Creating a CustomDataProcessor](#creating-a-customdataprocessor)
-* [Creating a Simple Table](#creating-a-simple-table)
-* [Building Your Simple Table](#building-your-simple-table)
-* [Linking Your CustomDataProcessor to Your ProcessingSource](#linking-your-customdataprocessor-to-your-processingsource)
+There are 4 distinct steps in creating a Simple SDK Plugin:
+1. [Creating a CustomDataProcessor](#creating-a-customdataprocessor)
+2. [Creating a Simple Table](#creating-a-simple-table)
+3. [Building Your Simple Table](#building-your-simple-table)
+4. [Linking Your CustomDataProcessor to Your ProcessingSource](#linking-your-customdataprocessor-to-your-processingsource)
 
 ## Creating a CustomDataProcessor
 

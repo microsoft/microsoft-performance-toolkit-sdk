@@ -32,7 +32,7 @@
 
 ## AboutInfo
 
-Exposes information about a plugin, such as its authors, copyright, and license. See [Adding About Information](./Using-the-SDK/Advanced/Adding-About-Information.md).
+Exposes information about a plugin, such as its authors, copyright, and license. See [Adding About Information](./Using-the-SDK/Creating-your-plugin.md#adding-about-information).
 
 ## Column
 
@@ -48,7 +48,8 @@ See also: [Projection](#projection).
 
 ## ColumnRole
 
-Meta-information about a [Column](#column) that defines the Column's role in data presentation. For example, a Column that contains a `Timestamp` whose value indicates when an event occured relative to the start of a [DataSource](#datasource) may be marked as a "start time" Column.
+Meta-information about a [Column](#column) that defines the Column's role in data presentation. 
+For example, a Column of `Timestamp` values relative to the start of a [DataSource](#datasource) may be marked as a "start time" Column.
 
 ## CompositeDataCooker
 

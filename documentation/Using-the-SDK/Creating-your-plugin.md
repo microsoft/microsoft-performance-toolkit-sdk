@@ -1,27 +1,28 @@
 # Creating an SDK Plugin
 
 This document outlines how to use the Performance Toolkit SDK (SDK) to create
-an SDK plugin. A plugin can be used for processing trace files to be used by
-automation, trace extractors, or viewers such as Windows Performance Analyzer.
+an SDK plugin. Plugins can be used to expose data from `DataSource`s for
+automation, trace extractors, or viewers (e.g. Windows Performance Analyzer).
 
 Before creating a plugin, it is recommended to read [the overview of the SDK's architecture](../Architecture/Overview.md).
 
 Creating a plugin can be outlined into 4 distinct steps:
-* [Creating the Project](#creating-the-project)
-  * [Requirements](#requirements)
-  * [Creating Your Project](#creating-your-project)
-  * [Configuring Your Project](#configuring-your-project)
-    * [Add the Microsoft.Performance.SDK NuGet Package](#add-the-microsoftperformancesdk-nuget-package)
-    * [Picking your SDK version](#picking-your-sdk-version)
-    * [Install WPA for Debugging](#install-wpa-for-debugging)
-    * [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
-* [Creating a ProcessingSource](#creating-a-processingsource)
-  * [Create a ProcessingSource class](#create-a-processingsource-class)
-  * [Decorate your ProcessingSource with the ProcessingSourceAttribute](#decorate-your-processingsource-with-the-processingsourceattribute)
-  * [Decorate your ProcessingSource with a DataSourceAttribute](#decorate-your-processingsource-with-a-datasourceattribute)
-  * [Implement the required ProcessingSource methods](#implement-the-required-processingsource-methods)
-* [Choosing a Plugin Framework](#choosing-a-plugin-framework)
-* [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
+1. [Creating the Project](#creating-the-project)
+    - [Requirements](#requirements)
+    - [Creating Your Project](#creating-your-project)
+    - [Configuring Your Project](#configuring-your-project)
+        * [Adding the Microsoft.Performance.SDK NuGet Package](#adding-the-microsoftperformancesdk-nuget-package)
+        * [Picking your SDK version](#picking-your-sdk-version)
+        * [Installing WPA for Debugging](#installing-wpa-for-debugging)
+        * [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
+2. [Creating a ProcessingSource](#creating-a-processingsource)
+    - [Creating a ProcessingSource class](#creating-a-processingsource-class)
+    - [Decorating your ProcessingSource with the ProcessingSourceAttribute](#decorating-your-processingsource-with-the-processingsourceattribute)
+    - [Decorating your ProcessingSource with a DataSourceAttribute](#decorating-your-processingsource-with-a-datasourceattribute)
+    - [Implementing the required ProcessingSource methods](#implementing-the-required-processingsource-methods)
+    - [(Optional) Adding About Information](#adding-about-information)
+3. [Choosing a Plugin Framework](#choosing-a-plugin-framework)
+4. [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
 
 ---
 
@@ -55,7 +56,7 @@ Please refer to the links above to download and install the necessary requiremen
 
 You should now have a solution with one project file.
 
-#### Add the Microsoft.Performance.SDK NuGet Package
+#### Adding the Microsoft.Performance.SDK NuGet Package
 
 [This documentation](https://docs.microsoft.com/en-us/nuget/quickstart/install-and-use-a-package-in-visual-studio) describes how to add a NuGet package to a Visual Studio project. Following these instructions, add the `Microsoft.Performance.SDK` package from [nuget.org](nuget.org) to your project.
 
@@ -64,7 +65,7 @@ The version of the SDK you add to your project will determine which versions of 
 
 To decide which version of the SDK to use, refer to the [known SDK driver compatibility lists](../Known-SDK-Driver-Compatibility/Overview.md).
 
-#### Install WPA for Debugging
+#### Installing WPA for Debugging
 
 One way to debug an SDK plugin project is to use WPA. Before we setup our project for this, WPA will need to be installed. 
 Please see [Using the SDK/Installing WPA](./Installing-WPA.md) for more information how to install WPA.
@@ -91,7 +92,7 @@ If you encounter issues loading your plugin in WPA, please refer to [Troubleshoo
 
 Every plugin, regardless of the plugin framework chosen below, requires at least one `ProcessingSource`. Each `ProcessingSource` is an entry point for your plugin; they are what the SDK looks for when your plugin loads.
 
-### Create a ProcessingSource class
+### Creating a ProcessingSource class
 
 In the project created above, replace the default `Program` class with one that extends the `ProcessingSource` class provided by the SDK.
 
@@ -108,7 +109,7 @@ public class MyProcessingSource : ProcessingSource
 > a single `ProcessingSource`.__ Tables, data cookers, and custom data processors are almost always associated with a single `ProcessingSource`. 
 > It is best therefore to package __only one__ `ProcessingSource` and all of its associated classes in a single binary. 
 
-### Decorate your ProcessingSource with the ProcessingSourceAttribute
+### Decorating your ProcessingSource with the ProcessingSourceAttribute
 
 The SDK finds your `ProcessingSource` by looking for classes with a `ProcessingSourceAttribute`. This attribute gives the SDK information about your `ProcessingSource`, such as its name, description, and globally-unique id (`GUID`).
 
@@ -128,7 +129,7 @@ public class MyProcessingSource : ProcessingSource
 
 Though your `ProcessingSource` is discoverable to the SDK, it still needs to advertise the `DataSource(s)` it supports in order to be useful.
 
-### Decorate your ProcessingSource with a DataSourceAttribute
+### Decorating your ProcessingSource with a DataSourceAttribute
 
 In order to advertise the `DataSource(s)` your `ProcessingSource` supports, we must decorate it with a `DataSourceAttribute`. `DataSourceAttribute` is an abstract class provided by the SDK, so we must decide on a concrete implementation to use. 
 
@@ -157,7 +158,7 @@ public class MyProcessingSource : ProcessingSource
 
 By specifying `".txt"`, the SDK will route any `.txt` files opened by a user to our `ProcessingSource`.
 
-### Implement the required ProcessingSource methods
+### Implementing the required ProcessingSource methods
 
 There are two methods a `ProcessingSource` is required to implement: `IsDataSourceSupportedCore` and `CreateProcessorCore`.
 
@@ -222,8 +223,54 @@ public class MyProcessingSource : ProcessingSource
 
 Currently, `MyDataProcessor` does not exist and we do not know which arguments to pass in. This is because the implementation of `MyDataProcessor` depends on the plugin framework you choose in the [Choosing a Plugin Framework](#choosing-a-plugin-framework) step. We will revisit this method once we have created `MyDataProcessor`.
 
-At this point, our `ProcessingSource` is almost complete. Before we continue, however, we must decide on which plugin framework our plugin will use.
+At this point, our `ProcessingSource` is almost complete. Before we continue, however, we must [choose a plugin framework](#choosing-a-plugin-framework).
 
+### Adding About Information
+
+When a plugin is used by a large and/or public audience, it is useful to 
+give users an easy way to contact its owners/maintainers. SDK Drivers such as 
+WPA look for __about information__ on a `ProcessingSource` for it to  
+present to users. Note adding about information is optional.
+
+To add about information to your `ProcessingSource`, simply override or 
+implement `GetAboutInfo`:
+
+```cs
+[ProcessingSource(...)]
+[FileDataSource(...)]
+public class MyProcessingSource
+    : ProcessingSource
+{
+    // ...
+
+    public override ProcessingSourceInfo GetAboutInfo()
+    {
+        return new ProcessingSourceInfo
+        {
+            Owners = new[]
+            {
+                new ContactInfo
+                {
+                    Name = "Author Name",
+                    Address = "Author Email",
+                    EmailAddresses = new[]
+                    {
+                        "owners@mycompany.com",
+                    },
+                },
+            },
+            LicenseInfo = null,
+            ProjectInfo = null,
+            CopyrightNotice = $"Copyright (C) {DateTime.Now.Year}",
+            AdditionalInformation = null,
+        };
+    }
+}
+```
+
+Where your about information is displayed depends on the SDK driver in which your plugin 
+is loaded. In Windows Performance Analyzer, your about information will appear as 
+a tab in the `Help -> About Windows Performance Analyzer` dialog.
 
 ## Choosing a Plugin Framework
 
