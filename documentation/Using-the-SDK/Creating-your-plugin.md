@@ -4,25 +4,26 @@ This document outlines how to use the Performance Toolkit SDK (SDK) to create
 an SDK plugin. Plugins can be used to expose data from `DataSource`s for
 automation, trace extractors, or viewers (e.g. Windows Performance Analyzer).
 
-Before creating a plugin, it is recommended to read [the overview of the SDK's architecture](../Architecture/Overview.md).
+Before creating a plugin, it is recommended to read [the overview of the SDK's architecture](../Architecture/README.md).
 
 Creating a plugin can be outlined into 4 distinct steps:
-1. [Creating the Project](#creating-the-project)
+- [Creating an SDK Plugin](#creating-an-sdk-plugin)
+  - [Creating the Project](#creating-the-project)
     - [Requirements](#requirements)
     - [Creating Your Project](#creating-your-project)
     - [Configuring Your Project](#configuring-your-project)
-        * [Adding the Microsoft.Performance.SDK NuGet Package](#adding-the-microsoftperformancesdk-nuget-package)
-        * [Picking your SDK version](#picking-your-sdk-version)
-        * [Installing WPA for Debugging](#installing-wpa-for-debugging)
-        * [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
-2. [Creating a ProcessingSource](#creating-a-processingsource)
+      - [Adding the Microsoft.Performance.SDK NuGet Package](#adding-the-microsoftperformancesdk-nuget-package)
+      - [Picking your SDK version](#picking-your-sdk-version)
+      - [Installing WPA for Debugging](#installing-wpa-for-debugging)
+      - [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
+  - [Creating a ProcessingSource](#creating-a-processingsource)
     - [Creating a ProcessingSource class](#creating-a-processingsource-class)
     - [Decorating your ProcessingSource with the ProcessingSourceAttribute](#decorating-your-processingsource-with-the-processingsourceattribute)
     - [Decorating your ProcessingSource with a DataSourceAttribute](#decorating-your-processingsource-with-a-datasourceattribute)
     - [Implementing the required ProcessingSource methods](#implementing-the-required-processingsource-methods)
-    - [(Optional) Adding About Information](#adding-about-information)
-3. [Choosing a Plugin Framework](#choosing-a-plugin-framework)
-4. [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
+    - [Adding About Information](#adding-about-information)
+  - [Choosing a Plugin Framework](#choosing-a-plugin-framework)
+  - [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
 
 ---
 
@@ -30,7 +31,7 @@ Creating a plugin can be outlined into 4 distinct steps:
 
 Plugins are created as C# class libraries that get dynamically loaded by the SDK runtime. To begin your plugin creation, we will first walk through creating a C# project.
 
-> :information_source: The SDK team is actively working on creating a dotnet template to simplify creating your project and writing the neccessary plugin boilerplate code. 
+*Note*: The SDK team is [actively working](https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/190) to create a dotnet template to simplify creating your project and writing the necessary plugin boilerplate code. 
 
 For simplicity, this section will assume you are using Visual Studio. The instructions may be adapted for other editors / IDEs.
 
@@ -48,7 +49,7 @@ Please refer to the links above to download and install the necessary requiremen
 2) Click "Create new project"  
  ![VS2019_Create_New_Project.PNG](./.attachments/VS2019_CreateProject_Markup.png)
 3) Select .NET Standard on the left, and choose "Class Library (.NET Standard)." Make sure that you are using .NET Standard 2.0, or a .NET version that supports .NET Standard 2.0 (such as .NET Core 3.1, .NET 6, etc.).
- ![VS2017_New_DotNetStandard_20_Project.PNG](./.attachments/VS2019_CreateProject_ClassLibrary_Markup.png)
+ ![VS2019_New_DotNetStandard_20_Project.PNG](./.attachments/VS2019_CreateProject_ClassLibrary_Markup.png)
 4) Name your project
 5) Click "Create"
 
@@ -63,7 +64,7 @@ You should now have a solution with one project file.
 #### Picking your SDK version
 The version of the SDK you add to your project will determine which versions of SDK drivers your plugin will work with. For example, a plugin that depends on SDK version 0.109.2 will not work a version of an SDK driver that uses SDK version 1.0.0.
 
-To decide which version of the SDK to use, refer to the [known SDK driver compatibility lists](../Known-SDK-Driver-Compatibility/Overview.md).
+To decide which version of the SDK to use, refer to the [known SDK driver compatibility lists](../Known-SDK-Driver-Compatibility/README.md).
 
 #### Installing WPA for Debugging
 

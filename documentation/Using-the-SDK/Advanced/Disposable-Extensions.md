@@ -91,4 +91,4 @@ that implementation.
 We have seen how to make our extensions disposable in order to allow for the
 SDK runtime to automatically dispose of objects created by our plugins.
 
-[Back to Advanced Topics](Overview.md)
+[Back to Advanced Topics](README.md)

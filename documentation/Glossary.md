@@ -1,32 +1,33 @@
 # Glossary
 
-* [AboutInfo](#aboutinfo)
-* [Column](#column)
-* [ColumnConfiguration](#columnconfiguration)
-* [ColumnRole](#columnrole)
-* [CompositeDataCooker](#compositedatacooker)
-* [CustomDataProcessor](#customdataprocessor)
-* [DataCooker](#datacooker)
-* [DataSource](#datasource)
-* [DynamicTable](#dynamictable)
-* [Pivot Column](#pivot-column)
-* [Pivot Table](#pivot-table)
-* [Plugin](#plugin)
-* [Processing Pipeline](#processing-pipeline)
-* [ProcessingSource](#processingsource)
-* [Projection](#projection)
-* [SDK Driver](#sdk-driver)
-* [Simple Table](#simple-table)
-* [SourceDataCooker](#sourcedatacooker)
-* [SourceParser](#sourceparser)
-* [Special Columns](#special-columns)
-* [Table](#table)
-* [TableBuilder](#tablebuilder)
-* [Table Building Cycle](#table-building-cycle)
-* [TableCommand](#tablecommand)
-* [TableConfiguration](#tableconfiguration)
-* [VisibleDomainSensitiveProjection](#visibledomainsensitiveprojection)
-* [Windows Performance Analyzer](#windows-performance-analyzer)
+- [Glossary](#glossary)
+  - [AboutInfo](#aboutinfo)
+  - [Column](#column)
+  - [ColumnConfiguration](#columnconfiguration)
+  - [ColumnRole](#columnrole)
+  - [CompositeDataCooker](#compositedatacooker)
+  - [CustomDataProcessor](#customdataprocessor)
+  - [DataCooker](#datacooker)
+  - [DataSource](#datasource)
+  - [DynamicTable](#dynamictable)
+  - [Pivot Column](#pivot-column)
+  - [Pivot Table](#pivot-table)
+  - [Plugin](#plugin)
+  - [Processing Pipeline](#processing-pipeline)
+  - [ProcessingSource](#processingsource)
+  - [Projection](#projection)
+  - [SDK Driver](#sdk-driver)
+  - [Simple Table](#simple-table)
+  - [SourceDataCooker](#sourcedatacooker)
+  - [SourceParser](#sourceparser)
+  - [Special Columns](#special-columns)
+  - [Table](#table)
+  - [TableBuilder](#tablebuilder)
+  - [Table Building Cycle](#table-building-cycle)
+  - [TableCommand](#tablecommand)
+  - [TableConfiguration](#tableconfiguration)
+  - [VisibleDomainSensitiveProjection](#visibledomainsensitiveprojection)
+  - [Windows Performance Analyzer](#windows-performance-analyzer)
 
 ---
 
@@ -109,6 +110,8 @@ If the "State" column above is a [Pivot Column](#pivot-column), the 5 rows would
 
 NOTE: the SDK has no understanding of Pivot Tables. Tables created by a plugin are purely "flat" tables - i.e. tables similar the first one above. It is up to programs like [Windows Performance Analyzer](#windows-performance-analyzer) to use pivot information in a [Table Configuration](#tableconfiguration) to present a plugin's Table as a Pivot Table.
 
+See also: [Wikipedia Pivot Tables](https://en.wikipedia.org/wiki/Pivot_table).
+
 ## Plugin
 
 A collection of one-or-more [ProcessingSources](#processingsource) that collectively create zero-or-more [Tables](#table) and consist of zero-or-more [DataCookers](#datacooker).
@@ -141,7 +144,7 @@ A [Table](#table) variant that cannot participate in a [Processing Pipeline](#pr
 
 ## SourceDataCooker
 
-A [DataCooker](#datacooker) that receives input from a specific [SourceParser](#sourceparser). A SourceDataCooker may also receive input from other DataCookers of the same SourceParser.
+A [DataCooker](#datacooker) that receives input from an associated [SourceParser](#sourceparser). A SourceDataCooker may also receive input from other SourceDataCookers enabled on the same SourceParser.
 
 ## SourceParser
 
