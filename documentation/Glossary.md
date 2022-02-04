@@ -147,7 +147,7 @@ A [DataCooker](#datacooker) that receives input from an associated [SourceParser
 
 ## SourceParser
 
-An object that a [CustomDataProcessor](#customdataprocessor) typically tasks with parsing a [DataSource](#datasource) into individual records. The records that a SourceParser emits typically begin a [Processing Pipeline](#processing-pipeline), wherein [DataCookers](#datacooker) further process data to be consumed by [Tables](#table).  
+An object that a [CustomDataProcessor](#customdataprocessor) tasks with parsing a [DataSource](#datasource) into individual records. The records that a SourceParser emits begin a [Processing Pipeline](#processing-pipeline), wherein [DataCookers](#datacooker) further process data to be consumed by [Tables](#table).  
 
 ## Special Columns
 

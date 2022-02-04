@@ -7,7 +7,7 @@ This folder contains instructions for developing SDK plugins and utilizing the S
 # Quick Start
 Refer to [Creating your first plugin](Using-the-SDK/Creating-your-plugin.md) to jump in quickly.
 
-> ⚠️ We recommend following the [Recommended Reading Order](#recommended-reading-order).
+> ⚠️ Note: We recommend following the [Recommended Reading Order](#recommended-reading-order).
 
 # Glossary
 

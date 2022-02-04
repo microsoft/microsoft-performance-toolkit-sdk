@@ -57,14 +57,13 @@ There are 4 distinct steps in creating a Simple SDK Plugin:
    This example assumes that we're using our `SimpleCustomDataProcessor` with the `ProcessingSource` created in [Creating an SDK Plugin](./Creating-your-plugin.md) that advertises support for `.txt` files beginning with `mydata`. Because of this, we are passing in the `filePaths` for all of the `mydata*.txt` files opened by the user.
 
 
-3. Implement `ProcessAsyncCore`. This method will be called to process data sources passed into your `CustomDataProcessor`. Typically the data in the data source is parsed and converted from some raw form into something more 
-   relevant and easily accessible to the processor.
+3. Implement `ProcessAsyncCore`. This method will be called to process data sources passed into your `CustomDataProcessor`. Typically the data in the data source is parsed and converted from some raw form into something more relevant and easily accessible to the processor.
    
-   In this example, we're calling a  `ParseFiles` method that converts lines in each file opened to ficticious `LineItem` objects. In a 
+   In this example, we're calling a  `ParseFiles` method that converts lines in each file opened to fictitious `LineItem` objects. In a 
    more realistic case, processing would probably be broken down into smaller units. For example, there might be logic 
    for parsing operating system processes and making that data queryable by time and or memory layout.
 
-   This method is also typically where `this.dataSourceInfo` would be set (see below).
+   This method is usually where `this.dataSourceInfo` is set (see below).
 
    ```cs
    public sealed class SimpleCustomDataProcessor
