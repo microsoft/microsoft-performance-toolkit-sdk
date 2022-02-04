@@ -28,7 +28,7 @@ the Visual Studio NuGet Package Manager, `dotnet.exe`, or `nuget.exe`.
 
 # Recommended Reading Order
 To best understand how the SDK works and how to develop SDK plugins, it is recommended to read documentation in the following order:
-1) [Architecture/Overview](./Architecture/README.md) to understand at a high level the various systems the SDK provides
-3) [Architecture/The Data-Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
+1. [Architecture/Overview](./Architecture/README.md) to understand at a high level the various systems the SDK provides
+2. [Architecture/The Data-Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
 can be used by tables
-3) [Creating your first plugin](Using-the-SDK/Creating-your-plugin.md) to learn how to create an SDK plugin
+3. [Creating your first plugin](Using-the-SDK/Creating-your-plugin.md) to learn how to create an SDK plugin
