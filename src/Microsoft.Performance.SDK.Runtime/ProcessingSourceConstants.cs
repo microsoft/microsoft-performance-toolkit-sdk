@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <remarks>
         ///     This is "CustomDataSources" because processing sources were historically
         ///     called custom data sources. This folder name is unchanged to increase
-        ///     backwards compatability of plugins.
+        ///     backwards compatibility of plugins.
         /// </remarks>
         public const string ProcessingSourceRootFolderName = "CustomDataSources";
     }

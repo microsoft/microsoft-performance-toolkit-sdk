@@ -1,130 +1,30 @@
 # Creating a Simple SDK Plugin
 
-An SDK plugin uses the SDK to create a mapping between arbitrary data sources (e.g. files with 
-specific formats) and 
-* zero or more __tables__
-* zero or more __data outputs__
+This document assumes you have already created a `ProcessingSource` and your plugin is using the simple plugin framework. For more details, refer to [Creating an SDK Plugin](./Creating-your-plugin.md).
 
+---
 
-A `ProcessingSource` (PS) acts as the entry point for the SDK runtime to discover and create these mappings. 
-An SDK plugin may contain more than one PS, but it is __highly recommended__ to only include one PS per 
-assembly inside a plugin.
+The simple plugin framework is centered around the `CustomDataProcessor` class. Your plugin must create a concrete implementation of the abstract `CustomDataProcessor` class provided by the SDK.
 
-A standard PS will utilize a `CustomDataProcessor` (CDP) to process the data sources that the SDK runtime provides it.
+In this framework, your `CustomDataProcessor` is responsible for
+1. Processing the `DataSource(s)` opened by a user that your `ProcessingSource` supports (i.e. the `DataSource(s)` that passed the `IsDataSourceSupportedCore` check)
+2. Building all of the `Tables` your `ProcessingSource` discovers
 
-A plugin may also define __tables__ that can be used by viewers such as Windows Performance Analyzer (WPA) to display the 
-processed data in an organized, interactable collection of rows. Tables are discovered and passed into CDPs by the SDK 
-runtime.
+> :information_source: When using the simple plugin framework, a `Table` is referred to as a `Simple Table`.
 
-The SDK also supports advanced data processing pipelines through data cookers and extensions, but these topics are 
-covered in the advanced documentaton. Refer to [Overview](../Overview.md) for more information.
+There are 4 distinct steps in creating a Simple SDK Plugin:
+1. [Creating a CustomDataProcessor](#creating-a-customdataprocessor)
+2. [Creating a Simple Table](#creating-a-simple-table)
+3. [Building Your Simple Table](#building-your-simple-table)
+4. [Linking Your CustomDataProcessor to Your ProcessingSource](#linking-your-customdataprocessor-to-your-processingsource)
 
-In this tutorial, we will explore creating a simple SDK plugin that has one PS, one CDP, and one table. 
-Refer to [the following sample](../../samples/SimpleDataSource/SampleAddIn.csproj) for source code that implements the steps outlined in this file.
+## Creating a CustomDataProcessor
 
-## Requirements of a Simple Plugin
-
-To create a simple plugin, you must:
-
-1. Create a public class that implements the abstract class `Processing`. This is your Processing Source 
-   (PS)
-2. Create a public class that implements the abstract class `CustomDataProcessorBase`. This your Custom Data Processor 
-   (CDP)
-3. Create one or more data table classes. These classes must:
-   - Be public
-   - Be decorated with `TableAttribute`
-   - Expose a static public field or property named "TableDescriptor" of type `TableDescriptor` which provides information
-     about the table. If these requirements are not met, the SDK runtime will not be able to find and pass your tables 
-     to your CDP
-
-## Implementing a ProcessingSource Class
-
-1. Create a public class that extends the abstract class `ProcessingSource`. Note that this example is decorated with 
-   two attributes: `ProcessingSourceAttribute` and `FileDataSourceAttribute`. The former is used by the SDK runtime to 
-   locate `ProcessingSource`s. The latter identifies a type of data source that the PS can consume.
-
-   ```cs
-   [ProcessingSource(
-      "{F73EACD4-1AE9-4844-80B9-EB77396781D1}",  // The GUID must be unique for your ProcessingSource. You can use 
-                                                 // Visual Studio's Tools -> Create Guid… tool to create a new GUID
-      "Simple Data Source",                      // The ProcessingSource MUST have a name
-      "A data source to count words!")]          // The ProcessingSource MUST have a description
-   [FileDataSource(
-      ".txt",                                    // A file extension is REQUIRED
-      "Text files")]                             // A description is OPTIONAL. The description is what appears in the 
-                                                 // file open menu to help users understand what the file type actually 
-                                                 // is. 
-   public class SimpleProcessingSource : ProcessingSource
-   {
-   }
-   ```
-
-2. Overwrite the `SetApplicationEnvironmentCore` method. The `IApplicationEnvironment` parameter is stored in the base 
-   class' `ApplicationEnvironment` property.
-
-   :information_source: In the future, this method will not need to be overridden as nothing needs to be done here
-
-   ```cs
-   protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)
-   {
-   }
-   ```
-
-3. Overwrite the `IsFileSupportedCore` method. This is where your class will determine if a given file contains data 
-   appropriate to your PS. For example, if your PS consumes `.xml` files, not all `.xml` files will be valid for your
-   PS. Use this method as an opportunity to filter out the files that aren't consumable by this PS.  
-   :warning: This method will be changed before 1.0 release - more details to come in patch notes.
-   ```cs
-   protected override bool IsFileSupportedCore(string path)
-   {
-      //
-      // This method is called for every file whose filetype matches the one declared in the FileDataSource attribute. It may be useful
-      // to peek inside the file to truly determine if you can support it, especially if your PS supports a common
-      // filetype like .txt or .csv.
-      // For this sample, we'll always return true for simplicity.
-      //
-
-      return true;
-   }
-   ```
-
-4. Overwrite the `CreateProcessorCore` method. When the SDK needs to process files your PS supports, it will obtain an 
-   instance of your CDP by calling this method. This is also where your PS learns about the files, passed as 
-   `IDataSource`s, that it will need to process.
-
-   ```cs
-   protected override ICustomDataProcessor CreateProcessorCore(
-      IEnumerable<IDataSource> dataSources,
-      IProcessorEnvironment processorEnvironment,
-      ProcessorOptions options)
-   {
-      //
-      // Create a new instance of a class implementing ICustomDataProcessor here to process the specified data 
-      // sources.
-      // Note that you can have more advanced logic here to create different processors if you would like based 
-      // on the file, or any other criteria.
-      // You are not restricted to always returning the same type from this method.
-      //
-
-      return new SimpleCustomDataProcessor(
-            dataSources.Select(x => x.GetUri().LocalPath).ToArray(),  // Map each IDataSource to its file path
-            options,
-            this.applicationEnvironment,
-            processorEnvironment,
-            this.AllTables,
-            this.MetadataTables);
-   }
-   ```
-
-Now let's implement the `SimpleCustomDataProcessor` being returned above.
-
-## Implementing the Custom Data Processor Class
-
-1. Create a public class that extends the abstract class `CustomDataProcessorBase`.
+1. Create a public class that extends the abstract class `CustomDataProcessor`.
 
    ```cs
    public sealed class SimpleCustomDataProcessor
-      : CustomDataProcessorBase
+      : CustomDataProcessor
    {
    }
    ```
@@ -132,47 +32,66 @@ Now let's implement the `SimpleCustomDataProcessor` being returned above.
 2. Create a constructor that calls into the base class.
 
    ```cs
-   public SimpleCustomDataProcessor(
-      string[] filePaths,
-      ProcessorOptions options,
-      IApplicationEnvironment applicationEnvironment,
-      IProcessorEnvironment processorEnvironment,
-      IReadOnlyDictionary<TableDescriptor, Action<ITableBuilder, IDataExtensionRetrieval>> allTablesMapping,
-      IEnumerable<TableDescriptor> metadataTables)
-      : base(options, applicationEnvironment, processorEnvironment, allTablesMapping, metadataTables)
+   public sealed class SimpleCustomDataProcessor
+      : CustomDataProcessor
    {
-      //
-      // Store the file paths for all of the data sources this processor will eventually 
-      // need to process in a field for later
-      //
+      private string[] filePaths;
 
-      this.filePaths = filePaths;
+      public SimpleCustomDataProcessor(
+         string[] filePaths,
+         ProcessorOptions options,
+         IApplicationEnvironment applicationEnvironment,
+         IProcessorEnvironment processorEnvironment)
+         : base(options, applicationEnvironment, processorEnvironment)
+      {
+         //
+         // Store the file paths for all of the data sources this processor will eventually 
+         // need to process in a field for later
+         //
+
+         this.filePaths = filePaths;
+      }
    }
    ```
 
+   This example assumes that we're using our `SimpleCustomDataProcessor` with the `ProcessingSource` created in [Creating an SDK Plugin](./Creating-your-plugin.md) that advertises support for `.txt` files beginning with `mydata`. Because of this, we are passing in the `filePaths` for all of the `mydata*.txt` files opened by the user.
 
-3. Implement `ProcessAsyncCore`. This method will be called to process data sources passed into the Custom Data 
-   Processor. Typically the data in the data source is parsed and converted from some raw form into something more 
+
+3. Implement `ProcessAsyncCore`. This method will be called to process data sources passed into your `CustomDataProcessor`. Typically the data in the data source is parsed and converted from some raw form into something more 
    relevant and easily accessible to the processor.
    
-   In this simple sample, a comma-delimited text file is parsed into event structures and stored for later use. In a 
+   In this example, we're calling a  `ParseFiles` method that converts lines in each file opened to ficticious `LineItem` objects. In a 
    more realistic case, processing would probably be broken down into smaller units. For example, there might be logic 
    for parsing operating system processes and making that data queryable by time and or memory layout.
 
    This method is also typically where `this.dataSourceInfo` would be set (see below).
 
    ```cs
-   protected override Task ProcessAsyncCore(
-      IProgress<int> progress,
-      CancellationToken cancellationToken)
+   public sealed class SimpleCustomDataProcessor
+      : CustomDataProcessor
    {
-      ...
+      private string[] filePaths;
+      private LineItem[] lineItems;
+
+      public SimpleCustomDataProcessor(...) : base(...)
+      {
+         ...
+      }
+
+      protected override Task ProcessAsyncCore(
+         IProgress<int> progress,
+         CancellationToken cancellationToken)
+      {
+         this.lineItems = ParseFiles(this.filePaths, progress, cancellationToken);
+      }
    }
    ```
 
+   We pass `progress` and `cancellationToken` into the ficticious `ParseFiles` method so it can use them. It is good practice to report parsing progress back to the `IProgress<int>` passed into `ProcessAsyncCore`. For example, `ParseFiles` could begin by quickly getting a combined line count of all files being processed, and then report what % of lines have been processed after each line of a file is parsed.
+
 4. Override the `GetDataSourceInfo` method. `DataSourceInfo` provides the driver some information about the data source
    to provide a better user experience. It is expected that this method will not be called before 
-   `ProcessAsync`/`ProcessAsyncCore` because the data necessary to create a `DataSourceInfo` object might not be
+   `ProcessAsyncCore` because the data necessary to create a `DataSourceInfo` object might not be
    available beforehand.
 
    A `DataSourceInfo` contains three important pieces of information:
@@ -181,96 +100,150 @@ Now let's implement the `SimpleCustomDataProcessor` being returned above.
    - The UTC wallclock time of the start of the sources being processed
 
    ```cs
-   public override DataSourceInfo GetDataSourceInfo()
+   public sealed class SimpleCustomDataProcessor
+      : CustomDataProcessor
    {
-         return this.dataSourceInfo;   
+      private string[] filePaths;
+      private LineItem[] lineItems;
+      private DataSourceInfo dataSourceInfo;
+
+      public SimpleCustomDataProcessor(...) : base(...)
+      {
+         ...
+      }
+
+      protected override Task ProcessAsyncCore(
+         IProgress<int> progress,
+         CancellationToken cancellationToken)
+      {
+         ...
+
+         this.dataSourceInfo = new DataSourceInfo(...)
+      }
+
+      public override DataSourceInfo GetDataSourceInfo()
+      {
+            return this.dataSourceInfo;   
+      }
    }
    ```
 
-5. Override the `BuildTableCore` method. This method is responsible for instantiating a given table. This method is 
-called for each table identified by the SDK runtime as part of this PS (see more on this in the "Create Tables" section). 
-The table to build is identified by the `TableDescriptor` passed in as a parameter to this method. If the CDP isn't interested 
-in the given table, it may return immediately.
+   The parameters to `DataSourceInfo`'s constructor typically are created while parsing `DataSources`. For more help, refer to the [SimpleDataSource sample](../../samples/SimpleDataSource/README.md).
 
-   ```cs
-   protected override void BuildTableCore(
-      TableDescriptor tableDescriptor,
-      Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction,
-      ITableBuilder tableBuilder)
-   {
-      ...
-   }
-   ```
-   
-   How a table is created is left up to the plugin author. The sample for this documentation uses reflection to instantiate an instance of the table class.
+Our `SimpleCustomDataProcessor` is now ready to process the `DataSources` opened by a user. The last step is ensuring our `SimpleCustomDataProcessor` can build tables discovered by our `ProcessingSource`. However, before implementing this, we must first create a `Table`.
 
-   After the table object is created, the `ITableBuilder` parameter is used to populate the table with columns and row data. In this example, 
-   the build logic exists in a `Build` method on the table, which is called by this method.
+## Creating a Simple Table
 
-## Create Tables
+For our `SimpleCustomDataProcessor` to build a table, the table must first be discovered by our `ProcessingSource`. By default, a `ProcessingSource` will "discover" each `Simple Table` defined in its assembly that meet the following criteria:
+ - The class is public and concrete (not `abstract`)
+ - The class is decorated with `TableAttribute`
+ - The class exposes a `static public` property named "TableDescriptor" of type `TableDescriptor`
 
-Simple processing sources provide tables as output. A table is set of columns and rows grouped together to provide output for related data. 
-Tables must be created (built) to be a plugin output.
+> :information_source: In a simple framework plugin, each `ProcessingSource` is responsible for "discovering" the `Simple Tables` that will be built by its `CustomDataProcessor`. By default, a `ProcessingSource` will "discover" all `Tables` defined in its assembly. _Most plugins do not need to override this behavior_. However, if you do wish to override this behavior, refer to [Custom Table Discovery](./Advanced/Custom-Table-Discovery.md). 
 
-Here are the requirements for a table to be discovered by the SDK runtime:
-   - Be public and concrete
-   - Be decorated with `TableAttribute`
-   - Expose a static public field or property named "TableDescriptor" of type `TableDescriptor` which provides information
-     about the table
-     
-If these requirements are not met, the SDK runtime will not be able to find and pass your tables to your CDP.
-
-Here's an example from the simple plugin example, where `TableBase` is an abstract class the simple plugin defines:
+Let's define a table `WordTable` that will eventually have one row for each distinct word in the `DataSources` processed.
 
 ```cs
 [Table]                      
 public sealed class WordTable
-   : TableBase
 {
-   public static TableDescriptor TableDescriptor => new TableDescriptor(
-      Guid.Parse("{E122471E-25A6-4F7F-BE6C-E62774FD0410}"), // The GUID must be unique across all tables
-      "Word Stats",                                         // The Table must have a name
-      "Statistics for words",                               // The Table must have a description
-      "Words");                                             // A category is optional. It useful for grouping 
-                                                            // different types of tables in the viewer's UI.
+   public static TableDescriptor TableDescriptor => 
+      new TableDescriptor(
+         Guid.Parse("{E122471E-25A6-4F7F-BE6C-E62774FD0410}"), // The GUID must be unique across all tables
+         "Word Stats",                                         // The Table must have a name
+         "Statistics for words",                               // The Table must have a description
+         "Words");                                             // A category is optional. It useful for grouping 
+                                                               // different types of tables in the SDK Driver's UI.
 }
 ```
 
+## Building Your Simple Table
 
-Sometime after `ProcessAsyncCore` finishes (at least for typical SDK drivers who ask the SDK to build tables 
-only *after* asking it to process sources), the SDK runtime will call `BuildTableCore` on your CDP for each table 
-"hooked up" to it. This method receives the `TableDescriptor` of the table it must create, and is responsible for 
-populating the  `ITableBuilder` with the columns that make up the table being constructed. This is most easily done by 
-delegating the work of populating the `ITableBuilder` to an instance of the class/table described by the 
-`TableDescriptor`.
+Now that we have a `Table` defined, we can override the `BuildTableCore` method of our `CustomDataProcessor`. This method is responsible for instantiating a given table. This method is 
+called for each table discovered by our `ProcessingSource`. 
+The table to build is identified by the `TableDescriptor` passed in as a parameter to this method. If the CDP isn't interested 
+in the given table, it may return immediately.
 
-Note that tables are "hooked up" to CDPs automatically by the SDK. **Every class that meets the requirements listed above 
-is automatically hooked up to any CDPs declared in that table's assembly.**
-
-In the sample code, the `WordTable` has a `Build` method that is called by `SimpleCustomDataProcessor`. The key code in 
-this method uses the `ITableBuilder` to generate the table.
+To build a `Table`, the `CustomDataProcessor` uses the `ITableBuilder` passed into `BuildTableCore`. Typically, the task of interacting with the `ITableBuilder` and building the `Table` is delegated to the `Table`'s class.
 
 ```cs
-public override void Build(ITableBuilder tableBuilder)
+public sealed class SimpleCustomDataProcessor
+   : CustomDataProcessor
 {
-   ...
+   private string[] filePaths;
+   private LineItem[] lineItems;
+   private DataSourceInfo dataSourceInfo;
 
-   tableBuilder.AddTableConfiguration(config)
-         .SetDefaultTableConfiguration(config)
-         .SetRowCount(allWords.Count)
-         .AddColumn(FileColumn, fileProjection)
-         .AddColumn(WordColumn, wordProjection)
-         .AddColumn(CharacterCountColumn, charCountProjection)
-         .AddColumn(TimeColumn, timeProjection);
+   public SimpleCustomDataProcessor(...) : base(...)
+   {
+      ...
+   }
+
+   protected override Task ProcessAsyncCore(
+      IProgress<int> progress,
+      CancellationToken cancellationToken)
+   {
+      ...
+   }
+
+   public override DataSourceInfo GetDataSourceInfo()
+   {
+      ...
+   }
+
+   protected override void BuildTableCore(
+      TableDescriptor tableDescriptor,
+      ITableBuilder tableBuilder)
+   {
+      switch (tableDescriptor.Guid)
+      {
+         case var g when (g == WordTable.TableDescriptor.Guid):
+            new WordTable(this.lineItems).Build(tableBuilder);
+            break;
+         default:
+            break;
+      }
+   }
 }
 ```
 
-The `TableConfiguration` passed into `ITableBuilder.AddTableConfiguration` and `ITableBuilder.SetDefaultConfiguration` details how the table should appear.
+In this plugin framework, how a table is created is left up to the plugin author. In this example, we are using pattern matching to determine the `Table` attempting to be built. When we're asked to build the `WordTable`, we first create a new instance that has a reference to all of the parsed `LineItem` objects and then ask that instance to build itself with the `tableBuilder` parameter.
+   
+Here, we are calling a ficticious `Build` method on our `WordTable`. For documentation on interacting with an `ITableBuilder,` refer to [Building a Table](./Building-a-table.md).
 
-`ITableBuilder.SetRowCount` establishes the number of rows for the table, and returns an `ITableBuilderWithRowCount`.
+## Linking Your CustomDataProcessor to Your ProcessingSource
 
-Each call to `ITableBuilderWithRowCount.AddColumn` establishes a column on the table. Each column requires a `ColumnConfiguration` 
-to describe the column, and an `IProjection<int, T>` which map a given row index for that column to a piece of data.
+Now that our `CustomDataProcessor` is finished and we have a `Table` to build, the final step is linking our `SimpleCustomDataProcessor` to `MyProcessingSource`.
+
+```cs
+[ProcessingSource(...)]
+[FileDataSource(...)]
+public class MyProcessingSource : ProcessingSource
+{
+   public MyProcessingSource() : base()
+   {
+   }
+
+   protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
+   {
+      ...
+   }
+
+   protected override ICustomDataProcessor CreateProcessorCore(
+      IEnumerable<IDataSource> dataSources,
+      IProcessorEnvironment processorEnvironment,
+      ProcessorOptions options)
+   {
+      return new SimpleCustomDataProcessor(
+         dataSources.Select(ds => ds as FileDataSource).Select(fds => fds.FullPath),
+         options,
+         this.ApplicationEnvironment,
+         processorEnvironment);
+   }
+}
+```
+
+With `CreateProcessorCore` implemented, our plugin is done and ready to use!
 
 # Video Walkthrough
 
@@ -278,5 +251,4 @@ A video tutorial of making a simple SDK plugin can be found in the [SQL plugin s
 
 # Next Steps
 
-Now that we've seen how to create a simple SDK plugin, let us learn how to create a data processing pipeline
-within the plugins you create. Continue reading at [Using the SDK/Creating a Data Processing Pipeline](./Creating-a-pipeline.md)
+Now that we've seen how to create a simple SDK plugin, let's see how we could have created this same plugin with the data-processing pipeline framework. Continue reading at [Using the SDK/Creating a Data-Processing Pipeline](./Creating-a-pipeline.md)

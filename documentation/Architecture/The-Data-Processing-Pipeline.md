@@ -1,4 +1,4 @@
-# The Data Processing Pipeline
+# The Data-Processing Pipeline
 
 Within a plugin, a `ProcessingSource` delegates the task of processing data sources to a `CustomDataProcessor`. 
 In order to minimize the overhead of accessing persistent data storage, a well-designed plugin aims to have its 
@@ -10,11 +10,11 @@ if the SDK provided a way to
 4) Allow external binaries, such as other plugins, access to the output of these transformations (as in *extend* the plugin defining the transformation)
 
 The SDK allows a plugin to achieve these goals, while minimizing the number of times data sources need to be directly accessed, 
-by facilitating and allowing the creation of a __data processing pipeline__.
+by facilitating and allowing the creation of a __data-processing pipeline__.
 
 # Pipeline Components
 
-At the highest level, when a plugin wishes to create a data processing pipeline, it will define two types of 
+At the highest level, when a plugin wishes to create a data-processing pipeline, it will define two types of 
 components: __source parsers__ and __data cookers__.
 
 ## Source Parsers
@@ -56,10 +56,9 @@ From an interface perspective, a `DataCooker` has the following properties:
 * A `DataCooker` processes (cooks) this data
 * A `DataCooker` exposes zero or more __data output__ properties
 
-`DataOutput`s are the key component of data cookers, and are what achieve the last two goals outlined at the beginning of this document. 
-The SDK is aware of every `DataOutput` a given `DataCooker` advertises, and any assembly with access to an instance of 
-the SDK with a `DataCooker` loaded can query that cooker for any of its `DataOutput`s. For instance, a `Table` can 
-query transformed data outputted by a `DataCooker` defined inside its own assembly:
+`DataOutput`s are the key component to `DataCooker`s as they achieve the last two goals outlined at the beginning of this document. 
+The SDK is aware of every `DataOutput` a given `DataCooker` advertises. Any assembly the SDK loads concurrently with a `DataCooker` can query that cooker for any of its `DataOutput`s. 
+For instance, a `Table` can query transformed data outputted by a `DataCooker` defined inside its own assembly:
 
 <img src=".attachments/cooker_query.svg" width="800">
 
@@ -87,26 +86,26 @@ The SDK handles these cases differently, so it is important to understand the di
 
 #### Source Data Cookers
 
-A `SourceDataCooker` is a `DataCooker` which consumes data from a single `SourceParser`. It must specify
-1) The `SourceParser` to consume data from and
+A `SourceDataCooker` is a `DataCooker` which must specify
+1) A single `SourceParser` to consume data from
 2) The keys of the events it wishes to receive
 
 It is helpful to think of keys as "group names" here. A `SourceDataCooker` specifies the "groups," or "types," of 
 events it wishes to receive. 
 
-Finally, a `SourceDataCooker` will consume (cook) events *one at a time* as the `SourceParser` emits them
+Finally, a `SourceDataCooker` will consume (cook) events *one at a time* as the `SourceParser` emits them.
 
 #### Composite Data Cookers
 
 A `CompositeDataCooker` is a `DataCooker` which consumes data from one or more other `DataCooker`s. It must 
 specify all of the other `DataCookerPath`s for the `DataCooker`s which it depends upon. The SDK instructs
 the `CompositeDataCooker` when *all* of its dependencies have finished processing their data, at which point 
-the `CompositeDataCooker` can query the `DataOutput`s it needs to perform *its* transformations.
+the `CompositeDataCooker` can query the `DataOutput`s it needs to perform *its own* transformations.
 
 # Putting Everything Together
 
 By combining `SourceParser`s, `SourceDataCooker`s, and `CompositeDataCooker`s, a plugin can create arbitrarily 
-complex and extensible data processing pipelines. For example, here is a pipeline a plugin may create to 
+complex and extensible data-processing pipelines. For example, here is a pipeline a plugin may create to 
 modularize and promote the extensibility of three tables:
 
 <img src=".attachments/complex_pipeline.svg" width="100%">
@@ -128,5 +127,5 @@ and do whatever it wishes with it.
 
 # Next Steps
 
-Now that we understand at a high level how a data processing pipeline works, we can now begin creating our own 
-SDK plugins. To get started, view [Using the SDK/Creating an SDK Plugin C# Project](../Using-the-SDK/Creating-your-project.md).
+Now that we understand at a high level how a data-processing pipeline works, we can now begin creating our own 
+SDK plugins. To get started, view [Using the SDK/Creating an SDK Plugin](../Using-the-SDK/Creating-your-plugin.md).
