@@ -6,7 +6,7 @@ automation, trace extractors, or viewers (e.g. Windows Performance Analyzer).
 
 Before creating a plugin, it is recommended to read [the overview of the SDK's architecture](../Architecture/README.md).
 
-Creating a plugin can be outlined into 4 distinct steps:
+Creating a plugin can be outlined into 4 distinct actions:
 * [Creating the Project](#creating-the-project)
   * [Requirements](#requirements)
   * [Creating Your Project](#creating-your-project)
