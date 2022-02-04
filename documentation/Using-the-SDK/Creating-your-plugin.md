@@ -30,7 +30,7 @@ Creating a plugin can be outlined into 4 distinct steps:
 
 Plugins are created as C# class libraries that get dynamically loaded by the SDK runtime. To begin your plugin creation, we will first walk through creating a C# project.
 
-*Note*: The SDK team will be creating [(see issue)](https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/190) a dotnet template to simplify creating your project and writing boilerplate code. 
+> ⚠️ The SDK team will be creating [(see issue)](https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/190) a dotnet template to simplify creating your project and writing boilerplate code. 
 
 For simplicity, this section will assume you are using Visual Studio. The instructions may be adapted for other editors / IDEs.
 
