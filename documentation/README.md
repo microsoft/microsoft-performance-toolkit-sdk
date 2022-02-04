@@ -16,7 +16,7 @@ For quick definitions/examples of terms and concepts, refer to the [Glossary](./
 # Requirements
 The following are required in order to develop an SDK plugin:
 * [NuGet](https://www.nuget.org/downloads)
-* [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks) or [compatible version](https://docs.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-1-0#tabpanel_1_net-standard-2-0)
+* [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks) or a [compatible version](https://docs.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-1-0#tabpanel_1_net-standard-2-0)
 * A text editor (for editing your source code)
 
 It is recommended to use [Visual Studio](https://visualstudio.microsoft.com/downloads/) to develop an SDK plugin since it satisfies all three requirements. Future documentation assumes the use of Visual Studio, but the instructions may be adapted for other editors/IDEs.

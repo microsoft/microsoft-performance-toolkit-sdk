@@ -9,12 +9,8 @@ including cookers that may not necessarily be shipped with said `Table`, to buil
 exposes data through cookers, then you can author a table to leverage said data.
 
 Creating a table involves two keys steps:
-- [Creating a Table](#creating-a-table)
-  - [Declaring the Table](#declaring-the-table)
-  - [Integrating the Table with our Data-Processing Pipeline](#integrating-the-table-with-our-data-processing-pipeline)
-- [Examples](#examples)
-- [Video Walkthrough](#video-walkthrough)
-- [Next Steps](#next-steps)
+* [Declaring the Table](#declaring-the-table)
+* [Integrating the Table with our Data-Processing Pipeline](#integrating-the-table-with-our-data-processing-pipeline)
 
 ## Declaring the Table
 

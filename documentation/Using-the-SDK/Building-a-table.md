@@ -2,22 +2,13 @@
 
 Table construction happens by interacting with an instance of an `ITableBuilder`. Broadly, `Tables` consist of `TableConfigurations` and Columns. Columns can be further broken down into `ColumnConfigurations` and `Projections`. An `ITableBuilder` has methods to add `TableConfigurations` and to establish a row count for the table.
 
-*Note*: Every projection in the table must support the table's established row count.
-
 Setting the table's row count (`ITableBuilder.SetRowCount`) returns an instance of `ITableBuilderWithRowCount` which has a method to add columns to the table.
 
-- [Building a Table](#building-a-table)
-  - [Column](#column)
-    - [ColumnConfiguration](#columnconfiguration)
-    - [Projection](#projection)
-    - [Combining ColumnConfiguration and Projections](#combining-columnconfiguration-and-projections)
-  - [TableConfiguration](#tableconfiguration)
-    - [ColumnRole](#columnrole)
-- [More Information](#more-information)
+> ❗Every projection in the table must support the table's established row count.
 
 ## Column
 
-A column is a conceptual pair (`ColumnConfiguration`, `Projection`) that defines data inside a [Table](#table).
+A column is a conceptual pair (`ColumnConfiguration`, `Projection`) that defines data inside a table.
 
 ### ColumnConfiguration
 

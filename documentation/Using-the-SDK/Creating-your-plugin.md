@@ -7,23 +7,22 @@ automation, trace extractors, or viewers (e.g. Windows Performance Analyzer).
 Before creating a plugin, it is recommended to read [the overview of the SDK's architecture](../Architecture/README.md).
 
 Creating a plugin can be outlined into 4 distinct steps:
-- [Creating an SDK Plugin](#creating-an-sdk-plugin)
-  - [Creating the Project](#creating-the-project)
-    - [Requirements](#requirements)
-    - [Creating Your Project](#creating-your-project)
-    - [Configuring Your Project](#configuring-your-project)
-      - [Adding the Microsoft.Performance.SDK NuGet Package](#adding-the-microsoftperformancesdk-nuget-package)
-      - [Picking your SDK version](#picking-your-sdk-version)
-      - [Installing WPA for Debugging](#installing-wpa-for-debugging)
-      - [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
-  - [Creating a ProcessingSource](#creating-a-processingsource)
-    - [Creating a ProcessingSource class](#creating-a-processingsource-class)
-    - [Decorating your ProcessingSource with the ProcessingSourceAttribute](#decorating-your-processingsource-with-the-processingsourceattribute)
-    - [Decorating your ProcessingSource with a DataSourceAttribute](#decorating-your-processingsource-with-a-datasourceattribute)
-    - [Implementing the required ProcessingSource methods](#implementing-the-required-processingsource-methods)
-    - [Adding About Information](#adding-about-information)
-  - [Choosing a Plugin Framework](#choosing-a-plugin-framework)
-  - [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
+* [Creating the Project](#creating-the-project)
+  * [Requirements](#requirements)
+  * [Creating Your Project](#creating-your-project)
+  * [Configuring Your Project](#configuring-your-project)
+    * [Adding the Microsoft.Performance.SDK NuGet Package](#adding-the-microsoftperformancesdk-nuget-package)
+    * [Picking your SDK version](#picking-your-sdk-version)
+    * [Installing WPA for Debugging](#installing-wpa-for-debugging)
+    * [Setup for Debugging Using WPA](#setup-for-debugging-using-wpa)
+* [Creating a ProcessingSource](#creating-a-processingsource)
+  * [Creating a ProcessingSource class](#creating-a-processingsource-class)
+  * [Decorating your ProcessingSource with the ProcessingSourceAttribute](#decorating-your-processingsource-with-the-processingsourceattribute)
+  * [Decorating your ProcessingSource with a DataSourceAttribute](#decorating-your-processingsource-with-a-datasourceattribute)
+  * [Implementing the required ProcessingSource methods](#implementing-the-required-processingsource-methods)
+  * [Adding About Information](#adding-about-information)
+* [Choosing a Plugin Framework](#choosing-a-plugin-framework)
+* [Creating a CustomDataProcessor and Tables](#creating-a-customdataprocessor-and-tables)
 
 ---
 
@@ -31,7 +30,7 @@ Creating a plugin can be outlined into 4 distinct steps:
 
 Plugins are created as C# class libraries that get dynamically loaded by the SDK runtime. To begin your plugin creation, we will first walk through creating a C# project.
 
-*Note*: The SDK team is [actively working](https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/190) to create a dotnet template to simplify creating your project and writing the necessary plugin boilerplate code. 
+*Note*: The SDK team will be creating [(see issue)](https://github.com/microsoft/microsoft-performance-toolkit-sdk/issues/190) a dotnet template to simplify creating your project and writing boilerplate code. 
 
 For simplicity, this section will assume you are using Visual Studio. The instructions may be adapted for other editors / IDEs.
 
