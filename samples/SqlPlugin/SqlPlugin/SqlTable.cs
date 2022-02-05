@@ -162,8 +162,7 @@ namespace SqlPlugin
                     TableConfiguration.RightFreezeColumn,
                     TableConfiguration.GraphColumn,
                     RelativeTimestampColumn
-                },
-                Layout = TableLayoutStyle.GraphAndTable
+                }
             };
 
             //

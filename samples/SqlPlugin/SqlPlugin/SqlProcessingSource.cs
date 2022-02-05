@@ -8,18 +8,18 @@ using System.Linq;
 
 namespace SqlPlugin
 {
-    [CustomDataSource("7309FAED-6A34-4FD1-8551-7AEB5006C71E",
+    [ProcessingSource("7309FAED-6A34-4FD1-8551-7AEB5006C71E",
                       "SQL Trace Data Source",
                       "Processes SQL trace files exported as XML.")]
     [FileDataSource(".xml", "XML files exported from TRC files")]
-    public class SqlCustomDataSource
-        : CustomDataSourceBase
+    public class SqlProcessingSource
+        : ProcessingSource
     {
         private IApplicationEnvironment applicationEnvironment;
 
-        public override CustomDataSourceInfo GetAboutInfo()
+        public override ProcessingSourceInfo GetAboutInfo()
         {
-            return new CustomDataSourceInfo
+            return new ProcessingSourceInfo
             {
                 CopyrightNotice = "Copyright 2021 Microsoft Corporation. All Rights Reserved.",
                 LicenseInfo = new LicenseInfo
@@ -56,35 +56,38 @@ namespace SqlPlugin
             // plugin, every data source should be used.
             //
 
-            var filePath = dataSources.First().GetUri().LocalPath;
+            var filePath = dataSources.First().Uri.LocalPath;
             return new SqlCustomDataProcessor(filePath,
                                               options,
                                               this.applicationEnvironment,
-                                              processorEnvironment,
-                                              this.AllTables,
-                                              this.MetadataTables);
+                                              processorEnvironment);
         }
 
-        protected override bool IsFileSupportedCore(string path)
+        protected override bool IsDataSourceSupportedCore(IDataSource source)
         {
-            // Peek inside the XML and make sure our XML namespace is declared and used
-
-            using (var reader = new StreamReader(path))
+            if (source is FileDataSource fileDataSource)
             {
-                // Skip first line since namespace should be on second
-                reader.ReadLine();
+                // Peek inside the XML and make sure our XML namespace is declared and used
 
-                var line = reader.ReadLine();
+                using (var reader = new StreamReader(fileDataSource.FullPath))
+                {
+                    // Skip first line since namespace should be on second
+                    reader.ReadLine();
 
-                if (line != null)
-                {
-                    return line.Contains(SqlPluginConstants.SqlXmlNamespace);
-                }
-                else
-                {
-                    return false;
+                    var line = reader.ReadLine();
+
+                    if (line != null)
+                    {
+                        return line.Contains(SqlPluginConstants.SqlXmlNamespace);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
+
+            return false;
         }
 
         protected override void SetApplicationEnvironmentCore(IApplicationEnvironment applicationEnvironment)

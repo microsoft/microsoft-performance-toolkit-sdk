@@ -21,6 +21,6 @@ namespace SqlPluginWithProcessingPipeline
         // and can be created by external binaries by just knowing the
         // parser and cooker IDs defined above
         public static readonly DataCookerPath CookerPath =
-            new DataCookerPath(SqlPluginConstants.ParserId, SqlPluginConstants.CookerId);
+            DataCookerPath.ForSource(SqlPluginConstants.ParserId, SqlPluginConstants.CookerId);
     }
 }
