@@ -18,7 +18,7 @@ In order to have your new `DataSource` recognized by the SDK, you must do the
 following:
 
 - Create a new class inheriting from `DataSource`.
-    - You may also implment `IDataSource` directly.
+    - You may also implement `IDataSource` directly.
 - Create a new attribute inheriting from `DataSourceAttribute`, and specify the
   `DataSource` you created in the call to the base constructor.
 - Optionally implement the `Accepts` method on your new attribute.
@@ -212,4 +212,4 @@ namespace Sample
 We have seen how to create a new kind of `DataSource` an how to seamlessly
 allow a `ProcessingSource` to leverage our new `DataSource`.
 
-[Back to Advanced Topics](Overview.md)
+[Back to Advanced Topics](README.md)

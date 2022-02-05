@@ -3,7 +3,7 @@
 This document outlines how to make a `ProcessingSource` or SDK
 extension - such as a `DataCooker` - disposable.
 
-# Motiviation
+# Motivation
 
 When your extension manages items that require cleanup, it would be useful to
 implement `IDisposable` and have the SDK's runtime make sure that your
@@ -58,7 +58,7 @@ using (var engine = Engine.Create())
 
     // ...
 
-    var resultes = engine.Process();
+    var results = engine.Process();
 
     // ...
 
@@ -91,4 +91,4 @@ that implementation.
 We have seen how to make our extensions disposable in order to allow for the
 SDK runtime to automatically dispose of objects created by our plugins.
 
-[Back to Advanced Topics](Overview.md)
+[Back to Advanced Topics](README.md)

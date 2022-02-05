@@ -109,6 +109,8 @@ If the "State" column above is a [Pivot Column](#pivot-column), the 5 rows would
 
 NOTE: the SDK has no understanding of Pivot Tables. Tables created by a plugin are purely "flat" tables - i.e. tables similar the first one above. It is up to programs like [Windows Performance Analyzer](#windows-performance-analyzer) to use pivot information in a [Table Configuration](#tableconfiguration) to present a plugin's Table as a Pivot Table.
 
+See also: [Wikipedia Pivot Tables](https://en.wikipedia.org/wiki/Pivot_table).
+
 ## Plugin
 
 A collection of one-or-more [ProcessingSources](#processingsource) that collectively create zero-or-more [Tables](#table) and consist of zero-or-more [DataCookers](#datacooker).
@@ -141,11 +143,11 @@ A [Table](#table) variant that cannot participate in a [Processing Pipeline](#pr
 
 ## SourceDataCooker
 
-A [DataCooker](#datacooker) that receives input from a specific [SourceParser](#sourceparser). A SourceDataCooker may also receive input from other DataCookers of the same SourceParser.
+A [DataCooker](#datacooker) that receives input from an associated [SourceParser](#sourceparser). A SourceDataCooker may also receive input from other SourceDataCookers enabled on the same SourceParser.
 
 ## SourceParser
 
-An object that a [CustomDataProcessor](#customdataprocessor) typically tasks with parsing a [DataSource](#datasource) into individual records. The records that a SourceParser emits typically begin a [Processing Pipeline](#processing-pipeline), wherein [DataCookers](#datacooker) further process data to be consumed by [Tables](#table).  
+An object that a [CustomDataProcessor](#customdataprocessor) tasks with parsing a [DataSource](#datasource) into individual records. The records that a SourceParser emits begin a [Processing Pipeline](#processing-pipeline), wherein [DataCookers](#datacooker) further process data to be consumed by [Tables](#table).  
 
 ## Special Columns
 

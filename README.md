@@ -7,7 +7,7 @@
 The Microsoft Performance Toolkit is a collection of cross-platform tools developers can use to create 
 and extend performance analysis applications. It serves as the runtime of the [Windows Performance Analyzer](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer), 
 a Windows program included in the [Windows Performance Toolkit](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/). 
-By using the Microsoft Performance Toolkit SDK, Windows Performance Anlazyer - or any performance analysis application - 
+By using the Microsoft Performance Toolkit SDK, Windows Performance Analyzer - or any performance analysis application - 
 can be configured to process and display performance data from arbitrary sources.
 
 The Microsoft Performance Toolkit SDK provides two key functionalities:
@@ -19,7 +19,7 @@ feature-rich data-processing pipeline
 These two functionalities are not mutually exclusive, and plugins may access data in another plugin's (or, commonly, its own) 
 data-processing pipeline when creating tables for a given data source.
 
-For help with getting started and developing SDK plugins, refer to our [documentation](./documentation/Overview.md).
+For help with getting started and developing SDK plugins, refer to our [documentation](./documentation/README.md).
 
 ## In this Repository
 * `devel-template`: a work-in-progress .NET template for creating SDK plugins
@@ -44,11 +44,11 @@ For help with getting started and developing SDK plugins, refer to our [document
 
 This repository tracks which versions of the SDK are compatibile with certain SDK drivers such as Windows Performance Analyzer. This information can be used to determine which version of an SDK driver should be used when loading plugins compiled against a specific SDK version.
 
-This information is listed in the [known SDK driver compatibility lists](./documentation/Known-SDK-Driver-Compatibility/Overview.md) document.
+This information is listed in the [known SDK driver compatibility lists](./documentation/Known-SDK-Driver-Compatibility/README.md) document.
 
 ## Getting Started
 
-Refer to the [documentation folder](./documentation/Overview.md) for help with creating SDK plugins.
+Refer to the [documentation folder](./documentation/README.md) for help with creating SDK plugins.
 
 ## Coming Soon
 

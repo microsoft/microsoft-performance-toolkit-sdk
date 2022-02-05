@@ -4,6 +4,11 @@ These plugins can be used by performance analysis applications that use the SDK 
 
 This folder contains instructions for developing SDK plugins and utilizing the SDK's various features.
 
+# Quick Start
+Refer to [Creating your first plugin](Using-the-SDK/Creating-your-plugin.md) to jump in quickly.
+
+> ⚠️ Note: We recommend following the [Recommended Reading Order](#recommended-reading-order).
+
 # Glossary
 
 For quick definitions/examples of terms and concepts, refer to the [Glossary](./Glossary.md). 
@@ -11,7 +16,7 @@ For quick definitions/examples of terms and concepts, refer to the [Glossary](./
 # Requirements
 The following are required in order to develop an SDK plugin:
 * [NuGet](https://www.nuget.org/downloads)
-* [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks)
+* [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks) or a [compatible version](https://docs.microsoft.com/en-us/dotnet/standard/net-standard?tabs=net-standard-1-0#tabpanel_1_net-standard-2-0)
 * A text editor (for editing your source code)
 
 It is recommended to use [Visual Studio](https://visualstudio.microsoft.com/downloads/) to develop an SDK plugin since it satisfies all three requirements. Future documentation assumes the use of Visual Studio, but the instructions may be adapted for other editors/IDEs.
@@ -21,12 +26,9 @@ The SDK is published as a NuGet package under the name [Microsoft.Performance.SD
 Since it is hosted on [NuGet.org](https://www.nuget.org/), it can be added to a `csproj` with no additional configuration by using 
 the Visual Studio NuGet Package Manager, `dotnet.exe`, or `nuget.exe`.
 
-# Creating A Plugin
-Refer to [Creating your first plugin](Using-the-SDK/Creating-your-plugin.md)
-
 # Recommended Reading Order
 To best understand how the SDK works and how to develop SDK plugins, it is recommended to read documentation in the following order:
-1) [Architecture/Overview](./Architecture/Overview.md) to understand at a high level the various systems the SDK provides
-2) [Architecture/The Data-Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
+1. [Architecture/Overview](./Architecture/README.md) to understand at a high level the various systems the SDK provides
+2. [Architecture/The Data-Processing Pipeline](./Architecture/The-Data-Processing-Pipeline.md) to understand how to systematically process data that 
 can be used by tables
-3) [Creating your first plugin](Using-the-SDK/Creating-your-plugin.md) to learn how to create an SDK plugin
+3. [Creating your first plugin](Using-the-SDK/Creating-your-plugin.md) to learn how to create an SDK plugin

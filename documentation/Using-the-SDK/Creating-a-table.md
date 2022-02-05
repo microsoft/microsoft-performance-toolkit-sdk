@@ -106,4 +106,4 @@ SDK plugins. For additional resources, you may browse our [samples folder](../..
 
 For more advanced usage of the SDK, please see the following:
 
-- [Overview of Advanced Topics](Advanced/Overview.md)
+- [Overview of Advanced Topics](Advanced/README.md)
