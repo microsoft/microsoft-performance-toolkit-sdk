@@ -10,7 +10,7 @@ assignees: mslukebo
 **Is your feature request an entirely new concept?**
 E.g. "I would like tables to support real-time data streaming."
 
-**Is your feature request related to an existing component?"
+**Is your feature request related to an existing component?**
 E.g. "I would like more functionality on the `TableConfiguration` class.
 
 **Is your feature request related to a problem? Please describe.**
