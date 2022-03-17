@@ -697,7 +697,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.applicationEnvironment = null;
             this.workingDataSourceSet = null;
             this.internalDataSourceSet = null;
-            this.applicationEnvironment = null;
             this.tablesToProcessors = null;
             this.isDisposed = true;
         }
@@ -778,7 +777,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                     instance.Factory.CreateSourceSessionFactory(),
                     createInfo.IsInteractive
                         ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
-                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger));
+                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger))
+                {
+                    IsInteractive = createInfo.IsInteractive,
+                };
 
                 foreach (var cds in instance.ProcessingSourceReferences)
                 {
