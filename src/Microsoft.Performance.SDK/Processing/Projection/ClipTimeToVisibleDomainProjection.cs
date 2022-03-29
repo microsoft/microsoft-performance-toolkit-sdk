@@ -108,12 +108,18 @@ namespace Microsoft.Performance.SDK.Processing
                   where TGenerator : IProjection<int, Timestamp>
             {
                 private readonly TGenerator generator;
-                private readonly VisibleDomainRegionContainer visibleDomain;
+                private readonly VisibleDomainRegionContainer visibleDomainContainer;
 
                 public ClipTimeToVisibleTimestampDomainColumnGenerator(TGenerator timestampGenerator)
                 {
                     this.generator = timestampGenerator;
-                    this.visibleDomain = new VisibleDomainRegionContainer();
+                    this.visibleDomainContainer = new VisibleDomainRegionContainer();
+                }
+
+                public ClipTimeToVisibleTimestampDomainColumnGenerator(TGenerator timestampGenerator, VisibleDomainRegionContainer visibleDomainContainer)
+                {
+                    this.generator = timestampGenerator;
+                    this.visibleDomainContainer = visibleDomainContainer;
                 }
 
                 // IProjection<int, Timestamp>
@@ -123,7 +129,7 @@ namespace Microsoft.Performance.SDK.Processing
                     {
                         Timestamp timestamp = this.generator[value];
 
-                        return ClipTimestampToVisibleDomain(timestamp, this.visibleDomain.VisibleDomain);
+                        return ClipTimestampToVisibleDomain(timestamp, this.visibleDomainContainer.VisibleDomain);
                     }
                 }
 
@@ -134,13 +140,13 @@ namespace Microsoft.Performance.SDK.Processing
                 public object Clone()
                 {
                     var result = new ClipTimeToVisibleTimestampDomainColumnGenerator<TGenerator>(
-                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.generator));
+                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.generator), this.visibleDomainContainer);
                     return result;
                 }
 
                 public bool NotifyVisibleDomainChanged(IVisibleDomainRegion visibleDomain)
                 {
-                    this.visibleDomain.VisibleDomainRegion = visibleDomain;
+                    this.visibleDomainContainer.VisibleDomainRegion = visibleDomain;
                     VisibleDomainSensitiveProjection.NotifyVisibleDomainChanged(this.generator, visibleDomain);
                     return true;
                 }
@@ -178,6 +184,12 @@ namespace Microsoft.Performance.SDK.Processing
                     this.VisibleDomainContainer = new VisibleDomainRegionContainer();
                 }
 
+                public ClipTimeToVisibleTimeRangeDomainColumnGenerator(TGenerator timestampGenerator, VisibleDomainRegionContainer visibleDomainRegionContainer)
+                {
+                    this.Generator = timestampGenerator;
+                    this.VisibleDomainContainer = visibleDomainRegionContainer;
+                }
+
                 // IProjection<int, Timestamp>
                 public TimeRange this[int value]
                 {
@@ -213,7 +225,7 @@ namespace Microsoft.Performance.SDK.Processing
                 public object Clone()
                 {
                     var result = new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(
-                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.Generator));
+                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.Generator), this.VisibleDomainContainer);
                     return result;
                 }
 
@@ -250,6 +262,14 @@ namespace Microsoft.Performance.SDK.Processing
                         new ClipTimeToVisibleTimeRangePercentFormatProvider(() => internalGenerator.VisibleDomainContainer.VisibleDomain.Duration);
                 }
 
+                public ClipTimeToVisibleTimeRangePercentColumnGenerator(ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator> timeRangeColumnGenerator)
+                {
+                    this.timeRangeColumnGenerator = timeRangeColumnGenerator;
+
+                    this.customFormatter =
+                        new ClipTimeToVisibleTimeRangePercentFormatProvider(() => timeRangeColumnGenerator.VisibleDomainContainer.VisibleDomain.Duration);
+                }
+
                 public TimeRange this[int value] => this.timeRangeColumnGenerator[value];
 
                 public Type SourceType => typeof(int);
@@ -267,7 +287,7 @@ namespace Microsoft.Performance.SDK.Processing
                 public object Clone()
                 {
                     var result = new ClipTimeToVisibleTimeRangePercentColumnGenerator<TGenerator>(
-                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.timeRangeColumnGenerator.Generator));
+                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.timeRangeColumnGenerator));
                     return result;
                 }
 
