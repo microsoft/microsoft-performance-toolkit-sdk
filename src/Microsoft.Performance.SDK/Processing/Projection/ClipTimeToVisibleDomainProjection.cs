@@ -111,12 +111,11 @@ namespace Microsoft.Performance.SDK.Processing
                 private readonly VisibleDomainRegionContainer visibleDomainContainer;
 
                 public ClipTimeToVisibleTimestampDomainColumnGenerator(TGenerator timestampGenerator)
+                    : this(timestampGenerator, new VisibleDomainRegionContainer())
                 {
-                    this.generator = timestampGenerator;
-                    this.visibleDomainContainer = new VisibleDomainRegionContainer();
                 }
 
-                public ClipTimeToVisibleTimestampDomainColumnGenerator(TGenerator timestampGenerator, VisibleDomainRegionContainer visibleDomainContainer)
+                private ClipTimeToVisibleTimestampDomainColumnGenerator(TGenerator timestampGenerator, VisibleDomainRegionContainer visibleDomainContainer)
                 {
                     this.generator = timestampGenerator;
                     this.visibleDomainContainer = visibleDomainContainer;
@@ -179,12 +178,11 @@ namespace Microsoft.Performance.SDK.Processing
                 internal VisibleDomainRegionContainer VisibleDomainContainer { get; }
 
                 public ClipTimeToVisibleTimeRangeDomainColumnGenerator(TGenerator timestampGenerator)
+                    : this(timestampGenerator, new VisibleDomainRegionContainer())
                 {
-                    this.Generator = timestampGenerator;
-                    this.VisibleDomainContainer = new VisibleDomainRegionContainer();
                 }
 
-                public ClipTimeToVisibleTimeRangeDomainColumnGenerator(TGenerator timestampGenerator, VisibleDomainRegionContainer visibleDomainRegionContainer)
+                private ClipTimeToVisibleTimeRangeDomainColumnGenerator(TGenerator timestampGenerator, VisibleDomainRegionContainer visibleDomainRegionContainer)
                 {
                     this.Generator = timestampGenerator;
                     this.VisibleDomainContainer = visibleDomainRegionContainer;
@@ -254,15 +252,11 @@ namespace Microsoft.Performance.SDK.Processing
                 private readonly ClipTimeToVisibleTimeRangePercentFormatProvider customFormatter;
 
                 public ClipTimeToVisibleTimeRangePercentColumnGenerator(TGenerator timeRangeGenerator)
+                    : this(new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(timeRangeGenerator))
                 {
-                    var internalGenerator = new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(timeRangeGenerator);
-                    this.timeRangeColumnGenerator = internalGenerator;
-
-                    this.customFormatter =
-                        new ClipTimeToVisibleTimeRangePercentFormatProvider(() => internalGenerator.VisibleDomainContainer.VisibleDomain.Duration);
                 }
 
-                public ClipTimeToVisibleTimeRangePercentColumnGenerator(ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator> timeRangeColumnGenerator)
+                private ClipTimeToVisibleTimeRangePercentColumnGenerator(ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator> timeRangeColumnGenerator)
                 {
                     this.timeRangeColumnGenerator = timeRangeColumnGenerator;
 
