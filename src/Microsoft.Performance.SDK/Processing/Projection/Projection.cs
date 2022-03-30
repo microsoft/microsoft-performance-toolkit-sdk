@@ -1832,19 +1832,24 @@ with anonymous methods for small tables.");
               where TGenerator : IProjection<int, T>
         {
             private readonly TGenerator columnToAggregate;
-            private readonly VisibleDomainRegionContainer visibleDomain;
+            private readonly VisibleDomainRegionContainer visibleDomainContainer;
 
             public AggregateRowsInVisibleDomainColumnGenerator(TGenerator columnToAggregate)
+                    : this(columnToAggregate, new VisibleDomainRegionContainer())
+            {
+            }
+
+            private AggregateRowsInVisibleDomainColumnGenerator(TGenerator columnToAggregate, VisibleDomainRegionContainer visibleDomainRegionContainer)
             {
                 this.columnToAggregate = columnToAggregate;
-                this.visibleDomain = new VisibleDomainRegionContainer();
+                this.visibleDomainContainer = visibleDomainRegionContainer;
             }
 
             public TAggregate this[int value]
             {
                 get
                 {
-                    return this.visibleDomain.VisibleDomainRegion.AggregateVisibleRows<T, TAggregate>(
+                    return this.visibleDomainContainer.VisibleDomainRegion.AggregateVisibleRows<T, TAggregate>(
                         this.columnToAggregate,
                         AggregationMode.Sum);
                 }
@@ -1859,12 +1864,12 @@ with anonymous methods for small tables.");
             public object Clone()
             {
                 return new AggregateRowsInVisibleDomainColumnGenerator<T, TAggregate, TGenerator>(
-                    VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.columnToAggregate));
+                    VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.columnToAggregate), this.visibleDomainContainer);
             }
 
             public bool NotifyVisibleDomainChanged(IVisibleDomainRegion visibleDomain)
             {
-                this.visibleDomain.VisibleDomainRegion = visibleDomain;
+                this.visibleDomainContainer.VisibleDomainRegion = visibleDomain;
                 VisibleDomainSensitiveProjection.NotifyVisibleDomainChanged(this.columnToAggregate, visibleDomain);
                 return true;
             }
