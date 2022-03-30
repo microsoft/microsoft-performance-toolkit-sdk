@@ -1858,8 +1858,10 @@ with anonymous methods for small tables.");
 
             public object Clone()
             {
-                return new AggregateRowsInVisibleDomainColumnGenerator<T, TAggregate, TGenerator>(
+                var result = new AggregateRowsInVisibleDomainColumnGenerator<T, TAggregate, TGenerator>(
                     VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.columnToAggregate));
+                result.NotifyVisibleDomainChanged(this.visibleDomain.VisibleDomainRegion);
+                return result;
             }
 
             public bool NotifyVisibleDomainChanged(IVisibleDomainRegion visibleDomain)

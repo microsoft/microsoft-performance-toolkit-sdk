@@ -167,6 +167,7 @@ namespace Microsoft.Performance.SDK.Processing
                 {
                     var result = new ClipTimeToVisibleTimestampDomainColumnGenerator<TGenerator>(
                         VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.generator));
+                    result.NotifyVisibleDomainChanged(this.visibleDomain.VisibleDomainRegion);
                     return result;
                 }
 
@@ -246,6 +247,7 @@ namespace Microsoft.Performance.SDK.Processing
                 {
                     var result = new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(
                         VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.Generator));
+                    result.NotifyVisibleDomainChanged(this.VisibleDomainContainer.VisibleDomainRegion);
                     return result;
                 }
 
@@ -268,8 +270,13 @@ namespace Microsoft.Performance.SDK.Processing
                 private readonly ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator> timeRangeColumnGenerator;
 
                 public ClipTimeToVisibleTimeRangePercentColumnGenerator(TGenerator timeRangeGenerator)
+                    : this(new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(timeRangeGenerator))
                 {
-                    this.timeRangeColumnGenerator = new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(timeRangeGenerator);
+                }
+
+                private ClipTimeToVisibleTimeRangePercentColumnGenerator(ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator> timeRangeColumnGenerator)
+                {
+                    this.timeRangeColumnGenerator = timeRangeColumnGenerator;
                 }
 
                 public double this[int value]
@@ -294,7 +301,7 @@ namespace Microsoft.Performance.SDK.Processing
                 public object Clone()
                 {
                     var result = new ClipTimeToVisibleTimeRangePercentColumnGenerator<TGenerator>(
-                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.timeRangeColumnGenerator.Generator));
+                        VisibleDomainSensitiveProjection.CloneIfVisibleDomainSensitive(this.timeRangeColumnGenerator));
                     return result;
                 }
 
