@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             /// <summary>
             ///     Create a <see cref="Timestamp"/> projection that is clipped to a
-            ///     <see cref="VisibleDomainRegionContainer"/>.
+            ///     <see cref="IVisibleDomainRegion"/>.
             ///     See also <seealso cref="IVisibleDomainSensitiveProjection"/>.
             /// </summary>
             /// <param name="timestampProjection">
@@ -45,7 +45,7 @@ namespace Microsoft.Performance.SDK.Processing
 
             /// <summary>
             ///     Create a <see cref="TimeRange"/> projection that is clipped to a
-            ///     <see cref="VisibleDomainRegionContainer"/>.
+            ///     <see cref="IVisibleDomainRegion"/>.
             ///     See also <seealso cref="IVisibleDomainSensitiveProjection"/>.
             /// </summary>
             /// <param name="timeRangeProjection">
@@ -82,7 +82,39 @@ namespace Microsoft.Performance.SDK.Processing
             /// <returns>
             ///     A viewport sensitive projection.
             /// </returns>
+            [Obsolete("This method returns incorrect data and will be removed in version 2.0. For correct data, please use CreatePercentDouble.")]
             public static IProjection<int, TimeRange> CreatePercent(IProjection<int, TimeRange> timeRangeColumn)
+            {
+                return Projection.Constant(TimeRange.Zero);
+            }
+
+            /// <summary>
+            ///     Creates a new projection that maps the portion of a given <see cref="TimeRange"/>
+            ///     inside the current <see cref="IVisibleDomainRegion"/> to its percent relative to the entire <see cref="TimeRange"/>
+            ///     of the <see cref="IVisibleDomainRegion"/>.
+            /// </summary>
+            /// <remarks>
+            ///     For example, with a <see cref="IVisibleDomainRegion"/> of [50, 100):
+            ///     <list type="bullet">
+            ///         <item>
+            ///             [50, 100) projects to 100.0 since it overlaps the entire <see cref="IVisibleDomainRegion"/>.
+            ///         </item>
+            ///         <item>
+            ///             [50, 75) projects to 50.0 since it overlaps half of the <see cref="IVisibleDomainRegion"/>.
+            ///         </item>
+            ///         <item>
+            ///             [0, 75) projects to 50.0 since its portion inside the visible domain is [50, 75),
+            ///             which overlaps half of the <see cref="IVisibleDomainRegion"/>.
+            ///         </item>
+            ///     </list>
+            /// </remarks>
+            /// <param name="timeRangeColumn">
+            ///     The original <see cref="TimeRange"/> projection.
+            /// </param>
+            /// <returns>
+            ///     The created projection.
+            /// </returns>
+            public static IProjection<int, double> CreatePercentDouble(IProjection<int, TimeRange> timeRangeColumn)
             {
                 Guard.NotNull(timeRangeColumn, nameof(timeRangeColumn));
 
@@ -98,7 +130,7 @@ namespace Microsoft.Performance.SDK.Processing
 
                 var type = typeof(ClipTimeToVisibleTimeRangePercentColumnGenerator<>).MakeGenericType(typeArgs);
                 var instance = Activator.CreateInstance(type, constructorArgs);
-                return (IProjection<int, TimeRange>)instance;
+                return (IProjection<int, double>)instance;
             }
 
             [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
@@ -229,40 +261,35 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             private struct ClipTimeToVisibleTimeRangePercentColumnGenerator<TGenerator>
-                : IProjection<int, TimeRange>,
-                  IVisibleDomainSensitiveProjection,
-                  IFormatProvider
+                : IProjection<int, double>,
+                  IVisibleDomainSensitiveProjection
                   where TGenerator : IProjection<int, TimeRange>
             {
                 private readonly ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator> timeRangeColumnGenerator;
 
-                // IFormatProvider returns an object - cannot return 'this' struct. 
-                // So implement ICustomFormatter in a private class and return that object.
-                //
-                private readonly ClipTimeToVisibleTimeRangePercentFormatProvider customFormatter;
-
                 public ClipTimeToVisibleTimeRangePercentColumnGenerator(TGenerator timeRangeGenerator)
                 {
-                    var internalGenerator = new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(timeRangeGenerator);
-                    this.timeRangeColumnGenerator = internalGenerator;
-
-                    this.customFormatter =
-                        new ClipTimeToVisibleTimeRangePercentFormatProvider(() => internalGenerator.VisibleDomainContainer.VisibleDomain.Duration);
+                    this.timeRangeColumnGenerator = new ClipTimeToVisibleTimeRangeDomainColumnGenerator<TGenerator>(timeRangeGenerator);
                 }
 
-                public TimeRange this[int value] => this.timeRangeColumnGenerator[value];
+                public double this[int value]
+                {
+                    get
+                    {
+                        var numerator = this.timeRangeColumnGenerator[value].Duration;
+                        var denominator = this.timeRangeColumnGenerator.VisibleDomainContainer.VisibleDomain.Duration;
+
+                        return (denominator != TimestampDelta.Zero) ?
+                            (100.0 * ((double)numerator.ToNanoseconds) / (denominator.ToNanoseconds)) :
+                            100.0;
+                    }
+                }
 
                 public Type SourceType => typeof(int);
 
-                public Type ResultType => typeof(TimeRange);
+                public Type ResultType => typeof(double);
 
                 public bool DependsOnVisibleDomain => true;
-
-                public object GetFormat(Type formatType)
-                {
-                    return (formatType == typeof(TimeRange) ||
-                            formatType == typeof(TimestampDelta)) ? this.customFormatter : null;
-                }
 
                 public object Clone()
                 {
@@ -275,48 +302,6 @@ namespace Microsoft.Performance.SDK.Processing
                 {
                     this.timeRangeColumnGenerator.NotifyVisibleDomainChanged(visibleDomain);
                     return true;
-                }
-
-                private class ClipTimeToVisibleTimeRangePercentFormatProvider
-                    : ICustomFormatter
-                {
-                    private readonly Func<TimestampDelta> getVisibleDomainDuration;
-
-                    public ClipTimeToVisibleTimeRangePercentFormatProvider(Func<TimestampDelta> getVisibleDomainDuration)
-                    {
-                        Guard.NotNull(getVisibleDomainDuration, nameof(getVisibleDomainDuration));
-
-                        this.getVisibleDomainDuration = getVisibleDomainDuration;
-                    }
-
-                    public string Format(string format, object arg, IFormatProvider formatProvider)
-                    {
-                        if (arg == null)
-                        {
-                            return string.Empty;
-                        }
-
-                        TimestampDelta numerator;
-                        if (arg is TimeRange)
-                        {
-                            numerator = ((TimeRange)arg).Duration;
-                        }
-                        else if (arg is TimestampDelta)
-                        {
-                            numerator = (TimestampDelta)arg;
-                        }
-                        else
-                        {
-                            throw new FormatException();
-                        }
-
-                        TimestampDelta visibleDomainDuration = getVisibleDomainDuration();
-                        double percent = (visibleDomainDuration != TimestampDelta.Zero) ?
-                            (100.0 * ((double)numerator.ToNanoseconds) / (visibleDomainDuration.ToNanoseconds)) :
-                            100.0;
-
-                        return percent.ToString(format, formatProvider);
-                    }
                 }
             }
         }
