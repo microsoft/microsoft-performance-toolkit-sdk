@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
@@ -193,18 +192,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             Assert.IsTrue(cooker1BeginCallIndex < cooker1EndCallIndex, "Cooker in first pass received EndDataCooking call before it received BeginDataCooking call.");
             Assert.IsTrue(cooker1EndCallIndex < cooker2BeginCallIndex, "Cooker in second pass received BeginDataCooking call before cooker in first pass received EndDataCooking call.");
             Assert.IsTrue(cooker2BeginCallIndex < cooker2EndCallIndex, "Cooker in second pass received EndDataCooking call before it received BeginDataCooking call.");
-        }
-
-        private void AssertCallOrder(IReadOnlyCollection<(DataCookerPath, string)> expectedCallOrder, IReadOnlyCollection<(DataCookerPath, string)> methodCallOrder)
-        {
-            int searchIndex = 0;
-            IReadOnlyCollection<(DataCookerPath, string)> methodCallsToSearch = methodCallOrder;
-
-            foreach (var expectedCall in expectedCallOrder)
-            {
-                Assert.IsTrue(methodCallsToSearch.Contains(expectedCall), $"Did not find {expectedCall.Item1}.{expectedCall.Item2} in any calls after index {searchIndex}");
-
-            }
         }
 
         [TestMethod]
