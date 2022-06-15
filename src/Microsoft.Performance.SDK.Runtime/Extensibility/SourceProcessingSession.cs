@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
@@ -88,24 +87,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
                 this.currentPassIndex = InvalidPass;
                 return;
             }
-            for (int passIndex = 0; passIndex < countOfPassesToProcess; passIndex++)
-            {
-                var sourceDataCookers = this.sourceCookersByPass[passIndex];
-
-                foreach (var sourceDataCooker in sourceDataCookers)
-                {
-                    IReadOnlyCollection<DataCookerPath> availableCookers = sourceDataCooker.RequiredDataCookers;
-                    if (availableCookers is null)
-                    {
-                        availableCookers = new List<DataCookerPath>().AsReadOnly();
-                    }
-
-                    var dependencyData = new SourceDataCookerDependencyProvider<T, TContext, TKey>(
-                            new HashSet<DataCookerPath>(availableCookers), this);
-
-                    sourceDataCooker.BeginDataCooking(dependencyData, cancellationToken);
-                }
-            }
 
             // Create a progressTracker for each pass
             List<DataProcessorProgress> progressTrackers = new List<DataProcessorProgress>(countOfPassesToProcess);
@@ -137,16 +118,15 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
 
                 progressTracker.PropertyChanged += propChangedCallback;
 
+                this.NotifyBeginDataCooking(passIndex, cancellationToken);
+
                 this.SourceParser.ProcessSource(this, logger, progressTrackers[passIndex], cancellationToken);
 
                 // Ensure to report 100 to signify finished and deregister callback.
                 progressTracker.Report(100);
                 progressTracker.PropertyChanged -= propChangedCallback;
 
-                foreach (var cooker in this.sourceCookersByPass[passIndex])
-                {
-                    cooker.EndDataCooking(cancellationToken);
-                }
+                this.NotifyEndDataCooking(passIndex, cancellationToken);
             }
 
             this.currentPassIndex = InvalidPass;
@@ -219,6 +199,27 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility
             }
 
             return countOfPassesToProcess;
+        }
+
+        private void NotifyBeginDataCooking(int passIndex, CancellationToken cancellationToken)
+        {
+            foreach (var cooker in this.sourceCookersByPass[passIndex])
+            {
+                IReadOnlyCollection<DataCookerPath> availableCookers = cooker.RequiredDataCookers ?? new List<DataCookerPath>().AsReadOnly();
+
+                var dependencyData = new SourceDataCookerDependencyProvider<T, TContext, TKey>(
+                        new HashSet<DataCookerPath>(availableCookers), this);
+
+                cooker.BeginDataCooking(dependencyData, cancellationToken);
+            }
+        }
+
+        private void NotifyEndDataCooking(int passIndex, CancellationToken cancellationToken)
+        {
+            foreach (var cooker in this.sourceCookersByPass[passIndex])
+            {
+                cooker.EndDataCooking(cancellationToken);
+            }
         }
     }
 }
