@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
+using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses;
 using Microsoft.Performance.SDK.Tests.DataTypes;
@@ -59,6 +60,20 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             return cooker;
         }
 
+        /// <summary>
+        ///     Create the source parser and session to use for a test.
+        /// </summary>
+        /// <returns>
+        ///     The created source parser and session.
+        /// </returns>
+        private (TestSourceParser sourceParser, SourceProcessingSession<TestRecord, TestParserContext, int> sourceSession) CreateSourceParserAndSession()
+        {
+            var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
+            var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
+
+            return (sourceParser, sourceSession);
+        }
+
         [TestMethod]
         [UnitTest]
         public void Constructor_NullSourceParser_Throws()
@@ -102,8 +117,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void RegisterSourceDataCooker()
         {
-            var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
-            var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
+            (TestSourceParser sourceParser, SourceProcessingSession<TestRecord, TestParserContext, int> sourceSession)
+               = CreateSourceParserAndSession();
 
             var sourceDataCooker = new TestSourceDataCooker()
             {
@@ -121,10 +136,70 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
         [TestMethod]
         [UnitTest]
+        public void BeginAndEndDataCooking_CalledInPassOrder()
+        {
+            (TestSourceParser sourceParser, SourceProcessingSession<TestRecord, TestParserContext, int> sourceSession)
+                = CreateSourceParserAndSession();
+
+            var dataCookerContext = new TestSourceDataCookerContext();
+
+            var pass1SourceCooker = new TestSourceDataCooker(dataCookerContext)
+            {
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TesPass1tSourceDataCooker"),
+                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 1 }),
+                DataProductionStrategy = DataProductionStrategy.PostSourceParsing
+            };
+            sourceSession.RegisterSourceDataCooker(pass1SourceCooker);
+
+            var pass2SourceCooker = new TestSourceDataCooker(dataCookerContext)
+            {
+                Path = DataCookerPath.ForSource(sourceParser.Id, "TestPass2SourceDataCooker"),
+                DataKeys = new ReadOnlyHashSet<int>(new HashSet<int>() { 1 }),
+            };
+            sourceSession.RegisterSourceDataCooker(pass2SourceCooker);
+
+            // Setup dependencies so that cooker2 will depend on cooker1. Since cooker1 has a 
+            // PostSourceParsing DataProductionStrategy, cooker2 must run in a second pass.
+            {
+                // pass2SourceCooker: Pass=1, Block=0
+                pass2SourceCooker.RequiredDataCookers = new ReadOnlyCollection<DataCookerPath>(
+                    new[] { pass1SourceCooker.Path });
+            }
+
+            // setup data for the TestParser to "parse" - we don't actually check it receives data in this test.
+            var testRecords = new List<TestRecord>
+            {
+                new TestRecord {Key = 1, Value = "42"},
+            };
+
+            sourceParser.TestRecords = testRecords;
+
+            Assert.AreEqual(sourceSession.RegisteredSourceDataCookers.Count, 2);
+
+            TestProgress progress = new TestProgress();
+            sourceSession.ProcessSource(new NullLogger(), progress, CancellationToken.None);
+
+            Assert.AreEqual(pass1SourceCooker.BeginDataCookingCallCount, 1);
+            Assert.AreEqual(pass1SourceCooker.EndDataCookingCallCount, 1);
+            Assert.AreEqual(pass2SourceCooker.BeginDataCookingCallCount, 1);
+            Assert.AreEqual(pass2SourceCooker.EndDataCookingCallCount, 1);
+
+            int cooker1BeginCallIndex = dataCookerContext.MethodCallOrder.IndexOf((pass1SourceCooker.Path, nameof(TestSourceDataCooker.BeginDataCooking)));
+            int cooker1EndCallIndex = dataCookerContext.MethodCallOrder.IndexOf((pass1SourceCooker.Path, nameof(TestSourceDataCooker.EndDataCooking)));
+            int cooker2BeginCallIndex = dataCookerContext.MethodCallOrder.IndexOf((pass2SourceCooker.Path, nameof(TestSourceDataCooker.BeginDataCooking)));
+            int cooker2EndCallIndex = dataCookerContext.MethodCallOrder.IndexOf((pass2SourceCooker.Path, nameof(TestSourceDataCooker.EndDataCooking)));
+
+            Assert.IsTrue(cooker1BeginCallIndex < cooker1EndCallIndex, "Cooker in first pass received EndDataCooking call before it received BeginDataCooking call.");
+            Assert.IsTrue(cooker1EndCallIndex < cooker2BeginCallIndex, "Cooker in second pass received BeginDataCooking call before cooker in first pass received EndDataCooking call.");
+            Assert.IsTrue(cooker2BeginCallIndex < cooker2EndCallIndex, "Cooker in second pass received EndDataCooking call before it received BeginDataCooking call.");
+        }
+
+        [TestMethod]
+        [UnitTest]
         public void ProcessSession()
         {
-            var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
-            var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
+            (TestSourceParser sourceParser, SourceProcessingSession<TestRecord, TestParserContext, int> sourceSession)
+               = CreateSourceParserAndSession();
 
             var dataCookerContext = new TestSourceDataCookerContext();
 
@@ -269,9 +344,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void ProgressReportsTest()
         {
-            var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
-            var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
-            var dataCookerContext = new TestSourceDataCookerContext();
+            (TestSourceParser sourceParser, SourceProcessingSession<TestRecord, TestParserContext, int> sourceSession)
+               = CreateSourceParserAndSession();
 
             // Create and populate cookers
             List<TestSourceDataCooker> cookers = new List<TestSourceDataCooker>();
@@ -380,8 +454,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void RegisteredDataKeysAreSentToSourceParser()
         {
-            var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
-            var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
+            (TestSourceParser sourceParser, SourceProcessingSession<TestRecord, TestParserContext, int> sourceSession)
+               = CreateSourceParserAndSession();
 
             var sourceDataCooker1 = new TestSourceDataCooker()
             {
@@ -418,8 +492,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void RegisteredDataKeysAreSentToSourceParserWithAllEventsTrue()
         {
-            var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
-            var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
+            (TestSourceParser sourceParser, SourceProcessingSession<TestRecord, TestParserContext, int> sourceSession)
+               = CreateSourceParserAndSession();
 
             var sourceDataCooker1 = new TestSourceDataCooker()
             {
