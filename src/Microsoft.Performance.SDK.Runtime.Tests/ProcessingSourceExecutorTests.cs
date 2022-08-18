@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -52,10 +53,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = null,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -68,7 +66,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -89,10 +87,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -108,7 +103,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 env,
                 options);
@@ -132,10 +127,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -150,7 +142,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 options);
@@ -174,10 +166,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -190,7 +179,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -216,10 +205,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -232,7 +218,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -259,10 +245,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -277,7 +260,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -303,10 +286,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -321,7 +301,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -350,10 +330,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -366,7 +343,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -392,10 +369,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tablesToEnable = new[]
             {
@@ -408,7 +382,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tablesToEnable,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -433,10 +407,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -447,7 +418,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -474,10 +445,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -488,7 +456,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -516,10 +484,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -530,7 +495,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -554,10 +519,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -568,7 +530,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -591,10 +553,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -605,7 +564,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -631,10 +590,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -645,7 +601,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => logger,
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -674,10 +630,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 DataProcessor = mockProcessor,
             };
 
-            var dataSources = new[]
-            {
-                Any.DataSource(),
-            };
+            var dataSourceGroup = Any.DataSourceGroup();
 
             var tables = new[]
             {
@@ -688,7 +641,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 progress,
                 _ => new NullLogger(),
                 CreateReference(fakeProcessingSource),
-                dataSources,
+                dataSourceGroup,
                 tables,
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
@@ -741,6 +694,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
             {
                 this.CreateProcessorCalls.Add(Tuple.Create(dataSources, processorEnvironment, options));
+                return this.DataProcessor;
+            }
+
+            public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+                ProcessorOptions options)
+            {
+                this.CreateProcessorCalls.Add(Tuple.Create((IEnumerable<IDataSource>)dataSourceGroup.DataSources, processorEnvironment, options));
                 return this.DataProcessor;
             }
 

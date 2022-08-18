@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -22,15 +23,15 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </summary>
         public DataSessionSource(
             ProcessingSourceReference processingSource,
-            IEnumerable<IDataSource> dataSources,
+            IDataSourceGroup dataSourceGroup,
             ProcessorOptions options)
         {
             Guard.NotNull(processingSource, nameof(processingSource));
-            Guard.NotNull(dataSources, nameof(dataSources));
+            Guard.NotNull(dataSourceGroup, nameof(dataSourceGroup));
             Guard.NotNull(options, nameof(options));
 
             this.ProcessingSource = processingSource;
-            this.DataSources = dataSources.ToList().AsReadOnly();
+            this.DataSourceGroup = dataSourceGroup;
             this.Options = options;
 
             this.ProgressTracker = new DataProcessorProgress();
@@ -43,10 +44,10 @@ namespace Microsoft.Performance.SDK.Runtime
         public ProcessingSourceReference ProcessingSource { get; }
 
         /// <summary>
-        ///     Gets the <see cref="IDataSource"/>s that can be
+        ///     Gets the <see cref="IDataSourceGroup"/> that can be
         ///     processed by the <see cref="ProcessingSource"/>.
         /// </summary>
-        public IEnumerable<IDataSource> DataSources { get; }
+        public IDataSourceGroup DataSourceGroup { get; }
 
         /// <summary>
         ///     Gets the options to pass to the processors.
@@ -90,29 +91,8 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </returns>
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            var dataSourceName = this.ProcessingSource.Name;
-            sb.Append(dataSourceName);
-
-            sb.Append(" (");
-            var isFirst = true;
-            foreach (var source in this.DataSources)
-            {
-                if (isFirst)
-                {
-                    isFirst = false;
-                }
-                else
-                {
-                    sb.Append(", ");
-                }
-
-                sb.Append(source.Uri);
-            }
-
-            sb.Append(")");
-
-            return sb.ToString();
+            string dataSourceUris = string.Join(", ", this.DataSourceGroup.DataSources.Select(ds => ds.Uri));
+            return $"{this.ProcessingSource.Name} ({{{dataSourceUris}}}, {this.DataSourceGroup.ProcessingMode.Name})";
         }
     }
 }

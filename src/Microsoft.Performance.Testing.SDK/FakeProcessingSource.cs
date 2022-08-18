@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.Testing.SDK
 {
@@ -27,6 +28,12 @@ namespace Microsoft.Performance.Testing.SDK
         }
 
         public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+        {
+            return this.CreateProcessorReturnValue;
+        }
+
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
         {
             return this.CreateProcessorReturnValue;
         }

@@ -625,10 +625,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             cds.CreateProcessorReturnValue = p;
             r.CreateProcessor(
-                new[]
-                {
-                    Any.DataSource(),
-                },
+                Any.DataSourceGroup(),
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
 

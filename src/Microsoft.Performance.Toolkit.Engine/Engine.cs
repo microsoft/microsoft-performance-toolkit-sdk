@@ -11,6 +11,7 @@ using System.Threading;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -954,7 +955,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         new ProcessingError(
                             executor.Context.ProcessingSource.Guid,
                             executor.Processor,
-                            executor.Context.DataSources,
+                            executor.Context.DataSourceGroup.DataSources,
                             e));
 
                     this.logger.Error($"Failed to process: {e}");
@@ -998,7 +999,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             new DataProcessorProgress(),
                             x => ConsoleLogger.Create(x.GetType()),
                             processingSource,
-                            dataSources,
+                            new DataSourceGroup(dataSources, new DefaultProcessingMode()), // TODO: use a group resolver to figure out groups to use instead
                             processingSource.Instance.MetadataTables,
                             new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
                             ProcessorOptions.Default);

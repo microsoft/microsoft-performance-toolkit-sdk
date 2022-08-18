@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -153,7 +154,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.AreExtensionlessFilesSupported());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Clone());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.CloneT());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateProcessor(null, null, null));
+                Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateProcessor((IDataSourceGroup)null, null, null));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Supports(Any.DataSource()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetCanonicalFileExtensions());
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetDirectoryDescription());
@@ -246,7 +247,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
                 for (var i = 0; i < processors.Length; ++i)
                 {
-                    sut.CreateProcessor(null, null, null);
+                    sut.CreateProcessor((IDataSourceGroup)null, null, null);
                 }
 
                 sut.Dispose();
@@ -440,6 +441,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
+            public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+                ProcessorOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
             public Stream GetSerializationStream(SerializationSource source)
             {
                 throw new NotImplementedException();
@@ -493,6 +500,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             }
 
             public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+                ProcessorOptions options)
             {
                 throw new NotImplementedException();
             }
@@ -574,6 +587,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
+            public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+                ProcessorOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
             public Stream GetSerializationStream(SerializationSource source)
             {
                 throw new NotImplementedException();
@@ -646,6 +665,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 throw new NotImplementedException();
             }
 
+            public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+                ProcessorOptions options)
+            {
+                throw new NotImplementedException();
+            }
+
             public void DisposeProcessor(ICustomDataProcessor processor)
             {
                 throw new NotImplementedException();
@@ -703,6 +728,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public Func<ICustomDataProcessor> ProcessorCreateFactory { get; set; }
             public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+            {
+                return this.ProcessorCreateFactory();
+            }
+
+            public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+                ProcessorOptions options)
             {
                 return this.ProcessorCreateFactory();
             }

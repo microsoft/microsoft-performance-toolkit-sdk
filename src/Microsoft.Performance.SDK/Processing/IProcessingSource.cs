@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -102,6 +103,26 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         ICustomDataProcessor CreateProcessor(
             IEnumerable<IDataSource> dataSources,
+            IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options);
+        
+        /// <summary>
+        ///     Creates a new processor for processing the specified data sources.
+        /// </summary>
+        /// <param name="dataSourceGroup">
+        ///     The data source group to process.
+        /// </param>
+        /// <param name="processorEnvironment">
+        ///     The environment for this specific processor instance.
+        /// </param>
+        /// <param name="options">
+        ///     The command line options to pass to the processor.
+        /// </param>
+        /// <returns>
+        ///     The created <see cref="ICustomDataProcessor"/>.
+        /// </returns>
+        ICustomDataProcessor CreateProcessor(
+            IDataSourceGroup dataSourceGroup,
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions options);
 
