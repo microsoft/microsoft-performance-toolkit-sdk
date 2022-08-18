@@ -10,6 +10,7 @@ namespace Microsoft.Performance.SDK.Processing
     {
         private static readonly Guid guid = new Guid("F97C3411-5DF5-4633-9EFD-470BEEBF40EF");
 
+        /// <inheritdoc />
         public Guid Guid => DefaultProcessingMode.guid;
 
         /// <inheritdoc />

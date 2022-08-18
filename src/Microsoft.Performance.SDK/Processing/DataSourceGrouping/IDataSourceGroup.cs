@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
         IReadOnlyCollection<IDataSource> DataSources { get; }
         
         /// <summary>
-        ///     
+        ///     Gets the <see cref="IProcessingMode"/> for this group.
         /// </summary>
         IProcessingMode ProcessingMode { get; }
     }

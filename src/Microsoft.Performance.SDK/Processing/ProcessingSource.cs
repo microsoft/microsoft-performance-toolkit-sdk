@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -197,6 +198,46 @@ namespace Microsoft.Performance.SDK.Processing
             return processor;
         }
 
+        public ICustomDataProcessor CreateProcessor(
+            IDataSourceGroup dataSourceGroup,
+            IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            Guard.NotNull(dataSourceGroup, nameof(dataSourceGroup));
+            Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
+            Guard.NotNull(options, nameof(options));
+            Guard.All(dataSourceGroup.DataSources, x => x != null, nameof(dataSourceGroup));
+
+            var processor = this.CreateProcessorCore(
+                dataSourceGroup,
+                processorEnvironment,
+                options);
+
+            if (processor is null)
+            {
+                throw new InvalidOperationException("CreateProcessorCore is not allowed to return null.");
+            }
+
+            return processor;
+        }
+
+        protected virtual ICustomDataProcessor CreateProcessorCore(
+            IDataSourceGroup dataSourceGroup,
+            IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            if (this is IDataSourceGrouper)
+            {
+                throw new InvalidOperationException(
+                    $"Prior to V2, you must override this method if you implement {nameof(IDataSourceGrouper)}");
+            }
+            
+            this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing modes - falling back to default processing.");
+	
+            // Call v1 methods for now
+            return this.CreateProcessor(dataSourceGroup.DataSources, processorEnvironment, options);
+        }
+
         /// <inheritdoc />
         public virtual Stream GetSerializationStream(SerializationSource source)
         {
@@ -314,6 +355,19 @@ namespace Microsoft.Performance.SDK.Processing
                 }
 
                 this.allTables.Add(table);
+            }
+        }
+
+        // Remove once this class is required to implement IDataSourceGrouper
+        internal IReadOnlyCollection<IDataSourceGroup> GroupInternal(IEnumerable<IDataSource> dataSources)
+        {
+            if (this is IDataSourceGrouper grouper)
+            {
+                return grouper.Group(dataSources);
+            }
+            else
+            {
+                return new DisjointGroupsDataSourceGrouper().Group(dataSources);
             }
         }
     }
