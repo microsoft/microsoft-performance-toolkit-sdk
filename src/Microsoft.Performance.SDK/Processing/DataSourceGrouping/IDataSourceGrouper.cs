@@ -2,14 +2,12 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
 {
     /// <summary>
-    ///     Responsible for grouping disparate <see cref="IDataSource"/> instances into <see cref="IDataSourceGroup"/>
-    ///     instances.
+    ///     An (optional) interface that <see cref="IProcessingSource"/> instances can implement to specify how
+    ///     its supported <see cref="IDataSource"/>s are capable of being grouped for processing.
     /// </summary>
     public interface IDataSourceGrouper
     {
@@ -21,11 +19,16 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
         ///     <paramref name="dataSources" />.
         /// </summary>
         /// <param name="dataSources">
-        ///     The <see cref="IDataSource"/> instances to be grouped.
+        ///     The <see cref="IDataSource"/> instances to be grouped. This will be every opened <see cref="IDataSource"/>
+        ///     that the implementing <see cref="IProcessingSource"/> specified it can open.
+        /// </param>
+        /// <param name="options">
+        ///     Options that will be passed to the implementing <see cref="IProcessingSource"/> for processing. This
+        ///     can be used, for instance, to limit the types of <see cref="IDataSourceGroup"/>s that will be returned.
         /// </param>
         /// <returns>
-        ///     All valid groups of <see cref="IDataSource"/>s.
+        ///     All valid groups of <see cref="IDataSource"/>s given the specified <paramref name="options"/>.
         /// </returns>
-        IReadOnlyCollection<IDataSourceGroup> Group(IEnumerable<IDataSource> dataSources);
+        IReadOnlyCollection<IDataSourceGroup> Group(IEnumerable<IDataSource> dataSources, ProcessorOptions options);
     }
 }

@@ -21,10 +21,13 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
         /// <param name="dataSources">
         ///     The <see cref="IDataSource"/> instances to be grouped.
         /// </param>
+        /// <param name="options">
+        ///     Ignored by this implementation.
+        /// </param>
         /// <returns>
         ///     A <see cref="IDataSourceGroup"/> for each item in <paramref name="dataSources"/>.
         /// </returns>
-        public IReadOnlyCollection<IDataSourceGroup> Group(IEnumerable<IDataSource> dataSources)
+        public IReadOnlyCollection<IDataSourceGroup> Group(IEnumerable<IDataSource> dataSources, ProcessorOptions options)
         {
             return dataSources
                 .Select(dataSource => new DataSourceGroup(new IDataSource[] { dataSource }.ToList(), new DefaultProcessingMode()))

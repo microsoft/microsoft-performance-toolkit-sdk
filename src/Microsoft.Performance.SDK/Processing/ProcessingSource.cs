@@ -357,18 +357,5 @@ namespace Microsoft.Performance.SDK.Processing
                 this.allTables.Add(table);
             }
         }
-
-        // Remove once this class is required to implement IDataSourceGrouper
-        internal IReadOnlyCollection<IDataSourceGroup> GroupInternal(IEnumerable<IDataSource> dataSources)
-        {
-            if (this is IDataSourceGrouper grouper)
-            {
-                return grouper.Group(dataSources);
-            }
-            else
-            {
-                return new DisjointGroupsDataSourceGrouper().Group(dataSources);
-            }
-        }
     }
 }
