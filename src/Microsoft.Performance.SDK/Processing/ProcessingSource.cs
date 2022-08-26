@@ -23,8 +23,6 @@ namespace Microsoft.Performance.SDK.Processing
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
 
-        private readonly IProcessingSourceTableProvider tableDiscoverer;
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSource"/>
         ///     class.
@@ -42,7 +40,7 @@ namespace Microsoft.Performance.SDK.Processing
             // init method so that we can pass the concrete type's assembly.
             //
 
-            this.tableDiscoverer = TableDiscovery.CreateForAssembly(this.GetType().Assembly);
+            this.TableDiscoverer = TableDiscovery.CreateForAssembly(this.GetType().Assembly);
         }
 
         /// <summary>
@@ -74,7 +72,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
-            this.tableDiscoverer = tableDiscoverer;
+            this.TableDiscoverer = tableDiscoverer;
         }
 
         /// <inheritdoc />
@@ -104,6 +102,11 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <seealso cref="ILogger"/>
         /// </summary>
         protected ILogger Logger { get; private set; }
+
+        /// <summary>
+        ///     Used to identify tables that should be associated with an <see cref="IProcessingSource"/>.
+        /// </summary>
+        protected IProcessingSourceTableProvider TableDiscoverer { get; }
 
         /// <inheritdoc />
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
@@ -293,7 +296,7 @@ namespace Microsoft.Performance.SDK.Processing
         {
             Debug.Assert(tableConfigSerializer != null);
 
-            var tables = this.tableDiscoverer.Discover(tableConfigSerializer);
+            var tables = this.TableDiscoverer.Discover(tableConfigSerializer);
 
             var tableSet = new HashSet<TableDescriptor>();
             foreach (var table in tables)
