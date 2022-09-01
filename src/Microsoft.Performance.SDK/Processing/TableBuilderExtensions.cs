@@ -232,5 +232,41 @@ namespace Microsoft.Performance.SDK.Processing
             var newColumn = new DataColumn<T>(old.Configuration, newProjection);
             return self.ReplaceColumn(old, newColumn);
         }
+
+        public static ITableBuilderWithRowCount AddExtensibleColumn<T>(
+            this ITableBuilderWithRowCount self,
+            ColumnConfigurationWithExtensions column,
+            IProjection<int, T> projection,
+            IEnumerable<IColumnExtender<T>> extenders)
+        {
+            return self.AddColumn(new DataColumnExtensible<T>(column, projection, extenders));
+        }
+
+        public static ITableBuilderWithRowCount AddExtensibleHierarchicalColumn<T>(
+            this ITableBuilderWithRowCount self,
+            ColumnConfigurationWithExtensions column,
+            IProjection<int, T> projection,
+            ICollectionInfoProvider<T> collectionProvider,
+            IEnumerable<IHierachicalColumnExtender<T>> extenders)
+        {
+            Guard.NotNull(self, nameof(self));
+            Guard.NotNull(projection, nameof(projection));
+            Guard.NotNull(collectionProvider, nameof(collectionProvider));
+
+            return self.AddColumn(new HierarchicalDataColumnExtensible<T>(column, projection, collectionProvider, extenders));
+        }
+
+
+        public static ITableBuilderWithRowCount ExtendColumn<T, TExtenderType>(
+            this ITableBuilderWithRowCount self,
+            IDataColumn<T> column,
+            TExtenderType extender) where TExtenderType : IColumnExtender<T>
+        {
+            // Check type match
+            // If already an IExtensibleColumn, add extender to existing collection
+            // If not an IExtensibleColumn, replace column with an IExtensibleColumn
+
+            return self;
+        }
     }
 }

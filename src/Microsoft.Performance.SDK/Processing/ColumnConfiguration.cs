@@ -6,7 +6,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Defines the information for how to configure a column in a table.
     /// </summary>
-    public sealed class ColumnConfiguration
+    public class ColumnConfiguration
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="ColumnConfiguration"/>
