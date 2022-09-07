@@ -473,8 +473,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(dataSources != null);
             Debug.Assert(processingSourceType != null);
 
-            var cdsr = this.processingSourceReferencesList.FirstOrDefault(x => this.TypeIs(x.Instance.GetType(), processingSourceType));
-            if (cdsr is null)
+            var processingSourceReference = this.processingSourceReferencesList.FirstOrDefault(x => this.TypeIs(x.Instance.GetType(), processingSourceType));
+            if (processingSourceReference is null)
             {
                 throw new UnsupportedProcessingSourceException(processingSourceType);
             }
@@ -485,7 +485,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Debug.Assert(dataSource != null);
 
                 atLeastOneDataSourceProvided = true;
-                if (!cdsr.Supports(dataSource))
+                if (!processingSourceReference.Supports(dataSource))
                 {
                     throw new UnsupportedDataSourceException(dataSource, processingSourceType);
                 }
@@ -496,10 +496,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                 throw new ArgumentException("The Data Source collection cannot be empty.", nameof(dataSources));
             }
 
-            if (!this.dataSourcesToProcess.TryGetValue(cdsr, out var list))
+            if (!this.dataSourcesToProcess.TryGetValue(processingSourceReference, out var list))
             {
                 list = new List<List<IDataSource>>();
-                this.dataSourcesToProcess[cdsr] = list;
+                this.dataSourcesToProcess[processingSourceReference] = list;
             }
 
             list.Add(dataSources.ToList());
