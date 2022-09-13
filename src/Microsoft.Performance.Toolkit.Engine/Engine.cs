@@ -985,11 +985,24 @@ namespace Microsoft.Performance.Toolkit.Engine
         private List<ProcessingSourceExecutor> CreateExecutors(
             Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
         {
+            return CreateExecutorsCore(allDataSourceAssociations, new Dictionary<ProcessingSourceReference, ProcessorOptions>());
+        }
+
+        private List<ProcessingSourceExecutor> CreateExecutorsCore(
+            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations,
+            Dictionary<ProcessingSourceReference, ProcessorOptions> processorOptionsMap)
+        {
             var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
             {
                 var processingSource = kvp.Key;
                 var dataSourceLists = kvp.Value;
+
+                ProcessorOptions processorOptions;
+                if (!processorOptionsMap.TryGetValue(processingSource, out processorOptions))
+                {
+                    processorOptions = ProcessorOptions.Default;
+                }
 
                 foreach (var dataSources in dataSourceLists)
                 {
@@ -1015,7 +1028,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             new DataSourceGroup(dataSources, new DefaultProcessingMode()), // see above TODO
                             processingSource.Instance.MetadataTables,
                             new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
-                            ProcessorOptions.Default);
+                            processorOptions);
 
                         var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
@@ -1076,6 +1089,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
             }
 
+            // cleaning step
+            // remove processingSourceReferences without any datasources
             foreach (var kvp in allDataSourceAssociations.ToArray())
             {
                 if (kvp.Value.Count == 0)
