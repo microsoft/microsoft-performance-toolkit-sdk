@@ -307,7 +307,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             // ProcessingSourceReference should support EVERY option passed
-            if (!this.processingSourceReferencesList.Any(psr => psr.Supports(dataSource) && !processorOptions.Options.All(o => psr.CommandLineOptions.Any(psro => psro.Id.Equals(o.Id)))))
+            if (!this.processingSourceReferencesList.Any(psr => psr.Supports(dataSource) && processorOptions.Options.All(o => psr.CommandLineOptions.Any(psro => psro.Id.Equals(o.Id)))))
             {
                 return false;
             }
