@@ -51,6 +51,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(plugins, nameof(plugins));
 
             this.dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
+            this.processorOptionsToProcess = new Dictionary<ProcessingSourceReference, List<ProcessorOptions>>();
             this.freeDataSources = new List<DataSourceWithOptions>();
             this.freeDataSourcesRO = new ReadOnlyCollection<DataSourceWithOptions>(this.freeDataSources);
             this.processingSourceReferencesList = plugins.ProcessingSourceReferences.ToList();
@@ -59,6 +60,11 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.ownsPlugins = ownsPlugins;
             this.isDisposed = false;
         }
+
+        // todo:
+        // Expose a public way to see all the processorOptions for processingSources
+        // Expose a public way to see the mapping for a list of dataSources and the affiliated ProcessorOption (by index)
+        // Expose a public way to see the mapping for a dataSource and it's processorOptions
 
         /// <summary>
         ///     Gets the collection of Data Sources grouped by their <see cref="IProcessingSource"/>.
@@ -696,8 +702,9 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (!this.dataSourcesToProcess.TryGetValue(processingSourceReference, out dataSourcesOfProcessingSource))
             {
                 dataSourcesOfProcessingSource = new List<List<IDataSource>>();
+                processorOptionsOfProcessingSource = new List<ProcessorOptions>();
                 this.dataSourcesToProcess[processingSourceReference] = dataSourcesOfProcessingSource;
-                this.processorOptionsToProcess[processingSourceReference] = new List<ProcessorOptions>();
+                this.processorOptionsToProcess[processingSourceReference] = processorOptionsOfProcessingSource;
             }
 
             dataSourcesOfProcessingSource.Add(dataSources.ToList());
