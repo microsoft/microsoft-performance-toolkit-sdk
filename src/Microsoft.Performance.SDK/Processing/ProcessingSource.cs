@@ -23,6 +23,10 @@ namespace Microsoft.Performance.SDK.Processing
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
 
+        // todo: when the constructor that takes a table provider is removed in v2, this should 
+        // be removed.
+        private readonly IProcessingSourceTableProvider tableProvider;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSource"/>
         ///     class.
@@ -32,15 +36,6 @@ namespace Microsoft.Performance.SDK.Processing
             this.allTables = new HashSet<TableDescriptor>();
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
-
-            //
-            // We need to have the full concrete type, and so must use this.GetType().
-            // 'this' is not allowed to be used in a : this or : base call in the constructor,
-            // so unfortunately we have to use an older idiom of every constructor calling an
-            // init method so that we can pass the concrete type's assembly.
-            //
-
-            this.TableDiscoverer = TableDiscovery.CreateForAssembly(this.GetType().Assembly);
         }
 
         /// <summary>
@@ -64,6 +59,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="tableDiscoverer"/> is <c>null</c>.
         /// </exception>
+        [Obsolete("This constructor will be removed in version 2. Implement CreateTableProvider instead.", false)]
         protected ProcessingSource(IProcessingSourceTableProvider tableDiscoverer)
         {
             Guard.NotNull(tableDiscoverer, nameof(tableDiscoverer));
@@ -72,7 +68,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.metadataTables = new HashSet<TableDescriptor>();
             this.metadataTablesRO = new ReadOnlyHashSet<TableDescriptor>(this.metadataTables);
 
-            this.TableDiscoverer = tableDiscoverer;
+            this.tableProvider = tableDiscoverer;
         }
 
         /// <inheritdoc />
@@ -102,11 +98,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <seealso cref="ILogger"/>
         /// </summary>
         protected ILogger Logger { get; private set; }
-
-        /// <summary>
-        ///     Used to identify tables that should be associated with an <see cref="IProcessingSource"/>.
-        /// </summary>
-        protected IProcessingSourceTableProvider TableDiscoverer { get; }
 
         /// <inheritdoc />
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
@@ -292,11 +283,28 @@ namespace Microsoft.Performance.SDK.Processing
         {
         }
 
+        /// <summary>
+        ///     A derived class may implement this to provide a custom <see cref="IProcessingSourceTableProvider"/>.
+        /// </summary>
+        /// <returns>
+        ///     A table provider for the processing source.
+        /// </returns>
+        protected virtual IProcessingSourceTableProvider CreateTableProvider()
+        {
+            return this.tableProvider ?? TableDiscovery.CreateForAssembly(this.GetType().Assembly);
+        }
+
         private void InitializeAllTables(ITableConfigurationsSerializer tableConfigSerializer)
         {
             Debug.Assert(tableConfigSerializer != null);
 
-            var tables = this.TableDiscoverer.Discover(tableConfigSerializer);
+            IProcessingSourceTableProvider tableProvider = CreateTableProvider();
+            if (tableProvider == null)
+            {
+                throw new InvalidOperationException($"{this.GetType().Name} returned a null table provider.");
+            }
+
+            var tables = tableProvider.Discover(tableConfigSerializer);
 
             var tableSet = new HashSet<TableDescriptor>();
             foreach (var table in tables)

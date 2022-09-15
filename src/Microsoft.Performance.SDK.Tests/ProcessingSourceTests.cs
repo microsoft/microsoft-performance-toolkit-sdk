@@ -137,7 +137,9 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        public void WhenTableDiscoveryProvidedUsesDiscovery()
+        [DataRow(true)]  // todo: this datarow is temporary and should be removed once the deprecated
+        [DataRow(false)] // ProcessingSource.ProcessingSource(IProcessingSourceTableProvider) constructor is removed
+        public void WhenTableDiscoveryProvidedUsesDiscovery(bool passTableDiscoverer)
         {
             TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
@@ -159,7 +161,7 @@ namespace Microsoft.Performance.SDK.Tests
                 expectedDescriptors[4],
             };
 
-            var sut = new StubDataSource(discovery);
+            var sut = passTableDiscoverer ? new StubDataSource(discovery, true) : new StubDataSource(discovery);
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.AreEqual(5, sut.AllTablesExposed.Count);
@@ -168,6 +170,14 @@ namespace Microsoft.Performance.SDK.Tests
             {
                 Assert.IsTrue(sut.AllTablesExposed.Contains(td));
             }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenTableDiscoveryProvidedIsNull_DiscoveryThrows()
+        {
+            var sut = new StubDataSource(null);
+            Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
         [TestMethod]
@@ -212,6 +222,9 @@ namespace Microsoft.Performance.SDK.Tests
         private sealed class StubDataSource
             : ProcessingSource
         {
+            private readonly bool useBaseCreateTableProvider;
+            private readonly IProcessingSourceTableProvider discovery;
+
             static StubDataSource()
             {
                 Assembly = typeof(StubDataSource).Assembly;
@@ -223,8 +236,25 @@ namespace Microsoft.Performance.SDK.Tests
             }
 
             public StubDataSource(IProcessingSourceTableProvider discovery)
+               : base()
+            {
+                this.useBaseCreateTableProvider = false;
+                this.discovery = discovery;
+
+                this.CommandLineOptionsToReturn = new List<Option>();
+                this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
+                this.ProcessorToReturn = new MockCustomDataProcessor();
+                this.CreateProcessorCoreCalls =
+                    new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
+            }
+
+            // todo: this will be removed when ProcessingSource removes the associated constructor
+            //     yes, this is awkward, but it's temporary to keep testing this deprecated path for now
+            public StubDataSource(IProcessingSourceTableProvider discovery, bool notUsed)
                : base(discovery)
             {
+                this.useBaseCreateTableProvider = true;
+
                 this.CommandLineOptionsToReturn = new List<Option>();
                 this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
                 this.ProcessorToReturn = new MockCustomDataProcessor();
@@ -264,6 +294,12 @@ namespace Microsoft.Performance.SDK.Tests
             protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return true;
+            }
+
+            protected override IProcessingSourceTableProvider CreateTableProvider()
+            {
+                // todo: this should just return 'this.discovery' once the deprecated constructor is removed
+                return this.useBaseCreateTableProvider ? base.CreateTableProvider() : this.discovery;
             }
         }
     }
