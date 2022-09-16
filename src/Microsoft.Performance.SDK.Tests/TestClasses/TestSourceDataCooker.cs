@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
@@ -14,7 +15,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
 {
     public class TestSourceDataCookerContext
     {
+        private List<(DataCookerPath, string)> methodCalls = new List<(DataCookerPath, string)>();
+
         public int CountOfTestRecordsReceived;
+
+        public void RecordMethodCall(DataCookerPath cooker, [CallerMemberName] string method = "")
+        {
+            this.methodCalls.Add((cooker, method));
+        }
+
+        public IList<(DataCookerPath, string)> MethodCallOrder => this.methodCalls;
     }
 
     public class TestSourceDataCooker
@@ -88,6 +98,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public Action<CancellationToken> BeginDataCookingAction { get; set; } = null;
         public void BeginDataCooking(ICookedDataRetrieval dependencyRetrieval, CancellationToken cancellationToken)
         {
+            this.Context.RecordMethodCall(this.Path);
+
             this.BeginDataCookingCallCount++;
             this.BeginDataCookingAction?.Invoke(cancellationToken);
         }
@@ -98,6 +110,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public Dictionary<TestRecord, int> ReceivedRecords = new Dictionary<TestRecord, int>();
         public DataProcessingResult CookDataElement(TestRecord data, TestParserContext context, CancellationToken cancellationToken)
         {
+            this.Context.RecordMethodCall(this.Path);
+
             this.ReceivedRecords.Add(data, this.Context.CountOfTestRecordsReceived);
             this.Context.CountOfTestRecordsReceived++;
 
@@ -114,6 +128,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility.TestClasses
         public Action<CancellationToken> EndDataCookingAction { get; set; } = null;
         public void EndDataCooking(CancellationToken cancellationToken)
         {
+            this.Context.RecordMethodCall(this.Path);
+
             this.EndDataCookingCallCount++;
             this.EndDataCookingAction?.Invoke(cancellationToken);
         }
