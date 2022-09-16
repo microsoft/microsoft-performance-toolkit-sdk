@@ -90,6 +90,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             self.AddDataSource(CreateFSDataSource(filePath), processingSourceType);
         }
 
+        // todo comments
+        public static void AddFile(this DataSourceSet self, string filePath, ProcessorOptions processorOptions, Type processingSourceType)
+        {
+            self.AddDataSource(CreateFSDataSource(filePath), processorOptions, processingSourceType);
+        }
+
         /// <summary>
         ///     Attempts to add the given file to this instance for processing.
         /// </summary>
@@ -110,6 +116,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         public static bool TryAddFile(this DataSourceSet self, string filePath)
         {
             return self.TryAddDataSource(CreateFSDataSource(filePath));
+        }
+
+        // todo comments
+        public static bool TryAddFile(this DataSourceSet self, string filePath, ProcessorOptions processorOptions)
+        {
+            return self.TryAddDataSource(CreateFSDataSource(filePath), processorOptions);
         }
 
         /// <summary>
@@ -135,6 +147,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         public static bool TryAddFile(this DataSourceSet self, string filePath, Type processingSourceType)
         {
             return self.TryAddDataSource(CreateFSDataSource(filePath), processingSourceType);
+        }
+
+        // todo comments
+        public static bool TryAddFile(this DataSourceSet self, string filePath, ProcessorOptions processorOptions, Type processingSourceType)
+        {
+            return self.TryAddDataSource(CreateFSDataSource(filePath), processorOptions, processingSourceType);
         }
 
         /// <summary>
@@ -182,6 +200,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             self.AddDataSources(filePaths.Select(CreateFSDataSource), processingSourceType);
         }
 
+        // todo comments
+        public static void AddFiles(this DataSourceSet self, IEnumerable<string> filePaths, ProcessorOptions processorOptions, Type processingSourceType)
+        {
+            self.AddDataSources(filePaths.Select(CreateFSDataSource), processorOptions, processingSourceType);
+        }
+
+
         /// <summary>
         ///     Attempts to add the given files to this instance. All of
         ///     the files will be processed by the same instance of 
@@ -207,6 +232,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         public static bool TryAddFiles(this DataSourceSet self, IEnumerable<string> filePaths, Type processingSourceType)
         {
             return self.TryAddDataSources(filePaths.Select(CreateFSDataSource), processingSourceType);
+        }
+
+        // todo comments
+        public static bool TryAddFiles(this DataSourceSet self, IEnumerable<string> filePaths, ProcessorOptions processorOptions, Type processingSourceType)
+        {
+            return self.TryAddDataSources(filePaths.Select(CreateFSDataSource), processorOptions, processingSourceType);
         }
 
         private static IDataSource CreateFSDataSource(string path)

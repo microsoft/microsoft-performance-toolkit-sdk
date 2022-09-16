@@ -194,6 +194,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             GC.SuppressFinalize(this);
         }
 
+        #region Processing Source Reference unspecified
+
         /// <summary>
         ///     Adds the given file to this instance for processing.
         /// </summary>
@@ -325,6 +327,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             return true;
         }
 
+        #endregion
+
+        #region Processing Source Reference Specified
+
         /// <summary>
         ///     Adds the given Data Source to this instance for processing by
         ///     the specific <see cref="IProcessingSource"/>.
@@ -438,9 +444,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        public bool TryAddDataSource(IDataSource dataSource, ProcessorOptions processorOption, Type processingSourceType)
+        public bool TryAddDataSource(IDataSource dataSource, ProcessorOptions processorOptions, Type processingSourceType)
         {
-            return this.TryAddDataSources(new[] { dataSource, }, processorOption, processingSourceType);
+            return this.TryAddDataSources(new[] { dataSource, }, processorOptions, processingSourceType);
         }
 
         /// <summary>
@@ -601,6 +607,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        #endregion
+
         /// <summary>
         ///     Returns a readonly deep-copy of this instance.
         /// </summary>
@@ -628,7 +636,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             //
 
             var dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
-            var freeDataSources = new List<IDataSource>();
+            var freeDataSourcesWithOptions = new List<DataSourceWithOptions>();
             var processingSourceReferencesList = new List<ProcessingSourceReference>();
 
             foreach (var kvp in this.dataSourcesToProcess)
@@ -638,12 +646,13 @@ namespace Microsoft.Performance.Toolkit.Engine
                     .ToList();
             }
 
-            freeDataSources.AddRange(this.FreeDataSourcesToProcess);
+            freeDataSourcesWithOptions.AddRange(this.FreeDataSourcesToProcessWithOptions);
             processingSourceReferencesList.AddRange(this.processingSourceReferencesList);
 
             return new ReadOnlyDataSourceSet(
                 dataSourcesToProcess,
-                freeDataSources,
+                processorOptionsToProcess,
+                freeDataSourcesWithOptions,
                 this.plugins);
         }
 

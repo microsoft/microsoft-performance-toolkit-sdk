@@ -448,6 +448,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
 
+
+
+
+
+
+
             sut.EnableTable(Source123Table.TableDescriptor);
 
             var result = sut.Process();
@@ -959,6 +965,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Dispose_NeverTakesOwnershipOfPlugins()
         {
+            // here
             using var plugins = PluginSet.Load();
 
             var file = new FileDataSource("test" + Source123DataSource.Extension);
