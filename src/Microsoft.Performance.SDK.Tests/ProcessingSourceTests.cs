@@ -21,7 +21,7 @@ namespace Microsoft.Performance.SDK.Tests
         [TestCleanup]
         public void Cleanup()
         {
-            StubDataSource.Assembly = typeof(StubDataSource).Assembly;
+            AssemblyBasedStubDataSource.Assembly = typeof(AssemblyBasedStubDataSource).Assembly;
         }
 
         [TestMethod]
@@ -51,9 +51,9 @@ namespace Microsoft.Performance.SDK.Tests
                 typeof(StubDataTableOneNoBuildMethod),
                 typeof(StubDataTableTwoNoBuildMethod));
 
-            StubDataSource.Assembly = assembly;
+            AssemblyBasedStubDataSource.Assembly = assembly;
 
-            var sut = new StubDataSource();
+            var sut = new AssemblyBasedStubDataSource();
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.AreEqual(expectedDescriptors.Count, sut.AllTablesExposed.Count);
@@ -71,7 +71,7 @@ namespace Microsoft.Performance.SDK.Tests
             var env = Any.ProcessorEnvironment();
             var options = ProcessorOptions.Default;
 
-            var sut = new StubDataSource();
+            var sut = new AssemblyBasedStubDataSource();
             sut.SetApplicationEnvironment(applicationEnvironment);
             var result = sut.CreateProcessor(dataSource, env, options);
 
@@ -88,7 +88,7 @@ namespace Microsoft.Performance.SDK.Tests
         {
             var dataSource = Any.DataSource();
 
-            var sut = new StubDataSource
+            var sut = new AssemblyBasedStubDataSource
             {
                 ProcessorToReturn = null,
             };
@@ -107,7 +107,7 @@ namespace Microsoft.Performance.SDK.Tests
             var env = Any.ProcessorEnvironment();
             var options = ProcessorOptions.Default;
 
-            var sut = new StubDataSource();
+            var sut = new AssemblyBasedStubDataSource();
             sut.SetApplicationEnvironment(applicationEnvironment);
             var result = sut.CreateProcessor(dataSources, env, options);
 
@@ -124,7 +124,7 @@ namespace Microsoft.Performance.SDK.Tests
             var dataSource = Any.DataSource();
             var dataSources = new[] { dataSource, };
 
-            var sut = new StubDataSource
+            var sut = new AssemblyBasedStubDataSource
             {
                 ProcessorToReturn = null,
             };
@@ -137,9 +137,7 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        [DataRow(true)]  // todo: this datarow is temporary and should be removed once the deprecated
-        [DataRow(false)] // ProcessingSource.ProcessingSource(IProcessingSourceTableProvider) constructor is removed
-        public void WhenTableDiscoveryProvidedUsesDiscovery(bool passTableDiscoverer)
+        public void WhenTableDiscoveryPassedInConstructorUsesDiscovery()
         {
             TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
@@ -161,7 +159,7 @@ namespace Microsoft.Performance.SDK.Tests
                 expectedDescriptors[4],
             };
 
-            var sut = passTableDiscoverer ? new StubDataSource(discovery, true) : new StubDataSource(discovery);
+            var sut = new DeprecatedStubDataSource(discovery);
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.AreEqual(5, sut.AllTablesExposed.Count);
@@ -176,8 +174,21 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void WhenTableDiscoveryProvidedIsNull_DiscoveryThrows()
         {
-            var sut = new StubDataSource(null);
+            var sut = new CreateTableProviderBasedStubDataSource(null);
             Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenTableDiscoveryNotProvided_DefaultUsedForDiscovery()
+        {
+            var sut = new DefaultTableProviderStubDataSource();
+            sut.SetApplicationEnvironment(applicationEnvironment);
+
+            // note: the table provider is assembly based so we can't easily check the contents in the unit test,
+            // but other tests check the contents, and the purpose of this test is just to check that a default
+            // provider was created.
+            Assert.IsNotNull(sut.TableProvider, "A default table provider should be used, but is null.");
         }
 
         [TestMethod]
@@ -212,35 +223,17 @@ namespace Microsoft.Performance.SDK.Tests
             var discovery = new FakeTableProvider();
             discovery.DiscoverReturnValue = expectedDescriptors;
 
-            var sut = new StubDataSource(discovery);
+            var sut = new CreateTableProviderBasedStubDataSource(discovery);
 
             Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
-        [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
-        [FileDataSource(".csv")]
-        private sealed class StubDataSource
+        private abstract class StubDataSource
             : ProcessingSource
         {
-            private readonly bool useBaseCreateTableProvider;
-            private readonly IProcessingSourceTableProvider discovery;
-
-            static StubDataSource()
+            protected StubDataSource()
+                : base()
             {
-                Assembly = typeof(StubDataSource).Assembly;
-            }
-
-            public StubDataSource()
-                : this(TableDiscovery.CreateForAssembly(Assembly))
-            {
-            }
-
-            public StubDataSource(IProcessingSourceTableProvider discovery)
-               : base()
-            {
-                this.useBaseCreateTableProvider = false;
-                this.discovery = discovery;
-
                 this.CommandLineOptionsToReturn = new List<Option>();
                 this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
                 this.ProcessorToReturn = new MockCustomDataProcessor();
@@ -248,21 +241,15 @@ namespace Microsoft.Performance.SDK.Tests
                     new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
             }
 
-            // todo: this will be removed when ProcessingSource removes the associated constructor
-            //     yes, this is awkward, but it's temporary to keep testing this deprecated path for now
-            public StubDataSource(IProcessingSourceTableProvider discovery, bool notUsed)
-               : base(discovery)
+            protected StubDataSource(IProcessingSourceTableProvider tableProvider)
+                : base(tableProvider)
             {
-                this.useBaseCreateTableProvider = true;
-
                 this.CommandLineOptionsToReturn = new List<Option>();
                 this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
                 this.ProcessorToReturn = new MockCustomDataProcessor();
                 this.CreateProcessorCoreCalls =
                     new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
             }
-
-            public static Assembly Assembly { get; set; }
 
             public HashSet<TableDescriptor> AllTablesExposed => new HashSet<TableDescriptor>(this.AllTables);
 
@@ -295,11 +282,79 @@ namespace Microsoft.Performance.SDK.Tests
             {
                 return true;
             }
+        }
+
+        [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class AssemblyBasedStubDataSource
+            : StubDataSource
+        {
+            static AssemblyBasedStubDataSource()
+            {
+                Assembly = typeof(AssemblyBasedStubDataSource).Assembly;
+            }
+
+            public AssemblyBasedStubDataSource()
+                : base()
+            {
+            }
+
+            public static Assembly Assembly { get; set; }
 
             protected override IProcessingSourceTableProvider CreateTableProvider()
             {
-                // todo: this should just return 'this.discovery' once the deprecated constructor is removed
-                return this.useBaseCreateTableProvider ? base.CreateTableProvider() : this.discovery;
+                return TableDiscovery.CreateForAssembly(Assembly);
+            }
+        }
+
+        [ProcessingSource("{9F196984-3614-418B-9471-CA3D7F593A3B}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class CreateTableProviderBasedStubDataSource
+            : StubDataSource
+        {
+            private readonly IProcessingSourceTableProvider tableProvider;
+
+            public CreateTableProviderBasedStubDataSource(IProcessingSourceTableProvider tableProvider)
+                : base()
+            {
+                this.tableProvider = tableProvider;
+            }
+
+            protected override IProcessingSourceTableProvider CreateTableProvider()
+            {
+                return this.tableProvider;
+            }
+        }
+
+        [ProcessingSource("{CB8E1000-527C-4C2E-AA49-7D3678FB80B4}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class DeprecatedStubDataSource
+            : StubDataSource
+        {
+            public DeprecatedStubDataSource(IProcessingSourceTableProvider tableProvider)
+                : base(tableProvider)
+            {
+            }
+        }
+
+        [ProcessingSource("{90B38463-201A-4C64-83E6-83BE7AE1FC1A}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class DefaultTableProviderStubDataSource
+            : StubDataSource
+        {
+            public DefaultTableProviderStubDataSource()
+                : base()
+            {
+            }
+
+            public IProcessingSourceTableProvider TableProvider { get; private set; }
+
+            // override this, but just return the base implementation after storing the value and making it accessible
+            // to the test.
+            protected override IProcessingSourceTableProvider CreateTableProvider()
+            {
+                this.TableProvider = base.CreateTableProvider();
+                return this.TableProvider;
             }
         }
     }
