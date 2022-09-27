@@ -86,6 +86,21 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
+        
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_DataSources()
+        {
+            var file = new FileDataSource("test" + Source123DataSource.Extension);
+            using var dataSources = DataSourceSet.Create();
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+
+            var info = new EngineCreateInfo(dataSources.AsReadOnly());
+            using var sut = Engine.Create(info);
+
+            Assert.AreNotSame(dataSources, sut.DataSourcesToProcess);
+            Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
+        }
 
         #endregion Create
 
