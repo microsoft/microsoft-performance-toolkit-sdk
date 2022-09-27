@@ -46,6 +46,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         private List<ProcessingSourceExecutor> executors;
         private ReadOnlyDataSourceSet workingDataSourceSet;
         private DataSourceSet internalDataSourceSet;
+        private IProcessingOptionsResolver optionsResolver;
 
         private TableExtensionSelector tableExtensionSelector;
 
@@ -78,6 +79,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.internalDataSourceSet = internalDataSourceSet;
 
             this.loggerFactory = createInfo.LoggerFactory;
+
+            this.optionsResolver = createInfo.OptionsResolver;
 
             this.tableGuidToDescriptor = new Dictionary<Guid, TableDescriptor>();
             this.allTables = new List<TableDescriptor>();
@@ -796,7 +799,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     instance.DataSourcesToProcess.FreeDataSourcesToProcess,
                     instance.DataSourcesToProcess.DataSourcesToProcess);
 
-                instance.executors = instance.CreateExecutors(allDataSourceAssociations);
+                instance.executors = instance.CreateExecutors(allDataSourceAssociations, createInfo.OptionsResolver);
 
                 instance.IsProcessed = false;
 
@@ -983,26 +986,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         private List<ProcessingSourceExecutor> CreateExecutors(
-            Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations)
-        {
-            return CreateExecutorsCore(allDataSourceAssociations, new Dictionary<ProcessingSourceReference, ProcessorOptions>());
-        }
-
-        private List<ProcessingSourceExecutor> CreateExecutorsCore(
             Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations,
-            Dictionary<ProcessingSourceReference, ProcessorOptions> processorOptionsMap)
+            IProcessingOptionsResolver optionsResolver)
         {
             var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
             {
                 var processingSource = kvp.Key;
                 var dataSourceLists = kvp.Value;
-
-                ProcessorOptions processorOptions;
-                if (!processorOptionsMap.TryGetValue(processingSource, out processorOptions))
-                {
-                    processorOptions = ProcessorOptions.Default;
-                }
 
                 foreach (var dataSources in dataSourceLists)
                 {
@@ -1021,6 +1012,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                          *         data source being processed in more than 1 group
                          * 4. Add a new executor for each IDataSourceGroups picked out in the above step
                          */
+                        var processorOptions = optionsResolver == null 
+                            ? ProcessorOptions.Default 
+                            : optionsResolver.GetProcessorOptions(dataSources, processingSource.Instance);
+
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
                             x => ConsoleLogger.Create(x.GetType()),

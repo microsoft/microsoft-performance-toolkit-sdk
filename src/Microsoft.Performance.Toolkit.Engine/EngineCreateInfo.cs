@@ -38,6 +38,25 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(dataSources, nameof(dataSources));
 
             this.DataSources = dataSources;
+            this.OptionsResolver = new ProcessingOptionsResolver();
+        }
+
+        /// <summary>
+        ///  Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
+        /// </summary>
+        /// <param name="dataSources">
+        ///     The data sources to be processed in the engine.
+        /// </param>
+        /// <param name="resolver">
+        ///     Resolver for the options which should be passed with the data sources for processing.
+        /// </param>
+        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources, IProcessingOptionsResolver resolver)
+        {
+            Guard.NotNull(dataSources, nameof(dataSources));
+            Guard.NotNull(resolver, nameof(resolver));
+
+            this.DataSources = dataSources;
+            this.OptionsResolver = resolver;
         }
 
         /// <summary>
@@ -66,6 +85,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     instance.
         /// </summary>
         public ReadOnlyDataSourceSet DataSources { get; }
+
+        /// <summary>
+        ///     
+        /// </summary>
+        public IProcessingOptionsResolver OptionsResolver { get; }
 
         /// <summary>
         ///     Gets or sets a value indicating whether the Engine instance will
