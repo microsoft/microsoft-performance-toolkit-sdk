@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -149,7 +150,7 @@ namespace Microsoft.Performance.SDK.Tests
                 typeof(StubMetadataTableOne),
                 typeof(StubMetadataTableTwo));
 
-            var discovery = new FakeTableProvider();
+            var discovery = new StubTableProvider();
             discovery.DiscoverReturnValue = new HashSet<TableDescriptor>
             {
                 expectedDescriptors[0],
@@ -199,7 +200,7 @@ namespace Microsoft.Performance.SDK.Tests
                 }
             }
 
-            var discovery = new FakeTableProvider();
+            var discovery = new StubTableProvider();
             discovery.DiscoverReturnValue = expectedDescriptors;
 
             var sut = new StubDataSource(discovery);
