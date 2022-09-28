@@ -12,8 +12,8 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
     {
         public StubTableProvider()
         {
-            DiscoverCalls = new List<ITableConfigurationsSerializer>();
-            DiscoverReturnValue = Array.Empty<TableDescriptor>();
+            this.DiscoverCalls = new List<ITableConfigurationsSerializer>();
+            this.DiscoverReturnValue = Array.Empty<TableDescriptor>();
         }
 
         public List<ITableConfigurationsSerializer> DiscoverCalls { get; }
