@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
