@@ -1,9 +1,10 @@
-﻿using Microsoft.Performance.SDK.Processing;
+﻿using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
 using System.Collections.Generic;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
-    public class ProcessingOptionsResolver : IProcessingOptionsResolver
+    public sealed class ProcessingOptionsResolver : IProcessingOptionsResolver
     {
         private readonly IDictionary<IEnumerable<IDataSource>, ProcessorOptions> dataSourceOptions;
 
@@ -14,6 +15,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         public ProcessingOptionsResolver(IDictionary<IEnumerable<IDataSource>, ProcessorOptions> dataSourceOptions)
         {
+            Guard.NotNull(dataSourceOptions, nameof(dataSourceOptions));
+
             this.dataSourceOptions = dataSourceOptions;
         }
 
@@ -21,6 +24,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         public ProcessorOptions GetProcessorOptions(IEnumerable<IDataSource> dataSourceGroup, IProcessingSource processingSource)
         {
+            Guard.NotNull(dataSourceGroup, nameof(dataSourceGroup));
+            Guard.NotNull(processingSource, nameof(processingSource));
+
             bool success = dataSourceOptions.TryGetValue(dataSourceGroup, out var options);
             return success ? options : ProcessorOptions.Default;
         }
