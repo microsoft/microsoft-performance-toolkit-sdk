@@ -22,8 +22,8 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
 
         public IEnumerable<TableDescriptor> Discover(ITableConfigurationsSerializer tableConfigSerializer)
         {
-            DiscoverCalls.Add(tableConfigSerializer);
-            return DiscoverReturnValue;
+            this.DiscoverCalls.Add(tableConfigSerializer);
+            return this.DiscoverReturnValue;
         }
     }
 }
