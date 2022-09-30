@@ -85,7 +85,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 { dsg2, opt2 }
             };
 
-            var processingResolver = new ProcessingOptionsResolver();
+            var processingResolver = new ProcessingOptionsResolver(dataSourceOptionsMap);
 
             var sut = new EngineCreateInfo(dataSources.AsReadOnly(), processingResolver);
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
@@ -95,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(opt1, sut.OptionsResolver.GetProcessorOptions(dsg1, psr.Instance));
             Assert.AreEqual(opt2, sut.OptionsResolver.GetProcessorOptions(dsg2, psr.Instance));
 
-            // This group doesn't exist in the map, so default
+            // This group doesn't exist in the map, so ensure it returns default options
             Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(dataSources.FreeDataSourcesToProcess, psr.Instance));
         }
     }
