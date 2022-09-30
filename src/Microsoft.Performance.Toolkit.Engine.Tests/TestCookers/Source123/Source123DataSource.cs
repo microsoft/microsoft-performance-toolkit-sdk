@@ -16,11 +16,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
     public sealed class Source123DataSource
         : ProcessingSource
     {
+        private IEnumerable<Option> options;
         public const string Extension = ".s123d";
 
         public Source123DataSource()
             : base(new Discovery())
         {
+            options = new List<Option>() { new Option('r', "test") };
         }
 
         protected override ICustomDataProcessor CreateProcessorCore(
@@ -44,6 +46,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                    Path.GetExtension(dataSource.Uri.LocalPath));
         }
 
+        public override IEnumerable<Option> CommandLineOptions => options;
+        
         private sealed class Discovery
             : IProcessingSourceTableProvider
         {

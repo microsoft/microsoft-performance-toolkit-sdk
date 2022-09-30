@@ -18,7 +18,7 @@ namespace Microsoft.Performance.SDK.Tests
             ProcessingOptionsResolver sut = new ProcessingOptionsResolver();
 
             Assert.IsNotNull(sut);
-            Assert.IsNotNull(sut.OptionsForDataSources);
+            Assert.IsNotNull(sut.OptionsForDataSourceGroups);
             Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(null, null));
         }
 
@@ -43,12 +43,11 @@ namespace Microsoft.Performance.SDK.Tests
             ProcessingOptionsResolver sut = new ProcessingOptionsResolver(dataSourceOptions);
 
             Assert.IsNotNull(sut);
-            Assert.IsNotNull(sut.OptionsForDataSources);
+            Assert.IsNotNull(sut.OptionsForDataSourceGroups);
 
 
             foreach (IEnumerable<IDataSource> dataSourceGroup in dataSourceOptions.Keys)
             {
-
 
                 // Assert.AreEqual(dataSourceGroup, sut.OptionsForDataSources[dataSourceGroup]);
             }
