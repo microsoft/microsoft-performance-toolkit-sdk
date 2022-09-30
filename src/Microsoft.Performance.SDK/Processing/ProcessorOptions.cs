@@ -64,5 +64,15 @@ namespace Microsoft.Performance.SDK.Processing
         ///     passed to the processor.
         /// </summary>
         public IEnumerable<string> Arguments { get; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ProcessorOptions other)
+            {
+
+            }
+
+            return base.Equals(obj);
+        }
     }
 }
