@@ -1,17 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Processing
 {
+    // todo : refactor with IDataSourceGroup
     public interface IProcessingOptionsResolver
     {
 
         /// <summary>
         ///     Mapping of DataSourceGroups to <see cref="ProcessorOptions"/>.
         /// </summary>
-        IDictionary<IEnumerable<IDataSource>, ProcessorOptions> OptionsForDataSources { get; }
+        IDictionary<IEnumerable<IDataSource>, ProcessorOptions> OptionsForDataSourceGroups { get; }
 
         /// <summary>
         ///     Get the processor options for a group of data sources processed by a given processor.
