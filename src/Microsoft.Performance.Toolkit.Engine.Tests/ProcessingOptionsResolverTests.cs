@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Tests
 {
+    // todo : do we need this?
     [TestClass]
     public class ProcessingOptionsResolverTests 
         : EngineFixture
