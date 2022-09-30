@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +10,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Provides a means of passing options to a data processor.
     /// </summary>
-    public class ProcessorOptions
+    public class ProcessorOptions : IEquatable<ProcessorOptions>
     {
         /// <summary>
         ///     Gets the instance that represents default <see cref="ProcessorOptions"/>.
@@ -65,14 +66,19 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public IEnumerable<string> Arguments { get; }
 
-        public override bool Equals(object obj)
+        public bool Equals(ProcessorOptions other)
         {
-            if (obj is ProcessorOptions other)
-            {
+            return !(other is null) &&
+                   EqualityComparer<IEnumerable<OptionInstance>>.Default.Equals(Options, other.Options) &&
+                   EqualityComparer<IEnumerable<string>>.Default.Equals(Arguments, other.Arguments);
+        }
 
-            }
-
-            return base.Equals(obj);
+        public override int GetHashCode()
+        {
+            int hashCode = -1518525876;
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<OptionInstance>>.Default.GetHashCode(Options);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<string>>.Default.GetHashCode(Arguments);
+            return hashCode;
         }
     }
 }
