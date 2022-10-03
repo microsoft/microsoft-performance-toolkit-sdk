@@ -198,6 +198,7 @@ namespace Microsoft.Performance.SDK.Processing
             return processor;
         }
 
+        /// <inheritdoc />
         public ICustomDataProcessor CreateProcessor(
             IDataSourceGroup dataSourceGroup,
             IProcessorEnvironment processorEnvironment,
@@ -219,23 +220,6 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             return processor;
-        }
-
-        protected virtual ICustomDataProcessor CreateProcessorCore(
-            IDataSourceGroup dataSourceGroup,
-            IProcessorEnvironment processorEnvironment,
-            ProcessorOptions options)
-        {
-            if (this is IDataSourceGrouper)
-            {
-                throw new InvalidOperationException(
-                    $"Prior to V2, you must override this method if you implement {nameof(IDataSourceGrouper)}");
-            }
-            
-            this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing groups - falling back to default processing.");
-	
-            // Call v1 methods for now
-            return this.CreateProcessor(dataSourceGroup.DataSources, processorEnvironment, options);
         }
 
         /// <inheritdoc />
@@ -295,6 +279,43 @@ namespace Microsoft.Performance.SDK.Processing
             IEnumerable<IDataSource> dataSources,
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions options);
+        
+        /// <summary>
+        ///     When implemented in a derived class, creates a new
+        ///     instance implementing <see cref="ICustomDataProcessor"/>
+        ///     to process the specified <paramref name="dataSourceGroup"/>.
+        /// </summary>
+        /// <param name="dataSourceGroup">
+        ///     The <see cref="IDataSourceGroup"/> to be processed by the processor.
+        ///     This parameter is guaranteed to be non-null, and all
+        ///     elements in the collection are guaranteed to be non-null.
+        /// </param>
+        /// <param name="processorEnvironment">
+        ///     The environment for this specific processor instance.
+        /// </param>
+        /// <param name="options">
+        ///     The options to pass to the processor.
+        /// </param>
+        /// <returns>
+        ///     A new <see cref="ICustomDataProcessor"/>. It is an error
+        ///     to return <c>null</c> from this method.
+        /// </returns>
+        protected virtual ICustomDataProcessor CreateProcessorCore(
+            IDataSourceGroup dataSourceGroup,
+            IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            if (this is IDataSourceGrouper)
+            {
+                throw new InvalidOperationException(
+                    $"Prior to V2, you must override this method if you implement {nameof(IDataSourceGrouper)}");
+            }
+            
+            this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing groups - falling back to default processing.");
+	
+            // Call v1 methods for now
+            return this.CreateProcessor(dataSourceGroup.DataSources, processorEnvironment, options);
+        }
 
         /// <summary>
         ///     When overridden in a derived class, returns a value indicating whether the
