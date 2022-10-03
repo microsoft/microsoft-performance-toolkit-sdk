@@ -999,6 +999,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     try
                     {
+                        var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode());
+
                         /*
                          * TODO (#214): for now, the engine ignores the groups returned by processing sources that implement
                          * IDataSourceGrouper. In the future, this needs to
@@ -1014,7 +1016,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                          */
                         var processorOptions = optionsResolver == null 
                             ? ProcessorOptions.Default 
-                            : optionsResolver.GetProcessorOptions(dataSources, processingSource.Instance);
+                            : optionsResolver.GetProcessorOptions(dsg, processingSource.Instance);
 
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),

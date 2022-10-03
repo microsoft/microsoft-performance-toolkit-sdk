@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 
@@ -33,12 +34,45 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="dataSources"/> is <c>null</c>.
         /// </exception>
-        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources)
+        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources) 
+            : this(dataSources, GlobalProcessingOptionsResolver.Default)
         {
-            Guard.NotNull(dataSources, nameof(dataSources));
+        }
 
-            this.DataSources = dataSources;
-            this.OptionsResolver = new ProcessingOptionsResolver();
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
+        /// </summary>
+        /// <param name="dataSources">
+        ///     The data sources to be processed in the engine.
+        /// </param>
+        /// <param name="globalOptions">
+        ///     Options to be passed to the <see cref="IProcessingOptionsResolver"/> for all Plugins and DataSources.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSources"/> is <c>null</c>.
+        ///     <paramref name="globalOptions"/> is <c>null</c>.
+        /// </exception>
+        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources, ProcessorOptions globalOptions) 
+            : this(dataSources, new GlobalProcessingOptionsResolver(globalOptions))
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
+        /// </summary>
+        /// <param name="dataSources">
+        ///     The data sources to be processed in the engine.
+        /// </param>
+        /// <param name="processingSourceOptions">
+        ///     A map to specify <see cref="ProcessorOptions"/> for each <see cref="IProcessingSource"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSources"/> is <c>null</c>.
+        ///     <paramref name="processingSourceOptions"/> is <c>null</c>.
+        /// </exception>
+        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources, IDictionary<IProcessingSource, ProcessorOptions> processingSourceOptions) 
+            : this(dataSources, new ProcessingSourceOptionsResolver(processingSourceOptions))
+        {
         }
 
         /// <summary>
@@ -48,15 +82,19 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The data sources to be processed in the engine.
         /// </param>
         /// <param name="resolver">
-        ///     Resolver for the options which should be passed with the data sources for processing.
+        ///     Options Resolver <see cref="IProcessingOptionsResolver"/> which specifies <see cref="ProcessorOptions"/> for a DataSourceGroup and ProcessingSource.
         /// </param>
-        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources, IProcessingOptionsResolver resolver)
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSources"/> is <c>null</c>.
+        ///     <paramref name="optionsResolver"/> is <c>null</c>.
+        /// </exception>
+        public EngineCreateInfo(ReadOnlyDataSourceSet dataSources, IProcessingOptionsResolver optionsResolver)
         {
             Guard.NotNull(dataSources, nameof(dataSources));
-            Guard.NotNull(resolver, nameof(resolver));
+            Guard.NotNull(optionsResolver, nameof(optionsResolver));
 
             this.DataSources = dataSources;
-            this.OptionsResolver = resolver;
+            this.OptionsResolver = optionsResolver;
         }
 
         /// <summary>
