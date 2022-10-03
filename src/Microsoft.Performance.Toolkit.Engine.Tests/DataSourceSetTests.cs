@@ -46,7 +46,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void AddDataSource_NullType_Throws()
         {
             var file = CreateTestFile(".txt");
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSource(file, (Type)null));
+            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSource(file, null));
         }
 
         [TestMethod]
@@ -207,7 +207,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void TryAddDataSource_NullType_False()
         {
             var file = CreateTestFile(".txt");
-            Assert.IsFalse(this.Sut.TryAddDataSource(file, (Type)null));
+            Assert.IsFalse(this.Sut.TryAddDataSource(file, null));
         }
 
         [TestMethod]

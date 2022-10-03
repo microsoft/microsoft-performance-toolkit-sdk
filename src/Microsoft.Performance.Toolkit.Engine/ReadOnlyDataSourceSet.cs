@@ -23,19 +23,16 @@ namespace Microsoft.Performance.Toolkit.Engine
     public sealed class ReadOnlyDataSourceSet
     {
         private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
-        private readonly Dictionary<ProcessingSourceReference, List<ProcessorOptions>> processorOptionsToProcess;
-        private readonly List<DataSourceWithOptions> freeDataSourcesToProcess;
-        private readonly ReadOnlyCollection<DataSourceWithOptions> freeDataSourcesRO;
+        private readonly List<IDataSource> freeDataSourcesToProcess;
+        private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
         private readonly PluginSet plugins;
 
         internal ReadOnlyDataSourceSet(
             Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess,
-            Dictionary<ProcessingSourceReference, List<ProcessorOptions>> processorOptionsToProcess,
-            List<DataSourceWithOptions> freeDataSourcesToProcess, // todo : create another constructor? or change this to list<DataSourceWIthOptions>
+            List<IDataSource> freeDataSourcesToProcess,
             PluginSet plugins)
         {
             this.dataSourcesToProcess = dataSourcesToProcess;
-            this.processorOptionsToProcess = processorOptionsToProcess;
             this.freeDataSourcesToProcess = freeDataSourcesToProcess;
             this.freeDataSourcesRO = this.freeDataSourcesToProcess.AsReadOnly();
             this.plugins = plugins;
@@ -71,7 +68,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             get
             {
-                return this.freeDataSourcesRO.Select(ds => ds.DataSource);
+                return this.freeDataSourcesRO;
             }
         }
 
