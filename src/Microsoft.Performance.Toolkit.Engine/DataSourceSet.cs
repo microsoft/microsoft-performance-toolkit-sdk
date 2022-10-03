@@ -19,8 +19,6 @@ namespace Microsoft.Performance.Toolkit.Engine
          : IDisposable
     {
         private readonly Dictionary<ProcessingSourceReference, List<List<IDataSource>>> dataSourcesToProcess;
-
-
         private readonly List<IDataSource> freeDataSources;
         private readonly ReadOnlyCollection<IDataSource> freeDataSourcesRO;
         private readonly List<ProcessingSourceReference> processingSourceReferencesList;
@@ -87,15 +85,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         public IEnumerable<IDataSource> FreeDataSourcesToProcess
-        {
-            get
-            {
-                this.ThrowIfDisposed();
-                return this.freeDataSourcesRO;
-            }
-        }
-
-        public IEnumerable<IDataSource> FreeDataSourcesToProcessWithOptions 
         {
             get
             {
@@ -304,7 +293,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             return this.AddDataSources(new[] { dataSource, }, processingSourceType);
         }
-        
+
         /// <summary>
         ///     Attempts to add the given Data Source to this instance for processing by
         ///     the specific <see cref="IProcessingSource"/>.
@@ -448,7 +437,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             //
 
             var dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
-            var freeDataSourcesWithOptions = new List<IDataSource>();
             var processingSourceReferencesList = new List<ProcessingSourceReference>();
 
             foreach (var kvp in this.dataSourcesToProcess)
@@ -458,12 +446,11 @@ namespace Microsoft.Performance.Toolkit.Engine
                     .ToList();
             }
 
-            freeDataSourcesWithOptions.AddRange(this.FreeDataSourcesToProcessWithOptions);
             processingSourceReferencesList.AddRange(this.processingSourceReferencesList);
 
             return new ReadOnlyDataSourceSet(
                 dataSourcesToProcess,
-                freeDataSourcesWithOptions,
+                freeDataSources,
                 this.plugins);
         }
 
@@ -515,6 +502,14 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 throw new ArgumentException("The Data Source collection cannot be empty.", nameof(dataSources));
             }
+
+            if (!this.dataSourcesToProcess.TryGetValue(processingSourceReference, out var list))
+            {
+                list = new List<List<IDataSource>>();
+                this.dataSourcesToProcess[processingSourceReference] = list;
+            }
+
+            list.Add(dataSources.ToList());
         }
 
         private void Dispose(bool disposing)
