@@ -42,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(processingSource, nameof(processingSource));
 
             // Ensure that the ProcessingSource supports all provided options
-            if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals(o.Id))))
+            if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals((o.Id as Option)?.Id))))
             {
                 throw new NotSupportedException($"All ProcessorOptions are not supported.");
             }

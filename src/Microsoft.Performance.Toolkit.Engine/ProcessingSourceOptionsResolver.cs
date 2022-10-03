@@ -56,22 +56,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             processorOptions ??= ProcessorOptions.Default;
 
             // Ensure that the ProcessingSource supports all provided options
-            if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals(o.Id))))
+            if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals((o.Id as Option)?.Id))))
             {
                 throw new NotSupportedException($"All ProcessorOptions are not supported.");
             }
 
             return processorOptions;
-        }
-    }
-
-    // Example of what a user might do.
-    internal sealed class StubDataSourceGroupeProcessingOptionsResolver : IProcessingOptionsResolver
-    {
-
-        public ProcessorOptions GetProcessorOptions(IDataSourceGroup dataSourceGroup, IProcessingSource processingSource)
-        {
-            return ProcessorOptions.Default;
         }
     }
 }

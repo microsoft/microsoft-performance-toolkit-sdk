@@ -16,6 +16,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
     public sealed class Source4DataSource
         : ProcessingSource
     {
+        private IEnumerable<Option> options = new List<Option>() 
+        { 
+            new Option('r', "test"),
+            new Option('s', "test1"),
+            new Option('t', "test2")
+        };
+
         public const string Extension = ".s4d";
 
         protected override ICustomDataProcessor CreateProcessorCore(
@@ -38,5 +45,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
                 Extension,
                 Path.GetExtension(dataSource.Uri.LocalPath));
         }
+
+        public override IEnumerable<Option> CommandLineOptions => options;
     }
 }
