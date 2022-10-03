@@ -86,22 +86,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
-        
-        [TestMethod]
-        [IntegrationTest]
-        public void Create_DataSources()
-        {
-            var file = new FileDataSource("test" + Source123DataSource.Extension);
-            using var dataSources = DataSourceSet.Create();
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-
-            var info = new EngineCreateInfo(dataSources.AsReadOnly());
-            using var sut = Engine.Create(info);
-
-            Assert.AreNotSame(dataSources, sut.DataSourcesToProcess);
-            Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
-        }
-
         #endregion Create
 
         #region Enable Cooker
@@ -462,12 +446,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             }
 
             using var sut = Engine.Create(new EngineCreateInfo(dataSources.AsReadOnly()));
-
-
-
-
-
-
 
             sut.EnableTable(Source123Table.TableDescriptor);
 
@@ -980,7 +958,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Dispose_NeverTakesOwnershipOfPlugins()
         {
-            // here
             using var plugins = PluginSet.Load();
 
             var file = new FileDataSource("test" + Source123DataSource.Extension);

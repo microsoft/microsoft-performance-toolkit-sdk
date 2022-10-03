@@ -1,6 +1,5 @@
 ﻿using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System.Collections.Generic;
 
 namespace Microsoft.Performance.Toolkit.Engine
@@ -23,13 +22,16 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         public IDictionary<IEnumerable<IDataSource>, ProcessorOptions> OptionsForDataSourceGroups => dataSourceGroupOptionsMap;
 
+        // todo: currently we don't use the IProcessingSource to check the map / verify the options. Do we even need this?
         public ProcessorOptions GetProcessorOptions(IEnumerable<IDataSource> dataSourceGroup, IProcessingSource processingSource)
         {
             Guard.NotNull(dataSourceGroup, nameof(dataSourceGroup));
             Guard.NotNull(processingSource, nameof(processingSource));
 
-            bool success = dataSourceGroupOptionsMap.TryGetValue(dataSourceGroup, out var options);
-            return success ? options : ProcessorOptions.Default;
+            dataSourceGroupOptionsMap.TryGetValue(dataSourceGroup, out var options);
+            options ??= ProcessorOptions.Default;
+
+            return options;
         }
     }
 }

@@ -1084,8 +1084,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
             }
 
-            // cleaning step
-            // remove processingSourceReferences without any datasources
             foreach (var kvp in allDataSourceAssociations.ToArray())
             {
                 if (kvp.Value.Count == 0)
