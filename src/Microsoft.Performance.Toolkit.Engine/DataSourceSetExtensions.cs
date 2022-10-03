@@ -182,7 +182,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             self.AddDataSources(filePaths.Select(CreateFSDataSource), processingSourceType);
         }
 
-
         /// <summary>
         ///     Attempts to add the given files to this instance. All of
         ///     the files will be processed by the same instance of 
