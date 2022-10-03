@@ -232,7 +232,7 @@ namespace Microsoft.Performance.SDK.Processing
                     $"Prior to V2, you must override this method if you implement {nameof(IDataSourceGrouper)}");
             }
             
-            this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing modes - falling back to default processing.");
+            this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing groups - falling back to default processing.");
 	
             // Call v1 methods for now
             return this.CreateProcessor(dataSourceGroup.DataSources, processorEnvironment, options);

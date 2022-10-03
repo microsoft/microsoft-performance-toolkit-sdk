@@ -67,8 +67,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public ProcessingSourceReference ProcessingSource { get; }
 
         /// <summary>
-        ///     Gets the <see cref="IDataSource"/>s that can be
-        ///     processed by the <see cref="ProcessingSource"/>.
+        ///     Gets the <see cref="IDataSourceGroup"/> that can be processed by the <see cref="ProcessingSource"/>.
         /// </summary>
         public IDataSourceGroup DataSourceGroup { get; }
 
