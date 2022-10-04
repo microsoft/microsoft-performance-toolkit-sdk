@@ -16,7 +16,6 @@ namespace Microsoft.Performance.SDK.Tests
     [TestClass]
     public class ProcessingOptionsResolverTests
     {
-
         [TestMethod]
         [IntegrationTest]
         public void DefaultGlobalProcessingOptionsResolverTest()
