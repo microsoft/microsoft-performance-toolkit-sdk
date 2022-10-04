@@ -12,6 +12,9 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
     {
         public DataSourceGroup(IReadOnlyCollection<IDataSource> dataSources, IProcessingMode processingMode)
         {
+            Guard.NotNull(dataSources, nameof(dataSources));
+            Guard.NotNull(processingMode, nameof(processingMode));
+
             DataSources = dataSources;
             ProcessingMode = processingMode;
         }
