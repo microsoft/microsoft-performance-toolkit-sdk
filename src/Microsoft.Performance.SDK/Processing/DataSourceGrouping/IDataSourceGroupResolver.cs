@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
     {
         /// <summary>
         ///     Selects which <see cref="IDataSourceGroup"/>s to use for processing from <paramref name="allValidGroups"/>.
-        ///     Each returned <see cref="IDataSourceGroup"/> will be processed independently from a unique
+        ///     Each returned <see cref="IDataSourceGroup"/> will be processed independently by a unique
         ///     <see cref="ICustomDataProcessor"/>.
         /// </summary>
         /// <param name="processingSourceGuid">
