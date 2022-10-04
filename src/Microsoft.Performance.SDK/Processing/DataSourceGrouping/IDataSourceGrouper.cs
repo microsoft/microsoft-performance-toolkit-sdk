@@ -34,6 +34,6 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
         ///     <see cref="IDataSource"/> inside a returned <see cref="IDataSourceGroup"/>'s <see cref="IDataSourceGroup.DataSources"/>
         ///     property must be one of these instances.
         /// </returns>
-        IReadOnlyCollection<IDataSourceGroup> Group(IEnumerable<IDataSource> dataSources, ProcessorOptions options);
+        IReadOnlyCollection<IDataSourceGroup> CreateValidGroups(IEnumerable<IDataSource> dataSources, ProcessorOptions options);
     }
 }
