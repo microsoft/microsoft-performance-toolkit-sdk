@@ -86,6 +86,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
+        
         #endregion Create
 
         #region Enable Cooker

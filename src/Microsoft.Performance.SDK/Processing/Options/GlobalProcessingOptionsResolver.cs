@@ -1,8 +1,8 @@
-﻿using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System;
-using System.Text;
 using System.Linq;
 
 namespace Microsoft.Performance.SDK.Processing.Options
