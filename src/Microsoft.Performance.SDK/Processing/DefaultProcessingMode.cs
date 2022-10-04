@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     A default <see cref="IProcessingMode"/>.
     /// </summary>
-    public class DefaultProcessingMode
+    public sealed class DefaultProcessingMode
         : IProcessingMode
     {
         /// <summary>
