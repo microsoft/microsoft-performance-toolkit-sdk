@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -192,6 +193,30 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <inheritdoc />
+        public ICustomDataProcessor CreateProcessor(
+            IDataSourceGroup dataSourceGroup,
+            IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            Guard.NotNull(dataSourceGroup, nameof(dataSourceGroup));
+            Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
+            Guard.NotNull(options, nameof(options));
+            Guard.All(dataSourceGroup.DataSources, x => x != null, nameof(dataSourceGroup));
+
+            var processor = this.CreateProcessorCore(
+                dataSourceGroup,
+                processorEnvironment,
+                options);
+
+            if (processor is null)
+            {
+                throw new InvalidOperationException("CreateProcessorCore is not allowed to return null.");
+            }
+
+            return processor;
+        }
+
+        /// <inheritdoc />
         public virtual Stream GetSerializationStream(SerializationSource source)
         {
             return null;
@@ -248,6 +273,52 @@ namespace Microsoft.Performance.SDK.Processing
             IEnumerable<IDataSource> dataSources,
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions options);
+        
+        /// <summary>
+        ///     When implemented in a derived class, creates a new
+        ///     instance implementing <see cref="ICustomDataProcessor"/>
+        ///     to process the specified <paramref name="dataSourceGroup"/>.
+        /// </summary>
+        /// <param name="dataSourceGroup">
+        ///     The <see cref="IDataSourceGroup"/> to be processed by the processor.
+        ///     This parameter is guaranteed to be non-null, and all
+        ///     elements in the collection are guaranteed to be non-null.
+        /// </param>
+        /// <param name="processorEnvironment">
+        ///     The environment for this specific processor instance.
+        /// </param>
+        /// <param name="options">
+        ///     The options to pass to the processor.
+        /// </param>
+        /// <returns>
+        ///     A new <see cref="ICustomDataProcessor"/>. It is an error
+        ///     to return <c>null</c> from this method.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     This <see cref="ProcessingSource"/> implements <see cref="IDataSourceGrouper"/>, but does not override
+        ///     this method.
+        /// </exception>
+        protected virtual ICustomDataProcessor CreateProcessorCore(
+            IDataSourceGroup dataSourceGroup,
+            IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            if (this is IDataSourceGrouper)
+            {
+                throw new InvalidOperationException(
+                    $"Prior to V2, you must override the {nameof(CreateProcessorCore)} which accepts a {nameof(IDataSourceGroup)} when implementing {nameof(IDataSourceGrouper)}");
+            }
+            
+            this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing groups - falling back to default processing.");
+	
+            // Call v1 methods for now
+            if (!(dataSourceGroup.ProcessingMode is DefaultProcessingMode))
+            {
+                this.Logger.Warn($"The {nameof(IProcessingMode)} of the {nameof(IDataSourceGroup)} passed to {nameof(CreateProcessorCore)} is not {nameof(DefaultProcessingMode)}, " +
+                                 $"but {this.GetType().Name} does not implement {nameof(IDataSourceGrouper)}. This may indicate an error using the {nameof(IDataSourceGroup)} processing API.");
+            }
+            return this.CreateProcessor(dataSourceGroup.DataSources, processorEnvironment, options);
+        }
 
         /// <summary>
         ///     When overridden in a derived class, returns a value indicating whether the

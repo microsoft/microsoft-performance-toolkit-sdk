@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -24,7 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime
             IProgress<int> progress,
             Func<ICustomDataProcessor, ILogger> loggerFactory,
             ProcessingSourceReference processingSource,
-            IEnumerable<IDataSource> dataSources,
+            IDataSourceGroup dataSourceGroup,
             IEnumerable<TableDescriptor> tablesToEnable,
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions commandLineOptions)
@@ -32,8 +33,8 @@ namespace Microsoft.Performance.SDK.Runtime
             Guard.NotNull(progress, nameof(progress));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
             Guard.NotNull(processingSource, nameof(processingSource));
-            Guard.NotNull(dataSources, nameof(dataSources));
-            Guard.All(dataSources, x => x != null, nameof(dataSources));
+            Guard.NotNull(dataSourceGroup, nameof(dataSourceGroup));
+            Guard.All(dataSourceGroup.DataSources, x => x != null, nameof(dataSourceGroup));
             Guard.NotNull(tablesToEnable, nameof(tablesToEnable));
             Guard.All(tablesToEnable, x => x != null, nameof(tablesToEnable));
             Guard.NotNull(processorEnvironment, nameof(processorEnvironment));
@@ -42,7 +43,7 @@ namespace Microsoft.Performance.SDK.Runtime
             this.ProgressReporter = progress;
             this.LoggerFactory = loggerFactory;
             this.ProcessingSource = processingSource;
-            this.DataSources = dataSources.ToList().AsReadOnly();
+            this.DataSourceGroup = dataSourceGroup;
             this.TablesToEnable = tablesToEnable.ToList().AsReadOnly();
             this.ProcessorEnvironment = processorEnvironment;
             this.CommandLineOptions = commandLineOptions;
@@ -66,10 +67,9 @@ namespace Microsoft.Performance.SDK.Runtime
         public ProcessingSourceReference ProcessingSource { get; }
 
         /// <summary>
-        ///     Gets the <see cref="IDataSource"/>s that can be
-        ///     processed by the <see cref="ProcessingSource"/>.
+        ///     Gets the <see cref="IDataSourceGroup"/> that can be processed by the <see cref="ProcessingSource"/>.
         /// </summary>
-        public IEnumerable<IDataSource> DataSources { get; }
+        public IDataSourceGroup DataSourceGroup { get; }
 
         /// <summary>
         ///     Gets the collection of tables that are to be
@@ -121,7 +121,7 @@ namespace Microsoft.Performance.SDK.Runtime
             switch (format)
             {
                 case "F":
-                    return string.Join(",", this.DataSources.Select(x => x.Uri));
+                    return string.Join(",", this.DataSourceGroup.DataSources.Select(x => x.Uri));
 
                 case "G":
                 case "g":

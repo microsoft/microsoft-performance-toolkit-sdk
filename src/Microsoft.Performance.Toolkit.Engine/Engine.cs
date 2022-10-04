@@ -11,6 +11,7 @@ using System.Threading;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -954,7 +955,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         new ProcessingError(
                             executor.Context.ProcessingSource.Guid,
                             executor.Processor,
-                            executor.Context.DataSources,
+                            executor.Context.DataSourceGroup.DataSources,
                             e));
 
                     this.logger.Error($"Failed to process: {e}");
@@ -994,11 +995,24 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     try
                     {
+                        /*
+                         * TODO (#214): for now, the engine ignores the groups returned by processing sources that implement
+                         * IDataSourceGrouper. In the future, this needs to
+                         * 1. Check if the processing source implements IDataSourceGrouper (which it must after V2)
+                         * 2. If not, do what we're doing now and just create a new DataSourceGroup with the default
+                         *     processing mode
+                         * 3. If yes, use an IDataSourceGroupResolver to pick out which of the IDataSourceGroup(s)
+                         *    returned by the processing source should be used for processing.
+                         *      a. If the engine user does not supply a resolver, a sensible one should be used. E.g.
+                         *         one that picks groups that maximize the number of data sources processed without a
+                         *         data source being processed in more than 1 group
+                         * 4. Add a new executor for each IDataSourceGroups picked out in the above step
+                         */
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
                             x => ConsoleLogger.Create(x.GetType()),
                             processingSource,
-                            dataSources,
+                            new DataSourceGroup(dataSources, new DefaultProcessingMode()), // see above TODO
                             processingSource.Instance.MetadataTables,
                             new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
                             ProcessorOptions.Default);
