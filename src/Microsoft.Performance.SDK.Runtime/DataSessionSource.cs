@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Runtime
     /// <summary>
     ///     Represents a session data source. A session data source
     ///     is an <see cref="IProcessingSource"/> and the associated
-    ///     <see cref="IDataSource"/>s that can be processed by the
+    ///     <see cref="IDataSourceGroup"/> that can be processed by the
     ///     <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class DataSessionSource
