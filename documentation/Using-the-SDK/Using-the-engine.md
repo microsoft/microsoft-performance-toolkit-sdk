@@ -108,8 +108,8 @@ using (var dataSources = DataSourceSet.Create(plugins))
 {
     dataSources.Add(new FileDataSource("myfile.txt");
 
-    var createInfo = new EngineCreateInfo(dataSources);
-    using (var engine = Engine.Create(info))
+    var createInfo = new EngineCreateInfo(dataSources.AsReadOnly());
+    using (var engine = Engine.Create(createInfo))
     {
         engine.EnableCooker(DataCookerPath);
 
