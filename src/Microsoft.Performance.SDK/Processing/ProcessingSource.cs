@@ -308,7 +308,7 @@ namespace Microsoft.Performance.SDK.Processing
             if (this is IDataSourceGrouper)
             {
                 throw new InvalidOperationException(
-                    $"Prior to V2, you must override this method if you implement {nameof(IDataSourceGrouper)}");
+                    $"Prior to V2, you must override the {nameof(CreateProcessorCore)} which accepts a {nameof(IDataSourceGroup)} if you implement {nameof(IDataSourceGrouper)}");
             }
             
             this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing groups - falling back to default processing.");
