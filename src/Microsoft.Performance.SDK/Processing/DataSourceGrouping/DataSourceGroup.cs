@@ -10,6 +10,16 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
     public sealed class DataSourceGroup
         : IDataSourceGroup
     {
+        /// <summary>
+        ///     Initializes a new instance of <see cref="DataSourceGroup"/>.
+        /// </summary>
+        /// <param name="dataSources">
+        ///     The <see cref="IDataSource"/>s in this group. This parameter may not be <c>null</c>.
+        /// </param>
+        /// <param name="processingMode">
+        ///     The <see cref="IProcessingMode"/> that this group should be processed in. This parameter may not
+        ///     be <c>null</c>.
+        /// </param>
         public DataSourceGroup(IReadOnlyCollection<IDataSource> dataSources, IProcessingMode processingMode)
         {
             Guard.NotNull(dataSources, nameof(dataSources));
