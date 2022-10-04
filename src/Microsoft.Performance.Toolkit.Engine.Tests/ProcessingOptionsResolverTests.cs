@@ -1,11 +1,16 @@
 ﻿using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Engine;
 using Microsoft.Performance.Toolkit.Engine.Tests;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
+using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
+using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Performance.SDK.Tests
 {
@@ -13,63 +18,300 @@ namespace Microsoft.Performance.SDK.Tests
     public class ProcessingOptionsResolverTests
         : EngineFixture
     {
-        //[TestMethod]
-        //[UnitTest]
-        //public void ProcessingOptionsReferenceTest()
-        //{
-        //    ProcessingOptionsResolver sut = new ProcessingOptionsResolver();
 
-        //    Assert.IsNotNull(sut);
-        //    Assert.IsNotNull(sut.OptionsForDataSourceGroups);
-        //    Assert.AreEqual(0, sut.OptionsForDataSourceGroups.Count, "Options for DSG is expected to be empty");
-        //    Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(new List<IDataSource>(), new Source123DataSource()));
-        //}
+        [TestMethod]
+        [IntegrationTest]
+        public void DefaultGlobalProcessingOptionsResolverTest()
+        {
+            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
 
-        //// This test needs a ProcessingSource
-        //[TestMethod]
-        //[UnitTest]
-        //public void ProcessingOptionsResolverTests2()
-        //{
+            var sut = engineCreateInfo.OptionsResolver;
 
-        //    IEnumerable<IDataSource> dataSources1 = new List<IDataSource>()
-        //    {
-        //        new FileDataSource("test1.txt"),
-        //        new FileDataSource("test2.txt")
-        //    };
+            Assert.IsNotNull(sut, "Options Resolver is null");
 
-        //    IEnumerable<IDataSource> dataSources2 = new List<IDataSource>()
-        //    {
-        //        new FileDataSource("test2.txt"),
-        //        new FileDataSource("test4.txt")
-        //    };
+            var dsg1 = new DataSourceGroup(
+                new[] { new FileDataSource("test1" + Source123DataSource.Extension) },
+                new DefaultProcessingMode());
 
-        //    var expectedProcessorOptions1 = new ProcessorOptions(new List<OptionInstance> { }, new List<string> { "arg1", "arg2" });
-        //    var expectedProcessorOptions2 = new ProcessorOptions(new List<OptionInstance> { }, new List<string> { "arg3", "arg4" });
+            var dsg2 = new DataSourceGroup(
+                new[] { new FileDataSource("test2" + Source4DataSource.Extension) },
+                new DefaultProcessingMode());
 
-        //    var dataSourceOptions = new Dictionary<IEnumerable<IDataSource>, ProcessorOptions>()
-        //    {
-        //        {  dataSources1, expectedProcessorOptions1 },
-        //        {  dataSources2, expectedProcessorOptions2 }
-        //    };
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
 
-        //    ProcessingOptionsResolver sut = new ProcessingOptionsResolver(dataSourceOptions);
+            // Ensure these are default
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg1, psr123.Instance), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg2, psr4.Instance), "ProcessorOptions differ from expected Default");
 
-        //    Assert.IsNotNull(sut);
-        //    Assert.IsNotNull(sut.OptionsForDataSourceGroups);
+            // Default ProcessorOptions should always work no matter the PSR
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg1, psr4.Instance), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg2, psr123.Instance), "ProcessorOptions differ from expected Default");
+        }
 
-        //    Assert.AreEqual(dataSourceOptions.Count, sut.OptionsForDataSourceGroups.Count, "Map counts do not match");
-        //    Assert.AreEqual(dataSourceOptions.Keys, sut.OptionsForDataSourceGroups.Keys, "Map Keys do not match");
-        //    Assert.AreEqual(dataSourceOptions.Values, sut.OptionsForDataSourceGroups.Values, "Map Values do not match");
+        [TestMethod]
+        [IntegrationTest]
+        public void GlobalProcessingOptionsResolverTest()
+        {
+            var processorOptions = new ProcessorOptions(
+                new[]
+                {
+                    new OptionInstance(
+                        new Option('s', "test1"),
+                        "arg1"),
+                });
 
-        //    Assert.AreEqual(expectedProcessorOptions1, sut.GetProcessorOptions(dataSources1, new Source123DataSource()));
-        //    Assert.AreEqual(expectedProcessorOptions2, sut.GetProcessorOptions(dataSources2, new Source123DataSource()));
-        //}
+            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly(), processorOptions);
 
-        private class MockDataSourceGroupeProcessingOptionsResolver : IProcessingOptionsResolver
+            var sut = engineCreateInfo.OptionsResolver;
+
+            Assert.IsNotNull(sut, "Options Resolver is null");
+
+            var dsg123 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test1" + Source123DataSource.Extension),
+                    new FileDataSource("test2" + Source123DataSource.Extension),
+                    new FileDataSource("test3" + Source123DataSource.Extension)
+                }, new DefaultProcessingMode());
+
+            var dsg4 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test4" + Source4DataSource.Extension),
+                }, new DefaultProcessingMode());
+
+            var dsg5 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test5" + Source5DataSource.Extension),
+                }, new DefaultProcessingMode());
+
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
+            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out var psr5);
+
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg123, psr123.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg4, psr4.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg5, psr5.Instance), "ProcessorOptions differ from expected");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void GlobalProcessingOptionsResolverTestFailure()
         {
 
-            public ProcessorOptions GetProcessorOptions(IDataSourceGroup dataSourceGroup, IProcessingSource processingSource)
+            var processorOptions = new ProcessorOptions(
+                new[]
+                {
+                    new OptionInstance(
+                        new Option('t', "test2"),
+                        "arg2"),
+                });
+
+            var dsg123 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test1" + Source123DataSource.Extension),
+                    new FileDataSource("test2" + Source123DataSource.Extension),
+                    new FileDataSource("test3" + Source123DataSource.Extension)
+                }, new DefaultProcessingMode());
+
+            var dsg4 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test4" + Source4DataSource.Extension),
+                }, new DefaultProcessingMode());
+
+            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly(), processorOptions);
+
+            var sut = engineCreateInfo.OptionsResolver;
+
+            Assert.IsNotNull(sut, "Options Resolver is null");
+
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
+
+            // success
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg4, psr4.Instance), "ProcessorOptions differ from expected");
+
+            // Failure Expected since 
+            try
             {
+                var actualOptions = sut.GetProcessorOptions(dsg123, psr123.Instance);
+            }
+            catch (NotSupportedException e)
+            {
+                Assert.IsNotNull(e);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void ProcessingOptionsResolverMapTest()
+        {
+            var dsg123_1 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test1" + Source123DataSource.Extension),
+                    new FileDataSource("test2" + Source123DataSource.Extension),
+                    new FileDataSource("test3" + Source123DataSource.Extension)
+                }, new DefaultProcessingMode());
+
+            var dsg123_2 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test4" + Source123DataSource.Extension)
+                }, new DefaultProcessingMode());
+
+            var dsg4 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test5" + Source4DataSource.Extension),
+                }, new DefaultProcessingMode());
+
+            var dsg5 = new DataSourceGroup(
+                new[]
+                {
+                    new FileDataSource("test6" + Source5DataSource.Extension),
+                }, new DefaultProcessingMode());
+
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
+            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out var psr5);
+
+            var processorOptions = new[]
+            {
+                new ProcessorOptions(
+                    new[]
+                    {
+                        new OptionInstance(
+                            new Option('s', "test1"),
+                            "arg1"),
+                    }),
+                new ProcessorOptions(
+                    new[]
+                    {
+                        new OptionInstance(
+                            new Option('t', "test2"),
+                            "arg2"),
+                    }),
+            };
+
+            IDictionary<IProcessingSource, ProcessorOptions> map = new Dictionary<IProcessingSource, ProcessorOptions>()
+            {
+                { psr123.Instance,  processorOptions[0]},
+                { psr4.Instance,    processorOptions[1]},
+                { psr5.Instance,    processorOptions[0]},
+            };
+
+            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly(), map);
+            var sut = engineCreateInfo.OptionsResolver;
+
+            Assert.IsNotNull(sut, "Options Resolver is null");
+
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(dsg123_1, psr123.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(dsg123_2, psr123.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[1], sut.GetProcessorOptions(dsg4, psr4.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(dsg5, psr5.Instance), "ProcessorOptions differ from expected");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void CustomProcessingOptionsResolver()
+        {
+            var dsSet = DataSourceSet.Create();
+
+            var singleDataSource = new FileDataSource("test" + Source123DataSource.Extension);
+            var dsCollection = new[]
+            {
+                new FileDataSource("test1" + Source123DataSource.Extension),
+                new FileDataSource("test2" + Source123DataSource.Extension),
+                new FileDataSource("test3" + Source123DataSource.Extension)
+            };
+
+            dsCollection.Select(ds => dsSet.AddDataSource(ds));
+            dsSet.AddDataSource(singleDataSource);
+
+            var customOptionsResolver = new MockDataSourceGrouperProcessingOptionsResolver( dsCollection, singleDataSource);
+
+            var engineCreateInfo = new EngineCreateInfo(dsSet.AsReadOnly(), customOptionsResolver);
+            var sut = engineCreateInfo.OptionsResolver;
+
+            var expectedProcessorOptions = new[]
+            {
+                new ProcessorOptions(
+                        new[]
+                        {
+                            new OptionInstance(
+                                new Option('s', "test1"),
+                                "arg1"),
+                        }),
+                new ProcessorOptions(
+                        new[]
+                        {
+                            new OptionInstance(
+                                new Option('r', "test"),
+                                "arg"),
+                        })
+            };
+
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
+
+
+            Assert.IsNotNull(sut, "Options resolver is null");
+
+            var po = sut.GetProcessorOptions(new DataSourceGroup(dsCollection, new DefaultProcessingMode()), psr123.Instance);
+            //Assert.AreEqual(expectedProcessorOptions[0], po, "ProcessorOptions differ from expected");
+            //Assert.AreEqual(expectedProcessorOptions.ElementAt(1), sut.GetProcessorOptions(new DataSourceGroup(new[] { singleDataSource }, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(new DataSourceGroup(null, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
+
+        }
+
+        private class MockDataSourceGrouperProcessingOptionsResolver : IProcessingOptionsResolver
+        {
+
+            private readonly IEnumerable<IDataSource> dataSourceCollection;
+            private readonly IDataSource singleDataSource;
+
+            public MockDataSourceGrouperProcessingOptionsResolver(IEnumerable<IDataSource> dataSourceCollection, IDataSource dataSource)
+            {
+                Guard.NotNull(dataSourceCollection, nameof(dataSourceCollection));
+                Guard.NotNull(dataSource, nameof(dataSource));
+
+                this.dataSourceCollection = dataSourceCollection;
+                this.singleDataSource = dataSource;
+            }
+
+            public ProcessorOptions GetProcessorOptions(IDataSourceGroup dsg, IProcessingSource processingSource)
+            {
+                if (dsg.DataSources == null)
+                {
+                    return ProcessorOptions.Default;
+                }
+                else if (this.dataSourceCollection.All(ds1 => dsg.DataSources.Any(ds2 => ds2.Equals(ds1)))) {
+                    return new ProcessorOptions(
+                        new[]
+                        {
+                            new OptionInstance(
+                                new Option('s', "test1"),
+                                "arg1"),
+                        });
+                }
+                else if (dsg.DataSources.Any(ds2 => ds2.Equals(this.singleDataSource))) {
+                    return new ProcessorOptions(
+                        new[]
+                        {
+                            new OptionInstance(
+                                new Option('r', "test"),
+                                "arg"),
+                        });
+                }
+
                 return ProcessorOptions.Default;
             }
         }
