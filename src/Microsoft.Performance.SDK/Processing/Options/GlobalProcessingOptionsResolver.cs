@@ -5,7 +5,7 @@ using System;
 using System.Text;
 using System.Linq;
 
-namespace Microsoft.Performance.Toolkit.Engine
+namespace Microsoft.Performance.SDK.Processing.Options
 {
     public sealed class GlobalProcessingOptionsResolver : IProcessingOptionsResolver
     {
@@ -27,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public GlobalProcessingOptionsResolver(ProcessorOptions options)
         {
             Guard.NotNull(options, nameof(options));
-            this.processorOptions = options;
+            processorOptions = options;
         }
 
         /// <inheritdoc/>

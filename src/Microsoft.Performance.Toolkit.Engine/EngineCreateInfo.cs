@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.Options;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {

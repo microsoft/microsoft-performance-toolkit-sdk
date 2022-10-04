@@ -4,7 +4,7 @@
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System.Collections.Generic;
 
-namespace Microsoft.Performance.SDK.Processing
+namespace Microsoft.Performance.SDK.Processing.Options
 {
     public interface IProcessingOptionsResolver
     {

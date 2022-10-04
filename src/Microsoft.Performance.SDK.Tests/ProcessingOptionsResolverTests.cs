@@ -1,9 +1,8 @@
 ﻿using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
+using Microsoft.Performance.SDK.Processing.Options;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
-using Microsoft.Performance.Toolkit.Engine;
-using Microsoft.Performance.Toolkit.Engine.Tests;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5;
@@ -16,16 +15,13 @@ namespace Microsoft.Performance.SDK.Tests
 {
     [TestClass]
     public class ProcessingOptionsResolverTests
-        : EngineFixture
     {
 
         [TestMethod]
         [IntegrationTest]
         public void DefaultGlobalProcessingOptionsResolverTest()
         {
-            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
-
-            var sut = engineCreateInfo.OptionsResolver;
+            var sut = GlobalProcessingOptionsResolver.Default;
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
@@ -61,9 +57,7 @@ namespace Microsoft.Performance.SDK.Tests
                         "arg1"),
                 });
 
-            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly(), processorOptions);
-
-            var sut = engineCreateInfo.OptionsResolver;
+            var sut = new GlobalProcessingOptionsResolver(processorOptions);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
@@ -100,7 +94,6 @@ namespace Microsoft.Performance.SDK.Tests
         [IntegrationTest]
         public void GlobalProcessingOptionsResolverTestFailure()
         {
-
             var processorOptions = new ProcessorOptions(
                 new[]
                 {
@@ -123,9 +116,7 @@ namespace Microsoft.Performance.SDK.Tests
                     new FileDataSource("test4" + Source4DataSource.Extension),
                 }, new DefaultProcessingMode());
 
-            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly(), processorOptions);
-
-            var sut = engineCreateInfo.OptionsResolver;
+            var sut = new GlobalProcessingOptionsResolver(processorOptions);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
@@ -209,8 +200,7 @@ namespace Microsoft.Performance.SDK.Tests
                 { psr5.Instance,    processorOptions[0]},
             };
 
-            var engineCreateInfo = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly(), map);
-            var sut = engineCreateInfo.OptionsResolver;
+            var sut = new ProcessingSourceOptionsResolver(map);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
@@ -224,8 +214,6 @@ namespace Microsoft.Performance.SDK.Tests
         [IntegrationTest]
         public void CustomProcessingOptionsResolver()
         {
-            var dsSet = DataSourceSet.Create();
-
             var singleDataSource = new FileDataSource("test" + Source123DataSource.Extension);
             var dsCollection = new[]
             {
@@ -234,13 +222,7 @@ namespace Microsoft.Performance.SDK.Tests
                 new FileDataSource("test3" + Source123DataSource.Extension)
             };
 
-            dsCollection.Select(ds => dsSet.AddDataSource(ds));
-            dsSet.AddDataSource(singleDataSource);
-
-            var customOptionsResolver = new MockDataSourceGrouperProcessingOptionsResolver( dsCollection, singleDataSource);
-
-            var engineCreateInfo = new EngineCreateInfo(dsSet.AsReadOnly(), customOptionsResolver);
-            var sut = engineCreateInfo.OptionsResolver;
+            var sut = new MockDataSourceGrouperProcessingOptionsResolver( dsCollection, singleDataSource);
 
             var expectedProcessorOptions = new[]
             {

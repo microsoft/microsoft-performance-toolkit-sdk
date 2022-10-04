@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Performance.Toolkit.Engine
+namespace Microsoft.Performance.SDK.Processing.Options
 {
     public sealed class ProcessingSourceOptionsResolver : IProcessingOptionsResolver
     {
@@ -51,9 +51,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Guard.NotNull(processingSource, nameof(processingSource));
 
-            this.processingSourceToOptionsMap.TryGetValue(processingSource, out ProcessorOptions processorOptions);
-
-            processorOptions ??= ProcessorOptions.Default;
+            var success = processingSourceToOptionsMap.TryGetValue(processingSource, out ProcessorOptions processorOptions);
+            if (!success || processorOptions == null)
+            {
+                processorOptions = ProcessorOptions.Default;
+            }
 
             // Ensure that the ProcessingSource supports all provided options
             if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals((o.Id as Option)?.Id))))
