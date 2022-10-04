@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,6 +21,9 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
         ///     The <see cref="IProcessingMode"/> that this group should be processed in. This parameter may not
         ///     be <c>null</c>.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSources"/> or <paramref name="processingMode"/> is <c>null</c>.
+        /// </exception>
         public DataSourceGroup(IReadOnlyCollection<IDataSource> dataSources, IProcessingMode processingMode)
         {
             Guard.NotNull(dataSources, nameof(dataSources));

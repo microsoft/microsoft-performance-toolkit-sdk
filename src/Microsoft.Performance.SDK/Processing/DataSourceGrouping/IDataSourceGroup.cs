@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
 {
     /// <summary>
-    ///     A <see cref="IDataSource"/> collection that a <see cref="ICustomDataProcessor"/> can process together as
-    ///     a single, combined <see cref="IDataSource"/> in the specified <see cref="ProcessingMode"/>.
+    ///     A collection of <see cref="IDataSource"/>s that a <see cref="ICustomDataProcessor"/> can process together
+    ///     in a specified <see cref="IProcessingMode"/>.
     /// </summary>
     public interface IDataSourceGroup
     {

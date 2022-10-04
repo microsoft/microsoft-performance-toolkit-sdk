@@ -12,8 +12,8 @@ namespace Microsoft.Performance.SDK.Processing.DataSourceGrouping
     public interface IDataSourceGrouper
     {
         /// <summary>
-        ///     Groups the specified <paramref name="dataSources" /> into groups that each can be processed by a
-        ///     <see cref="ICustomDataProcessor" /> as a single, combined <see cref="IDataSource" />.
+        ///     Groups the specified <paramref name="dataSources" /> into groups of <see cref="IDataSource"/>s that
+        ///     can be processed together by a <see cref="ICustomDataProcessor" />.
         ///     <para />
         ///     The returned value must include every valid combination of <see cref="IDataSource" />s in the given
         ///     <paramref name="dataSources" />.

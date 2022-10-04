@@ -300,6 +300,10 @@ namespace Microsoft.Performance.SDK.Processing
         ///     A new <see cref="ICustomDataProcessor"/>. It is an error
         ///     to return <c>null</c> from this method.
         /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     This <see cref="ProcessingSource"/> implements <see cref="IDataSourceGrouper"/>, but does not override
+        ///     this method.
+        /// </exception>
         protected virtual ICustomDataProcessor CreateProcessorCore(
             IDataSourceGroup dataSourceGroup,
             IProcessorEnvironment processorEnvironment,
@@ -308,12 +312,17 @@ namespace Microsoft.Performance.SDK.Processing
             if (this is IDataSourceGrouper)
             {
                 throw new InvalidOperationException(
-                    $"Prior to V2, you must override the {nameof(CreateProcessorCore)} which accepts a {nameof(IDataSourceGroup)} if you implement {nameof(IDataSourceGrouper)}");
+                    $"Prior to V2, you must override the {nameof(CreateProcessorCore)} which accepts a {nameof(IDataSourceGroup)} when implementing {nameof(IDataSourceGrouper)}");
             }
             
             this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing groups - falling back to default processing.");
 	
             // Call v1 methods for now
+            if (!(dataSourceGroup.ProcessingMode is DefaultProcessingMode))
+            {
+                this.Logger.Warn($"The {nameof(IProcessingMode)} of the {nameof(IDataSourceGroup)} passed to {nameof(CreateProcessorCore)} is not {nameof(DefaultProcessingMode)}, " +
+                                 $"but {this.GetType().Name} does not implement {nameof(IDataSourceGrouper)}. This may indicate an error using the {nameof(IDataSourceGroup)} processing API.");
+            }
             return this.CreateProcessor(dataSourceGroup.DataSources, processorEnvironment, options);
         }
 

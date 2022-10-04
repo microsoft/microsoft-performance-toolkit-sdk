@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
@@ -81,6 +82,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     The created <see cref="ICustomDataProcessor"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSource"/>, <paramref name="processorEnvironment"/>, or <paramref name="options"/> is <c>null</c>.
+        /// </exception>
         ICustomDataProcessor CreateProcessor(
             IDataSource dataSource,
             IProcessorEnvironment processorEnvironment,
@@ -101,6 +105,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     The created <see cref="ICustomDataProcessor"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSources"/>, <paramref name="processorEnvironment"/>, or <paramref name="options"/> is <c>null</c>.
+        /// </exception>
         ICustomDataProcessor CreateProcessor(
             IEnumerable<IDataSource> dataSources,
             IProcessorEnvironment processorEnvironment,
@@ -121,6 +128,13 @@ namespace Microsoft.Performance.SDK.Processing
         /// <returns>
         ///     The created <see cref="ICustomDataProcessor"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="dataSourceGroup"/>, <paramref name="processorEnvironment"/>, or <paramref name="options"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     This <see cref="IProcessingSource"/> implements <see cref="IDataSourceGrouper"/>, but does not provide a
+        ///     valid a way to process a <see cref="IDataSourceGroup"/>.
+        /// </exception>
         ICustomDataProcessor CreateProcessor(
             IDataSourceGroup dataSourceGroup,
             IProcessorEnvironment processorEnvironment,
