@@ -318,7 +318,7 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Creates a new processor for processing the specified data sources.
+        ///     Creates a new processor for processing the specified <see cref="IDataSourceGroup"/>.
         /// </summary>
         /// <param name="dataSourceGroup">
         ///     The data source group to process.
@@ -326,7 +326,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="processorEnvironment">
         ///     The environment for this specific processor instance.
         /// </param>
-        /// <param name="options">
+        /// <param name="commandLineOptions">
         ///     The command line options to pass to the processor.
         /// </param>
         /// <returns>
