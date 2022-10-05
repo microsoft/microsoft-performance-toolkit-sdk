@@ -30,7 +30,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
         /// </summary>
         /// <remarks>
-        ///     Uses default ProcessorOptions. To modify this behavior <see cref="WithProcessingOptions(IProcessingOptionsResolver)"/>.
+        ///     Uses default ProcessorOptions. To modify this behavior <see cref="WithProcessorOptions(IProcessingOptionsResolver)"/>.
         /// </remarks>
         /// <param name="dataSources">
         ///     The data sources to be processed in the engine.
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Guard.NotNull(globalProcessorOptions, nameof(globalProcessorOptions));
 
-            this.WithProcessingOptions(new GlobalProcessingOptionsResolver(globalProcessorOptions));
+            this.WithProcessorOptions(new GlobalProcessingOptionsResolver(globalProcessorOptions));
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Guard.NotNull(processingSourceOptionsMap, nameof(processingSourceOptionsMap));
 
-            this.WithProcessingOptions(new ProcessingSourceOptionsResolver(processingSourceOptionsMap));
+            this.WithProcessorOptions(new ProcessingSourceOptionsResolver(processingSourceOptionsMap));
         }
 
         /// <summary>
@@ -84,8 +84,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="processingOptionsResolver"/> is <c>null</c>.
         /// </exception>
-        public void WithProcessingOptions(IProcessingOptionsResolver processingOptionsResolver)
+        public void WithProcessorOptions(IProcessingOptionsResolver processingOptionsResolver)
         {
+            Guard.NotNull(processingOptionsResolver, nameof(processingOptionsResolver));
+
             this.OptionsResolver = processingOptionsResolver;
         }
 

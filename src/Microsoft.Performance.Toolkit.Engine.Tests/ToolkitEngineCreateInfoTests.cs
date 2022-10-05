@@ -8,6 +8,7 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests
@@ -85,6 +86,28 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(typeof(ProcessingSourceOptionsResolver), sut.OptionsResolver.GetType(), "Options Resolver is not of type ProcessingSourceOptionsResolver");
             
             Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(dsg, processingSource), "Expected processor options were not returned");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void NullOptionsResolver_Failure()
+        {
+            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
+            IProcessingOptionsResolver resolver = null;
+            
+            ArgumentNullException exception = null;
+
+            try
+            {
+                sut.WithProcessorOptions(resolver);
+
+            }
+            catch (ArgumentNullException e)
+            {
+                exception = e;
+            }
+
+            Assert.IsNotNull(exception, "NullException not found");
         }
     }
 }
