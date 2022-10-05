@@ -288,7 +288,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="NotSupportedException">
-        ///     The <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        ///     The <see cref="ProcessorOptions"/> returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
         /// </exception>
         public static Engine Create(
             IDataSource dataSource,
@@ -347,7 +347,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="NotSupportedException">
-        ///     The <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        ///     The <see cref="ProcessorOptions"/> returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
         /// </exception>
         public static Engine Create(
             IEnumerable<IDataSource> dataSources,
@@ -389,7 +389,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="NotSupportedException">
-        ///     The <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        ///     The <see cref="ProcessorOptions"/> returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
         /// </exception>
         public static Engine Create(EngineCreateInfo createInfo)
         {

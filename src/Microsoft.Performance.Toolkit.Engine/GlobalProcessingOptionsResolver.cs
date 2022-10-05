@@ -37,7 +37,6 @@ namespace Microsoft.Performance.SDK.Processing.Options
         public ProcessorOptions GetProcessorOptions(IDataSourceGroup dataSourceGroup, IProcessingSource processingSource)
         {
             Guard.NotNull(processingSource, nameof(processingSource));
-
             return this.processorOptions;
         }
     }

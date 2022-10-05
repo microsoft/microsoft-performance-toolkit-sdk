@@ -47,9 +47,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     The specified <paramref name="processingSource"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="NotSupportedException">
-        ///     The <c>processorOptions</c> are not supported by the provided <paramref name="processingSource"/>.
-        /// </exception>
         private ProcessorOptions GetProcessorOptions(IProcessingSource processingSource)
         {
             Guard.NotNull(processingSource, nameof(processingSource));
@@ -58,12 +55,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (!success || processorOptions == null)
             {
                 processorOptions = ProcessorOptions.Default;
-            }
-
-            // Ensure that the ProcessingSource supports all provided options
-            if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals((o.Id as Option)?.Id))))
-            {
-                throw new NotSupportedException($"All ProcessorOptions are not supported.");
             }
 
             return processorOptions;

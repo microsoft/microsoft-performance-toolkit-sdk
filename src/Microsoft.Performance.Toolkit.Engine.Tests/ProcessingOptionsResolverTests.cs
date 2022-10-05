@@ -3,13 +3,14 @@
 
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
+using Microsoft.Performance.SDK.Processing.Options;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Toolkit.Engine;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
