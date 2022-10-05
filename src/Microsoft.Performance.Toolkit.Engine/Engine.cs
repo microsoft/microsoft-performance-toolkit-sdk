@@ -291,6 +291,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
+        /// <exception cref="NotSupportedException">
+        ///     The <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        /// </exception>
         public static Engine Create(
             IDataSource dataSource,
             Type processingSourceType)
@@ -347,6 +350,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
+        /// <exception cref="NotSupportedException">
+        ///     The <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        /// </exception>
         public static Engine Create(
             IEnumerable<IDataSource> dataSources,
             Type processingSourceType)
@@ -385,6 +391,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        ///     The <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
         /// </exception>
         public static Engine Create(EngineCreateInfo createInfo)
         {
@@ -1002,8 +1011,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     try
                     {
-                        var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode());
-
                         /*
                          * TODO (#214): for now, the engine ignores the groups returned by processing sources that implement
                          * IDataSourceGrouper. In the future, this needs to
@@ -1018,6 +1025,13 @@ namespace Microsoft.Performance.Toolkit.Engine
                          * 4. Add a new executor for each IDataSourceGroups picked out in the above step
                          */
 
+                        var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode());
+                        var processorOptions = optionsResolver.GetProcessorOptions(dsg, processingSource.Instance);
+                        if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals((o.Id as Option)?.Id))))
+                        {
+                            throw new NotSupportedException($"All ProcessorOptions are not supported.");
+                        }
+
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
                             x => ConsoleLogger.Create(x.GetType()),
@@ -1025,7 +1039,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             new DataSourceGroup(dataSources, new DefaultProcessingMode()), // see above TODO
                             processingSource.Instance.MetadataTables,
                             new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
-                            optionsResolver.GetProcessorOptions(dsg, processingSource.Instance));
+                            processorOptions);
 
                         var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
