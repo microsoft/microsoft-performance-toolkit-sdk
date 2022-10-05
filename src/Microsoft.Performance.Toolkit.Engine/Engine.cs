@@ -990,6 +990,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations,
             IProcessingOptionsResolver optionsResolver)
         {
+            Debug.Assert(optionsResolver != null, $"{optionsResolver} is null");
+
             var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)
             {
@@ -1015,9 +1017,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                          *         data source being processed in more than 1 group
                          * 4. Add a new executor for each IDataSourceGroups picked out in the above step
                          */
-                        var processorOptions = optionsResolver == null 
-                            ? ProcessorOptions.Default 
-                            : optionsResolver.GetProcessorOptions(dsg, processingSource.Instance);
 
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
@@ -1026,7 +1025,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             new DataSourceGroup(dataSources, new DefaultProcessingMode()), // see above TODO
                             processingSource.Instance.MetadataTables,
                             new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
-                            processorOptions);
+                            optionsResolver.GetProcessorOptions(dsg, processingSource.Instance));
 
                         var executor = new ProcessingSourceExecutor();
                         executor.InitializeCustomDataProcessor(executionContext);
