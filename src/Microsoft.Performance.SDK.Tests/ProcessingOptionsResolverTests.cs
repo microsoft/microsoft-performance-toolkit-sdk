@@ -128,7 +128,7 @@ namespace Microsoft.Performance.SDK.Tests
             // success
             Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg4, psr4.Instance), "ProcessorOptions differ from expected");
 
-            // Failure Expected since 
+            // Failure Expected since all options are not supported
             try
             {
                 var actualOptions = sut.GetProcessorOptions(dsg123, psr123.Instance);
