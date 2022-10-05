@@ -47,7 +47,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         private List<ProcessingSourceExecutor> executors;
         private ReadOnlyDataSourceSet workingDataSourceSet;
         private DataSourceSet internalDataSourceSet;
-        private IProcessingOptionsResolver optionsResolver;
 
         private TableExtensionSelector tableExtensionSelector;
 
@@ -80,8 +79,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.internalDataSourceSet = internalDataSourceSet;
 
             this.loggerFactory = createInfo.LoggerFactory;
-
-            this.optionsResolver = createInfo.OptionsResolver;
 
             this.tableGuidToDescriptor = new Dictionary<Guid, TableDescriptor>();
             this.allTables = new List<TableDescriptor>();
