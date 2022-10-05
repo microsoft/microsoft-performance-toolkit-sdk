@@ -144,8 +144,13 @@ namespace Microsoft.Performance.SDK.Processing
         public override bool Equals(object obj)
         {
             var other = obj as Option;
-            bool success = other != null;
-            success &= this.Id.Equals(other.Id);
+
+            if (other is null)
+            {
+                return false;
+            }
+
+            bool success = this.Id.Equals(other.Id);
             success &= this.Name.Equals(other.Name);
             success &= this.MinimumParameterCount.Equals(other.MinimumParameterCount);
             success &= this.MaximumParameterCount.Equals(other.MaximumParameterCount);

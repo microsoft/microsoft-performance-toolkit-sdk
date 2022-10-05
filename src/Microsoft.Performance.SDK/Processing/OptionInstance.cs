@@ -81,8 +81,11 @@ namespace Microsoft.Performance.SDK.Processing
         public override bool Equals(object obj)
         {
             var other = obj as OptionInstance;
-            bool success = other != null;
-            success &= ((Option)this.Id).Equals((Option)other.Id);
+            if (other is null)
+            {
+                return false;
+            }
+            bool success = ((Option)this.Id).Equals((Option)other.Id);
             success &= Utils.Comparer(this.Arguments, other.Arguments);
             return success;
         }
