@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -10,7 +11,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Provides a means of passing options to a data processor.
     /// </summary>
-    public class ProcessorOptions : IEquatable<ProcessorOptions>
+    public class ProcessorOptions 
     {
         /// <summary>
         ///     Gets the instance that represents default <see cref="ProcessorOptions"/>.
@@ -66,19 +67,27 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public IEnumerable<string> Arguments { get; }
 
-        public bool Equals(ProcessorOptions other)
+        public override bool Equals(object obj)
         {
-            return !(other is null) &&
-                   EqualityComparer<IEnumerable<OptionInstance>>.Default.Equals(Options, other.Options) &&
-                   EqualityComparer<IEnumerable<string>>.Default.Equals(Arguments, other.Arguments);
+            var other = obj as ProcessorOptions;
+
+            if (other is null)
+            {
+                return false;
+            }
+
+
+            bool success = Utils.Comparer(this.Arguments, other.Arguments);
+            success &= Utils.Comparer(this.Options, other.Options);
+
+            return success;
         }
 
         public override int GetHashCode()
         {
-            int hashCode = -1518525876;
-            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<OptionInstance>>.Default.GetHashCode(Options);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<string>>.Default.GetHashCode(Arguments);
-            return hashCode;
+            return HashCodeUtils.CombineHashCodeValues(
+                this.Options.GetHashCode(),
+                this.Arguments.GetHashCode());
         }
     }
 }

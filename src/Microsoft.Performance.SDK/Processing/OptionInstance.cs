@@ -77,5 +77,22 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets the arguments provided to this option.
         /// </summary>
         public IEnumerable<string> Arguments { get; }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as OptionInstance;
+            bool success = other != null;
+            success &= ((Option)this.Id).Equals((Option)other.Id);
+            success &= Utils.Comparer(this.Arguments, other.Arguments);
+            return success;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCodeUtils.CombineHashCodeValues(
+                base.GetHashCode(),
+                this.Id.GetHashCode(),
+                this.Arguments.GetHashCode());
+        }
     }
 }
