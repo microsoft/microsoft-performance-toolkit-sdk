@@ -251,7 +251,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             Assert.AreEqual(expectedProcessorOptions.ElementAt(0), sut.GetProcessorOptions(new DataSourceGroup(dsCollection, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
             Assert.AreEqual(expectedProcessorOptions.ElementAt(1), sut.GetProcessorOptions(new DataSourceGroup(new[] { singleDataSource }, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(new DataSourceGroup(null, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(new DataSourceGroup(new[] { dsCollection.First() }, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
 
         }
 
