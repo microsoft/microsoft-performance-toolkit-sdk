@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Microsoft.Performance.SDK.Processing.Options
 {
-    public sealed class GlobalProcessingOptionsResolver : IProcessingOptionsResolver
+    internal class GlobalProcessingOptionsResolver : IProcessingOptionsResolver
     {
         private readonly ProcessorOptions processorOptions;
 
@@ -34,20 +34,11 @@ namespace Microsoft.Performance.SDK.Processing.Options
         /// <exception cref="ArgumentNullException">
         ///     The specified <paramref name="processingSource"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="NotSupportedException">
-        ///     The <c>processorOptions</c> are not supported by the provided Processing Source.
-        /// </exception>
         public ProcessorOptions GetProcessorOptions(IDataSourceGroup dataSourceGroup, IProcessingSource processingSource)
         {
             Guard.NotNull(processingSource, nameof(processingSource));
 
-            // Ensure that the ProcessingSource supports all provided options
-            if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals((o.Id as Option)?.Id))))
-            {
-                throw new NotSupportedException($"All ProcessorOptions are not supported.");
-            }
-
-            return processorOptions;
+            return this.processorOptions;
         }
     }
 }

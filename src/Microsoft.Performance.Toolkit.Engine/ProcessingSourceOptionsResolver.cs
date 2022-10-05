@@ -1,15 +1,16 @@
-﻿using Microsoft.Performance.SDK;
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Performance.SDK.Processing.Options
+namespace Microsoft.Performance.Toolkit.Engine
 {
-    public sealed class ProcessingSourceOptionsResolver : IProcessingOptionsResolver
+    internal sealed class ProcessingSourceOptionsResolver : IProcessingOptionsResolver
     {
         private readonly IDictionary<IProcessingSource, ProcessorOptions> processingSourceToOptionsMap;
 

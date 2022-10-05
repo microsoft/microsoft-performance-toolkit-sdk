@@ -16,7 +16,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     public sealed class EngineCreateInfo
     {
         private static string DefaultRuntimeName;
-        private IProcessingOptionsResolver optionsResolver;
 
         /// <summary>
         ///     Initializes the statc members of the <see cref="EngineCreateInfo"/>
@@ -44,7 +43,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(dataSources, nameof(dataSources));
 
             this.DataSources = dataSources;
-            this.optionsResolver = GlobalProcessingOptionsResolver.Default;
+            this.OptionsResolver = GlobalProcessingOptionsResolver.Default;
         }
 
         /// <summary>
@@ -87,7 +86,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </exception>
         public void WithProcessingOptions(IProcessingOptionsResolver processingOptionsResolver)
         {
-            this.optionsResolver = processingOptionsResolver;
+            this.OptionsResolver = processingOptionsResolver;
         }
 
         /// <summary>
@@ -118,9 +117,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         public ReadOnlyDataSourceSet DataSources { get; }
 
         /// <summary>
-        ///     
+        ///     Processing Options Resolver which can be used to provide <see cref="ProcessorOptions "/> depending on 
+        ///     <see cref="IProcessingSource"/>s and <see cref="IDataSourceGroup"/>s.
         /// </summary>
-        public IProcessingOptionsResolver OptionsResolver => this.optionsResolver;
+        public IProcessingOptionsResolver OptionsResolver { get; private set; }
 
         /// <summary>
         ///     Gets or sets a value indicating whether the Engine instance will
