@@ -11,6 +11,7 @@ using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -39,12 +40,12 @@ namespace Microsoft.Performance.SDK.Tests
             ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
 
             // Ensure these are default
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg1, psr123.Instance), "ProcessorOptions differ from expected Default");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg2, psr4.Instance), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr123.Guid, dsg1), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr4.Guid, dsg2), "ProcessorOptions differ from expected Default");
 
             // Default ProcessorOptions should always work no matter the PSR
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg1, psr4.Instance), "ProcessorOptions differ from expected Default");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(dsg2, psr123.Instance), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr4.Guid, dsg1), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr123.Guid, dsg2), "ProcessorOptions differ from expected Default");
         }
 
         [TestMethod]
@@ -87,9 +88,9 @@ namespace Microsoft.Performance.SDK.Tests
             ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
             ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out var psr5);
 
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg123, psr123.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg4, psr4.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg5, psr5.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr123.Guid, dsg123), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr4.Guid, dsg4), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr5.Guid, dsg5), "ProcessorOptions differ from expected");
         }
 
         [TestMethod]
@@ -144,21 +145,21 @@ namespace Microsoft.Performance.SDK.Tests
                     }),
             };
 
-            IDictionary<IProcessingSource, ProcessorOptions> map = new Dictionary<IProcessingSource, ProcessorOptions>()
+            IDictionary<Guid, ProcessorOptions> map = new Dictionary<Guid, ProcessorOptions>()
             {
-                { psr123.Instance,  processorOptions[0]},
-                { psr4.Instance,    processorOptions[1]},
-                { psr5.Instance,    processorOptions[0]},
+                { psr123.Guid,  processorOptions[0]},
+                { psr4.Guid,    processorOptions[1]},
+                { psr5.Guid,    processorOptions[0]},
             };
 
             var sut = new ProcessingSourceOptionsResolver(map);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(dsg123_1, psr123.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(dsg123_2, psr123.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[1], sut.GetProcessorOptions(dsg4, psr4.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(dsg5, psr5.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(psr123.Guid, dsg123_1), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(psr123.Guid, dsg123_2), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[1], sut.GetProcessorOptions(psr4.Guid, dsg4), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(psr5.Guid, dsg5), "ProcessorOptions differ from expected");
         }
 
         [TestMethod]
@@ -198,13 +199,14 @@ namespace Microsoft.Performance.SDK.Tests
 
             Assert.IsNotNull(sut, "Options resolver is null");
 
-            Assert.AreEqual(expectedProcessorOptions.ElementAt(0), sut.GetProcessorOptions(new DataSourceGroup(dsCollection, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(expectedProcessorOptions.ElementAt(1), sut.GetProcessorOptions(new DataSourceGroup(new[] { singleDataSource }, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(new DataSourceGroup(new[] { dsCollection.First() }, new DefaultProcessingMode()), psr123.Instance), "ProcessorOptions differ from expected");
+            Assert.AreEqual(expectedProcessorOptions.ElementAt(0), sut.GetProcessorOptions(psr123.Guid, new DataSourceGroup(dsCollection, new DefaultProcessingMode())), "ProcessorOptions differ from expected");
+            Assert.AreEqual(expectedProcessorOptions.ElementAt(1), sut.GetProcessorOptions(psr123.Guid, new DataSourceGroup(new[] { singleDataSource }, new DefaultProcessingMode())), "ProcessorOptions differ from expected");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr123.Guid, new DataSourceGroup(new[] { dsCollection.First() }, new DefaultProcessingMode())), "ProcessorOptions differ from expected");
 
         }
 
-        private class MockDataSourceGrouperProcessingOptionsResolver : IProcessingOptionsResolver
+        private class MockDataSourceGrouperProcessingOptionsResolver 
+            : IProcessingOptionsResolver
         {
 
             private readonly IEnumerable<IDataSource> dataSourceCollection;
@@ -219,7 +221,7 @@ namespace Microsoft.Performance.SDK.Tests
                 this.singleDataSource = dataSource;
             }
 
-            public ProcessorOptions GetProcessorOptions(IDataSourceGroup dsg, IProcessingSource processingSource)
+            public ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dsg)
             {
                 if (dsg.DataSources == null)
                 {

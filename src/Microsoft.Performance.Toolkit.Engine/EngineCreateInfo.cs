@@ -63,11 +63,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Set <see cref="ProcessorOptions"/> per <see cref="IProcessingSource"/>.
         /// </summary>
-        /// <param name="processingSourceOptionsMap">A map of <see cref="IProcessingSource"/>s with <see cref="ProcessorOptions"/> to pass it.</param>
+        /// <param name="processingSourceOptionsMap">A map to identify <see cref="ProcessorOptions"/> for processing sources via Guid.</param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="processingSourceOptionsMap"/> is <c>null</c>.
         /// </exception>
-        public void WithProcessorOptions(IDictionary<IProcessingSource, ProcessorOptions> processingSourceOptionsMap)
+        public void WithProcessorOptions(IDictionary<Guid, ProcessorOptions> processingSourceOptionsMap)
         {
             Guard.NotNull(processingSourceOptionsMap, nameof(processingSourceOptionsMap));
 

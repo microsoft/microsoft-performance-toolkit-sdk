@@ -6,52 +6,52 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
-    internal sealed class ProcessingSourceOptionsResolver : IProcessingOptionsResolver
+    internal sealed class ProcessingSourceOptionsResolver 
+        : IProcessingOptionsResolver
     {
-        private readonly IDictionary<IProcessingSource, ProcessorOptions> processingSourceToOptionsMap;
+        private readonly IDictionary<Guid, ProcessorOptions> processingSourceToOptionsMap;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSourceOptionsResolver"/> class.
         /// </summary>
         /// <param name="processingSourceToOptionsMap"> A map for each ProcessingSource to ProcessorOptions</param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="options"/> is <c>null</c>.
+        ///     <paramref name="processingSourceToOptionsMap"/> is <c>null</c>.
         /// </exception>
-        public ProcessingSourceOptionsResolver(IDictionary<IProcessingSource, ProcessorOptions> processingSourceToOptionsMap)
+        public ProcessingSourceOptionsResolver(IDictionary<Guid, ProcessorOptions> processingSourceToOptionsMap)
         {
             Guard.NotNull(processingSourceToOptionsMap, nameof(processingSourceToOptionsMap));
             this.processingSourceToOptionsMap = processingSourceToOptionsMap;
         }
 
         /// <summary>
-        ///  <see cref="GetProcessorOptions(IProcessingSource)"/>.
+        ///  <see cref="GetProcessorOptions(Guid)"/>.
         /// </summary>
-        /// <param name="dataSourceGroup">A DataSourceGroup</param>
-        /// <param name="processingSource">A Processing Source </param>
-        /// <returns>ProcessorOptions</returns>
-        public ProcessorOptions GetProcessorOptions(IDataSourceGroup dataSourceGroup, IProcessingSource processingSource)
+        /// <param name="dataSourceGroup">A DataSourceGroup.</param>
+        /// <param name="processingSourceGuid">A Guid for a Processing Source.</param>
+        /// <returns> Options for processing per ProcessingSource.</returns>
+        public ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dataSourceGroup)
         {
-            return GetProcessorOptions(processingSource);
+            return GetProcessorOptions(processingSourceGuid);
         }
 
         /// <summary>
-        ///     Return <see cref="ProcessorOptions"/> for a given <see cref="IProcessingSource"/>.
+        ///     Return options for processing for a ProcessingSource.
         /// </summary>
-        /// <param name="processingSource"> A ProcessingSource to find ProcessingOptions.</param>
+        /// <param name="processingSourceGuid"> A Guid for a  processing source to find processor options.</param>
         /// <remarks> Verify the ProcessingOptions are valid for the given ProcessingSource.</remarks>
         /// <returns>Options for a given ProcessingSource.</returns>
         /// <exception cref="ArgumentNullException">
-        ///     The specified <paramref name="processingSource"/> is <c>null</c>.
+        ///     The specified <paramref name="processingSourceGuid"/> is <c>null</c>.
         /// </exception>
-        private ProcessorOptions GetProcessorOptions(IProcessingSource processingSource)
+        private ProcessorOptions GetProcessorOptions(Guid processingSourceGuid)
         {
-            Guard.NotNull(processingSource, nameof(processingSource));
+            Guard.NotNull(processingSourceGuid, nameof(processingSourceGuid));
 
-            var success = processingSourceToOptionsMap.TryGetValue(processingSource, out ProcessorOptions processorOptions);
+            var success = processingSourceToOptionsMap.TryGetValue(processingSourceGuid, out ProcessorOptions processorOptions);
             if (!success || processorOptions == null)
             {
                 processorOptions = ProcessorOptions.Default;

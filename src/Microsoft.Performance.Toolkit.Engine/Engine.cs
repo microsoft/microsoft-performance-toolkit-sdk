@@ -1022,7 +1022,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                          */
 
                         var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode());
-                        var processorOptions = optionsResolver.GetProcessorOptions(dsg, processingSource.Instance);
+                        var processorOptions = optionsResolver.GetProcessorOptions(processingSource.Guid, dsg);
                         CheckUnsupportedOptions(processingSource.Instance, processorOptions);
 
                         var executionContext = new SDK.Runtime.ExecutionContext(

@@ -3,11 +3,13 @@
 
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Performance.SDK.Processing.Options
 {
-    internal class GlobalProcessingOptionsResolver : IProcessingOptionsResolver
+    internal class GlobalProcessingOptionsResolver 
+        : IProcessingOptionsResolver
     {
         private readonly ProcessorOptions processorOptions;
 
@@ -31,12 +33,11 @@ namespace Microsoft.Performance.SDK.Processing.Options
         }
 
         /// <inheritdoc/>
-        /// <exception cref="ArgumentNullException">
-        ///     The specified <paramref name="processingSource"/> is <c>null</c>.
-        /// </exception>
-        public ProcessorOptions GetProcessorOptions(IDataSourceGroup dataSourceGroup, IProcessingSource processingSource)
+        public ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dataSourceGroup)
         {
-            Guard.NotNull(processingSource, nameof(processingSource));
+            Debug.Assert(processingSourceGuid != null, nameof(processingSourceGuid));
+            Debug.Assert(dataSourceGroup != null, nameof(processingSourceGuid));
+
             return this.processorOptions;
         }
     }

@@ -56,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
             Assert.AreEqual(typeof(GlobalProcessingOptionsResolver), sut.OptionsResolver.GetType(), "Options Resolver is not of type GlobalProcessingOptionsResolver");
             
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(dsg, ps.Instance), "Expected processor options were not returned" );
+            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(ps.Guid, dsg), "Expected processor options were not returned" );
         }
 
         [TestMethod]
@@ -71,10 +71,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                         "arg1"),
                 });
 
-            var processingSource = new Source123DataSource();
-            var processorOptionsMap = new Dictionary<IProcessingSource, ProcessorOptions>()
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr);
+            var processorOptionsMap = new Dictionary<Guid, ProcessorOptions>()
             {
-                { processingSource, processorOptions }
+                { psr.Guid, processorOptions }
             };
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
@@ -84,8 +84,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
             Assert.AreEqual(typeof(ProcessingSourceOptionsResolver), sut.OptionsResolver.GetType(), "Options Resolver is not of type ProcessingSourceOptionsResolver");
-            
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(dsg, processingSource), "Expected processor options were not returned");
+            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(psr.Guid, dsg), "Expected processor options were not returned");
         }
 
         [TestMethod]
