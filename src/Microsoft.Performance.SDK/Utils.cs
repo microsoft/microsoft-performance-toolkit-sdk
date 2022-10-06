@@ -7,7 +7,7 @@ namespace Microsoft.Performance.SDK
 {
     internal class Utils
     {
-        internal static bool Comparer<T>(IEnumerable<T> list1, IEnumerable<T> list2)
+        internal static bool EnumerableComparer<T>(IEnumerable<T> list1, IEnumerable<T> list2)
         {
             bool nullList1 = list1 == null;
             bool nullList2 = list2 == null;

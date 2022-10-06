@@ -156,8 +156,8 @@ namespace Microsoft.Performance.SDK.Processing
             success &= this.MaximumParameterCount.Equals(other.MaximumParameterCount);
             success &= this.IsDeprecated.Equals(other.IsDeprecated);
 
-            success &= Utils.Comparer(this.ArgumentNames, other.ArgumentNames);
-            success &= Utils.Comparer(this.Description, other.Description);
+            success &= Utils.EnumerableComparer(this.ArgumentNames, other.ArgumentNames);
+            success &= Utils.EnumerableComparer(this.Description, other.Description);
 
             return success;
         }

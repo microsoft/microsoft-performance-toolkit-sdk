@@ -87,7 +87,7 @@ namespace Microsoft.Performance.SDK.Processing
                 return false;
             }
             bool success = ((Option)this.Id).Equals((Option)other.Id);
-            success &= Utils.Comparer(this.Arguments, other.Arguments);
+            success &= Utils.EnumerableComparer(this.Arguments, other.Arguments);
             return success;
         }
 
