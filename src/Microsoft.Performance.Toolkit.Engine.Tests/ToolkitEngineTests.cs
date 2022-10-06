@@ -797,6 +797,65 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             }
         }
 
+
+        public void Process_IPOR_Failure()
+        {
+
+        }
+
+
+        //[TestMethod]
+        //[IntegrationTest]
+        //public void GlobalProcessingOptionsResolverTestFailure()
+        //{
+        //    var processorOptions = new ProcessorOptions(
+        //        new[]
+        //        {
+        //            new OptionInstance(
+        //                new Option('t', "test2"),
+        //                "arg2"),
+        //        });
+
+        //    var dsg123 = new DataSourceGroup(
+        //        new[]
+        //        {
+        //            new FileDataSource("test1" + Source123DataSource.Extension),
+        //            new FileDataSource("test2" + Source123DataSource.Extension),
+        //            new FileDataSource("test3" + Source123DataSource.Extension)
+        //        }, new DefaultProcessingMode());
+
+        //    var dsg4 = new DataSourceGroup(
+        //        new[]
+        //        {
+        //            new FileDataSource("test4" + Source4DataSource.Extension),
+        //        }, new DefaultProcessingMode());
+
+        //    var sut = new GlobalProcessingOptionsResolver(processorOptions);
+
+        //    Assert.IsNotNull(sut, "Options Resolver is null");
+
+        //    ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
+        //    ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
+
+        //    // success
+        //    Assert.AreEqual(processorOptions, sut.GetProcessorOptions(dsg4, psr4.Instance), "ProcessorOptions differ from expected");
+
+        //    // Failure Expected since all options are not supported
+        //    try
+        //    {
+        //        var actualOptions = sut.GetProcessorOptions(dsg123, psr123.Instance);
+        //    }
+        //    catch (NotSupportedException e)
+        //    {
+        //        Assert.IsNotNull(e);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Assert.Fail(e.Message);
+        //    }
+        //}
+
+
         private static IEnumerable<object[]> ProcessTestData()
         {
             var suite = EngineTestsLoader.Load<EngineProcessTestSuiteDto>("TestData/ProcessTestSuite.json");

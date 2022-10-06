@@ -988,86 +988,162 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Debug.Assert(optionsResolver != null, $"{optionsResolver} is null. How did we get here?");
 
-            var executors = new List<ProcessingSourceExecutor>();
-            foreach (var kvp in allDataSourceAssociations)
+            var processingOptionsMap = new Dictionary<Tuple<ProcessingSourceReference, IDataSourceGroup>, ProcessorOptions>();
+
+            // validate the processor options and catch unsupported options
+            try
             {
-                var processingSource = kvp.Key;
-                var dataSourceLists = kvp.Value;
-
-                foreach (var dataSources in dataSourceLists)
+                var unsupportedOptions = new Dictionary<Guid, List<OptionInstance>>();
+                foreach (var kvp in allDataSourceAssociations)
                 {
-                    try
-                    {
-                        /*
-                         * TODO (#214): for now, the engine ignores the groups returned by processing sources that implement
-                         * IDataSourceGrouper. In the future, this needs to
-                         * 1. Check if the processing source implements IDataSourceGrouper (which it must after V2)
-                         * 2. If not, do what we're doing now and just create a new DataSourceGroup with the default
-                         *     processing mode
-                         * 3. If yes, use an IDataSourceGroupResolver to pick out which of the IDataSourceGroup(s)
-                         *    returned by the processing source should be used for processing.
-                         *      a. If the engine user does not supply a resolver, a sensible one should be used. E.g.
-                         *         one that picks groups that maximize the number of data sources processed without a
-                         *         data source being processed in more than 1 group
-                         * 4. Add a new executor for each IDataSourceGroups picked out in the above step
-                         */
+                    var processingSource = kvp.Key;
+                    var dataSourceLists = kvp.Value;
 
-                        var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode());
+                    foreach (var dataSources in dataSourceLists)
+                    {
+                        var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode()); // Todo #214
                         var processorOptions = optionsResolver.GetProcessorOptions(processingSource.Guid, dsg);
-                        CheckUnsupportedOptions(processingSource.Instance, processorOptions);
 
-                        var executionContext = new SDK.Runtime.ExecutionContext(
-                            new DataProcessorProgress(),
-                            x => ConsoleLogger.Create(x.GetType()),
-                            processingSource,
-                            new DataSourceGroup(dataSources, new DefaultProcessingMode()), // see above TODO
-                            processingSource.Instance.MetadataTables,
-                            new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
-                            processorOptions);
+                        Debug.Assert(processorOptions != null, "How did we get here");
 
-                        var executor = new ProcessingSourceExecutor();
-                        executor.InitializeCustomDataProcessor(executionContext);
+                        AggregateUnsupportedOptions(processingSource, processorOptions, unsupportedOptions);
 
-                        executors.Add(executor);
+                        // Save processorOptions for each DataSourceGroup and ProcessingSource.
+                        var processingSourceDataSourceGroupPair = new Tuple<ProcessingSourceReference, IDataSourceGroup>(processingSource, dsg);
+                        processingOptionsMap[processingSourceDataSourceGroupPair] = processorOptions;
                     }
-                    catch (Exception e)
-                    {
-                        this.logger.Error(
-                           "Error processing dataSources {0} on processing source {1}: {2}",
-                           dataSources.ToString(),
-                           processingSource.Name,
-                           e);
-                    }
+                }
+
+                if (unsupportedOptions.Any())
+                {
+                    throw new UnsupportedProcessorOptionsException(unsupportedOptions.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.AsEnumerable()));
+                }
+            }
+            catch (Exception e)
+            {
+                this.logger.Error(
+                    "Error validating processor options: {0}",
+                    e);
+            }
+
+            var executors = new List<ProcessingSourceExecutor>();
+            foreach (var psDsgPair in processingOptionsMap)
+            {
+                var processingSource = psDsgPair.Key.Item1;
+                var dsg = psDsgPair.Key.Item2;
+                var processorOptions = psDsgPair.Value;
+
+                try
+                {
+                    /*
+                     * TODO (#214): for now, the engine ignores the groups returned by processing sources that implement
+                     * IDataSourceGrouper. In the future, this needs to
+                     * 1. Check if the processing source implements IDataSourceGrouper (which it must after V2)
+                     * 2. If not, do what we're doing now and just create a new DataSourceGroup with the default
+                     *     processing mode
+                     * 3. If yes, use an IDataSourceGroupResolver to pick out which of the IDataSourceGroup(s)
+                     *    returned by the processing source should be used for processing.
+                     *      a. If the engine user does not supply a resolver, a sensible one should be used. E.g.
+                     *         one that picks groups that maximize the number of data sources processed without a
+                     *         data source being processed in more than 1 group
+                     * 4. Add a new executor for each IDataSourceGroups picked out in the above step
+                     */
+
+                    var executionContext = new SDK.Runtime.ExecutionContext(
+                        new DataProcessorProgress(),
+                        x => ConsoleLogger.Create(x.GetType()),
+                        processingSource,
+                        dsg, // todo #214
+                        processingSource.Instance.MetadataTables,
+                        new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
+                        processorOptions);
+
+                    var executor = new ProcessingSourceExecutor();
+                    executor.InitializeCustomDataProcessor(executionContext);
+
+                    executors.Add(executor);
+                }
+                catch (Exception e)
+                {
+                    this.logger.Error(
+                       "Error processing dataSources {0} on processing source {1}: {2}",
+                       dsg.DataSources.ToString(),
+                       processingSource.Name,
+                       e);
                 }
             }
 
             return executors;
         }
 
-        private static void CheckUnsupportedOptions(
-            IProcessingSource processingSource, 
-            ProcessorOptions processorOptions)
+        //private static void CheckUnsupportedOptions(IDictionary<Tuple<ProcessingSourceReference, IDataSourceGroup>, ProcessorOptions> map)
+        //{
+        //    foreach (var kvp in map)
+        //    {
+        //        var psr = kvp.Key.Item1;   
+        //        var dsg = kvp.Key.Item2;   
+        //        var processorOptions = kvp.Value;
+        //        CheckUnsupportedOptions(psr, processorOptions);
+        //    }
+        //}
+
+        private static void AggregateUnsupportedOptions(
+            ProcessingSourceReference processingSourceReference,
+            ProcessorOptions processorOptions,
+            IDictionary<Guid, List<OptionInstance>> unsupportedOptions)
         {
-            var unsupportedOptions = new List<OptionInstance>();
             foreach (var option in processorOptions.Options)
             {
-                var opt = option.Id as Option;
-
-                if (opt is null)
+                // Compare Option to every supported Option supported by the processingSourceReference
+                if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Equals(option.Id)))
                 {
-                    throw new UnsupportedProcessorOptionsException("Option is null");
+                    var guid = processingSourceReference.Guid;
+                    if (unsupportedOptions.TryGetValue(guid, out var options))
+                    {
+                        options.Add(option);
+                    }
+                    else
+                    {
+                        options = new List<OptionInstance>() { option };
+                    }
+                    unsupportedOptions[guid] = options;
                 }
-                else if (!processingSource.CommandLineOptions.Any(clo => clo.Id.Equals(opt.Id)))
-                {
-                    unsupportedOptions.Add(option);
-                }
-            }
-
-            if (unsupportedOptions.Any())
-            {
-                throw new UnsupportedProcessorOptionsException(unsupportedOptions);
             }
         }
+
+        //private static void CheckUnsupportedOptions(
+        //    ProcessingSourceReference processingSourceReference, 
+        //    ProcessorOptions processorOptions)
+        //{
+        //    var unsupportedOptions = new Dictionary<Guid, List<OptionInstance>>();
+        //    foreach (var option in processorOptions.Options)
+        //    {
+        //        var opt = option.Id as Option;
+
+        //        if (opt is null)
+        //        {
+        //            throw new UnsupportedProcessorOptionsException("Option is null");
+        //        }
+        //        else if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Equals(opt)))
+        //        {
+        //            var guid = processingSourceReference.Guid;
+        //            if (unsupportedOptions.TryGetValue(guid, out var options))
+        //            {
+        //                options.Add(option);
+        //            } 
+        //            else
+        //            {
+        //                options = new List<OptionInstance>() { option };
+        //            }
+        //            unsupportedOptions[guid] = options;
+        //        }
+        //    }
+
+        //    if (unsupportedOptions.Any())
+        //    {
+        //        throw new UnsupportedProcessorOptionsException(unsupportedOptions.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.AsEnumerable()));
+        //    }
+        //}
 
         private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(
             IEnumerable<ProcessingSourceReference> processingSources,

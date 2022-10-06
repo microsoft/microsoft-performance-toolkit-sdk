@@ -779,7 +779,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="options">
         ///     A list of options which contains an option that is not supported.
         /// </param>
-        public UnsupportedProcessorOptionsException(IEnumerable<OptionInstance> options) : this(FormatOptions(options), null)
+        public UnsupportedProcessorOptionsException(IDictionary<Guid, IEnumerable<OptionInstance>> unsupportedOptions) : this(FormatOptions(unsupportedOptions), null)
         {
         }
 
@@ -789,7 +789,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="options">
         ///     A list of options which contains an option that is not supported.
         /// </param>
-        public UnsupportedProcessorOptionsException(IEnumerable<OptionInstance> options, Exception inner) : this(FormatOptions(options), inner)
+        public UnsupportedProcessorOptionsException(IDictionary<Guid, IEnumerable<OptionInstance>> unsupportedOptions, Exception inner) : this(FormatOptions(unsupportedOptions), inner)
         {
         }
 
@@ -799,9 +799,19 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="options">
         ///     A list of options which contains an option that is not supported.
         /// </param>
-        private static string FormatOptions(IEnumerable<OptionInstance> options)
+        private static string FormatOptions(IDictionary<Guid, IEnumerable<OptionInstance>> unsupportedOptionsMap)
         {
-            return String.Join(',', options.Select(o => o.ToString()));
+            var unsupportedOptionsPerGuid = new List<string>();
+            foreach (var kvp in unsupportedOptionsMap)
+            {
+                var guid = kvp.Key;
+                var options = kvp.Value;
+
+                var unsupportedOptions =  String.Join(',', options.Select(o => o.ToString()));
+                var guidError = $"Guid: {guid} - Unsupported Options: [{unsupportedOptions}]" ;
+                unsupportedOptionsPerGuid.Add(guidError); 
+            }
+            return $"Unsupported Processor Options: { String.Join(',', unsupportedOptionsPerGuid)}";
         }
     }
 
