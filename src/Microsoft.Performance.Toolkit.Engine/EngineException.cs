@@ -802,7 +802,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="unsupportedOptionsMap">
         ///     options which contains an options that are not supported for each guid.
         /// </param>
-
         private static string FormatOptions(IDictionary<Guid, IEnumerable<OptionInstance>> unsupportedOptionsMap)
         {
             var unsupportedOptionsPerGuid = new List<string>();
