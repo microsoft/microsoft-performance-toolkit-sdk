@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System;
 using System.Diagnostics;
-using System.Linq;
 
-namespace Microsoft.Performance.SDK.Processing.Options
+namespace Microsoft.Performance.Toolkit.Engine
 {
     internal class GlobalProcessingOptionsResolver 
         : IProcessingOptionsResolver

@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
-using Microsoft.Performance.SDK.Processing.Options;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
-using Microsoft.Performance.Toolkit.Engine;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5;
@@ -15,7 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Performance.SDK.Tests
+namespace Microsoft.Performance.Toolkit.Engine.Tests
 {
     [TestClass]
     public class ProcessingOptionsResolverTests
@@ -24,20 +23,20 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void DefaultGlobalProcessingOptionsResolverTest()
         {
-            var sut = new GlobalProcessingOptionsResolver(ProcessorOptions.Default);
+            GlobalProcessingOptionsResolver sut = new GlobalProcessingOptionsResolver(ProcessorOptions.Default);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
-            var dsg1 = new DataSourceGroup(
+            DataSourceGroup dsg1 = new DataSourceGroup(
                 new[] { new FileDataSource("test1" + Source123DataSource.Extension) },
                 new DefaultProcessingMode());
 
-            var dsg2 = new DataSourceGroup(
+            DataSourceGroup dsg2 = new DataSourceGroup(
                 new[] { new FileDataSource("test2" + Source4DataSource.Extension) },
                 new DefaultProcessingMode());
 
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
-            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out ProcessingSourceReference psr4);
 
             // Ensure these are default
             Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr123.Guid, dsg1), "ProcessorOptions differ from expected Default");
@@ -52,7 +51,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void GlobalProcessingOptionsResolverTest()
         {
-            var processorOptions = new ProcessorOptions(
+            ProcessorOptions processorOptions = new ProcessorOptions(
                 new[]
                 {
                     new OptionInstance(
@@ -60,11 +59,11 @@ namespace Microsoft.Performance.SDK.Tests
                         "arg1"),
                 });
 
-            var sut = new GlobalProcessingOptionsResolver(processorOptions);
+            GlobalProcessingOptionsResolver sut = new GlobalProcessingOptionsResolver(processorOptions);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
-            var dsg123 = new DataSourceGroup(
+            DataSourceGroup dsg123 = new DataSourceGroup(
                 new[]
                 {
                     new FileDataSource("test1" + Source123DataSource.Extension),
@@ -72,21 +71,21 @@ namespace Microsoft.Performance.SDK.Tests
                     new FileDataSource("test3" + Source123DataSource.Extension)
                 }, new DefaultProcessingMode());
 
-            var dsg4 = new DataSourceGroup(
+            DataSourceGroup dsg4 = new DataSourceGroup(
                 new[]
                 {
                     new FileDataSource("test4" + Source4DataSource.Extension),
                 }, new DefaultProcessingMode());
 
-            var dsg5 = new DataSourceGroup(
+            DataSourceGroup dsg5 = new DataSourceGroup(
                 new[]
                 {
                     new FileDataSource("test5" + Source5DataSource.Extension),
                 }, new DefaultProcessingMode());
 
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
-            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
-            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out var psr5);
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out ProcessingSourceReference psr4);
+            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out ProcessingSourceReference psr5);
 
             Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr123.Guid, dsg123), "ProcessorOptions differ from expected");
             Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr4.Guid, dsg4), "ProcessorOptions differ from expected");
@@ -97,7 +96,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void ProcessingOptionsResolverMapTest()
         {
-            var dsg123_1 = new DataSourceGroup(
+            DataSourceGroup dsg123_1 = new DataSourceGroup(
                 new[]
                 {
                     new FileDataSource("test1" + Source123DataSource.Extension),
@@ -105,29 +104,29 @@ namespace Microsoft.Performance.SDK.Tests
                     new FileDataSource("test3" + Source123DataSource.Extension)
                 }, new DefaultProcessingMode());
 
-            var dsg123_2 = new DataSourceGroup(
+            DataSourceGroup dsg123_2 = new DataSourceGroup(
                 new[]
                 {
                     new FileDataSource("test4" + Source123DataSource.Extension)
                 }, new DefaultProcessingMode());
 
-            var dsg4 = new DataSourceGroup(
+            DataSourceGroup dsg4 = new DataSourceGroup(
                 new[]
                 {
                     new FileDataSource("test5" + Source4DataSource.Extension),
                 }, new DefaultProcessingMode());
 
-            var dsg5 = new DataSourceGroup(
+            DataSourceGroup dsg5 = new DataSourceGroup(
                 new[]
                 {
                     new FileDataSource("test6" + Source5DataSource.Extension),
                 }, new DefaultProcessingMode());
 
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
-            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out var psr4);
-            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out var psr5);
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out ProcessingSourceReference psr4);
+            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out ProcessingSourceReference psr5);
 
-            var processorOptions = new[]
+            ProcessorOptions[] processorOptions = new[]
             {
                 new ProcessorOptions(
                     new[]
@@ -152,7 +151,7 @@ namespace Microsoft.Performance.SDK.Tests
                 { psr5.Guid,    processorOptions[0]},
             };
 
-            var sut = new ProcessingSourceOptionsResolver(map);
+            ProcessingSourceOptionsResolver sut = new ProcessingSourceOptionsResolver(map);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
@@ -166,17 +165,17 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void CustomProcessingOptionsResolver()
         {
-            var singleDataSource = new FileDataSource("test" + Source123DataSource.Extension);
-            var dsCollection = new[]
+            FileDataSource singleDataSource = new FileDataSource("test" + Source123DataSource.Extension);
+            FileDataSource[] dsCollection = new[]
             {
                 new FileDataSource("test1" + Source123DataSource.Extension),
                 new FileDataSource("test2" + Source123DataSource.Extension),
                 new FileDataSource("test3" + Source123DataSource.Extension)
             };
 
-            var sut = new MockDataSourceGrouperProcessingOptionsResolver( dsCollection, singleDataSource);
+            MockDataSourceGrouperProcessingOptionsResolver sut = new MockDataSourceGrouperProcessingOptionsResolver(dsCollection, singleDataSource);
 
-            var expectedProcessorOptions = new[]
+            ProcessorOptions[] expectedProcessorOptions = new[]
             {
                 new ProcessorOptions(
                         new[]
@@ -194,7 +193,7 @@ namespace Microsoft.Performance.SDK.Tests
                         })
             };
 
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr123);
+            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
 
 
             Assert.IsNotNull(sut, "Options resolver is null");
@@ -205,7 +204,7 @@ namespace Microsoft.Performance.SDK.Tests
 
         }
 
-        private class MockDataSourceGrouperProcessingOptionsResolver 
+        private class MockDataSourceGrouperProcessingOptionsResolver
             : IProcessingOptionsResolver
         {
 
@@ -218,7 +217,7 @@ namespace Microsoft.Performance.SDK.Tests
                 Guard.NotNull(dataSource, nameof(dataSource));
 
                 this.dataSourceCollection = dataSourceCollection;
-                this.singleDataSource = dataSource;
+                singleDataSource = dataSource;
             }
 
             public ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dsg)
@@ -227,7 +226,8 @@ namespace Microsoft.Performance.SDK.Tests
                 {
                     return ProcessorOptions.Default;
                 }
-                else if (this.dataSourceCollection.All(ds1 => dsg.DataSources.Any(ds2 => ds2.Equals(ds1)))) {
+                else if (dataSourceCollection.All(ds1 => dsg.DataSources.Any(ds2 => ds2.Equals(ds1))))
+                {
                     return new ProcessorOptions(
                         new[]
                         {
@@ -236,7 +236,8 @@ namespace Microsoft.Performance.SDK.Tests
                                 "arg1"),
                         });
                 }
-                else if (dsg.DataSources.Any(ds2 => ds2.Equals(this.singleDataSource))) {
+                else if (dsg.DataSources.Any(ds2 => ds2.Equals(singleDataSource)))
+                {
                     return new ProcessorOptions(
                         new[]
                         {

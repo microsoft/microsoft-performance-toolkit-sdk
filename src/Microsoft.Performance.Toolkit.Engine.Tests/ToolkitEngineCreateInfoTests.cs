@@ -3,7 +3,6 @@
 
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
-using Microsoft.Performance.SDK.Processing.Options;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
