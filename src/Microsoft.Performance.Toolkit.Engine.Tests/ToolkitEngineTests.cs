@@ -9,8 +9,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
-using Microsoft.Performance.SDK.Processing.Options;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.Testing;
@@ -88,7 +86,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
-        
+
         #endregion Create
 
         #region Enable Cooker

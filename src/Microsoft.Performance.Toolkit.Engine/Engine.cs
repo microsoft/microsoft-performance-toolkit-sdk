@@ -382,9 +382,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        /// <exception cref="UnsupportedProcessorOptionsException">
-        ///     All the options returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
-        /// </exception>
         public static Engine Create(EngineCreateInfo createInfo)
         {
             Guard.NotNull(createInfo, nameof(createInfo));
