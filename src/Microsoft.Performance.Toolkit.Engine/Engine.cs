@@ -1076,17 +1076,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             return executors;
         }
 
-        //private static void CheckUnsupportedOptions(IDictionary<Tuple<ProcessingSourceReference, IDataSourceGroup>, ProcessorOptions> map)
-        //{
-        //    foreach (var kvp in map)
-        //    {
-        //        var psr = kvp.Key.Item1;   
-        //        var dsg = kvp.Key.Item2;   
-        //        var processorOptions = kvp.Value;
-        //        CheckUnsupportedOptions(psr, processorOptions);
-        //    }
-        //}
-
         private static void AggregateUnsupportedOptions(
             ProcessingSourceReference processingSourceReference,
             ProcessorOptions processorOptions,
@@ -1110,40 +1099,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
             }
         }
-
-        //private static void CheckUnsupportedOptions(
-        //    ProcessingSourceReference processingSourceReference, 
-        //    ProcessorOptions processorOptions)
-        //{
-        //    var unsupportedOptions = new Dictionary<Guid, List<OptionInstance>>();
-        //    foreach (var option in processorOptions.Options)
-        //    {
-        //        var opt = option.Id as Option;
-
-        //        if (opt is null)
-        //        {
-        //            throw new UnsupportedProcessorOptionsException("Option is null");
-        //        }
-        //        else if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Equals(opt)))
-        //        {
-        //            var guid = processingSourceReference.Guid;
-        //            if (unsupportedOptions.TryGetValue(guid, out var options))
-        //            {
-        //                options.Add(option);
-        //            } 
-        //            else
-        //            {
-        //                options = new List<OptionInstance>() { option };
-        //            }
-        //            unsupportedOptions[guid] = options;
-        //        }
-        //    }
-
-        //    if (unsupportedOptions.Any())
-        //    {
-        //        throw new UnsupportedProcessorOptionsException(unsupportedOptions.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.AsEnumerable()));
-        //    }
-        //}
 
         private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(
             IEnumerable<ProcessingSourceReference> processingSources,

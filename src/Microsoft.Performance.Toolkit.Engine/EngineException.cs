@@ -776,8 +776,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>.
         /// </summary>
-        /// <param name="options">
-        ///     A list of options which contains an option that is not supported.
+        /// <param name="unsupportedOptions">
+        ///     options which contains an options that are not supported for each guid.
         /// </param>
         public UnsupportedProcessorOptionsException(IDictionary<Guid, IEnumerable<OptionInstance>> unsupportedOptions) : this(FormatOptions(unsupportedOptions), null)
         {
@@ -786,8 +786,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>.
         /// </summary>
-        /// <param name="options">
-        ///     A list of options which contains an option that is not supported.
+        /// <param name="unsupportedOptions">
+        ///     options which contains an options that are not supported for each guid.
+        /// </param>
+        /// <param name="inner">
+        ///     The error that is the cause of this error.
         /// </param>
         public UnsupportedProcessorOptionsException(IDictionary<Guid, IEnumerable<OptionInstance>> unsupportedOptions, Exception inner) : this(FormatOptions(unsupportedOptions), inner)
         {
@@ -796,9 +799,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>.
         /// </summary>
-        /// <param name="options">
-        ///     A list of options which contains an option that is not supported.
+        /// <param name="unsupportedOptionsMap">
+        ///     options which contains an options that are not supported for each guid.
         /// </param>
+
         private static string FormatOptions(IDictionary<Guid, IEnumerable<OptionInstance>> unsupportedOptionsMap)
         {
             var unsupportedOptionsPerGuid = new List<string>();
