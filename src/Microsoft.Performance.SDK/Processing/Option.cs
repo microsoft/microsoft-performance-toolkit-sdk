@@ -155,22 +155,11 @@ namespace Microsoft.Performance.SDK.Processing
             success &= this.MinimumParameterCount.Equals(other.MinimumParameterCount);
             success &= this.MaximumParameterCount.Equals(other.MaximumParameterCount);
             success &= this.IsDeprecated.Equals(other.IsDeprecated);
-            
+
             success &= Utils.Comparer(this.ArgumentNames, other.ArgumentNames);
             success &= Utils.Comparer(this.Description, other.Description);
 
             return success;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCodeUtils.CombineHashCodeValues(
-                base.GetHashCode(),
-                this.Id.GetHashCode(),
-                this.Name.GetHashCode(),
-                this.MinimumParameterCount.GetHashCode(),
-                this.MaximumParameterCount.GetHashCode(),
-                this.IsDeprecated.GetHashCode());
         }
 
         /// <inheritdoc />

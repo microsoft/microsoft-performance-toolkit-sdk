@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -775,30 +774,30 @@ namespace Microsoft.Performance.Toolkit.Engine
         public UnsupportedProcessorOptionsException(string message, Exception inner) : base(message, inner) { }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>
+        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>.
         /// </summary>
         /// <param name="options">
-        ///     A list of options which contains an option that is not supported
+        ///     A list of options which contains an option that is not supported.
         /// </param>
         public UnsupportedProcessorOptionsException(IEnumerable<OptionInstance> options) : this(FormatOptions(options), null)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>
+        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>.
         /// </summary>
         /// <param name="options">
-        ///     A list of options which contains an option that is not supported
+        ///     A list of options which contains an option that is not supported.
         /// </param>
         public UnsupportedProcessorOptionsException(IEnumerable<OptionInstance> options, Exception inner) : this(FormatOptions(options), inner)
         {
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>
+        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>.
         /// </summary>
         /// <param name="options">
-        ///     A list of options which contains an option that is not supported
+        ///     A list of options which contains an option that is not supported.
         /// </param>
         private static string FormatOptions(IEnumerable<OptionInstance> options)
         {

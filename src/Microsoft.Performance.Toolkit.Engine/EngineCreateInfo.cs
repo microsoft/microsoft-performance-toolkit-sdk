@@ -43,11 +43,11 @@ namespace Microsoft.Performance.Toolkit.Engine
             Guard.NotNull(dataSources, nameof(dataSources));
 
             this.DataSources = dataSources;
-            this.OptionsResolver = GlobalProcessingOptionsResolver.Default;
+            this.OptionsResolver = new GlobalProcessingOptionsResolver(ProcessorOptions.Default);
         }
 
         /// <summary>
-        ///     <see cref="ProcessorOptions"/> to use for all processing sources and data source groups during processing.
+        ///     Resolves <paramref name="globalProcessorOptions"/> to use for all processing sources and data source groups during processing.
         /// </summary>
         /// <param name="globalProcessorOptions"> <see cref="ProcessorOptions"/> to use for all processing.</param>
         /// <exception cref="ArgumentNullException">
@@ -61,7 +61,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Set <see cref="ProcessorOptions"/> per <see cref="IProcessingSource"/>.
+        ///     Resolves processor options to use per processing sources during processing.
         /// </summary>
         /// <param name="processingSourceOptionsMap">A map to identify <see cref="ProcessorOptions"/> for processing sources via Guid.</param>
         /// <exception cref="ArgumentNullException">
@@ -75,11 +75,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Set a custom resolver for returning processor options. <see cref="IProcessingOptionsResolver"/> for more info. 
+        ///     Resolves <see cref="ProcessorOptions"/> to use depending on processing sources and data source groups during processing.
+        ///     <see cref="IProcessingOptionsResolver"/> for more info. 
         /// </summary>
         /// <remarks>
         ///     To set global processor options, you can also use <see cref="WithProcessorOptions(ProcessorOptions)"/>.
-        ///     To set processor options per processing source <seealso cref="WithProcessorOptions(IDictionary{IProcessingSource, ProcessorOptions})"/>.
+        ///     To set processor options per processing source <seealso cref="WithProcessorOptions(IDictionary{Guid, ProcessorOptions})"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="processingOptionsResolver"/> is <c>null</c>.

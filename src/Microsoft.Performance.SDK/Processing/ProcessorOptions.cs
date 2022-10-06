@@ -1,9 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -80,13 +78,6 @@ namespace Microsoft.Performance.SDK.Processing
             success &= Utils.Comparer(this.Options, other.Options);
 
             return success;
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCodeUtils.CombineHashCodeValues(
-                this.Options.GetHashCode(),
-                this.Arguments.GetHashCode());
         }
     }
 }

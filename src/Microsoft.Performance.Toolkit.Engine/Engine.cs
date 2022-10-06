@@ -986,7 +986,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations,
             IProcessingOptionsResolver optionsResolver)
         {
-            Debug.Assert(optionsResolver != null, $"{optionsResolver} is null");
+            Debug.Assert(optionsResolver != null, $"{optionsResolver} is null. How did we get here?");
 
             var executors = new List<ProcessingSourceExecutor>();
             foreach (var kvp in allDataSourceAssociations)

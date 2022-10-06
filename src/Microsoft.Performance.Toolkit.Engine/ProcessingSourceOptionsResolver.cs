@@ -6,6 +6,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -28,21 +29,32 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///  <see cref="GetProcessorOptions(Guid)"/>.
+        ///     Return options for processing for a ProcessingSource.
         /// </summary>
+        /// <remarks> 
+        ///     Verify the ProcessingOptions are valid for the given ProcessingSource. 
+        ///     If a ProcessingSourceGuid wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
+        /// </remarks>
+        /// <param name="processingSourceGuid"> A Guid for a  processing source to find processor options.</param>
         /// <param name="dataSourceGroup">A DataSourceGroup.</param>
-        /// <param name="processingSourceGuid">A Guid for a Processing Source.</param>
-        /// <returns> Options for processing per ProcessingSource.</returns>
+        /// <returns>Options for a given ProcessingSource.</returns>
+        /// <exception cref="ArgumentNullException">
+        ///     The specified <paramref name="processingSourceGuid"/> is <c>null</c>.
+        /// </exception>
         public ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dataSourceGroup)
         {
+            Debug.Assert(dataSourceGroup != null);
             return GetProcessorOptions(processingSourceGuid);
         }
 
         /// <summary>
         ///     Return options for processing for a ProcessingSource.
         /// </summary>
+        /// <remarks> 
+        ///     Verify the ProcessingOptions are valid for the given ProcessingSource. 
+        ///     If a ProcessingSourceGuid wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
+        /// </remarks>
         /// <param name="processingSourceGuid"> A Guid for a  processing source to find processor options.</param>
-        /// <remarks> Verify the ProcessingOptions are valid for the given ProcessingSource.</remarks>
         /// <returns>Options for a given ProcessingSource.</returns>
         /// <exception cref="ArgumentNullException">
         ///     The specified <paramref name="processingSourceGuid"/> is <c>null</c>.

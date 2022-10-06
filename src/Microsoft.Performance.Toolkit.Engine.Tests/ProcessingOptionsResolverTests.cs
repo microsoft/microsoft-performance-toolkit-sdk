@@ -24,7 +24,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void DefaultGlobalProcessingOptionsResolverTest()
         {
-            var sut = GlobalProcessingOptionsResolver.Default;
+            var sut = new GlobalProcessingOptionsResolver(ProcessorOptions.Default);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 

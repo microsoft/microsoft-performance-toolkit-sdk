@@ -91,14 +91,6 @@ namespace Microsoft.Performance.SDK.Processing
             return success;
         }
 
-        public override int GetHashCode()
-        {
-            return HashCodeUtils.CombineHashCodeValues(
-                base.GetHashCode(),
-                this.Id.GetHashCode(),
-                this.Arguments.GetHashCode());
-        }
-
         public override string ToString()
         {   
             if (this.Arguments is null)
