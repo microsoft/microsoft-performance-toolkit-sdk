@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -96,6 +97,16 @@ namespace Microsoft.Performance.SDK.Processing
                 base.GetHashCode(),
                 this.Id.GetHashCode(),
                 this.Arguments.GetHashCode());
+        }
+
+        public override string ToString()
+        {   
+            if (this.Arguments is null)
+            {
+                return $"{(Option)this.Id}";
+            }
+            var args = String.Join(",", this.Arguments.Select(a => a.ToString()));
+            return $"{(Option)this.Id} [$args: {args} ]";
         }
     }
 }

@@ -2,6 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.Design;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Performance.SDK.Extensibility;
@@ -757,4 +760,50 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
         }
     }
+
+    [Serializable]
+    public class UnsupportedProcessorOptionsException
+        : EngineException
+    {
+        /// <inheritdoc />
+        public UnsupportedProcessorOptionsException() : base() { }
+
+        /// <inheritdoc />
+        public UnsupportedProcessorOptionsException(string message) : base(message) { }
+
+        /// <inheritdoc />
+        public UnsupportedProcessorOptionsException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>
+        /// </summary>
+        /// <param name="options">
+        ///     A list of options which contains an option that is not supported
+        /// </param>
+        public UnsupportedProcessorOptionsException(IEnumerable<OptionInstance> options) : this(FormatOptions(options), null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>
+        /// </summary>
+        /// <param name="options">
+        ///     A list of options which contains an option that is not supported
+        /// </param>
+        public UnsupportedProcessorOptionsException(IEnumerable<OptionInstance> options, Exception inner) : this(FormatOptions(options), inner)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="UnsupportedProcessorOptionsException"/>
+        /// </summary>
+        /// <param name="options">
+        ///     A list of options which contains an option that is not supported
+        /// </param>
+        private static string FormatOptions(IEnumerable<OptionInstance> options)
+        {
+            return String.Join(',', options.Select(o => o.ToString()));
+        }
+    }
+
 }

@@ -396,7 +396,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-
             try
             {
                 this.AddDataSourcesCore(dataSources, processingSourceType);
@@ -450,7 +449,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             return new ReadOnlyDataSourceSet(
                 dataSourcesToProcess,
-                freeDataSources,
+                this.freeDataSources,
                 this.plugins);
         }
 

@@ -287,8 +287,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        /// <exception cref="NotSupportedException">
-        ///     The <see cref="ProcessorOptions"/> returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        /// <exception cref="UnsupportedProcessorOptionsException">
+        ///     All the options returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
         /// </exception>
         public static Engine Create(
             IDataSource dataSource,
@@ -346,8 +346,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        /// <exception cref="NotSupportedException">
-        ///     The <see cref="ProcessorOptions"/> returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        /// <exception cref="UnsupportedProcessorOptionsException">
+        ///     All the options returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
         /// </exception>
         public static Engine Create(
             IEnumerable<IDataSource> dataSources,
@@ -388,8 +388,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
-        /// <exception cref="NotSupportedException">
-        ///     The <see cref="ProcessorOptions"/> returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
+        /// <exception cref="UnsupportedProcessorOptionsException">
+        ///     All the options returned by <c>createInfo.OptionsResolver.</c> are not supported by the provided Processing Source.
         /// </exception>
         public static Engine Create(EngineCreateInfo createInfo)
         {
@@ -1023,9 +1023,26 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                         var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode());
                         var processorOptions = optionsResolver.GetProcessorOptions(dsg, processingSource.Instance);
-                        if (!processorOptions.Options.All(o => processingSource.CommandLineOptions.Any(clo => clo.Id.Equals((o.Id as Option)?.Id))))
+
+                        // track unsupported processor options and throw exception
+                        var unsupportedOptions = new List<OptionInstance>();
+                        foreach (var option in processorOptions.Options)
                         {
-                            throw new NotSupportedException($"All ProcessorOptions are not supported.");
+                            var opt = option.Id as Option;
+
+                            if (opt is null)
+                            {
+                                throw new UnsupportedProcessorOptionsException("Option is null");
+                            }
+                            else if (!processingSource.CommandLineOptions.Any(clo => clo.Id.Equals(opt.Id)))
+                            {
+                                unsupportedOptions.Add(option);
+                            }
+                        }
+
+                        if (unsupportedOptions.Any())
+                        {
+                            throw new UnsupportedProcessorOptionsException(unsupportedOptions);
                         }
 
                         var executionContext = new SDK.Runtime.ExecutionContext(

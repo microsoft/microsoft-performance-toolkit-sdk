@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Provides a means of passing options to a data processor.
     /// </summary>
-    public class ProcessorOptions 
+    public class ProcessorOptions
     {
         /// <summary>
         ///     Gets the instance that represents default <see cref="ProcessorOptions"/>.
