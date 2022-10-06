@@ -21,7 +21,7 @@ namespace Microsoft.Performance.SDK.Tests
     public class ProcessingOptionsResolverTests
     {
         [TestMethod]
-        [IntegrationTest]
+        [UnitTest]
         public void DefaultGlobalProcessingOptionsResolverTest()
         {
             var sut = GlobalProcessingOptionsResolver.Default;
@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
 
         [TestMethod]
-        [IntegrationTest]
+        [UnitTest]
         public void GlobalProcessingOptionsResolverTest()
         {
             var processorOptions = new ProcessorOptions(
@@ -94,7 +94,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
 
         [TestMethod]
-        [IntegrationTest]
+        [UnitTest]
         public void ProcessingOptionsResolverMapTest()
         {
             var dsg123_1 = new DataSourceGroup(
@@ -163,7 +163,7 @@ namespace Microsoft.Performance.SDK.Tests
         }
 
         [TestMethod]
-        [IntegrationTest]
+        [UnitTest]
         public void CustomProcessingOptionsResolver()
         {
             var singleDataSource = new FileDataSource("test" + Source123DataSource.Extension);
