@@ -1023,27 +1023,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                         var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode());
                         var processorOptions = optionsResolver.GetProcessorOptions(dsg, processingSource.Instance);
-
-                        // track unsupported processor options and throw exception
-                        var unsupportedOptions = new List<OptionInstance>();
-                        foreach (var option in processorOptions.Options)
-                        {
-                            var opt = option.Id as Option;
-
-                            if (opt is null)
-                            {
-                                throw new UnsupportedProcessorOptionsException("Option is null");
-                            }
-                            else if (!processingSource.CommandLineOptions.Any(clo => clo.Id.Equals(opt.Id)))
-                            {
-                                unsupportedOptions.Add(option);
-                            }
-                        }
-
-                        if (unsupportedOptions.Any())
-                        {
-                            throw new UnsupportedProcessorOptionsException(unsupportedOptions);
-                        }
+                        CheckUnsupportedOptions(processingSource.Instance, processorOptions);
 
                         var executionContext = new SDK.Runtime.ExecutionContext(
                             new DataProcessorProgress(),
@@ -1071,6 +1051,31 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             return executors;
+        }
+
+        private static void CheckUnsupportedOptions(
+            IProcessingSource processingSource, 
+            ProcessorOptions processorOptions)
+        {
+            var unsupportedOptions = new List<OptionInstance>();
+            foreach (var option in processorOptions.Options)
+            {
+                var opt = option.Id as Option;
+
+                if (opt is null)
+                {
+                    throw new UnsupportedProcessorOptionsException("Option is null");
+                }
+                else if (!processingSource.CommandLineOptions.Any(clo => clo.Id.Equals(opt.Id)))
+                {
+                    unsupportedOptions.Add(option);
+                }
+            }
+
+            if (unsupportedOptions.Any())
+            {
+                throw new UnsupportedProcessorOptionsException(unsupportedOptions);
+            }
         }
 
         private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(
