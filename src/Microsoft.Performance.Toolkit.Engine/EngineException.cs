@@ -760,6 +760,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
     }
 
+    /// <summary>
+    ///     Represents errors that occur when <see cref="ProcessorOptions"/> are unsupported.
+    /// </summary>
     [Serializable]
     public class UnsupportedProcessorOptionsException
         : EngineException

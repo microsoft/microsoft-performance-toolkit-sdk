@@ -120,8 +120,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public ReadOnlyDataSourceSet DataSources { get; }
 
         /// <summary>
-        ///     Processing Options Resolver which can be used to provide <see cref="ProcessorOptions "/> depending on 
-        ///     <see cref="IProcessingSource"/>s and <see cref="IDataSourceGroup"/>s.
+        ///     Processing Options Resolver which can be used to provide <see cref="ProcessorOptions "/>.
         /// </summary>
         public IProcessingOptionsResolver OptionsResolver { get; private set; }
 

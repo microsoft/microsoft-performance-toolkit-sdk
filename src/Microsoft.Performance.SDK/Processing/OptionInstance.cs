@@ -79,6 +79,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         public IEnumerable<string> Arguments { get; }
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             var other = obj as OptionInstance;
@@ -91,6 +92,13 @@ namespace Microsoft.Performance.SDK.Processing
             return success;
         }
 
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {   
             if (this.Arguments is null)
