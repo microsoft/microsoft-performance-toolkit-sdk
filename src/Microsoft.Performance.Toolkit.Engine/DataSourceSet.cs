@@ -436,6 +436,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             //
 
             var dataSourcesToProcess = new Dictionary<ProcessingSourceReference, List<List<IDataSource>>>();
+            var freeDataSources = new List<IDataSource>(); 
             var processingSourceReferencesList = new List<ProcessingSourceReference>();
 
             foreach (var kvp in this.dataSourcesToProcess)
@@ -445,11 +446,12 @@ namespace Microsoft.Performance.Toolkit.Engine
                     .ToList();
             }
 
+            freeDataSources.AddRange(this.FreeDataSourcesToProcess);
             processingSourceReferencesList.AddRange(this.processingSourceReferencesList);
 
             return new ReadOnlyDataSourceSet(
                 dataSourcesToProcess,
-                this.freeDataSources,
+                freeDataSources,
                 this.plugins);
         }
 
