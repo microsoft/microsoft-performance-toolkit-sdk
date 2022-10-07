@@ -92,20 +92,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
             var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
             IProcessingOptionsResolver resolver = null;
-            
-            ArgumentNullException exception = null;
-
-            try
-            {
-                sut.WithProcessorOptions(resolver);
-
-            }
-            catch (ArgumentNullException e)
-            {
-                exception = e;
-            }
-
-            Assert.IsNotNull(exception, "NullException not found");
+            Assert.ThrowsException<ArgumentNullException>(() => sut.WithProcessorOptions(resolver));
         }
     }
 }

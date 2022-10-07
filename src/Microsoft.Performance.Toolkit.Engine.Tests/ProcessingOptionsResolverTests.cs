@@ -35,16 +35,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new[] { new FileDataSource("test2" + Source4DataSource.Extension) },
                 new DefaultProcessingMode());
 
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
-            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out ProcessingSourceReference psr4);
-
             // Ensure these are default
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr123.Guid, dsg1), "ProcessorOptions differ from expected Default");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr4.Guid, dsg2), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg1), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg2), "ProcessorOptions differ from expected Default");
 
             // Default ProcessorOptions should always work no matter the PSR
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr4.Guid, dsg1), "ProcessorOptions differ from expected Default");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr123.Guid, dsg2), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg1), "ProcessorOptions differ from expected Default");
+            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg2), "ProcessorOptions differ from expected Default");
         }
 
         [TestMethod]
@@ -82,14 +79,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 {
                     new FileDataSource("test5" + Source5DataSource.Extension),
                 }, new DefaultProcessingMode());
-
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
-            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out ProcessingSourceReference psr4);
-            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out ProcessingSourceReference psr5);
-
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr123.Guid, dsg123), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr4.Guid, dsg4), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(psr5.Guid, dsg5), "ProcessorOptions differ from expected");
+            
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(Guid.NewGuid(), dsg123), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(Guid.NewGuid(), dsg4), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(Guid.NewGuid(), dsg5), "ProcessorOptions differ from expected");
         }
 
         [TestMethod]
@@ -122,9 +115,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     new FileDataSource("test6" + Source5DataSource.Extension),
                 }, new DefaultProcessingMode());
 
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
-            ProcessingSourceReference.TryCreateReference(typeof(Source4DataSource), out ProcessingSourceReference psr4);
-            ProcessingSourceReference.TryCreateReference(typeof(Source5DataSource), out ProcessingSourceReference psr5);
+            var guids = new[]
+            {
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+            };
 
             ProcessorOptions[] processorOptions = new[]
             {
@@ -146,109 +142,19 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             IDictionary<Guid, ProcessorOptions> map = new Dictionary<Guid, ProcessorOptions>()
             {
-                { psr123.Guid,  processorOptions[0]},
-                { psr4.Guid,    processorOptions[1]},
-                { psr5.Guid,    processorOptions[0]},
+                { guids[0],  processorOptions[0]},
+                { guids[1],    processorOptions[1]},
+                { guids[2],    processorOptions[0]},
             };
 
             ProcessingSourceOptionsResolver sut = new ProcessingSourceOptionsResolver(map);
 
             Assert.IsNotNull(sut, "Options Resolver is null");
 
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(psr123.Guid, dsg123_1), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(psr123.Guid, dsg123_2), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[1], sut.GetProcessorOptions(psr4.Guid, dsg4), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(psr5.Guid, dsg5), "ProcessorOptions differ from expected");
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void CustomProcessingOptionsResolver()
-        {
-            FileDataSource singleDataSource = new FileDataSource("test" + Source123DataSource.Extension);
-            FileDataSource[] dsCollection = new[]
-            {
-                new FileDataSource("test1" + Source123DataSource.Extension),
-                new FileDataSource("test2" + Source123DataSource.Extension),
-                new FileDataSource("test3" + Source123DataSource.Extension)
-            };
-
-            MockDataSourceGrouperProcessingOptionsResolver sut = new MockDataSourceGrouperProcessingOptionsResolver(dsCollection, singleDataSource);
-
-            ProcessorOptions[] expectedProcessorOptions = new[]
-            {
-                new ProcessorOptions(
-                        new[]
-                        {
-                            new OptionInstance(
-                                new Option('s', "test1"),
-                                "arg1"),
-                        }),
-                new ProcessorOptions(
-                        new[]
-                        {
-                            new OptionInstance(
-                                new Option('r', "test"),
-                                "arg"),
-                        })
-            };
-
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out ProcessingSourceReference psr123);
-
-
-            Assert.IsNotNull(sut, "Options resolver is null");
-
-            Assert.AreEqual(expectedProcessorOptions.ElementAt(0), sut.GetProcessorOptions(psr123.Guid, new DataSourceGroup(dsCollection, new DefaultProcessingMode())), "ProcessorOptions differ from expected");
-            Assert.AreEqual(expectedProcessorOptions.ElementAt(1), sut.GetProcessorOptions(psr123.Guid, new DataSourceGroup(new[] { singleDataSource }, new DefaultProcessingMode())), "ProcessorOptions differ from expected");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(psr123.Guid, new DataSourceGroup(new[] { dsCollection.First() }, new DefaultProcessingMode())), "ProcessorOptions differ from expected");
-
-        }
-
-        private class MockDataSourceGrouperProcessingOptionsResolver
-            : IProcessingOptionsResolver
-        {
-
-            private readonly IEnumerable<IDataSource> dataSourceCollection;
-            private readonly IDataSource singleDataSource;
-
-            public MockDataSourceGrouperProcessingOptionsResolver(IEnumerable<IDataSource> dataSourceCollection, IDataSource dataSource)
-            {
-                Guard.NotNull(dataSourceCollection, nameof(dataSourceCollection));
-                Guard.NotNull(dataSource, nameof(dataSource));
-
-                this.dataSourceCollection = dataSourceCollection;
-                singleDataSource = dataSource;
-            }
-
-            public ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dsg)
-            {
-                if (dsg.DataSources == null)
-                {
-                    return ProcessorOptions.Default;
-                }
-                else if (dataSourceCollection.All(ds1 => dsg.DataSources.Any(ds2 => ds2.Equals(ds1))))
-                {
-                    return new ProcessorOptions(
-                        new[]
-                        {
-                            new OptionInstance(
-                                new Option('s', "test1"),
-                                "arg1"),
-                        });
-                }
-                else if (dsg.DataSources.Any(ds2 => ds2.Equals(singleDataSource)))
-                {
-                    return new ProcessorOptions(
-                        new[]
-                        {
-                            new OptionInstance(
-                                new Option('r', "test"),
-                                "arg"),
-                        });
-                }
-
-                return ProcessorOptions.Default;
-            }
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(guids[0], dsg123_1), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(guids[0], dsg123_2), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[1], sut.GetProcessorOptions(guids[1], dsg4), "ProcessorOptions differ from expected");
+            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(guids[2], dsg5), "ProcessorOptions differ from expected");
         }
     }
 

@@ -16,17 +16,18 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
     public sealed class Source123DataSource
         : ProcessingSource
     {
-        private readonly IEnumerable<Option> options;
+        private IEnumerable<Option> options = new List<Option>()
+        {
+            new Option('r', "test"),
+            new Option('s', "test1"),
+            new Option('t', "test2")
+        };
+
         public const string Extension = ".s123d";
 
         public Source123DataSource()
             : base(new Discovery())
         {
-            options = new List<Option>() 
-            { 
-                new Option('r', "test"), 
-                new Option('s', "test1"), 
-            };
         }
 
         protected override ICustomDataProcessor CreateProcessorCore(

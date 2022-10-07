@@ -28,9 +28,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Initializes a new instance of the <see cref="EngineCreateInfo"/> class.
         /// </summary>
-        /// <remarks>
-        ///     Uses default ProcessorOptions. To modify this behavior <see cref="WithProcessorOptions(IProcessingOptionsResolver)"/>.
-        /// </remarks>
         /// <param name="dataSources">
         ///     The data sources to be processed in the engine.
         /// </param>
@@ -46,9 +43,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Resolves <paramref name="globalProcessorOptions"/> to use for all processing sources and data source groups during processing.
+        ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
         /// </summary>
-        /// <param name="globalProcessorOptions"> <see cref="ProcessorOptions"/> to use for all processing.</param>
+        /// <param name="globalProcessorOptions"> <see cref="ProcessorOptions"/> to use for all processors that will process the data sources. </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="globalProcessorOptions"/> is <c>null</c>.
         /// </exception>
@@ -60,9 +57,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Resolves processor options to use per processing sources during processing.
+        ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
         /// </summary>
-        /// <param name="processingSourceOptionsMap">A map to identify <see cref="ProcessorOptions"/> for processing sources via Guid.</param>
+        /// <param name="processingSourceOptionsMap">A map to identify <see cref="ProcessorOptions"/> for processors via Guid.</param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="processingSourceOptionsMap"/> is <c>null</c>.
         /// </exception>
@@ -74,8 +71,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Resolves <see cref="ProcessorOptions"/> to use depending on processing sources and data source groups during processing.
-        ///     <see cref="IProcessingOptionsResolver"/> for more info. 
+        ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
         /// </summary>
         /// <remarks>
         ///     To set global processor options, you can also use <see cref="WithProcessorOptions(ProcessorOptions)"/>.
