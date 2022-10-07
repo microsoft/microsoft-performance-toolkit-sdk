@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
@@ -12,7 +10,6 @@ using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests
 {
@@ -35,13 +32,16 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new[] { new FileDataSource("test2" + Source4DataSource.Extension) },
                 new DefaultProcessingMode());
 
-            // Ensure these are default
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg1), "ProcessorOptions differ from expected Default");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg2), "ProcessorOptions differ from expected Default");
 
-            // Default ProcessorOptions should always work no matter the PSR
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg1), "ProcessorOptions differ from expected Default");
-            Assert.AreEqual(ProcessorOptions.Default, sut.GetProcessorOptions(Guid.NewGuid(), dsg2), "ProcessorOptions differ from expected Default");
+            var guidDataSourcePairs = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg1),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg1),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg2),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg2),
+            };
+
+            AssertExpectedProcessorOptions(sut, guidDataSourcePairs, ProcessorOptions.Default);
         }
 
         [TestMethod]
@@ -80,9 +80,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     new FileDataSource("test5" + Source5DataSource.Extension),
                 }, new DefaultProcessingMode());
             
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(Guid.NewGuid(), dsg123), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(Guid.NewGuid(), dsg4), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions, sut.GetProcessorOptions(Guid.NewGuid(), dsg5), "ProcessorOptions differ from expected");
+            var guidDataSourcePairs = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg123),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg4),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg5),
+            };
+
+            AssertExpectedProcessorOptions(sut, guidDataSourcePairs, processorOptions);
         }
 
         [TestMethod]
@@ -121,7 +126,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
             };
-
             ProcessorOptions[] processorOptions = new[]
             {
                 new ProcessorOptions(
@@ -140,21 +144,49 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     }),
             };
 
-            IDictionary<Guid, ProcessorOptions> map = new Dictionary<Guid, ProcessorOptions>()
+            IDictionary<Guid, ProcessorOptions> optionsMap = new Dictionary<Guid, ProcessorOptions>()
             {
                 { guids[0],  processorOptions[0]},
                 { guids[1],    processorOptions[1]},
                 { guids[2],    processorOptions[0]},
             };
 
-            ProcessingSourceOptionsResolver sut = new ProcessingSourceOptionsResolver(map);
+            ProcessingSourceOptionsResolver sut = new ProcessingSourceOptionsResolver(optionsMap);
 
+            var guidDataSourcePairs1 = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(guids[0], dsg123_1),
+                new Tuple<Guid, IDataSourceGroup>(guids[0], dsg123_2),
+                new Tuple<Guid, IDataSourceGroup>(guids[0], dsg4),
+                new Tuple<Guid, IDataSourceGroup>(guids[0], dsg5),
+                new Tuple<Guid, IDataSourceGroup>(guids[2], dsg123_1),
+                new Tuple<Guid, IDataSourceGroup>(guids[2], dsg123_2),
+                new Tuple<Guid, IDataSourceGroup>(guids[2], dsg4),
+                new Tuple<Guid, IDataSourceGroup>(guids[2], dsg5),
+            };
+
+            var guidDataSourcePairs2 = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(guids[1], dsg123_1),
+                new Tuple<Guid, IDataSourceGroup>(guids[1], dsg123_2),
+                new Tuple<Guid, IDataSourceGroup>(guids[1], dsg4),
+                new Tuple<Guid, IDataSourceGroup>(guids[1], dsg5),
+            };
+
+            AssertExpectedProcessorOptions(sut, guidDataSourcePairs1, processorOptions[0]);
+            AssertExpectedProcessorOptions(sut, guidDataSourcePairs2, processorOptions[1]);
+        }
+
+        private void AssertExpectedProcessorOptions(
+            IProcessingOptionsResolver sut,
+            IEnumerable<Tuple<Guid, IDataSourceGroup>> guidDataSourceGroups,
+            ProcessorOptions expectedOptions)
+        {
             Assert.IsNotNull(sut, "Options Resolver is null");
-
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(guids[0], dsg123_1), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(guids[0], dsg123_2), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[1], sut.GetProcessorOptions(guids[1], dsg4), "ProcessorOptions differ from expected");
-            Assert.AreEqual(processorOptions[0], sut.GetProcessorOptions(guids[2], dsg5), "ProcessorOptions differ from expected");
+            foreach (var g in guidDataSourceGroups)
+            {
+                Assert.AreEqual(expectedOptions, sut.GetProcessorOptions(g.Item1, g.Item2), "ProcessorOptions differ from expected");
+            }
         }
     }
 

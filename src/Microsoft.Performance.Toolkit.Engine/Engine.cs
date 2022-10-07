@@ -990,43 +990,55 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             var processingOptionsMap = new Dictionary<Tuple<ProcessingSourceReference, IDataSourceGroup>, ProcessorOptions>();
 
-            // validate the processor options and catch unsupported options
-            try
+            // Retrieve, validate, and cache processor options
+            bool optionsFailure = false;
+            foreach (var kvp in allDataSourceAssociations)
             {
-                var unsupportedOptions = new Dictionary<Guid, List<OptionInstance>>();
-                foreach (var kvp in allDataSourceAssociations)
-                {
-                    var processingSource = kvp.Key;
-                    var dataSourceLists = kvp.Value;
+                var processingSource = kvp.Key;
+                var dataSourceLists = kvp.Value;
 
-                    foreach (var dataSources in dataSourceLists)
+                foreach (var dataSources in dataSourceLists)
+                {
+                    ProcessorOptions processorOptions = ProcessorOptions.Default;
+                    var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode()); // Todo #214
+                    
+                    // Retrieve processor options
+                    try
                     {
-                        var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode()); // Todo #214
-                        var processorOptions = optionsResolver.GetProcessorOptions(processingSource.Guid, dsg);
-
-                        Debug.Assert(processorOptions != null, "How did we get here");
-
-                        AggregateUnsupportedOptions(processingSource, processorOptions, unsupportedOptions);
-
-                        // Save processorOptions for each DataSourceGroup and ProcessingSource.
-                        var processingSourceDataSourceGroupPair = new Tuple<ProcessingSourceReference, IDataSourceGroup>(processingSource, dsg);
-                        processingOptionsMap[processingSourceDataSourceGroupPair] = processorOptions;
+                        processorOptions = optionsResolver.GetProcessorOptions(processingSource.Guid, dsg);
                     }
-                }
+                    catch (Exception e)
+                    {
+                        optionsFailure = true;
+                        this.logger.Error(
+                           "Unable to get processor options for processing source {0} and data sources {1}: {2}",
+                           processingSource.Name,
+                           dsg.DataSources.ToString(),
+                           e);
+                    }
 
-                if (unsupportedOptions.Any())
-                {
-                    throw new UnsupportedProcessorOptionsException(unsupportedOptions.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.AsEnumerable()));
+                    // Validate processor options
+                    Debug.Assert(processorOptions != null, "How did we get here");
+                    if (AreUnsupportedOptions(processingSource, processorOptions, this.logger))
+                    {
+                        optionsFailure = true;
+                    }
+
+                    // Cache processorOptions for each DataSourceGroup and ProcessingSource.
+                    var processingSourceDataSourceGroupPair = new Tuple<ProcessingSourceReference, IDataSourceGroup>(processingSource, dsg);
+                    processingOptionsMap[processingSourceDataSourceGroupPair] = processorOptions;
                 }
-            }
-            catch (Exception e)
-            {
-                this.logger.Error(
-                    "Error validating processor options: {0}",
-                    e);
             }
 
             var executors = new List<ProcessingSourceExecutor>();
+            
+            // If unable to retrieve any options or invalid options, return early
+            if (optionsFailure)
+            {
+                this.logger.Error("Failed processor options.");
+                return executors;
+            }
+
             foreach (var psDsgPair in processingOptionsMap)
             {
                 var processingSource = psDsgPair.Key.Item1;
@@ -1076,28 +1088,23 @@ namespace Microsoft.Performance.Toolkit.Engine
             return executors;
         }
 
-        private static void AggregateUnsupportedOptions(
+        private static bool AreUnsupportedOptions(
             ProcessingSourceReference processingSourceReference,
-            ProcessorOptions processorOptions,
-            IDictionary<Guid, List<OptionInstance>> unsupportedOptions)
+            ProcessorOptions processorOptions, 
+            ILogger logger)
         {
+            bool areUnsupportedOptions = false;
             foreach (var option in processorOptions.Options)
             {
                 // Compare Option to every supported Option supported by the processingSourceReference
                 if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Equals(option.Id)))
                 {
-                    var guid = processingSourceReference.Guid;
-                    if (unsupportedOptions.TryGetValue(guid, out var options))
-                    {
-                        options.Add(option);
-                    }
-                    else
-                    {
-                        options = new List<OptionInstance>() { option };
-                    }
-                    unsupportedOptions[guid] = options;
+                    areUnsupportedOptions = true;
+                    logger.Error($"{option} is unsupported");
                 }
             }
+
+            return areUnsupportedOptions;
         }
 
         private static Dictionary<ProcessingSourceReference, List<List<IDataSource>>> GroupAllDataSourcesToProcessingSources(

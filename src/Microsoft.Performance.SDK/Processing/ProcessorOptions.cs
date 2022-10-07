@@ -64,27 +64,5 @@ namespace Microsoft.Performance.SDK.Processing
         ///     passed to the processor.
         /// </summary>
         public IEnumerable<string> Arguments { get; }
-        
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            var other = obj as ProcessorOptions;
-
-            if (other is null)
-            {
-                return false;
-            }
-
-            bool success = Utils.EnumerableComparer(this.Arguments, other.Arguments);
-            success &= Utils.EnumerableComparer(this.Options, other.Options);
-
-            return success;
-        }
-
-        /// <inheritdoc/>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
     }
 }

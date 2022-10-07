@@ -80,25 +80,6 @@ namespace Microsoft.Performance.SDK.Processing
         public IEnumerable<string> Arguments { get; }
 
         /// <inheritdoc/>
-        public override bool Equals(object obj)
-        {
-            var other = obj as OptionInstance;
-            if (other is null)
-            {
-                return false;
-            }
-            bool success = ((Option)this.Id).Equals((Option)other.Id);
-            success &= Utils.EnumerableComparer(this.Arguments, other.Arguments);
-            return success;
-        }
-
-        /// <inheritdoc/>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <inheritdoc/>
         public override string ToString()
         {   
             if (this.Arguments is null)

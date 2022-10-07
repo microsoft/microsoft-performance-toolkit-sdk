@@ -142,34 +142,6 @@ namespace Microsoft.Performance.SDK.Processing
         public int MaximumParameterCount { get; }
 
         /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            var other = obj as Option;
-
-            if (other is null)
-            {
-                return false;
-            }
-
-            bool success = this.Id.Equals(other.Id);
-            success &= this.Name.Equals(other.Name);
-            success &= this.MinimumParameterCount.Equals(other.MinimumParameterCount);
-            success &= this.MaximumParameterCount.Equals(other.MaximumParameterCount);
-            success &= this.IsDeprecated.Equals(other.IsDeprecated);
-            
-            success &= Utils.EnumerableComparer(this.ArgumentNames, other.ArgumentNames);
-            success &= Utils.EnumerableComparer(this.Description, other.Description);
-
-            return success;
-        }
-
-        /// <inheritdoc/>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        /// <inheritdoc />
         public override string ToString()
         {
             return $"-{this.Name}";
