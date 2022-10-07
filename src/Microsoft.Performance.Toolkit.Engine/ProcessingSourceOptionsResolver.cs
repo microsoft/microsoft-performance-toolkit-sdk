@@ -18,25 +18,24 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSourceOptionsResolver"/> class.
         /// </summary>
-        /// <param name="processingSourceToOptionsMap"> A map for each ProcessingSource to ProcessorOptions</param>
+        /// <param name="optionsMap"> A dictionary which maps <see cref="ProcessorOptions"/> for a given processor which will process the data sources. </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="processingSourceToOptionsMap"/> is <c>null</c>.
+        ///     <paramref name="optionsMap"/> is <c>null</c>.
         /// </exception>
-        public ProcessingSourceOptionsResolver(IDictionary<Guid, ProcessorOptions> processingSourceToOptionsMap)
+        public ProcessingSourceOptionsResolver(IDictionary<Guid, ProcessorOptions> optionsMap)
         {
-            Guard.NotNull(processingSourceToOptionsMap, nameof(processingSourceToOptionsMap));
-            this.processingSourceToOptionsMap = processingSourceToOptionsMap;
+            Guard.NotNull(optionsMap, nameof(optionsMap));
+            this.processingSourceToOptionsMap = optionsMap;
         }
 
         /// <summary>
-        ///     Return options for processing for a ProcessingSource.
+        ///     Return <see cref="ProcessorOptions"/> for a ProcessingSource.
         /// </summary>
         /// <remarks> 
-        ///     Verify the ProcessingOptions are valid for the given ProcessingSource. 
         ///     If a ProcessingSourceGuid wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
         /// </remarks>
         /// <param name="processingSourceGuid"> A Guid for a  processing source to find processor options.</param>
-        /// <param name="dataSourceGroup">A DataSourceGroup.</param>
+        /// <param name="dataSourceGroup">A DataSourceGroup. This is ignored in this implementation. </param>
         /// <returns>Options for a given ProcessingSource.</returns>
         /// <exception cref="ArgumentNullException">
         ///     The specified <paramref name="processingSourceGuid"/> is <c>null</c>.
@@ -51,7 +50,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Return options for processing for a ProcessingSource.
         /// </summary>
         /// <remarks> 
-        ///     Verify the ProcessingOptions are valid for the given ProcessingSource. 
         ///     If a ProcessingSourceGuid wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
         /// </remarks>
         /// <param name="processingSourceGuid"> A Guid for a  processing source to find processor options.</param>

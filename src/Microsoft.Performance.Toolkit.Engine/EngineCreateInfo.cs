@@ -45,37 +45,37 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
         /// </summary>
-        /// <param name="globalProcessorOptions"> <see cref="ProcessorOptions"/> to use for all processors that will process the data sources. </param>
+        /// <param name="options"> <see cref="ProcessorOptions"/> to use for all processors that will process the data sources. </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="globalProcessorOptions"/> is <c>null</c>.
+        ///     <paramref name="options"/> is <c>null</c>.
         /// </exception>
-        public void WithProcessorOptions(ProcessorOptions globalProcessorOptions)
+        public void WithProcessorOptions(ProcessorOptions options)
         {
-            Guard.NotNull(globalProcessorOptions, nameof(globalProcessorOptions));
+            Guard.NotNull(options, nameof(options));
 
-            this.WithProcessorOptions(new GlobalProcessingOptionsResolver(globalProcessorOptions));
+            this.WithProcessorOptions(new GlobalProcessingOptionsResolver(options));
         }
 
         /// <summary>
         ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
         /// </summary>
-        /// <param name="processingSourceOptionsMap">A map to identify <see cref="ProcessorOptions"/> for processors via Guid.</param>
+        /// <param name="optionsMap">A dictionary which maps <see cref="ProcessorOptions"/> for a given processor which will process the data sources. </param>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="processingSourceOptionsMap"/> is <c>null</c>.
+        ///     <paramref name="optionsMap"/> is <c>null</c>.
         /// </exception>
-        public void WithProcessorOptions(IDictionary<Guid, ProcessorOptions> processingSourceOptionsMap)
+        public void WithProcessorOptions(IDictionary<Guid, ProcessorOptions> optionsMap)
         {
-            Guard.NotNull(processingSourceOptionsMap, nameof(processingSourceOptionsMap));
+            Guard.NotNull(optionsMap, nameof(optionsMap));
 
-            this.WithProcessorOptions(new ProcessingSourceOptionsResolver(processingSourceOptionsMap));
+            this.WithProcessorOptions(new ProcessingSourceOptionsResolver(optionsMap));
         }
 
         /// <summary>
         ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
         /// </summary>
         /// <remarks>
-        ///     To set global processor options, you can also use <see cref="WithProcessorOptions(ProcessorOptions)"/>.
-        ///     To set processor options per processing source <seealso cref="WithProcessorOptions(IDictionary{Guid, ProcessorOptions})"/>.
+        ///     To set processor options for all processing sources use <see cref="WithProcessorOptions(ProcessorOptions)"/>.
+        ///     To set processor options per processing source use <seealso cref="WithProcessorOptions(IDictionary{Guid, ProcessorOptions})"/>.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="processingOptionsResolver"/> is <c>null</c>.
@@ -115,7 +115,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public ReadOnlyDataSourceSet DataSources { get; }
 
         /// <summary>
-        ///     Processing Options Resolver which can be used to provide <see cref="ProcessorOptions "/>.
+        ///     Gets the <see cref="IProcessingOptionsResolver"/> which can be used to provide <see cref="ProcessorOptions "/>.
         /// </summary>
         public IProcessingOptionsResolver OptionsResolver { get; private set; }
 

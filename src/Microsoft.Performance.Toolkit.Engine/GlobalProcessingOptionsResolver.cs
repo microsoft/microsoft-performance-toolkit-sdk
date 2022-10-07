@@ -17,7 +17,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Initializes a new instance of the <see cref="GlobalProcessingOptionsResolver"/> class.
         /// </summary>
-        /// <param name="options"> Standard <see cref="ProcessorOptions"/> for all ProcessingSources and DataSourceGroups. </param>
+        /// <param name="options"> 
+        ///     The <see cref="ProcessorOptions"/> to return from all calls to <see cref="GetProcessorOptions"/>, 
+        ///     regardless of the specified <see cref="Guid"/> and <see cref="IDataSourceGroup "/>. 
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="options"/> is <c>null</c>.
         /// </exception>
