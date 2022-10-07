@@ -1097,7 +1097,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             foreach (var option in processorOptions.Options)
             {
                 // Compare Option to every supported Option supported by the processingSourceReference
-                if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Equals(option.Id)))
+                if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(((Option)option.Id).Id)))
                 {
                     areUnsupportedOptions = true;
                     logger.Error($"{option} is unsupported");
