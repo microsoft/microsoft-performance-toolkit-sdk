@@ -3,9 +3,8 @@
 
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
-using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -31,7 +30,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
             var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
-            Assert.AreEqual(typeof(GlobalProcessingOptionsResolver), sut.OptionsResolver.GetType(), "Options Resolver is not of type GlobalProcessingOptionsResolver");
+
+            var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
+
+            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), Any.DataSourceGroup()), "Options did not match default options.");
+            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), Any.DataSourceGroup()), "Options did not match default options.");
+            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Options did not match default options.");
         }
 
         [TestMethod]
@@ -47,15 +51,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 });
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var ps);
 
             var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
             sut.WithProcessorOptions(processorOptions);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
-            Assert.AreEqual(typeof(GlobalProcessingOptionsResolver), sut.OptionsResolver.GetType(), "Options Resolver is not of type GlobalProcessingOptionsResolver");
             
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(ps.Guid, dsg), "Expected processor options were not returned" );
+            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Expected processor options were not returned" );
+            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Expected processor options were not returned" );
+            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), Any.DataSourceGroup()), "Expected processor options were not returned" );
         }
 
         [TestMethod]
@@ -70,10 +74,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                         "arg1"),
                 });
 
-            ProcessingSourceReference.TryCreateReference(typeof(Source123DataSource), out var psr);
+            var processingGuid = Guid.NewGuid();
             var processorOptionsMap = new Dictionary<Guid, ProcessorOptions>()
             {
-                { psr.Guid, processorOptions }
+                { processingGuid, processorOptions }
             };
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
@@ -82,12 +86,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.WithProcessorOptions(processorOptionsMap);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
-            Assert.AreEqual(typeof(ProcessingSourceOptionsResolver), sut.OptionsResolver.GetType(), "Options Resolver is not of type ProcessingSourceOptionsResolver");
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(psr.Guid, dsg), "Expected processor options were not returned");
+            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(processingGuid, dsg), "Expected processor options were not returned");
+            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Expected default processor options for unspecified dsg");
         }
 
         [TestMethod]
-        [IntegrationTest]
+        [UnitTest]
         public void NullOptionsResolver_Failure()
         {
             var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());

@@ -13,11 +13,15 @@ namespace Microsoft.Performance.SDK.Processing
     public interface IProcessingOptionsResolver
     {
         /// <summary>
-        ///     Get the processor options for a group of data sources processed by a given processor.
+        ///     Get the <see cref="ProcessorOptions"/> for an <see cref="IDataSourceGroup"/> processed by a <see cref="IProcessingSource"/>.
         /// </summary>
-        /// <param name="processingSourceGuid"> Guid for processing source to process the data sources. </param>
+        /// <param name="processingSourceGuid"> Guid for a <see cref="IProcessingSource"/> to process the data sources. </param>
         /// <param name="dataSourceGroup"> A group of data sources. </param>
-        /// <returns> Options for processing.</returns>
+        /// <returns> 
+        ///     The <see cref="ProcessorOptions"/> to pass to the <see cref="IProcessingSource"/> 
+        ///     with the given <paramref name="processingSourceGuid"/> when it is asked to create an 
+        ///     <see cref="ICustomDataProcessor"/> to process the given <paramref name="dataSourceGroup"/>.
+        /// </returns>
         ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dataSourceGroup);
     }
 }

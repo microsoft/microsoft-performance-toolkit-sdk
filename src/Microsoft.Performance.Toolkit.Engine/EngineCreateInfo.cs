@@ -43,7 +43,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
+        ///     Specifies the <see cref="ProcessorOptions"/> to use when processing data sources.
         /// </summary>
         /// <param name="options"> <see cref="ProcessorOptions"/> to use for all processors that will process the data sources. </param>
         /// <exception cref="ArgumentNullException">
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
+        ///     Specifies the <see cref="ProcessorOptions"/> to use when processing data sources.
         /// </summary>
         /// <param name="optionsMap">A dictionary which maps <see cref="ProcessorOptions"/> for a given processor which will process the data sources. </param>
         /// <exception cref="ArgumentNullException">

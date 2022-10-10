@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Return <see cref="ProcessorOptions"/> for a ProcessingSource.
         /// </summary>
         /// <remarks> 
-        ///     If a ProcessingSourceGuid wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
+        ///     If a <paramref name="processingSourceGuid"/> wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
         /// </remarks>
         /// <param name="processingSourceGuid"> A Guid for a  processing source to find processor options.</param>
         /// <param name="dataSourceGroup">A DataSourceGroup. This is ignored in this implementation. </param>
@@ -50,7 +50,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Return options for processing for a ProcessingSource.
         /// </summary>
         /// <remarks> 
-        ///     If a ProcessingSourceGuid wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
+        ///     If a <paramref name="processingSourceGuid"/> wasn't specified, we return the <see cref="ProcessorOptions.Default"/>. 
         /// </remarks>
         /// <param name="processingSourceGuid"> A Guid for a  processing source to find processor options.</param>
         /// <returns>Options for a given ProcessingSource.</returns>

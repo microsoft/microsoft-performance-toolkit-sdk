@@ -1018,7 +1018,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                     }
 
                     // Validate processor options
-                    Debug.Assert(processorOptions != null, "How did we get here");
                     if (AreUnsupportedOptions(processingSource, processorOptions, this.logger))
                     {
                         optionsFailure = true;
@@ -1094,13 +1093,20 @@ namespace Microsoft.Performance.Toolkit.Engine
             ILogger logger)
         {
             bool areUnsupportedOptions = false;
+
+            if (processorOptions is null)
+            {
+                logger.Warn($"Provided Processor options are null for ${processingSourceReference} (${processingSourceReference.Guid}).");
+                return areUnsupportedOptions;
+            }
+
             foreach (var option in processorOptions.Options)
             {
                 // Compare Option to every supported Option supported by the processingSourceReference
                 if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(((Option)option.Id).Id)))
                 {
                     areUnsupportedOptions = true;
-                    logger.Error($"{option} is unsupported");
+                    logger.Error($"{option} is unsupported by ${processingSourceReference} (${processingSourceReference.Guid}).");
                 }
             }
 
