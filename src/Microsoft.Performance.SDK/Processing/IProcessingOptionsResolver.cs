@@ -3,7 +3,6 @@
 
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -21,6 +20,8 @@ namespace Microsoft.Performance.SDK.Processing
         ///     The <see cref="ProcessorOptions"/> to pass to the <see cref="IProcessingSource"/> 
         ///     with the given <paramref name="processingSourceGuid"/> when it is asked to create an 
         ///     <see cref="ICustomDataProcessor"/> to process the given <paramref name="dataSourceGroup"/>.
+        ///     
+        ///     It is invalid to return <c>null</c>.
         /// </returns>
         ProcessorOptions GetProcessorOptions(Guid processingSourceGuid, IDataSourceGroup dataSourceGroup);
     }

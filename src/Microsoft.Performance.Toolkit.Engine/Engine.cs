@@ -1097,16 +1097,31 @@ namespace Microsoft.Performance.Toolkit.Engine
             if (processorOptions is null)
             {
                 logger.Warn($"Provided Processor options are null for ${processingSourceReference} (${processingSourceReference.Guid}).");
-                return areUnsupportedOptions;
+                return true;
             }
 
-            foreach (var option in processorOptions.Options)
+            foreach (var optionInstance in processorOptions.Options)
             {
-                // Compare Option to every supported Option supported by the processingSourceReference
-                if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(((Option)option.Id).Id)))
+                if (optionInstance is null)
                 {
                     areUnsupportedOptions = true;
-                    logger.Error($"{option} is unsupported by ${processingSourceReference} (${processingSourceReference.Guid}).");
+                    logger.Error($"Provided option instance is null.");
+                } 
+                else
+                {
+                    var option = (Option)optionInstance.Id;
+
+                    if (option is null)
+                    {
+                        areUnsupportedOptions = true;
+                        logger.Error($"Provided processor option is null.");
+                    }
+                    else if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(option.Id)))
+                    {
+                        // Compare Option to every supported Option supported by the processingSourceReference
+                        areUnsupportedOptions = true;
+                        logger.Error($"{option} is unsupported by ${processingSourceReference} (${processingSourceReference.Guid}).");
+                    }
                 }
             }
 
