@@ -126,6 +126,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
             };
+
             ProcessorOptions[] processorOptions = new[]
             {
                 new ProcessorOptions(
@@ -177,7 +178,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             AssertExpectedProcessorOptions(sut, guidDataSourcePairs2, processorOptions[1]);
         }
 
-        private void AssertExpectedProcessorOptions(
+        public static void AssertExpectedProcessorOptions(
             IProcessingOptionsResolver sut,
             IEnumerable<Tuple<Guid, IDataSourceGroup>> guidDataSourceGroups,
             ProcessorOptions expectedOptions)

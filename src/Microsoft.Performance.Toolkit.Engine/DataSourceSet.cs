@@ -254,7 +254,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             return true;
         }
 
-        #endregion
+        #endregion Processing Source Reference unspecified
 
         #region Processing Source Reference Specified
 
@@ -407,7 +407,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
-        #endregion
+        #endregion Processing Source Reference Specified
 
         /// <summary>
         ///     Returns a readonly deep-copy of this instance.

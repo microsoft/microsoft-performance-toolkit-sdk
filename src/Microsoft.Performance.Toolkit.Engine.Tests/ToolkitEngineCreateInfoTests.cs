@@ -33,9 +33,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
 
-            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), Any.DataSourceGroup()), "Options did not match default options.");
-            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), Any.DataSourceGroup()), "Options did not match default options.");
-            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Options did not match default options.");
+            var guidDataSourcePairs = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
+            };
+
+            ProcessingOptionsResolverTests.AssertExpectedProcessorOptions(sut.OptionsResolver, guidDataSourcePairs, ProcessorOptions.Default);
         }
 
         [TestMethod]
@@ -56,10 +61,16 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.WithProcessorOptions(processorOptions);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
-            
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Expected processor options were not returned" );
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Expected processor options were not returned" );
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), Any.DataSourceGroup()), "Expected processor options were not returned" );
+
+            var guidDataSourcePairs = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
+            };
+
+            ProcessingOptionsResolverTests.AssertExpectedProcessorOptions(sut.OptionsResolver, guidDataSourcePairs, processorOptions);
         }
 
         [TestMethod]
@@ -86,8 +97,26 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             sut.WithProcessorOptions(processorOptionsMap);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
-            Assert.AreEqual(processorOptions, sut.OptionsResolver.GetProcessorOptions(processingGuid, dsg), "Expected processor options were not returned");
-            Assert.AreEqual(ProcessorOptions.Default, sut.OptionsResolver.GetProcessorOptions(Guid.NewGuid(), dsg), "Expected default processor options for unspecified dsg");
+
+
+            var guidDataSourcePairsDefault = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), dsg),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
+                new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
+            };
+            
+            var guidDataSourcePairs = new[]
+            {
+                new Tuple<Guid, IDataSourceGroup>(processingGuid, dsg),
+                new Tuple<Guid, IDataSourceGroup>(processingGuid, dsg),
+                new Tuple<Guid, IDataSourceGroup>(processingGuid, Any.DataSourceGroup()),
+                new Tuple<Guid, IDataSourceGroup>(processingGuid, Any.DataSourceGroup()),
+            };
+
+            ProcessingOptionsResolverTests.AssertExpectedProcessorOptions(sut.OptionsResolver, guidDataSourcePairs, processorOptions);
+            ProcessingOptionsResolverTests.AssertExpectedProcessorOptions(sut.OptionsResolver, guidDataSourcePairsDefault, ProcessorOptions.Default);
         }
 
         [TestMethod]

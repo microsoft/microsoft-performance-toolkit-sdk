@@ -16,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
     public sealed class Source5DataSource
         : ProcessingSource
     {
-        private IEnumerable<Option> options = new List<Option>()
+        private IEnumerable<Option> supportedOptions = new List<Option>()
         {
             new Option('s', "test1"),
             new Option('t', "test2")
@@ -50,6 +50,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
                 Path.GetExtension(dataSource.Uri.LocalPath));
         }
 
-        public override IEnumerable<Option> CommandLineOptions => options;
+        public override IEnumerable<Option> CommandLineOptions => supportedOptions;
     }
 }

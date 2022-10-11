@@ -71,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Specifies an <see cref="IProcessingOptionsResolver"/> to use when processing data sources.
+        ///     Specifies an <see cref="IProcessingOptionsResolver"/> to provide <see cref="ProcessorOptions"/> to use when processing data sources.
         /// </summary>
         /// <remarks>
         ///     To set processor options for all processing sources use <see cref="WithProcessorOptions(ProcessorOptions)"/>.

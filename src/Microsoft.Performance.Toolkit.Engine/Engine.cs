@@ -986,7 +986,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Dictionary<ProcessingSourceReference, List<List<IDataSource>>> allDataSourceAssociations,
             IProcessingOptionsResolver optionsResolver)
         {
-            Debug.Assert(optionsResolver != null, $"{optionsResolver} is null. How did we get here?");
+            Debug.Assert(optionsResolver != null, $"{optionsResolver} should not be null");
 
             var processingOptionsMap = new Dictionary<Tuple<ProcessingSourceReference, IDataSourceGroup>, ProcessorOptions>();
 
@@ -1113,9 +1113,9 @@ namespace Microsoft.Performance.Toolkit.Engine
                         areUnsupportedOptions = true;
                         logger.Error($"Provided processor option is null.");
                     }
-                    else if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(option.Id))) // this checks the options on the processingSourceReference...but we set these
+                    else if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(option.Id)))
                     {
-                        // Compare Option to every supported Option supported by the processingSourceReference
+                        // Compare Option to every Option specified as supported by the processingSourceReference
                         areUnsupportedOptions = true;
                         logger.Error($"{option} is unsupported by ${processingSourceReference} (${processingSourceReference.Guid}).");
                     }

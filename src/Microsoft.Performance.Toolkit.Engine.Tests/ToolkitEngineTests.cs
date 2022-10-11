@@ -87,7 +87,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
 
-
         [TestMethod]
         [IntegrationTest]
         public void Create_WithInvalidOptions()
@@ -115,7 +114,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(processingSourceReference.Count() >= 1, $"There should be atleast one instance of {nameof(Source123DataSource)}");
 
             var processingSourceInstance = processingSourceReference.First().Instance as Source123DataSource;
-            Assert.IsNull(processingSourceInstance.UserSpecifiedOptions, "User specified options were found, despite expecting null, as passed options are invalid");
+            Assert.IsNull(processingSourceInstance.UserSpecifiedOptions, "User specified supportedOptions were found, despite expecting null, as passed supportedOptions are invalid");
         }
 
         [TestMethod]
@@ -145,7 +144,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(processingSourceReference.Count() >= 1, $"There should be atleast one instance of {nameof(Source123DataSource)}");
 
             var processingSourceInstance = processingSourceReference.First().Instance as Source123DataSource;
-            Assert.AreEqual(expectedProcessorOptions, processingSourceInstance.UserSpecifiedOptions, "User specified options do not match");
+            Assert.AreEqual(expectedProcessorOptions, processingSourceInstance.UserSpecifiedOptions, "User specified supportedOptions do not match");
         }
 
         #endregion Create
