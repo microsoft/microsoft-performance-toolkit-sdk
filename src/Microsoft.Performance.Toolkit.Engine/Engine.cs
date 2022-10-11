@@ -1018,10 +1018,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     }
 
                     // Validate processor options
-                    if (AreUnsupportedOptions(processingSource, processorOptions, this.logger))
-                    {
-                        optionsFailure = true;
-                    }
+                    optionsFailure = AreUnsupportedOptions(processingSource, processorOptions, this.logger) || optionsFailure;
 
                     // Cache processorOptions for each DataSourceGroup and ProcessingSource.
                     var processingSourceDataSourceGroupPair = new Tuple<ProcessingSourceReference, IDataSourceGroup>(processingSource, dsg);
@@ -1116,7 +1113,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         areUnsupportedOptions = true;
                         logger.Error($"Provided processor option is null.");
                     }
-                    else if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(option.Id)))
+                    else if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(option.Id))) // this checks the options on the processingSourceReference...but we set these
                     {
                         // Compare Option to every supported Option supported by the processingSourceReference
                         areUnsupportedOptions = true;

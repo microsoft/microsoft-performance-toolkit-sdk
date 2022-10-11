@@ -87,6 +87,67 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
 
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_WithInvalidOptions()
+        {
+            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
+            using var dataSources = DataSourceSet.Create(plugins);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly());
+
+            var invalidProcessorOptions = new ProcessorOptions(
+                new[]
+                {
+                    new OptionInstance(
+                        new Option('w', "invalidOption"),
+                        "oops"),
+                });
+
+            engineCreateInfo.WithProcessorOptions(invalidProcessorOptions);
+
+            using var sut = Engine.Create(engineCreateInfo);
+
+            var processingSourceReference = plugins.ProcessingSourceReferences.Where(psr => psr.Guid.Equals(Source123DataSource.Guid));
+
+            Assert.IsNotNull(processingSourceReference, $"No ProcessingSourceReference matches our expected ProcessingSource: {nameof(Source123DataSource)}");
+            Assert.IsTrue(processingSourceReference.Count() >= 1, $"There should be atleast one instance of {nameof(Source123DataSource)}");
+
+            var processingSourceInstance = processingSourceReference.First().Instance as Source123DataSource;
+            Assert.IsNull(processingSourceInstance.UserSpecifiedOptions, "User specified options were found, despite expecting null, as passed options are invalid");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_WithValidOptions()
+        {
+            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
+            using var dataSources = DataSourceSet.Create(plugins);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly());
+
+            var expectedProcessorOptions = new ProcessorOptions(
+                new[]
+                {
+                    new OptionInstance(
+                        new Option('r', "test"),
+                        "valid"),
+                });
+
+            engineCreateInfo.WithProcessorOptions(expectedProcessorOptions);
+
+            using var sut = Engine.Create(engineCreateInfo);
+
+            var processingSourceReference = plugins.ProcessingSourceReferences.Where(psr => psr.Guid.Equals(Source123DataSource.Guid));
+
+            Assert.IsNotNull(processingSourceReference, $"No ProcessingSourceReference matches our expected ProcessingSource: {nameof(Source123DataSource)}");
+            Assert.IsTrue(processingSourceReference.Count() >= 1, $"There should be atleast one instance of {nameof(Source123DataSource)}");
+
+            var processingSourceInstance = processingSourceReference.First().Instance as Source123DataSource;
+            Assert.AreEqual(expectedProcessorOptions, processingSourceInstance.UserSpecifiedOptions, "User specified options do not match");
+        }
+
         #endregion Create
 
         #region Enable Cooker

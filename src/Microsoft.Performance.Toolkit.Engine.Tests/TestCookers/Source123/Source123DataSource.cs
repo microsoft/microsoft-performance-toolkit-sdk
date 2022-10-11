@@ -9,7 +9,7 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 {
     [ProcessingSource(
-       "{FA37C400-D2C4-48F7-B485-48F119BEE02E}",
+       GuidAsString,
        nameof(Source123DataSource),
        "Source123 for Runtime Tests")]
     [FileDataSource(Extension)]
@@ -23,6 +23,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             new Option('t', "test2")
         };
 
+        public const string GuidAsString = "{FA37C400-D2C4-48F7-B485-48F119BEE02E}";
+        public static Guid Guid = Guid.Parse(GuidAsString);
         public const string Extension = ".s123d";
 
         public Source123DataSource()
@@ -36,6 +38,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
             ProcessorOptions options)
         {
             var parser = new Source123Parser(dataSources);
+            this.UserSpecifiedOptions = options;
 
             return new Source123Processor(
                 parser,
@@ -52,6 +55,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         }
 
         public override IEnumerable<Option> CommandLineOptions => options;
+
+        public ProcessorOptions UserSpecifiedOptions { get; private set; }
         
         private sealed class Discovery
             : IProcessingSourceTableProvider
