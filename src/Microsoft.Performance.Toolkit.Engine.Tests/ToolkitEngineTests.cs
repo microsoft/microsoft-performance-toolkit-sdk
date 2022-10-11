@@ -108,12 +108,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             using var sut = Engine.Create(engineCreateInfo);
 
-            var processingSourceReference = plugins.ProcessingSourceReferences.Where(psr => psr.Guid.Equals(Source123DataSource.Guid));
-
-            Assert.IsNotNull(processingSourceReference, $"No ProcessingSourceReference matches our expected ProcessingSource: {nameof(Source123DataSource)}");
-            Assert.IsTrue(processingSourceReference.Count() >= 1, $"There should be atleast one instance of {nameof(Source123DataSource)}");
-
-            var processingSourceInstance = processingSourceReference.First().Instance as Source123DataSource;
+            var processingSourceReference = plugins.ProcessingSourceReferences.Single(psr => psr.Guid.Equals(Source123DataSource.Guid));
+            var processingSourceInstance = processingSourceReference.Instance as Source123DataSource;
             Assert.IsNull(processingSourceInstance.UserSpecifiedOptions, "User specified supportedOptions were found, despite expecting null, as passed supportedOptions are invalid");
         }
 
@@ -138,12 +134,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             using var sut = Engine.Create(engineCreateInfo);
 
-            var processingSourceReference = plugins.ProcessingSourceReferences.Where(psr => psr.Guid.Equals(Source123DataSource.Guid));
-
-            Assert.IsNotNull(processingSourceReference, $"No ProcessingSourceReference matches our expected ProcessingSource: {nameof(Source123DataSource)}");
-            Assert.IsTrue(processingSourceReference.Count() >= 1, $"There should be atleast one instance of {nameof(Source123DataSource)}");
-
-            var processingSourceInstance = processingSourceReference.First().Instance as Source123DataSource;
+            var processingSourceReference = plugins.ProcessingSourceReferences.Single(psr => psr.Guid.Equals(Source123DataSource.Guid));
+            var processingSourceInstance = processingSourceReference.Instance as Source123DataSource;
             Assert.AreEqual(expectedProcessorOptions, processingSourceInstance.UserSpecifiedOptions, "User specified supportedOptions do not match");
         }
 
