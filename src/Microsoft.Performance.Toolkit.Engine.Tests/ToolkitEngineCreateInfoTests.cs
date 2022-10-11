@@ -57,8 +57,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
 
-            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
-            sut.WithProcessorOptions(processorOptions);
+            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly()).WithProcessorOptions(processorOptions);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
 
@@ -93,11 +92,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
 
-            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
-            sut.WithProcessorOptions(processorOptionsMap);
+            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly()).WithProcessorOptions(processorOptionsMap);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
-
 
             var guidDataSourcePairsDefault = new[]
             {

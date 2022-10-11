@@ -46,28 +46,34 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Specifies the <see cref="ProcessorOptions"/> to use when processing data sources.
         /// </summary>
         /// <param name="options"> <see cref="ProcessorOptions"/> to use for all processors that will process the data sources. </param>
+        /// <returns>
+        ///     The instance of <see cref="EngineCreateInfo"/>.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="options"/> is <c>null</c>.
         /// </exception>
-        public void WithProcessorOptions(ProcessorOptions options)
+        public EngineCreateInfo WithProcessorOptions(ProcessorOptions options)
         {
             Guard.NotNull(options, nameof(options));
 
-            this.WithProcessorOptions(new GlobalProcessingOptionsResolver(options));
+            return this.WithProcessorOptions(new GlobalProcessingOptionsResolver(options));
         }
 
         /// <summary>
         ///     Specifies the <see cref="ProcessorOptions"/> to use when processing data sources.
         /// </summary>
         /// <param name="optionsMap">A dictionary which maps <see cref="ProcessorOptions"/> for a given processor which will process the data sources. </param>
+        /// <returns>
+        ///     The instance of <see cref="EngineCreateInfo"/>.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="optionsMap"/> is <c>null</c>.
         /// </exception>
-        public void WithProcessorOptions(IDictionary<Guid, ProcessorOptions> optionsMap)
+        public EngineCreateInfo WithProcessorOptions(IDictionary<Guid, ProcessorOptions> optionsMap)
         {
             Guard.NotNull(optionsMap, nameof(optionsMap));
 
-            this.WithProcessorOptions(new ProcessingSourceOptionsResolver(optionsMap));
+            return this.WithProcessorOptions(new ProcessingSourceOptionsResolver(optionsMap));
         }
 
         /// <summary>
@@ -77,14 +83,18 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     To set processor options for all processing sources use <see cref="WithProcessorOptions(ProcessorOptions)"/>.
         ///     To set processor options per processing source use <seealso cref="WithProcessorOptions(IDictionary{Guid, ProcessorOptions})"/>.
         /// </remarks>
+        /// <returns>
+        ///     The instance of <see cref="EngineCreateInfo"/>.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="processingOptionsResolver"/> is <c>null</c>.
         /// </exception>
-        public void WithProcessorOptions(IProcessingOptionsResolver processingOptionsResolver)
+        public EngineCreateInfo WithProcessorOptions(IProcessingOptionsResolver processingOptionsResolver)
         {
             Guard.NotNull(processingOptionsResolver, nameof(processingOptionsResolver));
 
             this.OptionsResolver = processingOptionsResolver;
+            return this;
         }
 
         /// <summary>

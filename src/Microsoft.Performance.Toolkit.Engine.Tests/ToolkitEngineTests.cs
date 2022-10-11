@@ -91,11 +91,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_WithInvalidOptions()
         {
-            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
-            using var dataSources = DataSourceSet.Create(plugins);
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly());
-
             var invalidProcessorOptions = new ProcessorOptions(
                 new[]
                 {
@@ -104,7 +99,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                         "oops"),
                 });
 
-            engineCreateInfo.WithProcessorOptions(invalidProcessorOptions);
+            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
+            using var dataSources = DataSourceSet.Create(plugins);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly()).WithProcessorOptions(invalidProcessorOptions);
 
             using var sut = Engine.Create(engineCreateInfo);
 
@@ -117,11 +115,6 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Create_WithValidOptions()
         {
-            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
-            using var dataSources = DataSourceSet.Create(plugins);
-            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
-            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly());
-
             var expectedProcessorOptions = new ProcessorOptions(
                 new[]
                 {
@@ -130,7 +123,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                         "valid"),
                 });
 
-            engineCreateInfo.WithProcessorOptions(expectedProcessorOptions);
+            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
+            using var dataSources = DataSourceSet.Create(plugins);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly()).WithProcessorOptions(expectedProcessorOptions);
 
             using var sut = Engine.Create(engineCreateInfo);
 
