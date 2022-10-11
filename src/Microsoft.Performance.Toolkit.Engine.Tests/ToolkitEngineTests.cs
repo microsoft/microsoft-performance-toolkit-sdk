@@ -87,6 +87,54 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
 
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_WithInvalidOptions()
+        {
+            var invalidProcessorOptions = new ProcessorOptions(
+                new[]
+                {
+                    new OptionInstance(
+                        new Option('w', "invalidOption"),
+                        "oops"),
+                });
+
+            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
+            using var dataSources = DataSourceSet.Create(plugins);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly()).WithProcessorOptions(invalidProcessorOptions);
+
+            using var sut = Engine.Create(engineCreateInfo);
+
+            var processingSourceReference = plugins.ProcessingSourceReferences.Single(psr => psr.Guid.Equals(Source123DataSource.Guid));
+            var processingSourceInstance = processingSourceReference.Instance as Source123DataSource;
+            Assert.IsNull(processingSourceInstance.UserSpecifiedOptions, "User specified supportedOptions were found, despite expecting null, as passed supportedOptions are invalid");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_WithValidOptions()
+        {
+            var expectedProcessorOptions = new ProcessorOptions(
+                new[]
+                {
+                    new OptionInstance(
+                        new Option('r', "test"),
+                        "valid"),
+                });
+
+            using var plugins = PluginSet.Load(Environment.CurrentDirectory);
+            using var dataSources = DataSourceSet.Create(plugins);
+            dataSources.AddDataSource(new FileDataSource("test" + Source123DataSource.Extension));
+            var engineCreateInfo = new EngineCreateInfo(dataSources.AsReadOnly()).WithProcessorOptions(expectedProcessorOptions);
+
+            using var sut = Engine.Create(engineCreateInfo);
+
+            var processingSourceReference = plugins.ProcessingSourceReferences.Single(psr => psr.Guid.Equals(Source123DataSource.Guid));
+            var processingSourceInstance = processingSourceReference.Instance as Source123DataSource;
+            Assert.AreEqual(expectedProcessorOptions, processingSourceInstance.UserSpecifiedOptions, "User specified supportedOptions do not match");
+        }
+
         #endregion Create
 
         #region Enable Cooker
