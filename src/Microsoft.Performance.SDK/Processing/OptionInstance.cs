@@ -84,10 +84,10 @@ namespace Microsoft.Performance.SDK.Processing
         {   
             if (this.Arguments is null)
             {
-                return $"{(Option)this.Id}";
+                return $"{this.Id}";
             }
             var args = String.Join(",", this.Arguments.Select(a => a.ToString()));
-            return $"{(Option)this.Id} [$args: {args} ]";
+            return $"{this.Id} [$args: {args} ]";
         }
     }
 }

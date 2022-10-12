@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Testing.SDK;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
 {
@@ -16,11 +17,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4
     public sealed class Source4DataSource
         : ProcessingSource
     {
-        private IEnumerable<Option> supportedOptions = new List<Option>() 
-        { 
-            new Option('r', "test"),
-            new Option('s', "test1"),
-            new Option('t', "test2")
+        private IEnumerable<Option> supportedOptions = new List<Option>()
+        {
+            FakeProcessingSourceOptions.FakeOptionOne,
+            FakeProcessingSourceOptions.FakeOptionTwo,
+            FakeProcessingSourceOptions.FakeOptionThree,
         };
 
         public const string Extension = ".s4d";

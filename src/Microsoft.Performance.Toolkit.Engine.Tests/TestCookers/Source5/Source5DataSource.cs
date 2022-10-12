@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Testing.SDK;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
 {
@@ -18,8 +19,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5
     {
         private IEnumerable<Option> supportedOptions = new List<Option>()
         {
-            new Option('s', "test1"),
-            new Option('t', "test2")
+            FakeProcessingSourceOptions.FakeOptionTwo,
+            FakeProcessingSourceOptions.FakeOptionThree,
         };
 
         public const string Extension = ".s5d";
