@@ -4,6 +4,7 @@
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source4;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source5;
@@ -52,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new[]
                 {
                     new OptionInstance(
-                        new Option('s', "test1"),
+                        FakeProcessingSourceOptions.Ids.Two,
                         "arg1"),
                 });
 
@@ -133,14 +134,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                     new[]
                     {
                         new OptionInstance(
-                            new Option('s', "test1"),
+                            FakeProcessingSourceOptions.Ids.Two,
                             "arg1"),
                     }),
                 new ProcessorOptions(
                     new[]
                     {
                         new OptionInstance(
-                            new Option('t', "test2"),
+                            FakeProcessingSourceOptions.Ids.Three,
                             "arg2"),
                     }),
             };
