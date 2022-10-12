@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Testing.SDK;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 {
@@ -18,9 +19,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
     {
         private IEnumerable<Option> supportedOptions = new List<Option>()
         {
-            new Option('r', "test"),
-            new Option('s', "test1"),
-            new Option('t', "test2")
+            FakeProcessingSourceOptions.FakeOptionOne,
+            FakeProcessingSourceOptions.FakeOptionTwo,
+            FakeProcessingSourceOptions.FakeOptionThree,
         };
 
         public const string GuidAsString = "{FA37C400-D2C4-48F7-B485-48F119BEE02E}";

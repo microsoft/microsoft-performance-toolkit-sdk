@@ -95,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new[]
                 {
                     new OptionInstance(
-                        new Option('w', "invalidOption"),
+                        new object(),
                         "oops"),
                 });
 
@@ -119,7 +119,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new[]
                 {
                     new OptionInstance(
-                        new Option('r', "test"),
+                        FakeProcessingSourceOptions.Ids.One,
                         "valid"),
                 });
 

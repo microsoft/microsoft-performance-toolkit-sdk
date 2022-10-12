@@ -51,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new[]
                 {
                     new OptionInstance(
-                        new Option('s', "test1"),
+                        FakeProcessingSourceOptions.Ids.Two,
                         "arg1"),
                 });
 
@@ -80,7 +80,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new[]
                 {
                     new OptionInstance(
-                        new Option('s', "test1"),
+                        FakeProcessingSourceOptions.Ids.Two,
                         "arg1"),
                 });
 
