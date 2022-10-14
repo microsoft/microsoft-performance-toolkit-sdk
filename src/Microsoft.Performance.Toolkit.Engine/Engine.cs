@@ -640,6 +640,24 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Enables retrieval of cooker data associated with source parsers.
+        /// </summary>
+        /// <remarks>
+        ///     In most cases it is better to retrieve cooked data through the <see cref="RuntimeExecutionResults"/>
+        ///     returned from <see cref="Engine.Process"/>. In rare circumstances, there is some data made available
+        ///     prior to processing <see cref="IDataSource"/>s; this provides a mechanism for retrieval in such cases.
+        /// </remarks>
+        /// <returns>
+        ///     Custom data retrieval interfaces from custom data processors created by the engine that derive from
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </returns>
+        public IEnumerable<ISourceParserRetrieval> GetSourceParserRetrieval()
+        {
+            Debug.Assert(this.executors != null);
+            return this.executors.Select(e => e.Processor).OfType<ISourceParserRetrieval>();
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -680,7 +698,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.applicationEnvironment = null;
             this.workingDataSourceSet = null;
             this.internalDataSourceSet = null;
-            this.applicationEnvironment = null;
             this.tablesToProcessors = null;
             this.isDisposed = true;
         }
@@ -761,7 +778,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                     instance.Factory.CreateSourceSessionFactory(),
                     createInfo.IsInteractive
                         ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
-                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger));
+                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger))
+                {
+                    IsInteractive = createInfo.IsInteractive,
+                };
 
                 foreach (var cds in instance.ProcessingSourceReferences)
                 {
@@ -809,6 +829,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
         }
 
+        /// <summary>
+        ///     Returns custom data processors that derive from <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </summary>
+        /// <returns>
+        ///     Custom data processors created by the engine that derive from
+        ///     <see cref="ICustomDataProcessorWithSourceParser"/>.
+        /// </returns>
         private IEnumerable<ICustomDataProcessorWithSourceParser> GetExtensibleProcessors()
         {
             Debug.Assert(this.executors != null);
