@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -77,5 +78,16 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets the arguments provided to this option.
         /// </summary>
         public IEnumerable<string> Arguments { get; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {   
+            if (this.Arguments is null)
+            {
+                return $"{this.Id}";
+            }
+            var args = String.Join(",", this.Arguments.Select(a => a.ToString()));
+            return $"{this.Id} [$args: {args} ]";
+        }
     }
 }

@@ -7,7 +7,7 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Performance.SDK.Tests
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     internal static class TableDescriptorUtils
     {

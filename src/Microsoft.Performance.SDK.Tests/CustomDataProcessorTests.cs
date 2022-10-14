@@ -32,7 +32,7 @@ namespace Microsoft.Performance.SDK.Tests
                 new[]
                 {
                     new OptionInstance(
-                        new Option('r', "test"),
+                        FakeProcessingSourceOptions.Ids.One,
                         "face"),
                 });
             this.ApplicationEnvironment = new StubApplicationEnvironment();

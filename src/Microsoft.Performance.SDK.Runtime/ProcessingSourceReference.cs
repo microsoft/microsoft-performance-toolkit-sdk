@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -317,22 +318,22 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Creates a new processor for processing the specified data sources.
+        ///     Creates a new processor for processing the specified <see cref="IDataSourceGroup"/>.
         /// </summary>
-        /// <param name="dataSources">
-        ///     The data sources to process.
+        /// <param name="dataSourceGroup">
+        ///     The data source group to process.
         /// </param>
         /// <param name="processorEnvironment">
         ///     The environment for this specific processor instance.
         /// </param>
-        /// <param name="options">
+        /// <param name="commandLineOptions">
         ///     The command line options to pass to the processor.
         /// </param>
         /// <returns>
         ///     The created <see cref="ICustomDataProcessor"/>.
         /// </returns>
         public ICustomDataProcessor CreateProcessor(
-            IEnumerable<IDataSource> dataSources,
+            IDataSourceGroup dataSourceGroup,
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions commandLineOptions)
         {
@@ -342,7 +343,7 @@ namespace Microsoft.Performance.SDK.Runtime
             try
             {
                 processor = this.Instance.CreateProcessor(
-                    dataSources,
+                    dataSourceGroup,
                     processorEnvironment,
                     commandLineOptions);
                 this.createdProcessors.Add(processor);

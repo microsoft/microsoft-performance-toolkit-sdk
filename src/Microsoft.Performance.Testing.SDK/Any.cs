@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.Testing.SDK
 {
@@ -31,6 +32,11 @@ namespace Microsoft.Performance.Testing.SDK
                 "What category?",
                 true,
                 TableLayoutStyle.GraphAndTable);
+        }
+
+        public static IDataSourceGroup DataSourceGroup()
+        {
+            return new DataSourceGroup(new[] { Any.DataSource() }, new DefaultProcessingMode());
         }
 
         public static IDataSource DataSource()

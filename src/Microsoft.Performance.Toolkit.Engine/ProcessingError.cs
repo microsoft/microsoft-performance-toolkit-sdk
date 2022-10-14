@@ -76,7 +76,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             Debug.Assert(executionResult != null);
 
             this.Processor = executionResult.Processor;
-            this.DataSources = executionResult.Context.DataSources.ToList().AsReadOnly();
+            this.DataSources = executionResult.Context.DataSourceGroup.DataSources.ToList().AsReadOnly();
 
             this.ProcessingSourceGuid = executionResult.Context.ProcessingSource.Guid;
             this.DataSourceInfoFault = executionResult.DataSourceInfoFailure;

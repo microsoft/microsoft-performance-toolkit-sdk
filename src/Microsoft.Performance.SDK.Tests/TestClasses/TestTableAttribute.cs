@@ -3,13 +3,13 @@
 
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.SDK.Tests
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestTableAttribute
         : TableAttribute
     {
         public TestTableAttribute(string buildTableActionMethodName)
-            : base(TableAttribute.DefaultTableDescriptorPropertyName, buildTableActionMethodName, TableAttribute.DefaultIsDataAvailableMethodName)
+            : base(DefaultTableDescriptorPropertyName, buildTableActionMethodName, DefaultIsDataAvailableMethodName)
         {
         }
     }

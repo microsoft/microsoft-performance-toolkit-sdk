@@ -24,6 +24,7 @@
     <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Testing.SDK\Microsoft.Performance.Testing.SDK.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Testing\Microsoft.Performance.Testing.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Toolkit.Engine.Tests\Microsoft.Performance.Toolkit.Engine.Tests.csproj" />
   </ItemGroup>
 
 </Project>

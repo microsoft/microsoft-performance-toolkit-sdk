@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +22,7 @@ namespace Microsoft.Performance.SDK.Tests
         [TestCleanup]
         public void Cleanup()
         {
-            StubDataSource.Assembly = typeof(StubDataSource).Assembly;
+            AssemblyBasedStubDataSource.Assembly = typeof(AssemblyBasedStubDataSource).Assembly;
         }
 
         [TestMethod]
@@ -51,9 +52,9 @@ namespace Microsoft.Performance.SDK.Tests
                 typeof(StubDataTableOneNoBuildMethod),
                 typeof(StubDataTableTwoNoBuildMethod));
 
-            StubDataSource.Assembly = assembly;
+            AssemblyBasedStubDataSource.Assembly = assembly;
 
-            var sut = new StubDataSource();
+            var sut = new AssemblyBasedStubDataSource();
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.AreEqual(expectedDescriptors.Count, sut.AllTablesExposed.Count);
@@ -71,7 +72,7 @@ namespace Microsoft.Performance.SDK.Tests
             var env = Any.ProcessorEnvironment();
             var options = ProcessorOptions.Default;
 
-            var sut = new StubDataSource();
+            var sut = new AssemblyBasedStubDataSource();
             sut.SetApplicationEnvironment(applicationEnvironment);
             var result = sut.CreateProcessor(dataSource, env, options);
 
@@ -88,7 +89,7 @@ namespace Microsoft.Performance.SDK.Tests
         {
             var dataSource = Any.DataSource();
 
-            var sut = new StubDataSource
+            var sut = new AssemblyBasedStubDataSource
             {
                 ProcessorToReturn = null,
             };
@@ -107,7 +108,7 @@ namespace Microsoft.Performance.SDK.Tests
             var env = Any.ProcessorEnvironment();
             var options = ProcessorOptions.Default;
 
-            var sut = new StubDataSource();
+            var sut = new AssemblyBasedStubDataSource();
             sut.SetApplicationEnvironment(applicationEnvironment);
             var result = sut.CreateProcessor(dataSources, env, options);
 
@@ -124,7 +125,7 @@ namespace Microsoft.Performance.SDK.Tests
             var dataSource = Any.DataSource();
             var dataSources = new[] { dataSource, };
 
-            var sut = new StubDataSource
+            var sut = new AssemblyBasedStubDataSource
             {
                 ProcessorToReturn = null,
             };
@@ -137,7 +138,7 @@ namespace Microsoft.Performance.SDK.Tests
 
         [TestMethod]
         [UnitTest]
-        public void WhenTableDiscoveryProvidedUsesDiscovery()
+        public void WhenTableDiscoveryPassedInConstructorUsesDiscovery()
         {
             TableDescriptorUtils.CreateTableDescriptors(
                 serializer,
@@ -149,7 +150,7 @@ namespace Microsoft.Performance.SDK.Tests
                 typeof(StubMetadataTableOne),
                 typeof(StubMetadataTableTwo));
 
-            var discovery = new FakeTableProvider();
+            var discovery = new StubTableProvider();
             discovery.DiscoverReturnValue = new HashSet<TableDescriptor>
             {
                 expectedDescriptors[0],
@@ -159,7 +160,7 @@ namespace Microsoft.Performance.SDK.Tests
                 expectedDescriptors[4],
             };
 
-            var sut = new StubDataSource(discovery);
+            var sut = new DeprecatedStubDataSource(discovery);
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.AreEqual(5, sut.AllTablesExposed.Count);
@@ -168,6 +169,27 @@ namespace Microsoft.Performance.SDK.Tests
             {
                 Assert.IsTrue(sut.AllTablesExposed.Contains(td));
             }
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenTableDiscoveryProvidedIsNull_DiscoveryThrows()
+        {
+            var sut = new CreateTableProviderBasedStubDataSource(null);
+            Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WhenTableDiscoveryNotProvided_DefaultUsedForDiscovery()
+        {
+            var sut = new DefaultTableProviderStubDataSource();
+            sut.SetApplicationEnvironment(applicationEnvironment);
+
+            // note: the table provider is assembly based so we can't easily check the contents in the unit test,
+            // but other tests check the contents, and the purpose of this test is just to check that a default
+            // provider was created.
+            Assert.IsNotNull(sut.TableProvider, "A default table provider should be used, but is null.");
         }
 
         [TestMethod]
@@ -199,31 +221,19 @@ namespace Microsoft.Performance.SDK.Tests
                 }
             }
 
-            var discovery = new FakeTableProvider();
+            var discovery = new StubTableProvider();
             discovery.DiscoverReturnValue = expectedDescriptors;
 
-            var sut = new StubDataSource(discovery);
+            var sut = new CreateTableProviderBasedStubDataSource(discovery);
 
             Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
-        [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
-        [FileDataSource(".csv")]
-        private sealed class StubDataSource
+        private abstract class StubDataSource
             : ProcessingSource
         {
-            static StubDataSource()
-            {
-                Assembly = typeof(StubDataSource).Assembly;
-            }
-
-            public StubDataSource()
-                : this(TableDiscovery.CreateForAssembly(Assembly))
-            {
-            }
-
-            public StubDataSource(IProcessingSourceTableProvider discovery)
-               : base(discovery)
+            protected StubDataSource()
+                : base()
             {
                 this.CommandLineOptionsToReturn = new List<Option>();
                 this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
@@ -232,7 +242,15 @@ namespace Microsoft.Performance.SDK.Tests
                     new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
             }
 
-            public static Assembly Assembly { get; set; }
+            protected StubDataSource(IProcessingSourceTableProvider tableProvider)
+                : base(tableProvider)
+            {
+                this.CommandLineOptionsToReturn = new List<Option>();
+                this.SetApplicationEnvironmentCalls = new List<IApplicationEnvironment>();
+                this.ProcessorToReturn = new MockCustomDataProcessor();
+                this.CreateProcessorCoreCalls =
+                    new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
+            }
 
             public HashSet<TableDescriptor> AllTablesExposed => new HashSet<TableDescriptor>(this.AllTables);
 
@@ -264,6 +282,80 @@ namespace Microsoft.Performance.SDK.Tests
             protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return true;
+            }
+        }
+
+        [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class AssemblyBasedStubDataSource
+            : StubDataSource
+        {
+            static AssemblyBasedStubDataSource()
+            {
+                Assembly = typeof(AssemblyBasedStubDataSource).Assembly;
+            }
+
+            public AssemblyBasedStubDataSource()
+                : base()
+            {
+            }
+
+            public static Assembly Assembly { get; set; }
+
+            protected override IProcessingSourceTableProvider CreateTableProvider()
+            {
+                return TableDiscovery.CreateForAssembly(Assembly);
+            }
+        }
+
+        [ProcessingSource("{9F196984-3614-418B-9471-CA3D7F593A3B}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class CreateTableProviderBasedStubDataSource
+            : StubDataSource
+        {
+            private readonly IProcessingSourceTableProvider tableProvider;
+
+            public CreateTableProviderBasedStubDataSource(IProcessingSourceTableProvider tableProvider)
+                : base()
+            {
+                this.tableProvider = tableProvider;
+            }
+
+            protected override IProcessingSourceTableProvider CreateTableProvider()
+            {
+                return this.tableProvider;
+            }
+        }
+
+        [ProcessingSource("{CB8E1000-527C-4C2E-AA49-7D3678FB80B4}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class DeprecatedStubDataSource
+            : StubDataSource
+        {
+            public DeprecatedStubDataSource(IProcessingSourceTableProvider tableProvider)
+                : base(tableProvider)
+            {
+            }
+        }
+
+        [ProcessingSource("{90B38463-201A-4C64-83E6-83BE7AE1FC1A}", "One", "One")]
+        [FileDataSource(".csv")]
+        private sealed class DefaultTableProviderStubDataSource
+            : StubDataSource
+        {
+            public DefaultTableProviderStubDataSource()
+                : base()
+            {
+            }
+
+            public IProcessingSourceTableProvider TableProvider { get; private set; }
+
+            // override this, but just return the base implementation after storing the value and making it accessible
+            // to the test.
+            protected override IProcessingSourceTableProvider CreateTableProvider()
+            {
+                this.TableProvider = base.CreateTableProvider();
+                return this.TableProvider;
             }
         }
     }

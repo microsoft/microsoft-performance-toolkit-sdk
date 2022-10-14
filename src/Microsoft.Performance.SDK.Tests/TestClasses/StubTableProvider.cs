@@ -5,12 +5,12 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.SDK.Tests
+namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
-    public class FakeTableProvider
+    public class StubTableProvider
         : IProcessingSourceTableProvider
     {
-        public FakeTableProvider()
+        public StubTableProvider()
         {
             this.DiscoverCalls = new List<ITableConfigurationsSerializer>();
             this.DiscoverReturnValue = Array.Empty<TableDescriptor>();

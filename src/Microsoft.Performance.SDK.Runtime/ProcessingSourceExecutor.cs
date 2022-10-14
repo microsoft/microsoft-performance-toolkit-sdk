@@ -66,7 +66,7 @@ namespace Microsoft.Performance.SDK.Runtime
             Guard.NotNull(context, nameof(context));
 
             this.Processor = context.ProcessingSource.CreateProcessor(
-                context.DataSources,
+                context.DataSourceGroup,
                 context.ProcessorEnvironment,
                 context.CommandLineOptions);
 

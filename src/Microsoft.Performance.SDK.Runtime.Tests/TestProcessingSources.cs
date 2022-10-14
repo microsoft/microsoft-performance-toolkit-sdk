@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
@@ -29,6 +30,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
         {
             throw new NotImplementedException();
         }
@@ -89,6 +96,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
         public Stream GetSerializationStream(SerializationSource source)
         {
             throw new NotImplementedException();
@@ -141,6 +154,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
         {
             throw new NotImplementedException();
         }
@@ -207,6 +226,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
         public Stream GetSerializationStream(SerializationSource source)
         {
             throw new NotImplementedException();
@@ -262,6 +287,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
         public Stream GetSerializationStream(SerializationSource source)
         {
             throw new NotImplementedException();
@@ -312,6 +343,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
         {
             throw new NotImplementedException();
         }
@@ -372,6 +409,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
         {
             throw new NotImplementedException();
         }
@@ -440,6 +483,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             throw new NotImplementedException();
         }
 
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
         public Stream GetSerializationStream(SerializationSource source)
         {
             throw new NotImplementedException();
@@ -496,6 +545,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         public ICustomDataProcessor CreateProcessor(IEnumerable<IDataSource> dataSources, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ICustomDataProcessor CreateProcessor(IDataSourceGroup dataSourceGroup, IProcessorEnvironment processorEnvironment,
+            ProcessorOptions options)
         {
             throw new NotImplementedException();
         }
