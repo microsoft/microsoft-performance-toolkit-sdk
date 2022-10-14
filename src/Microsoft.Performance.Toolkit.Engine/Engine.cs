@@ -640,12 +640,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Enables retrieval of cooker data associate with source parsers.
+        ///     Enables retrieval of cooker data associated with source parsers.
         /// </summary>
         /// <remarks>
         ///     In most cases it is better to retrieve cooked data through the <see cref="RuntimeExecutionResults"/>
         ///     returned from <see cref="Engine.Process"/>. In rare circumstances, there is some data made available
-        ///     prior to processing <see cref="IDataSource"/>s, and this provides a mechanism for retrieval.
+        ///     prior to processing <see cref="IDataSource"/>s; this provides a mechanism for retrieval in such cases.
         /// </remarks>
         /// <returns>
         ///     Custom data retrieval interfaces from custom data processors created by the engine that derive from
