@@ -125,6 +125,48 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             }
         }
         
+        [TestMethod]
+        [UnitTest]
+        public void NullDirectoryThrows()
+        {
+            (var loader, _) = Setup(true);
+            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugin(null, out _));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void NullDirectoriesThrows()
+        {
+            (var loader, _) = Setup(true);
+            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugins(null, out _));
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public void NullDirectoryInDirectoriesThrows()
+        {
+            (var loader, _) = Setup(true);
+            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugins(new List<string>() { "foo", null }, out _));
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public void EmptyStringFailsToLoad()
+        {
+            (var loader, var consumer) = Setup(true);
+            var success = loader.TryLoadPlugin(string.Empty, out _);
+            Assert.IsFalse(success);
+        }
+        
+        [TestMethod]
+        [UnitTest]
+        public void EmptyDirectoriesLoads()
+        {
+            (var loader, _) = Setup(true);
+            var success = loader.TryLoadPlugins(new List<string>(), out _);
+            Assert.IsTrue(success);
+        }
+        
         //
         // Invalid folder schema tests
         //
