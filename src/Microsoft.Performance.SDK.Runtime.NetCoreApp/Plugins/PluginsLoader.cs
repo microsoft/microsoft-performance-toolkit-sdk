@@ -288,7 +288,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 // If nothing was able to be loaded above, skip finalizing 
                 if (this.extensionRoot.IsLoaded)
                 {
-                    // TODO: this does redundant work re-finalizing processing sources
+                    // TODO (#223): this does redundant work re-finalizing processing sources
                     // loaded by previous calls to this method. The extension repository
                     // should get refactored to avoid this redundant work.
                     
