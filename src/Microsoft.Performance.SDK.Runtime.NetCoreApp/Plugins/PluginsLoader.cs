@@ -262,8 +262,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             this.ThrowIfDisposed();
             lock (this.mutex)
             {
-                int nLoaded = 0;
-
                 var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.ProcessingSources);
                 foreach (var dir in directories)
                 {
