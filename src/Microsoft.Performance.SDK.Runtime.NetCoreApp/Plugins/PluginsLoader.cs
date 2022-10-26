@@ -206,11 +206,11 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="directory"/> is null.
         /// </exception>
-        public async Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginAsync(IEnumerable<string> directory)
+        public async Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginAsync(IEnumerable<string> directories)
         {
             this.ThrowIfDisposed();
             IDictionary<string, ErrorInfo> taskErrors = null;
-            var task = Task.Run(() => this.TryLoadPlugins(directory, out taskErrors));
+            var task = Task.Run(() => this.TryLoadPlugins(directories, out taskErrors));
             var result = await task;
             return (result, taskErrors);
         }
