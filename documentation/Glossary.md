@@ -51,6 +51,8 @@ See also: [Projection](#projection).
 Meta-information about a [Column](#column) that defines the Column's role in data presentation. 
 For example, a Column of `Timestamp` values relative to the start of a [DataSource](#datasource) may be marked as a "start time" Column.
 
+ColumnRoles are specified as part of a [Table Configuration](#tableconfiguration).
+
 ## CompositeDataCooker
 
 A [DataCooker](#datacooker) that receives input solely from other DataCookers.
