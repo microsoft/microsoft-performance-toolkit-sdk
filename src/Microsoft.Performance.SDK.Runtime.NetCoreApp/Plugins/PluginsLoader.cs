@@ -265,15 +265,15 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.ProcessingSources);
                 foreach (var dir in directories)
                 {
-                    ErrorInfo emptyErrorInfo = new ErrorInfo(ErrorCodes.InvalidArgument, ErrorCodes.InvalidArgument.Description)
-                    {
-                        Target = dir,
-                    };
-
                     Guard.NotNull(dir, nameof(directories));
-                    
+
                     if (string.IsNullOrWhiteSpace(dir))
                     {
+                        ErrorInfo emptyErrorInfo = new ErrorInfo(ErrorCodes.InvalidArgument, ErrorCodes.InvalidArgument.Description)
+                        {
+                            Target = dir,
+                        };
+
                         failed.Add(dir, emptyErrorInfo);
                         continue;
                     }
