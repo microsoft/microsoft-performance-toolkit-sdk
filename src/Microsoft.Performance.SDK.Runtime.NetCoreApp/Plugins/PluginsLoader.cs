@@ -179,6 +179,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="directory"/> is null.
+        /// </exception>
         public bool TryLoadPlugin(string directory, out ErrorInfo error)
         {
             this.ThrowIfDisposed();
@@ -195,10 +198,13 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         }
 
         /// <summary>
-        ///     Asynchronous version of <see cref="TryLoadPlugin(string)"/>
+        ///     Asynchronous version of <see cref="TryLoadPlugin(string, out ErrorInfo)"/>
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="directory"/> is null.
         /// </exception>
         public async Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginAsync(IEnumerable<string> directories)
         {
@@ -235,26 +241,59 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Either <paramref name="directories"/> or one of its elements is null.
+        /// </exception>
         public bool TryLoadPlugins(IEnumerable<string> directories, out IDictionary<string, ErrorInfo> failed)
         {
+            Guard.NotNull(directories, nameof(directories));
+            foreach (string dir in directories)
+            {
+                Guard.NotNull(dir, nameof(directories));
+            }
+            
+            failed = new Dictionary<string, ErrorInfo>();
+
+            if (!directories.Any())
+            {
+                return true;
+            }
+
             this.ThrowIfDisposed();
             lock (this.mutex)
             {
-                failed = new Dictionary<string, ErrorInfo>();
                 var oldPlugins = new HashSet<ProcessingSourceReference>(this.extensionRoot.ProcessingSources);
                 foreach (var dir in directories)
                 {
+                    Guard.NotNull(dir, nameof(directories));
+
+                    if (string.IsNullOrWhiteSpace(dir))
+                    {
+                        ErrorInfo emptyErrorInfo = new ErrorInfo(ErrorCodes.InvalidArgument, ErrorCodes.InvalidArgument.Description)
+                        {
+                            Target = dir,
+                        };
+
+                        failed.Add(dir, emptyErrorInfo);
+                        continue;
+                    }
+                    
                     if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
                     {
                         failed.Add(dir, error);
                         continue;
                     }
                 }
-
-                // TODO: this does redundant work re-finalizing processing sources
-                // loaded by previous calls to this method. The extension repository
-                // should get refactored to avoid this redundant work.
-                this.extensionRoot.FinalizeDataExtensions();
+                
+                // If nothing was able to be loaded above, skip finalizing 
+                if (this.extensionRoot.IsLoaded)
+                {
+                    // TODO (#223): this does redundant work re-finalizing processing sources
+                    // loaded by previous calls to this method. The extension repository
+                    // should get refactored to avoid this redundant work.
+                    
+                    this.extensionRoot.FinalizeDataExtensions();
+                }
 
                 foreach (var source in this.extensionRoot.ProcessingSources.Except(oldPlugins))
                 {
@@ -271,6 +310,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// </summary>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Either <paramref name="directories"/> or one of its elements is null.
         /// </exception>
         public Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginsAsync(IEnumerable<string> directories)
         {
