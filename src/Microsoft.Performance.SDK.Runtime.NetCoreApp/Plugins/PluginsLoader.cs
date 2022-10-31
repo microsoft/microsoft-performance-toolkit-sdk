@@ -200,19 +200,22 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
         /// <summary>
         ///     Asynchronous version of <see cref="TryLoadPlugin(string, out ErrorInfo)"/>
         /// </summary>
+        /// <param name="directory">
+        ///     The root directory containing the plugin(s) to attempt to load.
+        /// </param>
         /// <exception cref="ObjectDisposedException">
         ///     This instance is disposed.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="directory"/> is null.
         /// </exception>
-        public async Task<(bool, IDictionary<string, ErrorInfo>)> TryLoadPluginAsync(IEnumerable<string> directories)
+        public async Task<(bool, ErrorInfo)> TryLoadPluginAsync(string directory)
         {
             this.ThrowIfDisposed();
-            IDictionary<string, ErrorInfo> taskErrors = null;
-            var task = Task.Run(() => this.TryLoadPlugins(directories, out taskErrors));
+            ErrorInfo taskError = null;
+            var task = Task.Run(() => this.TryLoadPlugin(directory, out taskError));
             var result = await task;
-            return (result, taskErrors);
+            return (result, taskError);
         }
 
         /// <summary>

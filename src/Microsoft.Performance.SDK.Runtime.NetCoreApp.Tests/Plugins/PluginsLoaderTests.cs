@@ -182,8 +182,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             Assert.IsFalse(success);
         }
         
-        /*
-         Uncomment out once #222 is fixed in v1.2
         [TestMethod]
         [UnitTest]
         public async Task EmptyStringFailsToLoadAsync()
@@ -192,8 +190,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             var result = await loader.TryLoadPluginAsync(string.Empty);
             Assert.IsFalse(result.Item1);
         }
-        */
-        
+
         [TestMethod]
         [UnitTest]
         public void EmptyDirectoriesLoads()
@@ -692,7 +689,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Subscribe(new MockPluginsConsumer()));
                 await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.SubscribeAsync(new MockPluginsConsumer()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugin(Any.FilePath(), out _));
-                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginAsync(new[] { Any.FilePath(), }));
+                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginAsync(Any.FilePath()));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugins(new[] { Any.FilePath(), }, out _));
                 await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginsAsync(new[] { Any.FilePath(), }));
                 Assert.ThrowsException<ObjectDisposedException>(() => sut.Unsubscribe(new MockPluginsConsumer()));
