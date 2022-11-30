@@ -6,7 +6,7 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
+using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -28,8 +28,8 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="tableDataSynchronizer">
         ///     Used to synchronize table data changes with the user interface.
         /// </param>
-        /// <param name="dataCookers">
-        ///     A repository of source data cookers.
+        /// <param name="sourceDataCookerFactory">
+        ///     Provides a way to create instances of data cookers of type <see cref="DataCookerType.SourceDataCooker"/>.
         /// </param>
         /// <param name="sourceSessionFactory">
         ///     Provides a way to create an <see cref="ISourceProcessingSession{T, TKey, TContext}"/> for a data processor.
@@ -41,14 +41,14 @@ namespace Microsoft.Performance.SDK.Runtime
             string applicationName,
             string runtimeName,
             ITableDataSynchronization tableDataSynchronizer,
-            ISourceDataCookerRepository dataCookers,
+            ISourceDataCookerFactoryRetrieval sourceDataCookerFactory,
             ISourceSessionFactory sourceSessionFactory,
             IMessageBox messageBox)
         {
             // application and runtime names may be null
 
             Guard.NotNull(tableDataSynchronizer, nameof(tableDataSynchronizer));
-            Guard.NotNull(dataCookers, nameof(dataCookers));
+            Guard.NotNull(sourceDataCookerFactory, nameof(sourceDataCookerFactory));
             Guard.NotNull(sourceSessionFactory, nameof(sourceSessionFactory));
             Guard.NotNull(messageBox, nameof(messageBox));
 
@@ -62,7 +62,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
             this.Serializer = new TableConfigurationsSerializer();
             this.TableDataSynchronizer = tableDataSynchronizer;
-            this.SourceDataCookerFactoryRetrieval = dataCookers;
+            this.SourceDataCookerFactoryRetrieval = sourceDataCookerFactory;
             this.SourceSessionFactory = sourceSessionFactory;
         }
 
