@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Discovery\" />
+    <Folder Include="Registry\" />
+    <Folder Include="Publishing\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\playground\microsoft-performance-toolkit-sdk\src\PluginManager\Microsoft.Performance.Toolkit.PluginManager.Core\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\playground\microsoft-performance-toolkit-sdk\src\PluginManager\Microsoft.Performance.Toolkit.PluginManager.Core\.editorconfig" />
+  </ItemGroup>
+
+</Project>
