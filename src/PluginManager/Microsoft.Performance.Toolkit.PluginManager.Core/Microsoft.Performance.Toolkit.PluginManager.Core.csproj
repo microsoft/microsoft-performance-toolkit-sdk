@@ -12,14 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EditorConfigFiles Remove="D:\playground\microsoft-performance-toolkit-sdk\src\PluginManager\Microsoft.Performance.Toolkit.PluginManager.Core\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="D:\playground\microsoft-performance-toolkit-sdk\src\PluginManager\Microsoft.Performance.Toolkit.PluginManager.Core\.editorconfig" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
   </ItemGroup>
 
