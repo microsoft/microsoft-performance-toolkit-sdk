@@ -3,7 +3,10 @@
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
 {
-    public class SupportedFolderDataSource : SupportedDataSource
+    public enum DataSourceType
     {
+        FileDataSource,
+        ExtensionlessFileDataSource,
+        FolderDataSource,
     }
 }

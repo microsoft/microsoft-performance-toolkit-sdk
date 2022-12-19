@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Folder Include="Discovery\" />
+    <Folder Include="Manager\" />
     <Folder Include="Registry\" />
     <Folder Include="Publishing\" />
   </ItemGroup>

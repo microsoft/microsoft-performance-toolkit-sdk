@@ -12,22 +12,39 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
     /// </summary>
     public class ProcessingSourceMetadata
     {
+        /// <summary>
+        /// The unique identifier for this processing source
+        /// </summary>
         public Guid Guid { get; set; }
 
+        /// <summary>
+        /// The name of this processing source
+        /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// The version of this procesing source
+        /// </summary>
         public string Version { get; set; }
 
+        /// <summary>
+        /// The description of this processing source
+        /// </summary>
         public string Description { get; set; }
 
+        /// <summary>
+        /// The information about this processing source as specified in <see cref="ProcessingSourceInfo"/>
+        /// </summary>
         public ProcessingSourceInfo AboutInfo { get; set; }
 
+        /// <summary>
+        /// The metadata of the tables exposed by this processing source
+        /// </summary>
         public IEnumerable<TableMetadata> AvailableTables { get; set; }
 
-        public IEnumerable<SupportedFileDataSource> SupportedFileDataSources { get; set; }
-
-        public IEnumerable<SupportedFolderDataSource> SupportedFolderDataSources { get; set; }
-
-        public IEnumerable<SupportedExtensionlessFileDataSource> SupportedExtensionlessFileDataSources { get; set; }
+        /// <summary>
+        /// The metadata of the data sources supported by this processing source
+        /// </summary>
+        public IEnumerable<SupportedDataSourceMetadata> SupportedDataSources { get; set; }
     }
 }

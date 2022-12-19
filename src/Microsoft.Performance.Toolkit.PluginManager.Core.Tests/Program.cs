@@ -21,22 +21,15 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                 {
                     new ProcessingSourceMetadata()
                     {
-                        SupportedFileDataSources = new SupportedFileDataSource[]
+                        SupportedDataSources = new SupportedDataSourceMetadata[]
                         {
-                            new SupportedFileDataSource()
+                            new SupportedDataSourceMetadata()
                             {
-                                Extension = "txt",
-                                Description = "efsfdsfdf",
+                                DataSourceType = DataSourceType.FileDataSource,
+                                Extension = ".txt",
+                                Description = "TXT",
                             },
-                        },
-                        SupportedFolderDataSources = new SupportedFolderDataSource[]
-                        {
-                            new SupportedFolderDataSource()
-                            {
-                                Description = "ddsfdfsfdsf"
-                            }
                         }
-
                     }
                 }
             };

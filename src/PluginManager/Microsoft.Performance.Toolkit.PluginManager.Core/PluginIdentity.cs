@@ -29,12 +29,12 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core
         public string Group { get; }
 
         /// <summary>
-        /// The identifer of the plugin
+        /// The identifer of this plugin
         /// </summary>
         public string Id { get; }
 
         /// <summary>
-        /// Plugin Version
+        /// The version of this plugin
         /// </summary>
         public Version Version { get; }
 
