@@ -25,7 +25,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         /// <summary>
         /// The version of this procesing source
         /// </summary>
-        public string Version { get; set; }
+        public Version Version { get; set; }
 
         /// <summary>
         /// The description of this processing source

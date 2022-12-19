@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Performance.Toolkit.PluginManager.Core\Microsoft.Performance.Toolkit.PluginManager.Core.csproj" />
-    <ProjectReference Include="..\PluginManager\Microsoft.Performance.Toolkit.PluginManager.Core\Microsoft.Performance.Toolkit.PluginManager.Core.csproj" />
   </ItemGroup>
 
 </Project>
