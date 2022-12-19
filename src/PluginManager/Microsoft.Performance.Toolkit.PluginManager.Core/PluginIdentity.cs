@@ -10,16 +10,16 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core
     /// </summary>
     public class PluginIdentity : IEquatable<PluginIdentity>
     {
-        public PluginIdentity(string name, Version version)
-            : this(name, version, null)
+        public PluginIdentity(string id, Version version)
+            : this(id, version, null)
         {
 
         }
 
-        public PluginIdentity(string name, Version version, string group)
+        public PluginIdentity(string id, Version version, string group)
         {
             this.Group = group;
-            this.Id = name;
+            this.Id = id;
             this.Version = version;
         }
 
