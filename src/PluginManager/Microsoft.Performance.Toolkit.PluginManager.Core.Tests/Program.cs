@@ -69,7 +69,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
             {
                 WriteIndented = true,
                 Converters ={
-                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase),
+                    new JsonStringEnumConverter(),
                     new StringConverter(),
                 }
             };
@@ -92,7 +92,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                     return new Version(stringValue);
                 }
 
-                throw new System.Text.Json.JsonException();
+                throw new JsonException();
             }
 
             public override void Write(Utf8JsonWriter writer, Version value, JsonSerializerOptions options)
