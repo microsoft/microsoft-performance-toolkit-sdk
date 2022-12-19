@@ -13,7 +13,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core
         public PluginIdentity(string id, Version version)
             : this(id, version, null)
         {
-
         }
 
         public PluginIdentity(string id, Version version, string group)

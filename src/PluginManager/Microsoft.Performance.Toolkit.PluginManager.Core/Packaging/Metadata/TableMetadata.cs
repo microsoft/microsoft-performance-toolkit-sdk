@@ -18,7 +18,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         /// </summary>
         public string Description { get; set; }
 
-
         /// <summary>
         /// The category into which this table belongs
         /// </summary>
