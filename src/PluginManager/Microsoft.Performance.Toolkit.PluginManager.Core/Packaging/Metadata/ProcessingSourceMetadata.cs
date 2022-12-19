@@ -10,7 +10,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
     /// <summary>
     /// Represents the metadata of a processing source
     /// </summary>
-    public class ProcessingSourceMetadata
+    public sealed class ProcessingSourceMetadata
     {
         /// <summary>
         /// The unique identifier for this processing source

@@ -3,7 +3,7 @@
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
 {
-    public class SupportedDataSourceMetadata
+    public sealed class SupportedDataSourceMetadata
     {
         /// <summary>
         /// The type of the data source
