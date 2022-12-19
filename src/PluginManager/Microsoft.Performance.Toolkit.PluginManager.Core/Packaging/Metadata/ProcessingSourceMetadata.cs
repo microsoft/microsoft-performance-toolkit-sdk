@@ -8,7 +8,7 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
 {
     /// <summary>
-    /// Represents the metadata of a processing source.
+    /// Represents the metadata of a processing source
     /// </summary>
     public class ProcessingSourceMetadata
     {

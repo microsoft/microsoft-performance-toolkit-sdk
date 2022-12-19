@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public string Id { get; set; }
 
         /// <summary>
-        /// Plugin Version
+        /// The version of the plugin
         /// </summary>
         public Version Version { get; set; }
 
@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// The human-readable description of this plugin
+        /// A user friendly description of this plugin
         /// </summary>
         public string Description { get; set; }
 
@@ -47,7 +47,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public Architecture[] TargetPlatforms { get; set; }
 
         /// <summary>
-        /// Metadata of the processing sources contained in this plugin
+        /// The metadata of the processing sources contained in this plugin
         /// </summary>
         public IEnumerable<ProcessingSourceMetadata> ProcessingSourceMetadataCollection { get; set; }
     }

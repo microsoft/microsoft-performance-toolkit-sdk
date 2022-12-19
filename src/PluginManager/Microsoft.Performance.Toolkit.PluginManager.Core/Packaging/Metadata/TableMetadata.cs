@@ -4,14 +4,24 @@
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
 {
     /// <summary>
-    /// Represents the metadata of a table.
+    /// Represents the metadata of a table
     /// </summary>
     public sealed class TableMetadata
     {
-        public string Name { get; }
+        /// <summary>
+        /// The table name
+        /// </summary>
+        public string Name { get; set; }
 
-        public string Description { get; }
+        /// <summary>
+        /// A user friendly description of this table
+        /// </summary>
+        public string Description { get; set; }
 
-        public string Category { get; }
+
+        /// <summary>
+        /// The category into which this table belongs
+        /// </summary>
+        public string Category { get; set; }
     }
 }
