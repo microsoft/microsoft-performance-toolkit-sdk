@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
 {
     /// <summary>
-    /// Represents the metadata of a plugin. 
+    /// Represents the metadata of a plugin
     /// </summary>
     public sealed class PluginMetadata
     {
@@ -17,7 +17,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public string Group { get; set; }
 
         /// <summary>
-        /// The identifer of the plugin
+        /// The identifer of this plugin
         /// </summary>
         public string Id { get; set; }
 
@@ -37,12 +37,17 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public string Description { get; set; }
 
         /// <summary>
+        /// The authors of this plugin
+        /// </summary>
+        public IEnumerable<string> Authors { get; set; }
+
+        /// <summary>
         /// The version of the performance SDK which this plugin depends upon
         /// </summary>
         public Version SdkVersion { get; set; }
 
         /// <summary>
-        /// The architecture of the platforms targeted by the plugin
+        /// The architecture of the platforms targeted by this plugin
         /// </summary>
         public Architecture[] TargetPlatforms { get; set; }
 
