@@ -22,5 +22,10 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         /// The category into which this table belongs
         /// </summary>
         public string Category { get; set; }
+
+        /// <summary>
+        ///  Indicates whether this table is a metadata table
+        /// </summary>
+        public bool IsMetadataTable{ get; set; }
     }
 }

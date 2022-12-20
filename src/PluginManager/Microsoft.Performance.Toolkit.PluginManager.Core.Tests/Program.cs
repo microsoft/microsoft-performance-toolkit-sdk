@@ -18,7 +18,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                 Version = new Version("1.0.0"),
                 DisplayName = "Linux Tool",
                 Description = "Linux Tool Bundles",
-                TargetPlatforms = new[] { Architecture.X64, Architecture.X86 },
                 Authors = new[] { "A", "B", "C", "D" },
                 SdkVersion = new Version("1.0.0"),
                 ProcessingSourceMetadataCollection = new[]
@@ -35,6 +34,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                                 Name = "Trace Stats",
                                 Description = "Trace Stats",
                                 Category = "Unkown",
+                                IsMetadataTable = false,
                             }
                         },
                         SupportedDataSources = new SupportedDataSourceMetadata[]
@@ -88,7 +88,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
             {
                 if (reader.TokenType == JsonTokenType.String)
                 {
-                    var stringValue = reader.GetString();
+                    string stringValue = reader.GetString();
                     return new Version(stringValue);
                 }
 

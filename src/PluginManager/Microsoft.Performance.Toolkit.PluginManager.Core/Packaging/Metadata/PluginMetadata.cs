@@ -47,11 +47,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public Version SdkVersion { get; set; }
 
         /// <summary>
-        /// The architecture of the platforms targeted by this plugin
-        /// </summary>
-        public Architecture[] TargetPlatforms { get; set; }
-
-        /// <summary>
         /// The metadata of the processing sources contained in this plugin
         /// </summary>
         public IEnumerable<ProcessingSourceMetadata> ProcessingSourceMetadataCollection { get; set; }
