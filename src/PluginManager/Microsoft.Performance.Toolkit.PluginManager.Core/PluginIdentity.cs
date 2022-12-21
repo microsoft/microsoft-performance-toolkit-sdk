@@ -11,21 +11,10 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core
     public class PluginIdentity : IEquatable<PluginIdentity>
     {
         public PluginIdentity(string id, Version version)
-            : this(id, version, null)
         {
-        }
-
-        public PluginIdentity(string id, Version version, string group)
-        {
-            this.Group = group;
             this.Id = id;
             this.Version = version;
         }
-
-        /// <summary>
-        /// The group this plugin belongs to
-        /// </summary>
-        public string Group { get; }
 
         /// <summary>
         /// The identifer of this plugin
@@ -54,8 +43,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core
                 return false;
             }
 
-            return string.Equals(a.Group, b.Group, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(a.Id, b.Id, StringComparison.OrdinalIgnoreCase)
+            return string.Equals(a.Id, b.Id, StringComparison.OrdinalIgnoreCase)
                 && Version.Equals(a.Version, b.Version);
         }
     }

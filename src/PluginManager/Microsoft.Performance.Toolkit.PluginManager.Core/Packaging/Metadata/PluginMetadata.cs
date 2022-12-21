@@ -37,9 +37,9 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public string Description { get; set; }
 
         /// <summary>
-        /// The authors of this plugin
+        /// The owners of this plugin
         /// </summary>
-        public IEnumerable<string> Authors { get; set; }
+        public IEnumerable<PluginOwner> Owners { get; set; }
 
         /// <summary>
         /// The version of the performance SDK which this plugin depends upon

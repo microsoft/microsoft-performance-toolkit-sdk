@@ -45,6 +45,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         /// <summary>
         /// The metadata of the data sources supported by this processing source
         /// </summary>
-        public IEnumerable<SupportedDataSourceMetadata> SupportedDataSources { get; set; }
+        public IEnumerable<DataSourceMetadata> SupportedDataSources { get; set; }
     }
 }

@@ -18,7 +18,15 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                 Version = new Version("1.0.0"),
                 DisplayName = "Linux Tool",
                 Description = "Linux Tool Bundles",
-                Authors = new[] { "A", "B", "C", "D" },
+                Owners = new[]
+                {
+                    new PluginOwner()
+                    {
+                        Name = "Someone",
+                        EmailAddresses = new[] {"abc@outlook.com", "xyz@outlook.com" },
+                        PhoneNumbers = new [] {"123-333-4566"}
+                    }
+                },
                 SdkVersion = new Version("1.0.0"),
                 ProcessingSourceMetadataCollection = new[]
                 {
@@ -37,12 +45,11 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                                 IsMetadataTable = false,
                             }
                         },
-                        SupportedDataSources = new SupportedDataSourceMetadata[]
+                        SupportedDataSources = new DataSourceMetadata[]
                         {
-                            new SupportedDataSourceMetadata()
+                            new DataSourceMetadata()
                             {
-                                DataSourceType = DataSourceType.FileDataSource,
-                                Extension = ".ctf",
+                                Name = ".ctf",
                                 Description = "Processes LTTng CTF data",
                             },
                         },
@@ -52,12 +59,11 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                         Name = "WaLinuxAgent",
                         Guid = Guid.Parse("a9ac39bc-2d07-4a01-b9b5-13a02611f5f2"),
                         Version = new Version("1.0.0.0"),
-                        SupportedDataSources = new SupportedDataSourceMetadata[]
+                        SupportedDataSources = new DataSourceMetadata[]
                         {
-                            new SupportedDataSourceMetadata
+                            new DataSourceMetadata
                             {
-                                DataSourceType = DataSourceType.FileDataSource,
-                                Extension = ".log",
+                                Name = ".log",
                                 Description = "Linux WaLinuxAgent Cloud Provisioning Log"
                             },
                         }
