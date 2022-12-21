@@ -12,11 +12,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
     public sealed class PluginMetadata
     {
         /// <summary>
-        /// The group this plugin belongs to
-        /// </summary>
-        public string Group { get; set; }
-
-        /// <summary>
         /// The identifer of this plugin
         /// </summary>
         public string Id { get; set; }

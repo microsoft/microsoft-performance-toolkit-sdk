@@ -1,4 +1,5 @@
-﻿using Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata;
+﻿using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -13,7 +14,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
         {
             var metadata = new PluginMetadata()
             {
-                Group = "Linux",
                 Id = "LinuxAndroidTools",
                 Version = new Version("1.0.0"),
                 DisplayName = "Linux Tool",
@@ -44,6 +44,29 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                                 Category = "Unkown",
                                 IsMetadataTable = false,
                             }
+                        },
+                        AboutInfo = new SDK.Processing.ProcessingSourceInfo
+                        {
+                            Owners = new[]
+                            {
+                                new ContactInfo()
+                                {
+                                    Name = "ps1",
+                                    EmailAddresses = new[] {"processingsource1@micrsoft.com"},
+                                    PhoneNumbers = new[] {"123-456-7890"}
+                                },
+                            },
+                            ProjectInfo = new ProjectInfo()
+                            {
+                                Uri = "github.com"
+                            },
+                            LicenseInfo = new LicenseInfo()
+                            {
+                                Name = "MIT",
+                                Text = "MIT",
+                                Uri = "license.com",
+                            },
+                            CopyrightNotice = "Copyright notice", 
                         },
                         SupportedDataSources = new DataSourceMetadata[]
                         {
