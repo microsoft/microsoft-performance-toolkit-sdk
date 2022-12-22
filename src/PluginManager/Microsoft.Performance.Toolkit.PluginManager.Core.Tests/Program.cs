@@ -28,7 +28,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                     }
                 },
                 SdkVersion = new Version("1.0.0"),
-                ProcessingSourceMetadataCollection = new[]
+                ProcessingSources = new[]
                 {
                     new ProcessingSourceMetadata
                     {
@@ -39,6 +39,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                         {
                             new TableMetadata
                             {
+                                Guid = Guid.Parse("F8F953B2-DFED-448B-87DD-A15CB6DD1D6D"),
                                 Name = "Trace Stats",
                                 Description = "Trace Stats",
                                 Category = "Unkown",
@@ -90,6 +91,25 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Tests
                                 Description = "Linux WaLinuxAgent Cloud Provisioning Log"
                             },
                         }
+                    }
+                },
+                DataCookers = new[]
+                {
+                    new DataCookerMetadata()
+                    {
+                        Name = "dc1",
+                        Description = "dc1",
+                    }
+                },
+                ExtensibleTables = new[]
+                {
+                     new TableMetadata
+                    {
+                        Guid = Guid.Parse("6E8AD993-CEF3-40C2-826A-078E21694C8F"),
+                        Name = "Extensible Table",
+                        Description = "extensible table",
+                        Category = "Unkown",
+                        IsMetadataTable = false,
                     }
                 }
             };

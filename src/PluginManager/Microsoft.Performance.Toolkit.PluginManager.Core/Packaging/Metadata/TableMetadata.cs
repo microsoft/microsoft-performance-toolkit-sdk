@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
 {
     /// <summary>
@@ -8,6 +10,11 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
     /// </summary>
     public sealed class TableMetadata
     {
+        /// <summary>
+        /// The unique identifier of this table
+        /// </summary>
+        public Guid Guid { get; set; }
+
         /// <summary>
         /// The table name
         /// </summary>

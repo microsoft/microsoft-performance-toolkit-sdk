@@ -44,6 +44,16 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         /// <summary>
         /// The metadata of the processing sources contained in this plugin
         /// </summary>
-        public IEnumerable<ProcessingSourceMetadata> ProcessingSourceMetadataCollection { get; set; }
+        public IEnumerable<ProcessingSourceMetadata> ProcessingSources { get; set; }
+
+        /// <summary>
+        /// The metadata of the data cookers contained in this plugin
+        /// </summary>
+        public IEnumerable<DataCookerMetadata> DataCookers { get; set; }
+
+        /// <summary>
+        /// The metadata of the extensible tables contained in this plugin
+        /// </summary>
+        public IEnumerable<TableMetadata> ExtensibleTables { get; set; }
     }
 }
