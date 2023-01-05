@@ -17,7 +17,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
         public string Id { get; set; }
 
         /// <summary>
-        /// The version of the plugin
+        /// The version of this plugin
         /// </summary>
         public Version Version { get; set; }
 
