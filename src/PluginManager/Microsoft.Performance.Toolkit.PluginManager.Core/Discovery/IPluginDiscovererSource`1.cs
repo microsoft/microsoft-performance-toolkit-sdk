@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
@@ -11,7 +13,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
     /// <typeparam name="TSource">
     ///     The <see cref="Type"/> of the <see cref="IPluginSource"/> this discover discovers plugins from.
     /// </typeparam>
-    public interface IPluginDiscoverer<in TSource> : IPluginDiscoverer
+    public interface IPluginDiscovererSource<in TSource> : IPluginDiscovererSource
         where TSource : class, IPluginSource
     {
         /// <summary>
@@ -27,11 +29,14 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         bool IsSourceSupported(TSource source);
 
         /// <summary>
-        /// 
+        ///     Creates a particular 
         /// </summary>
         /// <param name="source"></param>
         /// <param name="crendentialProvider"></param>
         /// <returns></returns>
-        IDiscovererEndpoint CreateDiscovererEndpoint(TSource source, ICrendentialProvider crendentialProvider);
+        IPluginDiscoverer CreateDiscoverer(TSource source);
+
+
+        void SetupCredentialService(IEnumerable<ICredentialProvider> credentialProviders); 
     }
 }

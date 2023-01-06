@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
+using Microsoft.Performance.Toolkit.PluginManager.Core.Packaging;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
@@ -20,7 +21,22 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<PluginMetadata> GetPluginMetadataAsync(CancellationToken cancellationToken);
+        Task<PluginMetadata> GetPluginMetadataAsync(
+            IProgress<int> progress,
+            CancellationToken cancellationToken,
+            bool force = false);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="progress"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="force"></param>
+        /// <returns></returns>
+        Task<PluginPackage> GetPluginPackageAsync(
+            IProgress<int> progress,
+            CancellationToken cancellationToken,
+            bool force = false);
 
         /// <summary>
         ///     Asynchronously gets the <see cref="Packaging.PluginPackage"/> file and returns it as a stream.
@@ -34,6 +50,8 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         /// <returns>
         ///     The stream of the plugin package file.
         /// </returns>
-        Task<Stream> GetPluginPackageStreamAsync(IProgress<int> progress, CancellationToken cancellationToken);
+        Task<Stream> GetPluginPackageStreamAsync(
+            IProgress<int> progress,
+            CancellationToken cancellationToken);
     }
 }

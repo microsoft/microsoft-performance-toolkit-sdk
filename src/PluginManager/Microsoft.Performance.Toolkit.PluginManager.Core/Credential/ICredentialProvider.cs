@@ -3,11 +3,12 @@
 
 using System.Threading.Tasks;
 using System;
+using System.Threading;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Credential
 {
-    public interface ICrendentialProvider
+    public interface ICredentialProvider
     {
-        Task<ICredentials> GetAsync(Uri uri);
+        Task<ICredentials> GetAsync(Uri uri, CancellationToken cancellationToken);
     }
 }
