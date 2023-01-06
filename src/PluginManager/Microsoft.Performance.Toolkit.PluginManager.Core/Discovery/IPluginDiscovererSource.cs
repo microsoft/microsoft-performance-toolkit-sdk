@@ -7,7 +7,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
     /// <summary>
     ///     A non-generic interface that exposes the type of the <see cref="IPluginSource"/> 
-    ///     a discoverer discovers plugins from.
+    ///     a discoverer source supports discovering plugins from.
     /// </summary>
     public interface IPluginDiscovererSource
     {

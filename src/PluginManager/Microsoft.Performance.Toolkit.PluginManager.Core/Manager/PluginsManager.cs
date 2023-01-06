@@ -12,7 +12,11 @@ using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
 {
-    /// <inheritdoc />
+    /// <summary>
+    ///     TODO: Update - right now is just a simplified plugin manager to showcase how discoveres are orchestrated.
+    ///     This only supports discovering <see cref="UriPluginSource"/>. We should probably just get rid of generic.
+    ///     Crendetials can be ignored.
+    /// </summary>
     public sealed class PluginsManagerImpl : IPluginsManager
     {
         private readonly ISet<UriPluginSource> pluginSources;
@@ -41,7 +45,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
             this.pluginSources.Clear();
             this.pluginSources.UnionWith( pluginSources );
 
-            AssignSourcesToDiscoverer();
+            CreateDiscoverers();
         }
 
         /// <inheritdoc />
@@ -80,19 +84,19 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
             return Array.Empty<IAvailablePlugin>();
         }
 
-        private void AssignSourcesToDiscoverer()
+        private void CreateDiscoverers()
         {
-            foreach (IPluginDiscovererSource<UriPluginSource> discoverer in this.discoverers.Keys)
+            foreach (IPluginDiscovererSource<UriPluginSource> discovererSource in this.discoverers.Keys)
             {
-                List<IPluginDiscoverer> endpoints = this.discoverers[discoverer];
-                endpoints.Clear();
+                List<IPluginDiscoverer> discoverer = this.discoverers[discovererSource];
+                discoverer.Clear();
 
                 foreach (UriPluginSource source in this.pluginSources)
                 {
-                    if (discoverer.IsSourceSupported(source))
+                    if (discovererSource.IsSourceSupported(source))
                     {
-                        IPluginDiscoverer endpoint = discoverer.CreateDiscoverer(source);
-                        endpoints.Add(endpoint);
+                        IPluginDiscoverer endpoint = discovererSource.CreateDiscoverer(source);
+                        discoverer.Add(endpoint);
                     }
                 }
             }

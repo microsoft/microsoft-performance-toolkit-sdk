@@ -19,4 +19,3 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging
         public Uri SourceUri { get; }
     }
 }
- 

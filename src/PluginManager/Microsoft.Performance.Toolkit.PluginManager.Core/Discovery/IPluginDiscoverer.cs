@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
     /// <summary>
-    ///     Core APIs that discoverer <see cref="IAvailablePlugin"/>s from <see cref="IPluginSource"/>(s)
+    ///    A discoverer that discovers <see cref="IAvailablePlugin"/>s from <see cref="IPluginSource"/>(s)
     /// </summary>
     public interface IPluginDiscoverer
     {

@@ -8,7 +8,7 @@ using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
     /// <summary>
-    ///     A discoverer that discovers plugins from a plugin source of type <typeparamref name="TSource"/>.
+    ///     A discoverer source that creates <see cref="IPluginDiscoverer"/> that discoveres source of type <typeparamref name="TSource"/>.
     /// </summary>
     /// <typeparam name="TSource">
     ///     The <see cref="Type"/> of the <see cref="IPluginSource"/> this discover discovers plugins from.
@@ -29,14 +29,17 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         bool IsSourceSupported(TSource source);
 
         /// <summary>
-        ///     Creates a particular 
+        /// 
         /// </summary>
         /// <param name="source"></param>
         /// <param name="crendentialProvider"></param>
         /// <returns></returns>
         IPluginDiscoverer CreateDiscoverer(TSource source);
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="credentialProviders"></param>
         void SetupCredentialService(IEnumerable<ICredentialProvider> credentialProviders); 
     }
 }

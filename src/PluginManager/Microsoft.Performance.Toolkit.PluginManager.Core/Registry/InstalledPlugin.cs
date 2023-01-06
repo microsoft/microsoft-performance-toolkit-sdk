@@ -6,6 +6,7 @@ using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Registry
 {
+    // TODO:
     public sealed class InstalledPlugin : IPluginInfo
     {
         public PluginIdentity Identity { get; }

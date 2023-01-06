@@ -16,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 {
     public sealed class NuGetAvailablePlugin : IAvailablePlugin
     {
-        private readonly AsyncLazy<IDownloader> downloader;
+        private readonly AsyncLazy<IPluginDownloader> downloader;
         private readonly ILogger logger;
         private PluginMetadata pluginMetadata;
         private PluginPackage pluginPackage;
@@ -33,7 +33,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
             this.DisplayName = displayName;
             this.Description = description;
             this.SourceUri = sourceUri;
-            this.downloader = new AsyncLazy<IDownloader>(
+            this.downloader = new AsyncLazy<IPluginDownloader>(
                 async () =>
                 {
                     DownloadResource downloadResource = await sourceRepository.GetResourceAsync<DownloadResource>();
@@ -85,7 +85,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
-            IDownloader downloader = await this.downloader;
+            IPluginDownloader downloader = await this.downloader;
             Stream downloadedStream = await downloader.DownloadPluginAsync(this.Identity, progress, cancellationToken);
 
             if (downloadedStream != null)

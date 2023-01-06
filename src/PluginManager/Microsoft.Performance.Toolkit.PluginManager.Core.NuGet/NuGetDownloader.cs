@@ -13,7 +13,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 {
-    public class NuGetDownloader : IDownloader
+    public class NuGetDownloader : IPluginDownloader
     {
         private readonly DownloadResource downloadResource;
         private readonly ILogger logger;
