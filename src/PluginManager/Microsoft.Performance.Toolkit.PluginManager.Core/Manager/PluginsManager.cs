@@ -12,40 +12,64 @@ using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
 {
-    /// <summary>
-    ///     TODO: Update - right now is just a simplified plugin manager to showcase how discoveres are orchestrated.
-    ///     This only supports discovering <see cref="UriPluginSource"/>. We should probably just get rid of generic.
-    ///     Crendetials can be ignored.
-    /// </summary>
-    public sealed class PluginsManagerImpl : IPluginsManager
+    /// <inheritdoc />
+    public sealed class PluginsManager : IPluginsManager
     {
-        private readonly ISet<UriPluginSource> pluginSources;
-        private readonly Dictionary<IPluginDiscovererSource<UriPluginSource>, List<IPluginDiscoverer>> discoverers;
+        private readonly DiscovererSourceCollection discovererSourceCollection;
+        private readonly ISet<IPluginSource> pluginSources;
+        private readonly Dictionary<IPluginDiscovererSource, List<IPluginDiscoverer>> discoverers;
         private readonly IEnumerable<ICredentialProvider> credentialProviders;
 
-        public PluginsManagerImpl(
-            ISet<IPluginDiscovererSource<UriPluginSource>> pluginDiscovererSources,
+        public PluginsManager(
+            DiscovererSourceCollection pluginDiscovererSources,
             IEnumerable<ICredentialProvider> credentialProviders)
         {
             this.credentialProviders = credentialProviders;
-            this.pluginSources = new HashSet<UriPluginSource>();
-            this.discoverers = new Dictionary<IPluginDiscovererSource<UriPluginSource>, List<IPluginDiscoverer>>();
+            this.pluginSources = new HashSet<IPluginSource>();
+            this.discoverers = new Dictionary<IPluginDiscovererSource, List<IPluginDiscoverer>>();
+            this.discovererSourceCollection = new DiscovererSourceCollection();
 
-            foreach (IPluginDiscovererSource<UriPluginSource> discovererSource in pluginDiscovererSources)
+            foreach (IPluginDiscovererSource<IPluginSource> discovererSource in pluginDiscovererSources.AllPluginDiscovererSources)
             {
                 discovererSource.SetupCredentialService(credentialProviders);
                 this.discoverers[discovererSource] = new List<IPluginDiscoverer>();
             }
         }
 
-        public IEnumerable<UriPluginSource> PluginSources { get { return this.pluginSources; } }
+        /// <inheritdoc />
+        public IEnumerable<IPluginSource> PluginSources
+        { 
+            get
+            {
+                return this.pluginSources;
+            }
+        }
 
-        public void SetPluginSources(IEnumerable<UriPluginSource> pluginSources)
+        /// <inheritdoc />
+        public void ClearPluginSources()
         {
             this.pluginSources.Clear();
-            this.pluginSources.UnionWith( pluginSources );
 
-            CreateDiscoverers();
+            foreach (List<IPluginDiscoverer> discoveres in this.discoverers.Values)
+            {
+                discoveres.Clear();
+            }
+        }
+
+        /// <inheritdoc />
+        public void AddPluginSource<TSource>(TSource source) where TSource : class, IPluginSource
+        {
+            Guard.NotNull(source, nameof(source));
+
+            this.pluginSources.Add(source);
+
+            foreach (IPluginDiscovererSource<TSource> discovererSource in  this.discovererSourceCollection.Get<TSource>())
+            {
+                if (discovererSource.IsSourceSupported(source))
+                {
+                    this.discoverers[discovererSource].Add(discovererSource.CreateDiscoverer(source));
+                }
+            }
         }
 
         /// <inheritdoc />
@@ -63,6 +87,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
             return results;
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<IAvailablePlugin>> GetAllVersionsOfPlugin(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken)
@@ -82,24 +107,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
             }
 
             return Array.Empty<IAvailablePlugin>();
-        }
-
-        private void CreateDiscoverers()
-        {
-            foreach (IPluginDiscovererSource<UriPluginSource> discovererSource in this.discoverers.Keys)
-            {
-                List<IPluginDiscoverer> discoverer = this.discoverers[discovererSource];
-                discoverer.Clear();
-
-                foreach (UriPluginSource source in this.pluginSources)
-                {
-                    if (discovererSource.IsSourceSupported(source))
-                    {
-                        IPluginDiscoverer endpoint = discovererSource.CreateDiscoverer(source);
-                        discoverer.Add(endpoint);
-                    }
-                }
-            }
         }
     }
 }
