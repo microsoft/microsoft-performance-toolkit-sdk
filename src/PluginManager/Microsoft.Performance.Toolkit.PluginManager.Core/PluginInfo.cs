@@ -3,31 +3,31 @@
 
 using System;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
+namespace Microsoft.Performance.Toolkit.PluginManager.Core
 {
     /// <summary>
-    ///     A common set of plugin information shared by available plugins and installed plugins.
+    ///     Basic information of a plugin.
     /// </summary>
-    public interface IPluginInfo
+    public sealed class PluginInfo
     {
         /// <summary>
         ///     The identity of this plugin.
         /// </summary>
-        PluginIdentity Identity { get; }
+        public PluginIdentity Identity { get; set; }
 
         /// <summary>
         ///     The human-readable name of this plugin.
         /// </summary>
-        string DisplayName { get; }
+        public string DisplayName { get; set; }
 
         /// <summary>
         ///     A user friendly description of this plugin.
         /// </summary>   
-        string Description { get; }
+        public string Description { get; set; }
 
         /// <summary>
         ///     The URI of the source of this plugin.
         /// </summary>
-        Uri SourceUri { get; }
+        public Uri SourceUri { get; set; }
     }
 }

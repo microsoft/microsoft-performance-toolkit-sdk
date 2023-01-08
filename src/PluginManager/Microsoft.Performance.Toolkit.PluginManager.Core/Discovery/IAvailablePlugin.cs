@@ -14,8 +14,18 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
     ///     Represents a discovered plugin container that Exposes plugin info and APIs for getting plugin metadata, plugin pakcage,
     ///     and other available versions of this plugin.
     /// </summary>
-    public interface IAvailablePlugin : IPluginInfo
+    public interface IAvailablePlugin
     {
+        /// <summary>
+        ///     Gets the identity of this plugin.
+        /// </summary>
+        PluginIdentity Identity { get; }
+
+        /// <summary>
+        ///     Gets the basic information of this plugin
+        /// </summary>
+        PluginInfo Info { get; }
+
         /// <summary>
         ///     Asynchronously gets the <see cref="Packaging.Metadata.PluginMetadata"/> of this plugin.
         /// </summary>

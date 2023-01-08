@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Transport;
 using NuGet.Common;
 using NuGet.Packaging;
 using NuGet.Packaging.Core;
@@ -13,7 +12,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 {
-    public class NuGetDownloader : IPluginDownloader
+    public class NuGetDownloader
     {
         private readonly DownloadResource downloadResource;
         private readonly ILogger logger;

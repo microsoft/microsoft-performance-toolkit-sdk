@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Packaging;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Transport;
 using NuGet.Common;
 using NuGet.Protocol.Core.Types;
 
@@ -16,7 +15,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 {
     public sealed class NuGetAvailablePlugin : IAvailablePlugin
     {
-        private readonly AsyncLazy<IPluginDownloader> downloader;
+        private readonly AsyncLazy<NuGetDownloader> downloader;
         private readonly ILogger logger;
         private PluginMetadata pluginMetadata;
         private PluginPackage pluginPackage;
@@ -30,10 +29,14 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
             ILogger logger)
         {
             this.Identity = identity;
-            this.DisplayName = displayName;
-            this.Description = description;
-            this.SourceUri = sourceUri;
-            this.downloader = new AsyncLazy<IPluginDownloader>(
+            this.Info = new PluginInfo()
+            {
+                DisplayName = displayName,
+                Description = description,
+                SourceUri = sourceUri,
+            };
+            
+            this.downloader = new AsyncLazy<NuGetDownloader>(
                 async () =>
                 {
                     DownloadResource downloadResource = await sourceRepository.GetResourceAsync<DownloadResource>();
@@ -44,11 +47,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 
         public PluginIdentity Identity { get; }
 
-        public string DisplayName { get; }
-
-        public string Description { get; }
-
-        public Uri SourceUri { get; }
+        public PluginInfo Info { get; }
 
         public async Task<PluginMetadata> GetPluginMetadataAsync(
             IProgress<int> progress,
@@ -85,7 +84,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
             IProgress<int> progress,
             CancellationToken cancellationToken)
         {
-            IPluginDownloader downloader = await this.downloader;
+            NuGetDownloader downloader = await this.downloader;
             Stream downloadedStream = await downloader.DownloadPluginAsync(this.Identity, progress, cancellationToken);
 
             if (downloadedStream != null)
