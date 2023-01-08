@@ -32,9 +32,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Credential
 
                 try
                 {
-
                     ProviderSemaphore.WaitOne();
-
                     creds = await provider.GetAsync(uri, cancellationToken);
                     if (creds != null)
                     {
