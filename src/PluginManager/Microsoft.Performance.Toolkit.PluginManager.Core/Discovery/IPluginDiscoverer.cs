@@ -8,36 +8,29 @@ using System.Threading.Tasks;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
     /// <summary>
-    ///    A discoverer that discovers <see cref="IAvailablePlugin"/>s from <see cref="IPluginSource"/>(s)
+    ///    A discoverer that discovers <see cref="IAvailablePlugin"/>s from the stored <see cref="IPluginSource"/>.
     /// </summary>
     public interface IPluginDiscoverer
     {
         /// <summary>
-        ///     Discovers the latest version of all plugins available from a plugin source.
+        ///     Discovers the latest version of all plugins.
         /// </summary>
-        /// <param name="source">
-        ///     The source this discover discovers plugins from.
-        /// </param>
         /// <param name="cancellationToken"></param>
         /// <returns>
-        ///     A collection of plugins that are discovered from the given source.
+        ///     A collection of plugins that are discovered.
         /// </returns>
         /// TODO: Add search
         Task<IReadOnlyCollection<IAvailablePlugin>> DiscoverPluginsLatestAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Discovers all versions of the given plugin from a plugin source.
-        /// </summary>
-        /// <param name="source">
-        ///     The source this discover discovers plugins from.
-        /// </param>
+        ///     Discovers all versions of the given plugin.
         /// <param name="pluginIdentity">
         ///     The target plugin to look up for.    
         /// </param>
         /// <param name="cancellationToken">
         /// </param>
         /// <returns>
-        ///     All versions of the plugin discovered from the given plugin source.
+        ///     All versions of the plugin discovered.
         /// </returns>
         Task<IReadOnlyCollection<IAvailablePlugin>> DiscoverAllVersionsOfPlugin(
             PluginIdentity pluginIdentity,

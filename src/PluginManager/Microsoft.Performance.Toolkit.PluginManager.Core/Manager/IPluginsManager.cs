@@ -37,17 +37,23 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
         /// <summary>
         ///     Gets all available plugins in their latest versions.
         /// </summary>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">
+        ///      A cancellation token.
+        /// </param>
         /// <returns>
         ///     A collection available plugins.
         /// </returns>
-       Task<IReadOnlyCollection<IAvailablePlugin>> GetAvailablePluginsLatestAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<IAvailablePlugin>> GetAvailablePluginsLatestAsync(CancellationToken cancellationToken);
 
         /// <summary>
         ///     Gets all available versions of a given plugin.
         /// </summary>
-        /// <param name="availablePlugin"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="availablePlugin">
+        ///     A discovered plugin.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A cancellation token.
+        /// </param>
         /// <returns>
         ///     A collection of available plugins.
         /// </returns>

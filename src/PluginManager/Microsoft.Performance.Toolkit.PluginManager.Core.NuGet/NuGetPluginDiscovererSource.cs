@@ -8,7 +8,7 @@ using NuGet.Configuration;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 {
-    public class NuGetPluginDiscovererSource : PluginDiscovererSource<UriPluginSource>
+    public class NuGetPluginDiscovererSource : PluginDiscovererProvider<UriPluginSource>
     {
         private Lazy<ICredentialProvider<UriPluginSource>> credentialProvider =
             new Lazy<ICredentialProvider<UriPluginSource>>(() => new NuGetCredentialProvider());

@@ -7,12 +7,12 @@ using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
     /// <summary>
-    ///     Provides a base class for implementing <see cref="IPluginDiscovererSource"/.
+    ///     Provides a base class for implementing <see cref="IPluginDiscovererProvider"/.
     /// </summary>
     /// <typeparam name="TSource">
     ///     The <see cref="Type"/> of the <see cref="IPluginSource"/> this discover discovers plugins from.
     /// </typeparam>
-    public abstract class PluginDiscovererSource<TSource> : IPluginDiscovererSource<TSource>
+    public abstract class PluginDiscovererProvider<TSource> : IPluginDiscovererProvider<TSource>
         where TSource : class, IPluginSource
     {
         /// <inheritdoc />

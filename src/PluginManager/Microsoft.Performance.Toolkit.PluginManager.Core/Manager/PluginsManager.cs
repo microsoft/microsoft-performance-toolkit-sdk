@@ -12,11 +12,21 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
     public sealed class PluginsManager : IPluginsManager
     {
         private readonly DiscoveryManager discoveryManager;
+        
+        /// <summary>
+        ///     Initializes a plugin manager instance.
+        /// </summary>
+        /// <param name="discovererProviders">
+        ///     The known providers that have already been loaded or intialized directly.
+        /// </param>
+        /// <param name="discovererSourceLoader">
+        ///     A loader that can load additional discoverer providers at run time.
+        /// </param>
         public PluginsManager(
-            IEnumerable<IPluginDiscovererSource> discovererSources,
-            IDiscovererSourceLoader discovererSourceLoader)
+            IEnumerable<IPluginDiscovererProvider> discovererProviders,
+            IDiscovererProvidersLoader discovererSourceLoader)
         {
-            this.discoveryManager = new DiscoveryManager(discovererSources, discovererSourceLoader);
+            this.discoveryManager = new DiscoveryManager(discovererProviders, discovererSourceLoader);
         }
 
         /// <inheritdoc />
@@ -55,6 +65,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
             return this.discoveryManager.GetAllVersionsOfPlugin(availablePlugin, cancellationToken);
         }
 
+        /// <inheritdoc />
         public void LoadAdditionalDiscovererSources(string directory)
         {
             this.discoveryManager.LoadAdditionalDiscovererSource(directory);

@@ -6,9 +6,9 @@ using System;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
     /// <summary>
-    /// 
+    ///     A <see cref="IPluginSource"/> specified with a <see cref="Uri"/>.
     /// </summary>
-    public abstract class UriPluginSource : IPluginSource
+    public class UriPluginSource : IPluginSource
     {
         protected UriPluginSource(string name, Uri uri)
         {
@@ -19,7 +19,9 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         /// <inheritdoc />
         public string Name { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        ///     Gets the <see cref="Uri"/> of this source.
+        /// </summary>
         public Uri Uri { get; }
     }
 }

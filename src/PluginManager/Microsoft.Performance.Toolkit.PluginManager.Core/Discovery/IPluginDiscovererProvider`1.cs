@@ -7,12 +7,12 @@ using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
     /// <summary>
-    ///     A discoverer source that creates <see cref="IPluginDiscoverer"/> that discoveres source of type <typeparamref name="TSource"/>.
+    ///     A generic interface reprenting a provider that creates <see cref="IPluginDiscoverer"/> that discoveres source of type <typeparamref name="TSource"/>.
     /// </summary>
     /// <typeparam name="TSource">
     ///     The <see cref="Type"/> of the <see cref="IPluginSource"/> this discover discovers plugins from.
     /// </typeparam>
-    public interface IPluginDiscovererSource<TSource> : IPluginDiscovererSource
+    public interface IPluginDiscovererProvider<TSource> : IPluginDiscovererProvider
         where TSource : class, IPluginSource
     {
         /// <summary>
@@ -28,14 +28,18 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         bool IsSourceSupported(TSource source);
 
         /// <summary>
-        /// 
+        ///     Creates a discoverer for the specified plugin source.
         /// </summary>
-        /// <param name="source"></param>
-        /// <returns></returns>
+        /// <param name="source">
+        ///     A plugin source.
+        /// </param>
+        /// <returns>
+        ///     A plugin discoverer.
+        /// </returns>
         IPluginDiscoverer CreateDiscoverer(TSource source);
 
         /// <summary>
-        ///     
+        ///     Lazily gets a credential provider that provides credentials for the discoverers created from this <see cref="IPluginDiscovererProvider{TSource}"/>.
         /// </summary>
         Lazy<ICredentialProvider<TSource>> CredentialProvider { get; }
     }

@@ -10,20 +10,25 @@ using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 {
+    /// <summary>
+    ///     Manages plugin discovery related resources.
+    /// </summary>
     // TODO: Lazy initialize discoverers
     public class DiscoveryManager
     {
         private readonly ISet<IPluginSource> pluginSources;
-        private readonly HashSet<IPluginDiscovererSource> discovererSources;
-        private readonly IDiscovererSourceLoader loader;
-        private readonly Dictionary<IPluginSource, IList<IPluginDiscoverer>> discoverers;
+        private readonly HashSet<IPluginDiscovererProvider> discovererProviders;
+        private readonly IDiscovererProvidersLoader loader;
+        private readonly Dictionary<IPluginSource, IList<IPluginDiscoverer>> sourceToDiscoverers;
 
         public DiscoveryManager(
-            IEnumerable<IPluginDiscovererSource> pluginDiscovererSources,
-            IDiscovererSourceLoader discovererSourceLoader)
+            IEnumerable<IPluginDiscovererProvider> discovererProviders,
+            IDiscovererProvidersLoader discovererSourceLoader)
         {
-            this.discovererSources = new HashSet<IPluginDiscovererSource>(pluginDiscovererSources);
-            this.discoverers = new Dictionary<IPluginSource, IList<IPluginDiscoverer>>();
+            this.pluginSources = new HashSet<IPluginSource>();
+            this.loader = discovererSourceLoader;
+            this.discovererProviders = new HashSet<IPluginDiscovererProvider>(discovererProviders);
+            this.sourceToDiscoverers = new Dictionary<IPluginSource, IList<IPluginDiscoverer>>();
         }
 
         public IEnumerable<IPluginSource> PluginSources
@@ -34,18 +39,18 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
             }
         }
 
-        public IEnumerable<IPluginDiscovererSource> DiscovererSources
+        public IEnumerable<IPluginDiscovererProvider> DiscovererProviders
         {
             get
             {
-                return this.discovererSources;
+                return this.discovererProviders;
             }
         }
 
         public void ClearPluginSources()
         {
             this.pluginSources.Clear();
-            this.discoverers.Clear();
+            this.sourceToDiscoverers.Clear();
         }
 
         public void AddPluginSource<TSource>(TSource source) where TSource : class, IPluginSource
@@ -53,13 +58,13 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
             Guard.NotNull(source, nameof(source));
 
             this.pluginSources.Add(source);
-            this.discoverers.Add(source, new List<IPluginDiscoverer>());
+            this.sourceToDiscoverers.Add(source, new List<IPluginDiscoverer>());
 
-            foreach (IPluginDiscovererSource<TSource> discovererSource in this.discovererSources.OfType<IPluginDiscovererSource<TSource>>())
+            foreach (IPluginDiscovererProvider<TSource> provider in this.discovererProviders.OfType<IPluginDiscovererProvider<TSource>>())
             {
-                if (discovererSource.IsSourceSupported(source))
+                if (provider.IsSourceSupported(source))
                 {
-                    this.discoverers[source].Add(discovererSource.CreateDiscoverer(source));
+                    this.sourceToDiscoverers[source].Add(provider.CreateDiscoverer(source));
                 }
             }
         }
@@ -68,19 +73,20 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         {
             Guard.NotNull(directory, nameof(directory));
 
-            if (!this.loader.TryLoad(directory, out IEnumerable<IPluginDiscovererSource> discovererSources))
+            if (!this.loader.TryLoad(directory, out IEnumerable<IPluginDiscovererProvider> loadedProviders))
             {
                 return;
             }
 
-            IEnumerable<IPluginDiscovererSource> newSources = discovererSources.Except(this.discovererSources);
-                
-            foreach (IPluginDiscovererSource source in newSources)
+            IEnumerable<IPluginDiscovererProvider> newProviders = loadedProviders.Except(this.discovererProviders);
+            this.discovererProviders.UnionWith(newProviders);
+
+            foreach (IPluginDiscovererProvider source in newProviders)
             {
                 Type sourceType = source.PluginSourceType;
                 Type discovererSourceType = source.GetType();
 
-                foreach (KeyValuePair<IPluginSource, IList<IPluginDiscoverer>> kvp in this.discoverers)
+                foreach (KeyValuePair<IPluginSource, IList<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
                 {
                     IPluginSource pluginSource = kvp.Key;
                     if (sourceType !=  pluginSource.GetType())
@@ -100,8 +106,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
                     }
                 }
             }
-
-            this.discovererSources.UnionWith(discovererSources);
         }
 
         public async Task<IReadOnlyCollection<IAvailablePlugin>> GetAvailablePluginsLatestFromSourceAsync(
@@ -115,7 +119,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            foreach (IPluginDiscoverer discoverer in this.discoverers[pluginSource])
+            foreach (IPluginDiscoverer discoverer in this.sourceToDiscoverers[pluginSource])
             {
                 IReadOnlyCollection<IAvailablePlugin> plugins = await discoverer.DiscoverPluginsLatestAsync(cancellationToken);
                 
@@ -152,7 +156,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
 
             if (this.pluginSources.Contains(availablePlugin.PluginSource))
             {
-                foreach (IPluginDiscoverer discoverer in this.discoverers[availablePlugin.PluginSource])
+                foreach (IPluginDiscoverer discoverer in this.sourceToDiscoverers[availablePlugin.PluginSource])
                 {
                     IReadOnlyCollection<IAvailablePlugin> plugins = await discoverer.DiscoverAllVersionsOfPlugin(
                         availablePlugin.Identity,
