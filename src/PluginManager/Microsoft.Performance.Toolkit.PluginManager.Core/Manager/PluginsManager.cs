@@ -1,13 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
@@ -15,25 +11,12 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
     /// <inheritdoc />
     public sealed class PluginsManager : IPluginsManager
     {
-        private readonly DiscovererSourceCollection discovererSourceCollection;
-        private readonly ISet<IPluginSource> pluginSources;
-        private readonly Dictionary<IPluginDiscovererSource, List<IPluginDiscoverer>> discoverers;
-        private readonly IEnumerable<ICredentialProvider> credentialProviders;
-
+        private readonly DiscoveryManager discoveryManager;
         public PluginsManager(
-            DiscovererSourceCollection pluginDiscovererSources,
-            IEnumerable<ICredentialProvider> credentialProviders)
+            IEnumerable<IPluginDiscovererSource> discovererSources,
+            IDiscovererSourceLoader discovererSourceLoader)
         {
-            this.credentialProviders = credentialProviders;
-            this.pluginSources = new HashSet<IPluginSource>();
-            this.discoverers = new Dictionary<IPluginDiscovererSource, List<IPluginDiscoverer>>();
-            this.discovererSourceCollection = new DiscovererSourceCollection();
-
-            foreach (IPluginDiscovererSource<IPluginSource> discovererSource in pluginDiscovererSources.AllPluginDiscovererSources)
-            {
-                discovererSource.SetupCredentialService(credentialProviders);
-                this.discoverers[discovererSource] = new List<IPluginDiscoverer>();
-            }
+            this.discoveryManager = new DiscoveryManager(discovererSources, discovererSourceLoader);
         }
 
         /// <inheritdoc />
@@ -41,72 +24,40 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
         { 
             get
             {
-                return this.pluginSources;
+                return this.discoveryManager.PluginSources;
             }
         }
 
         /// <inheritdoc />
         public void ClearPluginSources()
         {
-            this.pluginSources.Clear();
-
-            foreach (List<IPluginDiscoverer> discoveres in this.discoverers.Values)
-            {
-                discoveres.Clear();
-            }
+            this.discoveryManager.ClearPluginSources();
         }
 
         /// <inheritdoc />
         public void AddPluginSource<TSource>(TSource source) where TSource : class, IPluginSource
         {
-            Guard.NotNull(source, nameof(source));
-
-            this.pluginSources.Add(source);
-
-            foreach (IPluginDiscovererSource<TSource> discovererSource in  this.discovererSourceCollection.Get<TSource>())
-            {
-                if (discovererSource.IsSourceSupported(source))
-                {
-                    this.discoverers[discovererSource].Add(discovererSource.CreateDiscoverer(source));
-                }
-            }
+            this.discoveryManager.AddPluginSource(source);
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<IAvailablePlugin>> GetAvailablePluginsLatestAsync(
+        public Task<IReadOnlyCollection<IAvailablePlugin>> GetAvailablePluginsLatestAsync(
             CancellationToken cancellationToken)
         {
-            var results = new List<IAvailablePlugin>();
-
-            foreach (IPluginDiscoverer discovererEndpoint in this.discoverers.Values.SelectMany(x => x))
-            {
-                IReadOnlyCollection<IAvailablePlugin> plugins = await discovererEndpoint.DiscoverPluginsLatestAsync(cancellationToken);
-                results.AddRange(plugins);
-            }
-
-            return results;
+            return this.discoveryManager.GetAllAvailablePluginsLatestAsync(cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<IAvailablePlugin>> GetAllVersionsOfPlugin(
-            PluginIdentity pluginIdentity,
+        public Task<IReadOnlyCollection<IAvailablePlugin>> GetAllVersionsOfPlugin(
+            IAvailablePlugin availablePlugin,
             CancellationToken cancellationToken)
         {
-            Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
+            return this.discoveryManager.GetAllVersionsOfPlugin(availablePlugin, cancellationToken);
+        }
 
-            foreach (IPluginDiscoverer discovererEndpoint in this.discoverers.Values.SelectMany(x => x))
-            {
-                IReadOnlyCollection<IAvailablePlugin> plugins = await discovererEndpoint.DiscoverAllVersionsOfPlugin(
-                    pluginIdentity,
-                    cancellationToken);
-
-                if (plugins.Any())
-                {
-                    return plugins;
-                }
-            }
-
-            return Array.Empty<IAvailablePlugin>();
+        public void LoadAdditionalDiscovererSources(string directory)
+        {
+            this.discoveryManager.LoadAdditionalDiscovererSource(directory);
         }
     }
 }

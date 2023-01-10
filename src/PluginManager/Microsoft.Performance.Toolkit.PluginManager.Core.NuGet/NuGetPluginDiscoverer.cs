@@ -1,17 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using ICredentialService = Microsoft.Performance.Toolkit.PluginManager.Core.Credential.ICredentialService;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
     {
         private readonly UriPluginSource pluginSource;
         private readonly PackageSource packageSource;
-        private readonly ICredentialService credentialService;
+        private readonly Lazy<ICredentialProvider<UriPluginSource>> credentialProvider;
         private readonly SourceRepository repository;
         private readonly ILogger logger;
 
@@ -30,13 +31,17 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
         {
         }
 
-        public NuGetPluginDiscoverer(UriPluginSource pluginSource, ICredentialService credentialService)
+        public NuGetPluginDiscoverer(
+            UriPluginSource pluginSource,
+            Lazy<ICredentialProvider<UriPluginSource>> credentialProvider)
         {
             this.pluginSource = pluginSource;
-            this.credentialService = credentialService;
+            this.packageSource = new PackageSource(pluginSource.Uri.ToString());
+            this.credentialProvider = credentialProvider;
             this.logger = new NullLogger();
             this.repository = Repository.Factory.GetCoreV3(this.packageSource.Source);
         }
+
 
         public async Task<IReadOnlyCollection<IAvailablePlugin>> DiscoverAllVersionsOfPlugin(
             PluginIdentity pluginIdentity,
@@ -66,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
                         pluginId,
                         packageMetadata.Title,
                         packageMetadata.Description,
-                        this.pluginSource.Uri,
+                        this.pluginSource,
                         this.repository,
                         this.logger);
 
@@ -103,7 +108,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
                     pluginIdentity,
                     packageMetadata.Title,
                     packageMetadata.Description,
-                    this.pluginSource.Uri,
+                    this.pluginSource,
                     this.repository,
                     this.logger);
 

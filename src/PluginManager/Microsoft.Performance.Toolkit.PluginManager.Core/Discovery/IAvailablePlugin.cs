@@ -26,6 +26,9 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
         /// </summary>
         PluginInfo Info { get; }
 
+
+        IPluginSource PluginSource { get; }
+
         /// <summary>
         ///     Asynchronously gets the <see cref="Packaging.Metadata.PluginMetadata"/> of this plugin.
         /// </summary>

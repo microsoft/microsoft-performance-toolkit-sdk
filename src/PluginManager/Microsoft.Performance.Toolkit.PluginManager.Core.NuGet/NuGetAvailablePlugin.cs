@@ -24,16 +24,18 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
             PluginIdentity identity,
             string displayName,
             string description,
-            Uri sourceUri,
+            UriPluginSource pluginSource,
             SourceRepository sourceRepository,
             ILogger logger)
         {
+
+            this.PluginSource = pluginSource;
             this.Identity = identity;
             this.Info = new PluginInfo()
             {
                 DisplayName = displayName,
                 Description = description,
-                SourceUri = sourceUri,
+                SourceUri = pluginSource.Uri,
             };
             
             this.downloader = new AsyncLazy<NuGetDownloader>(
@@ -48,6 +50,8 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
         public PluginIdentity Identity { get; }
 
         public PluginInfo Info { get; }
+
+        public IPluginSource PluginSource { get; }
 
         public async Task<PluginMetadata> GetPluginMetadataAsync(
             IProgress<int> progress,

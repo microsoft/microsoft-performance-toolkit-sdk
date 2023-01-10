@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
 using NuGet.Configuration;
@@ -11,11 +10,20 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 {
     public class NuGetPluginDiscovererSource : PluginDiscovererSource<UriPluginSource>
     {
-        private CredentialService credentialService;
+        private Lazy<ICredentialProvider<UriPluginSource>> credentialProvider =
+            new Lazy<ICredentialProvider<UriPluginSource>>(() => new NuGetCredentialProvider());
+
+        public override Lazy<ICredentialProvider<UriPluginSource>> CredentialProvider
+        {
+            get
+            {
+                return this.credentialProvider;
+            }
+        }
 
         public override IPluginDiscoverer CreateDiscoverer(UriPluginSource source)
         {
-            return new NuGetPluginDiscoverer(source, this.credentialService);
+            return new NuGetPluginDiscoverer(source, this.CredentialProvider);
         }
 
         public override bool IsSourceSupported(UriPluginSource source)
@@ -29,11 +37,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
 
             // Support http V3 and local feed as of of now
             return IsHttpV3Feed(nugetSource) || nugetSource.IsLocal;
-        }
-
-        public override void SetupCredentialService(IEnumerable<ICredentialProvider> credentialProviders)
-        {
-            this.credentialService = new CredentialService(credentialProviders);
         }
 
         private static bool IsHttpV3Feed(PackageSource packageSource)

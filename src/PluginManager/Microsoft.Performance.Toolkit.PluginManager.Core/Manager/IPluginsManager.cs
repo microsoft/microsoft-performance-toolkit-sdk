@@ -30,6 +30,11 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
         void AddPluginSource<TSource>(TSource source) where TSource : class, IPluginSource;
 
         /// <summary>
+        ///     Clear all plugin sources in this plugin manager.
+        /// </summary>
+        void ClearPluginSources();
+
+        /// <summary>
         ///     Gets all available plugins in their latest versions.
         /// </summary>
         /// <param name="cancellationToken"></param>
@@ -41,11 +46,22 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
         /// <summary>
         ///     Gets all available versions of a given plugin.
         /// </summary>
-        /// <param name="pluginIdentity"></param>
+        /// <param name="availablePlugin"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>
         ///     A collection of available plugins.
         /// </returns>
-        Task<IReadOnlyCollection<IAvailablePlugin>> GetAllVersionsOfPlugin(PluginIdentity pluginIdentity, CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<IAvailablePlugin>> GetAllVersionsOfPlugin(
+            IAvailablePlugin availablePlugin,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Loads additional discoverer sources from <paramref name="directory"/> to this plugin manager.
+        /// </summary>
+        /// <param name="directory">
+        ///     The directory to load discoverer sources assemblies from.
+        /// </param>
+        void LoadAdditionalDiscovererSources(string directory);
+
     }
 }

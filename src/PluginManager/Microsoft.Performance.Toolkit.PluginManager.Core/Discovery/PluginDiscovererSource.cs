@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
@@ -24,12 +23,13 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
                 return typeof(TSource);
             }
         }
+        /// <inheritdoc />
+        public abstract Lazy<ICredentialProvider<TSource>> CredentialProvider { get; }
 
+        /// <inheritdoc />
         public abstract IPluginDiscoverer CreateDiscoverer(TSource source);
 
         /// <inheritdoc />
         public abstract bool IsSourceSupported(TSource source);
-
-        public abstract void SetupCredentialService(IEnumerable<ICredentialProvider> credentialProviders);
     }
 }
