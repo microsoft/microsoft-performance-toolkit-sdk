@@ -10,7 +10,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
     /// </summary>
     public class UriPluginSource : IPluginSource
     {
-        protected UriPluginSource(string name, Uri uri)
+        public UriPluginSource(string name, Uri uri)
         {
             this.Name = name;
             this.Uri = uri;
