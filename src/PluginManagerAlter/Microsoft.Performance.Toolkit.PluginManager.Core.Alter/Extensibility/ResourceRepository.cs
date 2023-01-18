@@ -37,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Extensibility
         }
 
         /// <summary>
-        ///     Perform proper operations upon new resources loaded.
+        ///     Adds new resources upon and notifies when they are added to the repository.
         /// </summary>
         /// <param name="loadedResources"
         ///     The newly loaded resources.

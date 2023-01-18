@@ -3,9 +3,7 @@
 
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Extensibility;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
         /// </summary>
         /// <param name="sources">
         ///     The plugin sources to be added.
-        /// /param>
+        /// </param>
         void AddPluginSources(IEnumerable<PluginSource> sources);
 
         /// <summary>
