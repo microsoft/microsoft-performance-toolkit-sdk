@@ -1,31 +1,39 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
 {
+    /// <summary>
+    ///     Manages a mapping from plugins sources to plugin discoverers.
+    /// </summary>
     public sealed class DiscoverersManager
     {
         private readonly ResourceRepository<IPluginDiscovererProvider> repository;
         private readonly DiscoverersFactory discoverersFactory;
-        private readonly Dictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
+        private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
 
         public DiscoverersManager(
             ResourceRepository<IPluginDiscovererProvider> discovererRepository,
             DiscoverersFactory discoverersFactory) 
         {
             this.repository = discovererRepository;
-            this.repository.ResourcesChanged += OnNewProvidersAdded;
+            this.repository.ResourcesAdded += OnNewProvidersAdded;
             this.discoverersFactory = discoverersFactory;
-            this.sourceToDiscoverers = new Dictionary<PluginSource, List<IPluginDiscoverer>>();
+            this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
         }
 
-        private void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
+        public IEnumerable<PluginSource> PluginSources
         {
-            foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
+            get
             {
-                kvp.Value.AddRange(this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginResources));
+                return this.sourceToDiscoverers.Keys;
             }
         }
 
@@ -58,8 +66,17 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
                 }
 
                 var discoverers = this.discoverersFactory.CreateDiscoverers(source, this.repository.PluginResources).ToList();
-                this.sourceToDiscoverers.Add(source, discoverers);
+                this.sourceToDiscoverers.TryAdd(source, discoverers);
             }
         }
+
+        private void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
+        {
+            foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
+            {
+                kvp.Value.AddRange(this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginResources));
+            }
+        }
+
     }
 }

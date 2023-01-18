@@ -2,7 +2,10 @@
 // Licensed under the MIT License.
 
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery;
+using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Extensibility;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
         IEnumerable<PluginSource> PluginSources { get; }
 
         /// <summary>
-        ///     Adds a plugin source of type <typeparamref name="TSource"> to the plugins manager.
+        ///     Adds a collection of plugin sources to the plugins manager.
         /// </summary>
         /// <param name="sources">
         ///     The plugin sources to be added.
@@ -38,18 +41,20 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
         ///      A cancellation token.
         /// </param>
         /// <returns>
-        ///     A collection available plugins.
+        ///     A collection of available plugins.
         /// </returns>
         Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        ///      Gets all available plugins in their latest versions from a given source.
+        ///      Gets all available plugins in their latest versions from a given plugin source.
         /// </summary>
         /// <param name="source">
-        ///     The source to discover plugins from.
+        ///      The source to discover plugins from.
         /// </param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <returns>
+        ///      A collection of available plugins.
+        /// </returns>
         Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestFromSourceAsync(
             PluginSource source,
             CancellationToken cancellationToken);
@@ -71,7 +76,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Loads additional <see cref="IPluginResource"/>s from <paramref name="directory"/> to this plugin manager.
+        ///     Loads additional <see cref="IPluginManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
         /// </summary>
         /// <param name="directory">
         ///     The directory to load resource assemblies from.

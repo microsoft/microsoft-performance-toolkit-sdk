@@ -1,12 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Extensibility;
+
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
 {
     /// <summary>
     ///     Represents a provider that creates <see cref="IPluginDiscoverer"/> for supported <see cref="PluginSource"/>s.
     /// </summary>
-    public interface IPluginDiscovererProvider : IPluginResource
+    public interface IPluginDiscovererProvider : IPluginManagerResource
     {
         /// <summary>
         ///     Checks if the given <paramref name="source"/> is supported by this discoverer.
@@ -18,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
         ///     <c>true</c> if <paramref name="source"/> is supported by this discoverer. <c>false</c>
         ///     otherwise.
         /// </returns>
-        bool CanDiscover(PluginSource source);
+        bool IsSupported(PluginSource source);
 
         /// <summary>
         ///     Creates a discoverer for the specified plugin source.

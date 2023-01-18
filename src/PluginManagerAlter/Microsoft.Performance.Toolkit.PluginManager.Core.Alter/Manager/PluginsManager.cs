@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery;
+using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Extensibility;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Transport;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
@@ -16,12 +17,10 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
     /// <inheritdoc />
     public sealed class PluginsManager : IPluginsManager
     {
-        private readonly HashSet<PluginSource> pluginSources;
-        private readonly IResourceLoader resourceLoader;
+        private readonly IPluginManagerResourceLoader resourceLoader;
 
         private readonly ResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
         private readonly ResourceRepository<IPluginFetcher> pluginFetcherRepository;
-
 
         private readonly DiscoverersManager discoverersManager;
 
@@ -29,15 +28,18 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
         ///     Initializes a plugin manager instance.
         /// </summary>
         /// <param name="discovererProviders">
-        ///     The known providers that have already been loaded or intialized directly.
+        ///     A collection of discoverer providers.
+        /// </param>
+        /// <param name="pluginFetchers">
+        ///     A collection of plugin fetchers.
         /// </param>
         /// <param name="resourceLoader">
-        ///     A loader that can load additional <see cref="IPluginResource"/>s at run time.
+        ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
         /// </param>
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> pluginFetchers,
-            IResourceLoader resourceLoader)
+            IPluginManagerResourceLoader resourceLoader)
         {
             this.resourceLoader = resourceLoader;
             
@@ -47,8 +49,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
             this.discoverersManager = new DiscoverersManager(
                 this.discovererProviderRepository,
                 new DiscoverersFactory());
-
-            this.pluginSources = new HashSet<PluginSource>();
 
 
             this.pluginFetcherRepository = new ResourceRepository<IPluginFetcher>(pluginFetchers);
@@ -62,21 +62,19 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
         { 
             get
             {
-                return this.pluginSources;
+                return this.discoverersManager.PluginSources;
             }
         }
 
         /// <inheritdoc />
         public void ClearPluginSources()
         {
-            this.pluginSources.Clear();
             this.discoverersManager.ClearPluginSources();
         }
 
         /// <inheritdoc />
         public void AddPluginSources(IEnumerable<PluginSource> sources)
         {
-            this.pluginSources.UnionWith(sources);
             this.discoverersManager.AddPluginSources(sources);
         }
 
@@ -107,23 +105,19 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
         {
             Guard.NotNull(source, nameof(source));
 
-            if (!this.pluginSources.Contains(source))
+            if (!this.PluginSources.Contains(source))
             {
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(source))
+            var results = new List<AvailablePlugin>();
+            foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(source).AsQueryable())
             {
                 IReadOnlyCollection<AvailablePlugin> plugins = await discoverer.DiscoverPluginsLatestAsync(cancellationToken);
-
-                // Stop calling other discoverers if plugins are found from one discoverer
-                if (plugins.Any())
-                {
-                    return plugins;
-                }
+                results.AddRange(plugins);
             }
 
-            return Array.Empty<AvailablePlugin>();
+            return results;
         }
 
         /// <inheritdoc />
@@ -133,9 +127,9 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
-            if (this.pluginSources.Contains(availablePlugin.PluginSource))
+            if (this.PluginSources.Contains(availablePlugin.PluginSource))
             {
-                foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(availablePlugin.PluginSource))
+                foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(availablePlugin.PluginSource).AsQueryable())
                 {
                     IReadOnlyCollection<AvailablePlugin> plugins = await discoverer.DiscoverAllVersionsOfPlugin(
                         availablePlugin.Identity,
@@ -151,7 +145,13 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
             return Array.Empty<AvailablePlugin>();
         }
 
-
+        /// <summary>
+        ///     This is just an example of how a fetchers will be used. Will be moved to the installer.
+        /// </summary>
+        /// <param name="availablePlugin"></param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="progress"></param>
+        /// <returns></returns>
         public async Task<Stream> GetPluginPackageStreamAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
@@ -161,13 +161,13 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
 
             foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
             {
-                if (fetcher.HostTypeGuid == availablePlugin.FetcherTypeId && fetcher.CanFetch(availablePlugin))
+                if (fetcher.TypeId == availablePlugin.FetcherTypeId && fetcher.IsSupported(availablePlugin))
                 {
-                    await fetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress);
+                    return await fetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress);
                 }
             }
 
-            return null;
+            throw new InvalidOperationException("No supported fetcher found");
         }
     }
 }

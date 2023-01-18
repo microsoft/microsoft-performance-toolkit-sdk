@@ -6,19 +6,24 @@ using System;
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
 {
     /// <summary>
-    ///     A source endpoint represented by a URI for discovering plugins.
+    ///     A URI source endpoint for discovering plugins.
     /// </summary>
     public sealed class PluginSource
     {
+        /// <summary>
+        ///     Initializes a <see cref="PluginSource"/.
+        /// </summary>
+        /// <param name="uri">
+        ///     A URI that can be used to discover plugins.
+        /// </param>
         public PluginSource(Uri uri)
         {
             this.Uri = uri;
         }
 
         /// <summary>
-        ///     Gets the URI of this plugin source.
+        ///     Gets the URI to discover plugins from.
         /// </summary>
         public Uri Uri { get; }
-
     }
 }
