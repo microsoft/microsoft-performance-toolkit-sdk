@@ -161,7 +161,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Manager
 
             foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
             {
-                if (fetcher.HostTypeGuid == availablePlugin.HostTypeId && fetcher.CanFetch(availablePlugin))
+                if (fetcher.HostTypeGuid == availablePlugin.FetcherTypeId && fetcher.CanFetch(availablePlugin))
                 {
                     await fetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress);
                 }
