@@ -260,6 +260,24 @@ namespace Microsoft.Performance.SDK
             return this.bytes.GetHashCode();
         }
 
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.ToString(null, null);
+        }
+
+        /// <inheritdoc />
+        public string ToString(string format)
+        {
+            return this.ToString(format, null);
+        }
+        
+        /// <inheritdoc />
+        public override string ToString(string format, IFormatProvider formatProvider)
+        {
+            return SignedBytesFormatProvider.Singleton.Format(format, this.bytes, formatProvider);
+        }
+
         /// <summary>
         ///     Subtracts two quantities of <see cref="SignedBytes"/> from
         ///     each other.
