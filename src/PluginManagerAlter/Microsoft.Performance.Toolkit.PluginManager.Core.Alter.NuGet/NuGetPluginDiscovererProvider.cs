@@ -23,7 +23,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.NuGet
 
         public IPluginDiscoverer CreateDiscoverer(PluginSource source)
         {
-            throw new NotImplementedException();
+            return new NuGetPluginDiscoverer(source, this.CredentialProvider);
         }
 
         public bool IsSupported(PluginSource source)
