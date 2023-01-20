@@ -8,7 +8,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Packaging
     /// <summary>
     ///     Represents a read-only plugin package.
     /// </summary>
-    /// TODO: This class is WIP.
+    /// TODO: #236
     public sealed class PluginPackage
     {
         public PluginMetadata PluginMetadata { get; }
