@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
 {
@@ -14,14 +15,14 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
         ///     A collection of discoverer providers.
         /// </param>
         /// <returns></returns>
-        public IEnumerable<IPluginDiscoverer> CreateDiscoverers(
+        public async Task<IEnumerable<IPluginDiscoverer>> CreateDiscoverers(
             PluginSource pluginSource,
             IEnumerable<IPluginDiscovererProvider> providers)
         {
             IList<IPluginDiscoverer> results = new List<IPluginDiscoverer>();
             foreach (IPluginDiscovererProvider provider in providers)
             {
-                if (provider.IsSupported(pluginSource))
+                if (await provider.IsSupportedAsync(pluginSource))
                 {
                     results.Add(provider.CreateDiscoverer(pluginSource));
                 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
@@ -20,7 +21,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
         ///     <c>true</c> if <paramref name="source"/> is supported by this discoverer. <c>false</c>
         ///     otherwise.
         /// </returns>
-        bool IsSupported(PluginSource source);
+        Task<bool> IsSupportedAsync(PluginSource source);
 
         /// <summary>
         ///     Creates a discoverer for the specified plugin source.

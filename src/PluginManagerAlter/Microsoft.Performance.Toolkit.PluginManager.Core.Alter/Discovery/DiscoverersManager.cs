@@ -84,7 +84,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
         /// <param name="sources">
         ///     The plugin sources to be added.
         /// </param>
-        public void AddPluginSources(IEnumerable<PluginSource> sources)
+        public async void AddPluginSources(IEnumerable<PluginSource> sources)
         {
             Guard.NotNull(sources, nameof(sources));
 
@@ -95,8 +95,8 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
                     continue;
                 }
 
-                var discoverers = this.discoverersFactory.CreateDiscoverers(source, this.repository.PluginResources).ToList();
-                this.sourceToDiscoverers.TryAdd(source, discoverers);
+                IEnumerable<IPluginDiscoverer> discoverers = await this.discoverersFactory.CreateDiscoverers(source, this.repository.PluginResources);
+                this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
             }
         }
 
@@ -110,11 +110,11 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery
         /// <param name="e">
         ///     Event args containing the newly added discoverer providers.
         /// </param>
-        private void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
+        private async void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
         {
             foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
             {
-                kvp.Value.AddRange(this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginResources));
+                kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginResources));
             }
         }
 

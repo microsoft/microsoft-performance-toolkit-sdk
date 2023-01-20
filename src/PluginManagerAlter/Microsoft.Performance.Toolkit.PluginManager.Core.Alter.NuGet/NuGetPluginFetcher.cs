@@ -32,14 +32,16 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.NuGet
             }
         }
 
-        public bool IsSupported(AvailablePlugin plugin)
+        public async Task<bool> IsSupportedAsync(AvailablePlugin plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
             var nugetSource = new PackageSource(plugin.PluginSource.Uri.ToString());
 
             // Support http V3 and local feed as of of now
-            return IsHttpV3Feed(nugetSource) || nugetSource.IsLocal;
+            bool isSupported =  IsHttpV3Feed(nugetSource) || nugetSource.IsLocal;
+
+            return isSupported;
         }
 
         public async Task<Stream> GetPluginStreamAsync(

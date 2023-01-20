@@ -5,6 +5,7 @@ using System;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery;
 using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Credential;
 using NuGet.Configuration;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.NuGet
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.NuGet
             return new NuGetPluginDiscoverer(source, this.CredentialProvider);
         }
 
-        public bool IsSupported(PluginSource source)
+        public async Task<bool> IsSupportedAsync(PluginSource source)
         {
             if (source == null)
             {
@@ -36,7 +37,9 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.NuGet
             var nugetSource = new PackageSource(source.Uri.ToString());
 
             // Support http V3 and local feed as of of now
-            return IsHttpV3Feed(nugetSource) || nugetSource.IsLocal;
+            bool isSupported = IsHttpV3Feed(nugetSource) || nugetSource.IsLocal;
+
+            return isSupported;
         }
 
         private static bool IsHttpV3Feed(PackageSource packageSource)

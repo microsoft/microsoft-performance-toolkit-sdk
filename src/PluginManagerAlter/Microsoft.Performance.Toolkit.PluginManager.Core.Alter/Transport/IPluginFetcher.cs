@@ -24,13 +24,13 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Transport
         ///     Checks if the given <paramref name="plugin"/> is supported by this fetcher.
         /// </summary>
         /// <param name="plugin">
-        ///     The source this discover discovers plugins from.
+        ///     The available plugin containing information for the fetcher to verify if it's supported.
         /// </param>
         /// <returns>
         ///     <c>true</c> if <paramref name="plugin"/> is supported by this fetcher. <c>false</c>
         ///     otherwise.
         /// </returns>
-        bool IsSupported(AvailablePlugin plugin);
+        Task<bool> IsSupportedAsync(AvailablePlugin plugin);
 
         /// <summary>
         ///     Asynchronously gets the plugin package associated with the given <see cref="AvailablePlugin"/> and returns as a stream.
