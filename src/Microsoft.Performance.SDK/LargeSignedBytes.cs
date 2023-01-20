@@ -16,7 +16,8 @@ namespace Microsoft.Performance.SDK
         : IComparable<LargeSignedBytes>,
           IEquatable<LargeSignedBytes>,
           IComparable,
-          IPlottableGraphType
+          IPlottableGraphType,
+          IFormattable
     {
         private readonly decimal bytes;
 
@@ -272,7 +273,7 @@ namespace Microsoft.Performance.SDK
         }
         
         /// <inheritdoc />
-        public override string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider)
         {
             return LargeSignedBytesFormatProvider.Singleton.Format(format, this.bytes, formatProvider);
         }

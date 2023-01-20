@@ -18,7 +18,8 @@ namespace Microsoft.Performance.SDK
           IComparable,
           IPlottableGraphType,
           IConvertible,
-          IDiffConvertible<LargeSignedBytes>
+          IDiffConvertible<LargeSignedBytes>,
+          IFormattable
     {
         private readonly ulong bytes;
 
@@ -274,7 +275,7 @@ namespace Microsoft.Performance.SDK
         }
         
         /// <inheritdoc />
-        public override string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider)
         {
             return BytesFormatProvider.Singleton.Format(format, this.bytes, formatProvider);
         }

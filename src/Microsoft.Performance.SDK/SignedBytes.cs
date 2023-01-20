@@ -17,7 +17,8 @@ namespace Microsoft.Performance.SDK
           IEquatable<SignedBytes>,
           IComparable,
           IPlottableGraphType,
-          IConvertible
+          IConvertible,
+          IFormattable
     {
         private long bytes;
 
@@ -273,7 +274,7 @@ namespace Microsoft.Performance.SDK
         }
         
         /// <inheritdoc />
-        public override string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string format, IFormatProvider formatProvider)
         {
             return SignedBytesFormatProvider.Singleton.Format(format, this.bytes, formatProvider);
         }
