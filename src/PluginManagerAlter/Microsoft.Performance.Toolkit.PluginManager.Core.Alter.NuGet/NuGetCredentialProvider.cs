@@ -10,6 +10,7 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.NuGet
 {
     public class NuGetCredentialProvider : ICredentialProvider
     {
+        // TODO: #235 Authentication
         public async Task<ICredentials> GetAsync(PluginSource pluginSource, CancellationToken cancellationToken)
         {
             return new NuGetCredentials();

@@ -94,8 +94,6 @@ namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.NuGet
                     break;
                 }
 
-                //TODO: Validate the package contains a plugin
-
                 var pluginIdentity = new PluginIdentity(packageMetadata.Identity.Id, packageMetadata.Identity.Version.Version);
 
                 var plugin = new AvailablePlugin(

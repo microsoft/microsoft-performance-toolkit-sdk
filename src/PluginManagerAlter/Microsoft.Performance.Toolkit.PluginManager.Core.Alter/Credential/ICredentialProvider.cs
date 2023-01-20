@@ -7,6 +7,7 @@ using Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Discovery;
 
 namespace Microsoft.Performance.Toolkit.PluginManager.Core.Alter.Credential
 {
+    // TODO: #235 Authentication
     public interface ICredentialProvider
     {
         Task<ICredentials> GetAsync(PluginSource source, CancellationToken cancellationToken);
