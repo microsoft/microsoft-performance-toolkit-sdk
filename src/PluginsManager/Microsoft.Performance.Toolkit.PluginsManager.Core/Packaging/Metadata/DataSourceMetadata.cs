@@ -3,7 +3,7 @@
 
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
 {
     /// <summary>
     /// Represents the metadata of a supported data source

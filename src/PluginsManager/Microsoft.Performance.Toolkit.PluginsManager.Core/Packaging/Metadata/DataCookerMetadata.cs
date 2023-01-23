@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
 {
     /// <summary>
     /// Represents the metadata of a data cooker
