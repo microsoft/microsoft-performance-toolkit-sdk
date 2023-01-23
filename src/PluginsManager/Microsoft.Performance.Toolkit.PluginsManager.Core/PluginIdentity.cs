@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core
 {
     /// <summary>
     /// Represents the core identity of a plugin
