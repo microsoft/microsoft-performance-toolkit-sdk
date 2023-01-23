@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Performance.Toolkit.PluginManager.Core\Microsoft.Performance.Toolkit.PluginsManager.Core.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Toolkit.PluginsManager.Core\Microsoft.Performance.Toolkit.PluginsManager.Core.csproj" />
   </ItemGroup>
 
 </Project>
