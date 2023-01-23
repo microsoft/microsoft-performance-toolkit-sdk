@@ -3,9 +3,9 @@
 
 using System.Threading.Tasks;
 using System.Threading;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Credential
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Credential
 {
     // TODO: #235 Authentication
     public interface ICredentialProvider

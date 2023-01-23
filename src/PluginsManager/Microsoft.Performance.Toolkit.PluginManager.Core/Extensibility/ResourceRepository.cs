@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Extensibility
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility
 {
     /// <summary>
     ///     Represents a repository for storing a collection of <see cref=" IPluginManagerResource"/>.

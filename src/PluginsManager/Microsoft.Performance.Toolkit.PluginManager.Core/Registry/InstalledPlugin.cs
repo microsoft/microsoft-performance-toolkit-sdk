@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Registry
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
     /// <summary>
     ///     Contains the information of an plugin recorded upon installation.

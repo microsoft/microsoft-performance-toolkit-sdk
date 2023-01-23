@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core
 {
     /// <summary>
     ///     A DTO that represents a discovered plugin that is available for installation.

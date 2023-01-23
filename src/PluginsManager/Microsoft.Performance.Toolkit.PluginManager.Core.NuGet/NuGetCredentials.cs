@@ -1,6 +1,6 @@
-﻿using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
+﻿using Microsoft.Performance.Toolkit.PluginsManager.Core.Credential;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
     // TODO: #235 Authentication
     public class NuGetCredentials : ICredentials

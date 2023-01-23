@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Manager
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 {
     /// <summary>
     ///     Contains logic for discovering, installing, uninstalling and updating plugins.

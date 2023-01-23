@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Discovery
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
 {
     /// <summary>
     ///     Represents a provider that creates <see cref="IPluginDiscoverer"/> for supported <see cref="PluginSource"/>s.

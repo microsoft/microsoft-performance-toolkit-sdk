@@ -7,18 +7,18 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Transport;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
 using NuGet.Configuration;
 using NuGet.Packaging.Core;
 using NuGet.Packaging;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using NuGet.Protocol;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using System.Linq;
 using NuGet.Common;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
     public sealed class NuGetPluginFetcher : IPluginFetcher
     {

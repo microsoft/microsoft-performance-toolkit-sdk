@@ -3,10 +3,10 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Credential;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Credential;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.NuGet
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
     public class NuGetCredentialProvider : ICredentialProvider
     {

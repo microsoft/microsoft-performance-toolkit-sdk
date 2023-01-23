@@ -31,9 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.Toolk
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PluginsManager", "PluginsManager", "{F5125921-DE2A-43BC-89C6-8584E2F23867}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.Toolkit.PluginManager.Core", "PluginsManager\Microsoft.Performance.Toolkit.PluginManager.Core\Microsoft.Performance.Toolkit.PluginManager.Core.csproj", "{421560CD-620A-439D-8C92-3032077E219C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.Toolkit.PluginsManager.Core", "PluginsManager\Microsoft.Performance.Toolkit.PluginManager.Core\Microsoft.Performance.Toolkit.PluginsManager.Core.csproj", "{421560CD-620A-439D-8C92-3032077E219C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.Toolkit.PluginManager.Core.NuGet", "PluginsManager\Microsoft.Performance.Toolkit.PluginManager.Core.NuGet\Microsoft.Performance.Toolkit.PluginManager.Core.NuGet.csproj", "{B7EECBE3-4C1E-459F-ACFF-3A8EF724AF2E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet", "PluginsManager\Microsoft.Performance.Toolkit.PluginManager.Core.NuGet\Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet.csproj", "{B7EECBE3-4C1E-459F-ACFF-3A8EF724AF2E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

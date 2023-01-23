@@ -5,9 +5,9 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.Toolkit.PluginManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Transport
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Transport
 {
     /// <summary>
     ///     Represents a fetcher that is capable of fetching the plugin package from a supported <see cref="AvailablePlugin"/>.

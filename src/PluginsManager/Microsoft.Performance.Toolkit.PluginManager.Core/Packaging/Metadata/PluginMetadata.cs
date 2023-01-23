@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Performance.Toolkit.PluginManager.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
 {
     /// <summary>
     /// Represents the metadata of a plugin
