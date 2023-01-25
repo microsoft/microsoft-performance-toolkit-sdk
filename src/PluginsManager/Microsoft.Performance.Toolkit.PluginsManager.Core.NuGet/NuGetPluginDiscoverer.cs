@@ -70,7 +70,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
                         packageMetadata.Title,
                         packageMetadata.Description,
                         this.pluginSource.Uri,
-                        Guid.Parse(PluginManagerConstants.NuGet));
+                        Guid.Parse(PluginsManagerConstants.NuGet));
 
                     result.Add(plugin);
                 }
@@ -105,7 +105,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
                         packageMetadata.Title,
                         packageMetadata.Description,
                         this.pluginSource.Uri,
-                        Guid.Parse(PluginManagerConstants.NuGet));
+                        Guid.Parse(PluginsManagerConstants.NuGet));
 
                 result.Add(plugin);
             }

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
@@ -11,28 +11,52 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
     /// </summary>
     public sealed class InstalledPlugin
     {
-        /// <summary>
-        ///     Gets the identity of this plugin.
-        /// </summary>
-        public PluginIdentity Identity { get; }
+        [JsonConstructor]
+        public InstalledPlugin(
+            string id,
+            Version version,
+            Uri sourceUri,
+            string displayName,
+            string description,
+            string installPath,
+            DateTimeOffset installedOn)
+        {
+            this.Id = id;
+            this.Version = version;
+            this.SourceUri = sourceUri;
+            this.DisplayName = displayName;
+            this.Description = description;
+            this.InstallPath = installPath;
+            this.InstalledOn = installedOn;
+        }
 
         /// <summary>
-        ///     Gets the souce where this plugin is discovered.
+        ///     Gets the identifier of this plugin.
         /// </summary>
-        public PluginSource PluginSource { get; }
+        public string Id { get; }
 
         /// <summary>
-        ///     Gets the human-readable name of this plugin.
+        ///     Gets the version of this plugin.
+        /// </summary>
+        public Version Version { get; }
+
+        /// <summary>
+        ///     Gets the source Uri of this plugin.
+        /// </summary>
+        public Uri SourceUri { get; }
+
+        /// <summary>
+        ///     Gets or sets the human-readable name of this plugin.
         /// </summary>
         public string DisplayName { get; }
 
         /// <summary>
-        ///     Gets the user friendly description of this plugin.
+        ///     Gets or sets the user friendly description of this plugin.
         /// </summary>   
         public string Description { get; }
 
         /// <summary>
-        ///     Gets the path to where the plugin is installed.
+        ///     Gets or sets the path to where the plugin is installed.
         /// </summary>
         public string InstallPath { get; }
 

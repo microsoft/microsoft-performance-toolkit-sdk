@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
@@ -23,6 +26,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         private readonly ResourceRepository<IPluginFetcher> pluginFetcherRepository;
 
         private readonly DiscoverersManager discoverersManager;
+
+        private readonly PluginInstaller pluginInstaller;
 
         /// <summary>
         ///     Initializes a plugin manager instance.
@@ -39,7 +44,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> pluginFetchers,
-            IPluginManagerResourceLoader resourceLoader)
+            IPluginManagerResourceLoader resourceLoader,
+            PluginRegistry pluginRegistry)
         {
             this.resourceLoader = resourceLoader;
             
@@ -55,6 +61,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             this.resourceLoader.Subscribe(this.discovererProviderRepository);
             this.resourceLoader.Subscribe(this.pluginFetcherRepository);
+
+            this.pluginInstaller = new PluginInstaller(pluginRegistry);
         }
 
         /// <inheritdoc />
@@ -169,5 +177,77 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             throw new InvalidOperationException("No supported fetcher found");
         }
+
+        /// <inheritdoc />
+        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> InstallAvailablePlugin(
+            AvailablePlugin availablePlugin,
+            string installationDir,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            Guard.NotNull(availablePlugin, nameof(availablePlugin));
+
+            IPluginFetcher pluginFetcher = null;
+            foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
+            {
+                if (fetcher.TypeId == availablePlugin.FetcherTypeId && await fetcher.IsSupportedAsync(availablePlugin))
+                {
+                    pluginFetcher = fetcher;
+                }
+            }
+            if (pluginFetcher == null)
+            {
+                throw new InvalidOperationException("No supported fetcher found");
+            }
+
+            using (Stream stream = await pluginFetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress))
+            using (var pluginPackage = new PluginPackage(stream))
+            {
+                await this.pluginInstaller.InstallPluginPackage(
+                    pluginPackage,
+                    installationDir,
+                    availablePlugin.PluginPackageUri,
+                    cancellationToken,
+                    progress);
+            }
+
+            return true;
+        }
+
+        public async Task<bool> InstallLocalPlugin(
+            string pluginPackagePath,
+            string installationDir,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
+            Guard.NotNull(installationDir, nameof(installationDir));
+
+            string packageFullPath = Path.GetFullPath(pluginPackagePath);
+
+            using (var pluginPackage = new PluginPackage(pluginPackagePath))
+            {
+                await this.pluginInstaller.InstallPluginPackage(
+                    pluginPackage,
+                    installationDir,
+                    new Uri(packageFullPath),
+                    cancellationToken,
+                    progress);
+            }
+
+            return true;
+        }
+
+        public Task<bool> InstallPlugin(AvailablePlugin availablePlugin, string installationDir, CancellationToken cancellationToken, IProgress<int> progress)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
+

@@ -3,6 +3,8 @@
 
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,7 +38,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     Gets all available plugins in their latest versions.
         /// </summary>
         /// <param name="cancellationToken">
-        ///      A cancellation token.
+        ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
         ///     A collection of available plugins.
@@ -49,7 +51,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <param name="source">
         ///      The source to discover plugins from.
         /// </param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
         /// <returns>
         ///      A collection of available plugins.
         /// </returns>
@@ -64,7 +68,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     A discovered plugin.
         /// </param>
         /// <param name="cancellationToken">
-        ///     A cancellation token.
+        ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
         ///     A collection of available plugins.
@@ -80,5 +84,38 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     The directory to load resource assemblies from.
         /// </param>
         void LoadAdditionalPluginResources(string directory);
+
+        /// <summary>
+        ///     Gets all installed plugins
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A collection of installed plugins.
+        /// </returns>
+        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Install a plugin to a given directory.
+        /// </summary>
+        /// <param name="availablePlugin">
+        ///     The available plugin to be installed.
+        /// </param>
+        /// <param name="installationDir">
+        ///     The directory where the plugin will be installed.
+        /// </param>
+        /// <param name="cancellationToken"></param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin package downloading.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> InstallPlugin(
+            AvailablePlugin availablePlugin,
+            string installationDir,
+            CancellationToken cancellationToken,
+            IProgress<int> progress);
     }
 }

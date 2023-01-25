@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
     public sealed class NuGetPluginFetcher : IPluginFetcher
     {
-        private static Guid NuGetId = Guid.Parse(PluginManagerConstants.NuGet);
+        private static Guid NuGetId = Guid.Parse(PluginsManagerConstants.NuGet);
         
         public Guid TypeId
         {
