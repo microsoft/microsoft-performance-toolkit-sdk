@@ -185,7 +185,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         }
 
         /// <inheritdoc />
-        public async Task<bool> InstallAvailablePlugin(
+        public async Task<bool> InstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             string installationDir,
             CancellationToken cancellationToken,
@@ -193,34 +193,22 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
-            IPluginFetcher pluginFetcher = null;
-            foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
-            {
-                if (fetcher.TypeId == availablePlugin.FetcherTypeId && await fetcher.IsSupportedAsync(availablePlugin))
-                {
-                    pluginFetcher = fetcher;
-                }
-            }
-            if (pluginFetcher == null)
-            {
-                throw new InvalidOperationException("No supported fetcher found");
-            }
-
+            IPluginFetcher pluginFetcher = await GetPluginFetcher(availablePlugin);
+            
             using (Stream stream = await pluginFetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress))
             using (var pluginPackage = new PluginPackage(stream))
             {
-                await this.pluginInstaller.InstallPluginPackage(
+                return await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
                     installationDir,
                     availablePlugin.PluginPackageUri,
                     cancellationToken,
                     progress);
             }
-
-            return true;
         }
 
-        public async Task<bool> InstallLocalPlugin(
+        /// <inheritdoc />
+        public async Task<bool> InstallLocalPluginAsync(
             string pluginPackagePath,
             string installationDir,
             CancellationToken cancellationToken,
@@ -233,7 +221,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             using (var pluginPackage = new PluginPackage(pluginPackagePath))
             {
-                await this.pluginInstaller.InstallPluginPackage(
+                await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
                     installationDir,
                     new Uri(packageFullPath),
@@ -244,9 +232,56 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             return true;
         }
 
-        public Task<bool> InstallPlugin(AvailablePlugin availablePlugin, string installationDir, CancellationToken cancellationToken, IProgress<int> progress)
+        /// <inheritdoc />
+        public async Task<bool> UninstallPluginAsync(
+            InstalledPlugin installedPlugin,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
         {
-            throw new NotImplementedException();
+            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+
+            return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> UpdatePluginAsync(
+            InstalledPlugin installedPlugin,
+            AvailablePlugin targetPlugin,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+            Guard.NotNull(targetPlugin, nameof(targetPlugin));
+
+            if (installedPlugin.Id != targetPlugin.Identity.Id || installedPlugin.Version == targetPlugin.Identity.Version)
+            {
+                throw new ArgumentException("Target plugin must have a same id but different version.");
+            }
+
+            IPluginFetcher pluginFetcher = await GetPluginFetcher(targetPlugin);
+
+            using (Stream stream = await pluginFetcher.GetPluginStreamAsync(targetPlugin, cancellationToken, progress))
+            using (var pluginPackage = new PluginPackage(stream))
+            {
+                return await this.pluginInstaller.UpdatePluginAsync(
+                    installedPlugin,
+                    pluginPackage,
+                    targetPlugin.PluginSource.Uri,
+                    cancellationToken,
+                    progress);
+            }
+        }
+        private async Task<IPluginFetcher> GetPluginFetcher(AvailablePlugin availablePlugin)
+        {
+            foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
+            {
+                if (fetcher.TypeId == availablePlugin.FetcherTypeId && await fetcher.IsSupportedAsync(availablePlugin))
+                {
+                    return fetcher;
+                }
+            }
+
+            throw new InvalidOperationException("No supported fetcher found");
         }
     }
 }

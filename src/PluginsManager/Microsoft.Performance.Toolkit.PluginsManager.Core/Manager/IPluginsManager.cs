@@ -97,7 +97,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Install a plugin to a given directory.
+        ///     Installs an available plugin to a given directory.
         /// </summary>
         /// <param name="availablePlugin">
         ///     The available plugin to be installed.
@@ -105,16 +105,86 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <param name="installationDir">
         ///     The directory where the plugin will be installed.
         /// </param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
         /// <param name="progress">
-        ///     Indicates the progress of plugin package downloading.
+        ///     Indicates the progress of plugin installation.
         /// </param>
         /// <returns>
         ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
         /// </returns>
-        Task<bool> InstallPlugin(
+        Task<bool> InstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             string installationDir,
+            CancellationToken cancellationToken,
+            IProgress<int> progress);
+
+        /// <summary>
+        ///     Installs a local plugin package to a given directory.
+        /// </summary>
+        /// <param name="pluginPackagePath">
+        ///     The path to the plugin package to be installed.
+        /// </param>
+        /// <param name="installationDir">
+        ///      The directory where the plugin will be installed.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin installation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> InstallLocalPluginAsync(
+           string pluginPackagePath,
+           string installationDir,
+           CancellationToken cancellationToken,
+           IProgress<int> progress);
+
+        /// <summary>
+        ///     Uninstalls a plugin.
+        /// </summary>
+        /// <param name="installedPlugin">
+        ///     The plugin to be uninstalled.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin uninstallation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> UninstallPluginAsync(
+            InstalledPlugin installedPlugin,
+            CancellationToken cancellationToken,
+            IProgress<int> progress);
+
+        /// <summary>
+        ///     Updates the plugin to another version.
+        /// </summary>
+        /// <param name="installedPlugin">
+        ///     The currently installed plugin.
+        /// </param>
+        /// <param name="targetPlugin">
+        ///     The available plugin to update to.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin uninstallation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin has been successfully updated. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> UpdatePluginAsync(
+            InstalledPlugin installedPlugin,
+            AvailablePlugin targetPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
     }

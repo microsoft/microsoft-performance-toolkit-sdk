@@ -9,7 +9,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
     /// <summary>
     ///     Contains the information of an plugin recorded upon installation.
     /// </summary>
-    public sealed class InstalledPlugin
+    public sealed class InstalledPlugin : IEquatable<InstalledPlugin>
     {
         [JsonConstructor]
         public InstalledPlugin(
@@ -64,5 +64,22 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
         ///     Gets the timestamp when the plugin is installed.
         /// </summary>
         public DateTimeOffset InstalledOn { get; }
+
+        /// <inheritdoc />
+        public bool Equals(InstalledPlugin other)
+        {
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+                
+            if (other == null)
+            {
+                return false;
+            }
+
+            return string.Equals(this.Id, this.Id, StringComparison.OrdinalIgnoreCase) &&
+                   Version.Equals(this.Version, other.Version);
+        }
     }
 }

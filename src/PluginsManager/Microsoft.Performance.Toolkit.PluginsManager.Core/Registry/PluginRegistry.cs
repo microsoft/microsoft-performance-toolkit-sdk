@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Performance.SDK;
 using System.Threading.Tasks;
 using System.Threading;
@@ -14,138 +12,91 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
     public sealed class PluginRegistry
     {
+        private static readonly string registryFileName = "installedPlugins.json";
+
         public PluginRegistry(string registryRoot)
         {
             this.RegistryRoot = registryRoot;
+            this.RegistryFilePath = Path.Combine(registryRoot, registryFileName);
         }
 
         public string RegistryRoot { get; }
 
-        public Task RegisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
+        public string RegistryFilePath { get; }
+
+        public async Task RegisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
-            var packages = GetInstalledPlugins(this.RegistryRoot);
+            List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
 
-            packages.RemoveAll(p => PluginEquals(p, plugin));
-            packages.Add(plugin);
+            installedPlugins.RemoveAll(p => p.Id == plugin.Id);
+            installedPlugins.Add(plugin);
 
-            WriteInstalledPlugins(packages);
-            return Task.CompletedTask;
+            await WriteInstalledPlugins(installedPlugins);
         }
 
-        public Task<bool> UnregisterPluginAsync(InstalledPlugin package, CancellationToken cancellationToken)
+        public async Task<bool> UnregisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
         {
-            if (package == null)
-                throw new ArgumentNullException(nameof(package));
+            Guard.NotNull(plugin, nameof(plugin));
 
-            var packages = GetInstalledPlugins(this.RegistryRoot);
+            List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
 
-            bool removed = packages.RemoveAll(p => PluginEquals(p, package)) > 0;
-            if (removed)
-                WriteInstalledPlugins(packages);
-
-            return Task.FromResult(removed);
-        }
-
-        public Task<IReadOnlyList<InstalledPlugin>> GetInstalledPluginsAsync()
-        {
-            return Task.FromResult<IReadOnlyList<InstalledPlugin>>(GetInstalledPlugins(RegistryRoot));
-        }
-
-        public Task<Stream> TryOpenFromCacheAsync(PluginIdentity pluginId, CancellationToken cancellationToken = default)
-        {
-            Guard.NotNull(pluginId, nameof(pluginId));
-
-            var fileName = this.GetCachedPackagePath(pluginId);
-            if (!File.Exists(fileName))
-                return Task.FromResult<Stream>(null);
-
-            try
+            int removed = installedPlugins.RemoveAll(p => p.Id == plugin.Id);
+            if (removed == 0)
             {
-                return Task.FromResult<Stream>(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete));
+                return false;
             }
-            catch (IOException)
-            {
-                // The File.Exists check above should handle most instances of this, but there is still
-                // the possibility of a race condition if the file gets deleted before it is opened.
-                return Task.FromResult<Stream>(null);
-            }
+
+            await WriteInstalledPlugins(installedPlugins);
+            return true;
         }
 
-        public async Task WriteToCacheAsync(PluginIdentity pluginIdentity, Stream pluginPackageStream, CancellationToken cancellationToken = default)
+        public Task<List<InstalledPlugin>> GetInstalledPlugins()
         {
-            Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
-            Guard.NotNull(pluginPackageStream, nameof(pluginPackageStream));
+            return ReadInstalledPlugins();
+        }
 
-            var fileName = this.GetCachedPackagePath(pluginIdentity, true);
-            try
+        public async Task<List<InstalledPlugin>> GetInstalledPluginsAsync()
+        {
+            return await ReadInstalledPlugins();
+        }
+
+        public Task<bool> UpdatePlugin(InstalledPlugin currentPlugin, InstalledPlugin updatedPlugin)
+        {
+            // TODO: Add implementation
+
+            return Task.FromResult(true);
+        }
+
+        private Task<List<InstalledPlugin>> ReadInstalledPlugins()
+        {
+            if (!File.Exists(this.RegistryFilePath))
             {
-                using (var fileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan))
-                {
-                    await pluginPackageStream.CopyToAsync(fileStream, 81920, cancellationToken);
-                }
+                return Task.FromResult(new List<InstalledPlugin>());
             }
-            catch (OperationCanceledException)
+            
+            using (var configStream = new FileStream(this.RegistryFilePath, FileMode.Open, FileAccess.Read))
             {
-                File.Delete(fileName);
-                throw;
+                // TODO: Refatcor to a serialization/deserialization class
+                return JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(configStream).AsTask();
             }
         }
 
-        private static List<InstalledPlugin> GetInstalledPlugins(string registryRoot)
+        private Task WriteInstalledPlugins(IEnumerable<InstalledPlugin> installedPlugins)
         {
-            var fileName = Path.Combine(registryRoot, "installedPlugins.json");
+            Directory.CreateDirectory(this.RegistryRoot);
+            string fileName = Path.Combine(this.RegistryRoot, registryFileName);
 
-            if (!File.Exists(fileName))
+            using (var registryFileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
-                return new List<InstalledPlugin>();
-            }
-            using (var configStream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
-            using (var doc = JsonDocument.Parse(configStream))
-            {
-                return doc.RootElement.EnumerateArray()
-                    .Select(e => JsonSerializer.Deserialize<InstalledPlugin>(e.GetRawText()))
-                    .ToList();
-            }
-        }
-
-        private void WriteInstalledPlugins(IEnumerable<InstalledPlugin> installedPlugins)
-        {
-            Directory.CreateDirectory(RegistryRoot);
-            var fileName = Path.Combine(RegistryRoot, "installedPlugins.json");
-
-            using (var configStream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
-            {
-                JsonSerializer.Serialize(
-                   configStream,
+                // TODO: Refatcor to a serialization/deserialization class
+                return JsonSerializer.SerializeAsync(
+                   registryFileStream,
                    installedPlugins,
-                   typeof(Dictionary<string, object>[]),
+                   typeof(InstalledPlugin[]),
                    new JsonSerializerOptions { WriteIndented = true });
             }
-        }
-
-        private string GetCachedPackagePath(PluginIdentity id, bool ensureDirectory = false)
-        {
-            var directoryName = "$" + id.Id;
-
-            var fullPath = Path.Combine(this.RegistryRoot, "PluginsCache", directoryName);
-            if (ensureDirectory)
-                Directory.CreateDirectory(fullPath);
-
-            var fileName = Path.Combine(fullPath, $"{id.Id}-{id.Version}.plugin");
-
-            return Path.Combine(fullPath, fileName);
-        }
-
-        private static bool PluginEquals(InstalledPlugin p1, InstalledPlugin p2)
-        {
-            if (ReferenceEquals(p1, p2))
-                return true;
-            if (p1 is null || p2 is null)
-                return false;
-
-            return string.Equals(p1.Id, p2.Id, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
