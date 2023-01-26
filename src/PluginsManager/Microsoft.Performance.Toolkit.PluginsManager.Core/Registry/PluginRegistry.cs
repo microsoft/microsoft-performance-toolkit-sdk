@@ -7,24 +7,29 @@ using Microsoft.Performance.SDK;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Text.Json;
+using System;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
-    public sealed class PluginRegistry
+    // TODO: #238 Error handling
+    public sealed class PluginRegistry : IDisposable
     {
         private static readonly string registryFileName = "installedPlugins.json";
+        private static readonly string lockFileName = ".lock";
+        private readonly string registryFilePath;
+        private readonly string lockFilePath;
+        private bool disposedValue;
 
         public PluginRegistry(string registryRoot)
         {
             this.RegistryRoot = registryRoot;
-            this.RegistryFilePath = Path.Combine(registryRoot, registryFileName);
+            this.registryFilePath = Path.Combine(registryRoot, registryFileName);
+            this.lockFilePath = Path.Combine(registryRoot, lockFileName);
         }
 
         public string RegistryRoot { get; }
 
-        public string RegistryFilePath { get; }
-
-        public async Task RegisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
+        public async Task<bool> RegisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
@@ -34,6 +39,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             installedPlugins.Add(plugin);
 
             await WriteInstalledPlugins(installedPlugins);
+            return true;
         }
 
         public async Task<bool> UnregisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
@@ -62,21 +68,39 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             return await ReadInstalledPlugins();
         }
 
-        public Task<bool> UpdatePlugin(InstalledPlugin currentPlugin, InstalledPlugin updatedPlugin)
+        public async Task<bool> UpdatePlugin(InstalledPlugin currentPlugin, InstalledPlugin updatedPlugin)
         {
             // TODO: Add implementation
 
-            return Task.FromResult(true);
+            Guard.NotNull(currentPlugin, nameof(currentPlugin));
+            Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
+
+            List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
+            installedPlugins.RemoveAll(p => p.Id == currentPlugin.Id);
+            installedPlugins.Add(updatedPlugin);
+
+            await WriteInstalledPlugins(installedPlugins);
+            return true;
+        }
+
+        public async Task AcquireLock(CancellationToken cancellationToken)
+        {
+            // TODO: Implement
+        }
+
+        public async void ReleaseLock()
+        {
+            // TODO: Implement
         }
 
         private Task<List<InstalledPlugin>> ReadInstalledPlugins()
         {
-            if (!File.Exists(this.RegistryFilePath))
+            if (!File.Exists(this.registryFilePath))
             {
                 return Task.FromResult(new List<InstalledPlugin>());
             }
             
-            using (var configStream = new FileStream(this.RegistryFilePath, FileMode.Open, FileAccess.Read))
+            using (var configStream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read))
             {
                 // TODO: Refatcor to a serialization/deserialization class
                 return JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(configStream).AsTask();
@@ -97,6 +121,28 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
                    typeof(InstalledPlugin[]),
                    new JsonSerializerOptions { WriteIndented = true });
             }
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

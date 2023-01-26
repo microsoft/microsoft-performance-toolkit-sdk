@@ -40,8 +40,18 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                 cancellationToken,
                 progress);
 
-            await this.pluginRegistry.RegisterPluginAsync(installedPlugin, CancellationToken.None);
-            return true;
+            bool success = false;
+            await this.pluginRegistry.AcquireLock(cancellationToken);
+            try
+            {
+                success = await this.pluginRegistry.RegisterPluginAsync(installedPlugin, CancellationToken.None);
+            }
+            finally
+            {
+                this.pluginRegistry.ReleaseLock();
+            }
+
+            return success;
         }
 
         public async Task<bool> UninstallPluginAsync(
@@ -51,7 +61,17 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            bool success = await this.pluginRegistry.UnregisterPluginAsync(installedPlugin, cancellationToken);
+            await this.pluginRegistry.AcquireLock(cancellationToken);
+            bool success = false;
+            try
+            {
+                await this.pluginRegistry.UnregisterPluginAsync(installedPlugin, cancellationToken);
+            }
+            finally
+            {
+                this.pluginRegistry.ReleaseLock();
+            }
+
             if (success)
             {
                 //TODO: Remove plugin from file system if not loaded anywhere.
@@ -79,7 +99,17 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                 cancellationToken,
                 progress);
 
-            bool success = await this.pluginRegistry.UpdatePlugin(currentPlugin, newInstalledPlugin);
+            await this.pluginRegistry.AcquireLock(cancellationToken);
+            bool success = false;
+            try
+            {
+                success = await this.pluginRegistry.UpdatePlugin(currentPlugin, newInstalledPlugin);
+            }
+            finally
+            {
+                this.pluginRegistry.ReleaseLock();
+            }
+                
             if (success)
             {
                 //TODO: Remove plugin from file system if not loaded anywhere.
