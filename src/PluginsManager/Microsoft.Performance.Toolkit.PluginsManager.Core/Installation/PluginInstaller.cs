@@ -21,9 +21,17 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             this.pluginRegistry = pluginRegistry;
         }
 
-        public async Task<IEnumerable<InstalledPlugin>> GetAllInstalledPlugins()
+        public async Task<IReadOnlyCollection<InstalledPlugin>> GetAllInstalledPlugins(CancellationToken cancellationToken)
         {
-            return await this.pluginRegistry.GetInstalledPluginsAsync();
+            await this.pluginRegistry.AcquireLock(cancellationToken);
+            try
+            {
+                return await this.pluginRegistry.GetInstalledPluginsAsync();
+            }
+            finally
+            {
+                this.pluginRegistry.ReleaseLock();
+            }          
         }
 
         public async Task<bool> InstallPluginAsync(
@@ -74,7 +82,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
             if (success)
             {
-                //TODO: Remove plugin from file system if not loaded anywhere.
+                //TODO: Mark these files for clean up.
             }
 
             return true;
@@ -116,6 +124,16 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     Checks if the plugin is still being installed in the registry.
+        /// </summary>
+        /// <param name="installedPlugin"></param>
+        /// <returns></returns>
+        public Task<bool> VerifyInstalled(InstalledPlugin installedPlugin)
+        {
+            return Task.FromResult(true);
         }
 
         private async Task<InstalledPlugin> InstallPluginPackageCoreAsync(

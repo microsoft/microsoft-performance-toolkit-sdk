@@ -12,6 +12,7 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
 
@@ -28,6 +29,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         private readonly DiscoverersManager discoverersManager;
 
         private readonly PluginInstaller pluginInstaller;
+        private readonly PluginRegistry pluginRegistry;
 
         /// <summary>
         ///     Initializes a plugin manager instance.
@@ -153,35 +155,10 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             return Array.Empty<AvailablePlugin>();
         }
 
-        /// <summary>
-        ///     This is just an example of how a fetchers will be used. Will be moved to the installer.
-        /// </summary>
-        /// <param name="availablePlugin"></param>
-        /// <param name="cancellationToken"></param>
-        /// <param name="progress"></param>
-        /// <returns></returns>
-        public async Task<Stream> GetPluginPackageStreamAsync(
-            AvailablePlugin availablePlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
-        {
-            Guard.NotNull(availablePlugin, nameof(availablePlugin));
-
-            foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
-            {
-                if (fetcher.TypeId == availablePlugin.FetcherTypeId && await fetcher.IsSupportedAsync(availablePlugin))
-                {
-                    return await fetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress);
-                }
-            }
-
-            throw new InvalidOperationException("No supported fetcher found");
-        }
-
         /// <inheritdoc />
-        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return await this.pluginInstaller.GetAllInstalledPlugins(cancellationToken);
         }
 
         /// <inheritdoc />
@@ -271,6 +248,33 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                     progress);
             }
         }
+
+        public async Task<PluginMetadata> GetInstalledPluginMetadataAsync(InstalledPlugin installedPlugin, CancellationToken cancellationToken)
+        {
+            await this.pluginRegistry.AcquireLock(cancellationToken);
+            try
+            {
+                if (!await this.pluginInstaller.VerifyInstalled(installedPlugin))
+                {
+                    throw new InvalidOperationException($"Plugin {installedPlugin.DisplayName} is not longer installed");
+                }
+
+                string metaDataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
+                using (var stream = new FileStream(metaDataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    if (!PluginMetadata.TryParse(stream, out PluginMetadata metadata))
+                    {
+                        throw new InvalidDataException($"Failed to read metadata from {metaDataFileName}");              
+                    }
+                    return metadata;
+                }
+            }
+            finally
+            {
+                this.pluginRegistry.ReleaseLock();
+            }
+        }
+
         private async Task<IPluginFetcher> GetPluginFetcher(AvailablePlugin availablePlugin)
         {
             foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)

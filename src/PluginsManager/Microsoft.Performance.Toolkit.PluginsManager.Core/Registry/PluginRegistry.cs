@@ -15,13 +15,14 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
     public sealed class PluginRegistry : IDisposable
     {
         private static readonly string registryFileName = "installedPlugins.json";
-        private static readonly string lockFileName = ".lock";
+        private static readonly string lockFileName = ".lockRegistry";
         private readonly string registryFilePath;
         private readonly string lockFilePath;
         private bool disposedValue;
 
         public PluginRegistry(string registryRoot)
         {
+            // TODO: Create a backup registry
             this.RegistryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.lockFilePath = Path.Combine(registryRoot, lockFileName);

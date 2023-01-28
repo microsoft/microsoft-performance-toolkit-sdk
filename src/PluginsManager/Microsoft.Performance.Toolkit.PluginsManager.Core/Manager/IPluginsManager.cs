@@ -3,6 +3,7 @@
 
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
 using System;
 using System.Collections.Generic;
@@ -187,5 +188,19 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             AvailablePlugin targetPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
+
+        /// <summary>
+        ///     Gets metadata of an installed plugin.
+        /// </summary>
+        /// <param name="installedPlugin">
+        ///     An installed plugin    
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     Metadata of the given plugin.
+        /// </returns>
+        Task<PluginMetadata> GetInstalledPluginMetadataAsync(InstalledPlugin installedPlugin, CancellationToken cancellationToken);
     }
 }
