@@ -64,6 +64,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             this.resourceLoader.Subscribe(this.discovererProviderRepository);
             this.resourceLoader.Subscribe(this.pluginFetcherRepository);
 
+            this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
         }
 

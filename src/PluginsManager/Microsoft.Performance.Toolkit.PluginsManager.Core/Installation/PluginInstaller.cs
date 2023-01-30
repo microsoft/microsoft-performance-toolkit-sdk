@@ -21,17 +21,13 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             this.pluginRegistry = pluginRegistry;
         }
 
-        public async Task<IReadOnlyCollection<InstalledPlugin>> GetAllInstalledPlugins(CancellationToken cancellationToken)
+        public async Task<IReadOnlyCollection<InstalledPlugin>> GetAllInstalledPlugins(
+            CancellationToken cancellationToken)
         {
-            await this.pluginRegistry.AcquireLock(cancellationToken);
-            try
+            using (this.pluginRegistry.UseLock(cancellationToken))
             {
                 return await this.pluginRegistry.GetInstalledPluginsAsync();
-            }
-            finally
-            {
-                this.pluginRegistry.ReleaseLock();
-            }          
+            }  
         }
 
         public async Task<bool> InstallPluginAsync(
@@ -41,25 +37,17 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            InstalledPlugin installedPlugin = await InstallPluginPackageCoreAsync(
-                pluginPackage,
-                installationDir,
-                sourceUri,
-                cancellationToken,
-                progress);
-
-            bool success = false;
-            await this.pluginRegistry.AcquireLock(cancellationToken);
-            try
+            using (this.pluginRegistry.UseLock(cancellationToken))
             {
-                success = await this.pluginRegistry.RegisterPluginAsync(installedPlugin, CancellationToken.None);
-            }
-            finally
-            {
-                this.pluginRegistry.ReleaseLock();
-            }
+                InstalledPlugin installedPlugin = await InstallPluginPackageCoreAsync(
+                    pluginPackage,
+                    installationDir,
+                    sourceUri,
+                    cancellationToken,
+                    progress);
 
-            return success;
+                return await this.pluginRegistry.RegisterPluginAsync(installedPlugin, CancellationToken.None);
+            }
         }
 
         public async Task<bool> UninstallPluginAsync(
@@ -69,23 +57,16 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            await this.pluginRegistry.AcquireLock(cancellationToken);
-            bool success = false;
-            try
+            using (this.pluginRegistry.UseLock(cancellationToken))
             {
-                await this.pluginRegistry.UnregisterPluginAsync(installedPlugin, cancellationToken);
-            }
-            finally
-            {
-                this.pluginRegistry.ReleaseLock();
-            }
+                bool success = await this.pluginRegistry.UnregisterPluginAsync(installedPlugin, cancellationToken);
+                if (success)
+                {
+                    //TODO: Mark these files for clean up.
+                }
 
-            if (success)
-            {
-                //TODO: Mark these files for clean up.
+                return success;
             }
-
-            return true;
         }
 
         public async Task<bool> UpdatePluginAsync(
@@ -100,30 +81,23 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
             string installationDir = Directory.GetParent(currentPlugin.InstallPath)?.FullName;
 
-            InstalledPlugin newInstalledPlugin = await InstallPluginPackageCoreAsync(
-                targetPlugin,
-                installationDir,
-                sourceUri,
-                cancellationToken,
-                progress);
+            using (this.pluginRegistry.UseLock(cancellationToken))
+            {
+                InstalledPlugin newInstalledPlugin = await InstallPluginPackageCoreAsync(
+                  targetPlugin,
+                  installationDir,
+                  sourceUri,
+                  cancellationToken,
+                  progress);
 
-            await this.pluginRegistry.AcquireLock(cancellationToken);
-            bool success = false;
-            try
-            {
-                success = await this.pluginRegistry.UpdatePlugin(currentPlugin, newInstalledPlugin);
-            }
-            finally
-            {
-                this.pluginRegistry.ReleaseLock();
-            }
-                
-            if (success)
-            {
-                //TODO: Remove plugin from file system if not loaded anywhere.
-            }
+                bool success = await this.pluginRegistry.UpdatePlugin(currentPlugin, newInstalledPlugin);
+                if (success)
+                {
+                    //TODO: Mark these files for clean up.
+                }
 
-            return true;
+                return success;
+            }
         }
 
         /// <summary>

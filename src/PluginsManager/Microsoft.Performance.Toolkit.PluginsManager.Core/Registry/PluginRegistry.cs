@@ -1,27 +1,33 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Performance.SDK;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Text.Json;
-using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
     // TODO: #238 Error handling
-    public sealed class PluginRegistry : IDisposable
+    public sealed class PluginRegistry : ISynchronizedObject
     {
         private static readonly string registryFileName = "installedPlugins.json";
         private static readonly string lockFileName = ".lockRegistry";
         private readonly string registryFilePath;
         private readonly string lockFilePath;
-        private bool disposedValue;
 
+        private static readonly TimeSpan sleepDuration = TimeSpan.FromMilliseconds(500);
         public PluginRegistry(string registryRoot)
         {
+            Guard.NotNull(registryRoot, nameof(registryRoot));
+            if (!Path.IsPathRooted(registryRoot))
+            {
+                throw new ArgumentException("Registry root must be a rooted path.");
+            }
+
             // TODO: Create a backup registry
             this.RegistryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
@@ -29,6 +35,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
         }
 
         public string RegistryRoot { get; }
+
+        public string LockToken { get; private set; }
 
         public async Task<bool> RegisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
         {
@@ -71,8 +79,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 
         public async Task<bool> UpdatePlugin(InstalledPlugin currentPlugin, InstalledPlugin updatedPlugin)
         {
-            // TODO: Add implementation
-
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
             Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
 
@@ -86,12 +92,57 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 
         public async Task AcquireLock(CancellationToken cancellationToken)
         {
-            // TODO: Implement
+            string lockToken = Guid.NewGuid().ToString();
+
+            Retry:
+            while (File.Exists(this.lockFilePath))
+            {
+                await Task.Delay(sleepDuration, cancellationToken).ConfigureAwait(false);
+            }
+
+            Directory.CreateDirectory(this.RegistryRoot);
+            try
+            {
+                File.WriteAllText(this.lockFilePath, lockToken);
+                string readToken = File.ReadAllText(this.lockFilePath);
+                if (readToken != lockToken)
+                {
+                    goto Retry;
+                }
+            }
+            catch (IOException)
+            {
+                goto Retry;
+            }
+
+            this.LockToken = lockToken;
         }
 
-        public async void ReleaseLock()
+        public void ReleaseLock()
         {
-            // TODO: Implement
+            if (this.LockToken == null || !File.Exists(this.lockFilePath))
+            {
+                return;
+            }
+            try
+            {
+                string token = File.ReadAllText(this.lockFilePath);
+                if (token == this.LockToken)
+                {
+                    File.Delete(this.lockFilePath);
+                }
+            }
+            catch (IOException e)
+            {
+                if (e is FileNotFoundException || e is DirectoryNotFoundException)
+                {
+                    return;
+                }
+
+                throw;
+            }
+
+            this.LockToken = null;
         }
 
         private Task<List<InstalledPlugin>> ReadInstalledPlugins()
@@ -122,28 +173,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
                    typeof(InstalledPlugin[]),
                    new JsonSerializerOptions { WriteIndented = true });
             }
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }
