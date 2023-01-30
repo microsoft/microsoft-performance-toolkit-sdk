@@ -251,29 +251,23 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             }
         }
 
+        /// <inheritdoc />
         public async Task<PluginMetadata> GetInstalledPluginMetadataAsync(InstalledPlugin installedPlugin, CancellationToken cancellationToken)
         {
-            await this.pluginRegistry.AcquireLock(cancellationToken);
-            try
+            if (!await this.pluginInstaller.VerifyInstalled(installedPlugin, cancellationToken))
             {
-                if (!await this.pluginInstaller.VerifyInstalled(installedPlugin))
+                throw new InvalidOperationException($"Plugin {installedPlugin.DisplayName} is not longer installed");
+            }
+
+            string metaDataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
+            using (var stream = new FileStream(metaDataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                if (!PluginMetadata.TryParse(stream, out PluginMetadata metadata))
                 {
-                    throw new InvalidOperationException($"Plugin {installedPlugin.DisplayName} is not longer installed");
+                    throw new InvalidDataException($"Failed to read metadata from {metaDataFileName}");              
                 }
 
-                string metaDataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
-                using (var stream = new FileStream(metaDataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    if (!PluginMetadata.TryParse(stream, out PluginMetadata metadata))
-                    {
-                        throw new InvalidDataException($"Failed to read metadata from {metaDataFileName}");              
-                    }
-                    return metadata;
-                }
-            }
-            finally
-            {
-                this.pluginRegistry.ReleaseLock();
+                return metadata;
             }
         }
 

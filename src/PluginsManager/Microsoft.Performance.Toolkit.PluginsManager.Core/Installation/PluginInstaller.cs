@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
@@ -26,7 +28,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         {
             using (this.pluginRegistry.UseLock(cancellationToken))
             {
-                return await this.pluginRegistry.GetInstalledPluginsAsync();
+                return await this.pluginRegistry.GetInstalledPlugins();
             }  
         }
 
@@ -46,7 +48,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                     cancellationToken,
                     progress);
 
-                return await this.pluginRegistry.RegisterPluginAsync(installedPlugin, CancellationToken.None);
+                return await this.pluginRegistry.RegisterPluginAsync(installedPlugin);
             }
         }
 
@@ -59,7 +61,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
             using (this.pluginRegistry.UseLock(cancellationToken))
             {
-                bool success = await this.pluginRegistry.UnregisterPluginAsync(installedPlugin, cancellationToken);
+                bool success = await this.pluginRegistry.UnregisterPluginAsync(installedPlugin);
                 if (success)
                 {
                     //TODO: Mark these files for clean up.
@@ -100,14 +102,17 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             }
         }
 
-        /// <summary>
-        ///     Checks if the plugin is still being installed in the registry.
-        /// </summary>
-        /// <param name="installedPlugin"></param>
-        /// <returns></returns>
-        public Task<bool> VerifyInstalled(InstalledPlugin installedPlugin)
+        public async Task<bool> VerifyInstalled(InstalledPlugin installedPlugin, CancellationToken cancellationToken)
         {
-            return Task.FromResult(true);
+            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+
+            using (this.pluginRegistry.UseLock(cancellationToken))
+            {
+                List<InstalledPlugin> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                InstalledPlugin matchingPlugin = installedPlugins.SingleOrDefault(plugin => plugin.Equals(installedPlugin));
+
+                return matchingPlugin != null;
+            }
         }
 
         private async Task<InstalledPlugin> InstallPluginPackageCoreAsync(

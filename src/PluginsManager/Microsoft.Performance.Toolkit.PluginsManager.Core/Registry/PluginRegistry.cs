@@ -38,7 +38,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 
         public string LockToken { get; private set; }
 
-        public async Task<bool> RegisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
+        public async Task<bool> RegisterPluginAsync(InstalledPlugin plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
@@ -51,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             return true;
         }
 
-        public async Task<bool> UnregisterPluginAsync(InstalledPlugin plugin, CancellationToken cancellationToken)
+        public async Task<bool> UnregisterPluginAsync(InstalledPlugin plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
@@ -72,17 +72,13 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             return ReadInstalledPlugins();
         }
 
-        public async Task<List<InstalledPlugin>> GetInstalledPluginsAsync()
-        {
-            return await ReadInstalledPlugins();
-        }
-
         public async Task<bool> UpdatePlugin(InstalledPlugin currentPlugin, InstalledPlugin updatedPlugin)
         {
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
             Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
 
             List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
+            
             installedPlugins.RemoveAll(p => p.Id == currentPlugin.Id);
             installedPlugins.Add(updatedPlugin);
 
@@ -152,19 +148,18 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
                 return Task.FromResult(new List<InstalledPlugin>());
             }
             
-            using (var configStream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read))
             {
                 // TODO: Refatcor to a serialization/deserialization class
-                return JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(configStream).AsTask();
+                return JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(stream).AsTask();
             }
         }
 
         private Task WriteInstalledPlugins(IEnumerable<InstalledPlugin> installedPlugins)
         {
             Directory.CreateDirectory(this.RegistryRoot);
-            string fileName = Path.Combine(this.RegistryRoot, registryFileName);
 
-            using (var registryFileStream = new FileStream(fileName, FileMode.Create, FileAccess.Write))
+            using (var registryFileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
             {
                 // TODO: Refatcor to a serialization/deserialization class
                 return JsonSerializer.SerializeAsync(
