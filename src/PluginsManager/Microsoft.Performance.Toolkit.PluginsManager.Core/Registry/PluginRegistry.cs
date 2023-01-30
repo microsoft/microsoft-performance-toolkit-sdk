@@ -18,8 +18,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
         private static readonly string lockFileName = ".lockRegistry";
         private readonly string registryFilePath;
         private readonly string lockFilePath;
-
         private static readonly TimeSpan sleepDuration = TimeSpan.FromMilliseconds(500);
+
         public PluginRegistry(string registryRoot)
         {
             Guard.NotNull(registryRoot, nameof(registryRoot));

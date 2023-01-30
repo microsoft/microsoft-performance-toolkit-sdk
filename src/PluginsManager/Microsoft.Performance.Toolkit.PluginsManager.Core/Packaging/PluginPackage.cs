@@ -103,31 +103,36 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
 
         public PluginMetadata PluginMetadata { get; }
 
-        public Task<bool> ExtractPackageAsync(string extractPath, CancellationToken cancellationToken)
+        public Task<bool> ExtractPackageAsync(
+            string extractPath,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
         {
             Guard.NotNull(extractPath, nameof(extractPath));
 
-            return ExtractEntriesAsync(extractPath, entry => true, cancellationToken);
+            return ExtractEntriesAsync(extractPath, entry => true, cancellationToken, progress);
         }
 
         public Task<bool> ExtractEntriesAsync(
             string extractPath,
             Func<PluginPackageEntry, bool> predicate,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
         {
             Guard.NotNull(extractPath, nameof(extractPath));
 
             return ExtractEntriesInternalAsync(
                 this.Entries.Where(e => predicate(e)),
                 extractPath,
-                cancellationToken
-            );
+                cancellationToken,
+                progress);
         }
 
         private static async Task<bool> ExtractEntriesInternalAsync(
            IEnumerable<PluginPackageEntry> entries,
            string extractPath,
-           CancellationToken cancellationToken)
+           CancellationToken cancellationToken,
+           IProgress<int> progress)
         {
             extractPath = Path.GetFullPath(extractPath);
             if (!extractPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))

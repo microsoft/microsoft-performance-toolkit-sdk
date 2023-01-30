@@ -110,6 +110,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             return results;
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestFromSourceAsync(
             PluginSource source,
             CancellationToken cancellationToken)

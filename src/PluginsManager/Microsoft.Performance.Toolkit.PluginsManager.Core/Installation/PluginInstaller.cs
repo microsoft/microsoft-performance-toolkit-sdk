@@ -122,7 +122,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
             installationDir = Path.GetFullPath(Path.Combine(installationDir, $"{pluginPackage.Id}-{pluginPackage.Version}"));
 
-            bool success = await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken);
+            bool success = await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
 
             if (!success)
             {
