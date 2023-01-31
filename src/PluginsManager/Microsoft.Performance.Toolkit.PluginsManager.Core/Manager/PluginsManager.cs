@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
@@ -129,20 +130,18 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             if (this.PluginSources.Contains(availablePlugin.PluginSource))
             {
-                foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(availablePlugin.PluginSource).AsQueryable())
-                {
-                    IReadOnlyCollection<AvailablePlugin> plugins = await discoverer.DiscoverAllVersionsOfPlugin(
-                        availablePlugin.Identity,
-                        cancellationToken);
-
-                    if (plugins.Any())
-                    {
-                        return plugins;
-                    }
-                }
+                return await availablePlugin.PluginDiscoverer.DiscoverAllVersionsOfPlugin(
+                    availablePlugin.Identity,
+                    cancellationToken);
             }
-
+            
             return Array.Empty<AvailablePlugin>();
+        }
+
+        /// <inheritdoc />
+        public async Task<PluginMetadata> GetAvailablePluginMetadata(AvailablePlugin availablePlugin, CancellationToken cancellationToken)
+        {
+            return await availablePlugin.PluginDiscoverer.GetPluginMetadataAsync(availablePlugin.Identity, cancellationToken);
         }
 
         /// <summary>
