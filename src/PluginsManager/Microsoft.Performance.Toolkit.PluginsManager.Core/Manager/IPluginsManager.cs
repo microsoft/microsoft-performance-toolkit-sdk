@@ -98,13 +98,24 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Installs an available plugin to a given directory.
+        ///      Checks if any plugin with the given ID has been installed to the plugin registry.
+        /// </summary>
+        /// <param name="pluginId">
+        ///     A plugin identifier.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin is currently installed. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> IsPluginInstalledAsync(string pluginId, CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Installs an available plugin if no other versions of this plugin installed.
         /// </summary>
         /// <param name="availablePlugin">
         ///     The available plugin to be installed.
-        /// </param>
-        /// <param name="installationDir">
-        ///     The directory where the plugin will be installed.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
@@ -117,18 +128,17 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// </returns>
         Task<bool> InstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
-            string installationDir,
             CancellationToken cancellationToken,
             IProgress<int> progress);
 
         /// <summary>
-        ///     Installs a local plugin package to a given directory.
+        ///     Installs a local plugin package.
         /// </summary>
         /// <param name="pluginPackagePath">
         ///     The path to the plugin package to be installed.
         /// </param>
-        /// <param name="installationDir">
-        ///      The directory where the plugin will be installed.
+        /// <param name="overwriteInstalled">
+        ///     Whether to overwrite the existing plugin if there's one isntalled. 
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
@@ -141,7 +151,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// </returns>
         Task<bool> InstallLocalPluginAsync(
            string pluginPackagePath,
-           string installationDir,
+           bool overwriteInstalled,
            CancellationToken cancellationToken,
            IProgress<int> progress);
 

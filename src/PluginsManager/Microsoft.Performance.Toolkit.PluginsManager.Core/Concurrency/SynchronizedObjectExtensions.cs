@@ -6,16 +6,30 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency
 {
+    /// <summary>
+    ///   Contains extension methods for <see cref="ISynchronizedObject"/>.
+    /// </summary>
     public static class SynchronizedObjectExtensions
     {
+        /// <summary>
+        ///     Returns a disposable object while acquiring the lock from a <see cref="ISynchronizedObject"/> that
+        ///     is capable of releasing the lock upon disposal.
+        /// </summary>
+        /// <param name="instance">
+        ///     A instnace <see cref="ISynchronizedObject"/>
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns></returns>
         public static IDisposable UseLock(this ISynchronizedObject instance, CancellationToken cancellationToken)
         {
             return UseLockScope.CreateAsync(instance, cancellationToken);
         }
 
-        public struct UseLockScope
+        private struct UseLockScope
             : IDisposable
         {
             private ISynchronizedObject instance;

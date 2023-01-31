@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
@@ -16,8 +17,13 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
     {
         private static readonly string registryFileName = "installedPlugins.json";
         private static readonly string lockFileName = ".lockRegistry";
+        private static readonly string obsoletePluginsFileName = ".obsolete";
+        private static readonly string backupRegistryFileExtension = ".bak";
+
         private readonly string registryFilePath;
         private readonly string lockFilePath;
+        private readonly string backupRegistryFilePath;
+        private readonly string obsoletePluginsFilePath;
         private static readonly TimeSpan sleepDuration = TimeSpan.FromMilliseconds(500);
 
         public PluginRegistry(string registryRoot)
@@ -31,6 +37,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             // TODO: Create a backup registry
             this.RegistryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
+            this.backupRegistryFilePath = this.registryFilePath + backupRegistryFileExtension;
+            this.obsoletePluginsFilePath = Path.Combine(registryRoot, obsoletePluginsFileName);
             this.lockFilePath = Path.Combine(registryRoot, lockFileName);
         }
 

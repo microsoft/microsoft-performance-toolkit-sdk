@@ -79,7 +79,12 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             }
 
             return string.Equals(this.Id, this.Id, StringComparison.OrdinalIgnoreCase) &&
-                   Version.Equals(this.Version, other.Version);
-        }
+                   Version.Equals(this.Version, other.Version) &&
+                   Uri.Equals(this.SourceUri, other.SourceUri) &&
+                   string.Equals(this.DisplayName, other.DisplayName, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
+                   string.Equals(this.InstallPath, other.InstallPath, StringComparison.OrdinalIgnoreCase) &&
+                   DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn);
+         }
     }
 }

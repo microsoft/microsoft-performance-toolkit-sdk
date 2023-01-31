@@ -31,6 +31,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         private readonly PluginInstaller pluginInstaller;
         private readonly PluginRegistry pluginRegistry;
 
+        private readonly string installationDir;
+
         /// <summary>
         ///     Initializes a plugin manager instance.
         /// </summary>
@@ -160,17 +162,26 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
         {
-            return await this.pluginInstaller.GetAllInstalledPlugins(cancellationToken);
+            return await this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
+        }
+
+        public async Task<bool> IsPluginInstalledAsync(string pluginId, CancellationToken cancellationToken)
+        {
+            return await this.pluginInstaller.IsInstalledAsync(pluginId, cancellationToken);
         }
 
         /// <inheritdoc />
         public async Task<bool> InstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
-            string installationDir,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
+
+            if (await this.pluginInstaller.IsInstalledAsync(availablePlugin.Identity.Id, cancellationToken))
+            {
+                throw new InvalidOperationException($"A version of plugin {availablePlugin.Identity.Id} is already installed.");
+            }
 
             IPluginFetcher pluginFetcher = await GetPluginFetcher(availablePlugin);
             
@@ -179,7 +190,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             {
                 return await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
-                    installationDir,
+                    this.installationDir,
                     availablePlugin.PluginPackageUri,
                     cancellationToken,
                     progress);
@@ -189,20 +200,24 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <inheritdoc />
         public async Task<bool> InstallLocalPluginAsync(
             string pluginPackagePath,
-            string installationDir,
+            bool overwriteInstalled,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
-            Guard.NotNull(installationDir, nameof(installationDir));
 
             string packageFullPath = Path.GetFullPath(pluginPackagePath);
 
             using (var pluginPackage = new PluginPackage(pluginPackagePath))
             {
+                if (!overwriteInstalled && await IsPluginInstalledAsync(pluginPackage.Id, cancellationToken))
+                {
+                    return false;
+                }
+
                 await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
-                    installationDir,
+                    this.installationDir,
                     new Uri(packageFullPath),
                     cancellationToken,
                     progress);
@@ -254,7 +269,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <inheritdoc />
         public async Task<PluginMetadata> GetInstalledPluginMetadataAsync(InstalledPlugin installedPlugin, CancellationToken cancellationToken)
         {
-            if (!await this.pluginInstaller.VerifyInstalled(installedPlugin, cancellationToken))
+            if (!await this.pluginInstaller.VerifyInstalledAsync(installedPlugin, cancellationToken))
             {
                 throw new InvalidOperationException($"Plugin {installedPlugin.DisplayName} is not longer installed");
             }
