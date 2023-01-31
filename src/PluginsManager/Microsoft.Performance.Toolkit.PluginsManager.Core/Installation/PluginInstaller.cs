@@ -15,6 +15,7 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Utils;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 {
+    // TODO: Add docstrings
     public sealed class PluginInstaller
     {
         private readonly PluginRegistry pluginRegistry;
@@ -62,13 +63,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
             using (this.pluginRegistry.UseLock(cancellationToken))
             {
-                bool success = await this.pluginRegistry.UnregisterPluginAsync(installedPlugin);
-                if (success)
-                {
-                    //TODO: Mark these files for clean up.
-                }
-
-                return success;
+                return await this.pluginRegistry.UnregisterPluginAsync(installedPlugin);
             }
         }
 
@@ -93,13 +88,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                   cancellationToken,
                   progress);
 
-                bool success = await this.pluginRegistry.UpdatePlugin(currentPlugin, newInstalledPlugin);
-                if (success)
-                {
-                    //TODO: Mark these files for clean up.
-                }
-
-                return success;
+                return await this.pluginRegistry.UpdatePlugin(currentPlugin, newInstalledPlugin);
             }
         }
 

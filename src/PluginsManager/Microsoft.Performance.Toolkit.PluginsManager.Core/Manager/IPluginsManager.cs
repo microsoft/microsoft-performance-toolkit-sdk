@@ -211,6 +211,20 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <returns>
         ///     Metadata of the given plugin.
         /// </returns>
-        Task<PluginMetadata> GetInstalledPluginMetadataAsync(InstalledPlugin installedPlugin, CancellationToken cancellationToken);
+        Task<PluginMetadata> GetInstalledPluginMetadataAsync(
+            InstalledPlugin installedPlugin,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Attempts to clean up all obsolete (unreigstered) plugin files.
+        ///     This method should be called safely by plugins consumers.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
+        /// </returns>
+        Task CleanupObsoletePlugins(CancellationToken cancellationToken);
     }
 }

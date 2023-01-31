@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
@@ -49,7 +51,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> pluginFetchers,
             IPluginManagerResourceLoader resourceLoader,
-            PluginRegistry pluginRegistry)
+            PluginRegistry pluginRegistry,
+            string installationDir)
         {
             this.resourceLoader = resourceLoader;
             
@@ -68,6 +71,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
+            this.installationDir = installationDir;
         }
 
         /// <inheritdoc />
@@ -165,6 +169,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             return await this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
         }
 
+        /// <inheritdoc />
         public async Task<bool> IsPluginInstalledAsync(string pluginId, CancellationToken cancellationToken)
         {
             return await this.pluginInstaller.IsInstalledAsync(pluginId, cancellationToken);
@@ -271,7 +276,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         {
             if (!await this.pluginInstaller.VerifyInstalledAsync(installedPlugin, cancellationToken))
             {
-                throw new InvalidOperationException($"Plugin {installedPlugin.DisplayName} is not longer installed");
+                throw new InvalidOperationException($"Plugin {installedPlugin.DisplayName} is no longer installed");
             }
 
             string metaDataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
@@ -283,6 +288,29 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                 }
 
                 return metadata;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task CleanupObsoletePlugins(CancellationToken cancellationToken)
+        {
+            if (!Directory.Exists(this.installationDir))
+            {
+                return;
+            }
+
+            using (this.pluginRegistry.UseLock(cancellationToken))
+            {
+                List<InstalledPlugin> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
+                var toRemove = new List<string>();
+                foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())
+                {
+                    if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
+                    {
+                        dir.Delete();
+                    }
+                }
             }
         }
 

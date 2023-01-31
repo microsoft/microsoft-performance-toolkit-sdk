@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,19 +13,24 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
-    // TODO: #238 Error handling
+    // TODO: #238 Add proper error handling
+    // TODO: Add docstrings
+    /// <summary>
+    ///     Contains a registry file that records information of installed plugins 
+    ///     and an ephemeral lock file that indicates whether a process is currently interacting with the registry.
+    ///     Only one version of a same plugin may be be registered at a time 
+    /// </summary>
     public sealed class PluginRegistry : ISynchronizedObject
     {
         private static readonly string registryFileName = "installedPlugins.json";
         private static readonly string lockFileName = ".lockRegistry";
-        private static readonly string obsoletePluginsFileName = ".obsolete";
         private static readonly string backupRegistryFileExtension = ".bak";
 
         private readonly string registryFilePath;
         private readonly string lockFilePath;
         private readonly string backupRegistryFilePath;
-        private readonly string obsoletePluginsFilePath;
         private static readonly TimeSpan sleepDuration = TimeSpan.FromMilliseconds(500);
+        private string lockToken;
 
         public PluginRegistry(string registryRoot)
         {
@@ -38,21 +44,21 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             this.RegistryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.backupRegistryFilePath = this.registryFilePath + backupRegistryFileExtension;
-            this.obsoletePluginsFilePath = Path.Combine(registryRoot, obsoletePluginsFileName);
             this.lockFilePath = Path.Combine(registryRoot, lockFileName);
         }
 
         public string RegistryRoot { get; }
-
-        public string LockToken { get; private set; }
 
         public async Task<bool> RegisterPluginAsync(InstalledPlugin plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
             List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
+            if (installedPlugins.Any(p => p.Id.Equals(plugin.Id)))
+            {
+                throw new InvalidOperationException("Plugin already registered.");
+            }
 
-            installedPlugins.RemoveAll(p => p.Id == plugin.Id);
             installedPlugins.Add(plugin);
 
             await WriteInstalledPlugins(installedPlugins);
@@ -64,11 +70,10 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             Guard.NotNull(plugin, nameof(plugin));
 
             List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
-
-            int removed = installedPlugins.RemoveAll(p => p.Id == plugin.Id);
+            int removed = installedPlugins.RemoveAll(p => p.Equals(plugin));
             if (removed == 0)
             {
-                return false;
+                throw new InvalidOperationException("Failed to unregister plugin as it is not currently registered.");
             }
 
             await WriteInstalledPlugins(installedPlugins);
@@ -87,13 +92,23 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 
             List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
             
-            installedPlugins.RemoveAll(p => p.Id == currentPlugin.Id);
+            int removed = installedPlugins.RemoveAll(p => p.Id == currentPlugin.Id);
+            if (removed == 0)
+            {
+                throw new InvalidOperationException("Failed to update plugin as it is not currently registered.");
+            }
+            if (installedPlugins.Any(p => p.Equals(updatedPlugin)))
+            {
+                throw new InvalidOperationException("Failed to update plugin as the new version is already installed.");
+            }
+
             installedPlugins.Add(updatedPlugin);
 
             await WriteInstalledPlugins(installedPlugins);
             return true;
         }
 
+        // TODO: Might want to change this to a file lock that supports read lock.
         public async Task AcquireLock(CancellationToken cancellationToken)
         {
             string lockToken = Guid.NewGuid().ToString();
@@ -119,19 +134,19 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
                 goto Retry;
             }
 
-            this.LockToken = lockToken;
+            this.lockToken = lockToken;
         }
 
         public void ReleaseLock()
         {
-            if (this.LockToken == null || !File.Exists(this.lockFilePath))
+            if (this.lockToken == null || !File.Exists(this.lockFilePath))
             {
                 return;
             }
             try
             {
                 string token = File.ReadAllText(this.lockFilePath);
-                if (token == this.LockToken)
+                if (token == this.lockToken)
                 {
                     File.Delete(this.lockFilePath);
                 }
@@ -146,7 +161,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
                 throw;
             }
 
-            this.LockToken = null;
+            this.lockToken = null;
         }
 
         private Task<List<InstalledPlugin>> ReadInstalledPlugins()
