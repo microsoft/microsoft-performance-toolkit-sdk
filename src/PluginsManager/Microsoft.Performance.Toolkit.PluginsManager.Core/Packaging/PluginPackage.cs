@@ -17,6 +17,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
     ///     Represents a read-only plugin package.
     /// </summary>
     /// TODO: #236
+    /// TODO: Add docstrings
     public sealed class PluginPackage : IDisposable
     {
         private readonly ZipArchive zip;
