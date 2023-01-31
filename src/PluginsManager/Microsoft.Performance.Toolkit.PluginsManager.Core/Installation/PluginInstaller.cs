@@ -11,6 +11,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Utils;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 {
@@ -173,6 +174,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                 return null;
             }
 
+            string hash = await HashUtils.GetDirectoryHash(installationDir);
+
             var installedPlugin = new InstalledPlugin(
                 pluginPackage.Id,
                 pluginPackage.Version,
@@ -180,7 +183,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                 pluginPackage.DisplayName,
                 pluginPackage.Description,
                 installationDir,
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                hash);
 
             return installedPlugin;
         }
