@@ -4,7 +4,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
+namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 {
     /// <summary>
     ///     Contains the information of an plugin recorded upon installation.
@@ -79,20 +79,20 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             {
                 return true;
             }
-                
+
             if (other == null)
             {
                 return false;
             }
 
             return string.Equals(this.Id, this.Id, StringComparison.OrdinalIgnoreCase) &&
-                   Version.Equals(this.Version, other.Version) &&
-                   Uri.Equals(this.SourceUri, other.SourceUri) &&
+                   Equals(this.Version, other.Version) &&
+                   Equals(this.SourceUri, other.SourceUri) &&
                    string.Equals(this.DisplayName, other.DisplayName, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(this.InstallPath, other.InstallPath, StringComparison.OrdinalIgnoreCase) &&
                    DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn) &&
                    string.Equals(this.Hash, other.Hash);
-         }
+        }
     }
 }

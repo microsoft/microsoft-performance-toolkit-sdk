@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {

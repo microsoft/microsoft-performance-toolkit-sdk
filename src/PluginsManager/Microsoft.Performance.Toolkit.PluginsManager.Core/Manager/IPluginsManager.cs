@@ -3,8 +3,8 @@
 
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
 using System;
 using System.Collections.Generic;
 using System.Threading;
