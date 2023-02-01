@@ -17,23 +17,45 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
     ///     Represents a read-only plugin package.
     /// </summary>
     /// TODO: #236
-    /// TODO: Add docstrings
     public sealed class PluginPackage : IDisposable
     {
         private readonly ZipArchive zip;
         private static readonly string pluginContentPath = "plugin/";
         private static readonly string pluginMetadataFileName = "pluginspec.json";
         private bool disposedValue;
-
+        
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginPackage"/>.
+        /// </summary>
+        /// <param name="fileName">
+        ///     The full file name of the plugin package.
+        /// </param>
         public PluginPackage(string fileName)
             : this(OpenFile(fileName))
         {
         }
 
-        public PluginPackage(Stream stream) : this(stream, false)
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginPackage"/>.
+        /// </summary>
+        /// <param name="stream">
+        ///     Stream for reading the plugin package file.
+        /// </param>
+        public PluginPackage(Stream stream) 
+            : this(stream, false)
         {
         }
 
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginPackage"/>.
+        /// </summary>
+        /// <param name="stream">
+        ///     Stream for reading the plugin package file.
+        /// </param>
+        /// <param name="leaveOpen">
+        ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
+        ///     <c>false</c> otherwise.
+        /// </param>
         public PluginPackage(Stream stream, bool leaveOpen)
         {
             Guard.NotNull(stream, nameof(stream));
@@ -51,7 +73,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
                 throw;
             }
         }
-
+        /// <summary>
+        ///     Gets the relative file path to plugin content.
+        /// </summary>
         public static string PluginContentPath
         {
             get
@@ -60,6 +84,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
         }
 
+        /// <summary>
+        ///     Gets the name of the metadata file.
+        /// </summary>
         public static string PluginMetadataFileName
         {
             get
@@ -68,6 +95,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
         }
 
+        /// <summary>
+        ///     Gets the plugin ID.
+        /// </summary>
         public string Id
         {
             get
@@ -76,6 +106,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
         }
 
+        /// <summary>
+        ///     Gets the plugin version.
+        /// </summary>
         public Version Version
         {
             get
@@ -84,6 +117,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
         }
 
+        /// <summary>
+        ///     Gets the plugin display name.
+        /// </summary>
         public string DisplayName
         {
             get
@@ -92,6 +128,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
         }
 
+        /// <summary>
+        ///     Gets the plugin description.
+        /// </summary>
         public string Description
         {
             get
@@ -100,33 +139,76 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
         }
 
+        /// <summary>
+        ///     Gets all entries (files and directories) contained in this plugin package.
+        /// </summary>
         public IReadOnlyCollection<PluginPackageEntry> Entries { get; }
 
+        /// <summary>
+        ///     Gets the plugin metadata object.
+        /// </summary>
         public PluginMetadata PluginMetadata { get; }
 
+        /// <summary>
+        ///     Extracts all files in this package.
+        /// </summary>
+        /// <param name="extractPath">
+        ///     The path to which the files will be extracted.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of the extraction.
+        /// </param>
+        /// <returns>
+        ///     An await-able task whose result represents whether the extraction succeeds.
+        /// </returns>
         public Task<bool> ExtractPackageAsync(
             string extractPath,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            Guard.NotNull(extractPath, nameof(extractPath));
-
             return ExtractEntriesAsync(extractPath, entry => true, cancellationToken, progress);
         }
 
+        /// <summary>
+        ///     Extract certain entires from the package.
+        /// </summary>
+        /// <param name="extractPath">
+        ///     The path to which the files will be extracted.
+        /// </param>
+        /// <param name="predicate">
+        ///     A function whose result indicates whether an entry should be extracted.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of the extraction.
+        /// </param>
+        /// <returns>
+        ///     An await-able task whose result represents whether the extraction succeeds.
+        /// </returns>
         public Task<bool> ExtractEntriesAsync(
             string extractPath,
             Func<PluginPackageEntry, bool> predicate,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            Guard.NotNull(extractPath, nameof(extractPath));
-
             return ExtractEntriesInternalAsync(
                 this.Entries.Where(e => predicate(e)),
                 extractPath,
                 cancellationToken,
                 progress);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         private static async Task<bool> ExtractEntriesInternalAsync(
@@ -135,6 +217,11 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
            CancellationToken cancellationToken,
            IProgress<int> progress)
         {
+            Guard.NotNull(extractPath, nameof(extractPath));
+
+            const int bufferSize = 4096;
+            const int defaultAsyncBufferSize = 81920;
+
             extractPath = Path.GetFullPath(extractPath);
             if (!extractPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
             {
@@ -142,6 +229,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
 
             // TODO: #238 Error handling
+            // TODO: Report progress
             foreach (PluginPackageEntry entry in entries)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -165,10 +253,10 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
                         FileMode.Create,
                         FileAccess.Write,
                         FileShare.None,
-                        4096,
+                        bufferSize,
                         FileOptions.Asynchronous | FileOptions.SequentialScan))
                     {
-                        await entryStream.CopyToAsync(destStream, 81920, cancellationToken).ConfigureAwait(false);
+                        await entryStream.CopyToAsync(destStream, defaultAsyncBufferSize, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -213,13 +301,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
 
                 this.disposedValue = true;
             }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }
