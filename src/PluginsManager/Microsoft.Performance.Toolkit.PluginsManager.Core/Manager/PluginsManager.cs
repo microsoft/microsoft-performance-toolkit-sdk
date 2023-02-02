@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
@@ -159,15 +160,34 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
-            foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
+            IPluginFetcher fetcher = this.pluginFetcherRepository.PluginResources
+                .SingleOrDefault(f => f.TryGetGuid() == availablePlugin.FetcherResourceId);
+
+            if (fetcher == null || await fetcher.IsSupportedAsync(availablePlugin))
             {
-                if (fetcher.TypeId == availablePlugin.FetcherTypeId && await fetcher.IsSupportedAsync(availablePlugin))
-                {
-                    return await fetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress);
-                }
+                throw new InvalidOperationException("No supported fetcher found.");
             }
 
-            throw new InvalidOperationException("No supported fetcher found");
+            return await fetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress);
+        }
+
+        /// <inheritdoc />
+        public async Task<PluginMetadata> GetAvailablePluginMetadata(
+            AvailablePlugin availablePlugin,
+            CancellationToken cancellationToken)
+        {
+            Guard.NotNull(availablePlugin, nameof(availablePlugin));
+
+            IPluginDiscoverer discoverer = this.discoverersManager.GetDiscovererFromSourceAndId(
+                availablePlugin.PluginSource,
+                availablePlugin.DiscovererResourceId);
+
+            if (discoverer == null)
+            {
+                throw new InvalidOperationException("Unable to get metadata - no supported discoverer found.");
+            }
+
+            return await discoverer.GetPluginMetadataAsync(availablePlugin.Identity, cancellationToken);
         }
     }
 }

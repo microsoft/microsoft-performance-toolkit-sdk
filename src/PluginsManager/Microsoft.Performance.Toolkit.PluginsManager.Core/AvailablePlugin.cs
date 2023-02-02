@@ -20,14 +20,16 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core
             string displayName,
             string description,
             Uri packageUri,
-            Guid fetcherTypeId) 
+            Guid fetcherTypeId,
+            Guid discovererResourceId) 
         {
             this.Identity = pluginIdentity;
             this.PluginSource = pluginSource;
             this.DisplayName = displayName;
             this.Description = description;
             this.PluginPackageUri = packageUri;
-            this.FetcherTypeId = fetcherTypeId;
+            this.FetcherResourceId = fetcherTypeId;
+            this.DiscovererResourceId = discovererResourceId;
         }
 
         /// <summary>
@@ -56,8 +58,15 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core
         public Uri PluginPackageUri { get; }
 
         /// <summary>
-        ///     Gets the Guid which identifies the platform (NuGet, Github etc.) the plugin package is hosted on.
+        ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resouce
+        ///     the plugin package should be fetched from.
         /// </summary>
-        public Guid FetcherTypeId { get; }
+        public Guid FetcherResourceId { get; }
+
+        /// <summary>
+        ///     Gets the Guid which identifies the unique <see cref="IPluginDiscovererProvider"/> resource
+        ///     this plugin is discovered from.
+        /// </summary>
+        public Guid DiscovererResourceId { get; }
     }
 }

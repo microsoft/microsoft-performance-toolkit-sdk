@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +14,11 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
     /// </summary>
     public interface IPluginDiscoverer
     {
+        /// <summary>
+        ///     Gets the Guid that identifies the <see cref="IPluginDiscovererProvider"/> this discoverer is created from.
+        /// </summary>
+        Guid DiscovererResourceId { get; }
+
         /// <summary>
         ///     Discovers the latest version of all plugins.
         /// </summary>

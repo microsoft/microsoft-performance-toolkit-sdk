@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 {
@@ -80,5 +81,21 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     The directory to load resource assemblies from.
         /// </param>
         void LoadAdditionalPluginResources(string directory);
+
+        /// <summary>
+        ///     Gets the metadata of an available plugin.
+        /// </summary>
+        /// <param name="availablePlugin">
+        ///     A discovered plugin.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     The metadata of a plugin.
+        /// </returns>
+        Task<PluginMetadata> GetAvailablePluginMetadata(
+            AvailablePlugin availablePlugin,
+            CancellationToken cancellationToken);
     }
 }

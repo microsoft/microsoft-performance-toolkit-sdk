@@ -71,6 +71,26 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         }
 
         /// <summary>
+        ///     Gets a single discoverer (if any) associated with a given plugin source and resource ID.
+        /// </summary>
+        /// <param name="source">
+        ///     A plugin source.
+        /// </param>
+        /// <param name="resourceId">
+        ///     A resource ID that identifies a unique <see cref="IPluginManagerResource"/>.
+        /// </param>
+        /// <returns>
+        ///     A single discoverer if there is a match or <c>null</c> otherwise.
+        /// </returns>
+        public IPluginDiscoverer GetDiscovererFromSourceAndId(PluginSource source, Guid resourceId)
+        {
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(resourceId, nameof(resourceId));
+
+            return GetDiscoverersFromSource(source).SingleOrDefault(d => d.DiscovererResourceId == resourceId);
+        }
+
+        /// <summary>
         ///     Clears all plugin sources and their discoverers.
         /// </summary>
         public void ClearPluginSources()

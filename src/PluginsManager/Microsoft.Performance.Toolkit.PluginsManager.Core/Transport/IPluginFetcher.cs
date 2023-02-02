@@ -16,11 +16,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Transport
     public interface IPluginFetcher : IPluginManagerResource
     {
         /// <summary>
-        ///     Gets the identifier of this fetcher type.
-        /// </summary>
-        Guid TypeId { get; }
-
-        /// <summary>
         ///     Checks if the given <paramref name="plugin"/> is supported by this fetcher.
         /// </summary>
         /// <param name="plugin">

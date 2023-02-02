@@ -27,18 +27,23 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
         private readonly ILogger logger;
         private readonly Lazy<ICredentialProvider> credentialProvider;
 
+        public static readonly Guid FetcherResourceId = Guid.Parse(PluginManagerConstants.NuGetFetcherId);
         public static readonly int PageCount = 20;
 
         public NuGetPluginDiscoverer(
             PluginSource pluginSource,
+            Guid discovererResourceId,
             Lazy<ICredentialProvider> credentialProvider)
         {
             this.pluginSource = pluginSource;
+            this.DiscovererResourceId = discovererResourceId;
             this.packageSource = new PackageSource(pluginSource.Uri.ToString());
             this.logger = NullLogger.Instance;
             this.repository = Repository.Factory.GetCoreV3(this.packageSource.Source);
             this.credentialProvider = credentialProvider;
         }
+
+        public Guid DiscovererResourceId { get; }
 
         public async Task<IReadOnlyCollection<AvailablePlugin>> DiscoverAllVersionsOfPlugin(
             PluginIdentity pluginIdentity,
@@ -70,7 +75,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
                         packageMetadata.Title,
                         packageMetadata.Description,
                         this.pluginSource.Uri,
-                        Guid.Parse(PluginManagerConstants.NuGet));
+                        FetcherResourceId,
+                        this.DiscovererResourceId);
 
                     result.Add(plugin);
                 }
@@ -105,7 +111,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
                         packageMetadata.Title,
                         packageMetadata.Description,
                         this.pluginSource.Uri,
-                        Guid.Parse(PluginManagerConstants.NuGet));
+                        FetcherResourceId,
+                        this.DiscovererResourceId);
 
                 result.Add(plugin);
             }

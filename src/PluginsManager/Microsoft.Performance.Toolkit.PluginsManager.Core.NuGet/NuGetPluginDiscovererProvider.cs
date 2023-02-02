@@ -2,14 +2,17 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Credential;
-using NuGet.Configuration;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Credential;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using NuGet.Configuration;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
-    public class NuGetPluginDiscovererProvider : IPluginDiscovererProvider
+    [PluginManagerResource(PluginManagerConstants.NuGetDiscovererProviderId)]
+    public class NuGetPluginDiscovererProvider 
+        : IPluginDiscovererProvider
     {
         private Lazy<ICredentialProvider> credentialProvider =
             new Lazy<ICredentialProvider>(() => new NuGetCredentialProvider());
@@ -24,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 
         public IPluginDiscoverer CreateDiscoverer(PluginSource source)
         {
-            return new NuGetPluginDiscoverer(source, this.CredentialProvider);
+            return new NuGetPluginDiscoverer(source, this.TryGetGuid() ,this.CredentialProvider);
         }
 
         public async Task<bool> IsSupportedAsync(PluginSource source)

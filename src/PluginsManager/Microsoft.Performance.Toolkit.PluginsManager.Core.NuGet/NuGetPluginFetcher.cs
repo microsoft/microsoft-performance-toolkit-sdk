@@ -17,21 +17,13 @@ using NuGet.Protocol;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using System.Linq;
 using NuGet.Common;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
+    [PluginManagerResource(PluginManagerConstants.NuGetFetcherId)]
     public sealed class NuGetPluginFetcher : IPluginFetcher
     {
-        private static Guid NuGetId = Guid.Parse(PluginManagerConstants.NuGet);
-        
-        public Guid TypeId
-        {
-            get
-            {
-                return NuGetId;
-            }
-        }
-
         public async Task<bool> IsSupportedAsync(AvailablePlugin plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
