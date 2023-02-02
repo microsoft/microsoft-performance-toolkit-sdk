@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         /// <returns>
         ///     A collection of plugins that are discovered.
         /// </returns>
-        /// TODO: Add search
+        /// TODO: #243 Add search
         Task<IReadOnlyCollection<AvailablePlugin>> DiscoverPluginsLatestAsync(CancellationToken cancellationToken);
 
         /// <summary>

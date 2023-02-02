@@ -16,7 +16,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
     /// <summary>
     ///     Represents a read-only plugin package.
     /// </summary>
-    /// TODO: #236
     public sealed class PluginPackage : IDisposable
     {
         private readonly ZipArchive zip;
@@ -229,7 +228,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             }
 
             // TODO: #238 Error handling
-            // TODO: Report progress
+            // TODO: #257 Report progress
             foreach (PluginPackageEntry entry in entries)
             {
                 cancellationToken.ThrowIfCancellationRequested();

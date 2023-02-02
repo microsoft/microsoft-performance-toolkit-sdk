@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <Folder Include="Loading\" />
-    <Folder Include="Publishing\" />
   </ItemGroup>
 
   <ItemGroup>

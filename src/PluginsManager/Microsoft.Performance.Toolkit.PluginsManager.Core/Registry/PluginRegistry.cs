@@ -15,7 +15,7 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 {
     // TODO: #238 Add proper error handling
-    // TODO: Add docstrings
+    // TODO: #254 Add docstrings
     /// <summary>
     ///     Contains a registry file that records information of installed plugins 
     ///     and an ephemeral lock file that indicates whether a process is currently interacting with the registry.
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
                 throw new ArgumentException("Registry root must be a rooted path.");
             }
 
-            // TODO: Create a backup registry
+            // TODO: #256 Create a backup registry
             this.RegistryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.backupRegistryFilePath = this.registryFilePath + backupRegistryFileExtension;
@@ -174,7 +174,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             
             using (var stream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read))
             {
-                // TODO: Refatcor to a serialization/deserialization class
+                // TODO: #255 Refatcor to a serialization/deserialization class
                 return JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(stream).AsTask();
             }
         }
@@ -185,7 +185,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 
             using (var registryFileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
             {
-                // TODO: Refatcor to a serialization/deserialization class
+                // TODO: #255 Refatcor to a serialization/deserialization class
                 return JsonSerializer.SerializeAsync(
                    registryFileStream,
                    installedPlugins,

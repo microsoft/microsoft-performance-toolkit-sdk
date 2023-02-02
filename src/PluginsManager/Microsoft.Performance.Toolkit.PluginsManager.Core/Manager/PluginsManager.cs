@@ -164,15 +164,15 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         }
 
         /// <inheritdoc />
-        public async Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
+        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPlugins(CancellationToken cancellationToken)
         {
-            return await this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
+            return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsPluginInstalledAsync(string pluginId, CancellationToken cancellationToken)
+        public Task<bool> IsPluginInstalled(string pluginId, CancellationToken cancellationToken)
         {
-            return await this.pluginInstaller.IsInstalledAsync(pluginId, cancellationToken);
+            return this.pluginInstaller.IsInstalledAsync(pluginId, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -215,7 +215,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             using (var pluginPackage = new PluginPackage(pluginPackagePath))
             {
-                if (!overwriteInstalled && await IsPluginInstalledAsync(pluginPackage.Id, cancellationToken))
+                if (!overwriteInstalled && await IsPluginInstalled(pluginPackage.Id, cancellationToken))
                 {
                     return false;
                 }

@@ -95,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <returns>
         ///     A collection of installed plugins.
         /// </returns>
-        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPlugins(CancellationToken cancellationToken);
 
         /// <summary>
         ///      Checks if any plugin with the given ID has been installed to the plugin registry.
@@ -109,7 +109,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <returns>
         ///     <c>true</c> if the plugin is currently installed. <c>false</c> otherwise.
         /// </returns>
-        Task<bool> IsPluginInstalledAsync(string pluginId, CancellationToken cancellationToken);
+        Task<bool> IsPluginInstalled(string pluginId, CancellationToken cancellationToken);
 
         /// <summary>
         ///     Installs an available plugin if no other versions of this plugin installed.

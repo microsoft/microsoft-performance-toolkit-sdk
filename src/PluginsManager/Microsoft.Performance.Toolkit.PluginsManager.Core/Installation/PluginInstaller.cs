@@ -15,7 +15,7 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Utils;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 {
-    // TODO: Add docstrings
+    // TODO: #254 docstrings
     public sealed class PluginInstaller
     {
         private readonly PluginRegistry pluginRegistry;
