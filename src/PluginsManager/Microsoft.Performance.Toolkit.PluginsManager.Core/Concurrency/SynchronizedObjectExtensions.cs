@@ -23,13 +23,15 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
-        /// <returns></returns>
+        /// <returns>
+        ///     A disposable object that releases the lock of the <see cref="ISynchronizedObject"/> upon disposal.
+        /// </returns>
         public static IDisposable UseLock(this ISynchronizedObject instance, CancellationToken cancellationToken)
         {
             return UseLockScope.CreateAsync(instance, cancellationToken);
         }
 
-        private struct UseLockScope
+        private sealed class UseLockScope
             : IDisposable
         {
             private ISynchronizedObject instance;
@@ -52,10 +54,10 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency
 
             public void Dispose()
             {
-                if (this.instance != null)
+                ISynchronizedObject instance = Interlocked.Exchange(ref this.instance, null);
+                if (instance != null)
                 {
-                    this.instance.ReleaseLock();
-                    this.instance = null;
+                    instance.ReleaseLock();
                 }
             }
         }
