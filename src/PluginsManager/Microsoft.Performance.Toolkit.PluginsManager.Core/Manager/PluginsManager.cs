@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
@@ -114,80 +113,28 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             var results = new List<AvailablePlugin>();
             foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(source).AsQueryable())
             {
-                IReadOnlyCollection<AvailablePlugin> plugins = await discoverer.DiscoverPluginsLatestAsync(cancellationToken);
-                results.AddRange(plugins);
+                foreach(AvailablePluginInfo info in await discoverer.DiscoverPluginsLatestAsync(cancellationToken))
+                {
+                    IPluginFetcher fetcher = await GetPluginFetcher(info);
+                    var AvailablePlugin = new AvailablePlugin(info, discoverer, fetcher);
+                    results.Add(AvailablePlugin);
+                }
             }
 
             return results;
         }
 
-        /// <inheritdoc />
-        public async Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPlugin(
-            AvailablePlugin availablePlugin,
-            CancellationToken cancellationToken)
+        private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePlugin)
         {
-            Guard.NotNull(availablePlugin, nameof(availablePlugin));
-
-            if (this.PluginSources.Contains(availablePlugin.PluginSource))
+            foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
             {
-                foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(availablePlugin.PluginSource).AsQueryable())
+                if (fetcher.TryGetGuid() == availablePlugin.FetcherResourceId && await fetcher.IsSupportedAsync(availablePlugin))
                 {
-                    IReadOnlyCollection<AvailablePlugin> plugins = await discoverer.DiscoverAllVersionsOfPlugin(
-                        availablePlugin.Identity,
-                        cancellationToken);
-
-                    if (plugins.Any())
-                    {
-                        return plugins;
-                    }
+                    return fetcher;
                 }
             }
 
-            return Array.Empty<AvailablePlugin>();
-        }
-
-        /// <summary>
-        ///     This is just an example of how a fetchers will be used. Will be moved to the installer.
-        /// </summary>
-        /// <param name="availablePlugin"></param>
-        /// <param name="cancellationToken"></param>
-        /// <param name="progress"></param>
-        /// <returns></returns>
-        public async Task<Stream> GetPluginPackageStreamAsync(
-            AvailablePlugin availablePlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
-        {
-            Guard.NotNull(availablePlugin, nameof(availablePlugin));
-
-            IPluginFetcher fetcher = this.pluginFetcherRepository.PluginResources
-                .SingleOrDefault(f => f.TryGetGuid() == availablePlugin.FetcherResourceId);
-
-            if (fetcher == null || await fetcher.IsSupportedAsync(availablePlugin))
-            {
-                throw new InvalidOperationException("No supported fetcher found.");
-            }
-
-            return await fetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress);
-        }
-
-        /// <inheritdoc />
-        public async Task<PluginMetadata> GetAvailablePluginMetadata(
-            AvailablePlugin availablePlugin,
-            CancellationToken cancellationToken)
-        {
-            Guard.NotNull(availablePlugin, nameof(availablePlugin));
-
-            IPluginDiscoverer discoverer = this.discoverersManager.GetDiscovererFromSourceAndId(
-                availablePlugin.PluginSource,
-                availablePlugin.DiscovererResourceId);
-
-            if (discoverer == null)
-            {
-                throw new InvalidOperationException("Unable to get metadata - no supported discoverer found.");
-            }
-
-            return await discoverer.GetPluginMetadataAsync(availablePlugin.Identity, cancellationToken);
+            throw new InvalidOperationException("No supported fetcher found");
         }
     }
 }

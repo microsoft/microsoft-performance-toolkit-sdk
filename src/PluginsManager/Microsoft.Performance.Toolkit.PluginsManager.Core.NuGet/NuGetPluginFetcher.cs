@@ -4,27 +4,27 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
+using NuGet.Common;
 using NuGet.Configuration;
-using NuGet.Packaging.Core;
 using NuGet.Packaging;
+using NuGet.Packaging.Core;
+using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using NuGet.Protocol;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using System.Linq;
-using NuGet.Common;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
     [PluginManagerResource(PluginManagerConstants.NuGetFetcherId)]
     public sealed class NuGetPluginFetcher : IPluginFetcher
     {
-        public async Task<bool> IsSupportedAsync(AvailablePlugin plugin)
+        public async Task<bool> IsSupportedAsync(AvailablePluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
@@ -37,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
         }
 
         public async Task<Stream> GetPluginStreamAsync(
-            AvailablePlugin plugin,
+            AvailablePluginInfo plugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {

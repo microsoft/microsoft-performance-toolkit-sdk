@@ -59,43 +59,11 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Gets all available versions of a given plugin.
-        /// </summary>
-        /// <param name="availablePlugin">
-        ///     A discovered plugin.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     A cancellation token.
-        /// </param>
-        /// <returns>
-        ///     A collection of available plugins.
-        /// </returns>
-        Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPlugin(
-            AvailablePlugin availablePlugin,
-            CancellationToken cancellationToken);
-
-        /// <summary>
         ///     Loads additional <see cref="IPluginManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
         /// </summary>
         /// <param name="directory">
         ///     The directory to load resource assemblies from.
         /// </param>
         void LoadAdditionalPluginResources(string directory);
-
-        /// <summary>
-        ///     Gets the metadata of an available plugin.
-        /// </summary>
-        /// <param name="availablePlugin">
-        ///     A discovered plugin.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///     The metadata of a plugin.
-        /// </returns>
-        Task<PluginMetadata> GetAvailablePluginMetadata(
-            AvailablePlugin availablePlugin,
-            CancellationToken cancellationToken);
     }
 }

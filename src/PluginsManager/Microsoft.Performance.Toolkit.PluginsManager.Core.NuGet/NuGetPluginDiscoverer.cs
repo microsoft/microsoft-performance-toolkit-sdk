@@ -32,26 +32,22 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 
         public NuGetPluginDiscoverer(
             PluginSource pluginSource,
-            Guid discovererResourceId,
             Lazy<ICredentialProvider> credentialProvider)
         {
             this.pluginSource = pluginSource;
-            this.DiscovererResourceId = discovererResourceId;
             this.packageSource = new PackageSource(pluginSource.Uri.ToString());
             this.logger = NullLogger.Instance;
             this.repository = Repository.Factory.GetCoreV3(this.packageSource.Source);
             this.credentialProvider = credentialProvider;
         }
 
-        public Guid DiscovererResourceId { get; }
-
-        public async Task<IReadOnlyCollection<AvailablePlugin>> DiscoverAllVersionsOfPlugin(
+        public async Task<IReadOnlyCollection<AvailablePluginInfo>> DiscoverAllVersionsOfPlugin(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken)
         {
             PackageMetadataResource metadataResource = await this.repository.GetResourceAsync<PackageMetadataResource>(cancellationToken);
 
-            var result = new List<AvailablePlugin>();
+            var result = new List<AvailablePluginInfo>();
 
             using (var sourceCacheContext = new SourceCacheContext())
             {
@@ -69,14 +65,14 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
                 {
                     var pluginId = new PluginIdentity(packageMetadata.Identity.Id, packageMetadata.Identity.Version.Version);
 
-                    var plugin = new AvailablePlugin(
+                    // TODO: #249 serialize/deserialize - fetcher resource id should be provided by nuget
+                    var plugin = new AvailablePluginInfo(
                         pluginId,
                         this.pluginSource,
                         packageMetadata.Title,
                         packageMetadata.Description,
                         this.pluginSource.Uri,
-                        FetcherResourceId,
-                        this.DiscovererResourceId);
+                        FetcherResourceId);
 
                     result.Add(plugin);
                 }
@@ -85,12 +81,12 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
             return result;
         }
 
-        public async Task<IReadOnlyCollection<AvailablePlugin>> DiscoverPluginsLatestAsync(
+        public async Task<IReadOnlyCollection<AvailablePluginInfo>> DiscoverPluginsLatestAsync(
             CancellationToken cancellationToken)
         {
             PackageSearchResource searchResource = await this.repository.GetResourceAsync<PackageSearchResource>(cancellationToken);
 
-            var result = new List<AvailablePlugin>();
+            var result = new List<AvailablePluginInfo>();
             IEnumerable<IPackageSearchMetadata> packages = await searchResource.SearchAsync(null, new SearchFilter(false), 0, PageCount, this.logger, cancellationToken);
 
             int sourceSearchPackageCount = 0;
@@ -105,14 +101,14 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 
                 var pluginIdentity = new PluginIdentity(packageMetadata.Identity.Id, packageMetadata.Identity.Version.Version);
 
-                var plugin = new AvailablePlugin(
+                // TODO: #249 serialize/deserialize - fetcher resource id should be provided by nuget
+                var plugin = new AvailablePluginInfo(
                         pluginIdentity,
                         this.pluginSource,
                         packageMetadata.Title,
                         packageMetadata.Description,
                         this.pluginSource.Uri,
-                        FetcherResourceId,
-                        this.DiscovererResourceId);
+                        FetcherResourceId);
 
                 result.Add(plugin);
             }
@@ -122,6 +118,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 
         public async Task<PluginMetadata> GetPluginMetadataAsync(PluginIdentity pluginIdentity, CancellationToken cancellationToken)
         {
+            // TODO: #249
             // Cannot get the metadata from nuget discoverer without downloading the package.
             // Returns empty metadata for now
             return new PluginMetadata();
