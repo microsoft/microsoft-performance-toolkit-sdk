@@ -27,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 
         public IPluginDiscoverer CreateDiscoverer(PluginSource source)
         {
-            return new NuGetPluginDiscoverer(source, this.TryGetGuid() ,this.CredentialProvider);
+            return new NuGetPluginDiscoverer(source, this.CredentialProvider);
         }
 
         public async Task<bool> IsSupportedAsync(PluginSource source)
