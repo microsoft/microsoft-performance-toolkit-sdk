@@ -24,6 +24,8 @@ namespace Microsoft.Performance.SDK.Processing
           ICustomDataProcessorWithSourceParser<T, TContext, TKey>
           where T : IKeyedDataType<TKey>
     {
+        private readonly Lazy<ISourceProcessingSession<T, TContext, TKey>> sourceProcessingSession;
+
         /// <summary>
         /// This constructor will setup the data processor so that it can use the data extension framework - allowing
         /// table and data cookers both internally and external to this plugin.
@@ -42,7 +44,10 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(sourceParser, nameof(sourceParser));
 
             this.SourceParser = sourceParser;
-            this.SourceProcessingSession = this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this);
+
+            this.sourceProcessingSession = new Lazy<ISourceProcessingSession<T, TContext, TKey>>(
+                () => this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this),
+                LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         /// <summary>
@@ -64,7 +69,8 @@ namespace Microsoft.Performance.SDK.Processing
         public ISourceParser<T, TContext, TKey> SourceParser { get; }
 
         /// <inheritdoc cref="ICustomDataProcessorWithSourceParser{T,TContext,TKey}"/>
-        public ISourceProcessingSession<T, TContext, TKey> SourceProcessingSession { get; }
+        public ISourceProcessingSession<T, TContext, TKey> SourceProcessingSession
+            => this.sourceProcessingSession.Value;
 
         /// <inheritdoc cref="ICustomDataProcessorWithSourceParser"/>
         public string SourceParserId => this.SourceParser.Id;
