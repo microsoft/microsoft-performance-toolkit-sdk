@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
@@ -48,7 +46,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core
         /// </summary>
         public AvailablePluginInfo AvailablePluginInfo { get; }
 
-
         /// <summary>
         ///     Gets the metadata of this plugin.
         /// </summary>
@@ -63,34 +60,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core
             return this.pluginDiscoverer.GetPluginMetadataAsync(this.AvailablePluginInfo.Identity, cancellationToken);
         }
 
-        /// <summary>
-        ///     Gets all available versions of this plugin.
-        /// </summary>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///      A collection of available plugins.
-        /// </returns>
-        public async Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersions(CancellationToken cancellationToken)
-        {
-            IReadOnlyCollection<AvailablePluginInfo> pluginInfos = await this.pluginDiscoverer.DiscoverAllVersionsOfPlugin(
-                this.AvailablePluginInfo.Identity, cancellationToken);
-
-            return pluginInfos.Select(info => new AvailablePlugin(info, this.pluginDiscoverer, this.pluginFetcher)).ToList();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of plugin installation.
-        /// </param>
-        /// <returns></returns>
-        public Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
+        internal Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
         {
             return this.pluginFetcher.GetPluginStreamAsync(this.AvailablePluginInfo, cancellationToken, progress);
         }

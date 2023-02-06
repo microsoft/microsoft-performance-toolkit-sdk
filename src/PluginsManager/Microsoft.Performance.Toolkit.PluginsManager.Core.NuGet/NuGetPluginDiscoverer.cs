@@ -65,7 +65,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
                 {
                     var pluginId = new PluginIdentity(packageMetadata.Identity.Id, packageMetadata.Identity.Version.Version);
 
-                    // TODO: #249 serialize/deserialize - fetcher resource id should be provided by nuget
+                    // TODO: #249 serialize/deserialize - fetcher resource id and package uri should be provided by nuget
                     var plugin = new AvailablePluginInfo(
                         pluginId,
                         this.pluginSource,
@@ -81,12 +81,12 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
             return result;
         }
 
-        public async Task<IReadOnlyCollection<AvailablePluginInfo>> DiscoverPluginsLatestAsync(
+        public async Task<IReadOnlyDictionary<string, AvailablePluginInfo>> DiscoverPluginsLatestAsync(
             CancellationToken cancellationToken)
         {
             PackageSearchResource searchResource = await this.repository.GetResourceAsync<PackageSearchResource>(cancellationToken);
 
-            var result = new List<AvailablePluginInfo>();
+            var result = new Dictionary<string, AvailablePluginInfo>();
             IEnumerable<IPackageSearchMetadata> packages = await searchResource.SearchAsync(null, new SearchFilter(false), 0, PageCount, this.logger, cancellationToken);
 
             int sourceSearchPackageCount = 0;
@@ -101,7 +101,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 
                 var pluginIdentity = new PluginIdentity(packageMetadata.Identity.Id, packageMetadata.Identity.Version.Version);
 
-                // TODO: #249 serialize/deserialize - fetcher resource id should be provided by nuget
+                // TODO: #249 serialize/deserialize - fetcher resource id and package uri should be provided by nuget
                 var plugin = new AvailablePluginInfo(
                         pluginIdentity,
                         this.pluginSource,
@@ -110,7 +110,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
                         this.pluginSource.Uri,
                         FetcherResourceId);
 
-                result.Add(plugin);
+                result.Add(pluginIdentity.Id, plugin);
             }
 
             return result;

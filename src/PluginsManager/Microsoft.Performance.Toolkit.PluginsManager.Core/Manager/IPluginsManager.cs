@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 {
@@ -65,5 +64,42 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     The directory to load resource assemblies from.
         /// </param>
         void LoadAdditionalPluginResources(string directory);
+
+
+        /// <summary>
+        ///     Gets all available versions of a plugin by discovering from all plugin sources.
+        /// </summary>
+        /// <param name="pluginIdentity">
+        ///     The identity of the target plugin.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A collection of available plugins.
+        /// </returns>
+        Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginAsync(
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Gets all available versions of a plugin from a particular source.
+        /// </summary>
+        /// <param name="source">
+        ///     The plugin source to discover plugins from.
+        /// </param>
+        /// <param name="pluginIdentity">
+        ///     The identity of the target plugin.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A collection of available plugins.
+        /// </returns>
+        Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginFromSourceAsync(
+            PluginSource source,
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken);
     }
 }

@@ -15,7 +15,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
     /// </summary>
     public sealed class DiscoverersManager : IDisposable
     {
-        private readonly ResourceRepository<IPluginDiscovererProvider> repository;
+        private readonly IResourceRepository<IPluginDiscovererProvider> repository;
         private readonly DiscoverersFactory discoverersFactory;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
 
@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         ///     A factory for creating <see cref="IPluginDiscoverer" /> instances.
         /// </param>
         public DiscoverersManager(
-            ResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
+            IResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
             DiscoverersFactory discoverersFactory) 
         {
             this.repository = discovererProviderRepository;
@@ -95,7 +95,10 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
                     continue;
                 }
 
-                IEnumerable<IPluginDiscoverer> discoverers = await this.discoverersFactory.CreateDiscoverers(source, this.repository.PluginResources);
+                IEnumerable<IPluginDiscoverer> discoverers = await this.discoverersFactory.CreateDiscoverers(
+                    source,
+                    this.repository.PluginResources);
+
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
             }
         }
@@ -119,7 +122,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         }
 
         /// <summary>
-        ///     Dispose resources held by this class.
+        ///     Disposes resources held by this class.
         /// </summary>
         public void Dispose()
         {

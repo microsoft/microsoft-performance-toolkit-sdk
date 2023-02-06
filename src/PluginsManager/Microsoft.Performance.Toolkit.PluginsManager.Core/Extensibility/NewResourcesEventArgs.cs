@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility
 {
     /// <summary>
-    ///     Event args for <see cref="ResourceRepository{T}.ResourcesAdded".
+    ///     Event args for <see cref="IResourceRepository{T}.ResourcesAdded".
     /// </summary>
     /// <typeparam name="T">
     ///     Resource type.

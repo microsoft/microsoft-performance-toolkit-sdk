@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,39 +18,38 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
     {
         private readonly IPluginManagerResourceLoader resourceLoader;
 
-        private readonly ResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
-        private readonly ResourceRepository<IPluginFetcher> pluginFetcherRepository;
+        private readonly IResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
+        private readonly IResourceRepository<IPluginFetcher> pluginFetcherRepository;
 
         private readonly DiscoverersManager discoverersManager;
 
         /// <summary>
         ///     Initializes a plugin manager instance.
         /// </summary>
-        /// <param name="discovererProviders">
-        ///     A collection of discoverer providers.
+        /// <param name="discovererProviderRepo">
+        ///     A repository of discoverer providers.
         /// </param>
-        /// <param name="pluginFetchers">
-        ///     A collection of plugin fetchers.
+        /// <param name="fetcherRepo">
+        ///     A repository of plugin fetchers.
         /// </param>
         /// <param name="resourceLoader">
         ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
         /// </param>
         public PluginsManager(
-            IEnumerable<IPluginDiscovererProvider> discovererProviders,
-            IEnumerable<IPluginFetcher> pluginFetchers,
+            IResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
+            IResourceRepository<IPluginFetcher> fetcherRepo,
             IPluginManagerResourceLoader resourceLoader)
         {
             this.resourceLoader = resourceLoader;
-            
-            this.discovererProviderRepository = 
-                new ResourceRepository<IPluginDiscovererProvider>(discovererProviders);
+
+            this.discovererProviderRepository = discovererProviderRepo;
 
             this.discoverersManager = new DiscoverersManager(
                 this.discovererProviderRepository,
                 new DiscoverersFactory());
 
 
-            this.pluginFetcherRepository = new ResourceRepository<IPluginFetcher>(pluginFetchers);
+            this.pluginFetcherRepository = fetcherRepo;
 
             this.resourceLoader.Subscribe(this.discovererProviderRepository);
             this.resourceLoader.Subscribe(this.pluginFetcherRepository);
@@ -59,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
         /// <inheritdoc />
         public IEnumerable<PluginSource> PluginSources
-        { 
+        {
             get
             {
                 return this.discoverersManager.PluginSources;
@@ -88,17 +86,40 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(
             CancellationToken cancellationToken)
         {
-            var results = new List<AvailablePlugin>();
-
-            foreach (PluginSource pluginSource in this.PluginSources)
+            var tasks = Task.WhenAll(this.PluginSources.Select(s => GetAvailablePluginsLatestFromSourceAsync(s, cancellationToken)));
+            try
             {
-                IReadOnlyCollection<AvailablePlugin> plugins = await GetAvailablePluginsLatestFromSourceAsync(pluginSource, cancellationToken);
-                results.AddRange(plugins);
+                await tasks;
+            }
+            catch
+            {
+                throw tasks.Exception;
             }
 
-            return results;
+            // The below code combines plugins discovered from all plugin sources.
+            // For each discovered plugin, the latest version across all sources will be returned.
+            // For now, we assume:
+            //      1. Duplicates (plugins with same id and version) maybe be discovered from different sources.
+            //      2. In the case when duplicated "lastest" are discovered, only one of the duplicates will be returned.
+            var results = new Dictionary<string, AvailablePlugin>();
+            foreach (IReadOnlyCollection<AvailablePlugin> taskResult in tasks.Result)
+            {
+                IEnumerable<KeyValuePair<string, AvailablePlugin>> kvps = taskResult
+                    .Select(p => new KeyValuePair<string, AvailablePlugin>(p.AvailablePluginInfo.Identity.Id, p));
+
+                results.Union(kvps)
+                       .GroupBy(g => g.Key)
+                       .ToDictionary(g => g.Key, g => g.Select(kvp => kvp.Value)
+                                                       .OrderByDescending(x => x.AvailablePluginInfo.Identity.Version)
+                                                       .ThenBy(x=>x.AvailablePluginInfo.PluginSource.Uri)
+                                                       .ThenBy(x=>x.AvailablePluginInfo.PluginSource.Uri)
+                                                       .First());
+            }
+
+            return results.Values;
         }
 
+        /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestFromSourceAsync(
             PluginSource source,
             CancellationToken cancellationToken)
@@ -110,18 +131,117 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            var results = new List<AvailablePlugin>();
-            foreach (IPluginDiscoverer discoverer in this.discoverersManager.GetDiscoverersFromSource(source).AsQueryable())
+            IPluginDiscoverer[] discoverers = this.discoverersManager.GetDiscoverersFromSource(source).ToArray();
+
+            var tasks = Task.WhenAll(discoverers.Select(d => d.DiscoverPluginsLatestAsync(cancellationToken)));
+            try
             {
-                foreach(AvailablePluginInfo info in await discoverer.DiscoverPluginsLatestAsync(cancellationToken))
+                await tasks;
+            }
+            catch
+            {
+                throw tasks.Exception;
+            }
+
+            // The below code combines plugins discovered from the same plugin source but by different discoverers.
+            // If more than one available plugin with the same identity are discovered, exception should be thrown.
+            var results = new Dictionary<string, AvailablePlugin>();
+            for (int i = 0; i < tasks.Result.Length; i++)
+            {
+                IPluginDiscoverer discoverer = discoverers[i];
+                
+                foreach (KeyValuePair<string, AvailablePluginInfo> kvp in tasks.Result[i])
                 {
-                    IPluginFetcher fetcher = await GetPluginFetcher(info);
-                    var AvailablePlugin = new AvailablePlugin(info, discoverer, fetcher);
-                    results.Add(AvailablePlugin);
+                    string id = kvp.Key;
+                    AvailablePluginInfo pluginInfo = kvp.Value;
+
+                    if (!results.TryGetValue(id, out AvailablePlugin availablePlugin) ||
+                        availablePlugin.AvailablePluginInfo.Identity.Version < pluginInfo.Identity.Version)
+                    {
+
+                        IPluginFetcher fetcher = await GetPluginFetcher(pluginInfo);
+                        var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                        results[id] = newPlugin;
+                    }
+                    else if (availablePlugin.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
+                    {
+                        throw new InvalidOperationException
+                            ($"Duplicated plugins identity {pluginInfo.Identity.Id}-{pluginInfo.Identity.Version}, " +
+                            $"found from source {source.Uri}");
+                    }
                 }
             }
 
-            return results;
+            return results.Values;
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginAsync(
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken)
+        {
+            var tasks = Task.WhenAll(this.PluginSources.Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken)));
+            try
+            {
+                await tasks;
+            }
+            catch
+            {
+                throw tasks.Exception;
+            }
+
+            // The below code combines versions of plugin discovered from all plugin sources.
+            // For now, we assume:
+            //      1. Duplicates (same version) maybe discovered from different sources.
+            //      2. In the case when duplicated versions are discovered, only one of them will be returned.
+            var results = tasks.Result.SelectMany(x => x)
+                                .GroupBy(x => x.AvailablePluginInfo.Identity)
+                                .ToDictionary(g => g.Key, g => g.OrderBy(x => x.AvailablePluginInfo.PluginSource.Uri)
+                                                                .First());
+
+            return results.Values;
+        }
+
+        /// <inheritdoc />
+        public async Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginFromSourceAsync(
+            PluginSource source,
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken)
+        {
+            IPluginDiscoverer[] discoverers = this.discoverersManager.GetDiscoverersFromSource(source).ToArray();
+            var tasks = Task.WhenAll(discoverers.Select(d => d.DiscoverAllVersionsOfPlugin(pluginIdentity, cancellationToken)));
+
+            try
+            {
+                await tasks;
+            }
+            catch
+            {
+                throw tasks.Exception;
+            }
+
+            // The below code combines plugins discovered from the same plugin source but by different discoverers.
+            // If more than one available plugin with the same identity are discovered, exception should be thrown.
+            var results = new Dictionary<PluginIdentity, AvailablePlugin>();     
+            for (int i = 0; i < discoverers.Length; i++)
+            {
+                IPluginDiscoverer discoverer = discoverers[i];
+                foreach (AvailablePluginInfo pluginInfo in tasks.Result[i])
+                {
+                    if (results.ContainsKey(pluginInfo.Identity))
+                    {
+                        throw new InvalidOperationException
+                            ($"Duplicated plugins identity {pluginInfo.Identity.Id}-{pluginInfo.Identity.Version}, " +
+                            $"found from source {source.Uri}");
+                    }
+
+                    IPluginFetcher fetcher = await GetPluginFetcher(pluginInfo);
+                    var availablePlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                    results[pluginInfo.Identity] = availablePlugin; 
+                }
+            }
+
+            return results.Values;
         }
 
         private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePlugin)

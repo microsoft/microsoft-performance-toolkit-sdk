@@ -10,7 +10,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility
     {
         /// <summary>
         ///     Tries to load <see cref="IPluginManagerResource"/>s from the given directory
-        ///     to the subscribed <see cref="ResourceRepository{T}">s.
+        ///     to the subscribed <see cref="IResourceRepository{T}">s.
         /// <param name="directory">
         ///     The directoty to load resouces from.
         /// </param>
@@ -21,31 +21,31 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility
         bool TryLoad(string directory);
 
         /// <summary>
-        ///     Registers a <see cref="ResourceRepository{T}"/> to receive all future loaded resources.
+        ///     Registers a <see cref="IResourceRepository{T}"/> to receive all future loaded resources.
         /// </summary>
         /// <typeparam name="T">
         ///     The type of the resources stored in the given <paramref name="resourceRepository"/>.
         /// </typeparam>
         /// <param name="resourceRepository">
-        ///     The <see cref="ResourceRepository{T}"/> to be registered to this loader.
+        ///     The <see cref="IResourceRepository{T}"/> to be registered to this loader.
         /// </param>
         /// <returns>
         ///     Whether or not the <paramref name="resourceRepository"/> is successfully subscribed.
         /// </returns>
-        bool Subscribe<T>(ResourceRepository<T> resourceRepository) where T : IPluginManagerResource;
+        bool Subscribe<T>(IResourceRepository<T> resourceRepository) where T : class, IPluginManagerResource;
 
         /// <summary>
-        ///     Unregisters a <see cref="ResourceRepository{T}"/> from receiving future loaded resources.
+        ///     Unregisters a <see cref="IResourceRepository{T}"/> from receiving future loaded resources.
         /// </summary>
         /// <typeparam name="T">
         ///     The type of the resources stored in the given <paramref name="resourceRepository"/>.
         /// </typeparam>
         /// <param name="resourceRepository">
-        ///     The <see cref="ResourceRepository{T}"/> to be unregistered from this loader.
+        ///     The <see cref="IResourceRepository{T}"/> to be unregistered from this loader.
         /// </param>
         /// <returns>
         ///     Whether or not the <paramref name="resourceRepository"/> is successfully unsubscribed.
         /// </returns>
-        bool Unsubscribe<T>(ResourceRepository<T> resourceRepository) where T: IPluginManagerResource;
+        bool Unsubscribe<T>(IResourceRepository<T> resourceRepository) where T : class, IPluginManagerResource;
     }
 }
