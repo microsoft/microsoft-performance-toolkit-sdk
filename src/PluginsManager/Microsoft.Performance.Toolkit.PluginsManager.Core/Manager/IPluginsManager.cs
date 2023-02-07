@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 {
@@ -58,27 +58,48 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Gets all available versions of a given plugin.
-        /// </summary>
-        /// <param name="availablePlugin">
-        ///     A discovered plugin.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     A cancellation token.
-        /// </param>
-        /// <returns>
-        ///     A collection of available plugins.
-        /// </returns>
-        Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPlugin(
-            AvailablePlugin availablePlugin,
-            CancellationToken cancellationToken);
-
-        /// <summary>
         ///     Loads additional <see cref="IPluginManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
         /// </summary>
         /// <param name="directory">
         ///     The directory to load resource assemblies from.
         /// </param>
         void LoadAdditionalPluginResources(string directory);
+
+
+        /// <summary>
+        ///     Gets all available versions of a plugin by discovering from all plugin sources.
+        /// </summary>
+        /// <param name="pluginIdentity">
+        ///     The identity of the target plugin.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A collection of available plugins.
+        /// </returns>
+        Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginAsync(
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Gets all available versions of a plugin from a particular source.
+        /// </summary>
+        /// <param name="source">
+        ///     The plugin source to discover plugins from.
+        /// </param>
+        /// <param name="pluginIdentity">
+        ///     The identity of the target plugin.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A collection of available plugins.
+        /// </returns>
+        Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginFromSourceAsync(
+            PluginSource source,
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken);
     }
 }
