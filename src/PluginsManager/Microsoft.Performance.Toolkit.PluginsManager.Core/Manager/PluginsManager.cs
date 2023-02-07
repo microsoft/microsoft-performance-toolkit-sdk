@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -278,20 +277,20 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
-            if (await this.pluginInstaller.IsInstalledAsync(availablePlugin.Identity.Id, cancellationToken))
+            var pluginId = availablePlugin.AvailablePluginInfo.Identity.Id;
+
+            if (await this.pluginInstaller.IsInstalledAsync(pluginId, cancellationToken))
             {
-                throw new InvalidOperationException($"A version of plugin {availablePlugin.Identity.Id} is already installed.");
+                throw new InvalidOperationException($"A version of plugin {pluginId} is already installed.");
             }
 
-            IPluginFetcher pluginFetcher = await GetPluginFetcher(availablePlugin);
-            
-            using (Stream stream = await pluginFetcher.GetPluginStreamAsync(availablePlugin, cancellationToken, progress))
+            using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
             using (var pluginPackage = new PluginPackage(stream))
             {
                 return await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
                     this.installationDir,
-                    availablePlugin.PluginPackageUri,
+                    availablePlugin.AvailablePluginInfo.PluginPackageUri,
                     cancellationToken,
                     progress);
             }
@@ -347,20 +346,18 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
             Guard.NotNull(targetPlugin, nameof(targetPlugin));
 
-            if (installedPlugin.Id != targetPlugin.Identity.Id || installedPlugin.Version == targetPlugin.Identity.Version)
+            if (installedPlugin.Id != targetPlugin.AvailablePluginInfo.Identity.Id || installedPlugin.Version == targetPlugin.AvailablePluginInfo.Identity.Version)
             {
                 throw new ArgumentException("Target plugin must have a same id but different version.");
             }
 
-            IPluginFetcher pluginFetcher = await GetPluginFetcher(targetPlugin);
-
-            using (Stream stream = await pluginFetcher.GetPluginStreamAsync(targetPlugin, cancellationToken, progress))
+            using (Stream stream = await targetPlugin.GetPluginPackageStream(cancellationToken, progress))
             using (var pluginPackage = new PluginPackage(stream))
             {
                 return await this.pluginInstaller.UpdatePluginAsync(
                     installedPlugin,
                     pluginPackage,
-                    targetPlugin.PluginSource.Uri,
+                    targetPlugin.AvailablePluginInfo.PluginSource.Uri,
                     cancellationToken,
                     progress);
             }

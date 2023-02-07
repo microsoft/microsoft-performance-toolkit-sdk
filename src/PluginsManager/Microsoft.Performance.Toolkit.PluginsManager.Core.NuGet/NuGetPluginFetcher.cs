@@ -21,7 +21,7 @@ using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
-    [PluginManagerResource(PluginManagerConstants.NuGetFetcherId)]
+    [PluginManagerResource(PluginsManagerConstants.NuGetFetcherId)]
     public sealed class NuGetPluginFetcher : IPluginFetcher
     {
         public async Task<bool> IsSupportedAsync(AvailablePluginInfo plugin)
