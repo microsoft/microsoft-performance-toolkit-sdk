@@ -9,7 +9,7 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
 {
     /// <summary>
-    ///    A discoverer that is capable of discovering <see cref="AvailablePlugin"/>.
+    ///    A discoverer that is capable of discovering <see cref="AvailablePluginInfo"/>.
     /// </summary>
     public interface IPluginDiscoverer
     {
@@ -20,10 +20,10 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     A collection of plugins that are discovered.
+        ///     The <see cref="AvailablePluginInfo"/> of all discovered plugin grouped by plugin identifiers.
         /// </returns>
         /// TODO: Add search
-        Task<IReadOnlyCollection<AvailablePlugin>> DiscoverPluginsLatestAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyDictionary<string, AvailablePluginInfo>> DiscoverPluginsLatestAsync(CancellationToken cancellationToken);
 
         /// <summary>
         ///     Discovers all versions of the given plugin.
@@ -34,9 +34,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     All versions of the plugin discovered.
+        ///     The <see cref="AvailablePluginInfo"/> of all versions of the given plugin.
         /// </returns>
-        Task<IReadOnlyCollection<AvailablePlugin>> DiscoverAllVersionsOfPlugin(
+        Task<IReadOnlyCollection<AvailablePluginInfo>> DiscoverAllVersionsOfPlugin(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
 
