@@ -18,8 +18,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
     {
         private readonly IPluginManagerResourceLoader resourceLoader;
 
-        private readonly IResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
-        private readonly IResourceRepository<IPluginFetcher> pluginFetcherRepository;
+        private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
+        private readonly IPluginManagerResourceRepository<IPluginFetcher> pluginFetcherRepository;
 
         private readonly DiscoverersManager discoverersManager;
 
@@ -36,8 +36,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
         /// </param>
         public PluginsManager(
-            IResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
-            IResourceRepository<IPluginFetcher> fetcherRepo,
+            IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
+            IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
             IPluginManagerResourceLoader resourceLoader)
         {
             this.resourceLoader = resourceLoader;

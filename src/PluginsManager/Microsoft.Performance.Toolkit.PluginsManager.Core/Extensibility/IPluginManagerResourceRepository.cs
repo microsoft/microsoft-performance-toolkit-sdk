@@ -12,7 +12,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility
     /// <typeparam name="T">
     ///     The type of the resources stored in this repository.
     /// </typeparam>
-    public interface IResourceRepository<T>
+    public interface IPluginManagerResourceRepository<T>
         where T : class, IPluginManagerResource
     {
         /// <summary>

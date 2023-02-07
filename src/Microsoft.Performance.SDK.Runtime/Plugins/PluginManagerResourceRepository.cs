@@ -10,19 +10,19 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
 namespace Microsoft.Performance.SDK.Runtime.Plugins
 {
     /// <inheritdoc />
-    public class ResourceRepository<T>
-        : IResourceRepository<T>
+    public class PluginManagerResourceRepository<T>
+        : IPluginManagerResourceRepository<T>
         where T : class, IPluginManagerResource
     {
         private readonly HashSet<T> resources;
 
         /// <summary>
-        ///     Initializes a <see cref="ResourceRepository{T}"/> with an existing collection of <paramref name="resources"/>.
+        ///     Initializes a <see cref="PluginManagerResourceRepository{T}"/> with an existing collection of <paramref name="resources"/>.
         /// </summary>
         /// <param name="resources">
         ///     A collection of <see cref="IPluginManagerResource"s of type <see cref="T"/>.
         /// </param>
-        public ResourceRepository(IEnumerable<T> resources)
+        public PluginManagerResourceRepository(IEnumerable<T> resources)
         {
             this.resources = new HashSet<T>(resources, PluginManagerResourceComparer.Instance);
         }

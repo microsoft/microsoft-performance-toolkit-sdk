@@ -15,7 +15,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
     /// </summary>
     public sealed class DiscoverersManager : IDisposable
     {
-        private readonly IResourceRepository<IPluginDiscovererProvider> repository;
+        private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> repository;
         private readonly DiscoverersFactory discoverersFactory;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
 
@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         ///     A factory for creating <see cref="IPluginDiscoverer" /> instances.
         /// </param>
         public DiscoverersManager(
-            IResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
+            IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
             DiscoverersFactory discoverersFactory) 
         {
             this.repository = discovererProviderRepository;
