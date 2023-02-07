@@ -4,12 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
-  </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Loading\" />
+    <ProjectReference Include="..\..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
   </ItemGroup>
 
   <ItemGroup>
