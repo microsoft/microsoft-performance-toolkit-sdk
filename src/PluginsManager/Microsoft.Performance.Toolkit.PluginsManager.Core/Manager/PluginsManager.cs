@@ -111,8 +111,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                        .GroupBy(g => g.Key)
                        .ToDictionary(g => g.Key, g => g.Select(kvp => kvp.Value)
                                                        .OrderByDescending(x => x.AvailablePluginInfo.Identity.Version)
-                                                       .ThenBy(x=>x.AvailablePluginInfo.PluginSource.Uri)
-                                                       .ThenBy(x=>x.AvailablePluginInfo.PluginSource.Uri)
+                                                       .ThenBy(x => x.AvailablePluginInfo.PluginSource.Uri)
                                                        .First());
             }
 
@@ -144,12 +143,12 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             }
 
             // The below code combines plugins discovered from the same plugin source but by different discoverers.
-            // If more than one available plugin with the same identity are discovered, exception should be thrown.
+            // If more than one available plugin with the same identity are discovered, the first of them will be returned.
             var results = new Dictionary<string, AvailablePlugin>();
             for (int i = 0; i < tasks.Result.Length; i++)
             {
                 IPluginDiscoverer discoverer = discoverers[i];
-                
+
                 foreach (KeyValuePair<string, AvailablePluginInfo> kvp in tasks.Result[i])
                 {
                     string id = kvp.Key;
@@ -165,9 +164,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                     }
                     else if (availablePlugin.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
                     {
-                        throw new InvalidOperationException
-                            ($"Duplicated plugins identity {pluginInfo.Identity.Id}-{pluginInfo.Identity.Version}, " +
-                            $"found from source {source.Uri}");
+                        // TODO: Log a warning for discovering duplicates.
                     }
                 }
             }
@@ -221,8 +218,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             }
 
             // The below code combines plugins discovered from the same plugin source but by different discoverers.
-            // If more than one available plugin with the same identity are discovered, exception should be thrown.
-            var results = new Dictionary<PluginIdentity, AvailablePlugin>();     
+            // If more than one available plugin with the same identity are discovered, the first of them will be returned.
+            var results = new Dictionary<PluginIdentity, AvailablePlugin>();
             for (int i = 0; i < discoverers.Length; i++)
             {
                 IPluginDiscoverer discoverer = discoverers[i];
@@ -230,14 +227,13 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                 {
                     if (results.ContainsKey(pluginInfo.Identity))
                     {
-                        throw new InvalidOperationException
-                            ($"Duplicated plugins identity {pluginInfo.Identity.Id}-{pluginInfo.Identity.Version}, " +
-                            $"found from source {source.Uri}");
+                        // TODO: Log a warning for discovering duplicates.
+                        continue;
                     }
 
                     IPluginFetcher fetcher = await GetPluginFetcher(pluginInfo);
                     var availablePlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                    results[pluginInfo.Identity] = availablePlugin; 
+                    results[pluginInfo.Identity] = availablePlugin;
                 }
             }
 
