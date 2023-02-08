@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             this.Description = description;
             this.InstallPath = installPath;
             this.InstalledOn = installedOn;
-            this.Hash = hash;
+            this.Checksum = hash;
         }
 
         /// <summary>
@@ -68,9 +68,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         public DateTimeOffset InstalledOn { get; }
 
         /// <summary>
-        ///     Gets the hash of the installed plugin.
+        ///     Gets the checksum of the installed plugin.
         /// </summary>
-        public string Hash { get; }
+        public string Checksum { get; }
 
         /// <inheritdoc />
         public bool Equals(InstalledPlugin other)
@@ -92,7 +92,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                    string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(this.InstallPath, other.InstallPath, StringComparison.OrdinalIgnoreCase) &&
                    DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn) &&
-                   string.Equals(this.Hash, other.Hash);
+                   string.Equals(this.Checksum, other.Checksum);
         }
     }
 }

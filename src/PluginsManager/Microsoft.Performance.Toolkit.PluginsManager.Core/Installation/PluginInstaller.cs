@@ -11,7 +11,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Utils;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 {
