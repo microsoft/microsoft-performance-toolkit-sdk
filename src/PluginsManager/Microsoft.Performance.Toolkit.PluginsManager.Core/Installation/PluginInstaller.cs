@@ -28,7 +28,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         public async Task<IReadOnlyCollection<InstalledPlugin>> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken)
         {
-            using (this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 return await this.pluginRegistry.GetInstalledPlugins();
             }  
@@ -41,7 +41,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            using (this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 InstalledPlugin installedPlugin = await InstallPluginPackageCoreAsync(
                     pluginPackage,
@@ -61,7 +61,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            using (this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 return await this.pluginRegistry.UnregisterPluginAsync(installedPlugin);
             }
@@ -79,7 +79,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
             string installationDir = Directory.GetParent(currentPlugin.InstallPath)?.FullName;
 
-            using (this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 InstalledPlugin newInstalledPlugin = await InstallPluginPackageCoreAsync(
                   targetPlugin,

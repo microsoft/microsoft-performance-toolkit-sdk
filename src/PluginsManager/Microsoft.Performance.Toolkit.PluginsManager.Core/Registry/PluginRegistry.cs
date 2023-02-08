@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
@@ -57,7 +58,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
             if (installedPlugins.Any(p => p.Id.Equals(plugin.Id)))
             {
-                throw new InvalidOperationException("Plugin already registered.");
+                throw new InvalidOperationException($"Plugin already registered.{plugin.Id} {plugin.Version}");
             }
 
             installedPlugins.Add(plugin);
@@ -165,32 +166,58 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             this.lockToken = null;
         }
 
-        private Task<List<InstalledPlugin>> ReadInstalledPlugins()
+        private async Task<List<InstalledPlugin>> ReadInstalledPlugins()
         {
             if (!File.Exists(this.registryFilePath))
             {
-                return Task.FromResult(new List<InstalledPlugin>());
+                return new List<InstalledPlugin>();
             }
             
             using (var stream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read))
             {
                 // TODO: #255 Refatcor to a serialization/deserialization class
-                return JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(stream).AsTask();
+                return await JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(stream);
             }
         }
 
-        private Task WriteInstalledPlugins(IEnumerable<InstalledPlugin> installedPlugins)
+        private async Task WriteInstalledPlugins(IEnumerable<InstalledPlugin> installedPlugins)
         {
             Directory.CreateDirectory(this.RegistryRoot);
 
             using (var registryFileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
             {
                 // TODO: #255 Refatcor to a serialization/deserialization class
-                return JsonSerializer.SerializeAsync(
+                 await JsonSerializer.SerializeAsync(
                    registryFileStream,
                    installedPlugins,
-                   typeof(InstalledPlugin[]),
-                   new JsonSerializerOptions { WriteIndented = true });
+                   typeof(IEnumerable<InstalledPlugin>),
+                   new JsonSerializerOptions { 
+                       WriteIndented = true,
+                       Converters =
+                       {
+                           new JsonStringEnumConverter(),
+                           new StringConverter(),
+                       }
+                   });
+            }
+        }
+
+        internal class StringConverter : JsonConverter<Version>
+        {
+            public override Version Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.String)
+                {
+                    string stringValue = reader.GetString();
+                    return new Version(stringValue);
+                }
+
+                throw new JsonException();
+            }
+
+            public override void Write(Utf8JsonWriter writer, Version value, JsonSerializerOptions options)
+            {
+                writer.WriteStringValue(value.ToString());
             }
         }
     }

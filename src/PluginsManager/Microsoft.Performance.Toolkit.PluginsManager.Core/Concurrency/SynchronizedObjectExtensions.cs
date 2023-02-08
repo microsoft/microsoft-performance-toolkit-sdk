@@ -26,9 +26,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency
         /// <returns>
         ///     A disposable object that releases the lock of the <see cref="ISynchronizedObject"/> upon disposal.
         /// </returns>
-        public static IDisposable UseLock(this ISynchronizedObject instance, CancellationToken cancellationToken)
+        public static async Task<IDisposable> UseLock(this ISynchronizedObject instance, CancellationToken cancellationToken)
         {
-            return UseLockScope.CreateAsync(instance, cancellationToken);
+            return await UseLockScope.CreateAsync(instance, cancellationToken);
         }
 
         private sealed class UseLockScope

@@ -391,7 +391,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                 return;
             }
 
-            using (this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 List<InstalledPlugin> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
@@ -400,7 +400,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                 {
                     if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
                     {
-                        dir.Delete();
+                        dir.Delete(true);
                     }
                 }
             }
