@@ -107,7 +107,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
                 IEnumerable<KeyValuePair<string, AvailablePlugin>> kvps = taskResult
                     .Select(p => new KeyValuePair<string, AvailablePlugin>(p.AvailablePluginInfo.Identity.Id, p));
 
-                results.Union(kvps)
+                results = results.Union(kvps)
                        .GroupBy(g => g.Key)
                        .ToDictionary(g => g.Key, g => g.Select(kvp => kvp.Value)
                                                        .OrderByDescending(x => x.AvailablePluginInfo.Identity.Version)
