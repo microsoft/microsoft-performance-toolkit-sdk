@@ -8,42 +8,42 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
 {
     /// <summary>
-    /// Represents the metadata of a processing source
+    ///     Represents the metadata of a processing source.
     /// </summary>
     public sealed class ProcessingSourceMetadata
     {
         /// <summary>
-        /// The unique identifier for this processing source
+        ///     Gets or sets the unique identifier for this processing source.
         /// </summary>
         public Guid Guid { get; set; }
 
         /// <summary>
-        /// The name of this processing source
+        ///     Gets or sets the name of this processing source.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// The version of this procesing source
+        ///     Gets or sets the version of this procesing source.
         /// </summary>
         public Version Version { get; set; }
 
         /// <summary>
-        /// The description of this processing source
+        ///     Gets or sets the description of this processing source.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// The information about this processing source as specified in <see cref="ProcessingSourceInfo"/>
+        ///     Gets or sets the information about this processing source as specified in <see cref="ProcessingSourceInfo"/>.
         /// </summary>
         public ProcessingSourceInfo AboutInfo { get; set; }
 
         /// <summary>
-        /// The metadata of the tables exposed by this processing source
+        ///     Gets or sets the metadata of the tables exposed by this processing source.
         /// </summary>
         public IEnumerable<TableMetadata> AvailableTables { get; set; }
 
         /// <summary>
-        /// The metadata of the data sources supported by this processing source
+        ///     Gets or sets the metadata of the data sources supported by this processing source.
         /// </summary>
         public IEnumerable<DataSourceMetadata> SupportedDataSources { get; set; }
     }
