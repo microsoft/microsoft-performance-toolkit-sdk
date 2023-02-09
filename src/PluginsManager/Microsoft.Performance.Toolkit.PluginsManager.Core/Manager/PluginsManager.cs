@@ -258,7 +258,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         }
 
         /// <inheritdoc />
-        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPlugins(CancellationToken cancellationToken)
+        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
         {
             return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
         }
@@ -274,14 +274,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
             using (var pluginPackage = new PluginPackage(stream))
             {
-                pluginPackage.PluginMetadata = new PluginMetadata()
-                {
-                    Id = availablePlugin.AvailablePluginInfo.Identity.Id,
-                    Version = availablePlugin.AvailablePluginInfo.Identity.Version,
-                    Description = availablePlugin.AvailablePluginInfo.Description,
-                    DisplayName = availablePlugin.AvailablePluginInfo.DisplayName
-                };
-
                 return await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
                     this.installationDir,
@@ -316,7 +308,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
         /// <inheritdoc />
         public async Task<bool> UninstallPluginAsync(
-            InstalledPluginInfo installedPlugin,
+            InstalledPlugin installedPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
@@ -326,7 +318,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         }
 
         /// <inheritdoc />
-        public async Task CleanupObsoletePlugins(CancellationToken cancellationToken)
+        public async Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken)
         {
             if (!Directory.Exists(this.installationDir))
             {

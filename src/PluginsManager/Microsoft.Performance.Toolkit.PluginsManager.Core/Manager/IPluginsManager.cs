@@ -116,7 +116,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <returns>
         ///     A collection of installed plugins.
         /// </returns>
-        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPlugins(CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
 
         /// <summary>
         ///     Installs an available plugin if no other versions of this plugin installed.
@@ -178,7 +178,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
         /// </returns>
         Task<bool> UninstallPluginAsync(
-            InstalledPluginInfo installedPlugin,
+            InstalledPlugin installedPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
 
@@ -192,6 +192,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <returns>
         ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
         /// </returns>
-        Task CleanupObsoletePlugins(CancellationToken cancellationToken);
+        Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken);
     }
 }

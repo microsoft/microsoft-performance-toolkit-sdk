@@ -15,7 +15,10 @@ using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 {
-    // TODO: #254 docstrings
+    /// <summary>
+    ///     Responsible for the installation and unistallation of plugins to/from a
+    ///     specific plugin registry.
+    /// </summary>
     public sealed class PluginInstaller
     {
         private readonly PluginRegistry pluginRegistry;
@@ -96,7 +99,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
                 if (installedPlugin != null)
                 {
-                    if (installedPlugin.Version.Equals(pluginPackage.Version) && await ValidateInstalledPlugin(installedPlugin))
+                    if (installedPlugin.Version.Equals(pluginPackage.Version) && await ValidateInstalledPluginAsync(installedPlugin))
                     {
                         return true;
                     }
@@ -175,7 +178,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         ///     <c>true</c> if the plugin is successfully unistalled. <c>false</c> otherwise.
         /// </returns>
         public async Task<bool> UninstallPluginAsync(
-            InstalledPluginInfo installedPlugin,
+            InstalledPlugin installedPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
@@ -183,14 +186,19 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
 
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                return await this.pluginRegistry.UnregisterPluginAsync(installedPlugin);
+                if (await VerifyInstalledAsync(installedPlugin.PluginInfo, cancellationToken))
+                {
+                    return await this.pluginRegistry.UnregisterPluginAsync(installedPlugin.PluginInfo);
+                }
+
+                return false;
             }
         }
 
         /// <summary>
-        ///     Verifies the given installed plugin matches the reocrd in the plugin registry.
+        ///     Verifies the given installed plugin info matches the reocrd in the plugin registry.
         /// </summary>
-        /// <param name="installedPlugin">
+        /// <param name="installedPluginInfo">
         ///     An installed plugin.
         /// </param>
         /// <param name="cancellationToken">
@@ -199,19 +207,20 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         /// <returns>
         ///     <c>true</c> if the installed plugin matches the record in the plugin registry. <c>false</c> otherwise.
         /// </returns>
-        public async Task<bool> VerifyInstalledAsync(
-            InstalledPluginInfo installedPlugin,
+        private async Task<bool> VerifyInstalledAsync(
+            InstalledPluginInfo installedPluginInfo,
             CancellationToken cancellationToken)
         {
-            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+            Guard.NotNull(installedPluginInfo, nameof(installedPluginInfo));
 
-            Func<InstalledPluginInfo, bool> predicate = plugin => plugin.Equals(installedPlugin);
+            Func<InstalledPluginInfo, bool> predicate = plugin => plugin.Equals(installedPluginInfo);
             InstalledPluginInfo matchingPlugin = await CheckInstalledCoreAsync(predicate, cancellationToken);
             return matchingPlugin != null;
         }
 
         /// <summary>
-        ///     Checks if any plugin with the given ID has been installed to the plugin registry.
+        ///     Checks if any plugin with the given ID has been installed to the plugin registry
+        ///     and returns the matching record.
         /// </summary>
         /// <param name="pluginId">
         ///     A plugin identifier.
@@ -222,7 +231,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         /// <returns>
         ///     <c>true</c> if the plugin is currently installed. <c>false</c> otherwise.
         /// </returns>
-        public async Task<InstalledPluginInfo> GetInstalledPluginIfExistsAsync(
+        private async Task<InstalledPluginInfo> GetInstalledPluginIfExistsAsync(
             string pluginId,
             CancellationToken cancellationToken)
         {
@@ -244,7 +253,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             return matchingPlugin;
         }
 
-        private async Task<bool> ValidateInstalledPlugin(InstalledPluginInfo plugin)
+        private async Task<bool> ValidateInstalledPluginAsync(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 

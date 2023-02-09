@@ -63,6 +63,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             {
                 this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
                 this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
+                this.PluginMetadata = ReadMetadata();
             }
             catch when (!leaveOpen)
             {
@@ -144,7 +145,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
         /// <summary>
         ///     Gets the plugin metadata object.
         /// </summary>
-        public PluginMetadata PluginMetadata { get; set; }
+        public PluginMetadata PluginMetadata { get; }
 
         /// <summary>
         ///     Extracts all files in this package.
