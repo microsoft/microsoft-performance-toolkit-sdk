@@ -10,7 +10,7 @@ using NuGet.Configuration;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
 {
-    [PluginManagerResource(PluginManagerConstants.NuGetDiscovererProviderId)]
+    [PluginManagerResource(PluginsManagerConstants.NuGetDiscovererProviderId)]
     public class NuGetPluginDiscovererProvider 
         : IPluginDiscovererProvider
     {

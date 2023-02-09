@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
         /// <returns>
         ///     The <see cref="AvailablePluginInfo"/> of all discovered plugin grouped by plugin identifiers.
         /// </returns>
-        /// TODO: Add search
+        /// TODO: 243 Add search
         Task<IReadOnlyDictionary<string, AvailablePluginInfo>> DiscoverPluginsLatestAsync(CancellationToken cancellationToken);
 
         /// <summary>

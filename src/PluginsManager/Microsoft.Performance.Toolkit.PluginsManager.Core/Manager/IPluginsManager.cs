@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 {
@@ -36,7 +39,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     Gets all available plugins in their latest versions.
         /// </summary>
         /// <param name="cancellationToken">
-        ///      A cancellation token.
+        ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
         ///     A collection of available plugins.
@@ -49,7 +52,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// <param name="source">
         ///      The source to discover plugins from.
         /// </param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
         /// <returns>
         ///      A collection of available plugins.
         /// </returns>
@@ -101,5 +106,92 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             PluginSource source,
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Gets all installed plugins
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     A collection of installed plugins.
+        /// </returns>
+        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Installs an available plugin if no other versions of this plugin installed.
+        /// </summary>
+        /// <param name="availablePlugin">
+        ///     The available plugin to be installed.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin installation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> InstallAvailablePluginAsync(
+            AvailablePlugin availablePlugin,
+            CancellationToken cancellationToken,
+            IProgress<int> progress);
+
+        /// <summary>
+        ///     Installs a local plugin package.
+        /// </summary>
+        /// <param name="pluginPackagePath">
+        ///     The path to the plugin package to be installed.
+        /// </param>
+        /// <param name="overwriteInstalled">
+        ///     Whether to overwrite the existing plugin if there's one isntalled. 
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin installation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> InstallLocalPluginAsync(
+           string pluginPackagePath,
+           bool overwriteInstalled,
+           CancellationToken cancellationToken,
+           IProgress<int> progress);
+
+        /// <summary>
+        ///     Uninstalls a plugin.
+        /// </summary>
+        /// <param name="installedPlugin">
+        ///     The plugin to be uninstalled.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin uninstallation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
+        /// </returns>
+        Task<bool> UninstallPluginAsync(
+            InstalledPlugin installedPlugin,
+            CancellationToken cancellationToken,
+            IProgress<int> progress);
+
+        /// <summary>
+        ///     Attempts to clean up all obsolete (unreigstered) plugin files.
+        ///     This method should be called safely by plugins consumers.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
+        /// </returns>
+        Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken);
     }
 }

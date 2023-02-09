@@ -6,27 +6,27 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
 {
     /// <summary>
-    /// The information of a plugin owner
+    ///     Gets or sets the information of a plugin owner.
     /// </summary>
     public sealed class PluginOwner
     {
         /// <summary>
-        /// The name of the plugin owner
+        ///     Gets or sets the name of the plugin owner.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// The address of the owner, if any
+        ///     Gets or sets the address of the owner, if any.
         /// </summary>
         public string Address { get; set; }
 
         /// <summary>
-        /// The email addresses of the owner, if any
+        ///     Gets or sets the email addresses of the owner, if any.
         /// </summary>
         public IEnumerable<string> EmailAddresses { get; set; }
 
         /// <summary>
-        /// The phone numbers of the owner, if any
+        ///     Gets or sets the phone numbers of the owner, if any.
         /// </summary>
         public IEnumerable<string> PhoneNumbers { get; set; }
     }
