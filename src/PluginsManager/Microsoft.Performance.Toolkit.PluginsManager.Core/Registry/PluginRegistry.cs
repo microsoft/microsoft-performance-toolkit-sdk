@@ -52,16 +52,16 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
 
         public string RegistryRoot { get; }
 
-        public async Task<List<InstalledPlugin>> GetInstalledPlugins()
+        public async Task<List<InstalledPluginInfo>> GetInstalledPlugins()
         {
             return await ReadInstalledPlugins();
         }
 
-        public async Task<bool> RegisterPluginAsync(InstalledPlugin plugin)
+        public async Task<bool> RegisterPluginAsync(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
-            List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
+            List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
             int installedCount = installedPlugins.Count(p => p.Id.Equals(plugin.Id));
 
             if (installedCount == 1)
@@ -80,11 +80,11 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             return true;
         }
 
-        public async Task<bool> UnregisterPluginAsync(InstalledPlugin plugin)
+        public async Task<bool> UnregisterPluginAsync(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
-            List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
+            List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
             int toRemove = installedPlugins.RemoveAll(p => p.Equals(plugin));
             if (toRemove == 0)
             {
@@ -101,12 +101,12 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             return true;
         }
 
-        public async Task<bool> UpdatePluginAync(InstalledPlugin currentPlugin, InstalledPlugin updatedPlugin)
+        public async Task<bool> UpdatePluginAync(InstalledPluginInfo currentPlugin, InstalledPluginInfo updatedPlugin)
         {
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
             Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
 
-            List<InstalledPlugin> installedPlugins = await ReadInstalledPlugins();
+            List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
             
             // TODO: refactor duplicated code.
             int toRemove = installedPlugins.RemoveAll(p => p.Id == currentPlugin.Id);
@@ -194,21 +194,21 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
             this.lockToken = null;
         }
 
-        private async Task<List<InstalledPlugin>> ReadInstalledPlugins()
+        private async Task<List<InstalledPluginInfo>> ReadInstalledPlugins()
         {
             if (!File.Exists(this.registryFilePath))
             {
-                return new List<InstalledPlugin>();
+                return new List<InstalledPluginInfo>();
             }
             
             using (var stream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read))
             {
                 // TODO: #255 Refatcor to a serialization/deserialization class
-                return await JsonSerializer.DeserializeAsync<List<InstalledPlugin>>(stream);
+                return await JsonSerializer.DeserializeAsync<List<InstalledPluginInfo>>(stream);
             }
         }
 
-        private async Task WriteInstalledPlugins(IEnumerable<InstalledPlugin> installedPlugins)
+        private async Task WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
         {
             Guard.NotNull(installedPlugins, nameof(installedPlugins));
 
@@ -220,7 +220,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Registry
                  await JsonSerializer.SerializeAsync(
                    registryFileStream,
                    installedPlugins,
-                   typeof(IEnumerable<InstalledPlugin>),
+                   typeof(IEnumerable<InstalledPluginInfo>),
                    new JsonSerializerOptions { 
                        WriteIndented = true,
                        Converters =

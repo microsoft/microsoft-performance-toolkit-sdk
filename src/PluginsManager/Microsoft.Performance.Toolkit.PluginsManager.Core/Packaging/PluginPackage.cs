@@ -63,8 +63,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
             {
                 this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
                 this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
-                this.PluginMetadata = ReadMetadata();
-
             }
             catch when (!leaveOpen)
             {
@@ -146,7 +144,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
         /// <summary>
         ///     Gets the plugin metadata object.
         /// </summary>
-        public PluginMetadata PluginMetadata { get; }
+        public PluginMetadata PluginMetadata { get; set; }
 
         /// <summary>
         ///     Extracts all files in this package.
@@ -280,12 +278,15 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
 
             using (Stream stream = entry.Open())
             {
-                if (!PluginMetadata.TryParse(stream, out PluginMetadata metadata))
+                try
                 {
-                    throw new InvalidDataException($"Failed to read metadata from {pluginMetadataFileName}");
+                    PluginMetadata pluginMetadata = PluginMetadata.Parse(stream).GetAwaiter().GetResult();
+                    return pluginMetadata;
                 }
-
-                return metadata;
+                catch (Exception e)
+                {
+                    throw new InvalidDataException($"Failed to read metadata from {pluginMetadataFileName}: {e.Message}");
+                }
             }
         }
 

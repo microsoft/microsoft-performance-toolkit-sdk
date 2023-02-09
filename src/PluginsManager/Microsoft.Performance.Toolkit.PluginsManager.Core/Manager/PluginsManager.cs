@@ -316,33 +316,13 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
         /// <inheritdoc />
         public async Task<bool> UninstallPluginAsync(
-            InstalledPlugin installedPlugin,
+            InstalledPluginInfo installedPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
             return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
-        }
-
-        /// <inheritdoc />
-        public async Task<PluginMetadata> GetInstalledPluginMetadataAsync(InstalledPlugin installedPlugin, CancellationToken cancellationToken)
-        {
-            if (!await this.pluginInstaller.VerifyInstalledAsync(installedPlugin, cancellationToken))
-            {
-                throw new InvalidOperationException($"Plugin {installedPlugin.DisplayName} is no longer installed");
-            }
-
-            string metaDataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
-            using (var stream = new FileStream(metaDataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                if (!PluginMetadata.TryParse(stream, out PluginMetadata metadata))
-                {
-                    throw new InvalidDataException($"Failed to read metadata from {metaDataFileName}");              
-                }
-
-                return metadata;
-            }
         }
 
         /// <inheritdoc />
@@ -355,7 +335,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                List<InstalledPlugin> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
                 var toRemove = new List<string>();
                 foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())

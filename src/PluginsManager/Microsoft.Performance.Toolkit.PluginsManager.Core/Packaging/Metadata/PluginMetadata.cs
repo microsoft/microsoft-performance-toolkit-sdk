@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
@@ -14,23 +15,14 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
     /// </summary>
     public sealed class PluginMetadata
     {
-        public static bool TryParse(Stream jsonStream, out PluginMetadata pluginMetadata)
+        public static async Task<PluginMetadata> Parse(Stream jsonStream)
         {
             Guard.NotNull(jsonStream, nameof(jsonStream));
 
             // TODO: #238 Error handling
-            try
+            using (var doc = JsonDocument.Parse(jsonStream))
             {
-                using (var doc = JsonDocument.Parse(jsonStream))
-                {
-                    pluginMetadata = JsonSerializer.Deserialize<PluginMetadata>(jsonStream);
-                    return pluginMetadata != null;
-                }
-            }
-            catch
-            {
-                pluginMetadata = null;
-                return false;
+                return await JsonSerializer.DeserializeAsync<PluginMetadata>(jsonStream);
             }
         }
 

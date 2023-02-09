@@ -178,25 +178,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
         /// </returns>
         Task<bool> UninstallPluginAsync(
-            InstalledPlugin installedPlugin,
+            InstalledPluginInfo installedPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
-
-        /// <summary>
-        ///     Gets metadata of an installed plugin.
-        /// </summary>
-        /// <param name="installedPlugin">
-        ///     An installed plugin    
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///     Metadata of the given plugin.
-        /// </returns>
-        Task<PluginMetadata> GetInstalledPluginMetadataAsync(
-            InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken);
 
         /// <summary>
         ///     Attempts to clean up all obsolete (unreigstered) plugin files.

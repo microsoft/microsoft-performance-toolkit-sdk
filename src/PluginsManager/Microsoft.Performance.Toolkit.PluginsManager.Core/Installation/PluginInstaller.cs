@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
@@ -44,7 +45,18 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         {
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                return await this.pluginRegistry.GetInstalledPlugins();
+                List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                var tasks = Task.WhenAll(installedPlugins.Select(p => CreateInstalledPluginAsync(p, cancellationToken)));
+                try
+                {
+                    await Task.WhenAll(tasks);
+                }
+                catch
+                {
+                    throw tasks.Exception;
+                }
+
+                return tasks.Result;
             }  
         }
 
@@ -79,7 +91,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 // Check if any version of this plugin is already installed.
-                InstalledPlugin installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
+                InstalledPluginInfo installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
                 bool needsUninstall = false;
 
                 if (installedPlugin != null)
@@ -105,7 +117,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
                     }
 
                     string checksum = await HashUtils.GetDirectoryHash(installationDir);
-                    var pluginToInstall = new InstalledPlugin(
+                    var pluginToInstall = new InstalledPluginInfo(
                         pluginPackage.Id,
                         pluginPackage.Version,
                         sourceUri,
@@ -163,7 +175,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         ///     <c>true</c> if the plugin is successfully unistalled. <c>false</c> otherwise.
         /// </returns>
         public async Task<bool> UninstallPluginAsync(
-            InstalledPlugin installedPlugin,
+            InstalledPluginInfo installedPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
@@ -188,13 +200,13 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         ///     <c>true</c> if the installed plugin matches the record in the plugin registry. <c>false</c> otherwise.
         /// </returns>
         public async Task<bool> VerifyInstalledAsync(
-            InstalledPlugin installedPlugin,
+            InstalledPluginInfo installedPlugin,
             CancellationToken cancellationToken)
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            Func<InstalledPlugin, bool> predicate = plugin => plugin.Equals(installedPlugin);
-            InstalledPlugin matchingPlugin = await CheckInstalledCoreAsync(predicate, cancellationToken);
+            Func<InstalledPluginInfo, bool> predicate = plugin => plugin.Equals(installedPlugin);
+            InstalledPluginInfo matchingPlugin = await CheckInstalledCoreAsync(predicate, cancellationToken);
             return matchingPlugin != null;
         }
 
@@ -210,29 +222,29 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
         /// <returns>
         ///     <c>true</c> if the plugin is currently installed. <c>false</c> otherwise.
         /// </returns>
-        public async Task<InstalledPlugin> GetInstalledPluginIfExistsAsync(
+        public async Task<InstalledPluginInfo> GetInstalledPluginIfExistsAsync(
             string pluginId,
             CancellationToken cancellationToken)
         {
             Guard.NotNull(pluginId, nameof(pluginId));
 
-            Func<InstalledPlugin, bool> predicate = plugin => plugin.Id.Equals(pluginId, StringComparison.OrdinalIgnoreCase);
+            Func<InstalledPluginInfo, bool> predicate = plugin => plugin.Id.Equals(pluginId, StringComparison.OrdinalIgnoreCase);
             return await CheckInstalledCoreAsync(predicate, cancellationToken);
         }
 
-        private async Task<InstalledPlugin> CheckInstalledCoreAsync(
-            Func<InstalledPlugin, bool> predicate,
+        private async Task<InstalledPluginInfo> CheckInstalledCoreAsync(
+            Func<InstalledPluginInfo, bool> predicate,
             CancellationToken cancellationToken)
         {
             Guard.NotNull(predicate, nameof(predicate));
 
-            IReadOnlyCollection<InstalledPlugin> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
-            InstalledPlugin matchingPlugin = installedPlugins.SingleOrDefault(p => predicate(p));
+            IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+            InstalledPluginInfo matchingPlugin = installedPlugins.SingleOrDefault(p => predicate(p));
 
             return matchingPlugin;
         }
 
-        private async Task<bool> ValidateInstalledPlugin(InstalledPlugin plugin)
+        private async Task<bool> ValidateInstalledPlugin(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
@@ -240,6 +252,32 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             string checksum = await HashUtils.GetDirectoryHash(installPath);
 
             return checksum.Equals(plugin.Checksum);
+        }
+
+        private async Task<InstalledPlugin> CreateInstalledPluginAsync(
+            InstalledPluginInfo installedPlugin,
+            CancellationToken cancellationToken)
+        {
+            if (!await VerifyInstalledAsync(installedPlugin, cancellationToken))
+            {
+                throw new InvalidOperationException($"Plugin {installedPlugin.Id}-{installedPlugin.Version} is no longer installed");
+            }
+
+            string metadataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
+            PluginMetadata pluginMetadata = null;
+            using (var stream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                try
+                {
+                    pluginMetadata = await PluginMetadata.Parse(stream);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidDataException($"Failed to read metadata from {metadataFileName}: {e.Message}");
+                }
+            }
+
+            return new InstalledPlugin(installedPlugin, pluginMetadata);
         }
     }
 }
