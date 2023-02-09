@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Text.Json.Serialization;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core
@@ -14,20 +15,21 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core
         /// <summary>
         ///     Initializes an instance of <see cref="AvailablePluginInfo"/>.
         /// </summary>
+        [JsonConstructor]
         public AvailablePluginInfo(
-            PluginIdentity pluginIdentity,
+            PluginIdentity Identity,
             PluginSource pluginSource,
             string displayName,
             string description,
-            Uri packageUri,
-            Guid fetcherTypeId) 
+            Uri pluginPackageUri,
+            Guid fetcherResourceId)
         {
-            this.Identity = pluginIdentity;
+            this.Identity = Identity;
             this.PluginSource = pluginSource;
             this.DisplayName = displayName;
             this.Description = description;
-            this.PluginPackageUri = packageUri;
-            this.FetcherResourceId = fetcherTypeId;
+            this.PluginPackageUri = pluginPackageUri;
+            this.FetcherResourceId = fetcherResourceId;
         }
 
         /// <summary>
