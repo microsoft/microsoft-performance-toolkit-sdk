@@ -119,20 +119,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPlugins(CancellationToken cancellationToken);
 
         /// <summary>
-        ///      Checks if any plugin with the given ID has been installed to the plugin registry.
-        /// </summary>
-        /// <param name="pluginId">
-        ///     A plugin identifier.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the plugin is currently installed. <c>false</c> otherwise.
-        /// </returns>
-        Task<bool> IsPluginInstalled(string pluginId, CancellationToken cancellationToken);
-
-        /// <summary>
         ///     Installs an available plugin if no other versions of this plugin installed.
         /// </summary>
         /// <param name="availablePlugin">
@@ -193,30 +179,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         /// </returns>
         Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress);
-
-        /// <summary>
-        ///     Updates the plugin to another version.
-        /// </summary>
-        /// <param name="installedPlugin">
-        ///     The currently installed plugin.
-        /// </param>
-        /// <param name="targetPlugin">
-        ///     The available plugin to update to.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of plugin uninstallation.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the plugin has been successfully updated. <c>false</c> otherwise.
-        /// </returns>
-        Task<bool> UpdatePluginAsync(
-            InstalledPlugin installedPlugin,
-            AvailablePlugin targetPlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
 

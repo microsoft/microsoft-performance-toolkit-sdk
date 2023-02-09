@@ -20,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             string description,
             string installPath,
             DateTimeOffset installedOn,
-            string hash)
+            string checksum)
         {
             this.Id = id;
             this.Version = version;
@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
             this.Description = description;
             this.InstallPath = installPath;
             this.InstalledOn = installedOn;
-            this.Checksum = hash;
+            this.Checksum = checksum;
         }
 
         /// <summary>

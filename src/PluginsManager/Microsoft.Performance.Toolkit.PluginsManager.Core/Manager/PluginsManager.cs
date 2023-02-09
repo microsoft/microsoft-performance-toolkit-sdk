@@ -264,12 +264,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         }
 
         /// <inheritdoc />
-        public Task<bool> IsPluginInstalled(string pluginId, CancellationToken cancellationToken)
-        {
-            return this.pluginInstaller.IsInstalledAsync(pluginId, cancellationToken);
-        }
-
-        /// <inheritdoc />
         public async Task<bool> InstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
@@ -277,16 +271,17 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
-            var pluginId = availablePlugin.AvailablePluginInfo.Identity.Id;
-
-            if (await this.pluginInstaller.IsInstalledAsync(pluginId, cancellationToken))
-            {
-                throw new InvalidOperationException($"A version of plugin {pluginId} is already installed.");
-            }
-
             using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
             using (var pluginPackage = new PluginPackage(stream))
             {
+                pluginPackage.PluginMetadata = new PluginMetadata()
+                {
+                    Id = availablePlugin.AvailablePluginInfo.Identity.Id,
+                    Version = availablePlugin.AvailablePluginInfo.Identity.Version,
+                    Description = availablePlugin.AvailablePluginInfo.Description,
+                    DisplayName = availablePlugin.AvailablePluginInfo.DisplayName
+                };
+
                 return await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
                     this.installationDir,
@@ -306,14 +301,8 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
 
             string packageFullPath = Path.GetFullPath(pluginPackagePath);
-
             using (var pluginPackage = new PluginPackage(pluginPackagePath))
             {
-                if (!overwriteInstalled && await IsPluginInstalled(pluginPackage.Id, cancellationToken))
-                {
-                    return false;
-                }
-
                 await this.pluginInstaller.InstallPluginAsync(
                     pluginPackage,
                     this.installationDir,
@@ -334,33 +323,6 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
             return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> UpdatePluginAsync(
-            InstalledPlugin installedPlugin,
-            AvailablePlugin targetPlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
-        {
-            Guard.NotNull(installedPlugin, nameof(installedPlugin));
-            Guard.NotNull(targetPlugin, nameof(targetPlugin));
-
-            if (installedPlugin.Id != targetPlugin.AvailablePluginInfo.Identity.Id || installedPlugin.Version == targetPlugin.AvailablePluginInfo.Identity.Version)
-            {
-                throw new ArgumentException("Target plugin must have a same id but different version.");
-            }
-
-            using (Stream stream = await targetPlugin.GetPluginPackageStream(cancellationToken, progress))
-            using (var pluginPackage = new PluginPackage(stream))
-            {
-                return await this.pluginInstaller.UpdatePluginAsync(
-                    installedPlugin,
-                    pluginPackage,
-                    targetPlugin.AvailablePluginInfo.PluginSource.Uri,
-                    cancellationToken,
-                    progress);
-            }
         }
 
         /// <inheritdoc />
