@@ -27,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
         private readonly ILogger logger;
         private readonly Lazy<ICredentialProvider> credentialProvider;
 
-        public static readonly Guid FetcherResourceId = Guid.Parse(PluginManagerConstants.NuGetFetcherId);
+        public static readonly Guid FetcherResourceId = Guid.Parse(PluginsManagerConstants.NuGetFetcherId);
         public static readonly int PageCount = 20;
 
         public NuGetPluginDiscoverer(

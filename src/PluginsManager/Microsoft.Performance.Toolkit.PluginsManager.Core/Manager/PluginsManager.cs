@@ -3,12 +3,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
 using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
 
 namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
@@ -22,6 +28,11 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         private readonly IPluginManagerResourceRepository<IPluginFetcher> pluginFetcherRepository;
 
         private readonly DiscoverersManager discoverersManager;
+
+        private readonly PluginInstaller pluginInstaller;
+        private readonly PluginRegistry pluginRegistry;
+
+        private readonly string installationDir;
 
         /// <summary>
         ///     Initializes a plugin manager instance.
@@ -38,7 +49,9 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
         public PluginsManager(
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
             IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
-            IPluginManagerResourceLoader resourceLoader)
+            IPluginManagerResourceLoader resourceLoader,
+             PluginRegistry pluginRegistry,
+            string installationDir)
         {
             this.resourceLoader = resourceLoader;
 
@@ -53,6 +66,10 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
 
             this.resourceLoader.Subscribe(this.discovererProviderRepository);
             this.resourceLoader.Subscribe(this.pluginFetcherRepository);
+
+            this.pluginRegistry = pluginRegistry;
+            this.pluginInstaller = new PluginInstaller(pluginRegistry);
+            this.installationDir = installationDir;
         }
 
         /// <inheritdoc />
@@ -238,6 +255,89 @@ namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
             }
 
             return results.Values;
+        }
+
+        /// <inheritdoc />
+        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
+        {
+            return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> InstallAvailablePluginAsync(
+            AvailablePlugin availablePlugin,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            Guard.NotNull(availablePlugin, nameof(availablePlugin));
+
+            using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
+            using (var pluginPackage = new PluginPackage(stream))
+            {
+                return await this.pluginInstaller.InstallPluginAsync(
+                    pluginPackage,
+                    this.installationDir,
+                    availablePlugin.AvailablePluginInfo.PluginPackageUri,
+                    cancellationToken,
+                    progress);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> InstallLocalPluginAsync(
+            string pluginPackagePath,
+            bool overwriteInstalled,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
+
+            string packageFullPath = Path.GetFullPath(pluginPackagePath);
+            using (var pluginPackage = new PluginPackage(pluginPackagePath))
+            {
+                await this.pluginInstaller.InstallPluginAsync(
+                    pluginPackage,
+                    this.installationDir,
+                    new Uri(packageFullPath),
+                    cancellationToken,
+                    progress);
+            }
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> UninstallPluginAsync(
+            InstalledPlugin installedPlugin,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+
+            return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
+        }
+
+        /// <inheritdoc />
+        public async Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken)
+        {
+            if (!Directory.Exists(this.installationDir))
+            {
+                return;
+            }
+
+            using (await this.pluginRegistry.UseLock(cancellationToken))
+            {
+                List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
+                var toRemove = new List<string>();
+                foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())
+                {
+                    if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
+                    {
+                        dir.Delete(true);
+                    }
+                }
+            }
         }
 
         private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePlugin)
