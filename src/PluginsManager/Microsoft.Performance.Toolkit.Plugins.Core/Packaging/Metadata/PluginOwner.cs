@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
     /// <summary>
     ///     Gets or sets the information of a plugin owner.

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
     /// <summary>
     ///     Represents the metadata of a data cooker.

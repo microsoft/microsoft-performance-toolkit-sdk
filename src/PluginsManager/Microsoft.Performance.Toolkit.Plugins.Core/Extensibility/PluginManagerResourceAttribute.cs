@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
 {
     /// <summary>
     ///     This attribute is used to mark a concrete class as an <see cref="IPluginManagerResource"/>.

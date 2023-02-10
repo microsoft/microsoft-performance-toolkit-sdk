@@ -8,7 +8,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
     /// <summary>
     ///     Represents the metadata of a plugin.

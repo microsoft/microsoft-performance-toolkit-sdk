@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Credential;
+using Microsoft.Performance.Toolkit.Plugins.Core.Credential;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
+namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
     // TODO: #235 Authentication
     public class NuGetCredentials : ICredentials

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
 {
     /// <summary>
     ///     A URI source endpoint for discovering plugins.

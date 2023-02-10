@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Installation
 {
     /// <summary>
     ///     Represents an installed plugin.

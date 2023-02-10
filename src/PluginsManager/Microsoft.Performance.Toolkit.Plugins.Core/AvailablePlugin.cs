@@ -5,11 +5,11 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
+using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core
+namespace Microsoft.Performance.Toolkit.Plugins.Core
 {
     /// <summary>
     ///     Represents a discovered plugin that is available for installation.

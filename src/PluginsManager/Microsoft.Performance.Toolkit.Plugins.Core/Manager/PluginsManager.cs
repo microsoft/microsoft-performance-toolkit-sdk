@@ -8,16 +8,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Installation;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
+using Microsoft.Performance.Toolkit.Plugins.Core.Concurrency;
+using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Core.Installation;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Registry;
+using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Manager
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Manager
 {
     /// <inheritdoc />
     public sealed class PluginsManager : IPluginsManager

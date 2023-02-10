@@ -3,9 +3,9 @@
 
 using System;
 using System.Text.Json.Serialization;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core
+namespace Microsoft.Performance.Toolkit.Plugins.Core
 {
     /// <summary>
     ///     A DTO that contains information of a discovered plugin that is available for installation.

@@ -8,12 +8,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Registry;
+using Microsoft.Performance.Toolkit.Plugins.Core.Concurrency;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Registry;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Installation
 {
     /// <summary>
     ///     Responsible for the installation and unistallation of plugins to/from a

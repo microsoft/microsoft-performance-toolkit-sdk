@@ -4,7 +4,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Installation
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Installation
 {
     /// <summary>
     ///     Contains the information of an plugin recorded upon installation.

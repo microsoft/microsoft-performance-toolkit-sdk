@@ -4,9 +4,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
 {
     /// <summary>
     ///    A discoverer that is capable of discovering <see cref="AvailablePluginInfo"/>.

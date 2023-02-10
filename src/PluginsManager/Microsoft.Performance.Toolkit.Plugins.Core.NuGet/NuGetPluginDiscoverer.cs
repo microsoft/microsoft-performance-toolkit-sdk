@@ -6,18 +6,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Credential;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Credential;
+using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 using ILogger = NuGet.Common.ILogger;
-using IPluginDiscoverer = Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery.IPluginDiscoverer;
+using IPluginDiscoverer = Microsoft.Performance.Toolkit.Plugins.Core.Discovery.IPluginDiscoverer;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
+namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
     public sealed class NuGetPluginDiscoverer : IPluginDiscoverer
     {

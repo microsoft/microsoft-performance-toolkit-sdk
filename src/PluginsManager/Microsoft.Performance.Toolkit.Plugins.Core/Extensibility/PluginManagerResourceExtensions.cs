@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
 {
     /// <summary>
     ///     Extension methods for <see cref="IPluginManagerResource"/>.

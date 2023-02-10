@@ -8,9 +8,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Transport;
+using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Packaging;
@@ -19,7 +19,7 @@ using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.NuGet
+namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
     [PluginManagerResource(PluginsManagerConstants.NuGetFetcherId)]
     public sealed class NuGetPluginFetcher : IPluginFetcher

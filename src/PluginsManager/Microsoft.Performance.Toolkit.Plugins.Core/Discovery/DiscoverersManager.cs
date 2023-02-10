@@ -6,9 +6,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
 {
     /// <summary>
     ///     Manages a mapping from plugins sources to plugin discoverers.

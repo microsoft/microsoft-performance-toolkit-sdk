@@ -4,14 +4,14 @@
 using System.IO.Compression;
 using System.IO;
 using System;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.SDK;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Packaging
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
 {
     /// <summary>
     ///     Represents a read-only plugin package.

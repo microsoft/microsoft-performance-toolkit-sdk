@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Discovery
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
 {
     public sealed class DiscoverersFactory
     {

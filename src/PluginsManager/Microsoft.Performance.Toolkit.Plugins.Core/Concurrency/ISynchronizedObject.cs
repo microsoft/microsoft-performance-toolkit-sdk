@@ -4,7 +4,7 @@
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Microsoft.Performance.Toolkit.PluginsManager.Core.Concurrency
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Concurrency
 {
     /// <summary>
     ///     Represents an object that facilitates grouping method calls into one synchronization region by surrounding them
