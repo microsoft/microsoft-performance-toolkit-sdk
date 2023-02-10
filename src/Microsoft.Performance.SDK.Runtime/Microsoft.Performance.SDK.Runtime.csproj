@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
-    <ProjectReference Include="..\PluginsManager\Microsoft.Performance.Toolkit.PluginsManager.Core\Microsoft.Performance.Toolkit.PluginsManager.Core.csproj" />
+    <ProjectReference Include="..\PluginsManager\Microsoft.Performance.Toolkit.Plugins.Core\Microsoft.Performance.Toolkit.Plugins.Core.csproj" />
   </ItemGroup>
 
 </Project>
