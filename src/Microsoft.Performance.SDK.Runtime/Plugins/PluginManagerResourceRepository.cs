@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Performance.Toolkit.PluginsManager.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
 namespace Microsoft.Performance.SDK.Runtime.Plugins
 {
