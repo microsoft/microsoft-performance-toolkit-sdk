@@ -8,19 +8,18 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core.Concurrency;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
-using Microsoft.Performance.Toolkit.Plugins.Core.Installation;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Core.Registry;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Manager
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <inheritdoc />
-    public sealed class PluginsManager : IPluginsManager
+    public sealed class PluginsManager 
+        : IPluginsManager
     {
         private readonly IPluginManagerResourceLoader resourceLoader;
 
@@ -50,8 +49,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Manager
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
             IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
             IPluginManagerResourceLoader resourceLoader,
-             PluginRegistry pluginRegistry,
-            string installationDir)
+            PluginRegistry pluginRegistry,
+            string installationDir,
+            Func<Type, ILogger> loggerFactory)
         {
             this.resourceLoader = resourceLoader;
 
@@ -70,7 +70,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Manager
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
             this.installationDir = installationDir;
+
+            this.LoggerFactory = loggerFactory;
+            this.Logger = loggerFactory(typeof(PluginsManager));
         }
+
+        public ILogger Logger { get; }
+
+        public Func<Type, ILogger> LoggerFactory { get; }
 
         /// <inheritdoc />
         public IEnumerable<PluginSource> PluginSources

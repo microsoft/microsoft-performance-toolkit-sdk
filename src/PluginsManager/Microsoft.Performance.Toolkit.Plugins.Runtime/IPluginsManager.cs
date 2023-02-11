@@ -5,12 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
-using Microsoft.Performance.Toolkit.Plugins.Core.Installation;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Manager
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
     ///     Contains logic for discovering, installing, uninstalling and updating plugins.

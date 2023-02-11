@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Concurrency
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
     ///   Contains extension methods for <see cref="ISynchronizedObject"/>.
