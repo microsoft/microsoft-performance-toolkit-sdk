@@ -3,7 +3,7 @@
 
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
     ///     Represents a loader that facilitates the loading of <see cref="IPluginManagerResource"/>s.

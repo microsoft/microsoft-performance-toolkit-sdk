@@ -14,11 +14,13 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
     /// <inheritdoc />
-    public sealed class PluginsManager 
+    public sealed class PluginsManager
         : IPluginsManager
     {
         private readonly IPluginManagerResourceLoader resourceLoader;
@@ -50,8 +52,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
             IPluginManagerResourceLoader resourceLoader,
             PluginRegistry pluginRegistry,
-            string installationDir,
-            Func<Type, ILogger> loggerFactory)
+            string installationDir)
         {
             this.resourceLoader = resourceLoader;
 
@@ -70,14 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
             this.installationDir = installationDir;
-
-            this.LoggerFactory = loggerFactory;
-            this.Logger = loggerFactory(typeof(PluginsManager));
         }
-
-        public ILogger Logger { get; }
-
-        public Func<Type, ILogger> LoggerFactory { get; }
 
         /// <inheritdoc />
         public IEnumerable<PluginSource> PluginSources
