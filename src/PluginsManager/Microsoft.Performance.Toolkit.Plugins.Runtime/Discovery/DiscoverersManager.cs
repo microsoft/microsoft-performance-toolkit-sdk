@@ -6,9 +6,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
     /// <summary>
     ///     Manages a mapping from plugins sources to plugin discoverers.
@@ -30,7 +31,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// </param>
         public DiscoverersManager(
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
-            DiscoverersFactory discoverersFactory) 
+            DiscoverersFactory discoverersFactory)
         {
             this.repository = discovererProviderRepository;
             this.repository.ResourcesAdded += OnNewProvidersAdded;

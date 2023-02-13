@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
     ///     Represents a loader that facilitates the loading of <see cref="IPluginManagerResource"/>s.

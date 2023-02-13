@@ -10,10 +10,8 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core.Concurrency;
-using Microsoft.Performance.Toolkit.Plugins.Core.Installation;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Registry
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     // TODO: #238 Add proper error handling
     // TODO: #254 Add docstrings
