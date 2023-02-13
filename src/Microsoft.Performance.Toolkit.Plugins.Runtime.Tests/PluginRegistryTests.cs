@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Performance.Testing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
