@@ -20,10 +20,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             Guard.NotNull(jsonStream, nameof(jsonStream));
 
             // TODO: #238 Error handling
-            using (var doc = await JsonDocument.ParseAsync(jsonStream))
-            {
-                return doc.Deserialize<PluginMetadata>();
-            }
+            var metadata = await JsonSerializer.DeserializeAsync<PluginMetadata>(jsonStream);
+            return metadata;
         }
 
         /// <summary>
