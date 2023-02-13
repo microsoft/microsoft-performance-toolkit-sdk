@@ -8,19 +8,20 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core.Concurrency;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
-using Microsoft.Performance.Toolkit.Plugins.Core.Installation;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Core.Registry;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Manager
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
     /// <inheritdoc />
-    public sealed class PluginsManager : IPluginsManager
+    public sealed class PluginsManager
+        : IPluginsManager
     {
         private readonly IPluginManagerResourceLoader resourceLoader;
 
@@ -50,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Manager
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
             IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
             IPluginManagerResourceLoader resourceLoader,
-             PluginRegistry pluginRegistry,
+            PluginRegistry pluginRegistry,
             string installationDir)
         {
             this.resourceLoader = resourceLoader;
