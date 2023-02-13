@@ -15,15 +15,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     /// </summary>
     public sealed class PluginMetadata
     {
-        public static async Task<PluginMetadata> Parse(Stream jsonStream)
+        public static Task<PluginMetadata> Parse(Stream jsonStream)
         {
             Guard.NotNull(jsonStream, nameof(jsonStream));
 
             // TODO: #238 Error handling
-            using (var doc = JsonDocument.Parse(jsonStream))
-            {
-                return await JsonSerializer.DeserializeAsync<PluginMetadata>(jsonStream);
-            }
+            return JsonSerializer.DeserializeAsync<PluginMetadata>(jsonStream).AsTask();
         }
 
         /// <summary>
