@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
@@ -34,6 +35,34 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         private readonly PluginRegistry pluginRegistry;
 
         private readonly string installationDir;
+        private readonly ILogger logger;
+
+        /// <summary>
+        ///     Initializes a plugin manager instance with a default <see cref="ILogger"/>.
+        /// </summary>
+        /// <param name="discovererProviderRepo">
+        ///     A repository of discoverer providers.
+        /// </param>
+        /// <param name="fetcherRepo">
+        ///     A repository of plugin fetchers.
+        /// </param>
+        /// <param name="resourceLoader">
+        ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
+        /// </param>
+        /// <param name="pluginRegistry">
+        ///     A plugin registry this plugin manager will interact with.
+        /// </param>
+        /// <param name="installationDir">
+        ///     The directory where the plugins will be installed to.
+        /// </param>
+        public PluginsManager(
+            IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
+            IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
+            IPluginManagerResourceLoader resourceLoader,
+            PluginRegistry pluginRegistry,
+            string installationDir) : this(discovererProviderRepo, fetcherRepo, resourceLoader, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
+        {
+        }
 
         /// <summary>
         ///     Initializes a plugin manager instance.
@@ -47,12 +76,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="resourceLoader">
         ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
         /// </param>
+        /// <param name="pluginRegistry">
+        ///     A plugin registry this plugin manager will interact with.
+        /// </param>
+        /// <param name="installationDir">
+        ///     The directory where the plugins will be installed to.
+        /// </param>
+        /// <param name="logger">
+        ///     A logger used to log messages.
+        /// </param>
         public PluginsManager(
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
             IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
             IPluginManagerResourceLoader resourceLoader,
             PluginRegistry pluginRegistry,
-            string installationDir)
+            string installationDir,
+            ILogger logger)
         {
             this.resourceLoader = resourceLoader;
 
@@ -71,6 +110,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
             this.installationDir = installationDir;
+            this.logger = logger;
         }
 
         /// <inheritdoc />
