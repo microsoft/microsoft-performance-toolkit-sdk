@@ -14,14 +14,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     /// <summary>
     ///     Manages a mapping from plugins sources to plugin discoverers.
     /// </summary>
-    public sealed class DiscoverersManager : IDisposable
+    public sealed class DiscovererSourcesManager
+          : IDisposable
     {
-        private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> repository;
         private readonly DiscoverersFactory discoverersFactory;
+        private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
+        private bool isDisposed;
 
         /// <summary>
-        ///     Creates an instance of <see cref="DiscoverersManager"/>.
+        ///     Creates an instance of <see cref="DiscovererSourcesManager"/>.
         /// </summary>
         /// <param name="discovererProviderRepository">
         ///     A repository containing all available <see cref="IPluginDiscovererProvider" />s.
@@ -29,12 +31,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <param name="discoverersFactory">
         ///     A factory for creating <see cref="IPluginDiscoverer" /> instances.
         /// </param>
-        public DiscoverersManager(
+        public DiscovererSourcesManager(
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
             DiscoverersFactory discoverersFactory)
         {
-            this.repository = discovererProviderRepository;
-            this.repository.ResourcesAdded += OnNewProvidersAdded;
+            this.discovererProviderRepository = discovererProviderRepository;
+            this.discovererProviderRepository.ResourcesAdded += OnNewProvidersAdded;
+            
             this.discoverersFactory = discoverersFactory;
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
         }
@@ -98,7 +101,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
                 IEnumerable<IPluginDiscoverer> discoverers = await this.discoverersFactory.CreateDiscoverers(
                     source,
-                    this.repository.PluginResources);
+                    this.discovererProviderRepository.Resources);
 
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
             }
@@ -118,7 +121,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
             {
-                kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginResources));
+                kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginManagerResources));
             }
         }
 
@@ -127,7 +130,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// </summary>
         public void Dispose()
         {
-            this.repository.ResourcesAdded -= OnNewProvidersAdded;
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                if (disposing)
+                {
+                    this.discovererProviderRepository.ResourcesAdded -= OnNewProvidersAdded;
+                }
+
+                this.isDisposed = true;
+            }
         }
     }
 }
