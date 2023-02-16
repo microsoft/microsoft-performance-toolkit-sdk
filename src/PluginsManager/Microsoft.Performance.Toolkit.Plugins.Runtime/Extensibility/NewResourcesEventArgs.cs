@@ -13,20 +13,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
     /// <typeparam name="T">
     ///     Resource type.
     /// </typeparam>
-    public class NewResourcesEventArgs<T> : EventArgs where T : IPluginManagerResource
+    public class NewResourcesEventArgs<T>
+        : EventArgs
+        where T : IPluginManagerResource
     {
         /// <summary>
         ///     Initializes a new <see cref="NewResourcesEventArgs"/>.
         /// </summary>
-        /// <param name="newPluginResources"></param>
-        public NewResourcesEventArgs(IEnumerable<T> newPluginResources)
+        /// <param name="newPluginManagerResources"></param>
+        public NewResourcesEventArgs(IEnumerable<T> newPluginManagerResources)
         {
-            this.NewPluginResources = newPluginResources;
+            this.NewPluginManagerResources = newPluginManagerResources;
         }
 
         /// <summary>
         ///     A collection of newly added resources.
         /// </summary>
-        public IEnumerable<T> NewPluginResources { get; }
+        public IEnumerable<T> NewPluginManagerResources { get; }
     }
 }

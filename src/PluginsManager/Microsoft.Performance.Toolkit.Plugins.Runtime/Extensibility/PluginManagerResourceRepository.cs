@@ -3,18 +3,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <inheritdoc />
     public class PluginManagerResourceRepository<T>
-        : IPluginManagerResourceRepository<T>
-        where T : class, IPluginManagerResource
+        : IPluginManagerResourcesConsumer,
+          IPluginManagerResourceRepository<T>
+        where T : IPluginManagerResource
     {
-        private readonly HashSet<T> resources;
+        private readonly HashSet<PluginManagerResourceReference> resources;
 
         /// <summary>
         ///     Initializes a <see cref="PluginManagerResourceRepository{T}"/> with an existing collection of <paramref name="resources"/>.
@@ -24,65 +25,37 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// </param>
         public PluginManagerResourceRepository(IEnumerable<T> resources)
         {
-            this.resources = new HashSet<T>(resources, PluginManagerResourceComparer.Instance);
+            this.resources = new HashSet<PluginManagerResourceReference>(resources.Select(r => new PluginManagerResourceReference(r)));
         }
 
         /// <inheritdoc />
-        public IEnumerable<T> PluginResources
+        public IEnumerable<T> Resources
         {
             get
             {
-                return this.resources;
+                return this.resources.Select(r => r.Instance).OfType<T>();
             }
         }
 
         /// <inheritdoc />
-        public void OnNewResourcesLoaded(IEnumerable<T> loadedResources)
+        public void OnNewResourcesLoaded(IEnumerable<PluginManagerResourceReference> loadedResources)
         {
             lock (this.resources)
             {
-                IEnumerable<T> newResources = loadedResources.Except(this.resources);
-                this.resources.UnionWith(newResources);
+                IEnumerable<PluginManagerResourceReference> newResources = loadedResources
+                    .Where(r => r.Instance is T)
+                    .Except(this.resources);
 
+                this.resources.UnionWith(newResources);
+                
                 if (newResources.Any())
                 {
-                    ResourcesAdded?.Invoke(this, new NewResourcesEventArgs<T>(newResources));
+                    ResourcesAdded?.Invoke(this, new NewResourcesEventArgs<T>(newResources.Select(r => r.Instance).OfType<T>()));
                 }
             }
         }
 
         /// <inheritdoc />
         public event EventHandler<NewResourcesEventArgs<T>> ResourcesAdded;
-
-        private sealed class PluginManagerResourceComparer
-            : IEqualityComparer<T>
-        {
-            public static readonly IEqualityComparer<T> Instance = new PluginManagerResourceComparer();
-
-            public bool Equals(T x, T y)
-            {
-                Debug.Assert(x != null);
-                Debug.Assert(y != null);
-
-                Guid xGuid = x.TryGetGuid();
-                Guid yGuid = y.TryGetGuid();
-
-                Debug.Assert(xGuid != Guid.Empty);
-                Debug.Assert(yGuid != Guid.Empty);
-
-                return xGuid.Equals(yGuid);
-            }
-
-            public int GetHashCode(T obj)
-            {
-                Debug.Assert(obj != null);
-
-                Guid guid = obj.TryGetGuid();
-
-                Debug.Assert(guid != Guid.Empty);
-
-                return guid.GetHashCode();
-            }
-        }
     }
 }

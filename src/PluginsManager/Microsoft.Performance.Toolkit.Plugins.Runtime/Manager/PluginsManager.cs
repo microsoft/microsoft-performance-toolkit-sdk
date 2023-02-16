@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
@@ -25,73 +26,108 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
     {
         private readonly IPluginManagerResourceLoader resourceLoader;
 
-        private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
-        private readonly IPluginManagerResourceRepository<IPluginFetcher> pluginFetcherRepository;
+        private readonly PluginManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
+        private readonly PluginManagerResourceRepository<IPluginFetcher> fetcherRepository;
 
-        private readonly DiscoverersManager discoverersManager;
-
+        private readonly DiscovererSourcesManager discovererSourcesManager;
+        
         private readonly PluginInstaller pluginInstaller;
         private readonly PluginRegistry pluginRegistry;
 
         private readonly string installationDir;
+        private readonly ILogger logger;
 
         /// <summary>
-        ///     Initializes a plugin manager instance.
+        ///     Initializes a plugin manager instance with a default <see cref="ILogger"/>.
         /// </summary>
-        /// <param name="discovererProviderRepo">
-        ///     A repository of discoverer providers.
+        /// <param name="discovererProviders">
+        ///     A collection of discoverer providers.
         /// </param>
-        /// <param name="fetcherRepo">
-        ///     A repository of plugin fetchers.
+        /// <param name="fetchers">
+        ///     A collection of fetchers.
         /// </param>
         /// <param name="resourceLoader">
         ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
         /// </param>
+        /// <param name="pluginRegistry">
+        ///     A plugin registry this plugin manager will interact with.
+        /// </param>
+        /// <param name="installationDir">
+        ///     The directory where the plugins will be installed to.
+        /// </param>
         public PluginsManager(
-            IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepo,
-            IPluginManagerResourceRepository<IPluginFetcher> fetcherRepo,
+            IEnumerable<IPluginDiscovererProvider> discovererProviders,
+            IEnumerable<IPluginFetcher> fetchers,
             IPluginManagerResourceLoader resourceLoader,
             PluginRegistry pluginRegistry,
-            string installationDir)
+            string installationDir) 
+            : this(discovererProviders, fetchers, resourceLoader, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a plugin manager instance.
+        /// </summary>
+        /// <param name="discovererProviders">
+        ///     A collection of discoverer providers.
+        /// </param>
+        /// <param name="fetchers">
+        ///     A collection of fetchers.
+        /// </param>
+        /// <param name="resourceLoader">
+        ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
+        /// </param>
+        /// <param name="pluginRegistry">
+        ///     A plugin registry this plugin manager will interact with.
+        /// </param>
+        /// <param name="installationDir">
+        ///     The directory where the plugins will be installed to.
+        /// </param>
+        /// <param name="logger">
+        ///     A logger used to log messages.
+        /// </param>
+        public PluginsManager(
+            IEnumerable<IPluginDiscovererProvider> discovererProviders,
+            IEnumerable<IPluginFetcher> fetchers,
+            IPluginManagerResourceLoader resourceLoader,
+            PluginRegistry pluginRegistry,
+            string installationDir,
+            ILogger logger)
         {
             this.resourceLoader = resourceLoader;
+            this.discovererRepository = new PluginManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
+            this.fetcherRepository = new PluginManagerResourceRepository<IPluginFetcher>(fetchers);
 
-            this.discovererProviderRepository = discovererProviderRepo;
+            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository, new DiscoverersFactory());
 
-            this.discoverersManager = new DiscoverersManager(
-                this.discovererProviderRepository,
-                new DiscoverersFactory());
-
-
-            this.pluginFetcherRepository = fetcherRepo;
-
-            this.resourceLoader.Subscribe(this.discovererProviderRepository);
-            this.resourceLoader.Subscribe(this.pluginFetcherRepository);
+            this.resourceLoader.Subscribe(this.discovererRepository);
+            this.resourceLoader.Subscribe(this.fetcherRepository);
 
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
             this.installationDir = installationDir;
+            this.logger = logger;
         }
-
+        
         /// <inheritdoc />
         public IEnumerable<PluginSource> PluginSources
         {
             get
             {
-                return this.discoverersManager.PluginSources;
+                return this.discovererSourcesManager.PluginSources;
             }
         }
 
         /// <inheritdoc />
         public void ClearPluginSources()
         {
-            this.discoverersManager.ClearPluginSources();
+            this.discovererSourcesManager.ClearPluginSources();
         }
 
         /// <inheritdoc />
         public void AddPluginSources(IEnumerable<PluginSource> sources)
         {
-            this.discoverersManager.AddPluginSources(sources);
+            this.discovererSourcesManager.AddPluginSources(sources);
         }
 
         /// <inheritdoc />
@@ -148,7 +184,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            IPluginDiscoverer[] discoverers = this.discoverersManager.GetDiscoverersFromSource(source).ToArray();
+            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
 
             var tasks = Task.WhenAll(discoverers.Select(d => d.DiscoverPluginsLatestAsync(cancellationToken)));
             try
@@ -223,7 +259,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken)
         {
-            IPluginDiscoverer[] discoverers = this.discoverersManager.GetDiscoverersFromSource(source).ToArray();
+            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
             var tasks = Task.WhenAll(discoverers.Select(d => d.DiscoverAllVersionsOfPlugin(pluginIdentity, cancellationToken)));
 
             try
@@ -341,11 +377,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
         }
 
-        private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePlugin)
+        private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePluginInfo)
         {
-            foreach (IPluginFetcher fetcher in this.pluginFetcherRepository.PluginResources)
+            foreach (IPluginFetcher fetcher in this.fetcherRepository.Resources)
             {
-                if (fetcher.TryGetGuid() == availablePlugin.FetcherResourceId && await fetcher.IsSupportedAsync(availablePlugin))
+                if (fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId && await fetcher.IsSupportedAsync(availablePluginInfo))
                 {
                     return fetcher;
                 }

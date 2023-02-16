@@ -69,7 +69,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// </param>
         void LoadAdditionalPluginResources(string directory);
 
-
         /// <summary>
         ///     Gets all available versions of a plugin by discovering from all plugin sources.
         /// </summary>
