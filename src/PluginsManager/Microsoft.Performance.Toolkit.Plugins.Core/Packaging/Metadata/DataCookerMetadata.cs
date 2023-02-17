@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Text.Json.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
@@ -11,18 +12,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     public sealed class DataCookerMetadata
     {
         /// <summary>
-        ///     Gets or sets the name of this data cooker.
+        ///     Initializes an instance of <see cref="DataCookerMetadata".s
         /// </summary>
-        public string Name { get; set; }
+        [JsonConstructor]
+        public DataCookerMetadata(
+            string name,
+            string description,
+            Guid processingSourceGuid)
+        {
+            this.Name = name;
+            this.Description = description;
+            this.ProcessingSourceGuid = processingSourceGuid;
+        }
 
         /// <summary>
-        ///     Gets or sets the user friendly description of this data cooker.
+        ///     Gets the name of this data cooker.
         /// </summary>
-        public string Description { get; set; }
+        public string Name { get; }
 
         /// <summary>
-        ///     Gets or sets the Guid of the processing source this data cooker roots from.
+        ///     Gets the user friendly description of this data cooker.
         /// </summary>
-        public Guid ProcessingSourceGuid { get; set; }
+        public string Description { get; }
+
+        /// <summary>
+        ///     Gets the Guid of the processing source this data cooker roots from.
+        /// </summary>
+        public Guid ProcessingSourceGuid { get; }
     }
 }
