@@ -1,28 +1,33 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.IO.Compression;
-using System.IO;
 using System;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.SDK;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
     ///     Represents a read-only plugin package.
     /// </summary>
-    public sealed class PluginPackage : IDisposable
+    public sealed class PluginPackage
+        : IDisposable
     {
         private readonly ZipArchive zip;
         private static readonly string pluginContentPath = "plugin/";
         private static readonly string pluginMetadataFileName = "pluginspec.json";
         private bool disposedValue;
-        
+        private ILogger logger;
+
         /// <summary>
         ///     Creates an instance of <see cref="PluginPackage"/>.
         /// </summary>
@@ -32,6 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         public PluginPackage(string fileName)
             : this(OpenFile(fileName))
         {
+            Guard.NotNull(fileName, nameof(fileName));
         }
 
         /// <summary>
@@ -58,6 +64,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         public PluginPackage(Stream stream, bool leaveOpen)
         {
             Guard.NotNull(stream, nameof(stream));
+
+            this.logger = Logger.Create<PluginPackage>();
 
             try
             {
@@ -281,7 +289,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
             {
                 try
                 {
-                    PluginMetadata pluginMetadata = PluginMetadata.Parse(stream).GetAwaiter().GetResult();
+                    PluginMetadata pluginMetadata = SerializationUtils.ReadFromStream<PluginMetadata>(stream, this.logger);
                     return pluginMetadata;
                 }
                 catch (Exception e)

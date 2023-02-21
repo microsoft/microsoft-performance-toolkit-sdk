@@ -8,8 +8,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -20,6 +22,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public sealed class PluginInstaller
     {
         private readonly PluginRegistry pluginRegistry;
+        private readonly ILogger logger;
 
         /// <summary>
         ///     Creates an instance of a <see cref="PluginInstaller"/>.
@@ -28,8 +31,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The <see cref="PluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
         public PluginInstaller(PluginRegistry pluginRegistry)
+            : this(pluginRegistry, Logger.Create<PluginInstaller>())
         {
+        }
+
+        public PluginInstaller(PluginRegistry pluginRegistry, ILogger logger)
+        {
+            Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
+            Guard.NotNull(logger, nameof(logger));
+
             this.pluginRegistry = pluginRegistry;
+            this.logger = logger;          
         }
 
         /// <summary>
@@ -47,6 +59,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                
                 var tasks = Task.WhenAll(installedPlugins.Select(p => CreateInstalledPluginAsync(p, cancellationToken)));
                 try
                 {
@@ -267,16 +280,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             if (!await VerifyInstalledAsync(installedPlugin, cancellationToken))
             {
-                throw new InvalidOperationException($"Plugin {installedPlugin.Id}-{installedPlugin.Version} is no longer installed");
+                throw new InvalidOperationException(
+                    $"Plugin {installedPlugin.Id}-{installedPlugin.Version} is no longer installed");
             }
 
             string metadataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
+           
             PluginMetadata pluginMetadata = null;
             using (var stream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 try
                 {
-                    pluginMetadata = await PluginMetadata.Parse(stream);
+                    pluginMetadata = await SerializationUtils.ReadFromStreamAsync<PluginMetadata>(stream, this.logger);
                 }
                 catch (Exception e)
                 {

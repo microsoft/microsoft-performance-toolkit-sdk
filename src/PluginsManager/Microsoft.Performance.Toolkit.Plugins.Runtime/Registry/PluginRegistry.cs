@@ -10,6 +10,9 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -20,7 +23,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     ///     and an ephemeral lock file that indicates whether a process is currently interacting with the registry.
     ///     Only one version of a same plugin may be be registered at a time 
     /// </summary>
-    public sealed class PluginRegistry : ISynchronizedObject
+    public sealed class PluginRegistry
+        : ISynchronizedObject
     {
         private static readonly string registryFileName = "installedPlugins.json";
         private static readonly string lockFileName = ".lockRegistry";
@@ -29,12 +33,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly string registryFilePath;
         private readonly string lockFilePath;
         private readonly string backupRegistryFilePath;
+        private readonly ILogger logger;
+
         private static readonly TimeSpan sleepDuration = TimeSpan.FromMilliseconds(500);
         private string lockToken;
 
         public PluginRegistry(string registryRoot)
+            : this(registryRoot, Logger.Create(typeof(PluginRegistry)))
+        {         
+        }
+
+        public PluginRegistry(string registryRoot, ILogger logger)
         {
             Guard.NotNull(registryRoot, nameof(registryRoot));
+            Guard.NotNull(logger, nameof(logger));
 
             if (!Path.IsPathRooted(registryRoot))
             {
@@ -46,6 +58,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.backupRegistryFilePath = this.registryFilePath + backupRegistryFileExtension;
             this.lockFilePath = Path.Combine(registryRoot, lockFileName);
+            this.logger = logger;
         }
 
         public string RegistryRoot { get; }
@@ -74,8 +87,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             installedPlugins.Add(plugin);
 
-            await WriteInstalledPlugins(installedPlugins);
-            return true;
+            return await WriteInstalledPlugins(installedPlugins);;
         }
 
         public async Task<bool> UnregisterPluginAsync(InstalledPluginInfo plugin)
@@ -95,8 +107,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 throw new InvalidDataException($"Duplicated records found in the plugin registry.");
             }
 
-            await WriteInstalledPlugins(installedPlugins);
-            return true;
+            return await WriteInstalledPlugins(installedPlugins);
         }
 
         public async Task<bool> UpdatePluginAync(InstalledPluginInfo currentPlugin, InstalledPluginInfo updatedPlugin)
@@ -132,8 +143,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             installedPlugins.Add(updatedPlugin);
 
-            await WriteInstalledPlugins(installedPlugins);
-            return true;
+            return await WriteInstalledPlugins(installedPlugins);
         }
 
         // TODO: Might want to change this to a file lock that supports read lock.
@@ -192,62 +202,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.lockToken = null;
         }
 
-        private async Task<List<InstalledPluginInfo>> ReadInstalledPlugins()
+        private Task<List<InstalledPluginInfo>> ReadInstalledPlugins()
         {
             if (!File.Exists(this.registryFilePath))
             {
-                return new List<InstalledPluginInfo>();
+                return Task.FromResult(new List<InstalledPluginInfo>());
             }
-            
-            using (var stream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read))
-            {
-                // TODO: #255 Refatcor to a serialization/deserialization class
-                return await JsonSerializer.DeserializeAsync<List<InstalledPluginInfo>>(stream);
-            }
+
+            return SerializationUtils.ReadFromFileAsync<List<InstalledPluginInfo>>(this.registryFilePath, this.logger);
         }
 
-        private async Task WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
+        private Task<bool> WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
         {
             Guard.NotNull(installedPlugins, nameof(installedPlugins));
 
             Directory.CreateDirectory(this.RegistryRoot);
 
-            using (var registryFileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
-            {
-                // TODO: #255 Refatcor to a serialization/deserialization class
-                 await JsonSerializer.SerializeAsync(
-                   registryFileStream,
-                   installedPlugins,
-                   typeof(IEnumerable<InstalledPluginInfo>),
-                   new JsonSerializerOptions { 
-                       WriteIndented = true,
-                       Converters =
-                       {
-                           new JsonStringEnumConverter(),
-                           new StringConverter(),
-                       }
-                   });
-            }
-        }
-
-        // TODO: #255 Refatcor to a serialization/deserialization class
-        internal class StringConverter : JsonConverter<Version>
-        {
-            public override Version Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                if (reader.TokenType == JsonTokenType.String)
-                {
-                    string stringValue = reader.GetString();
-                    return new Version(stringValue);
-                }
-
-                throw new JsonException();
-            }
-
-            public override void Write(Utf8JsonWriter writer, Version value, JsonSerializerOptions options)
-            {
-                writer.WriteStringValue(value.ToString());
-            }
+            return SerializationUtils.WriteToFileAsync(this.registryFilePath, installedPlugins, this.logger);
         }
     }
 }

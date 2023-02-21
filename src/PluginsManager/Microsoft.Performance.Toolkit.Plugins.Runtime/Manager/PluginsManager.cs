@@ -13,7 +13,6 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
@@ -308,15 +307,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
-            using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
-            using (var pluginPackage = new PluginPackage(stream))
+            try
             {
-                return await this.pluginInstaller.InstallPluginAsync(
-                    pluginPackage,
-                    this.installationDir,
-                    availablePlugin.AvailablePluginInfo.PluginPackageUri,
-                    cancellationToken,
-                    progress);
+                using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
+                using (var pluginPackage = new PluginPackage(stream))
+                {
+                    return await this.pluginInstaller.InstallPluginAsync(
+                        pluginPackage,
+                        this.installationDir,
+                        availablePlugin.AvailablePluginInfo.PluginPackageUri,
+                        cancellationToken,
+                        progress);
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
 
