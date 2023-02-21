@@ -43,7 +43,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization
             }
         }
 
-        public static bool WriteToStream<T>(Stream stream, T obj)
+        public static bool WriteToStream<T>(Stream stream, T obj, ILogger logger)
         {
             return WriteToStreamWithOptions<T>(stream, obj, PluginsManagerSerializerDefaultOptions);
         }
@@ -75,7 +75,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization
             }
         }
 
-        public static Task<bool> WriteToStreamAsyc<T>(Stream stream, T obj)
+        public static Task<bool> WriteToStreamAsyc<T>(Stream stream, T obj, ILogger logger)
         {
             return WriteToStreamWithOptionsAsync<T>(stream, obj, PluginsManagerSerializerDefaultOptions);
         }
