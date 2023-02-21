@@ -11,7 +11,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -102,66 +102,73 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            using (await this.pluginRegistry.UseLock(cancellationToken))
+            try
             {
-                // Check if any version of this plugin is already installed.
-                InstalledPluginInfo installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
-                bool needsUninstall = false;
-
-                if (installedPlugin != null)
+                using (await this.pluginRegistry.UseLock(cancellationToken))
                 {
-                    if (installedPlugin.Version.Equals(pluginPackage.Version) && await ValidateInstalledPluginAsync(installedPlugin))
+                    // Check if any version of this plugin is already installed.
+                    InstalledPluginInfo installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
+                    bool needsUninstall = false;
+
+                    if (installedPlugin != null)
                     {
-                        return true;
+                        if (installedPlugin.Version.Equals(pluginPackage.Version) && await ValidateInstalledPluginAsync(installedPlugin))
+                        {
+                            return true;
+                        }
+
+                        needsUninstall = true;
                     }
 
-                    needsUninstall = true;
-                }
+                    string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
+                    try
+                    {
+                        // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
+                        // We need to revist this code once we have a mechanism for checking whether individual plugin are in use by plugin consumers.
+                        bool success = await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
+                        if (!success)
+                        {
+                            cleanUpExtractedFiles(installationDir);
+                            return false;
+                        }
 
-                string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
-                try
-                {
-                    // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
-                    // We need to revist this code once we have a mechanism for checking whether individual plugin are in use by plugin consumers.
-                    bool success = await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
-                    if (!success)
+                        string checksum = await HashUtils.GetDirectoryHash(installationDir);
+                        var pluginToInstall = new InstalledPluginInfo(
+                            pluginPackage.Id,
+                            pluginPackage.Version,
+                            sourceUri,
+                            pluginPackage.DisplayName,
+                            pluginPackage.Description,
+                            installationDir,
+                            DateTime.UtcNow,
+                            checksum);
+
+                        if (needsUninstall)
+                        {
+                            return await this.pluginRegistry.UpdatePluginAync(installedPlugin, pluginToInstall);
+                        }
+                        else
+                        {
+                            return await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
+                        }
+                    }
+                    catch (Exception e)
                     {
                         cleanUpExtractedFiles(installationDir);
+
+                        if (e is OperationCanceledException)
+                        {
+                            throw;
+                        }
+
+                        //TODO: #259 Log exception
                         return false;
                     }
-
-                    string checksum = await HashUtils.GetDirectoryHash(installationDir);
-                    var pluginToInstall = new InstalledPluginInfo(
-                        pluginPackage.Id,
-                        pluginPackage.Version,
-                        sourceUri,
-                        pluginPackage.DisplayName,
-                        pluginPackage.Description,
-                        installationDir,
-                        DateTime.UtcNow,
-                        checksum);
-
-                    if (needsUninstall)
-                    {
-                        return await this.pluginRegistry.UpdatePluginAync(installedPlugin, pluginToInstall);
-                    }
-                    else
-                    {
-                        return await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
-                    }
                 }
-                catch (Exception e)
-                {
-                    cleanUpExtractedFiles(installationDir);
-
-                    if (e is OperationCanceledException)
-                    {
-                        throw;
-                    }
-
-                    //TODO: #259 Log exception
-                    return false;
-                }
+            }
+            catch
+            {
+                return false;
             }
 
             void cleanUpExtractedFiles(string extractionDir)
@@ -197,12 +204,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                if (await VerifyInstalledAsync(installedPlugin.PluginInfo, cancellationToken))
-                {
-                    return await this.pluginRegistry.UnregisterPluginAsync(installedPlugin.PluginInfo);
-                }
-
-                return false;
+                return await this.pluginRegistry.UnregisterPluginAsync(installedPlugin.PluginInfo);
             }
         }
 
@@ -285,19 +287,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
 
             string metadataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
-           
-            PluginMetadata pluginMetadata = null;
-            using (var stream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+
+            PluginMetadata pluginMetadata = await SerializationUtils.ReadFromFileAsync<PluginMetadata>(
+                metadataFileName,
+                SerializationConfig.PluginsManagerSerializerDefaultOptions,
+                this.logger);
+
+            if (pluginMetadata == null)
             {
-                try
-                {
-                    pluginMetadata = await SerializationUtils.ReadFromStreamAsync<PluginMetadata>(stream, this.logger);
-                }
-                catch (Exception e)
-                {
-                    throw new InvalidDataException($"Failed to read metadata from {metadataFileName}: {e.Message}");
-                }
+                return null;
             }
+            // TODO:
 
             return new InstalledPlugin(installedPlugin, pluginMetadata);
         }

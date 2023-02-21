@@ -12,7 +12,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -28,27 +28,71 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private bool disposedValue;
         private ILogger logger;
 
-        /// <summary>
-        ///     Creates an instance of <see cref="PluginPackage"/>.
-        /// </summary>
-        /// <param name="fileName">
-        ///     The full file name of the plugin package.
-        /// </param>
-        public PluginPackage(string fileName)
-            : this(OpenFile(fileName))
-        {
-            Guard.NotNull(fileName, nameof(fileName));
-        }
-
-        /// <summary>
-        ///     Creates an instance of <see cref="PluginPackage"/>.
-        /// </summary>
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
         /// </param>
-        public PluginPackage(Stream stream) 
-            : this(stream, false)
+        public static bool TryCreate(
+            Stream stream,
+            bool leaveOpen,
+            out PluginPackage package)
         {
+            return TryCreate(stream, leaveOpen, Logger.Create<PluginPackage>(), out package);
+        }
+
+        public static bool TryCreate(
+            Stream stream,
+            out PluginPackage package)
+        {
+            return TryCreate(stream, false, out package);
+        }
+
+        public static bool TryCreate(
+            Stream stream,
+            bool leaveOpen,
+            ILogger logger,
+            out PluginPackage package)
+        {
+            try
+            {
+                package = new PluginPackage(stream, leaveOpen, logger);
+                return true;
+            }
+            catch
+            {
+                package = null;
+                return false;
+            }
+        }
+
+        /// <param name="fileName">
+        ///     The full file name of the plugin package.
+        /// </param>
+        public static bool TryCreate(
+            string fileName,
+            out PluginPackage package)
+        {
+            return TryCreate(fileName, Logger.Create<PluginPackage>(), out package);
+        }
+
+        public static bool TryCreate(
+            string fileName,
+            ILogger logger,
+            out PluginPackage package)
+        {
+            try
+            {
+                using (Stream stream = OpenFile(fileName))
+                {
+                    return TryCreate(stream, out package);
+                }
+            }
+            catch (Exception e)
+            {
+                package = null;
+                logger.Error(e, $"Failed to read plugin package from file {fileName}");
+
+                return false;
+            }
         }
 
         /// <summary>
@@ -61,7 +105,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
         ///     <c>false</c> otherwise.
         /// </param>
-        public PluginPackage(Stream stream, bool leaveOpen)
+        /// <param name="logger">
+        /// 
+        /// </param>
+        private PluginPackage(
+            Stream stream, 
+            bool leaveOpen,
+            ILogger logger)
         {
             Guard.NotNull(stream, nameof(stream));
 
@@ -287,15 +337,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             using (Stream stream = entry.Open())
             {
-                try
+                PluginMetadata pluginMetadata = SerializationUtils.ReadFromStream<PluginMetadata>(
+                    stream,
+                    SerializationConfig.PluginsManagerSerializerDefaultOptions,
+                    this.logger);
+
+                if (pluginMetadata == null)
                 {
-                    PluginMetadata pluginMetadata = SerializationUtils.ReadFromStream<PluginMetadata>(stream, this.logger);
-                    return pluginMetadata;
+                    // TODO:
+                    throw new InvalidDataException("");
+                    // InvalidDataExceptionFactory.CreateInvalidPluginMetadataException();
                 }
-                catch (Exception e)
-                {
-                    throw new InvalidDataException($"Failed to read metadata from {pluginMetadataFileName}: {e.Message}");
-                }
+
+                return pluginMetadata;
             }
         }
 

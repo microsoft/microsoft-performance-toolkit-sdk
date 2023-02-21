@@ -5,14 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -209,7 +207,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 return Task.FromResult(new List<InstalledPluginInfo>());
             }
 
-            return SerializationUtils.ReadFromFileAsync<List<InstalledPluginInfo>>(this.registryFilePath, this.logger);
+            return SerializationUtils.ReadFromFileAsync<List<InstalledPluginInfo>>(
+                this.registryFilePath,
+                SerializationConfig.PluginsManagerSerializerDefaultOptions,
+                this.logger);
         }
 
         private Task<bool> WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
@@ -218,7 +219,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             Directory.CreateDirectory(this.RegistryRoot);
 
-            return SerializationUtils.WriteToFileAsync(this.registryFilePath, installedPlugins, this.logger);
+            return SerializationUtils.WriteToFileAsync(
+                this.registryFilePath,
+                installedPlugins,
+                SerializationConfig.PluginsManagerSerializerDefaultOptions,
+                this.logger);
         }
     }
 }
