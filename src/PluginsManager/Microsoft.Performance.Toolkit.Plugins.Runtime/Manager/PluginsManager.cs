@@ -329,7 +329,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <inheritdoc />
         public async Task<bool> InstallLocalPluginAsync(
             string pluginPackagePath,
-            bool overwriteInstalled,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {

@@ -142,9 +142,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="pluginPackagePath">
         ///     The path to the plugin package to be installed.
         /// </param>
-        /// <param name="overwriteInstalled">
-        ///     Whether to overwrite the existing plugin if there's one isntalled. 
-        /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
@@ -156,7 +153,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// </returns>
         Task<bool> InstallLocalPluginAsync(
            string pluginPackagePath,
-           bool overwriteInstalled,
            CancellationToken cancellationToken,
            IProgress<int> progress);
 
