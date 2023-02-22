@@ -102,73 +102,66 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            try
+            using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                using (await this.pluginRegistry.UseLock(cancellationToken))
+                // Check if any version of this plugin is already installed.
+                InstalledPluginInfo installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
+                bool needsUninstall = false;
+
+                if (installedPlugin != null)
                 {
-                    // Check if any version of this plugin is already installed.
-                    InstalledPluginInfo installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
-                    bool needsUninstall = false;
-
-                    if (installedPlugin != null)
+                    if (installedPlugin.Version.Equals(pluginPackage.Version) && await ValidateInstalledPluginAsync(installedPlugin))
                     {
-                        if (installedPlugin.Version.Equals(pluginPackage.Version) && await ValidateInstalledPluginAsync(installedPlugin))
-                        {
-                            return true;
-                        }
-
-                        needsUninstall = true;
+                        return true;
                     }
 
-                    string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
-                    try
-                    {
-                        // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
-                        // We need to revist this code once we have a mechanism for checking whether individual plugin are in use by plugin consumers.
-                        bool success = await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
-                        if (!success)
-                        {
-                            cleanUpExtractedFiles(installationDir);
-                            return false;
-                        }
+                    needsUninstall = true;
+                }
 
-                        string checksum = await HashUtils.GetDirectoryHash(installationDir);
-                        var pluginToInstall = new InstalledPluginInfo(
-                            pluginPackage.Id,
-                            pluginPackage.Version,
-                            sourceUri,
-                            pluginPackage.DisplayName,
-                            pluginPackage.Description,
-                            installationDir,
-                            DateTime.UtcNow,
-                            checksum);
-
-                        if (needsUninstall)
-                        {
-                            return await this.pluginRegistry.UpdatePluginAync(installedPlugin, pluginToInstall);
-                        }
-                        else
-                        {
-                            return await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
-                        }
-                    }
-                    catch (Exception e)
+                string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
+                try
+                {
+                    // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
+                    // We need to revist this code once we have a mechanism for checking whether individual plugin are in use by plugin consumers.
+                    bool success = await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
+                    if (!success)
                     {
                         cleanUpExtractedFiles(installationDir);
-
-                        if (e is OperationCanceledException)
-                        {
-                            throw;
-                        }
-
-                        //TODO: #259 Log exception
                         return false;
                     }
+
+                    string checksum = await HashUtils.GetDirectoryHash(installationDir);
+                    var pluginToInstall = new InstalledPluginInfo(
+                        pluginPackage.Id,
+                        pluginPackage.Version,
+                        sourceUri,
+                        pluginPackage.DisplayName,
+                        pluginPackage.Description,
+                        installationDir,
+                        DateTime.UtcNow,
+                        checksum);
+
+                    if (needsUninstall)
+                    {
+                        return await this.pluginRegistry.UpdatePluginAsync(installedPlugin, pluginToInstall);
+                    }
+                    else
+                    {
+                        return await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
+                    }
                 }
-            }
-            catch
-            {
-                return false;
+                catch (Exception e)
+                {
+                    cleanUpExtractedFiles(installationDir);
+
+                    if (e is OperationCanceledException)
+                    {
+                        throw;
+                    }
+
+                    //TODO: #259 Log exception
+                    return false;
+                }
             }
 
             void cleanUpExtractedFiles(string extractionDir)
@@ -288,7 +281,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             string metadataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
 
-            PluginMetadata pluginMetadata = await SerializationUtils.ReadFromFileAsync<PluginMetadata>(
+            PluginMetadata pluginMetadata = await SerializationUtils.TryReadFromFileAsync<PluginMetadata>(
                 metadataFileName,
                 SerializationConfig.PluginsManagerSerializerDefaultOptions,
                 this.logger);

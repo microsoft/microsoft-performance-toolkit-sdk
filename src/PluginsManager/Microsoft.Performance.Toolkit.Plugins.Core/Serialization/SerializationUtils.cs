@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -148,7 +149,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
             }
         }
 
-        public static async Task<T> ReadFromFileAsync<T>(
+        public static async Task<T> TryReadFromFileAsync<T>(
             string fileName,
             JsonSerializerOptions options,
             ILogger logger)
@@ -162,9 +163,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
                     return await ReadFromStreamAsync<T>(fileStream, options, logger);
                 }
             }
-            catch (IOException ex)
+            catch (Exception e)
             {
                 return default;
+            }
+        }
+
+        public static async Task<T> ReadFromFileAsync<T>(
+            string fileName,
+            JsonSerializerOptions options,
+            ILogger logger)
+        {
+            Guard.NotNull(fileName, nameof(fileName));
+            
+            using (var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return await ReadFromStreamAsync<T>(fileStream, options, logger);
             }
         }
     }

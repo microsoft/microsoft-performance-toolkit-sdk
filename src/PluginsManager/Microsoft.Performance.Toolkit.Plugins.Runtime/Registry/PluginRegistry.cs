@@ -71,21 +71,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(plugin, nameof(plugin));
 
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
-            int installedCount = installedPlugins.Count(p => p.Id.Equals(plugin.Id));
-
-            if (installedCount == 1)
-            {
-                throw new InvalidOperationException($"Plugin already registered: " +
-                    $"{plugin.Id}-{plugin.Version}");
-            }
-            if (installedCount > 1)
-            {
-                throw new InvalidDataException($"Duplicated records found in the plugin registry.");
-            }
-
+            
+            ThrowIfAlreadyRegistered(installedPlugins, plugin);
             installedPlugins.Add(plugin);
 
-            return await WriteInstalledPlugins(installedPlugins);;
+            return await WriteInstalledPlugins(installedPlugins);
         }
 
         public async Task<bool> UnregisterPluginAsync(InstalledPluginInfo plugin)
@@ -93,52 +83,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(plugin, nameof(plugin));
 
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
-            int toRemove = installedPlugins.RemoveAll(p => p.Equals(plugin));
-            if (toRemove == 0)
-            {
-                throw new InvalidOperationException($"Failed to unregister plugin as it is not currently registered: " +
-                    $"{plugin.Id}-{plugin.Version}");
-            }
 
-            if (toRemove > 1)
-            {
-                throw new InvalidDataException($"Duplicated records found in the plugin registry.");
-            }
+            ThrowIfNotRegistered(installedPlugins, plugin);
+            installedPlugins.Remove(plugin);
 
             return await WriteInstalledPlugins(installedPlugins);
         }
 
-        public async Task<bool> UpdatePluginAync(InstalledPluginInfo currentPlugin, InstalledPluginInfo updatedPlugin)
+        public async Task<bool> UpdatePluginAsync(InstalledPluginInfo currentPlugin, InstalledPluginInfo updatedPlugin)
         {
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
             Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
 
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
-            
-            // TODO: refactor duplicated code.
-            int toRemove = installedPlugins.RemoveAll(p => p.Id == currentPlugin.Id);
-            if (toRemove == 0)
-            {
-                throw new InvalidOperationException("Failed to update plugin as it is not currently registered: " +
-                    $"{currentPlugin.Id}-{currentPlugin.Version}");
-            }
 
-            if (toRemove > 1)
-            {
-                throw new InvalidDataException($"Duplicated records found in the plugin registry.");
-            }
-            
-            int installedCount = installedPlugins.Count(p => p.Id.Equals(updatedPlugin.Id));
-            if (installedCount == 1)
-            {
-                throw new InvalidOperationException("Failed to update plugin as the new version is already installed: " +
-                    $"{currentPlugin.Id}-{currentPlugin.Version}");
-            }
-            if (installedCount > 1)
-            {
-                throw new InvalidDataException($"Duplicated records found in the plugin registry.");
-            }
+            ThrowIfNotRegistered(installedPlugins, currentPlugin);
+            ThrowIfAlreadyRegistered(installedPlugins, updatedPlugin);
 
+            installedPlugins.Remove(currentPlugin);
             installedPlugins.Add(updatedPlugin);
 
             return await WriteInstalledPlugins(installedPlugins);
@@ -224,6 +186,44 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 installedPlugins,
                 SerializationConfig.PluginsManagerSerializerDefaultOptions,
                 this.logger);
+        }
+
+        private void ThrowIfAlreadyRegistered(
+            IEnumerable<InstalledPluginInfo> installedPluginInfos,
+            InstalledPluginInfo pluginToInstall)
+        {
+            int installedCount = installedPluginInfos.Count(p => p.Id.Equals(pluginToInstall.Id));
+            if (installedCount == 1)
+            {
+                throw new InvalidOperationException($"Failed to register plugin {pluginToInstall} as it is already registered.");
+            }
+
+            if (installedCount > 1)
+            {
+                string errorMsg = $"Duplicated records of plugin {pluginToInstall} found in the plugin registry.";
+                this.logger.Error(errorMsg);
+
+                throw new PluginRegistryCorruptedException(errorMsg);
+            }
+        }
+
+        private void ThrowIfNotRegistered(
+            IEnumerable<InstalledPluginInfo> installedPluginInfos,
+            InstalledPluginInfo pluginToRemove)
+        {
+            int installedCount = installedPluginInfos.Count(p => p.Equals(pluginToRemove));
+            if (installedCount == 0)
+            {
+                throw new InvalidOperationException($"Failed to unregister plugin {pluginToRemove} as it is not currently registered.");
+            }
+
+            if (installedCount > 1)
+            {
+                string errorMsg = $"Duplicated records of plugin {pluginToRemove} found in the plugin registry.";
+                this.logger.Error(errorMsg);
+
+                throw new PluginRegistryCorruptedException(errorMsg);
+            }
         }
     }
 }
