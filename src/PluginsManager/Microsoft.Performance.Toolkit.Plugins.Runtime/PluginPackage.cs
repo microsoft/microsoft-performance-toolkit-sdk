@@ -218,9 +218,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Indicates the progress of the extraction.
         /// </param>
         /// <returns>
-        ///     An await-able task whose result represents whether the extraction succeeds.
+        ///     An await-able task.
         /// </returns>
-        public Task<bool> ExtractPackageAsync(
+        public Task ExtractPackageAsync(
             string extractPath,
             CancellationToken cancellationToken,
             IProgress<int> progress)
@@ -244,9 +244,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Indicates the progress of the extraction.
         /// </param>
         /// <returns>
-        ///     An await-able task whose result represents whether the extraction succeeds.
+        ///     An await-able task.
         /// </returns>
-        public Task<bool> ExtractEntriesAsync(
+        public Task ExtractEntriesAsync(
             string extractPath,
             Func<PluginPackageEntry, bool> predicate,
             CancellationToken cancellationToken,
@@ -267,7 +267,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             GC.SuppressFinalize(this);
         }
 
-        private static async Task<bool> ExtractEntriesInternalAsync(
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{this.Id} - {this.Version}";
+        }
+
+        private static async Task ExtractEntriesInternalAsync(
            IEnumerable<PluginPackageEntry> entries,
            string extractPath,
            CancellationToken cancellationToken,
@@ -316,8 +322,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 }
             }
-
-            return true;
         }
 
         private static Stream OpenFile(string fileName)

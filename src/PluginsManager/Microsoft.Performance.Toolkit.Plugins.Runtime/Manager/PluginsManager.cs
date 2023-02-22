@@ -403,7 +403,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins();
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
                 var toRemove = new List<string>();
                 foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())

@@ -61,9 +61,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
         public string RegistryRoot { get; }
 
-        public Task<List<InstalledPluginInfo>> GetAllInstalledPlugins()
+        public async Task<IReadOnlyCollection<InstalledPluginInfo>> GetAllInstalledPlugins()
         {
-            return ReadInstalledPlugins();
+            List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
+            return installedPlugins.AsReadOnly();
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
@@ -35,6 +36,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
         }
 
+        /// <summary>
+        ///     Creates an instance of a <see cref="PluginInstaller"/> with a <see cref="ILogger"/> object.
+        /// </summary>
+        /// <param name="pluginRegistry">
+        ///     The <see cref="PluginRegistry"/> this installer register/unregister plugin records to.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log messages.
+        /// </param>
         public PluginInstaller(PluginRegistry pluginRegistry, ILogger logger)
         {
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
@@ -58,19 +68,53 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins();
+                InstalledPluginInfo[] installedPluginsArr = installedPlugins.ToArray();
+
+                Task<InstalledPlugin>[] tasks = installedPluginsArr
+                    .Select(p => CreateInstalledPluginAsync(p, cancellationToken))
+                    .ToArray();
                 
-                var tasks = Task.WhenAll(installedPlugins.Select(p => CreateInstalledPluginAsync(p, cancellationToken)));
+                
+                var task = Task.WhenAll(installedPluginsArr.Select(p => CreateInstalledPluginAsync(p, cancellationToken)));
+
                 try
                 {
-                    await Task.WhenAll(tasks);
+                    await task.ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    this.logger.Info($"Request for getting all installed plugins is cancelled.");
+                    throw;
                 }
                 catch
                 {
-                    throw tasks.Exception;
                 }
 
-                return tasks.Result;
+                if (!task.IsFaulted && !task.IsCanceled)
+                {
+                    return task.Result;
+                }
+
+                var results = new List<InstalledPlugin>();
+                for (int i = 0; i < tasks.Length; i++)
+                {
+                    Task<InstalledPlugin> t = tasks[i];
+                    InstalledPluginInfo plugin = installedPluginsArr[i];
+                    if (t.IsFaulted)
+                    {
+                        foreach (Exception ex in t.Exception.Flatten().InnerExceptions)
+                        {
+                            this.logger.Error(ex, $"An error occured when reading installed plugin {plugin}");
+                        }
+                    }
+                    else if (t.Status == TaskStatus.RanToCompletion)
+                    {
+                        results.Add(t.Result);
+                    }
+                }
+
+                return results;
             }  
         }
 
@@ -105,30 +149,36 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 // Check if any version of this plugin is already installed.
-                InstalledPluginInfo installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
+                InstalledPluginInfo installedPlugin = await this.pluginRegistry.TryGetInstalledPluginByIdAsync(pluginPackage.Id);
                 bool needsUninstall = false;
 
                 if (installedPlugin != null)
                 {
-                    if (installedPlugin.Version.Equals(pluginPackage.Version) && await ValidateInstalledPluginAsync(installedPlugin))
+                    if (!installedPlugin.Version.Equals(pluginPackage.Version))
                     {
-                        return true;
+                        needsUninstall = true;
                     }
+                    else
+                    {
+                        if (await ValidateInstalledPluginAsync(installedPlugin))
+                        {
+                            this.logger.Warn($"Attempted to install an already installed and valid plugin.");
+                            return false;
+                        }
 
-                    needsUninstall = true;
-                }
+                        this.logger.Warn($"Installer is going to reinstall {installedPlugin} because it is tampered.");
+                        needsUninstall = true;
+                    }                    
+                };
 
                 string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
                 try
                 {
                     // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
                     // We need to revist this code once we have a mechanism for checking whether individual plugin are in use by plugin consumers.
-                    bool success = await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
-                    if (!success)
-                    {
-                        cleanUpExtractedFiles(installationDir);
-                        return false;
-                    }
+                    this.logger.Info($"Extracting content of plugin {pluginPackage} to {installationDir}");
+                    await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
+                    this.logger.Info("Extraction completed.");
 
                     string checksum = await HashUtils.GetDirectoryHash(installationDir);
                     var pluginToInstall = new InstalledPluginInfo(
@@ -143,25 +193,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
                     if (needsUninstall)
                     {
-                        return await this.pluginRegistry.UpdatePluginAsync(installedPlugin, pluginToInstall);
+                        await this.pluginRegistry.UpdatePluginAsync(installedPlugin, pluginToInstall);
                     }
                     else
                     {
-                        return await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
+                        await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
                     }
                 }
                 catch (Exception e)
                 {
-                    cleanUpExtractedFiles(installationDir);
-
                     if (e is OperationCanceledException)
                     {
-                        throw;
+                        this.logger.Info($"Request to install {pluginPackage} is cancelled.");
                     }
 
-                    //TODO: #259 Log exception
-                    return false;
+                    cleanUpExtractedFiles(installationDir);
+
+                    throw;
                 }
+
+                return true;
             }
 
             void cleanUpExtractedFiles(string extractionDir)
@@ -197,66 +248,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                return await this.pluginRegistry.UnregisterPluginAsync(installedPlugin.PluginInfo);
+                if (!await this.pluginRegistry.IsPluginRegisteredAsync(installedPlugin.PluginInfo))
+                {
+                    this.logger.Warn($"Unable to uninstall plugin {installedPlugin.PluginInfo} because it is not currently registered.");
+                    return false;
+                }
+
+                await this.pluginRegistry.UnregisterPluginAsync(installedPlugin.PluginInfo);
+                return true;
             }
-        }
-
-        /// <summary>
-        ///     Verifies the given installed plugin info matches the reocrd in the plugin registry.
-        /// </summary>
-        /// <param name="installedPluginInfo">
-        ///     An installed plugin.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the installed plugin matches the record in the plugin registry. <c>false</c> otherwise.
-        /// </returns>
-        private async Task<bool> VerifyInstalledAsync(
-            InstalledPluginInfo installedPluginInfo,
-            CancellationToken cancellationToken)
-        {
-            Guard.NotNull(installedPluginInfo, nameof(installedPluginInfo));
-
-            Func<InstalledPluginInfo, bool> predicate = plugin => plugin.Equals(installedPluginInfo);
-            InstalledPluginInfo matchingPlugin = await CheckInstalledCoreAsync(predicate, cancellationToken);
-            return matchingPlugin != null;
-        }
-
-        /// <summary>
-        ///     Checks if any plugin with the given ID has been installed to the plugin registry
-        ///     and returns the matching record.
-        /// </summary>
-        /// <param name="pluginId">
-        ///     A plugin identifier.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the plugin is currently installed. <c>false</c> otherwise.
-        /// </returns>
-        private async Task<InstalledPluginInfo> GetInstalledPluginIfExistsAsync(
-            string pluginId,
-            CancellationToken cancellationToken)
-        {
-            Guard.NotNull(pluginId, nameof(pluginId));
-
-            Func<InstalledPluginInfo, bool> predicate = plugin => plugin.Id.Equals(pluginId, StringComparison.OrdinalIgnoreCase);
-            return await CheckInstalledCoreAsync(predicate, cancellationToken);
-        }
-
-        private async Task<InstalledPluginInfo> CheckInstalledCoreAsync(
-            Func<InstalledPluginInfo, bool> predicate,
-            CancellationToken cancellationToken)
-        {
-            Guard.NotNull(predicate, nameof(predicate));
-
-            IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
-            InstalledPluginInfo matchingPlugin = installedPlugins.SingleOrDefault(p => predicate(p));
-
-            return matchingPlugin;
         }
 
         private async Task<bool> ValidateInstalledPluginAsync(InstalledPluginInfo plugin)
@@ -273,24 +273,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             InstalledPluginInfo installedPlugin,
             CancellationToken cancellationToken)
         {
-            if (!await VerifyInstalledAsync(installedPlugin, cancellationToken))
+            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+
+            if (!await this.pluginRegistry.IsPluginRegisteredAsync(installedPlugin))
             {
                 throw new InvalidOperationException(
-                    $"Plugin {installedPlugin.Id}-{installedPlugin.Version} is no longer installed");
+                    $"Plugin {installedPlugin} is no longer registered in the plugin registry");
+            }
+
+            if (!await ValidateInstalledPluginAsync(installedPlugin))
+            {
+                throw new InstalledPluginCorruptedOrMissingException(
+                    $"Plugin {installedPlugin} is corrupted or missing.",
+                    installedPlugin);
             }
 
             string metadataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
-
-            PluginMetadata pluginMetadata = await SerializationUtils.TryReadFromFileAsync<PluginMetadata>(
-                metadataFileName,
-                SerializationConfig.PluginsManagerSerializerDefaultOptions,
-                this.logger);
-
-            if (pluginMetadata == null)
+            PluginMetadata pluginMetadata;
+            using (var fileStream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return null;
+                pluginMetadata = await JsonSerializer.DeserializeAsync<PluginMetadata>(
+                    fileStream,
+                    SerializationConfig.PluginsManagerSerializerDefaultOptions,
+                    cancellationToken);
             }
-            // TODO:
 
             return new InstalledPlugin(installedPlugin, pluginMetadata);
         }
