@@ -67,7 +67,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="directory">
         ///     The directory to load resource assemblies from.
         /// </param>
-        void LoadAdditionalPluginResources(string directory);
+        /// <returns>
+        ///     Whether the loading was successful.
+        /// </returns>
+        bool LoadAdditionalPluginResources(string directory);
 
         /// <summary>
         ///     Gets all available versions of a plugin by discovering from all plugin sources.

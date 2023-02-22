@@ -130,9 +130,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
         /// <inheritdoc />
-        public void LoadAdditionalPluginResources(string directory)
+        public bool LoadAdditionalPluginResources(string directory)
         {
-            this.resourceLoader.TryLoad(directory);
+            return this.resourceLoader.TryLoad(directory);
         }
 
         /// <inheritdoc />
