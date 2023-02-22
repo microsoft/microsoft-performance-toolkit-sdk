@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
@@ -14,7 +15,6 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
-    // TODO: #238 Add proper error handling
     // TODO: #254 Add docstrings
     /// <summary>
     ///     Contains a registry file that records information of installed plugins 
@@ -61,12 +61,62 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
         public string RegistryRoot { get; }
 
-        public async Task<List<InstalledPluginInfo>> GetInstalledPlugins()
+        public Task<List<InstalledPluginInfo>> GetAllInstalledPlugins()
         {
-            return await ReadInstalledPlugins();
+            return ReadInstalledPlugins();
         }
 
-        public async Task<bool> RegisterPluginAsync(InstalledPluginInfo plugin)
+        /// <summary>
+        ///     Checks if any plugin with the given ID has been installed to the plugin registry
+        ///     and returns the matching record.
+        /// </summary>
+        /// <param name="pluginId">
+        ///     A plugin identifier.
+        /// </param>
+        /// <returns>
+        ///     The matching <see cref="InstalledPluginInfo"/> or <c>null</c> if no matching record found.
+        /// </returns>
+        public async Task<InstalledPluginInfo> TryGetInstalledPluginByIdAsync(string pluginId)
+        {
+            Guard.NotNull(pluginId, nameof(pluginId));
+
+            List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
+            try
+            {
+                return installedPlugins.SingleOrDefault(
+                    plugin => plugin.Id.Equals(pluginId, StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                LogDuplicatedRegistered(pluginId);
+                throw CreateDuplicatedRegisteredException(pluginId);
+            }       
+        }
+
+        /// <summary>
+        ///     Verifies the given installed plugin info matches the record in the plugin registry.
+        /// </summary>
+        /// <param name="installedPluginInfo">
+        ///     The plugin info to check for.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the installed plugin matches the record in the plugin registry. <c>false</c> otherwise.
+        /// </returns>
+        public async Task<bool> IsPluginRegisteredAsync(InstalledPluginInfo pluginInfo)
+        {
+            List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
+
+            int installedCount = installedPlugins.Count(p => p.Equals(pluginInfo));
+            if (installedCount > 1)
+            {
+                LogDuplicatedRegistered(pluginInfo.Id);
+                throw CreateDuplicatedRegisteredException(pluginInfo.Id);
+            }
+
+            return installedCount == 1;
+        }
+
+        public async Task RegisterPluginAsync(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
@@ -75,22 +125,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             ThrowIfAlreadyRegistered(installedPlugins, plugin);
             installedPlugins.Add(plugin);
 
-            return await WriteInstalledPlugins(installedPlugins);
+            await WriteInstalledPlugins(installedPlugins);
         }
 
-        public async Task<bool> UnregisterPluginAsync(InstalledPluginInfo plugin)
+        public async Task UnregisterPluginAsync(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
 
             ThrowIfNotRegistered(installedPlugins, plugin);
-            installedPlugins.Remove(plugin);
+            installedPlugins.RemoveAll(p => p.Equals(plugin));
 
-            return await WriteInstalledPlugins(installedPlugins);
+            await WriteInstalledPlugins(installedPlugins);
         }
 
-        public async Task<bool> UpdatePluginAsync(InstalledPluginInfo currentPlugin, InstalledPluginInfo updatedPlugin)
+        public async Task UpdatePluginAsync(InstalledPluginInfo currentPlugin, InstalledPluginInfo updatedPlugin)
         {
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
             Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
@@ -100,10 +150,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             ThrowIfNotRegistered(installedPlugins, currentPlugin);
             ThrowIfAlreadyRegistered(installedPlugins, updatedPlugin);
 
-            installedPlugins.Remove(currentPlugin);
+            installedPlugins.RemoveAll(p => p.Equals(currentPlugin));
             installedPlugins.Add(updatedPlugin);
 
-            return await WriteInstalledPlugins(installedPlugins);
+            await WriteInstalledPlugins(installedPlugins);
         }
 
         // TODO: Might want to change this to a file lock that supports read lock.
@@ -169,23 +219,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 return Task.FromResult(new List<InstalledPluginInfo>());
             }
 
-            return SerializationUtils.ReadFromFileAsync<List<InstalledPluginInfo>>(
-                this.registryFilePath,
-                SerializationConfig.PluginsManagerSerializerDefaultOptions,
-                this.logger);
+            using (var fileStream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return JsonSerializer.DeserializeAsync<List<InstalledPluginInfo>>(
+                    fileStream,
+                    SerializationConfig.PluginsManagerSerializerDefaultOptions).AsTask();          
+            }
         }
 
-        private Task<bool> WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
+        private Task WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
         {
             Guard.NotNull(installedPlugins, nameof(installedPlugins));
 
             Directory.CreateDirectory(this.RegistryRoot);
 
-            return SerializationUtils.WriteToFileAsync(
-                this.registryFilePath,
-                installedPlugins,
-                SerializationConfig.PluginsManagerSerializerDefaultOptions,
-                this.logger);
+            using (var fileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
+            {
+                return JsonSerializer.SerializeAsync(
+                    fileStream,
+                    installedPlugins,
+                    SerializationConfig.PluginsManagerSerializerDefaultOptions);
+            }     
         }
 
         private void ThrowIfAlreadyRegistered(
@@ -193,17 +247,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             InstalledPluginInfo pluginToInstall)
         {
             int installedCount = installedPluginInfos.Count(p => p.Id.Equals(pluginToInstall.Id));
-            if (installedCount == 1)
+            if (installedCount >= 1)
             {
+                if (installedCount > 1)
+                {
+                    LogDuplicatedRegistered(pluginToInstall.Id);
+                }
+
                 throw new InvalidOperationException($"Failed to register plugin {pluginToInstall} as it is already registered.");
-            }
-
-            if (installedCount > 1)
-            {
-                string errorMsg = $"Duplicated records of plugin {pluginToInstall} found in the plugin registry.";
-                this.logger.Error(errorMsg);
-
-                throw new PluginRegistryCorruptedException(errorMsg);
             }
         }
 
@@ -219,11 +270,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             if (installedCount > 1)
             {
-                string errorMsg = $"Duplicated records of plugin {pluginToRemove} found in the plugin registry.";
-                this.logger.Error(errorMsg);
-
-                throw new PluginRegistryCorruptedException(errorMsg);
+                LogDuplicatedRegistered(pluginToRemove.Id);
             }
+        }
+
+        private PluginRegistryCorruptedException CreateDuplicatedRegisteredException(string pluginId)
+        {
+            return new PluginRegistryCorruptedException
+                    ($"Duplicated records of plugin {pluginId} found in the plugin registry");
+        }
+
+        private void LogDuplicatedRegistered(string pluginId)
+        {
+            this.logger.Error($"Duplicated records of plugin {pluginId} found in the plugin registry.");
         }
     }
 }
