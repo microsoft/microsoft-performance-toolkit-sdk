@@ -24,8 +24,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
     public sealed class PluginsManager
         : IPluginsManager
     {
-        private readonly IPluginManagerResourceLoader resourceLoader;
-
         private readonly PluginManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
         private readonly PluginManagerResourceRepository<IPluginFetcher> fetcherRepository;
 
@@ -46,9 +44,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="fetchers">
         ///     A collection of fetchers.
         /// </param>
-        /// <param name="resourceLoader">
-        ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
-        /// </param>
         /// <param name="pluginRegistry">
         ///     A plugin registry this plugin manager will interact with.
         /// </param>
@@ -58,10 +53,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginManagerResourceLoader resourceLoader,
             PluginRegistry pluginRegistry,
             string installationDir) 
-            : this(discovererProviders, fetchers, resourceLoader, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
+            : this(discovererProviders, fetchers, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
         {
         }
 
@@ -73,9 +67,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// </param>
         /// <param name="fetchers">
         ///     A collection of fetchers.
-        /// </param>
-        /// <param name="resourceLoader">
-        ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
         /// </param>
         /// <param name="pluginRegistry">
         ///     A plugin registry this plugin manager will interact with.
@@ -89,26 +80,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginManagerResourceLoader resourceLoader,
             PluginRegistry pluginRegistry,
             string installationDir,
             ILogger logger)
         {
             Guard.NotNull(discovererProviders, nameof(discovererProviders));
             Guard.NotNull(fetchers, nameof(fetchers));
-            Guard.NotNull(resourceLoader, nameof(resourceLoader));
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
             Guard.NotNullOrWhiteSpace(installationDir, nameof(installationDir));
             Guard.NotNull(logger, nameof(logger));
 
-            this.resourceLoader = resourceLoader;
             this.discovererRepository = new PluginManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
             this.fetcherRepository = new PluginManagerResourceRepository<IPluginFetcher>(fetchers);
 
             this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository, new DiscoverersFactory());
-
-            this.resourceLoader.Subscribe(this.discovererRepository);
-            this.resourceLoader.Subscribe(this.fetcherRepository);
 
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
@@ -137,11 +122,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.discovererSourcesManager.AddPluginSources(sources);
         }
 
-        /// <inheritdoc />
-        public bool LoadAdditionalPluginResources(string directory)
-        {
-            return this.resourceLoader.TryLoad(directory);
-        }
+        // TODO: Re-enable when we start to support loading additional resources.
+        ///// <inheritdoc />
+        //public bool LoadAdditionalPluginResources(string directory)
+        //{
+        //    return this.resourceLoader.TryLoad(directory);
+        //}
 
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(
