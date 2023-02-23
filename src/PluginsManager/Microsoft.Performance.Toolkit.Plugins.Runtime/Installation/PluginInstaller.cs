@@ -13,6 +13,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -61,9 +62,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     A collection of installed plugins.
+        ///     A <see cref="InstalledPluginsResults"/> instance containing all valid and invalid installed plugins.
         /// </returns>
-        public async Task<IReadOnlyCollection<InstalledPlugin>> GetAllInstalledPluginsAsync(
+        public async Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken)
         {
             using (await this.pluginRegistry.UseLock(cancellationToken))
@@ -93,10 +94,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
                 if (!task.IsFaulted && !task.IsCanceled)
                 {
-                    return task.Result;
+                    return new InstalledPluginsResults(
+                        task.Result.AsReadOnly(),
+                        new List<InstalledPluginInfo>().AsReadOnly());
                 }
 
                 var results = new List<InstalledPlugin>();
+                var invalidPluginsInfo = new List<InstalledPluginInfo>();
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     Task<InstalledPlugin> t = tasks[i];
@@ -105,6 +109,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     {
                         foreach (Exception ex in t.Exception.Flatten().InnerExceptions)
                         {
+                            invalidPluginsInfo.Add(plugin);
                             this.logger.Error(ex, $"An error occured when reading installed plugin {plugin}");
                         }
                     }
@@ -114,7 +119,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 }
 
-                return results;
+                return new InstalledPluginsResults(results, invalidPluginsInfo);
             }  
         }
 

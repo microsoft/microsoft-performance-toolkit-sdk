@@ -16,6 +16,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
@@ -294,7 +295,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
         /// <inheritdoc />
-        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
+        public Task<InstalledPluginsResults> GetInstalledPluginsAsync(CancellationToken cancellationToken)
         {
             return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
         }

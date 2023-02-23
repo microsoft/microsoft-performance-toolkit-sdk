@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
@@ -115,9 +116,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     A collection of installed plugins.
+        ///     A <see cref="InstalledPluginsResults"/> instance containing all valid and invalid installed plugins.
         /// </returns>
-        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
+        Task<InstalledPluginsResults> GetInstalledPluginsAsync(CancellationToken cancellationToken);
 
         /// <summary>
         ///     Installs an available plugin if no other versions of this plugin installed.
