@@ -48,14 +48,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         public PluginMetadata()
         {  
         }
-        
-        public static Task<PluginMetadata> Parse(Stream jsonStream)
-        {
-            Guard.NotNull(jsonStream, nameof(jsonStream));
-
-            // TODO: #238 Error handling
-            return JsonSerializer.DeserializeAsync<PluginMetadata>(jsonStream).AsTask();
-        }
 
         /// <summary>
         ///     Gets or sets the identifer of this plugin.

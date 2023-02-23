@@ -77,6 +77,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     The matching <see cref="InstalledPluginInfo"/> or <c>null</c> if no matching record found.
         /// </returns>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is corrupted.
+        /// </exception>
         public async Task<InstalledPluginInfo> TryGetInstalledPluginByIdAsync(string pluginId)
         {
             Guard.NotNull(pluginId, nameof(pluginId));
@@ -213,34 +216,57 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.lockToken = null;
         }
 
-        private Task<List<InstalledPluginInfo>> ReadInstalledPlugins()
+        private async Task<List<InstalledPluginInfo>> ReadInstalledPlugins()
         {
             if (!File.Exists(this.registryFilePath))
             {
-                return Task.FromResult(new List<InstalledPluginInfo>());
+                return new List<InstalledPluginInfo>();
             }
 
-            using (var fileStream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            try
             {
-                return JsonSerializer.DeserializeAsync<List<InstalledPluginInfo>>(
-                    fileStream,
-                    SerializationConfig.PluginsManagerSerializerDefaultOptions).AsTask();          
+                using (var fileStream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    return await JsonSerializer.DeserializeAsync<List<InstalledPluginInfo>>(
+                        fileStream,
+                        SerializationConfig.PluginsManagerSerializerDefaultOptions);
+                }
+            }
+            catch (Exception e)
+            {
+                if (e is JsonException)
+                {
+                    this.logger.Error(e, $"Deserialization of plugin registry failed due to invalid JSON text.");
+                }
+
+                string errorMsg = $"Failed to read from plugin registry file.";
+                this.logger.Error(e, errorMsg);
+                throw new PluginRegistryReadWriteException(errorMsg, this.registryFilePath, e);
             }
         }
 
-        private Task WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
+        private async Task WriteInstalledPlugins(IEnumerable<InstalledPluginInfo> installedPlugins)
         {
             Guard.NotNull(installedPlugins, nameof(installedPlugins));
 
             Directory.CreateDirectory(this.RegistryRoot);
 
-            using (var fileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
+            try
             {
-                return JsonSerializer.SerializeAsync(
-                    fileStream,
-                    installedPlugins,
-                    SerializationConfig.PluginsManagerSerializerDefaultOptions);
-            }     
+                using (var fileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
+                {
+                    await JsonSerializer.SerializeAsync(
+                        fileStream,
+                        installedPlugins,
+                        SerializationConfig.PluginsManagerSerializerDefaultOptions);
+                }
+            }
+            catch (Exception e)
+            {
+                string errorMsg = $"Failed to write to plugin registry file.";
+                this.logger.Error(e, errorMsg);
+                throw new PluginRegistryReadWriteException(errorMsg, this.registryFilePath, e);
+            }
         }
 
         private void ThrowIfAlreadyRegistered(

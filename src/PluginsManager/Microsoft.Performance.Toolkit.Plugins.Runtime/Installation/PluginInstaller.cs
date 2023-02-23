@@ -139,7 +139,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     <c>true</c> if the plugin is successfully installed. <c>false</c> otherwise.
         /// </returns>
-        public async Task<bool> InstallPluginAsync(
+        public async Task<InstalledPluginInfo> InstallPluginAsync(
             PluginPackage pluginPackage,
             string installationRoot,
             Uri sourceUri,
@@ -163,7 +163,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         if (await ValidateInstalledPluginAsync(installedPlugin))
                         {
                             this.logger.Warn($"Attempted to install an already installed and valid plugin.");
-                            return false;
+                            return null;
                         }
 
                         this.logger.Warn($"Installer is going to reinstall {installedPlugin} because it is tampered.");
@@ -199,20 +199,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     {
                         await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
                     }
+
+                    return pluginToInstall;
                 }
                 catch (Exception e)
                 {
+                    cleanUpExtractedFiles(installationDir);
+                    
                     if (e is OperationCanceledException)
                     {
                         this.logger.Info($"Request to install {pluginPackage} is cancelled.");
                     }
-
-                    cleanUpExtractedFiles(installationDir);
-
+                    else
+                    {
+                        this.logger.Error(e, $"Failed to install plugin {pluginPackage} to {installationDir}.");
+                    }
+                    
                     throw;
                 }
-
-                return true;
             }
 
             void cleanUpExtractedFiles(string extractionDir)

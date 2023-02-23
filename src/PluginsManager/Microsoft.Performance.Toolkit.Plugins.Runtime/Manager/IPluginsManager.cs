@@ -132,9 +132,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Indicates the progress of plugin installation.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        ///     The <see cref="InstalledPluginInfo"/> if plugin is successfully installed. <c>null</c> otherwise.
         /// </returns>
-        Task<bool> InstallAvailablePluginAsync(
+        Task<InstalledPluginInfo> InstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
@@ -152,9 +152,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Indicates the progress of plugin installation.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        ///     The <see cref="InstalledPluginInfo"/> if plugin is successfully installed.. <c>null</c> otherwise.
         /// </returns>
-        Task<bool> InstallLocalPluginAsync(
+        Task<InstalledPluginInfo> InstallLocalPluginAsync(
            string pluginPackagePath,
            CancellationToken cancellationToken,
            IProgress<int> progress);

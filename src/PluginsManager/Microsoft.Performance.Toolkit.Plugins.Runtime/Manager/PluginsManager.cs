@@ -300,61 +300,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
         /// <inheritdoc />
-        public async Task<bool> InstallAvailablePluginAsync(
+        public async Task<InstalledPluginInfo> InstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
+            Stream stream;
             try
             {
-                using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
-                {
-                    if (stream == null)
-                    {
-                        // TODO: log
-                        return false;
-                    }
-
-                    if (!PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
-                    {
-                        return false;
-                    }
-
-                    using (pluginPackage)
-                    {
-                        return await this.pluginInstaller.InstallPluginAsync(
-                            pluginPackage,
-                            this.installationDir,
-                            availablePlugin.AvailablePluginInfo.PluginPackageUri,
-                            cancellationToken,
-                            progress);
-                    }
-                }
-                
+                stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress);
             }
-            catch (Exception ex)
+            catch
             {
-                return false;
+                // throw fetching exeception.
+                throw;
             }
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> InstallLocalPluginAsync(
-            string pluginPackagePath,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
-        {
-            Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
-
-            string packageFullPath = Path.GetFullPath(pluginPackagePath);
-
-            try
+            
+            using (stream)
             {
-                if (!PluginPackage.TryCreate(pluginPackagePath, out PluginPackage pluginPackage))
+                if (!PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
                 {
-                    return false;
+                    throw new PluginPackageCreationException(
+                        $"Failed to create plugin package from discovered plugin {availablePlugin.AvailablePluginInfo.Identity}");
                 }
 
                 using (pluginPackage)
@@ -362,15 +331,36 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                     return await this.pluginInstaller.InstallPluginAsync(
                         pluginPackage,
                         this.installationDir,
-                        new Uri(packageFullPath),
+                        availablePlugin.AvailablePluginInfo.PluginPackageUri,
                         cancellationToken,
                         progress);
                 }
             }
-            catch (Exception e)
+        }
+
+        /// <inheritdoc />
+        public async Task<InstalledPluginInfo> InstallLocalPluginAsync(
+            string pluginPackagePath,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
+
+            string packageFullPath = Path.GetFullPath(pluginPackagePath);
+            
+            if (!PluginPackage.TryCreate(pluginPackagePath, out PluginPackage pluginPackage))
             {
-                this.logger.Error(e, $"Failed to install plugin from {packageFullPath}");
-                return false;
+                throw new PluginPackageCreationException($"Failed to create plugin package from {packageFullPath}");
+            }
+
+            using (pluginPackage)
+            {
+                return await this.pluginInstaller.InstallPluginAsync(
+                    pluginPackage,
+                    this.installationDir,
+                    new Uri(packageFullPath),
+                    cancellationToken,
+                    progress);
             }
         }
 
@@ -382,15 +372,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            try
-            {
-                return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
-            }
-            catch (Exception e)
-            {
-                this.logger.Error(e, $"Failed to uninstall plugin {installedPlugin.PluginInfo.DisplayName}");
-                return false;
-            }
+            return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
         }
 
         /// <inheritdoc />

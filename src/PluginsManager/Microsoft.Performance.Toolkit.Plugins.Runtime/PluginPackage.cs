@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
@@ -26,7 +28,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private static readonly string pluginContentPath = "plugin/";
         private static readonly string pluginMetadataFileName = "pluginspec.json";
         private bool disposedValue;
-        private ILogger logger;
+        private readonly ILogger logger;
 
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
@@ -79,19 +81,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             ILogger logger,
             out PluginPackage package)
         {
+            Stream stream;
             try
             {
-                using (Stream stream = OpenFile(fileName))
-                {
-                    return TryCreate(stream, out package);
-                }
+                stream = OpenFile(fileName);
             }
             catch (Exception e)
             {
                 package = null;
-                logger.Error(e, $"Failed to read plugin package from file {fileName}");
+                logger.Error(e, $"Failed to open a stream for reading {fileName}");
 
                 return false;
+            }
+
+            using (stream)
+            {
+                return TryCreate(stream, out package);
             }
         }
 
@@ -106,7 +111,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     <c>false</c> otherwise.
         /// </param>
         /// <param name="logger">
-        /// 
+        ///     Used to log messages.
         /// </param>
         private PluginPackage(
             Stream stream, 
@@ -115,7 +120,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(stream, nameof(stream));
 
-            this.logger = Logger.Create<PluginPackage>();
+            this.logger = logger;
 
             try
             {
@@ -123,9 +128,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
                 this.PluginMetadata = ReadMetadata();
             }
-            catch when (!leaveOpen)
+            catch (Exception e)
             {
-                stream.Dispose();
+                if (!leaveOpen)
+                {
+                    stream.Dispose();
+                }
+
+                if (e is JsonException)
+                {
+                    this.logger.Error(e, $"Deserialization failed due to invalid JSON text");
+                }
+                else if (e is InvalidDataException)
+                {
+                    this.logger.Error(e, $"Invalid stream for a plugin package.");
+                }
+
                 throw;
             }
         }
@@ -255,6 +273,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             return ExtractEntriesInternalAsync(
                 this.Entries.Where(e => predicate(e)),
                 extractPath,
+                this.logger,
                 cancellationToken,
                 progress);
         }
@@ -276,6 +295,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private static async Task ExtractEntriesInternalAsync(
            IEnumerable<PluginPackageEntry> entries,
            string extractPath,
+           ILogger logger,
            CancellationToken cancellationToken,
            IProgress<int> progress)
         {
@@ -290,37 +310,45 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 extractPath += Path.DirectorySeparatorChar;
             }
 
-            // TODO: #238 Error handling
             // TODO: #257 Report progress
-            foreach (PluginPackageEntry entry in entries)
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                string destPath = Path.GetFullPath(Path.Combine(extractPath, entry.RelativePath));
-                if (entry.IsDirectory )
+                foreach (PluginPackageEntry entry in entries)
                 {
-                    Directory.CreateDirectory(destPath);                    
-                }
-                else
-                {
-                    string destDir = Path.GetDirectoryName(destPath);
-                    if (!string.IsNullOrEmpty(destDir))
-                    {
-                        Directory.CreateDirectory(destDir);
-                    }
+                    cancellationToken.ThrowIfCancellationRequested();
 
-                    using (Stream entryStream = entry.Open())
-                    using (var destStream = new FileStream(
-                        destPath,
-                        FileMode.Create,
-                        FileAccess.Write,
-                        FileShare.None,
-                        bufferSize,
-                        FileOptions.Asynchronous | FileOptions.SequentialScan))
+                    string destPath = Path.GetFullPath(Path.Combine(extractPath, entry.RelativePath));
+                    if (entry.IsDirectory)
                     {
-                        await entryStream.CopyToAsync(destStream, defaultAsyncBufferSize, cancellationToken).ConfigureAwait(false);
+                        Directory.CreateDirectory(destPath);
+                    }
+                    else
+                    {
+                        string destDir = Path.GetDirectoryName(destPath);
+                        if (!string.IsNullOrEmpty(destDir))
+                        {
+                            Directory.CreateDirectory(destDir);
+                        }
+
+                        using (Stream entryStream = entry.Open())
+                        using (var destStream = new FileStream(
+                            destPath,
+                            FileMode.Create,
+                            FileAccess.Write,
+                            FileShare.None,
+                            bufferSize,
+                            FileOptions.Asynchronous | FileOptions.SequentialScan))
+                        {
+                            await entryStream.CopyToAsync(destStream, defaultAsyncBufferSize, cancellationToken).ConfigureAwait(false);
+                        }
                     }
                 }
+            }
+            catch (Exception e) when (!(e is OperationCanceledException))
+            {
+                string errorMsg = $"Unable to extract plugin content to {extractPath}";
+                logger.Error(e, errorMsg);
+                throw new PluginPackageExtractionException(errorMsg, e);
             }
         }
 
@@ -336,27 +364,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             ZipArchiveEntry entry = this.zip.GetEntry(pluginMetadataFileName);
             if (entry == null)
             {
-                throw new InvalidDataException($"{pluginMetadataFileName} not found in package.");
+                throw new MalformedPluginPackageException($"{pluginMetadataFileName} not found in the plugin package.");
             }
-
+            
             using (Stream stream = entry.Open())
             {
-                PluginMetadata pluginMetadata = SerializationUtils.ReadFromStream<PluginMetadata>(
+                PluginMetadata pluginMetadata = JsonSerializer.Deserialize<PluginMetadata>(
                     stream,
-                    SerializationConfig.PluginsManagerSerializerDefaultOptions,
-                    this.logger);
-
-                if (pluginMetadata == null)
-                {
-                    // TODO:
-                    throw new InvalidDataException("");
-                    // InvalidDataExceptionFactory.CreateInvalidPluginMetadataException();
-                }
+                    SerializationConfig.PluginsManagerSerializerDefaultOptions);
 
                 return pluginMetadata;
             }
         }
-
+        
         private void Dispose(bool disposing)
         {
             if (!this.disposedValue)

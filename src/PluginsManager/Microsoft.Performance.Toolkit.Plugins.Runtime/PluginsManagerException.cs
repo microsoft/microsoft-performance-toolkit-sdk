@@ -46,24 +46,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public string PluginRegistryPath { get; }
     }
 
-    public class PluginRegistrySerializationException
+    public class PluginRegistryReadWriteException
         : PluginsManagerException
     {
-        public PluginRegistrySerializationException()
+        public PluginRegistryReadWriteException()
         {
         }
 
-        public PluginRegistrySerializationException(string message)
+        public PluginRegistryReadWriteException(string message)
             : base(message)
         {
         }
 
-        public PluginRegistrySerializationException(string message, Exception innerException)
+        public PluginRegistryReadWriteException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
-        public PluginRegistrySerializationException(string message, string registryFilePath, Exception innerException)
+        public PluginRegistryReadWriteException(string message, string registryFilePath, Exception innerException)
             : this(message, innerException)
         {
             this.PluginRegistryPath = registryFilePath;
@@ -96,5 +96,95 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         public InstalledPluginInfo PluginInfo { get; }
+    }
+    
+    public class PluginPackageCreationException
+        : PluginsManagerException
+    {
+        public PluginPackageCreationException()
+        {
+        }
+
+        public PluginPackageCreationException(string message)
+            : base(message)
+        {
+        }
+
+        public PluginPackageCreationException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    public class PluginPackageExtractionException
+        : PluginsManagerException
+    {
+        public PluginPackageExtractionException()
+        {
+        }
+
+        public PluginPackageExtractionException(string message)
+            : base(message)
+        {
+        }
+
+        public PluginPackageExtractionException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    public class MalformedPluginPackageException
+        : PluginsManagerException
+    {
+        public MalformedPluginPackageException()
+        {
+        }
+
+        public MalformedPluginPackageException(string message)
+            : base(message)
+        {
+        }
+
+        public MalformedPluginPackageException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    public class InvalidPluginMetadataException
+        : PluginsManagerException
+    {
+        public InvalidPluginMetadataException()
+        {
+        }
+
+        public InvalidPluginMetadataException(string message)
+            : base(message)
+        {
+        }
+
+        public InvalidPluginMetadataException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    public class PluginInstallationException
+        : PluginsManagerException
+    {
+        public PluginInstallationException()
+        {
+        }
+
+        public PluginInstallationException(string message)
+            : base(message)
+        {
+        }
+
+        public PluginInstallationException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
     }
 }
