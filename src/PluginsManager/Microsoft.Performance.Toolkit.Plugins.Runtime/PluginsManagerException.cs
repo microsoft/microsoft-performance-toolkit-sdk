@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -152,21 +153,35 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
     }
 
-    public class PluginInstallationException
+    public class PluginFetchingException
         : PluginsManagerException
     {
-        public PluginInstallationException()
+        public PluginFetchingException()
         {
         }
 
-        public PluginInstallationException(string message)
+        public PluginFetchingException(string message)
             : base(message)
         {
         }
 
-        public PluginInstallationException(string message, Exception innerException)
+        public PluginFetchingException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
+
+        public PluginFetchingException(string message, AvailablePluginInfo pluginInfo)
+            : this(message)
+        {
+            this.PluginInfo = pluginInfo;
+        }
+
+        public PluginFetchingException(string message, AvailablePluginInfo pluginInfo, Exception innerException)
+            : this(message, innerException)
+        {
+            this.PluginInfo = pluginInfo;
+        }
+
+        public AvailablePluginInfo PluginInfo { get; }
     }
 }

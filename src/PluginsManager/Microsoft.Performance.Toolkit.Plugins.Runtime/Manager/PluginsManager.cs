@@ -94,6 +94,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             string installationDir,
             ILogger logger)
         {
+            Guard.NotNull(discovererProviders, nameof(discovererProviders));
+            Guard.NotNull(fetchers, nameof(fetchers));
+            Guard.NotNull(resourceLoader, nameof(resourceLoader));
+            Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
+            Guard.NotNullOrWhiteSpace(installationDir, nameof(installationDir));
+            Guard.NotNull(logger, nameof(logger));
+
             this.resourceLoader = resourceLoader;
             this.discovererRepository = new PluginManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
             this.fetcherRepository = new PluginManagerResourceRepository<IPluginFetcher>(fetchers);
@@ -143,7 +150,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             var tasks = Task.WhenAll(this.PluginSources.Select(s => GetAvailablePluginsLatestFromSourceAsync(s, cancellationToken)));
             try
             {
-                await tasks;
+                await tasks.ConfigureAwait(false);
             }
             catch
             {
@@ -313,10 +320,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress);
             }
-            catch
+            catch (OperationCanceledException)
             {
-                // throw fetching exeception.
+                this.logger.Info("Request to fetch plugin package is cancelled.");
                 throw;
+            }
+            catch (Exception e)
+            {
+                string errorMsg = $"Fails to fetch plugin {availablePlugin.AvailablePluginInfo.Identity} " +
+                    $"from {availablePlugin.AvailablePluginInfo.PluginPackageUri}";
+                
+                this.logger.Error(e, errorMsg);
+
+                throw new PluginFetchingException(errorMsg, availablePlugin.AvailablePluginInfo, e);
             }
             
             using (stream)
