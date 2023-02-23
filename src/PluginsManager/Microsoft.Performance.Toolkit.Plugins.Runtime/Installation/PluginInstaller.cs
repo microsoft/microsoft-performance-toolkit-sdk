@@ -70,14 +70,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins();
-                InstalledPluginInfo[] installedPluginsArr = installedPlugins.ToArray();
+                InstalledPluginInfo[] installedPluginsArray = installedPlugins.ToArray();
 
-                Task<InstalledPlugin>[] tasks = installedPluginsArr
+                Task<InstalledPlugin>[] tasks = installedPluginsArray
                     .Select(p => CreateInstalledPluginAsync(p, cancellationToken))
                     .ToArray();
-                
-                
-                var task = Task.WhenAll(installedPluginsArr.Select(p => CreateInstalledPluginAsync(p, cancellationToken)));
+
+
+                var task = Task.WhenAll(tasks);
 
                 try
                 {
@@ -85,7 +85,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 }
                 catch (OperationCanceledException)
                 {
-                    this.logger.Info($"Request for getting all installed plugins is cancelled.");
+                    this.logger.Info($"The request to get all installed plugins is cancelled.");
                     throw;
                 }
                 catch
@@ -104,19 +104,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     Task<InstalledPlugin> t = tasks[i];
-                    InstalledPluginInfo plugin = installedPluginsArr[i];
-                    if (t.IsFaulted)
-                    {
-                        foreach (Exception ex in t.Exception.Flatten().InnerExceptions)
-                        {
-                            invalidPluginsInfo.Add(plugin);
-                            this.logger.Error(ex, $"An error occured when reading installed plugin {plugin}");
-                        }
-                    }
-                    else if (t.Status == TaskStatus.RanToCompletion)
+                    InstalledPluginInfo plugin = installedPluginsArray[i];
+                    if (t.Status == TaskStatus.RanToCompletion)
                     {
                         results.Add(t.Result);
                     }
+                    else
+                    {
+                        if ((t.IsFaulted))
+                        {
+                            this.logger.Error($"Failed to load installed plugin {plugin}.", t.Exception);
+                        }
+                        
+                        invalidPluginsInfo.Add(plugin);
+
+                    };
                 }
 
                 return new InstalledPluginsResults(results, invalidPluginsInfo);
