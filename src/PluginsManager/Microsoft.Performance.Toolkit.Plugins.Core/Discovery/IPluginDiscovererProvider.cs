@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
@@ -9,7 +10,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
     /// <summary>
     ///     Represents a provider that creates <see cref="IPluginDiscoverer"/> for supported <see cref="PluginSource"/>s.
     /// </summary>
-    public interface IPluginDiscovererProvider : IPluginManagerResource
+    public interface IPluginDiscovererProvider
+        : IPluginManagerResource
     {
         /// <summary>
         ///     Checks if the given <paramref name="source"/> is supported by this discoverer.
@@ -32,6 +34,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// <returns>
         ///     A plugin discoverer.
         /// </returns>
-        IPluginDiscoverer CreateDiscoverer(PluginSource source);
+        IPluginDiscoverer CreateDiscoverer(
+            PluginSource source);
+
+        /// <summary>
+        ///     Provides the <see cref="IPluginDiscovererProvider"/> an application-appropriate logging mechanism.
+        /// </summary>
+        /// <param name="logger">
+        ///     Used to log information.
+        /// </param>
+        void SetLogger(ILogger logger);
     }
 }

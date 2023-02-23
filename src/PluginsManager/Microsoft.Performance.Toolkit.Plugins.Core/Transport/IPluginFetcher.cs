@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Transport
@@ -13,7 +14,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Transport
     ///     Represents a fetcher that is capable of fetching the plugin package from a supported <see cref="AvailablePluginInfo"/>.
     ///     A fetcher is meant to be stateless.
     /// </summary>
-    public interface IPluginFetcher : IPluginManagerResource
+    public interface IPluginFetcher
+        : IPluginManagerResource
     {
         /// <summary>
         ///     Checks if the given <paramref name="pluginInfo"/> is supported by this fetcher.
@@ -21,17 +23,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Transport
         /// <param name="pluginInfo">
         ///     The available plugin info containing information for the fetcher to verify if it's supported.
         /// </param>
+        /// <param name="logger">
+        ///     Used to log information.
+        /// </param>
         /// <returns>
         ///     <c>true</c> if <paramref name="pluginInfo"/> is supported by this fetcher. <c>false</c>
         ///     otherwise.
         /// </returns>
-        Task<bool> IsSupportedAsync(AvailablePluginInfo pluginInfo);
+        Task<bool> IsSupportedAsync(AvailablePluginInfo pluginInfo, ILogger logger);
 
         /// <summary>
         ///     Asynchronously gets the plugin package associated with the given <see cref="AvailablePluginInfo"/> and returns as a stream.
         /// </summary>
         /// <param name="pluginInfo">
         ///     The information of a discovered plugin that is available for fetching.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log information.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
@@ -44,6 +52,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Transport
         /// </returns>
         Task<Stream> GetPluginStreamAsync(
             AvailablePluginInfo pluginInfo,
+            ILogger logger,
             CancellationToken cancellationToken,
             IProgress<int> progress);
     }

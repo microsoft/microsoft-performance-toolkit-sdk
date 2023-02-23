@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
@@ -63,7 +64,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
         internal Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
         {
-            return this.pluginFetcher.GetPluginStreamAsync(this.AvailablePluginInfo, cancellationToken, progress);
+            return this.pluginFetcher.GetPluginStreamAsync(
+                this.AvailablePluginInfo,
+                Logger.Create(this.pluginFetcher.GetType()),
+                cancellationToken,
+                progress);
         }
     }
 }

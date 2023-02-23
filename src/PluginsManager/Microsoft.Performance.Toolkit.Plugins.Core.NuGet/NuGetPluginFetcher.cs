@@ -22,9 +22,10 @@ using NuGet.Versioning;
 namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
     [PluginManagerResource(PluginsManagerConstants.NuGetFetcherId)]
-    public sealed class NuGetPluginFetcher : IPluginFetcher
+    public sealed class NuGetPluginFetcher
+        : IPluginFetcher
     {
-        public async Task<bool> IsSupportedAsync(AvailablePluginInfo plugin)
+        public async Task<bool> IsSupportedAsync(AvailablePluginInfo plugin, SDK.Processing.ILogger logger)
         {
             Guard.NotNull(plugin, nameof(plugin));
 
@@ -38,6 +39,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 
         public async Task<Stream> GetPluginStreamAsync(
             AvailablePluginInfo plugin,
+            SDK.Processing.ILogger logger,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {

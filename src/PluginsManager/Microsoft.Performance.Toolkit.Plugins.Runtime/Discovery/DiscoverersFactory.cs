@@ -3,10 +3,14 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
+    /// <summary>
+    ///    Creates discoverer instances for a plugin source given a collection of providers.
+    /// </summary>
     public sealed class DiscoverersFactory
     {
         /// <summary>
@@ -18,7 +22,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <param name="providers">
         ///     A collection of discoverer providers.
         /// </param>
-        /// <returns></returns>
+        /// <returns>
+        ///     A collection of discoverers that can discover plugins from the given plugin source.
+        /// </returns>
         public async Task<IEnumerable<IPluginDiscoverer>> CreateDiscoverers(
             PluginSource pluginSource,
             IEnumerable<IPluginDiscovererProvider> providers)
@@ -28,7 +34,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             {
                 if (await provider.IsSupportedAsync(pluginSource))
                 {
-                    results.Add(provider.CreateDiscoverer(pluginSource));
+                    IPluginDiscoverer discoverer = provider.CreateDiscoverer(pluginSource);
+                    discoverer.SetLogger(Logger.Create(provider.GetType()));
+                    results.Add(discoverer);
                 }
             }
 

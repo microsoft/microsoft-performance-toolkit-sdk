@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 
@@ -15,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     ///     Manages a mapping from plugins sources to plugin discoverers.
     /// </summary>
     public sealed class DiscovererSourcesManager
-          : IDisposable
+        : IDisposable
     {
         private readonly DiscoverersFactory discoverersFactory;
         private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
@@ -35,11 +36,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
             DiscoverersFactory discoverersFactory)
         {
+            Guard.NotNull(discovererProviderRepository, nameof(discovererProviderRepository));
+            Guard.NotNull(discoverersFactory, nameof(discoverersFactory));
+
             this.discovererProviderRepository = discovererProviderRepository;
             this.discovererProviderRepository.ResourcesAdded += OnNewProvidersAdded;
             
             this.discoverersFactory = discoverersFactory;
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
+            
+            SetResourcesLoggers(this.discovererProviderRepository.Resources);
         }
 
         /// <summary>
@@ -119,6 +125,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// </param>
         private async void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
         {
+            SetResourcesLoggers(e.NewPluginManagerResources);
+
             foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
             {
                 kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginManagerResources));
@@ -145,6 +153,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 }
 
                 this.isDisposed = true;
+            }
+        }
+
+        private void SetResourcesLoggers(IEnumerable<IPluginDiscovererProvider> discovererProviders)
+        {
+            foreach (IPluginDiscovererProvider provider in this.discovererProviderRepository.Resources)
+            {
+                provider.SetLogger(Logger.Create(provider.GetType()));
             }
         }
     }

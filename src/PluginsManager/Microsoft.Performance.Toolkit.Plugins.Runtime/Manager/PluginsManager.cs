@@ -403,7 +403,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         {
             foreach (IPluginFetcher fetcher in this.fetcherRepository.Resources)
             {
-                if (fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId && await fetcher.IsSupportedAsync(availablePluginInfo))
+                if (fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId &&
+                    await fetcher.IsSupportedAsync(availablePluginInfo, Logger.Create(fetcher.GetType())))
                 {
                     return fetcher;
                 }

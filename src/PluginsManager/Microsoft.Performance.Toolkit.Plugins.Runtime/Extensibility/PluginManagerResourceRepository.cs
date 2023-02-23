@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
@@ -25,6 +26,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// </param>
         public PluginManagerResourceRepository(IEnumerable<T> resources)
         {
+            Guard.NotNull(resources, nameof(resources));
+            
             this.resources = new HashSet<PluginManagerResourceReference>(resources.Select(r => new PluginManagerResourceReference(r)));
         }
 
@@ -40,6 +43,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// <inheritdoc />
         public void OnNewResourcesLoaded(IEnumerable<PluginManagerResourceReference> loadedResources)
         {
+            Guard.NotNull(loadedResources, nameof(loadedResources));
+
             lock (this.resources)
             {
                 IEnumerable<PluginManagerResourceReference> newResources = loadedResources

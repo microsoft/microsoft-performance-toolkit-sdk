@@ -9,22 +9,22 @@ using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Core.Credential;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
-using ILogger = NuGet.Common.ILogger;
+using ILogger = Microsoft.Performance.SDK.Processing.ILogger;
 using IPluginDiscoverer = Microsoft.Performance.Toolkit.Plugins.Core.Discovery.IPluginDiscoverer;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
-    public sealed class NuGetPluginDiscoverer : IPluginDiscoverer
+    public sealed class NuGetPluginDiscoverer
+        : IPluginDiscoverer
     {
         private readonly PluginSource pluginSource;
         private readonly PackageSource packageSource;
         private readonly SourceRepository repository;
-        private readonly ILogger logger;
+        private ILogger logger;
         private readonly Lazy<ICredentialProvider> credentialProvider;
 
         public static readonly Guid FetcherResourceId = Guid.Parse(PluginsManagerConstants.NuGetFetcherId);
@@ -36,7 +36,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
         {
             this.pluginSource = pluginSource;
             this.packageSource = new PackageSource(pluginSource.Uri.ToString());
-            this.logger = NullLogger.Instance;
             this.repository = Repository.Factory.GetCoreV3(this.packageSource.Source);
             this.credentialProvider = credentialProvider;
         }
@@ -56,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
                     false,
                     false,
                     sourceCacheContext,
-                    this.logger,
+                    null,
                     cancellationToken
                 );
 
@@ -87,7 +86,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
             PackageSearchResource searchResource = await this.repository.GetResourceAsync<PackageSearchResource>(cancellationToken);
 
             var result = new Dictionary<string, AvailablePluginInfo>();
-            IEnumerable<IPackageSearchMetadata> packages = await searchResource.SearchAsync(null, new SearchFilter(false), 0, PageCount, this.logger, cancellationToken);
+            IEnumerable<IPackageSearchMetadata> packages = await searchResource.SearchAsync(null, new SearchFilter(false), 0, PageCount, null, cancellationToken);
 
             int sourceSearchPackageCount = 0;
             foreach (IPackageSearchMetadata packageMetadata in packages)
@@ -122,6 +121,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
             // Cannot get the metadata from nuget discoverer without downloading the package.
             // Returns empty metadata for now
             return new PluginMetadata();
+        }
+
+        public void SetLogger(SDK.Processing.ILogger logger)
+        {
+            this.logger = logger;
         }
     }
 }
