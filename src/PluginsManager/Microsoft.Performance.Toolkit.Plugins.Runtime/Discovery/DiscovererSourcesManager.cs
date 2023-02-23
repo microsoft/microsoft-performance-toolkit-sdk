@@ -158,7 +158,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private void SetResourcesLoggers(IEnumerable<IPluginDiscovererProvider> discovererProviders)
         {
-            foreach (IPluginDiscovererProvider provider in this.discovererProviderRepository.Resources)
+            foreach (IPluginDiscovererProvider provider in discovererProviders)
             {
                 provider.SetLogger(Logger.Create(provider.GetType()));
             }
