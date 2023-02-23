@@ -152,24 +152,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
     }
 
-    public class InvalidPluginMetadataException
-        : PluginsManagerException
-    {
-        public InvalidPluginMetadataException()
-        {
-        }
-
-        public InvalidPluginMetadataException(string message)
-            : base(message)
-        {
-        }
-
-        public InvalidPluginMetadataException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-    }
-
     public class PluginInstallationException
         : PluginsManagerException
     {
