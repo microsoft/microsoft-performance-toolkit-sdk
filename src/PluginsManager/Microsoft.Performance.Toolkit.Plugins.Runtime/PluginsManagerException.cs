@@ -244,28 +244,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     }
 
     //
-    // Installer Exception Types
-    //
-
-    public class PluginInstallerException
-        : PluginsManagerException
-    {
-        public PluginInstallerException()
-        {
-        }
-
-        public PluginInstallerException(string message)
-            : base(message)
-        {
-        }
-
-        public PluginInstallerException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-    }
-
-    //
     // Fetching Exception Types
     //
 

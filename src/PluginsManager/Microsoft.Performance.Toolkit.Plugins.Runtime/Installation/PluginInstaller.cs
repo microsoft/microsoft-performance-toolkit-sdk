@@ -159,9 +159,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <exception cref="PluginRegistryException">
         ///     Throws when something is wrong with the plugin registry.
         /// </exception>
-        /// <exception cref="PluginInstallerException">
-        ///     Throws when something is wrong with the plugin installer.
-        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
         /// </exception>
@@ -236,7 +233,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 }
                 catch (Exception e)
                 {
-                    PluginInstallerException installerException = null;
                     if (e is OperationCanceledException)
                     {
                         this.logger.Info($"Request to install {pluginPackage} is cancelled.");
@@ -245,21 +241,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     {
                         this.logger.Error(e, $"Failed to install plugin {pluginPackage} to {installationDir} due to a failure in the plugin registry.");
                     }
+                    else if (e is PluginPackageException)
+                    {
+                        this.logger.Error(e, $"Failed to install plugin {pluginPackage} to {installationDir} due to a failure in the plugin package.");
+                    }
                     else
                     {
-                        string errorMsg = $"Failed to install plugin {pluginPackage} to {installationDir}.";
-                        installerException = new PluginInstallerException(errorMsg, e);
-
-                        this.logger.Error(e, errorMsg);
+                        this.logger.Error(e, $"Failed to install plugin {pluginPackage} to {installationDir}.");
                     }
 
                     this.logger.Info($"Cleaning up extraction folder: {installationDir}");
                     cleanUpExtractedFiles(installationDir);
-
-                    if (installerException != null)
-                    {
-                        throw installerException;
-                    }
 
                     throw;
                 }
