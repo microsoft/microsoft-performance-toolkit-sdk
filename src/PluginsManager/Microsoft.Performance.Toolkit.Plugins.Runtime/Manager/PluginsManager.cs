@@ -404,20 +404,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             
             using (stream)
             {
-                if (!PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
+                if (PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
+                {
+                    using (pluginPackage)
+                    {
+                        return await this.pluginInstaller.InstallPluginAsync(
+                            pluginPackage,
+                            this.installationDir,
+                            availablePlugin.AvailablePluginInfo.PluginPackageUri,
+                            cancellationToken,
+                            progress);
+                    }
+                }
+                else
                 {
                     throw new PluginPackageCreationException(
-                        $"Failed to create plugin package from discovered plugin {availablePlugin.AvailablePluginInfo.Identity}");
-                }
-
-                using (pluginPackage)
-                {
-                    return await this.pluginInstaller.InstallPluginAsync(
-                        pluginPackage,
-                        this.installationDir,
-                        availablePlugin.AvailablePluginInfo.PluginPackageUri,
-                        cancellationToken,
-                        progress);
+                       $"Failed to create plugin package from discovered plugin {availablePlugin.AvailablePluginInfo.Identity}");
                 }
             }
         }
@@ -431,20 +433,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
 
             string packageFullPath = Path.GetFullPath(pluginPackagePath);
-            
-            if (!PluginPackage.TryCreate(pluginPackagePath, out PluginPackage pluginPackage))
+            using (var stream = new FileStream(pluginPackagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                throw new PluginPackageCreationException($"Failed to create plugin package from {packageFullPath}");
-            }
-
-            using (pluginPackage)
-            {
-                return await this.pluginInstaller.InstallPluginAsync(
-                    pluginPackage,
-                    this.installationDir,
-                    new Uri(packageFullPath),
-                    cancellationToken,
-                    progress);
+                if (PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
+                {
+                    using (pluginPackage)
+                    {
+                        return await this.pluginInstaller.InstallPluginAsync(
+                            pluginPackage,
+                            this.installationDir,
+                            new Uri(packageFullPath),
+                            cancellationToken,
+                            progress);
+                    }
+                }
+                else
+                {
+                    throw new PluginPackageCreationException($"Failed to create plugin package from {packageFullPath}");
+                }
             }
         }
 
@@ -471,11 +477,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins();
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
-                var toRemove = new List<string>();
+
                 foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())
                 {
                     if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
                     {
+                        this.logger.Info($"Deleting obsolete plugin files in {dir.FullName}");
                         dir.Delete(true);
                     }
                 }
@@ -484,25 +491,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePluginInfo)
         {
-            IPluginFetcher fetcherToUse = null;
-            foreach (IPluginFetcher fetcher in this.fetcherRepository.Resources)
+            IPluginFetcher fetcherToUse = this.fetcherRepository.Resources
+                .SingleOrDefault(fetcher => fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId);
+
+            if (fetcherToUse == null)
             {
-                if (fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId &&
-                    await fetcher.IsSupportedAsync(availablePluginInfo, Logger.Create(fetcher.GetType())))
-                {
-                    if (fetcherToUse == null)
-                    {
-                        fetcherToUse = fetcher;
-                    }
-                    else
-                    {
-                        this.logger.Warn($"Multiple fetchers are found for plugin {availablePluginInfo.Identity}" +
-                            $"from {availablePluginInfo.PluginPackageUri}. Returning the first one found: {fetcherToUse.GetType().FullName}.");
-                    }
-                }
+                this.logger.Error($"Fetcher with ID {availablePluginInfo.FetcherResourceId} is not found.");
+                return null;
             }
 
-            return null;
+            Type fetcherType = fetcherToUse.GetType();
+            bool isSupported = await fetcherToUse.IsSupportedAsync(availablePluginInfo, Logger.Create(fetcherType));
+            if (!isSupported)
+            {
+                this.logger.Error($"Fetcher {fetcherType.Name} doesn't support fetching from {availablePluginInfo.PluginPackageUri}");
+                return null;
+            }
+
+            return fetcherToUse ;
         }
 
         private async Task ProcessDiscoverAllResult(
