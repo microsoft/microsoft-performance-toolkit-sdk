@@ -15,7 +15,6 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
-    // TODO: #254 Add docstrings
     /// <summary>
     ///     Contains a registry file that records information of installed plugins 
     ///     and an ephemeral lock file that indicates whether a process is currently interacting with the registry.
@@ -36,11 +35,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private static readonly TimeSpan sleepDuration = TimeSpan.FromMilliseconds(500);
         private string lockToken;
 
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginRegistry"/> with a registry root.
+        /// </summary>
+        /// <param name="registryRoot">
+        ///     The root directory of the registry.
+        /// </param>
         public PluginRegistry(string registryRoot)
             : this(registryRoot, Logger.Create(typeof(PluginRegistry)))
         {         
         }
 
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginRegistry"/> with a registry root and a logger.
+        /// </summary>
+        /// <param name="registryRoot">
+        ///     The root directory of the registry.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log information.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        ///     Throws when <paramref name="registryRoot"/> is not a rooted path.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///    Throws when <paramref name="registryRoot"/> or <paramref name="logger"/> is null.
+        /// </exception>  
         public PluginRegistry(string registryRoot, ILogger logger)
         {
             Guard.NotNull(registryRoot, nameof(registryRoot));
@@ -59,8 +79,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.logger = logger;
         }
 
+        /// <summary>
+        ///     Gets the root directory of the registry.
+        /// </summary>
         public string RegistryRoot { get; }
 
+        /// <summary>
+        ///     Gets all installed plugin records from the registry;
+        /// </summary>
+        /// <returns>
+        ///     A collection of <see cref="InstalledPluginInfo"/> objects.
+        /// </returns>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when the plugin registry cannot be read or written.
+        /// </exception>
         public async Task<IReadOnlyCollection<InstalledPluginInfo>> GetAllInstalledPlugins()
         {
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
@@ -78,7 +113,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The matching <see cref="InstalledPluginInfo"/> or <c>null</c> if no matching record found.
         /// </returns>
         /// <exception cref="PluginRegistryCorruptedException">
-        ///     Throws when the plugin registry is corrupted.
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when the plugin registry cannot be read or written.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Throws when <paramref name="pluginId"/> is null.
         /// </exception>
         public async Task<InstalledPluginInfo> TryGetInstalledPluginByIdAsync(string pluginId)
         {
@@ -106,6 +147,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     <c>true</c> if the installed plugin matches the record in the plugin registry. <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when the plugin registry cannot be read or written.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Throws when <paramref name="installedPluginInfo"/> is null.
+        /// </exception>
         public async Task<bool> IsPluginRegisteredAsync(InstalledPluginInfo pluginInfo)
         {
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins();
@@ -120,6 +170,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             return installedCount == 1;
         }
 
+        /// <summary>
+        ///     Registers the given plugin to the plugin registry.
+        /// </summary>
+        /// <param name="plugin">
+        ///     The plugin to register.
+        /// </param>
+        /// <returns>
+        ///     An awaitable task.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Throws when the plugin is already registered.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///    Throws when the plugin registry cannot be read or written.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///    Throws when <paramref name="plugin"/> is null.
+        /// </exception>
         public async Task RegisterPluginAsync(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
@@ -132,6 +203,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             await WriteInstalledPlugins(installedPlugins);
         }
 
+        /// <summary>
+        ///    Unregisters the given plugin from the plugin registry.
+        /// </summary>
+        /// <param name="plugin">
+        ///     The plugin to unregister.
+        /// </param>
+        /// <returns>
+        ///     An awaitable task.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Throws when the plugin is not registered.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when the plugin registry cannot be read or written.
+        /// </exception>   
         public async Task UnregisterPluginAsync(InstalledPluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
@@ -144,6 +233,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             await WriteInstalledPlugins(installedPlugins);
         }
 
+        /// <summary>
+        ///    Updates the given plugin with the given updated plugin.
+        /// </summary>
+        /// <param name="currentPlugin">
+        ///     The plugin to update.
+        /// </param>
+        /// <param name="updatedPlugin">
+        ///     The updated plugin.
+        /// </param>
+        /// <returns>
+        ///     An awaitable task.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     Throws when <paramref name="currentPlugin"/> is not registered or <paramref name="updatedPlugin"/> is already registered.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when the plugin registry cannot be read or written.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        ///     Throws when <paramref name="currentPlugin"/> or <paramref name="updatedPlugin"/> is null.
+        /// </exception>   
         public async Task UpdatePluginAsync(InstalledPluginInfo currentPlugin, InstalledPluginInfo updatedPlugin)
         {
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
@@ -161,6 +274,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         // TODO: Might want to change this to a file lock that supports read lock.
+        /// <summary>
+        ///    Acquires a lock on the plugin registry.  This is used to prevent multiple processes from reading and writing to the plugin registry at the same time.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///    Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     An awaitable task.
+        /// </returns>
         public async Task AcquireLock(CancellationToken cancellationToken)
         {
             string lockToken = Guid.NewGuid().ToString();
@@ -189,6 +311,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.lockToken = lockToken;
         }
 
+        /// <summary>
+        ///     Releases the lock on the plugin registry.
+        /// </summary>
         public void ReleaseLock()
         {
             if (this.lockToken == null || !File.Exists(this.lockFilePath))
