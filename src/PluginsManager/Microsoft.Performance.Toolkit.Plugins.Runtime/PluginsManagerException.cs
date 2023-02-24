@@ -238,16 +238,35 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         public InstalledPluginCorruptedOrMissingException(string message, InstalledPluginInfo pluginInfo)
-            : this(message)
+            : base(message, pluginInfo)
         {
-            this.PluginInfo = pluginInfo;
         }
-
-        public InstalledPluginInfo PluginInfo { get; }
     }
 
     //
-    // Fetchinf Exception Types
+    // Installer Exception Types
+    //
+
+    public class PluginInstallerException
+        : PluginsManagerException
+    {
+        public PluginInstallerException()
+        {
+        }
+
+        public PluginInstallerException(string message)
+            : base(message)
+        {
+        }
+
+        public PluginInstallerException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    //
+    // Fetching Exception Types
     //
 
     public class PluginFetchingException

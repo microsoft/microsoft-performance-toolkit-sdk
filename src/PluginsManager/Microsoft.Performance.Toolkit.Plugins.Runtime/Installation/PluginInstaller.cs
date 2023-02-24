@@ -56,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         /// <summary>
-        ///     Returns all plugins that are installed to the registry.
+        ///     Returns all plugins that are registered to the registry.
         /// </summary>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
@@ -64,6 +64,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     A <see cref="InstalledPluginsResults"/> instance containing all valid and invalid installed plugins.
         /// </returns>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was cancelled.
+        /// </exception>
         public async Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken)
         {
@@ -117,7 +120,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         }
                         
                         invalidPluginsInfo.Add(plugin);
-
                     };
                 }
 
@@ -127,6 +129,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
         /// <summary>
         ///     Installs a plugin package to a given directory and register it to the plugin registry.
+        ///     If a different version of this plugin is already installed, it will be uninstalled first.
+        ///     If a same version of this plugin is already installed:
+        ///        - If the plugin is valid, returns null without attempting to install.
+        ///        - If the plugin is corrupted or missing, it will be uninstalled and reinstalled.
         /// </summary>
         /// <param name="pluginPackage">
         ///     The plugin package to be installed.
@@ -146,6 +152,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     <c>true</c> if the plugin is successfully installed. <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
+        ///      <paramref name="sourceUri"/> is null.
+        /// </exception>
+        /// <exception cref="PluginRegistryException">
+        ///     Throws when something is wrong with the plugin registry.
+        /// </exception>
+        /// <exception cref="PluginInstallerException">
+        ///     Throws when something is wrong with the plugin installer.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was cancelled.
+        /// </exception>
         public async Task<InstalledPluginInfo> InstallPluginAsync(
             PluginPackage pluginPackage,
             string installationRoot,
@@ -153,12 +172,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
+            Guard.NotNull(pluginPackage, nameof(pluginPackage));
+            Guard.NotNull(installationRoot, nameof(installationRoot));
+            Guard.NotNull(sourceUri, nameof(sourceUri));
+
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
                 // Check if any version of this plugin is already installed.
                 InstalledPluginInfo installedPlugin = await this.pluginRegistry.TryGetInstalledPluginByIdAsync(pluginPackage.Id);
+                
                 bool needsUninstall = false;
-
                 if (installedPlugin != null)
                 {
                     if (!installedPlugin.Version.Equals(pluginPackage.Version))
@@ -201,27 +224,43 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     if (needsUninstall)
                     {
                         await this.pluginRegistry.UpdatePluginAsync(installedPlugin, pluginToInstall);
+                        this.logger.Info($"{installedPlugin} is updated to {pluginToInstall} in the plugin registry.");
                     }
                     else
                     {
                         await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
+                        this.logger.Info($"{pluginToInstall} is registered in the plugin registry.");
                     }
 
                     return pluginToInstall;
                 }
                 catch (Exception e)
                 {
-                    cleanUpExtractedFiles(installationDir);
-                    
+                    PluginInstallerException installerException = null;
                     if (e is OperationCanceledException)
                     {
                         this.logger.Info($"Request to install {pluginPackage} is cancelled.");
                     }
+                    else if (e is PluginRegistryException)
+                    {
+                        this.logger.Error(e, $"Failed to install plugin {pluginPackage} to {installationDir} due to a failure in the plugin registry.");
+                    }
                     else
                     {
-                        this.logger.Error(e, $"Failed to install plugin {pluginPackage} to {installationDir}.");
+                        string errorMsg = $"Failed to install plugin {pluginPackage} to {installationDir}.";
+                        installerException = new PluginInstallerException(errorMsg, e);
+
+                        this.logger.Error(e, errorMsg);
                     }
-                    
+
+                    this.logger.Info($"Cleaning up extraction folder: {installationDir}");
+                    cleanUpExtractedFiles(installationDir);
+
+                    if (installerException != null)
+                    {
+                        throw installerException;
+                    }
+
                     throw;
                 }
             }
@@ -250,6 +289,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     <c>true</c> if the plugin is successfully unistalled. <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Throws when <paramref name="installedPlugin"/> is null.
+        /// </exception>
+        /// <exception cref="PluginRegistryException">
+        ///     Throws when something is wrong with the plugin registry.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was cancelled.
+        /// </exception>
         public async Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
             CancellationToken cancellationToken,
