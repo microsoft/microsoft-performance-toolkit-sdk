@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,9 +29,40 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private bool disposedValue;
         private readonly ILogger logger;
 
+        /// <summary>
+        ///    Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
+        /// </summary>
+        /// <param name="stream">
+        ///    Stream for reading the plugin package file.
+        /// </param>
+        /// <param name="package">
+        ///     The created <see cref="PluginPackage"/> instance.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="PluginPackage"/> was created successfully. <c>false</c> otherwise.
+        /// </returns>
+        public static bool TryCreate(
+            Stream stream,
+            out PluginPackage package)
+        {
+            return TryCreate(stream, false, out package);
+        }
+
+        /// <summary>
+        ///    Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
+        /// </summary>
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
         /// </param>
+        /// <param name="leaveOpen">
+        ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
+        /// </param>
+        /// <param name="package">
+        ///     The created <see cref="PluginPackage"/> instance.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="PluginPackage"/> was created successfully. <c>false</c> otherwise.
+        /// </returns>
         public static bool TryCreate(
             Stream stream,
             bool leaveOpen,
@@ -41,13 +71,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             return TryCreate(stream, leaveOpen, Logger.Create<PluginPackage>(), out package);
         }
 
-        public static bool TryCreate(
-            Stream stream,
-            out PluginPackage package)
-        {
-            return TryCreate(stream, false, out package);
-        }
-
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginPackage"/> with the specified parameters.
+        /// </summary>
+        /// <param name="stream">
+        ///     Stream for reading the plugin package file.
+        /// </param>
+        /// <param name="leaveOpen">
+        ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
+        ///     <c>false</c> otherwise.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log information.
+        /// </param>
+        /// <param name="package">
+        ///     The created <see cref="PluginPackage"/> instance.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <see cref="PluginPackage"/> was created successfully. <c>false</c> otherwise.
+        /// </returns>
         public static bool TryCreate(
             Stream stream,
             bool leaveOpen,
@@ -59,44 +101,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 package = new PluginPackage(stream, leaveOpen, logger);
                 return true;
             }
-            catch
-            {
-                package = null;
-                return false;
-            }
-        }
-
-        /// <param name="fileName">
-        ///     The full file name of the plugin package.
-        /// </param>
-        public static bool TryCreate(
-            string fileName,
-            out PluginPackage package)
-        {
-            return TryCreate(fileName, Logger.Create<PluginPackage>(), out package);
-        }
-
-        public static bool TryCreate(
-            string fileName,
-            ILogger logger,
-            out PluginPackage package)
-        {
-            Stream stream;
-            try
-            {
-                stream = OpenFile(fileName);
-            }
             catch (Exception e)
             {
+                if (!leaveOpen)
+                {
+                    stream.Dispose();
+                }
+
+                if (e is MalformedPluginPackageException)
+                {
+                    logger.Error(e, e.Message);
+                }   
+                else if (e is JsonException)
+                {
+                    logger.Error(e, $"Deserialization failed due to invalid JSON text in plugin metadata");
+                }
+                else if (e is InvalidDataException)
+                {
+                    logger.Error(e, $"Invalid stream for a plugin package.");
+                }
+
                 package = null;
-                logger.Error(e, $"Failed to open a stream for reading {fileName}");
-
                 return false;
-            }
-
-            using (stream)
-            {
-                return TryCreate(stream, out package);
             }
         }
 
@@ -111,7 +137,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     <c>false</c> otherwise.
         /// </param>
         /// <param name="logger">
-        ///     Used to log messages.
+        ///     Used to log information.
         /// </param>
         private PluginPackage(
             Stream stream, 
@@ -121,32 +147,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(stream, nameof(stream));
 
             this.logger = logger;
-
-            try
-            {
-                this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
-                this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
-                this.PluginMetadata = ReadMetadata();
-            }
-            catch (Exception e)
-            {
-                if (!leaveOpen)
-                {
-                    stream.Dispose();
-                }
-
-                if (e is JsonException)
-                {
-                    this.logger.Error(e, $"Deserialization failed due to invalid JSON text");
-                }
-                else if (e is InvalidDataException)
-                {
-                    this.logger.Error(e, $"Invalid stream for a plugin package.");
-                }
-
-                throw;
-            }
+            this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
+            this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
+            this.PluginMetadata = ReadMetadata();
         }
+
         /// <summary>
         ///     Gets the relative file path to plugin content.
         /// </summary>
@@ -350,13 +355,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 logger.Error(e, errorMsg);
                 throw new PluginPackageExtractionException(errorMsg, e);
             }
-        }
-
-        private static Stream OpenFile(string fileName)
-        {
-            Guard.NotNull(fileName, nameof(fileName));
-
-            return new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
 
         private PluginMetadata ReadMetadata()
