@@ -502,7 +502,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
 
             Type fetcherType = fetcherToUse.GetType();
-            bool isSupported = await fetcherToUse.IsSupportedAsync(availablePluginInfo, Logger.Create(fetcherType));
+            bool isSupported = await fetcherToUse.IsSupportedAsync(availablePluginInfo);
             if (!isSupported)
             {
                 this.logger.Error($"Fetcher {fetcherType.Name} doesn't support fetching from {availablePluginInfo.PluginPackageUri}");

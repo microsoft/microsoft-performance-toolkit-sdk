@@ -44,8 +44,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             
             this.discoverersFactory = discoverersFactory;
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
-            
-            SetResourcesLoggers(this.discovererProviderRepository.Resources);
         }
 
         /// <summary>
@@ -125,8 +123,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// </param>
         private async void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
         {
-            SetResourcesLoggers(e.NewPluginManagerResources);
-
             foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
             {
                 kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginManagerResources));
@@ -153,14 +149,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 }
 
                 this.isDisposed = true;
-            }
-        }
-
-        private void SetResourcesLoggers(IEnumerable<IPluginDiscovererProvider> discovererProviders)
-        {
-            foreach (IPluginDiscovererProvider provider in discovererProviders)
-            {
-                provider.SetLogger(Logger.Create(provider.GetType()));
             }
         }
     }

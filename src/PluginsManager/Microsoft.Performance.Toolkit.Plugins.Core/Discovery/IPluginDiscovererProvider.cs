@@ -36,13 +36,5 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// </returns>
         IPluginDiscoverer CreateDiscoverer(
             PluginSource source);
-
-        /// <summary>
-        ///     Provides the <see cref="IPluginDiscovererProvider"/> an application-appropriate logging mechanism.
-        /// </summary>
-        /// <param name="logger">
-        ///     Used to log information.
-        /// </param>
-        void SetLogger(ILogger logger);
     }
 }

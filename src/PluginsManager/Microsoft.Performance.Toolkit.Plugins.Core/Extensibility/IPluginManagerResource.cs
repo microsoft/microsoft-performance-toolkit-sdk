@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing;
+
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
 {
     /// <summary>
@@ -9,5 +11,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
     /// </summary>
     public interface IPluginManagerResource
     {
+        /// <summary>
+        ///     Provides the <see cref="IPluginManagerResource"/> an application-appropriate logging mechanism.
+        /// </summary>
+        /// <param name="logger">
+        ///     Used to log information.
+        /// </param>
+        void SetLogger(ILogger logger);
     }
 }

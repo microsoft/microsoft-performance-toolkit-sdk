@@ -66,7 +66,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             return this.pluginFetcher.GetPluginStreamAsync(
                 this.AvailablePluginInfo,
-                Logger.Create(this.pluginFetcher.GetType()),
                 cancellationToken,
                 progress);
         }
