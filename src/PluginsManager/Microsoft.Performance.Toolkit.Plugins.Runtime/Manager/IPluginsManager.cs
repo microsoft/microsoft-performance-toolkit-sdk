@@ -61,7 +61,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             PluginSource source,
             CancellationToken cancellationToken);
 
-
         // TODO: Re-enable when we start to support loading additional resources.
         ///// <summary>
         /////     Loads additional <see cref="IPluginManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
@@ -119,6 +118,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <returns>
         ///     A <see cref="InstalledPluginsResults"/> instance containing all valid and invalid installed plugins.
         /// </returns>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was canceled.
         /// </exception>
@@ -154,7 +159,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.
         /// </exception>
-        Task<InstalledPluginInfo> InstallAvailablePluginAsync(
+        Task<InstalledPluginInfo> TryInstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
@@ -186,7 +191,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.
         /// </exception>
-        Task<InstalledPluginInfo> InstallLocalPluginAsync(
+        Task<InstalledPluginInfo> TryInstallLocalPluginAsync(
            string pluginPackagePath,
            CancellationToken cancellationToken,
            IProgress<int> progress);

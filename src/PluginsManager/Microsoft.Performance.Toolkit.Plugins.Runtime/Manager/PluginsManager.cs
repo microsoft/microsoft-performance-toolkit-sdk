@@ -15,6 +15,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
 
@@ -375,7 +376,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
         /// <inheritdoc />
-        public async Task<InstalledPluginInfo> InstallAvailablePluginAsync(
+        public async Task<InstalledPluginInfo> TryInstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
@@ -425,7 +426,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
         /// <inheritdoc />
-        public async Task<InstalledPluginInfo> InstallLocalPluginAsync(
+        public async Task<InstalledPluginInfo> TryInstallLocalPluginAsync(
             string pluginPackagePath,
             CancellationToken cancellationToken,
             IProgress<int> progress)

@@ -12,6 +12,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
