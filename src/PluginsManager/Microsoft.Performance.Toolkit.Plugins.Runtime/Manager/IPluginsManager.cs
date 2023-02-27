@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
@@ -150,11 +151,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="PluginFetchingException">
         ///     Throws when the plugin package cannot be fetched.
         /// </exception>
-        /// <exception cref="PluginRegistryException">
-        ///     Throws when there is an error interacting with plugin registry.
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        /// <exception cref="PluginPackageException">
-        ///     Throws when there is an error interacting with plugin package.
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginPackageCreationException">
+        ///     Throws when there is an error creating plugin package.
+        /// </exception>
+        /// <exception cref="PluginPackageExtractionException">
+        ///     Throws when there is an error extracting plugin package.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.
@@ -182,11 +189,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="pluginPackagePath"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="PluginRegistryException">
-        ///     Throws when there is an error interacting with plugin registry.
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        /// <exception cref="PluginPackageException">
-        ///     Throws when there is an error interacting with plugin package.
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginPackageCreationException">
+        ///     Throws when there is an error creating plugin package.
+        /// </exception>
+        /// <exception cref="PluginPackageExtractionException">
+        ///     Throws when there is an error extracting plugin package.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.
@@ -214,8 +227,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="installedPlugin"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="PluginRegistryException">
-        ///     Throws when there is an error interacting with plugin registry.
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.
@@ -235,8 +251,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <returns>
         ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
         /// </returns>
-        /// <exception cref="PluginRegistryException">
-        ///     Throws when there is an error interacting with plugin registry.
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.

@@ -8,7 +8,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions
     /// <summary>
     ///     Exception that occurs when the plugin package is malformed.
     /// </summary>
-    public class MalformedPluginPackageException
+    internal class MalformedPluginPackageException
        : PluginPackageException
     {
         public MalformedPluginPackageException()

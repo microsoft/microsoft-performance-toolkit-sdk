@@ -157,8 +157,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
         ///      <paramref name="sourceUri"/> is null.
         /// </exception>
-        /// <exception cref="PluginRegistryException">
-        ///     Throws when something is wrong with the plugin registry.
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
@@ -285,8 +288,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="installedPlugin"/> is null.
         /// </exception>
-        /// <exception cref="PluginRegistryException">
-        ///     Throws when something is wrong with the plugin registry.
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
