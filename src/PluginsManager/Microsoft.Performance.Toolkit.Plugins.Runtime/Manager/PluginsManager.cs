@@ -15,6 +15,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
@@ -94,14 +95,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.discovererRepository = new PluginManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
             this.fetcherRepository = new PluginManagerResourceRepository<IPluginFetcher>(fetchers);
 
-            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository, new DiscoverersFactory());
+            var discoverersFactory = new DiscoverersFactory();
+            discoverersFactory.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
+            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository, discoverersFactory);
 
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
             this.installationDir = installationDir;
             this.logger = logger;
         }
-        
+
+        /// <inheritdoc />
+        public event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
+
         /// <inheritdoc />
         public IEnumerable<PluginSource> PluginSources
         {
@@ -162,19 +168,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             for (int i = 0; i < tasks.Length; i++)
             {
                 Task<IReadOnlyCollection<AvailablePlugin>> t = tasks[i];
+                PluginSource pluginSource = pluginSources[i];
+
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    this.logger.Info($"Successfully discovered {t.Result.Count} available plugins from source {pluginSources[i].Uri}.");
+                    this.logger.Info($"Successfully discovered {t.Result.Count} available plugins from source {pluginSource.Uri}.");
                     discoveredAvailablePlugins.Add(t.Result);
                 }          
                 else if (t.IsFaulted)
                 {
-                    this.logger.Error($"Failed to get available plugins from source {pluginSources[i].Uri}. Skipping.", t.Exception);
+                    this.logger.Error($"Failed to get available plugins from source {pluginSource.Uri}. Skipping.", t.Exception);
                     continue;
                 }
                 else if (t.IsCanceled)
                 {
-                    this.logger.Info($"The request to get lastest available plugins from source {pluginSources[i].Uri} is cancelled.");
+                    this.logger.Info($"The request to get lastest available plugins from source {pluginSource.Uri} is cancelled.");
                     continue;
                 }
                 else
@@ -215,10 +223,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
             if (discoverers.Length == 0)
             {
-                this.logger.Warn($"No discoverer is available for plugin source {source.Uri}.");
-                return new AvailablePlugin[0];
-            }
+                PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginDiscoverer)));
 
+                this.logger.Warn($"No discoverer is available for plugin source {source.Uri}.");
+                return Array.Empty<AvailablePlugin>();
+            }
+            
             Task<IReadOnlyDictionary<string, AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverPluginsLatestAsync(cancellationToken)).ToArray();
             var task = Task.WhenAll(tasks);
             try
@@ -251,6 +261,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 }
                 else if (t.IsFaulted)
                 {
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceExceptionEventArgs(source, t.Exception));
                     this.logger.Error($"Discoverer {discovererTypeStr} failed to discover plugins from {source.Uri}.", t.Exception);
                     continue;
                 }
@@ -315,8 +326,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
             if (discoverers.Length == 0)
             {
+                PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginDiscoverer)));
+
                 this.logger.Warn($"No discoverer is available for plugin source {source.Uri}.");
-                return new AvailablePlugin[0];
+                return Array.Empty<AvailablePlugin>();
             }
 
             Task<IReadOnlyCollection<AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverAllVersionsOfPlugin(pluginIdentity, cancellationToken)).ToArray();
@@ -351,6 +364,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 }
                 else if (t.IsFaulted)
                 {
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceExceptionEventArgs(source, t.Exception));
                     this.logger.Error($"Discoverer {discovererTypeStr} failed to discover plugins from {source.Uri}.", t.Exception);
                     continue;
                 }
@@ -490,7 +504,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
         }
 
-        private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePluginInfo)
+        private async Task<IPluginFetcher> TryGetPluginFetcher(AvailablePluginInfo availablePluginInfo)
         {
             IPluginFetcher fetcherToUse = this.fetcherRepository.Resources
                 .SingleOrDefault(fetcher => fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId);
@@ -500,16 +514,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 this.logger.Error($"Fetcher with ID {availablePluginInfo.FetcherResourceId} is not found.");
                 return null;
             }
-
+            
+            // Validate that the found fetcher actually supports fetching the given plugin.
             Type fetcherType = fetcherToUse.GetType();
-            bool isSupported = await fetcherToUse.IsSupportedAsync(availablePluginInfo);
-            if (!isSupported)
+            try
             {
-                this.logger.Error($"Fetcher {fetcherType.Name} doesn't support fetching from {availablePluginInfo.PluginPackageUri}");
+                bool isSupported = await fetcherToUse.IsSupportedAsync(availablePluginInfo);
+                if (!isSupported)
+                {
+                    this.logger.Error($"Fetcher {fetcherType.Name} doesn't support fetching from {availablePluginInfo.PluginPackageUri}");
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                this.logger.Error($"Error occurred when checking if plugin {availablePluginInfo.Identity} is supported by {fetcherType.Name}.", e);
                 return null;
             }
 
-            return fetcherToUse ;
+            return fetcherToUse;
         }
 
         private async Task ProcessDiscoverAllResult(
@@ -526,14 +549,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 if (!results.TryGetValue(id, out (AvailablePlugin, IPluginDiscoverer) tuple) ||
                     tuple.Item1.AvailablePluginInfo.Identity.Version < pluginInfo.Identity.Version)
                 {
-                    IPluginFetcher fetcher = await GetPluginFetcher(pluginInfo);
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
                     if (fetcher == null)
                     {
-                        this.logger.Error($"No fetcher is found for plugin {pluginInfo.Identity}. Skipping.");
+                        PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginFetcher)));
+                        this.logger.Error($"No fetcher is found that supports fetching plugin {pluginInfo.Identity}. Skipping.");
                     }
-
-                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                    results[id] = (newPlugin, discoverer);
+                    else
+                    {
+                        var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                        results[id] = (newPlugin, discoverer);
+                    }
                 }
                 else if (tuple.Item1.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
                 {
@@ -553,14 +579,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 if (!results.TryGetValue(pluginInfo.Identity, out (AvailablePlugin, IPluginDiscoverer) tuple))
                 {
-                    IPluginFetcher fetcher = await GetPluginFetcher(pluginInfo);
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
                     if (fetcher == null)
                     {
-                        this.logger.Error($"No fetcher is found for plugin {pluginInfo.Identity}. Skipping.");
+                        PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginFetcher)));
+                        this.logger.Error($"No fetcher is found that supports fetching plugin {pluginInfo.Identity}. Skipping.");
                     }
-
-                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                    results[pluginInfo.Identity] = (newPlugin, discoverer);
+                    else
+                    {
+                        var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                        results[pluginInfo.Identity] = (newPlugin, discoverer);
+                    }
                 }
                 else
                 {

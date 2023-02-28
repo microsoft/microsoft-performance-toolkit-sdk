@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
 
@@ -261,5 +262,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Throws when the operation was canceled.
         /// </exception>
         Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
+        ///    Subsribe to this event to handle errors related to a particular <see cref="PluginSource"/>.
+        /// </summary>
+        event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
     }
 }

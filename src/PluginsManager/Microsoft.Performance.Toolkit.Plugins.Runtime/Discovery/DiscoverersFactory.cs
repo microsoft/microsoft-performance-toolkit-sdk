@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
@@ -38,6 +40,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         }
 
         /// <summary>
+        ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
+        /// </summary>
+        public event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
+
+        /// <summary>
         ///     Creates discoverer instances for a plugin source given a collection of providers.
         /// </summary>
         /// <param name="pluginSource">
@@ -58,18 +65,43 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             {
                 try
                 {
-                    if (await provider.IsSupportedAsync(pluginSource))
+                    bool isSupported = await provider.IsSupportedAsync(pluginSource);
+                    if (!isSupported)
                     {
-                        IPluginDiscoverer discoverer = provider.CreateDiscoverer(pluginSource);
-                        discoverer.SetLogger(Logger.Create(discoverer.GetType()));
-                        results.Add(discoverer);
+                        continue;
                     }
                 }
                 catch (Exception e)
                 {
-                    this.logger.Error($"Error occured from discoverer provider {provider.GetType().Name}. Skipping creating discoverers from this provider.", e);
+                    string errorMsg = $"Error occurred when checking if {pluginSource.Uri} is supported by discoverer provider {provider.GetType().Name}";
+                    PluginSourceErrorOccured?.Invoke(this,
+                        new PluginSourceExceptionEventArgs(pluginSource, errorMsg, e));
+
+                    this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
+
                     continue;
                 }
+
+                IPluginDiscoverer discoverer = null;
+                try
+                {
+                    discoverer = provider.CreateDiscoverer(pluginSource);
+                }
+                catch (Exception e)
+                {
+                    string errorMsg = $"Error occurred when creating discoverer for {pluginSource.Uri}";
+                    PluginSourceErrorOccured?.Invoke(this,
+                       new PluginSourceExceptionEventArgs(pluginSource, errorMsg, e));
+
+                    this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
+
+                    continue;
+                }
+
+                Debug.Assert(discoverer != null);
+
+                discoverer.SetLogger(Logger.Create(discoverer.GetType()));
+                results.Add(discoverer);
             }
 
             this.logger.Info($"{results.Count} discoverers are created for plugin source {pluginSource.Uri}");

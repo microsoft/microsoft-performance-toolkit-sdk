@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 
@@ -110,7 +109,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
             }
         }
-
+        
         /// <summary>
         ///     An event handler that is called to create new <see cref="IPluginDiscoverer">s when 
         ///     new <see cref="IPluginDiscovererProvider"> are added to the repository. 
