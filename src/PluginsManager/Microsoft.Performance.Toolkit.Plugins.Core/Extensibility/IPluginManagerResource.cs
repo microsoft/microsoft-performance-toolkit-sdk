@@ -9,6 +9,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
     ///     Represents a resource that is used by the plugin manager to perform operations like plugin discovering and fetching.
     ///     This interface is meant to be the root extension point of plugin managers resources (discoverer providers, fetechers etc.)
     /// </summary>
+    /// <remarks>
+    ///     Instances of this interface are intended to be shared resources that can be concurrently accessed by multiple threads.
+    ///     Thread safety needs to be ensured by the implementer.
+    /// </remarks>
     public interface IPluginManagerResource
     {
         /// <summary>
@@ -17,6 +21,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
         /// <param name="logger">
         ///     Used to log information.
         /// </param>
+        /// <remarks>
+        ///     Ensure that this method called and called only once before the resource is used.
+        ///     Ensure that the logger is thread-safe.
+        /// </remarks>
         void SetLogger(ILogger logger);
     }
 }
