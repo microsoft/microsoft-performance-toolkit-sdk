@@ -360,14 +360,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
             catch (Exception e)
             {
+                string errorMsg = null;              
                 if (e is JsonException)
                 {
-                    this.logger.Error(e, $"Deserialization of plugin registry failed due to invalid JSON text.");
+                    errorMsg = $"Deserialization of plugin registry failed due to invalid JSON text.";
+                }
+                else if (e is IOException)
+                {
+                    errorMsg = $"Failed to read the plugin registry file at {this.registryFilePath}.";
                 }
 
-                string errorMsg = $"Failed to read from plugin registry file.";
-                this.logger.Error(e, errorMsg);
-                throw new PluginRegistryReadWriteException(errorMsg, this.registryFilePath, e);
+                if (errorMsg != null)
+                {
+                    this.logger.Error(e, errorMsg);
+                    throw new PluginRegistryReadWriteException(errorMsg, this.registryFilePath, e);
+                }
+                
+                throw;
             }
         }
 
@@ -387,9 +396,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         SerializationConfig.PluginsManagerSerializerDefaultOptions);
                 }
             }
-            catch (Exception e)
+            catch (IOException e)
             {
-                string errorMsg = $"Failed to write to plugin registry file.";
+                string errorMsg = $"Failed to write to plugin registry file at {this.registryFilePath}.";
                 this.logger.Error(e, errorMsg);
                 throw new PluginRegistryReadWriteException(errorMsg, this.registryFilePath, e);
             }
