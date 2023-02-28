@@ -18,7 +18,7 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {

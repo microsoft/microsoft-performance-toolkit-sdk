@@ -14,7 +14,7 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Result;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -100,11 +100,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 {
                     return new InstalledPluginsResults(
                         task.Result.AsReadOnly(),
-                        new List<InstalledPluginInfo>().AsReadOnly());
+                        Array.Empty<(InstalledPluginInfo, Exception)>().AsReadOnly());
                 }
 
                 var results = new List<InstalledPlugin>();
-                var invalidPluginsInfo = new List<InstalledPluginInfo>();
+                var failedResults = new List<(InstalledPluginInfo, Exception)>();
                 for (int i = 0; i < tasks.Length; i++)
                 {
                     Task<InstalledPlugin> t = tasks[i];
@@ -114,17 +114,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         results.Add(t.Result);
                     }
                     else
-                    {
-                        if ((t.IsFaulted))
+                    {             
+                        if (t.IsFaulted)
                         {
                             this.logger.Error($"Failed to load installed plugin {plugin}.", t.Exception);
                         }
-                        
-                        invalidPluginsInfo.Add(plugin);
+
+                        failedResults.Add((plugin, t.Exception));
                     };
                 }
 
-                return new InstalledPluginsResults(results, invalidPluginsInfo);
+                return new InstalledPluginsResults(results, failedResults);
             }  
         }
 
