@@ -73,9 +73,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 }
                 catch (Exception e)
                 {
-                    string errorMsg = $"Error occurred when checking if {pluginSource.Uri} is supported by discoverer provider {provider.GetType().Name}";
-                    PluginSourceErrorOccured?.Invoke(this,
-                        new PluginSourceExceptionEventArgs(pluginSource, errorMsg, e));
+                    string errorMsg = $"Error occurred when checking if {pluginSource} is supported by discoverer provider {provider.GetType().Name}.";
+                    var errorInfo = new ErrorInfo(
+                        ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                        errorMsg);
+
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
 
                     this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
 
@@ -89,9 +92,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 }
                 catch (Exception e)
                 {
-                    string errorMsg = $"Error occurred when creating discoverer for {pluginSource.Uri}";
-                    PluginSourceErrorOccured?.Invoke(this,
-                       new PluginSourceExceptionEventArgs(pluginSource, errorMsg, e));
+                    string errorMsg = $"Error occurred when creating discoverer for {pluginSource}.";
+                    var errorInfo = new ErrorInfo(
+                       ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                       errorMsg);
+
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
 
                     this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
 
@@ -104,7 +110,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 results.Add(discoverer);
             }
 
-            this.logger.Info($"{results.Count} discoverers are created for plugin source {pluginSource.Uri}");
+            this.logger.Info($"{results.Count} discoverers are created for plugin source {pluginSource}");
             return results;
         }
     }

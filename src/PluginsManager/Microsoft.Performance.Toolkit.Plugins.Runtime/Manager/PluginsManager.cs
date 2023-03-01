@@ -172,17 +172,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    this.logger.Info($"Successfully discovered {t.Result.Count} available plugins from source {pluginSource.Uri}.");
+                    this.logger.Info($"Successfully discovered {t.Result.Count} available plugins from source {pluginSource}.");
                     discoveredAvailablePlugins.Add(t.Result);
                 }          
                 else if (t.IsFaulted)
                 {
-                    this.logger.Error($"Failed to get available plugins from source {pluginSource.Uri}. Skipping.", t.Exception);
+                    this.logger.Error($"Failed to get available plugins from source {pluginSource}. Skipping.", t.Exception);
                     continue;
                 }
                 else if (t.IsCanceled)
                 {
-                    this.logger.Info($"The request to get lastest available plugins from source {pluginSource.Uri} is cancelled.");
+                    this.logger.Info($"The request to get lastest available plugins from source {pluginSource} is cancelled.");
                     continue;
                 }
                 else
@@ -221,11 +221,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
 
             IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
-            if (discoverers.Length == 0)
+            if (!discoverers.Any())
             {
-                PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginDiscoverer)));
-
-                this.logger.Warn($"No discoverer is available for plugin source {source.Uri}.");
+                HandleResourceNotFoundError(
+                    source,
+                    $"No available {typeof(IPluginDiscoverer).Name} found supporting plugin source {source}.");
                 return Array.Empty<AvailablePlugin>();
             }
             
@@ -237,7 +237,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
             catch (OperationCanceledException)
             {
-                this.logger.Info($"The request to get available plugins from {source.Uri} is cancelled.");
+                this.logger.Info($"The request to get available plugins from {source} is cancelled.");
                 throw;
             }
             catch
@@ -253,7 +253,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {source.Uri}.");
+                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {source}.");
 
                     // Combines plugins discovered from the same plugin source but by different discoverers.
                     // If more than one available plugin with the same identity are discovered, the first of them will be returned.
@@ -261,13 +261,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 }
                 else if (t.IsFaulted)
                 {
-                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceExceptionEventArgs(source, t.Exception));
-                    this.logger.Error($"Discoverer {discovererTypeStr} failed to discover plugins from {source.Uri}.", t.Exception);
+                    HandlePluginSourceException(
+                        source,
+                        $"Discoverer {discovererTypeStr} failed to discover plugins from {source}.",
+                        t.Exception);
+
                     continue;
                 }
                 else if (t.IsCanceled)
                 {
-                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {source.Uri}.");
+                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {source}.");
                     continue;
                 }
                 else
@@ -324,11 +327,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
             IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
-            if (discoverers.Length == 0)
+            if (!discoverers.Any())
             {
-                PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginDiscoverer)));
-
-                this.logger.Warn($"No discoverer is available for plugin source {source.Uri}.");
+                HandleResourceNotFoundError(
+                    source,
+                    $"No available {typeof(IPluginDiscoverer).Name} found supporting the plugin source {source}.");
+               
                 return Array.Empty<AvailablePlugin>();
             }
 
@@ -341,7 +345,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
             catch (OperationCanceledException)
             {
-                this.logger.Info($"The request to get all versions of plugin {pluginIdentity} from {source.Uri} is cancelled.");
+                this.logger.Info($"The request to get all versions of plugin {pluginIdentity} from {source} is cancelled.");
             }
             catch
             {
@@ -356,7 +360,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {source.Uri}.");
+                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {source}.");
 
                     // Combines plugins discovered from the same plugin source but by different discoverers.
                     // If more than one available plugin with the same identity are discovered, the first of them will be returned.
@@ -364,13 +368,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 }
                 else if (t.IsFaulted)
                 {
-                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceExceptionEventArgs(source, t.Exception));
-                    this.logger.Error($"Discoverer {discovererTypeStr} failed to discover plugins from {source.Uri}.", t.Exception);
+                    HandlePluginSourceException(
+                        source,
+                        $"Discoverer {discovererTypeStr} failed to discover plugins from {source}.",
+                        t.Exception);
+
                     continue;
                 }
                 else if (t.IsCanceled)
                 {
-                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {source.Uri}.");
+                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {source}.");
                     continue;
                 }
                 else
@@ -552,18 +559,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                     IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
                     if (fetcher == null)
                     {
-                        PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginFetcher)));
-                        this.logger.Error($"No fetcher is found that supports fetching plugin {pluginInfo.Identity}. Skipping.");
+                        HandleResourceNotFoundError(
+                            source,
+                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                        continue;
                     }
-                    else
-                    {
-                        var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                        results[id] = (newPlugin, discoverer);
-                    }
+
+                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                    results[id] = (newPlugin, discoverer);
                 }
                 else if (tuple.Item1.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
                 {
-                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source.Uri} by {discoverer.GetType().Name}." +
+                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
                         $"Using the first found discoverer: {tuple.Item2.GetType().Name}.");
                 }
             }
@@ -582,21 +589,37 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                     IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
                     if (fetcher == null)
                     {
-                        PluginSourceErrorOccured?.Invoke(this, new PluginSourceResourceNotFoundEventArgs(source, typeof(IPluginFetcher)));
-                        this.logger.Error($"No fetcher is found that supports fetching plugin {pluginInfo.Identity}. Skipping.");
+                        HandleResourceNotFoundError(
+                            source,
+                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                        continue;
                     }
-                    else
-                    {
-                        var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                        results[pluginInfo.Identity] = (newPlugin, discoverer);
-                    }
+                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                    results[pluginInfo.Identity] = (newPlugin, discoverer);
                 }
                 else
                 {
-                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source.Uri} by {discoverer.GetType().Name}." +
+                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
                        $"Using the first found discoverer: {tuple.Item2.GetType().Name}.");
                 } 
             }
+        }
+
+
+        private void HandleResourceNotFoundError(PluginSource source, string errorMsg)
+        {
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginManagerResourceNotFound, errorMsg);
+            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(source, errorInfo));
+
+            this.logger.Error(errorMsg);
+        }
+
+        private void HandlePluginSourceException(PluginSource source, string errorMsg, Exception exception)
+        {
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginSourceException, errorMsg);
+            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(source, errorInfo, exception));
+
+            this.logger.Error(errorMsg, exception);
         }
     }
 }
