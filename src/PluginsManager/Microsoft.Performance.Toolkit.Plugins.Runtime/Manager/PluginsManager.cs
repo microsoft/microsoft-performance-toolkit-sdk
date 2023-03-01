@@ -362,7 +362,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 return;
             }
 
-            using (await this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
                 List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));

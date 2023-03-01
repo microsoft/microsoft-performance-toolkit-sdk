@@ -44,7 +44,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public async Task<IReadOnlyCollection<InstalledPlugin>> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken)
         {
-            using (await this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
                 List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
                 var tasks = Task.WhenAll(installedPlugins.Select(p => CreateInstalledPluginAsync(p, cancellationToken)));
@@ -89,7 +89,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            using (await this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
                 // Check if any version of this plugin is already installed.
                 InstalledPluginInfo installedPlugin = await GetInstalledPluginIfExistsAsync(pluginPackage.Id, cancellationToken);
@@ -182,7 +182,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            using (await this.pluginRegistry.UseLock(cancellationToken))
+            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
                 if (await VerifyInstalledAsync(installedPlugin.PluginInfo, cancellationToken))
                 {

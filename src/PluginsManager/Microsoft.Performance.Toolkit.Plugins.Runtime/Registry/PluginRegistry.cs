@@ -7,8 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
 using System.Threading.Tasks;
+using Medallion.Threading.FileSystem;
 using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
@@ -20,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     ///     and an ephemeral lock file that indicates whether a process is currently interacting with the registry.
     ///     Only one version of a same plugin may be be registered at a time 
     /// </summary>
-    public sealed class PluginRegistry : ISynchronizedObject
+    public sealed class PluginRegistry
     {
         private static readonly string registryFileName = "installedPlugins.json";
         private static readonly string lockFileName = ".lockRegistry";
@@ -46,7 +46,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.backupRegistryFilePath = this.registryFilePath + backupRegistryFileExtension;
             this.lockFilePath = Path.Combine(registryRoot, lockFileName);
+            this.FileLock = new FileDistributedLock(new FileInfo(this.lockFilePath));
         }
+
+        /// <summary>
+        ///    An exclusive file lock that indicates whether a process is currently interacting with the registry.
+        ///    Always make sure to acquire this lock before interacting with the registry and release it after the interaction.
+        ///    Usage:
+        ///    <code>
+        ///         await using (await myLock.AcquireAsync(...))
+        ///         {
+        ///             /* we have the lock! */
+        ///         }
+        ///         // dispose releases the lock
+        ///     </code>
+        /// </summary>
+        public FileDistributedLock FileLock { get; }
 
         public string RegistryRoot { get; }
 
@@ -134,62 +149,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             await WriteInstalledPlugins(installedPlugins);
             return true;
-        }
-
-        // TODO: Might want to change this to a file lock that supports read lock.
-        public async Task AcquireLock(CancellationToken cancellationToken)
-        {
-            string lockToken = Guid.NewGuid().ToString();
-
-            Retry:
-            while (File.Exists(this.lockFilePath))
-            {
-                await Task.Delay(sleepDuration, cancellationToken).ConfigureAwait(false);
-            }
-
-            Directory.CreateDirectory(this.RegistryRoot);
-            try
-            {
-                File.WriteAllText(this.lockFilePath, lockToken);
-                string readToken = File.ReadAllText(this.lockFilePath);
-                if (readToken != lockToken)
-                {
-                    goto Retry;
-                }
-            }
-            catch (IOException)
-            {
-                goto Retry;
-            }
-
-            this.lockToken = lockToken;
-        }
-
-        public void ReleaseLock()
-        {
-            if (this.lockToken == null || !File.Exists(this.lockFilePath))
-            {
-                return;
-            }
-            try
-            {
-                string token = File.ReadAllText(this.lockFilePath);
-                if (token == this.lockToken)
-                {
-                    File.Delete(this.lockFilePath);
-                }
-            }
-            catch (IOException e)
-            {
-                if (e is FileNotFoundException || e is DirectoryNotFoundException)
-                {
-                    return;
-                }
-
-                throw;
-            }
-
-            this.lockToken = null;
         }
 
         private async Task<List<InstalledPluginInfo>> ReadInstalledPlugins()
