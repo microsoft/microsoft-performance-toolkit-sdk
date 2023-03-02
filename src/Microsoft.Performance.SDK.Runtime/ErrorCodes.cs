@@ -221,7 +221,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </summary>
         public static ErrorCodes PLUGINS_MANAGER_PluginSourceException = new ErrorCodes(
             50001,
-            "PLUGIN_MANAGER_PluginSourceException",
+            "PLUGINS_MANAGER_PluginSourceException",
             "An error occurred when interacting with a plugin source.");
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </summary>
         public static ErrorCodes PLUGINS_MANAGER_PluginManagerResourceNotFound = new ErrorCodes(
             50002,
-            "PLUGIN_MANAGER_PluginManagerResourceNotFound",
+            "PLUGINS_MANAGER_PluginManagerResourceNotFound",
             "No available plugin manager resource was found to perform requests against the plugin source.");
 
         //

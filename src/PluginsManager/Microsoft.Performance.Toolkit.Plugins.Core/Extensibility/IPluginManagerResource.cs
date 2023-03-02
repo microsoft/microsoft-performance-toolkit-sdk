@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
         ///     Used to log information.
         /// </param>
         /// <remarks>
-        ///     Ensure that this method called and called only once before the resource is used.
+        ///     Ensure that this method is called and is called only once before the resource is used.
         ///     Ensure that the logger is thread-safe.
         /// </remarks>
         void SetLogger(ILogger logger);
