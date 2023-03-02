@@ -13,7 +13,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Transport
     ///     Represents a fetcher that is capable of fetching the plugin package from a supported <see cref="AvailablePluginInfo"/>.
     ///     A fetcher is meant to be stateless.
     /// </summary>
-    public interface IPluginFetcher : IPluginManagerResource
+    public interface IPluginFetcher
+        : IPluginManagerResource
     {
         /// <summary>
         ///     Checks if the given <paramref name="pluginInfo"/> is supported by this fetcher.

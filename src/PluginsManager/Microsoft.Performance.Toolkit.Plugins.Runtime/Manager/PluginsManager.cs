@@ -13,10 +13,12 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
@@ -24,8 +26,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
     public sealed class PluginsManager
         : IPluginsManager
     {
-        private readonly IPluginManagerResourceLoader resourceLoader;
-
         private readonly PluginManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
         private readonly PluginManagerResourceRepository<IPluginFetcher> fetcherRepository;
 
@@ -46,9 +46,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="fetchers">
         ///     A collection of fetchers.
         /// </param>
-        /// <param name="resourceLoader">
-        ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
-        /// </param>
         /// <param name="pluginRegistry">
         ///     A plugin registry this plugin manager will interact with.
         /// </param>
@@ -58,10 +55,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginManagerResourceLoader resourceLoader,
             PluginRegistry pluginRegistry,
             string installationDir) 
-            : this(discovererProviders, fetchers, resourceLoader, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
+            : this(discovererProviders, fetchers, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
         {
         }
 
@@ -73,9 +69,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// </param>
         /// <param name="fetchers">
         ///     A collection of fetchers.
-        /// </param>
-        /// <param name="resourceLoader">
-        ///     A loader that can load additional <see cref="IPluginManagerResource"/>s at run time.
         /// </param>
         /// <param name="pluginRegistry">
         ///     A plugin registry this plugin manager will interact with.
@@ -89,26 +82,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginManagerResourceLoader resourceLoader,
             PluginRegistry pluginRegistry,
             string installationDir,
             ILogger logger)
         {
-            this.resourceLoader = resourceLoader;
+            Guard.NotNull(discovererProviders, nameof(discovererProviders));
+            Guard.NotNull(fetchers, nameof(fetchers));
+            Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
+            Guard.NotNullOrWhiteSpace(installationDir, nameof(installationDir));
+            Guard.NotNull(logger, nameof(logger));
+
             this.discovererRepository = new PluginManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
             this.fetcherRepository = new PluginManagerResourceRepository<IPluginFetcher>(fetchers);
 
-            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository, new DiscoverersFactory());
-
-            this.resourceLoader.Subscribe(this.discovererRepository);
-            this.resourceLoader.Subscribe(this.fetcherRepository);
+            var discoverersFactory = new DiscoverersFactory();
+            discoverersFactory.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
+            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository, discoverersFactory);
 
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
             this.installationDir = installationDir;
             this.logger = logger;
         }
-        
+
+        /// <inheritdoc />
+        public event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
+
         /// <inheritdoc />
         public IEnumerable<PluginSource> PluginSources
         {
@@ -130,24 +129,34 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.discovererSourcesManager.AddPluginSources(sources);
         }
 
-        /// <inheritdoc />
-        public void LoadAdditionalPluginResources(string directory)
-        {
-            this.resourceLoader.TryLoad(directory);
-        }
+        // TODO: Re-enable when we start to support loading additional resources.
+        ///// <inheritdoc />
+        //public bool LoadAdditionalPluginResources(string directory)
+        //{
+        //    return this.resourceLoader.TryLoad(directory);
+        //}
 
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(
             CancellationToken cancellationToken)
         {
-            var tasks = Task.WhenAll(this.PluginSources.Select(s => GetAvailablePluginsLatestFromSourceAsync(s, cancellationToken)));
+            PluginSource[] pluginSources = this.PluginSources.ToArray();
+            Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
+                .Select(s => GetAvailablePluginsLatestFromSourceAsync(s, cancellationToken))
+                .ToArray() ;
+            
+            var task = Task.WhenAll(tasks);
             try
             {
-                await tasks;
+                await task.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                this.logger.Info($"The request to get lastest available plugins is cancelled.");
+                throw;
             }
             catch
             {
-                throw tasks.Exception;
             }
 
             // The below code combines plugins discovered from all plugin sources.
@@ -155,8 +164,35 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             // For now, we assume:
             //      1. Duplicates (plugins with same id and version) maybe be discovered from different sources.
             //      2. In the case when duplicated "lastest" are discovered, only one of the duplicates will be returned.
+            var discoveredAvailablePlugins = new List<IReadOnlyCollection<AvailablePlugin>>();
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                Task<IReadOnlyCollection<AvailablePlugin>> t = tasks[i];
+                PluginSource pluginSource = pluginSources[i];
+
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    this.logger.Info($"Successfully discovered {t.Result.Count} available plugins from source {pluginSource}.");
+                    discoveredAvailablePlugins.Add(t.Result);
+                }          
+                else if (t.IsFaulted)
+                {
+                    this.logger.Error($"Failed to get available plugins from source {pluginSource}. Skipping.", t.Exception);
+                    continue;
+                }
+                else if (t.IsCanceled)
+                {
+                    this.logger.Info($"The request to get lastest available plugins from source {pluginSource} is cancelled.");
+                    continue;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+
             var results = new Dictionary<string, AvailablePlugin>();
-            foreach (IReadOnlyCollection<AvailablePlugin> taskResult in tasks.Result)
+            foreach (IReadOnlyCollection<AvailablePlugin> taskResult in discoveredAvailablePlugins)
             {
                 IEnumerable<KeyValuePair<string, AvailablePlugin>> kvps = taskResult
                     .Select(p => new KeyValuePair<string, AvailablePlugin>(p.AvailablePluginInfo.Identity.Id, p));
@@ -185,67 +221,95 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
 
             IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
-
-            var tasks = Task.WhenAll(discoverers.Select(d => d.DiscoverPluginsLatestAsync(cancellationToken)));
+            if (!discoverers.Any())
+            {
+                HandleResourceNotFoundError(
+                    source,
+                    $"No available {typeof(IPluginDiscoverer).Name} found supporting plugin source {source}.");
+                return Array.Empty<AvailablePlugin>();
+            }
+            
+            Task<IReadOnlyDictionary<string, AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverPluginsLatestAsync(cancellationToken)).ToArray();
+            var task = Task.WhenAll(tasks);
             try
             {
-                await tasks;
+                await task.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                this.logger.Info($"The request to get available plugins from {source} is cancelled.");
+                throw;
             }
             catch
             {
-                throw tasks.Exception;
             }
 
-            // The below code combines plugins discovered from the same plugin source but by different discoverers.
-            // If more than one available plugin with the same identity are discovered, the first of them will be returned.
-            var results = new Dictionary<string, AvailablePlugin>();
-            for (int i = 0; i < tasks.Result.Length; i++)
+            var results = new Dictionary<string, (AvailablePlugin, IPluginDiscoverer)>();
+            for (int i = 0; i < tasks.Length; i++)
             {
+                Task<IReadOnlyDictionary<string, AvailablePluginInfo>> t = tasks[i];
                 IPluginDiscoverer discoverer = discoverers[i];
+                string discovererTypeStr = discoverer.GetType().Name;
 
-                foreach (KeyValuePair<string, AvailablePluginInfo> kvp in tasks.Result[i])
+                if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    string id = kvp.Key;
-                    AvailablePluginInfo pluginInfo = kvp.Value;
+                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {source}.");
 
-                    if (!results.TryGetValue(id, out AvailablePlugin availablePlugin) ||
-                        availablePlugin.AvailablePluginInfo.Identity.Version < pluginInfo.Identity.Version)
-                    {
+                    // Combines plugins discovered from the same plugin source but by different discoverers.
+                    // If more than one available plugin with the same identity are discovered, the first of them will be returned.
+                    await ProcessDiscoverAllResult(task.Result[i], discoverer, source, results);
+                }
+                else if (t.IsFaulted)
+                {
+                    HandlePluginSourceException(
+                        source,
+                        $"Discoverer {discovererTypeStr} failed to discover plugins from {source}.",
+                        t.Exception);
 
-                        IPluginFetcher fetcher = await GetPluginFetcher(pluginInfo);
-                        var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                        results[id] = newPlugin;
-                    }
-                    else if (availablePlugin.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
-                    {
-                        // TODO: Log a warning for discovering duplicates.
-                    }
+                    continue;
+                }
+                else if (t.IsCanceled)
+                {
+                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {source}.");
+                    continue;
+                }
+                else
+                {
+                    continue;
                 }
             }
 
-            return results.Values;
+            AvailablePlugin[] availablePlugins = results.Values.Select(tuple => tuple.Item1).ToArray();
+            return availablePlugins.AsReadOnly();
         }
-
+        
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginAsync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken)
         {
-            var tasks = Task.WhenAll(this.PluginSources.Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken)));
+            Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
+
+            Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources.Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken)).ToArray();
+            var task = Task.WhenAll(tasks);
             try
             {
-                await tasks;
+                await task.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                this.logger.Info($"The request to get all versions of plugin {pluginIdentity} is cancelled.");
+                throw;
             }
             catch
             {
-                throw tasks.Exception;
             }
 
             // The below code combines versions of plugin discovered from all plugin sources.
             // For now, we assume:
             //      1. Duplicates (same version) maybe discovered from different sources.
             //      2. In the case when duplicated versions are discovered, only one of them will be returned.
-            var results = tasks.Result.SelectMany(x => x)
+            var results = task.Result.SelectMany(x => x)
                                 .GroupBy(x => x.AvailablePluginInfo.Identity)
                                 .ToDictionary(g => g.Key, g => g.OrderBy(x => x.AvailablePluginInfo.PluginSource.Uri)
                                                                 .First());
@@ -259,88 +323,157 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken)
         {
-            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
-            var tasks = Task.WhenAll(discoverers.Select(d => d.DiscoverAllVersionsOfPlugin(pluginIdentity, cancellationToken)));
+            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
+            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
+            if (!discoverers.Any())
+            {
+                HandleResourceNotFoundError(
+                    source,
+                    $"No available {typeof(IPluginDiscoverer).Name} found supporting the plugin source {source}.");
+               
+                return Array.Empty<AvailablePlugin>();
+            }
+
+            Task<IReadOnlyCollection<AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverAllVersionsOfPlugin(pluginIdentity, cancellationToken)).ToArray();
+
+            var task = Task.WhenAll(tasks);
             try
             {
-                await tasks;
+                await task.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                this.logger.Info($"The request to get all versions of plugin {pluginIdentity} from {source} is cancelled.");
             }
             catch
             {
-                throw tasks.Exception;
             }
 
-            // The below code combines plugins discovered from the same plugin source but by different discoverers.
-            // If more than one available plugin with the same identity are discovered, the first of them will be returned.
-            var results = new Dictionary<PluginIdentity, AvailablePlugin>();
-            for (int i = 0; i < discoverers.Length; i++)
+            var results = new Dictionary<PluginIdentity, (AvailablePlugin, IPluginDiscoverer)>();
+            for (int i = 0; i < tasks.Length; i++)
             {
+                Task<IReadOnlyCollection<AvailablePluginInfo>> t = tasks[i];
                 IPluginDiscoverer discoverer = discoverers[i];
-                foreach (AvailablePluginInfo pluginInfo in tasks.Result[i])
-                {
-                    if (results.ContainsKey(pluginInfo.Identity))
-                    {
-                        // TODO: Log a warning for discovering duplicates.
-                        continue;
-                    }
+                string discovererTypeStr = discoverer.GetType().Name;
 
-                    IPluginFetcher fetcher = await GetPluginFetcher(pluginInfo);
-                    var availablePlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                    results[pluginInfo.Identity] = availablePlugin;
+                if (t.Status == TaskStatus.RanToCompletion)
+                {
+                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {source}.");
+
+                    // Combines plugins discovered from the same plugin source but by different discoverers.
+                    // If more than one available plugin with the same identity are discovered, the first of them will be returned.
+                    await ProcessDiscoverAllVersionsResult(t.Result, discoverer, source, results);
+                }
+                else if (t.IsFaulted)
+                {
+                    HandlePluginSourceException(
+                        source,
+                        $"Discoverer {discovererTypeStr} failed to discover plugins from {source}.",
+                        t.Exception);
+
+                    continue;
+                }
+                else if (t.IsCanceled)
+                {
+                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {source}.");
+                    continue;
+                }
+                else
+                {
+                    continue;
                 }
             }
 
-            return results.Values;
+            AvailablePlugin[] availablePlugins = results.Values.Select(tuple => tuple.Item1).ToArray();
+            return availablePlugins.AsReadOnly();
         }
 
         /// <inheritdoc />
-        public Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken)
+        public Task<InstalledPluginsResults> GetInstalledPluginsAsync(CancellationToken cancellationToken)
         {
             return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
         }
 
         /// <inheritdoc />
-        public async Task<bool> InstallAvailablePluginAsync(
+        public async Task<InstalledPluginInfo> TryInstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(availablePlugin, nameof(availablePlugin));
 
-            using (Stream stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress))
-            using (var pluginPackage = new PluginPackage(stream))
+            Stream stream;
+            try
             {
-                return await this.pluginInstaller.InstallPluginAsync(
-                    pluginPackage,
-                    this.installationDir,
-                    availablePlugin.AvailablePluginInfo.PluginPackageUri,
-                    cancellationToken,
-                    progress);
+                stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress);
+            }
+            catch (OperationCanceledException)
+            {
+                this.logger.Info("Request to fetch plugin package is cancelled.");
+                throw;
+            }
+            catch (Exception e)
+            {
+                string errorMsg = $"Fails to fetch plugin {availablePlugin.AvailablePluginInfo.Identity} " +
+                    $"from {availablePlugin.AvailablePluginInfo.PluginPackageUri}";
+                
+                this.logger.Error(e, errorMsg);
+
+                throw new PluginFetchingException(errorMsg, availablePlugin.AvailablePluginInfo, e);
+            }
+            
+            using (stream)
+            {
+                if (PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
+                {
+                    using (pluginPackage)
+                    {
+                        return await this.pluginInstaller.InstallPluginAsync(
+                            pluginPackage,
+                            this.installationDir,
+                            availablePlugin.AvailablePluginInfo.PluginPackageUri,
+                            cancellationToken,
+                            progress);
+                    }
+                }
+                else
+                {
+                    throw new PluginPackageCreationException(
+                       $"Failed to create plugin package from discovered plugin {availablePlugin.AvailablePluginInfo.Identity}");
+                }
             }
         }
 
         /// <inheritdoc />
-        public async Task<bool> InstallLocalPluginAsync(
+        public async Task<InstalledPluginInfo> TryInstallLocalPluginAsync(
             string pluginPackagePath,
-            bool overwriteInstalled,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
 
             string packageFullPath = Path.GetFullPath(pluginPackagePath);
-            using (var pluginPackage = new PluginPackage(pluginPackagePath))
+            using (var stream = new FileStream(pluginPackagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                await this.pluginInstaller.InstallPluginAsync(
-                    pluginPackage,
-                    this.installationDir,
-                    new Uri(packageFullPath),
-                    cancellationToken,
-                    progress);
+                if (PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
+                {
+                    using (pluginPackage)
+                    {
+                        return await this.pluginInstaller.InstallPluginAsync(
+                            pluginPackage,
+                            this.installationDir,
+                            new Uri(packageFullPath),
+                            cancellationToken,
+                            progress);
+                    }
+                }
+                else
+                {
+                    throw new PluginPackageCreationException($"Failed to create plugin package from {packageFullPath}");
+                }
             }
-
-            return true;
         }
 
         /// <inheritdoc />
@@ -364,30 +497,129 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             using (await this.pluginRegistry.UseLock(cancellationToken))
             {
-                List<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetInstalledPlugins();
+                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins();
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
-                var toRemove = new List<string>();
+
                 foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())
                 {
                     if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
                     {
+                        this.logger.Info($"Deleting obsolete plugin files in {dir.FullName}");
                         dir.Delete(true);
                     }
                 }
             }
         }
 
-        private async Task<IPluginFetcher> GetPluginFetcher(AvailablePluginInfo availablePluginInfo)
+        private async Task<IPluginFetcher> TryGetPluginFetcher(AvailablePluginInfo availablePluginInfo)
         {
-            foreach (IPluginFetcher fetcher in this.fetcherRepository.Resources)
+            IPluginFetcher fetcherToUse = this.fetcherRepository.Resources
+                .SingleOrDefault(fetcher => fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId);
+
+            if (fetcherToUse == null)
             {
-                if (fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId && await fetcher.IsSupportedAsync(availablePluginInfo))
+                this.logger.Error($"Fetcher with ID {availablePluginInfo.FetcherResourceId} is not found.");
+                return null;
+            }
+            
+            // Validate that the found fetcher actually supports fetching the given plugin.
+            Type fetcherType = fetcherToUse.GetType();
+            try
+            {
+                bool isSupported = await fetcherToUse.IsSupportedAsync(availablePluginInfo);
+                if (!isSupported)
                 {
-                    return fetcher;
+                    this.logger.Error($"Fetcher {fetcherType.Name} doesn't support fetching from {availablePluginInfo.PluginPackageUri}");
+                    return null;
                 }
             }
+            catch (Exception e)
+            {
+                this.logger.Error($"Error occurred when checking if plugin {availablePluginInfo.Identity} is supported by {fetcherType.Name}.", e);
+                return null;
+            }
 
-            throw new InvalidOperationException("No supported fetcher found");
+            return fetcherToUse;
+        }
+
+        private async Task ProcessDiscoverAllResult(
+            IReadOnlyDictionary<string, AvailablePluginInfo> discoveryResult,
+            IPluginDiscoverer discoverer,
+            PluginSource source,
+            IDictionary<string, (AvailablePlugin, IPluginDiscoverer)> results)
+        {
+            foreach (KeyValuePair<string, AvailablePluginInfo> kvp in discoveryResult)
+            {
+                string id = kvp.Key;
+                AvailablePluginInfo pluginInfo = kvp.Value;
+
+                if (!results.TryGetValue(id, out (AvailablePlugin, IPluginDiscoverer) tuple) ||
+                    tuple.Item1.AvailablePluginInfo.Identity.Version < pluginInfo.Identity.Version)
+                {
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
+                    if (fetcher == null)
+                    {
+                        HandleResourceNotFoundError(
+                            source,
+                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                        continue;
+                    }
+
+                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                    results[id] = (newPlugin, discoverer);
+                }
+                else if (tuple.Item1.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
+                {
+                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
+                        $"Using the first found discoverer: {tuple.Item2.GetType().Name}.");
+                }
+            }
+        }
+
+        private async Task ProcessDiscoverAllVersionsResult(
+            IReadOnlyCollection<AvailablePluginInfo> discoveryResult,
+            IPluginDiscoverer discoverer,
+            PluginSource source,
+            IDictionary<PluginIdentity, (AvailablePlugin, IPluginDiscoverer)> results)
+        {
+            foreach (AvailablePluginInfo pluginInfo in discoveryResult)
+            {
+                if (!results.TryGetValue(pluginInfo.Identity, out (AvailablePlugin, IPluginDiscoverer) tuple))
+                {
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
+                    if (fetcher == null)
+                    {
+                        HandleResourceNotFoundError(
+                            source,
+                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                        continue;
+                    }
+                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                    results[pluginInfo.Identity] = (newPlugin, discoverer);
+                }
+                else
+                {
+                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
+                       $"Using the first found discoverer: {tuple.Item2.GetType().Name}.");
+                } 
+            }
+        }
+
+
+        private void HandleResourceNotFoundError(PluginSource source, string errorMsg)
+        {
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginManagerResourceNotFound, errorMsg);
+            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(source, errorInfo));
+
+            this.logger.Error(errorMsg);
+        }
+
+        private void HandlePluginSourceException(PluginSource source, string errorMsg, Exception exception)
+        {
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginSourceException, errorMsg);
+            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(source, errorInfo, exception));
+
+            this.logger.Error(errorMsg, exception);
         }
     }
 }
