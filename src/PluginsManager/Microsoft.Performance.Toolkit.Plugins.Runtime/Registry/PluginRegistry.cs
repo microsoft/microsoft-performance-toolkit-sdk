@@ -25,15 +25,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     {
         private static readonly string registryFileName = "installedPlugins.json";
         private static readonly string lockFileName = ".lockRegistry";
-        private static readonly string backupRegistryFileExtension = ".bak";
-
         private readonly string registryFilePath;
         private readonly string lockFilePath;
-        private readonly string backupRegistryFilePath;
         private readonly ILogger logger;
-
-        private static readonly TimeSpan sleepDuration = TimeSpan.FromMilliseconds(500);
-        private string lockToken;
 
         /// <summary>
         ///     Creates an instance of <see cref="PluginRegistry"/> with a registry root.
@@ -74,7 +68,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             // TODO: #256 Create a backup registry
             this.RegistryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
-            this.backupRegistryFilePath = this.registryFilePath + backupRegistryFileExtension;
             this.logger = logger;
             
             this.lockFilePath = Path.Combine(registryRoot, lockFileName);
