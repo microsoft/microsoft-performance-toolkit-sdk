@@ -54,11 +54,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///    Always make sure to acquire this lock before interacting with the registry and release it after the interaction.
         ///    Usage:
         ///    <code>
-        ///         await using (await myLock.AcquireAsync(...))
+        ///         using (await myLock.AcquireAsync(...))
         ///         {
         ///             /* we have the lock! */
         ///         }
-        ///         // dispose releases the lock
+        ///         // The lock is released here after the using block
         ///     </code>
         /// </summary>
         public FileDistributedLock FileLock { get; }
