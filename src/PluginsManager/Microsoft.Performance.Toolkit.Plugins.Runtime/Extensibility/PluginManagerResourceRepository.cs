@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
@@ -25,6 +26,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// </param>
         public PluginManagerResourceRepository(IEnumerable<T> resources)
         {
+            Guard.NotNull(resources, nameof(resources));
+
+            SetResourcesLoggers(resources);
             this.resources = new HashSet<PluginManagerResourceReference>(resources.Select(r => new PluginManagerResourceReference(r)));
         }
 
@@ -40,16 +44,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// <inheritdoc />
         public void OnNewResourcesLoaded(IEnumerable<PluginManagerResourceReference> loadedResources)
         {
+            Guard.NotNull(loadedResources, nameof(loadedResources));
+
             lock (this.resources)
             {
                 IEnumerable<PluginManagerResourceReference> newResources = loadedResources
                     .Where(r => r.Instance is T)
                     .Except(this.resources);
-
-                this.resources.UnionWith(newResources);
                 
                 if (newResources.Any())
                 {
+                    this.resources.UnionWith(newResources);
+                    SetResourcesLoggers(newResources.Select(r => r.Instance).OfType<T>());
                     ResourcesAdded?.Invoke(this, new NewResourcesEventArgs<T>(newResources.Select(r => r.Instance).OfType<T>()));
                 }
             }
@@ -57,5 +63,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
         /// <inheritdoc />
         public event EventHandler<NewResourcesEventArgs<T>> ResourcesAdded;
+        
+        private void SetResourcesLoggers(IEnumerable<T> pluginManagerResources)
+        {
+            foreach (T resource in pluginManagerResources)
+            {
+                resource.SetLogger(Logger.Create(resource.GetType()));
+            }
+        }
     }
 }
