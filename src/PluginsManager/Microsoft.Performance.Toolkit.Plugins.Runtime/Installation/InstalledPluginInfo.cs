@@ -95,5 +95,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                    DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn) &&
                    string.Equals(this.Checksum, other.Checksum);
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{this.Id} - {this.Version}";
+        }
     }
 }

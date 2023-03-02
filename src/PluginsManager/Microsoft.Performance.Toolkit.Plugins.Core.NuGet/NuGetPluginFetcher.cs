@@ -18,12 +18,16 @@ using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using ILogger = Microsoft.Performance.SDK.Processing.ILogger;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
     [PluginManagerResource(PluginsManagerConstants.NuGetFetcherId)]
-    public sealed class NuGetPluginFetcher : IPluginFetcher
+    public sealed class NuGetPluginFetcher
+        : IPluginFetcher
     {
+        private ILogger logger;
+
         public async Task<bool> IsSupportedAsync(AvailablePluginInfo plugin)
         {
             Guard.NotNull(plugin, nameof(plugin));
@@ -90,6 +94,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
             return packageSource.IsHttp &&
               (packageSource.Source.EndsWith("index.json", StringComparison.OrdinalIgnoreCase)
               || packageSource.ProtocolVersion == 3);
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            this.logger = logger;
         }
     }
 }

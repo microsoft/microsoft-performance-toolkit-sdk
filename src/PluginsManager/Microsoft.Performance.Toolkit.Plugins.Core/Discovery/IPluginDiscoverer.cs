@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
@@ -55,5 +56,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         Task<PluginMetadata> GetPluginMetadataAsync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Provides the <see cref="IPluginDiscoverer"/> an application-appropriate logging mechanism.
+        /// </summary>
+        /// <param name="logger">
+        ///     Used to log information.
+        /// </param>
+        void SetLogger(ILogger logger);
     }
 }
