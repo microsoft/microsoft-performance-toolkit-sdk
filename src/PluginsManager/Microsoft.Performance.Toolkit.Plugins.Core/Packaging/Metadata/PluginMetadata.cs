@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 
@@ -15,57 +16,82 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     /// </summary>
     public sealed class PluginMetadata
     {
-        public static Task<PluginMetadata> Parse(Stream jsonStream)
+        /// <summary>
+        ///     Intializes a new instance of the <see cref="PluginMetadata"/> class with the specified parameters.
+        /// </summary>
+        [JsonConstructor]
+        public PluginMetadata(
+            string id,
+            Version version,
+            string displayName,
+            string description,
+            IEnumerable<PluginOwner> owners,
+            Version sdkVersion,
+            IEnumerable<ProcessingSourceMetadata> processingSources,
+            IEnumerable<DataCookerMetadata> dataCookers,
+            IEnumerable<TableMetadata> extensibleTables)
         {
-            Guard.NotNull(jsonStream, nameof(jsonStream));
+            this.Id = id;
+            this.Version = version;
+            this.DisplayName = displayName;
+            this.Description = description;
+            this.Owners = owners;
+            this.SdkVersion = sdkVersion;
+            this.ProcessingSources = processingSources;
+            this.DataCookers = dataCookers;
+            this.ExtensibleTables = extensibleTables;
+        }
 
-            // TODO: #238 Error handling
-            return JsonSerializer.DeserializeAsync<PluginMetadata>(jsonStream).AsTask();
+        /// <summary>
+        ///     Intializes a new instance of the <see cref="PluginMetadata"/> class.
+        /// </summary>
+        public PluginMetadata()
+        {  
         }
 
         /// <summary>
         ///     Gets or sets the identifer of this plugin.
         /// </summary>
-        public string Id { get; set; }
+        public string Id { get; }
 
         /// <summary>
         ///     Gets or sets the version of this plugin.
         /// </summary>
-        public Version Version { get; set; }
+        public Version Version { get; }
 
         /// <summary>
         ///     Gets or sets the human-readable name of this plugin.
         /// </summary>
-        public string DisplayName { get; set; }
+        public string DisplayName { get; }
 
         /// <summary>
         ///     Gets or sets the user friendly description of this plugin.
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; }
 
         /// <summary>
         ///     Gets or sets the owners of this plugin.
         /// </summary>
-        public IEnumerable<PluginOwner> Owners { get; set; }
+        public IEnumerable<PluginOwner> Owners { get; }
 
         /// <summary>
         ///     Gets or sets the version of the performance SDK which this plugin depends upon.
         /// </summary>
-        public Version SdkVersion { get; set; }
+        public Version SdkVersion { get; }
 
         /// <summary>
         ///     Gets or sets the metadata of the processing sources contained in this plugin.
         /// </summary>
-        public IEnumerable<ProcessingSourceMetadata> ProcessingSources { get; set; }
+        public IEnumerable<ProcessingSourceMetadata> ProcessingSources { get; }
 
         /// <summary>
         ///     Gets or sets the metadata of the data cookers contained in this plugin.
         /// </summary>
-        public IEnumerable<DataCookerMetadata> DataCookers { get; set; }
+        public IEnumerable<DataCookerMetadata> DataCookers { get; }
 
         /// <summary>
         ///     Gets or sets the metadata of the extensible tables contained in this plugin.
         /// </summary>
-        public IEnumerable<TableMetadata> ExtensibleTables { get; set; }
+        public IEnumerable<TableMetadata> ExtensibleTables { get; }
     }
 }

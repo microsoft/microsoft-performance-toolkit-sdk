@@ -82,5 +82,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                this.Id.GetHashCode(),
                this.Version.GetHashCode());
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{this.Id} - {this.Version}";
+        }
     }
 }

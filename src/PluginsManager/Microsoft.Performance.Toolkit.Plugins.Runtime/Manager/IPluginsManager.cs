@@ -7,7 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
-using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
@@ -61,13 +63,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             PluginSource source,
             CancellationToken cancellationToken);
 
-        /// <summary>
-        ///     Loads additional <see cref="IPluginManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
-        /// </summary>
-        /// <param name="directory">
-        ///     The directory to load resource assemblies from.
-        /// </param>
-        void LoadAdditionalPluginResources(string directory);
+        // TODO: Re-enable when we start to support loading additional resources.
+        ///// <summary>
+        /////     Loads additional <see cref="IPluginManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
+        ///// </summary>
+        ///// <param name="directory">
+        /////     The directory to load resource assemblies from.
+        ///// </param>
+        ///// <returns>
+        /////     Whether the loading was successful.
+        ///// </returns>
+        //bool LoadAdditionalPluginResources(string directory);
 
         /// <summary>
         ///     Gets all available versions of a plugin by discovering from all plugin sources.
@@ -112,9 +118,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     A collection of installed plugins.
+        ///     A <see cref="InstalledPluginsResults"/> instance containing all valid and invalid installed plugins.
         /// </returns>
-        Task<IReadOnlyCollection<InstalledPlugin>> GetInstalledPluginsAsync(CancellationToken cancellationToken);
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was canceled.
+        /// </exception>
+        Task<InstalledPluginsResults> GetInstalledPluginsAsync(CancellationToken cancellationToken);
 
         /// <summary>
         ///     Installs an available plugin if no other versions of this plugin installed.
@@ -129,9 +144,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Indicates the progress of plugin installation.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        ///     The <see cref="InstalledPluginInfo"/> if plugin is successfully installed. <c>null</c> otherwise.
         /// </returns>
-        Task<bool> InstallAvailablePluginAsync(
+        /// <exception cref="ArgumentNullException">
+        ///     Throws when <paramref name="availablePlugin"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="PluginFetchingException">
+        ///     Throws when the plugin package cannot be fetched.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginPackageCreationException">
+        ///     Throws when there is an error creating plugin package.
+        /// </exception>
+        /// <exception cref="PluginPackageExtractionException">
+        ///     Throws when there is an error extracting plugin package.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was canceled.
+        /// </exception>
+        Task<InstalledPluginInfo> TryInstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
             IProgress<int> progress);
@@ -142,9 +178,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="pluginPackagePath">
         ///     The path to the plugin package to be installed.
         /// </param>
-        /// <param name="overwriteInstalled">
-        ///     Whether to overwrite the existing plugin if there's one isntalled. 
-        /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
@@ -152,11 +185,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Indicates the progress of plugin installation.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the plugin has been successfully installed. <c>false</c> otherwise.
+        ///     The <see cref="InstalledPluginInfo"/> if plugin is successfully installed.. <c>null</c> otherwise.
         /// </returns>
-        Task<bool> InstallLocalPluginAsync(
+        /// <exception cref="ArgumentNullException">
+        ///     Throws when <paramref name="pluginPackagePath"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginPackageCreationException">
+        ///     Throws when there is an error creating plugin package.
+        /// </exception>
+        /// <exception cref="PluginPackageExtractionException">
+        ///     Throws when there is an error extracting plugin package.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was canceled.
+        /// </exception>
+        Task<InstalledPluginInfo> TryInstallLocalPluginAsync(
            string pluginPackagePath,
-           bool overwriteInstalled,
            CancellationToken cancellationToken,
            IProgress<int> progress);
 
@@ -175,6 +225,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <returns>
         ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     Throws when <paramref name="installedPlugin"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was canceled.
+        /// </exception>
         Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
             CancellationToken cancellationToken,
@@ -190,6 +252,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <returns>
         ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
         /// </returns>
+        /// <exception cref="PluginRegistryReadWriteException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="PluginRegistryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was canceled.
+        /// </exception>
         Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
+        ///    Subsribe to this event to handle errors related to a particular <see cref="PluginSource"/>.
+        /// </summary>
+        event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
     }
 }

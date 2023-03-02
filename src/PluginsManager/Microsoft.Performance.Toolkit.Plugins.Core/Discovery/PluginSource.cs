@@ -25,5 +25,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         ///     Gets the URI to discover plugins from.
         /// </summary>
         public Uri Uri { get; }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.Uri.ToString();
+        }
     }
 }

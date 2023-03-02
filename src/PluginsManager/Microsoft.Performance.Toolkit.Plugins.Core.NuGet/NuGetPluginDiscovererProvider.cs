@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Credential;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
@@ -14,6 +15,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
     public class NuGetPluginDiscovererProvider 
         : IPluginDiscovererProvider
     {
+        private ILogger logger;
         private Lazy<ICredentialProvider> credentialProvider =
             new Lazy<ICredentialProvider>(() => new NuGetCredentialProvider());
 
@@ -50,6 +52,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
             return packageSource.IsHttp &&
               (packageSource.Source.EndsWith("index.json", StringComparison.OrdinalIgnoreCase)
               || packageSource.ProtocolVersion == 3);
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            this.logger = logger;
         }
     }
 }
