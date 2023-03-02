@@ -15,7 +15,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     ///     Manages a mapping from plugins sources to plugin discoverers.
     /// </summary>
     public sealed class DiscovererSourcesManager
-          : IDisposable
+        : IDisposable
     {
         private readonly DiscoverersFactory discoverersFactory;
         private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
@@ -35,6 +35,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
             DiscoverersFactory discoverersFactory)
         {
+            Guard.NotNull(discovererProviderRepository, nameof(discovererProviderRepository));
+            Guard.NotNull(discoverersFactory, nameof(discoverersFactory));
+
             this.discovererProviderRepository = discovererProviderRepository;
             this.discovererProviderRepository.ResourcesAdded += OnNewProvidersAdded;
             
@@ -106,7 +109,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
             }
         }
-
+        
         /// <summary>
         ///     An event handler that is called to create new <see cref="IPluginDiscoverer">s when 
         ///     new <see cref="IPluginDiscovererProvider"> are added to the repository. 
