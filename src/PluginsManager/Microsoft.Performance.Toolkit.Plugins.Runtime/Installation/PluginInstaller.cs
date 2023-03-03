@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     ///     Responsible for the installation and unistallation of plugins to/from a
     ///     specific plugin registry.
     /// </summary>
-    public sealed class PluginInstaller
+    internal sealed class PluginInstaller
     {
         private readonly PluginRegistry pluginRegistry;
         private readonly ILogger logger;
@@ -281,9 +281,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of the uninstallation.
-        /// </param>
         /// <returns>
         ///     <c>true</c> if the plugin is successfully unistalled. <c>false</c> otherwise.
         /// </returns>
@@ -301,8 +298,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </exception>
         public async Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
+            CancellationToken cancellationToken)
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
