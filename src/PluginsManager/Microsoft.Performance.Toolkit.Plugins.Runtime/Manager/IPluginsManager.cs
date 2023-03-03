@@ -219,9 +219,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of plugin uninstallation.
-        /// </param>
         /// <returns>
         ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
         /// </returns>
@@ -239,8 +236,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// </exception>
         Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress);
+            CancellationToken cancellationToken);
 
         /// <summary>
         ///     Attempts to clean up all obsolete (unreigstered) plugin files.
