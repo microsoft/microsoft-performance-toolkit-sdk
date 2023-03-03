@@ -22,7 +22,7 @@ using ILogger = Microsoft.Performance.SDK.Processing.ILogger;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
-    [PluginManagerResource(PluginsManagerConstants.NuGetFetcherId)]
+    [PluginsManagerResource(PluginsManagerConstants.NuGetFetcherId)]
     public sealed class NuGetPluginFetcher
         : IPluginFetcher
     {

@@ -18,7 +18,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         : IDisposable
     {
         private readonly DiscoverersFactory discoverersFactory;
-        private readonly IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
+        private readonly IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
         private bool isDisposed;
 
@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         ///     A factory for creating <see cref="IPluginDiscoverer" /> instances.
         /// </param>
         public DiscovererSourcesManager(
-            IPluginManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
+            IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
             DiscoverersFactory discoverersFactory)
         {
             Guard.NotNull(discovererProviderRepository, nameof(discovererProviderRepository));
@@ -124,7 +124,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
             {
-                kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginManagerResources));
+                kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginsManagerResources));
             }
         }
 

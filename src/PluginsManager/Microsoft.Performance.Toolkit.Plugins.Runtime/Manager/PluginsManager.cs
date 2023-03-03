@@ -26,8 +26,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
     public sealed class PluginsManager
         : IPluginsManager
     {
-        private readonly PluginManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
-        private readonly PluginManagerResourceRepository<IPluginFetcher> fetcherRepository;
+        private readonly PluginsManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
+        private readonly PluginsManagerResourceRepository<IPluginFetcher> fetcherRepository;
 
         private readonly DiscovererSourcesManager discovererSourcesManager;
         
@@ -92,8 +92,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             Guard.NotNullOrWhiteSpace(installationDir, nameof(installationDir));
             Guard.NotNull(logger, nameof(logger));
 
-            this.discovererRepository = new PluginManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
-            this.fetcherRepository = new PluginManagerResourceRepository<IPluginFetcher>(fetchers);
+            this.discovererRepository = new PluginsManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
+            this.fetcherRepository = new PluginsManagerResourceRepository<IPluginFetcher>(fetchers);
 
             var discoverersFactory = new DiscoverersFactory();
             discoverersFactory.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
@@ -609,7 +609,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         private void HandleResourceNotFoundError(PluginSource source, string errorMsg)
         {
-            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginManagerResourceNotFound, errorMsg);
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginsManagerResourceNotFound, errorMsg);
             PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(source, errorInfo));
 
             this.logger.Error(errorMsg);

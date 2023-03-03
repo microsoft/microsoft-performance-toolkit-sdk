@@ -10,31 +10,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
     ///     This class registers to with a provider to receive Types that might be
-    ///     <see cref="Plugins.Core.Extensibility.IPluginManagerResource"/>s.
-    ///     The types are evaluated and stored as a <see cref="PluginManagerResourceReference"/> when applicable.
+    ///     <see cref="Plugins.Core.Extensibility.IPluginsManagerResource"/>s.
+    ///     The types are evaluated and stored as a <see cref="PluginsManagerResourceReference"/> when applicable.
     /// </summary>
-    public sealed class PluginManagerResourceReflector
+    public sealed class PluginsManagerResourceReflector
         : IExtensionTypeObserver
     {
-        private readonly Dictionary<Type, PluginManagerResourceReference> loadedResources;
+        private readonly Dictionary<Type, PluginsManagerResourceReference> loadedResources;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginManagerResourceReflector"/>
+        ///     Initializes a new instance of the <see cref="PluginsManagerResourceReflector"/>
         ///     class, registering to receive updates from the given <see cref="IExtensionTypeProvider"/>
         /// </summary>
         /// <param name="extensionTypeProvider">
         ///     The object doing extension discovery.
         /// </param>
-        public PluginManagerResourceReflector(IExtensionTypeProvider extensionTypeProvider)
+        public PluginsManagerResourceReflector(IExtensionTypeProvider extensionTypeProvider)
         {
-            this.loadedResources = new Dictionary<Type, PluginManagerResourceReference>();
+            this.loadedResources = new Dictionary<Type, PluginsManagerResourceReference>();
             extensionTypeProvider.RegisterTypeConsumer(this);
         }
 
         /// <inheritdoc />
         public void ProcessType(Type type, string sourceName)
         {
-            if (PluginManagerResourceReference.TryCreateReference(type, out PluginManagerResourceReference reference))
+            if (PluginsManagerResourceReference.TryCreateReference(type, out PluginsManagerResourceReference reference))
             {
                 try
                 {
@@ -55,9 +55,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <summary>
-        ///     Gets all loaded <see cref="PluginManagerResourceReference"/>s observed by this object.
+        ///     Gets all loaded <see cref="PluginsManagerResourceReference"/>s observed by this object.
         /// </summary>
-        public IEnumerable<PluginManagerResourceReference> AllResources
+        public IEnumerable<PluginsManagerResourceReference> AllResources
         {
             get
             {

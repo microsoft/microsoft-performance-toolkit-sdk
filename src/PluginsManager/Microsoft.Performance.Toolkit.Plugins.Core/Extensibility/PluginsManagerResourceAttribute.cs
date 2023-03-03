@@ -7,13 +7,13 @@ using Microsoft.Performance.SDK;
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
 {
     /// <summary>
-    ///     This attribute is used to mark a concrete class as an <see cref="IPluginManagerResource"/>.
+    ///     This attribute is used to mark a concrete class as an <see cref="IPluginsManagerResource"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-    public sealed class PluginManagerResourceAttribute
+    public sealed class PluginsManagerResourceAttribute
         : Attribute
     {
-        public PluginManagerResourceAttribute(string guid)
+        public PluginsManagerResourceAttribute(string guid)
         {
             Guard.NotNullOrWhiteSpace(guid, nameof(guid));
 
@@ -26,7 +26,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
         }
 
         /// <summary>
-        ///     Gets the unique identifier for this <see cref="IPluginManagerResource"/>.
+        ///     Gets the unique identifier for this <see cref="IPluginsManagerResource"/>.
         /// </summary>
         public Guid Guid { get; }
     }
