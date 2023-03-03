@@ -16,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     /// <summary>
     ///    Creates discoverer instances for a plugin source given a collection of providers.
     /// </summary>
-    public sealed class DiscoverersFactory
+    internal sealed class DiscoverersFactory
     {
         private readonly ILogger logger;
 
