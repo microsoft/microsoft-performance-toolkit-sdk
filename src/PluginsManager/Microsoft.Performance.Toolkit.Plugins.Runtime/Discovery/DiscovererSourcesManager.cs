@@ -59,17 +59,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <summary>
         ///     Returns a collection of discoverers associated with a given plugin source.
         /// </summary>
-        /// <param name="source">
+        /// <param name="pluginSource">
         ///     A plugin source.
         /// </param>
         /// <returns>
-        ///     A collection of discoverers that are capable of discovering plugins for the given <paramref name="source"/>.
+        ///     A collection of discoverers that are capable of discovering plugins for the given <paramref name="pluginSource"/>.
         /// </returns>
-        public IEnumerable<IPluginDiscoverer> GetDiscoverersFromSource(PluginSource source)
+        public IEnumerable<IPluginDiscoverer> GetDiscoverersFromSource(PluginSource pluginSource)
         {
-            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(pluginSource, nameof(pluginSource));
 
-            if (this.sourceToDiscoverers.TryGetValue(source, out List<IPluginDiscoverer> disoverers))
+            if (this.sourceToDiscoverers.TryGetValue(pluginSource, out List<IPluginDiscoverer> disoverers))
             {
                 return disoverers;
             }
@@ -88,14 +88,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <summary>
         ///     Adds a collection of plugin sources to this discoverers manager.
         /// </summary>
-        /// <param name="sources">
+        /// <param name="pluginSources">
         ///     The plugin sources to be added.
         /// </param>
-        public async void AddPluginSources(IEnumerable<PluginSource> sources)
+        public async void AddPluginSources(IEnumerable<PluginSource> pluginSources)
         {
-            Guard.NotNull(sources, nameof(sources));
+            Guard.NotNull(pluginSources, nameof(pluginSources));
 
-            foreach (PluginSource source in sources)
+            foreach (PluginSource source in pluginSources)
             {
                 if (this.sourceToDiscoverers.ContainsKey(source))
                 {

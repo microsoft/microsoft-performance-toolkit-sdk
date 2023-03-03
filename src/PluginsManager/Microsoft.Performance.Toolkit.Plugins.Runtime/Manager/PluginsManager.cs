@@ -210,22 +210,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestFromSourceAsync(
-            PluginSource source,
+            PluginSource pluginSource,
             CancellationToken cancellationToken)
         {
-            Guard.NotNull(source, nameof(source));
+            Guard.NotNull(pluginSource, nameof(pluginSource));
 
-            if (!this.PluginSources.Contains(source))
+            if (!this.PluginSources.Contains(pluginSource))
             {
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
+            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(pluginSource).ToArray();
             if (!discoverers.Any())
             {
                 HandleResourceNotFoundError(
-                    source,
-                    $"No available {typeof(IPluginDiscoverer).Name} found supporting plugin source {source}.");
+                    pluginSource,
+                    $"No available {typeof(IPluginDiscoverer).Name} found supporting plugin source {pluginSource}.");
                 return Array.Empty<AvailablePlugin>();
             }
             
@@ -237,7 +237,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
             catch (OperationCanceledException)
             {
-                this.logger.Info($"The request to get available plugins from {source} is cancelled.");
+                this.logger.Info($"The request to get available plugins from {pluginSource} is cancelled.");
                 throw;
             }
             catch
@@ -253,24 +253,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
                 if (t.Status == TaskStatus.RanToCompletion)
                 {
-                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {source}.");
+                    this.logger.Info($"Discoverer {discovererTypeStr} discovered {t.Result.Count} plugins from {pluginSource}.");
 
                     // Combines plugins discovered from the same plugin source but by different discoverers.
                     // If more than one available plugin with the same identity are discovered, the first of them will be returned.
-                    await ProcessDiscoverAllResult(task.Result[i], discoverer, source, results);
+                    await ProcessDiscoverAllResult(task.Result[i], discoverer, pluginSource, results);
                 }
                 else if (t.IsFaulted)
                 {
                     HandlePluginSourceException(
-                        source,
-                        $"Discoverer {discovererTypeStr} failed to discover plugins from {source}.",
+                        pluginSource,
+                        $"Discoverer {discovererTypeStr} failed to discover plugins from {pluginSource}.",
                         t.Exception);
 
                     continue;
                 }
                 else if (t.IsCanceled)
                 {
-                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {source}.");
+                    this.logger.Info($"Discoverer {discovererTypeStr} cancelled the discovery of plugins from {pluginSource}.");
                     continue;
                 }
                 else
@@ -607,18 +607,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
 
-        private void HandleResourceNotFoundError(PluginSource source, string errorMsg)
+        private void HandleResourceNotFoundError(PluginSource pluginSource, string errorMsg)
         {
             var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginsManagerResourceNotFound, errorMsg);
-            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(source, errorInfo));
+            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo));
 
             this.logger.Error(errorMsg);
         }
 
-        private void HandlePluginSourceException(PluginSource source, string errorMsg, Exception exception)
+        private void HandlePluginSourceException(PluginSource pluginSource, string errorMsg, Exception exception)
         {
             var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginSourceException, errorMsg);
-            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(source, errorInfo, exception));
+            PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, exception));
 
             this.logger.Error(errorMsg, exception);
         }
