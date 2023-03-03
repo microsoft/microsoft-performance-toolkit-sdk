@@ -479,12 +479,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <inheritdoc />
         public async Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
+            CancellationToken cancellationToken)
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
+            return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -497,11 +496,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
-                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins();
+                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins(cancellationToken);
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
 
                 foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    
                     if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
                     {
                         this.logger.Info($"Deleting obsolete plugin files in {dir.FullName}");
