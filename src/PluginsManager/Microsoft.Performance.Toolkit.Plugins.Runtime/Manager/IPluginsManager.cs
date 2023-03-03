@@ -65,7 +65,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         // TODO: Re-enable when we start to support loading additional resources.
         ///// <summary>
-        /////     Loads additional <see cref="IPluginManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
+        /////     Loads additional <see cref="IPluginsManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
         ///// </summary>
         ///// <param name="directory">
         /////     The directory to load resource assemblies from.

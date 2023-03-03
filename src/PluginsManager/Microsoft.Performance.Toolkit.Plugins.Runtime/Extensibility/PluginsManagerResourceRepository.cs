@@ -11,25 +11,25 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <inheritdoc />
-    public class PluginManagerResourceRepository<T>
-        : IPluginManagerResourcesConsumer,
-          IPluginManagerResourceRepository<T>
-        where T : IPluginManagerResource
+    public class PluginsManagerResourceRepository<T>
+        : IPluginsManagerResourcesConsumer,
+          IPluginsManagerResourceRepository<T>
+        where T : IPluginsManagerResource
     {
-        private readonly HashSet<PluginManagerResourceReference> resources;
+        private readonly HashSet<PluginsManagerResourceReference> resources;
 
         /// <summary>
-        ///     Initializes a <see cref="PluginManagerResourceRepository{T}"/> with an existing collection of <paramref name="resources"/>.
+        ///     Initializes a <see cref="PluginsManagerResourceRepository{T}"/> with an existing collection of <paramref name="resources"/>.
         /// </summary>
         /// <param name="resources">
-        ///     A collection of <see cref="IPluginManagerResource"s of type <see cref="T"/>.
+        ///     A collection of <see cref="IPluginsManagerResource"s of type <see cref="T"/>.
         /// </param>
-        public PluginManagerResourceRepository(IEnumerable<T> resources)
+        public PluginsManagerResourceRepository(IEnumerable<T> resources)
         {
             Guard.NotNull(resources, nameof(resources));
 
             SetResourcesLoggers(resources);
-            this.resources = new HashSet<PluginManagerResourceReference>(resources.Select(r => new PluginManagerResourceReference(r)));
+            this.resources = new HashSet<PluginsManagerResourceReference>(resources.Select(r => new PluginsManagerResourceReference(r)));
         }
 
         /// <inheritdoc />
@@ -42,13 +42,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public void OnNewResourcesLoaded(IEnumerable<PluginManagerResourceReference> loadedResources)
+        public void OnNewResourcesLoaded(IEnumerable<PluginsManagerResourceReference> loadedResources)
         {
             Guard.NotNull(loadedResources, nameof(loadedResources));
 
             lock (this.resources)
             {
-                IEnumerable<PluginManagerResourceReference> newResources = loadedResources
+                IEnumerable<PluginsManagerResourceReference> newResources = loadedResources
                     .Where(r => r.Instance is T)
                     .Except(this.resources);
                 
@@ -64,9 +64,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// <inheritdoc />
         public event EventHandler<NewResourcesEventArgs<T>> ResourcesAdded;
         
-        private void SetResourcesLoggers(IEnumerable<T> pluginManagerResources)
+        private void SetResourcesLoggers(IEnumerable<T> pluginsManagerResources)
         {
-            foreach (T resource in pluginManagerResources)
+            foreach (T resource in pluginsManagerResources)
             {
                 resource.SetLogger(Logger.Create(resource.GetType()));
             }

@@ -11,7 +11,7 @@ using NuGet.Configuration;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
 {
-    [PluginManagerResource(PluginsManagerConstants.NuGetDiscovererProviderId)]
+    [PluginsManagerResource(PluginsManagerConstants.NuGetDiscovererProviderId)]
     public class NuGetPluginDiscovererProvider 
         : IPluginDiscovererProvider
     {

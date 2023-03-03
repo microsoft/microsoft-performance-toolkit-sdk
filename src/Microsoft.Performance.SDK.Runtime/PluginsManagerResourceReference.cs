@@ -10,23 +10,23 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> 
-    ///     where T is <see cref="IPluginManagerResource"/> and Derived is <see cref="PluginManagerResourceReference"/>.
+    ///     where T is <see cref="IPluginsManagerResource"/> and Derived is <see cref="PluginsManagerResourceReference"/>.
     /// </summary>
-    public sealed class PluginManagerResourceReference
-         : AssemblyTypeReferenceWithInstance<IPluginManagerResource, PluginManagerResourceReference>
+    public sealed class PluginsManagerResourceReference
+         : AssemblyTypeReferenceWithInstance<IPluginsManagerResource, PluginsManagerResourceReference>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginManagerResourceReference"/> class.
+        ///     Initializes a new instance of the <see cref="PluginsManagerResourceReference"/> class.
         /// </summary>
         /// <param name="type">
         ///     The <see cref="Type"/> of instance being referenced by this instance.
         /// </param>
         /// <param name="metadata">
-        ///     The <see cref="IPluginManagerResource"/> metadata.
+        ///     The <see cref="IPluginsManagerResource"/> metadata.
         /// </param>
-        public PluginManagerResourceReference(
+        public PluginsManagerResourceReference(
             Type type,
-            PluginManagerResourceAttribute metadata)
+            PluginsManagerResourceAttribute metadata)
             : base(type)
         {
             Guard.NotNull(type, nameof(type));
@@ -36,13 +36,13 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginManagerResourceReference"/>
+        ///     Initializes a new instance of the <see cref="PluginsManagerResourceReference"/>
         ///     class with the given instance.
         /// </summary>
         /// <param name="instance">
-        ///     An existing instance of <see cref="IPluginManagerResource"/>
+        ///     An existing instance of <see cref="IPluginsManagerResource"/>
         /// </param>
-        public PluginManagerResourceReference(IPluginManagerResource instance)
+        public PluginsManagerResourceReference(IPluginsManagerResource instance)
             : base(instance.GetType(), () => instance)
         {
             Guard.NotNull(instance, nameof(instance));
@@ -51,13 +51,13 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginManagerResourceReference"/>
+        ///     Initializes a new instance of the <see cref="PluginsManagerResourceReference"/>
         ///     class as a copy of the given instance.
         /// </summary>
         /// <param name="other">
         ///      The instance from which to make a copy.
         /// </param>
-        public PluginManagerResourceReference(PluginManagerResourceReference other)
+        public PluginsManagerResourceReference(PluginsManagerResourceReference other)
             : base(other.Type)
         {
             Guard.NotNull(other, nameof(other));
@@ -68,22 +68,22 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Tries to create an instance of <see cref="PluginManagerResourceReference"/> 
+        ///     Tries to create an instance of <see cref="PluginsManagerResourceReference"/> 
         ///     based on the <paramref name="candidateType"/>.
         /// </summary>
         /// <param name="candidateType">
-        ///      Candidate <see cref="Type"/> for the <see cref="PluginManagerResourceReference"/>
+        ///      Candidate <see cref="Type"/> for the <see cref="PluginsManagerResourceReference"/>
         /// </param>
         /// <param name="reference">
-        ///      Out <see cref="PluginManagerResourceReference"/>
+        ///      Out <see cref="PluginsManagerResourceReference"/>
         /// </param>
         /// <returns>
         ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of 
-        ///     <see cref="PluginManagerResourceReference"/>; <c>false</c> otherwise.
+        ///     <see cref="PluginsManagerResourceReference"/>; <c>false</c> otherwise.
         /// </returns>
         public static bool TryCreateReference(
             Type candidateType,
-            out PluginManagerResourceReference reference)
+            out PluginsManagerResourceReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
 
@@ -92,10 +92,10 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 if (candidateType.TryGetEmptyPublicConstructor(out ConstructorInfo constructor))
                 {
-                    PluginManagerResourceAttribute metadataAttribute = candidateType.GetCustomAttribute<PluginManagerResourceAttribute>();
+                    PluginsManagerResourceAttribute metadataAttribute = candidateType.GetCustomAttribute<PluginsManagerResourceAttribute>();
                     if (metadataAttribute != null)
                     {
-                        reference = new PluginManagerResourceReference(
+                        reference = new PluginsManagerResourceReference(
                             candidateType,
                             metadataAttribute);
                     }
@@ -106,14 +106,14 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <summary>
-        ///     Gets the Guid of this <see cref="IPluginManagerResource"/>.
+        ///     Gets the Guid of this <see cref="IPluginsManagerResource"/>.
         /// </summary>
         public Guid Guid { get; }
 
         /// <inheritdoc />
-        public override PluginManagerResourceReference CloneT()
+        public override PluginsManagerResourceReference CloneT()
         {
-            return new PluginManagerResourceReference(this);
+            return new PluginsManagerResourceReference(this);
         }
 
         /// <inheritdoc />
@@ -129,7 +129,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 return true;
             }
 
-            return obj is PluginManagerResourceReference other &&
+            return obj is PluginsManagerResourceReference other &&
                 this.Guid.Equals(other.Guid);
         }
 
