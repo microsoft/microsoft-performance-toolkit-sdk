@@ -24,16 +24,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     /// </summary>
     internal sealed class PluginInstaller
     {
-        private readonly PluginRegistry pluginRegistry;
+        private readonly IPluginRegistry pluginRegistry;
         private readonly ILogger logger;
 
         /// <summary>
         ///     Creates an instance of a <see cref="PluginInstaller"/>.
         /// </summary>
         /// <param name="pluginRegistry">
-        ///     The <see cref="PluginRegistry"/> this installer register/unregister plugin records to.
+        ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
-        public PluginInstaller(PluginRegistry pluginRegistry)
+        public PluginInstaller(IPluginRegistry pluginRegistry)
             : this(pluginRegistry, Logger.Create<PluginInstaller>())
         {
         }
@@ -42,12 +42,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Creates an instance of a <see cref="PluginInstaller"/> with a <see cref="ILogger"/> object.
         /// </summary>
         /// <param name="pluginRegistry">
-        ///     The <see cref="PluginRegistry"/> this installer register/unregister plugin records to.
+        ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
         /// <param name="logger">
         ///     Used to log messages.
         /// </param>
-        public PluginInstaller(PluginRegistry pluginRegistry, ILogger logger)
+        public PluginInstaller(IPluginRegistry pluginRegistry, ILogger logger)
         {
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
             Guard.NotNull(logger, nameof(logger));
@@ -71,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public async Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken)
         {
-            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
+            using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins(cancellationToken);
 
@@ -177,7 +177,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(installationRoot, nameof(installationRoot));
             Guard.NotNull(sourceUri, nameof(sourceUri));
 
-            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
+            using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 // Check if any version of this plugin is already installed.
                 InstalledPluginInfo installedPlugin = await this.pluginRegistry.TryGetInstalledPluginByIdAsync(
@@ -302,7 +302,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
+            using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 if (!await this.pluginRegistry.IsPluginRegisteredAsync(installedPlugin.PluginInfo, cancellationToken))
                 {
