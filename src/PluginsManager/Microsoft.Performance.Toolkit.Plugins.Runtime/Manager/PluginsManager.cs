@@ -94,10 +94,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             this.discovererRepository = new PluginsManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
             this.fetcherRepository = new PluginsManagerResourceRepository<IPluginFetcher>(fetchers);
-
-            var discoverersFactory = new DiscoverersFactory();
-            discoverersFactory.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
-            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository, discoverersFactory);
+            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository);
+            this.discovererSourcesManager.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
 
             this.pluginRegistry = pluginRegistry;
             this.pluginInstaller = new PluginInstaller(pluginRegistry);
