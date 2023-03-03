@@ -479,12 +479,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <inheritdoc />
         public async Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
+            CancellationToken cancellationToken)
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken, progress);
+            return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken);
         }
 
         /// <inheritdoc />
