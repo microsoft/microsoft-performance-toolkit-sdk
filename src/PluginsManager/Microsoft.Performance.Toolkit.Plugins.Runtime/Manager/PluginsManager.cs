@@ -30,7 +30,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         private readonly PluginsManagerResourceRepository<IPluginFetcher> fetcherRepository;
 
         private readonly DiscovererSourcesManager discovererSourcesManager;
-        
+
         private readonly PluginInstaller pluginInstaller;
         private readonly IPluginRegistry pluginRegistry;
 
@@ -56,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
             IPluginRegistry pluginRegistry,
-            string installationDir) 
+            string installationDir)
             : this(discovererProviders, fetchers, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
         {
         }
@@ -143,8 +143,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             PluginSource[] pluginSources = this.PluginSources.ToArray();
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
                 .Select(s => GetAvailablePluginsLatestFromSourceAsync(s, cancellationToken))
-                .ToArray() ;
-            
+                .ToArray();
+
             var task = Task.WhenAll(tasks);
             try
             {
@@ -174,7 +174,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 {
                     this.logger.Info($"Successfully discovered {t.Result.Count} available plugins from source {pluginSource}.");
                     discoveredAvailablePlugins.Add(t.Result);
-                }          
+                }
                 else if (t.IsFaulted)
                 {
                     this.logger.Error($"Failed to get available plugins from source {pluginSource}. Skipping.", t.Exception);
@@ -228,7 +228,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                     $"No available {typeof(IPluginDiscoverer).Name} found supporting plugin source {pluginSource}.");
                 return Array.Empty<AvailablePlugin>();
             }
-            
+
             Task<IReadOnlyDictionary<string, AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverPluginsLatestAsync(cancellationToken)).ToArray();
             var task = Task.WhenAll(tasks);
             try
@@ -282,7 +282,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             AvailablePlugin[] availablePlugins = results.Values.Select(tuple => tuple.Item1).ToArray();
             return availablePlugins.AsReadOnly();
         }
-        
+
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginAsync(
             PluginIdentity pluginIdentity,
@@ -332,7 +332,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 HandleResourceNotFoundError(
                     source,
                     $"No available {typeof(IPluginDiscoverer).Name} found supporting the plugin source {source}.");
-               
+
                 return Array.Empty<AvailablePlugin>();
             }
 
@@ -418,12 +418,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 string errorMsg = $"Fails to fetch plugin {availablePlugin.AvailablePluginInfo.Identity} " +
                     $"from {availablePlugin.AvailablePluginInfo.PluginPackageUri}";
-                
+
                 this.logger.Error(e, errorMsg);
 
                 throw new PluginFetchingException(errorMsg, availablePlugin.AvailablePluginInfo, e);
             }
-            
+
             using (stream)
             {
                 if (PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
@@ -502,7 +502,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    
+
                     if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
                     {
                         this.logger.Info($"Deleting obsolete plugin files in {dir.FullName}");
@@ -522,7 +522,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 this.logger.Error($"Fetcher with ID {availablePluginInfo.FetcherResourceId} is not found.");
                 return null;
             }
-            
+
             // Validate that the found fetcher actually supports fetching the given plugin.
             Type fetcherType = fetcherToUse.GetType();
             try
@@ -602,7 +602,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 {
                     this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
                        $"Using the first found discoverer: {tuple.Item2.GetType().Name}.");
-                } 
+                }
             }
         }
 
