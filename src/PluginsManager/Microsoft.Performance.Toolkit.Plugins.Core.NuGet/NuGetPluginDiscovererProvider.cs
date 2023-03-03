@@ -27,19 +27,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.NuGet
             }
         }
 
-        public IPluginDiscoverer CreateDiscoverer(PluginSource source)
+        public IPluginDiscoverer CreateDiscoverer(PluginSource pluginSource)
         {
-            return new NuGetPluginDiscoverer(source, this.CredentialProvider);
+            return new NuGetPluginDiscoverer(pluginSource, this.CredentialProvider);
         }
 
-        public async Task<bool> IsSupportedAsync(PluginSource source)
+        public async Task<bool> IsSupportedAsync(PluginSource pluginSource)
         {
-            if (source == null)
+            if (pluginSource == null)
             {
                 return false;
             }
 
-            var nugetSource = new PackageSource(source.Uri.ToString());
+            var nugetSource = new PackageSource(pluginSource.Uri.ToString());
 
             // Support http V3 and local feed as of of now
             bool isSupported = IsHttpV3Feed(nugetSource) || nugetSource.IsLocal;
