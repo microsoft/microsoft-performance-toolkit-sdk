@@ -31,10 +31,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly ILogger logger;
 
         /// <summary>
-        ///    Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
+        ///     Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
         /// </summary>
         /// <param name="stream">
-        ///    Stream for reading the plugin package file.
+        ///     Stream for reading the plugin package file.
         /// </param>
         /// <param name="package">
         ///     The created <see cref="PluginPackage"/> instance.
@@ -50,7 +50,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         /// <summary>
-        ///    Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
+        ///     Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
         /// </summary>
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
@@ -112,7 +112,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 if (e is MalformedPluginPackageException)
                 {
                     logger.Error(e, e.Message);
-                }   
+                }
                 else if (e is JsonException)
                 {
                     logger.Error(e, $"Deserialization failed due to invalid JSON text in plugin metadata");
@@ -141,7 +141,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Used to log information.
         /// </param>
         private PluginPackage(
-            Stream stream, 
+            Stream stream,
             bool leaveOpen,
             ILogger logger)
         {
@@ -365,7 +365,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             {
                 throw new MalformedPluginPackageException($"{pluginMetadataFileName} not found in the plugin package.");
             }
-            
+
             using (Stream stream = entry.Open())
             {
                 PluginMetadata pluginMetadata = JsonSerializer.Deserialize<PluginMetadata>(
@@ -375,7 +375,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 return pluginMetadata;
             }
         }
-        
+
         private void Dispose(bool disposing)
         {
             if (!this.disposedValue)
