@@ -11,17 +11,17 @@ using Microsoft.Performance.SDK.Runtime.Discovery;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <inheritdoc />
-    public sealed class PluginManagerResourceLoader
-        : IPluginManagerResourceLoader
+    public sealed class PluginsManagerResourceLoader
+        : IPluginsManagerResourceLoader
     {
         private readonly object mutex = new object();
         private readonly AssemblyExtensionDiscovery extensionDiscovery;
 
-        private readonly HashSet<IPluginManagerResourcesConsumer> subscribers;
-        private readonly PluginManagerResourceReflector resourcesReflector;
+        private readonly HashSet<IPluginsManagerResourcesConsumer> subscribers;
+        private readonly PluginsManagerResourceReflector resourcesReflector;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginManagerResourceLoader"/>
+        ///     Initializes a new instance of the <see cref="PluginsManagerResourceLoader"/>
         /// </summary>
         /// <param name="assemblyLoader">
         ///     Loads assemblies.
@@ -33,13 +33,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         ///     a new <see cref="IPreloadValidator"/> instance. This function
         ///     should never return <c>null</c>.
         /// </param>
-        public PluginManagerResourceLoader(
+        public PluginsManagerResourceLoader(
             IAssemblyLoader assemblyLoader,
             Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
         {
-            this.subscribers = new HashSet<IPluginManagerResourcesConsumer>();
+            this.subscribers = new HashSet<IPluginsManagerResourcesConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
-            this.resourcesReflector = new PluginManagerResourceReflector(this.extensionDiscovery);
+            this.resourcesReflector = new PluginsManagerResourceReflector(this.extensionDiscovery);
         }
         
         /// <inheritdoc />
@@ -49,11 +49,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
             lock (this.mutex)
             {
-                var oldResources = new HashSet<PluginManagerResourceReference>(this.resourcesReflector.AllResources);
+                var oldResources = new HashSet<PluginsManagerResourceReference>(this.resourcesReflector.AllResources);
 
                 bool success = this.extensionDiscovery.ProcessAssemblies(directory, out ErrorInfo error);
 
-                IEnumerable<PluginManagerResourceReference> newResources = this.resourcesReflector.AllResources.Except(oldResources);
+                IEnumerable<PluginsManagerResourceReference> newResources = this.resourcesReflector.AllResources.Except(oldResources);
                 NotifyResourceLoaded(newResources);
                 
                 return success;
@@ -61,7 +61,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public bool Subscribe(IPluginManagerResourcesConsumer consumer)
+        public bool Subscribe(IPluginsManagerResourcesConsumer consumer)
         {
             Guard.NotNull(consumer, nameof(consumer));
 
@@ -82,7 +82,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public bool Unsubscribe(IPluginManagerResourcesConsumer consumer)
+        public bool Unsubscribe(IPluginsManagerResourcesConsumer consumer)
         {
             Guard.NotNull(consumer, nameof(consumer));
 
@@ -92,9 +92,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
             }
         }
         
-        private void NotifyResourceLoaded(IEnumerable<PluginManagerResourceReference> resources)
+        private void NotifyResourceLoaded(IEnumerable<PluginsManagerResourceReference> resources)
         {
-            foreach (IPluginManagerResourcesConsumer subscriber in this.subscribers)
+            foreach (IPluginsManagerResourcesConsumer subscriber in this.subscribers)
             {
                 subscriber.OnNewResourcesLoaded(resources);
             }

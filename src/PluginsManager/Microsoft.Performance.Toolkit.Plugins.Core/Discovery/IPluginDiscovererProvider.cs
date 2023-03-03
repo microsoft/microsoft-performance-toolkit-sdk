@@ -10,7 +10,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
     ///     Represents a provider that creates <see cref="IPluginDiscoverer"/> for supported <see cref="PluginSource"/>s.
     /// </summary>
     public interface IPluginDiscovererProvider
-        : IPluginManagerResource
+        : IPluginsManagerResource
     {
         /// <summary>
         ///     Checks if the given <paramref name="source"/> is supported by this discoverer.

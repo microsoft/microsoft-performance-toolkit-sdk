@@ -14,7 +14,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Transport
     ///     A fetcher is meant to be stateless.
     /// </summary>
     public interface IPluginFetcher
-        : IPluginManagerResource
+        : IPluginsManagerResource
     {
         /// <summary>
         ///     Checks if the given <paramref name="pluginInfo"/> is supported by this fetcher.

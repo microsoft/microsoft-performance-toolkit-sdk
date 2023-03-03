@@ -8,13 +8,13 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
-    ///     Represents a repository for storing a collection of <see cref=" IPluginManagerResource"/> of type <typeparamref name="T"/>.
+    ///     Represents a repository for storing a collection of <see cref=" IPluginsManagerResource"/> of type <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">
     ///     The type of the resources stored in this repository.
     /// </typeparam>
-    public interface IPluginManagerResourceRepository<T>
-        where T : IPluginManagerResource
+    public interface IPluginsManagerResourceRepository<T>
+        where T : IPluginsManagerResource
     {
         /// <summary>
         ///     Gets all plugins manager resources contained in this repository.

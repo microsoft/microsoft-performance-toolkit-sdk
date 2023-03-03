@@ -227,9 +227,9 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <summary>
         ///     No available plugin manager resource was found to perform requests against the plugin source.
         /// </summary>
-        public static ErrorCodes PLUGINS_MANAGER_PluginManagerResourceNotFound = new ErrorCodes(
+        public static ErrorCodes PLUGINS_MANAGER_PluginsManagerResourceNotFound = new ErrorCodes(
             50002,
-            "PLUGINS_MANAGER_PluginManagerResourceNotFound",
+            "PLUGINS_MANAGER_PluginsManagerResourceNotFound",
             "No available plugin manager resource was found to perform requests against the plugin source.");
 
         //
