@@ -4,9 +4,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
@@ -15,12 +20,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     ///     Manages a mapping from plugins sources to plugin discoverers.
     /// </summary>
     internal sealed class DiscovererSourcesManager
-        : IDisposable
     {
-        private readonly DiscoverersFactory discoverersFactory;
         private readonly IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
-        private bool isDisposed;
+        private readonly ILogger logger;
+
+        /// <summary>
+        ///     Creates an instance of <see cref="DiscovererSourcesManager"/> with a logger;
+        /// </summary>
+        /// <param name="discovererProviderRepository">
+        ///     A repository containing all available <see cref="IPluginDiscovererProvider" />s.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log information.
+        /// </param>
+        public DiscovererSourcesManager(
+            IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
+            ILogger logger)
+        {
+            Guard.NotNull(discovererProviderRepository, nameof(discovererProviderRepository));
+
+            this.discovererProviderRepository = discovererProviderRepository;
+            this.discovererProviderRepository.ResourcesAdded += OnNewProvidersAdded;
+
+            this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
+            this.logger = logger;
+        }
 
         /// <summary>
         ///     Creates an instance of <see cref="DiscovererSourcesManager"/>.
@@ -28,21 +53,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <param name="discovererProviderRepository">
         ///     A repository containing all available <see cref="IPluginDiscovererProvider" />s.
         /// </param>
-        /// <param name="discoverersFactory">
-        ///     A factory for creating <see cref="IPluginDiscoverer" /> instances.
-        /// </param>
         public DiscovererSourcesManager(
-            IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository,
-            DiscoverersFactory discoverersFactory)
+            IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProviderRepository)
+            : this(discovererProviderRepository, Logger.Create<DiscovererSourcesManager>())
         {
-            Guard.NotNull(discovererProviderRepository, nameof(discovererProviderRepository));
-            Guard.NotNull(discoverersFactory, nameof(discoverersFactory));
-
-            this.discovererProviderRepository = discovererProviderRepository;
-            this.discovererProviderRepository.ResourcesAdded += OnNewProvidersAdded;
-
-            this.discoverersFactory = discoverersFactory;
-            this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
         }
 
         /// <summary>
@@ -55,6 +69,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 return this.sourceToDiscoverers.Keys;
             }
         }
+
+        /// <summary>
+        ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
+        /// </summary>
+        public event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
 
         /// <summary>
         ///     Returns a collection of discoverers associated with a given plugin source.
@@ -102,7 +121,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                     continue;
                 }
 
-                IEnumerable<IPluginDiscoverer> discoverers = await this.discoverersFactory.CreateDiscoverers(
+                IEnumerable<IPluginDiscoverer> discoverers = await CreateDiscoverers(
                     source,
                     this.discovererProviderRepository.Resources);
 
@@ -124,31 +143,78 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
             {
-                kvp.Value.AddRange(await this.discoverersFactory.CreateDiscoverers(kvp.Key, e.NewPluginsManagerResources));
+                kvp.Value.AddRange(await CreateDiscoverers(kvp.Key, e.NewPluginsManagerResources));
             }
         }
 
         /// <summary>
-        ///     Disposes resources held by this class.
+        ///     Creates discoverer instances for a plugin source given a collection of providers.
         /// </summary>
-        public void Dispose()
+        /// <param name="pluginSource">
+        ///     A plugin source.
+        /// </param>
+        /// <param name="providers">
+        ///     A collection of discoverer providers.
+        /// </param>
+        /// <returns>
+        ///     A collection of discoverers that can discover plugins from the given plugin source.
+        /// </returns>
+        private async Task<IEnumerable<IPluginDiscoverer>> CreateDiscoverers(
+           PluginSource pluginSource,
+           IEnumerable<IPluginDiscovererProvider> providers)
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!this.isDisposed)
+            IList<IPluginDiscoverer> results = new List<IPluginDiscoverer>();
+            foreach (IPluginDiscovererProvider provider in providers)
             {
-                if (disposing)
+                try
                 {
-                    this.discovererProviderRepository.ResourcesAdded -= OnNewProvidersAdded;
+                    bool isSupported = await provider.IsSupportedAsync(pluginSource);
+                    if (!isSupported)
+                    {
+                        continue;
+                    }
+                }
+                catch (Exception e)
+                {
+                    string errorMsg = $"Error occurred when checking if {pluginSource} is supported by discoverer provider {provider.GetType().Name}.";
+                    var errorInfo = new ErrorInfo(
+                        ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                        errorMsg);
+
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
+
+                    this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
+
+                    continue;
                 }
 
-                this.isDisposed = true;
+                IPluginDiscoverer discoverer = null;
+                try
+                {
+                    discoverer = provider.CreateDiscoverer(pluginSource);
+                }
+                catch (Exception e)
+                {
+                    string errorMsg = $"Error occurred when creating discoverer for {pluginSource}.";
+                    var errorInfo = new ErrorInfo(
+                       ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                       errorMsg);
+
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
+
+                    this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
+
+                    continue;
+                }
+
+                Debug.Assert(discoverer != null);
+
+                discoverer.SetLogger(Logger.Create(discoverer.GetType()));
+                results.Add(discoverer);
             }
+
+            this.logger.Info($"{results.Count} discoverers are created for plugin source {pluginSource}");
+            return results;
         }
     }
 }
