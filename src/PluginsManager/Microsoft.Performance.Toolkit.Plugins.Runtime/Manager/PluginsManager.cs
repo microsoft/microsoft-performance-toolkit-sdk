@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         private readonly DiscovererSourcesManager discovererSourcesManager;
         
         private readonly PluginInstaller pluginInstaller;
-        private readonly PluginRegistry pluginRegistry;
+        private readonly IPluginRegistry pluginRegistry;
 
         private readonly string installationDir;
         private readonly ILogger logger;
@@ -55,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            PluginRegistry pluginRegistry,
+            IPluginRegistry pluginRegistry,
             string installationDir) 
             : this(discovererProviders, fetchers, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
         {
@@ -82,7 +82,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            PluginRegistry pluginRegistry,
+            IPluginRegistry pluginRegistry,
             string installationDir,
             ILogger logger)
         {
@@ -494,7 +494,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 return;
             }
 
-            using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
+            using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins(cancellationToken);
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
