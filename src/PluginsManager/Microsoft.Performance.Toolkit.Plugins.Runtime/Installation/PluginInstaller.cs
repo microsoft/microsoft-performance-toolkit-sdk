@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     ///     Responsible for the installation and unistallation of plugins to/from a
     ///     specific plugin registry.
     /// </summary>
-    public sealed class PluginInstaller
+    internal sealed class PluginInstaller
     {
         private readonly PluginRegistry pluginRegistry;
         private readonly ILogger logger;
@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(logger, nameof(logger));
 
             this.pluginRegistry = pluginRegistry;
-            this.logger = logger;          
+            this.logger = logger;
         }
 
         /// <summary>
@@ -73,9 +73,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
-                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins();
-                InstalledPluginInfo[] installedPluginsArray = installedPlugins.ToArray();
+                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins(cancellationToken);
 
+                InstalledPluginInfo[] installedPluginsArray = installedPlugins.ToArray();
                 Task<InstalledPlugin>[] tasks = installedPluginsArray
                     .Select(p => CreateInstalledPluginAsync(p, cancellationToken))
                     .ToArray();
@@ -114,7 +114,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         results.Add(t.Result);
                     }
                     else
-                    {             
+                    {
                         if (t.IsFaulted)
                         {
                             this.logger.Error($"Failed to load installed plugin {plugin}.", t.Exception);
@@ -125,7 +125,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 }
 
                 return new InstalledPluginsResults(results, failedResults);
-            }  
+            }
         }
 
         /// <summary>
@@ -180,8 +180,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
                 // Check if any version of this plugin is already installed.
-                InstalledPluginInfo installedPlugin = await this.pluginRegistry.TryGetInstalledPluginByIdAsync(pluginPackage.Id);
-                
+                InstalledPluginInfo installedPlugin = await this.pluginRegistry.TryGetInstalledPluginByIdAsync(
+                    pluginPackage.Id,
+                    cancellationToken);
+
                 bool needsUninstall = false;
                 if (installedPlugin != null)
                 {
@@ -199,7 +201,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
                         this.logger.Warn($"Installer is going to reinstall {installedPlugin} because it is tampered.");
                         needsUninstall = true;
-                    }                    
+                    }
                 };
 
                 string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
@@ -224,12 +226,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
                     if (needsUninstall)
                     {
-                        await this.pluginRegistry.UpdatePluginAsync(installedPlugin, pluginToInstall);
+                        await this.pluginRegistry.UpdatePluginAsync(installedPlugin, pluginToInstall, cancellationToken);
                         this.logger.Info($"{installedPlugin} is updated to {pluginToInstall} in the plugin registry.");
                     }
                     else
                     {
-                        await this.pluginRegistry.RegisterPluginAsync(pluginToInstall);
+                        await this.pluginRegistry.RegisterPluginAsync(pluginToInstall, cancellationToken);
                         this.logger.Info($"{pluginToInstall} is registered in the plugin registry.");
                     }
 
@@ -279,9 +281,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of the uninstallation.
-        /// </param>
         /// <returns>
         ///     <c>true</c> if the plugin is successfully unistalled. <c>false</c> otherwise.
         /// </returns>
@@ -299,20 +298,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </exception>
         public async Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
+            CancellationToken cancellationToken)
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
             using (await this.pluginRegistry.FileLock.AcquireAsync(null, cancellationToken))
             {
-                if (!await this.pluginRegistry.IsPluginRegisteredAsync(installedPlugin.PluginInfo))
+                if (!await this.pluginRegistry.IsPluginRegisteredAsync(installedPlugin.PluginInfo, cancellationToken))
                 {
                     this.logger.Warn($"Unable to uninstall plugin {installedPlugin.PluginInfo} because it is not currently registered.");
                     return false;
                 }
 
-                await this.pluginRegistry.UnregisterPluginAsync(installedPlugin.PluginInfo);
+                await this.pluginRegistry.UnregisterPluginAsync(installedPlugin.PluginInfo, cancellationToken);
                 return true;
             }
         }
@@ -333,7 +331,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            if (!await this.pluginRegistry.IsPluginRegisteredAsync(installedPlugin))
+            if (!await this.pluginRegistry.IsPluginRegisteredAsync(installedPlugin, cancellationToken))
             {
                 throw new InvalidOperationException(
                     $"Plugin {installedPlugin} is no longer registered in the plugin registry");
