@@ -50,7 +50,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <summary>
         ///      Gets all available plugins in their latest versions from a given plugin source.
         /// </summary>
-        /// <param name="source">
+        /// <param name="pluginSource">
         ///      The source to discover plugins from.
         /// </param>
         /// <param name="cancellationToken">
@@ -60,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///      A collection of available plugins.
         /// </returns>
         Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestFromSourceAsync(
-            PluginSource source,
+            PluginSource pluginSource,
             CancellationToken cancellationToken);
 
         // TODO: Re-enable when we start to support loading additional resources.
@@ -94,7 +94,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <summary>
         ///     Gets all available versions of a plugin from a particular source.
         /// </summary>
-        /// <param name="source">
+        /// <param name="pluginSource">
         ///     The plugin source to discover plugins from.
         /// </param>
         /// <param name="pluginIdentity">
@@ -107,7 +107,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     A collection of available plugins.
         /// </returns>
         Task<IReadOnlyCollection<AvailablePlugin>> GetAllVersionsOfPluginFromSourceAsync(
-            PluginSource source,
+            PluginSource pluginSource,
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
 
