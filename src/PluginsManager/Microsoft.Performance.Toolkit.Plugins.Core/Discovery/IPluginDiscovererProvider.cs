@@ -13,27 +13,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         : IPluginsManagerResource
     {
         /// <summary>
-        ///     Checks if the given <paramref name="source"/> is supported by this discoverer.
+        ///     Checks if the given <paramref name="pluginSource"/> is supported by this discoverer.
         /// </summary>
-        /// <param name="source">
+        /// <param name="pluginSource">
         ///     The source this discover discovers plugins from.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if <paramref name="source"/> is supported by this discoverer. <c>false</c>
+        ///     <c>true</c> if <paramref name="pluginSource"/> is supported by this discoverer. <c>false</c>
         ///     otherwise.
         /// </returns>
-        Task<bool> IsSupportedAsync(PluginSource source);
+        Task<bool> IsSupportedAsync(PluginSource pluginSource);
 
         /// <summary>
         ///     Creates a discoverer for the specified plugin source.
         /// </summary>
-        /// <param name="source">
+        /// <param name="pluginSource">
         ///     A plugin source.
         /// </param>
         /// <returns>
         ///     A plugin discoverer.
         /// </returns>
         IPluginDiscoverer CreateDiscoverer(
-            PluginSource source);
+            PluginSource pluginSource);
     }
 }
