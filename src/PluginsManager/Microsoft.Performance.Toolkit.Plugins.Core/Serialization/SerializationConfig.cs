@@ -7,8 +7,14 @@ using System.Text.Json.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
 {
+    /// <summary>
+    ///     Contains the default serialization options for the PluginsManager.
+    /// </summary>
     public static class SerializationConfig
     {
+        /// <summary>
+        ///     Gets the default serialization options for the PluginsManager.
+        /// </summary>
         public static readonly JsonSerializerOptions PluginsManagerSerializerDefaultOptions = new JsonSerializerOptions
         {
             WriteIndented = true,

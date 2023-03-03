@@ -41,7 +41,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
             this.resourcesReflector = new PluginsManagerResourceReflector(this.extensionDiscovery);
         }
-        
+
         /// <inheritdoc />
         public bool TryLoad(string directory)
         {
@@ -55,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
                 IEnumerable<PluginsManagerResourceReference> newResources = this.resourcesReflector.AllResources.Except(oldResources);
                 NotifyResourceLoaded(newResources);
-                
+
                 return success;
             }
         }
@@ -74,7 +74,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
                 // Notify consumer of exisiting resources.
                 consumer.OnNewResourcesLoaded(this.resourcesReflector.AllResources);
-                
+
                 this.subscribers.Add(consumer);
 
                 return true;
@@ -91,7 +91,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
                 return this.subscribers.Remove(consumer);
             }
         }
-        
+
         private void NotifyResourceLoaded(IEnumerable<PluginsManagerResourceReference> resources)
         {
             foreach (IPluginsManagerResourcesConsumer subscriber in this.subscribers)

@@ -36,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         ///     Gets the identity of this plugin.
         /// </summary>
         public PluginIdentity Identity { get; }
-        
+
         /// <summary>
         ///     Gets the souce where this plugin is discovered.
         /// </summary>
