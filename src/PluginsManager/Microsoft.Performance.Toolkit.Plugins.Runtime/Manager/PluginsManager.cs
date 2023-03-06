@@ -334,7 +334,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 return Array.Empty<AvailablePlugin>();
             }
 
-            Task<IReadOnlyCollection<AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverAllVersionsOfPluginAync(pluginIdentity, cancellationToken)).ToArray();
+            Task<IReadOnlyCollection<AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverAllVersionsOfPluginAsync(pluginIdentity, cancellationToken)).ToArray();
 
             var task = Task.WhenAll(tasks);
             try
