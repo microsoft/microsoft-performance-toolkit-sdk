@@ -37,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// <returns>
         ///     The <see cref="AvailablePluginInfo"/> of all versions of the given plugin.
         /// </returns>
-        Task<IReadOnlyCollection<AvailablePluginInfo>> DiscoverAllVersionsOfPlugin(
+        Task<IReadOnlyCollection<AvailablePluginInfo>> DiscoverAllVersionsOfPluginAync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
 
