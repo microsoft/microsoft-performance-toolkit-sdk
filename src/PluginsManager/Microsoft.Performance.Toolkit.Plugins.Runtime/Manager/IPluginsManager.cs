@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <returns>
         ///     A task that completes when all plugin sources have been added.
         /// </returns>
-        Task AddPluginSources(IEnumerable<PluginSource> sources);
+        Task AddPluginSourcesAsync(IEnumerable<PluginSource> sources);
 
         /// <summary>
         ///     Clears all plugin sources in this plugin manager.
