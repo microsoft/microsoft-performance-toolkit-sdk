@@ -122,9 +122,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
         /// <inheritdoc />
-        public void AddPluginSources(IEnumerable<PluginSource> sources)
+        public async Task AddPluginSources(IEnumerable<PluginSource> sources)
         {
-            this.discovererSourcesManager.AddPluginSources(sources);
+            await this.discovererSourcesManager.AddPluginSources(sources);
         }
 
         // TODO: Re-enable when we start to support loading additional resources.
