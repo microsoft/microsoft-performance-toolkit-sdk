@@ -113,7 +113,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <returns>
         ///     A task that completes when all plugin sources have been added.
         /// </returns>
-        public async Task AddPluginSources(IEnumerable<PluginSource> pluginSources)
+        public async Task AddPluginSourcesAsync(IEnumerable<PluginSource> pluginSources)
         {
             Guard.NotNull(pluginSources, nameof(pluginSources));
 
