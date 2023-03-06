@@ -105,12 +105,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         }
 
         /// <summary>
-        ///     Adds a collection of plugin sources to this discoverers manager.
+        ///     Adds a collection of plugin sources to this discoverers manager and creates discoverers for each source.
         /// </summary>
         /// <param name="pluginSources">
         ///     The plugin sources to be added.
         /// </param>
-        public async void AddPluginSources(IEnumerable<PluginSource> pluginSources)
+        /// <returns>
+        ///     A task that completes when all plugin sources have been added.
+        /// </returns>
+        public async Task AddPluginSources(IEnumerable<PluginSource> pluginSources)
         {
             Guard.NotNull(pluginSources, nameof(pluginSources));
 
