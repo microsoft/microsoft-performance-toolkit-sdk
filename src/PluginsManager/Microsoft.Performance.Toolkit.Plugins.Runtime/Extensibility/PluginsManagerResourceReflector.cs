@@ -42,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
                 }
                 catch
                 {
-                    // TODO: Add error handling and logging when re-enable loading additional resources.
+                    // TODO: #271 Add error handling and logging when re-enable loading additional resources.
                 }
             }
         }
