@@ -255,7 +255,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
                     // Combines plugins discovered from the same plugin source but by different discoverers.
                     // If more than one available plugin with the same identity are discovered, the first of them will be returned.
-                    await ProcessDiscoverAllResult(task.Result[i], discoverer, pluginSource, results);
+                    await ProcessDiscoverAllLatestResult(task.Result[i], discoverer, pluginSource, results);
                 }
                 else if (t.IsFaulted)
                 {
@@ -541,7 +541,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             return fetcherToUse;
         }
 
-        private async Task ProcessDiscoverAllResult(
+        private async Task ProcessDiscoverAllLatestResult(
             IReadOnlyDictionary<string, AvailablePluginInfo> discoveryResult,
             IPluginDiscoverer discoverer,
             PluginSource source,
