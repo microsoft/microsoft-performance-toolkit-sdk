@@ -21,15 +21,15 @@ namespace Microsoft.Performance.SDK
         ///     Path to the directory.
         /// </param>
         /// <returns>
-        ///     The combined MD5 hash of all files including the file paths.
+        ///     The combined SHA256 hash of all files including the file paths.
         /// </returns>
         public static async Task<string> GetDirectoryHash(string directory)
         {
             Guard.NotNull(directory, nameof(directory));
             Guard.IsTrue(Directory.Exists(directory), $"Directory {directory} doesn't exist.");
 
-            using (var md5 = MD5.Create())
-            using (var cs = new CryptoStream(Stream.Null, md5, CryptoStreamMode.Write))
+            using (var sha256 = SHA256.Create())
+            using (var cs = new CryptoStream(Stream.Null, sha256, CryptoStreamMode.Write))
             {
                 foreach (string filePath in Directory.EnumerateFiles(directory))
                 {
@@ -45,7 +45,7 @@ namespace Microsoft.Performance.SDK
                 }
 
                 cs.FlushFinalBlock();
-                return BitConverter.ToString(md5.Hash).Replace("-", "").ToLower();
+                return BitConverter.ToString(sha256.Hash).Replace("-", "").ToLower();
             }
         }
     }
