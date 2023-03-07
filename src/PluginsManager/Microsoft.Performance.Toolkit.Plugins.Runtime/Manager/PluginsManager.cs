@@ -127,7 +127,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             await this.discovererSourcesManager.AddPluginSourcesAsync(sources);
         }
 
-        // TODO: Re-enable when we start to support loading additional resources.
+        // TODO: #271 Re-enable when we start to support loading additional resources.
         ///// <inheritdoc />
         //public bool LoadAdditionalPluginResources(string directory)
         //{
