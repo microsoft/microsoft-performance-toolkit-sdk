@@ -224,7 +224,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 return Array.Empty<AvailablePlugin>();
             }
 
-            Task<IReadOnlyDictionary<string, AvailablePluginInfo>>[] tasks = discoverers.Select(d => d.DiscoverPluginsLatestAsync(cancellationToken)).ToArray();
+            Task<IReadOnlyDictionary<string, AvailablePluginInfo>>[] tasks = discoverers
+                .Select(d => d.DiscoverPluginsLatestAsync(cancellationToken))
+                .ToArray();
+
             var task = Task.WhenAll(tasks);
             try
             {
@@ -289,7 +292,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
                 .Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken))
                 .ToArray();
-            
+
             var task = Task.WhenAll(tasks);
             try
             {
