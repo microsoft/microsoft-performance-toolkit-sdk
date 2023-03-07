@@ -40,7 +40,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
                 {
                     this.loadedResources.Add(type, reference);
                 }
-                catch { }
+                catch
+                {
+                    // TODO: Add error handling and logging when re-enable loading additional resources.
+                }
             }
         }
 
