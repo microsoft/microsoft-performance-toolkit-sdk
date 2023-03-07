@@ -3,6 +3,7 @@
 
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
@@ -279,12 +280,41 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         }
 
 
+        [TestMethod]
+        [UnitTest]
+        public async Task GetAvailablePluginsLatestFromSourceAsync_DuplicatesFromMultipleDiscoverers_ErrorRaised()
+        {
+            var fakeDiscoverer1 = new Mock<IPluginDiscoverer>();
+            var fakeDiscoverer2 = new Mock<IPluginDiscoverer>();
+
+            var fakeResults = new Dictionary<string, AvailablePluginInfo>();
+            fakeResults.Add(AvailablePluginInfos.AvailablePluginInfo_Source1_A_v2.Identity.Id,
+                AvailablePluginInfos.AvailablePluginInfo_Source1_A_v2);
+
+            fakeDiscoverer1.Setup(x => x.DiscoverPluginsLatestAsync(It.IsAny<CancellationToken>()).Result)
+                .Returns(fakeResults);
+            fakeDiscoverer2.Setup(x => x.DiscoverPluginsLatestAsync(It.IsAny<CancellationToken>()).Result)
+              .Returns(fakeResults);
+
+            PluginsManager sut = CreateSut(
+                new IPluginDiscovererProvider[] { 
+                    FakeDiscovererProvider.Create(fakeDiscoverer1).Object,
+                    FakeDiscovererProvider.Create(fakeDiscoverer2).Object,
+                },
+                new IPluginFetcher[] { new FakeFetcher_1() });
+
+            await sut.AddPluginSourcesAsync(new PluginSource[] {
+                PluginSources.PluginSource1 });
+
+            IReadOnlyCollection<AvailablePlugin> result = await sut.GetAvailablePluginsLatestFromSourceAsync(
+                PluginSources.PluginSource1,
+                CancellationToken.None);
+
+            Assert.IsTrue(result.Count == 1);
+            Assert.AreEqual(result.Single().AvailablePluginInfo, AvailablePluginInfos.AvailablePluginInfo_Source1_A_v2);
+        }
+
         #endregion
-
-
-
-
-
 
         private PluginsManager CreateSut(
         IEnumerable<IPluginDiscovererProvider>? providers = null,
