@@ -153,9 +153,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 this.logger.Info($"The request to get lastest available plugins is cancelled.");
                 throw;
             }
-            catch
-            {
-            }
 
             // The below code combines plugins discovered from all plugin sources.
             // For each discovered plugin, the latest version across all sources will be returned.
@@ -240,6 +237,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
             catch
             {
+                // Exeptions from each tasks are handled in the loop below.
             }
 
             var results = new Dictionary<string, (AvailablePlugin, IPluginDiscoverer)>();
@@ -288,7 +286,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources.Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken)).ToArray();
+            Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
+                .Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken))
+                .ToArray();
+            
             var task = Task.WhenAll(tasks);
             try
             {
@@ -298,9 +299,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 this.logger.Info($"The request to get all versions of plugin {pluginIdentity} is cancelled.");
                 throw;
-            }
-            catch
-            {
             }
 
             // The below code combines versions of plugin discovered from all plugin sources.
@@ -347,6 +345,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
             catch
             {
+                // Exceptions from each tasks are handled in the loop below.
             }
 
             var results = new Dictionary<PluginIdentity, (AvailablePlugin, IPluginDiscoverer)>();
