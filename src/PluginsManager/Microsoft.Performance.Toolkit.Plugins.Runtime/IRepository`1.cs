@@ -14,7 +14,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     /// <typeparam name="TEntity">
     ///     The type of entity stored in the repository.
     /// </typeparam>
-    public interface IRepository<TEntity>
+    /// <typeparam name="TId">
+    ///     The type of the identifier used to retrieve <typeparamref name="TEntity"/> objects.
+    /// </typeparam>
+    public interface IRepository<TEntity, TId>
     {
         /// <summary>
         ///     Gets all <typeparamref name="TEntity"/> objects in the repository.
@@ -54,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="Id"/> is null.
         /// </exception>
-        Task<TEntity> TryGetByIdAsync(string Id, CancellationToken cancellationToken);
+        Task<TEntity> TryGetByIdAsync(TId Id, CancellationToken cancellationToken);
 
         /// <summary>
         ///     Checks if the given <typeparamref name="TEntity"/> exists in the repository.
