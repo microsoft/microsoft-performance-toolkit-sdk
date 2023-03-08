@@ -31,8 +31,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         private readonly DiscovererSourcesManager discovererSourcesManager;
 
-        private readonly PluginInstaller pluginInstaller;
-        private readonly IPluginRegistry pluginRegistry;
+        private readonly IPluginInstaller pluginInstaller;
 
         private readonly string installationDir;
         private readonly ILogger logger;
@@ -46,8 +45,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="fetchers">
         ///     A collection of fetchers.
         /// </param>
-        /// <param name="pluginRegistry">
-        ///     A plugin registry this plugin manager will interact with.
+        /// <param name="pluginInstaller">
+        ///     A <see cref="IPluginInstaller"/> this plugin manager uses to install/unintall plugins.
         /// </param>
         /// <param name="installationDir">
         ///     The directory where the plugins will be installed to.
@@ -55,9 +54,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginRegistry pluginRegistry,
+            IPluginInstaller pluginInstaller,
             string installationDir)
-            : this(discovererProviders, fetchers, pluginRegistry, installationDir, Logger.Create<PluginsManager>())
+            : this(
+                  discovererProviders,
+                  fetchers,
+                  pluginInstaller,
+                  installationDir,
+                  Logger.Create<PluginsManager>())
         {
         }
 
@@ -70,8 +74,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="fetchers">
         ///     A collection of fetchers.
         /// </param>
-        /// <param name="pluginRegistry">
-        ///     A plugin registry this plugin manager will interact with.
+        /// <param name="pluginInstaller">
+        ///     A <see cref="IPluginInstaller"/> this plugin manager uses to install/unintall plugins.
         /// </param>
         /// <param name="installationDir">
         ///     The directory where the plugins will be installed to.
@@ -82,13 +86,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginRegistry pluginRegistry,
+            IPluginInstaller pluginInstaller,
             string installationDir,
             ILogger logger)
         {
             Guard.NotNull(discovererProviders, nameof(discovererProviders));
             Guard.NotNull(fetchers, nameof(fetchers));
-            Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
+            Guard.NotNull(pluginInstaller, nameof(pluginInstaller));
             Guard.NotNullOrWhiteSpace(installationDir, nameof(installationDir));
             Guard.NotNull(logger, nameof(logger));
 
@@ -97,8 +101,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository);
             this.discovererSourcesManager.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
 
-            this.pluginRegistry = pluginRegistry;
-            this.pluginInstaller = new PluginInstaller(pluginRegistry);
+            this.pluginInstaller = pluginInstaller;
             this.installationDir = installationDir;
             this.logger = logger;
         }
@@ -426,23 +429,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             using (stream)
             {
-                if (PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
-                {
-                    using (pluginPackage)
-                    {
-                        return await this.pluginInstaller.InstallPluginAsync(
-                            pluginPackage,
-                            this.installationDir,
-                            availablePlugin.AvailablePluginInfo.PluginPackageUri,
-                            cancellationToken,
-                            progress);
-                    }
-                }
-                else
-                {
-                    throw new PluginPackageCreationException(
-                       $"Failed to create plugin package from discovered plugin {availablePlugin.AvailablePluginInfo.Identity}");
-                }
+                return await this.pluginInstaller.InstallPluginAsync(
+                    stream,
+                    this.installationDir,
+                    availablePlugin.AvailablePluginInfo.PluginPackageUri,
+                    cancellationToken,
+                    progress);
             }
         }
 
@@ -457,22 +449,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             string packageFullPath = Path.GetFullPath(pluginPackagePath);
             using (var stream = new FileStream(pluginPackagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                if (PluginPackage.TryCreate(stream, out PluginPackage pluginPackage))
-                {
-                    using (pluginPackage)
-                    {
-                        return await this.pluginInstaller.InstallPluginAsync(
-                            pluginPackage,
-                            this.installationDir,
-                            new Uri(packageFullPath),
-                            cancellationToken,
-                            progress);
-                    }
-                }
-                else
-                {
-                    throw new PluginPackageCreationException($"Failed to create plugin package from {packageFullPath}");
-                }
+                return await this.pluginInstaller.InstallPluginAsync(
+                    stream,
+                    this.installationDir,
+                    new Uri(packageFullPath),
+                    cancellationToken,
+                    progress);
             }
         }
 
@@ -489,27 +471,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <inheritdoc />
         public async Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken)
         {
-            if (!Directory.Exists(this.installationDir))
-            {
-                return;
-            }
-
-            using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
-            {
-                IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllInstalledPlugins(cancellationToken);
-                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
-
-                foreach (DirectoryInfo dir in new DirectoryInfo(this.installationDir).GetDirectories())
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if (!registeredInstallDirs.Any(d => d.Equals(Path.GetFullPath(dir.FullName), StringComparison.OrdinalIgnoreCase)))
-                    {
-                        this.logger.Info($"Deleting obsolete plugin files in {dir.FullName}");
-                        dir.Delete(true);
-                    }
-                }
-            }
+            await this.pluginInstaller.CleanupObsoletePluginsAsync(this.installationDir, cancellationToken);
         }
 
         private async Task<IPluginFetcher> TryGetPluginFetcher(AvailablePluginInfo availablePluginInfo)
