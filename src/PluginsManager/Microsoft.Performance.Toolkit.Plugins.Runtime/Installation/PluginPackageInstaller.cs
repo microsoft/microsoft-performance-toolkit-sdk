@@ -77,7 +77,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.pluginMetadataSerializer = metadataSerializer;
             this.logger = logger;
         }
-        
+
         /// <inheritdoc/>
         public async Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken)
