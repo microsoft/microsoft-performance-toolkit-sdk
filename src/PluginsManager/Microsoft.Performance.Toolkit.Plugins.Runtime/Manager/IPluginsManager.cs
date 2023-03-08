@@ -123,10 +123,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <returns>
         ///     A <see cref="InstalledPluginsResults"/> instance containing all valid and invalid installed plugins.
         /// </returns>
-        /// <exception cref="PluginRegistryReadWriteException">
+        /// <exception cref="RepositoryDataAccessException">
         ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        /// <exception cref="PluginRegistryCorruptedException">
+        /// <exception cref="RepositoryCorruptedException">
         ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="OperationCanceledException">
@@ -155,10 +155,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="PluginFetchingException">
         ///     Throws when the plugin package cannot be fetched.
         /// </exception>
-        /// <exception cref="PluginRegistryReadWriteException">
+        /// <exception cref="RepositoryDataAccessException">
         ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        /// <exception cref="PluginRegistryCorruptedException">
+        /// <exception cref="RepositoryCorruptedException">
         ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="PluginPackageCreationException">
@@ -193,10 +193,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="pluginPackagePath"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="PluginRegistryReadWriteException">
+        /// <exception cref="RepositoryDataAccessException">
         ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        /// <exception cref="PluginRegistryCorruptedException">
+        /// <exception cref="RepositoryCorruptedException">
         ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="PluginPackageCreationException">
@@ -228,10 +228,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="installedPlugin"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="PluginRegistryReadWriteException">
+        /// <exception cref="RepositoryDataAccessException">
         ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        /// <exception cref="PluginRegistryCorruptedException">
+        /// <exception cref="RepositoryCorruptedException">
         ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="OperationCanceledException">
@@ -251,10 +251,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <returns>
         ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
         /// </returns>
-        /// <exception cref="PluginRegistryReadWriteException">
+        /// <exception cref="RepositoryDataAccessException">
         ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        /// <exception cref="PluginRegistryCorruptedException">
+        /// <exception cref="RepositoryCorruptedException">
         ///     Throws when the plugin registry is in an invalid state.
         /// </exception>
         /// <exception cref="OperationCanceledException">
