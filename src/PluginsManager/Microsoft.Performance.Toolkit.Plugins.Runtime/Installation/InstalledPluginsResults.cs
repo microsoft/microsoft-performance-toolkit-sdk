@@ -7,10 +7,13 @@ using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
+    /// <summary>
+    ///     Results of the reading all installed plugins operations.
+    /// </summary>
     public sealed class InstalledPluginsResults
     {
         /// <summary>
-        ///     Results of the reading all installed plugins operations.
+        ///     Initializes a new instance of the <see cref="InstalledPluginsResults"/> class.
         /// </summary>
         /// <param name="validPlugins">
         ///     The plugins that were successfully read.
