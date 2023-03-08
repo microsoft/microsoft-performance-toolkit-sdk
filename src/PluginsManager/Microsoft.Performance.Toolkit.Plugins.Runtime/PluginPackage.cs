@@ -36,24 +36,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
         /// </param>
-        /// <param name="package">
-        ///     The created <see cref="PluginPackage"/> instance.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the <see cref="PluginPackage"/> was created successfully. <c>false</c> otherwise.
-        /// </returns>
-        public static bool TryCreate(
-            Stream stream,
-            out PluginPackage package)
-        {
-            return TryCreate(stream, false, out package);
-        }
-
-        /// <summary>
-        ///     Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
-        /// </summary>
-        /// <param name="stream">
-        ///     Stream for reading the plugin package file.
+        /// <param name="metadataSerializer">
+        ///     Used to deserialize the plugin metadata.
         /// </param>
         /// <param name="leaveOpen">
         ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
@@ -66,10 +50,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </returns>
         public static bool TryCreate(
             Stream stream,
+            ISerializer<PluginMetadata> metadataSerializer,
             bool leaveOpen,
             out PluginPackage package)
         {
-            return TryCreate(stream, leaveOpen, Logger.Create<PluginPackage>(), out package);
+            return TryCreate(stream, metadataSerializer, leaveOpen, Logger.Create<PluginPackage>(), out package);
         }
 
         /// <summary>
@@ -77,6 +62,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </summary>
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
+        /// </param>
+        /// <param name="metadataSerializer">
+        ///     Used to deserialize the plugin metadata.
         /// </param>
         /// <param name="leaveOpen">
         ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
@@ -93,13 +81,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </returns>
         public static bool TryCreate(
             Stream stream,
-            bool leaveOpen,
+            ISerializer<PluginMetadata> metadataSerializer,
+            bool leaveOpen,     
             ILogger logger,
             out PluginPackage package)
         {
             try
             {
-                package = new PluginPackage(stream, leaveOpen, logger);
+                package = new PluginPackage(stream, metadataSerializer, leaveOpen, logger);
                 return true;
             }
             catch (Exception e)
@@ -133,6 +122,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
         /// </param>
+        /// <param name="metadataSerializer">
+        ///     Used to deserialize the plugin metadata.
+        /// </param>
         /// <param name="leaveOpen">
         ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
         ///     <c>false</c> otherwise.
@@ -142,6 +134,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </param>
         private PluginPackage(
             Stream stream,
+            ISerializer<PluginMetadata> metadataSerializer,
             bool leaveOpen,
             ILogger logger)
         {
@@ -150,7 +143,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.logger = logger;
             this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
             this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
-            this.PluginMetadata = ReadMetadata();
+            this.PluginMetadata = ReadMetadata(metadataSerializer);
         }
 
         /// <summary>
@@ -358,7 +351,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
         }
 
-        private PluginMetadata ReadMetadata()
+        private PluginMetadata ReadMetadata(ISerializer<PluginMetadata> serializer)
         {
             ZipArchiveEntry entry = this.zip.GetEntry(pluginMetadataFileName);
             if (entry == null)
@@ -368,10 +361,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             using (Stream stream = entry.Open())
             {
-                PluginMetadata pluginMetadata = JsonSerializer.Deserialize<PluginMetadata>(
-                    stream,
-                    SerializationConfig.PluginsManagerSerializerDefaultOptions);
-
+                PluginMetadata pluginMetadata = serializer.Deserialize(stream);
                 return pluginMetadata;
             }
         }

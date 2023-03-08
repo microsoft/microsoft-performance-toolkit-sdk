@@ -3,11 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
