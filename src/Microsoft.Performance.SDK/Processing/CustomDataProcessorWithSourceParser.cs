@@ -45,8 +45,9 @@ namespace Microsoft.Performance.SDK.Processing
 
             this.SourceParser = sourceParser;
 
+            var sourceSessionFactory = applicationEnvironment.SourceSessionFactory;
             this.sourceProcessingSession = new Lazy<ISourceProcessingSession<T, TContext, TKey>>(
-                () => this.ApplicationEnvironment.SourceSessionFactory.CreateSourceSession(this),
+                () => sourceSessionFactory.CreateSourceSession(this),
                 LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
