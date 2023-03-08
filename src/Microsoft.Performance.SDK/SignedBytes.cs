@@ -17,7 +17,8 @@ namespace Microsoft.Performance.SDK
           IEquatable<SignedBytes>,
           IComparable,
           IPlottableGraphType,
-          IConvertible
+          IConvertible,
+          IFormattable
     {
         private long bytes;
 
@@ -258,6 +259,24 @@ namespace Microsoft.Performance.SDK
         public override int GetHashCode()
         {
             return this.bytes.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.ToString(null, null);
+        }
+
+        /// <inheritdoc />
+        public string ToString(string format)
+        {
+            return this.ToString(format, null);
+        }
+        
+        /// <inheritdoc />
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            return SignedBytesFormatProvider.Singleton.Format(format, this.bytes, formatProvider);
         }
 
         /// <summary>
