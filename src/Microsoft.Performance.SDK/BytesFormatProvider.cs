@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK
 
             Decimal divisor;
             int fractionDigits;
-            switch (format)
+            switch (format ?? "B")
             {
                 case "B":
                     divisor = 1;

@@ -18,7 +18,8 @@ namespace Microsoft.Performance.SDK
           IComparable,
           IPlottableGraphType,
           IConvertible,
-          IDiffConvertible<LargeSignedBytes>
+          IDiffConvertible<LargeSignedBytes>,
+          IFormattable
     {
         private readonly ulong bytes;
 
@@ -259,6 +260,24 @@ namespace Microsoft.Performance.SDK
         public override int GetHashCode()
         {
             return this.bytes.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.ToString(null, null);
+        }
+
+        /// <inheritdoc />
+        public string ToString(string format)
+        {
+            return this.ToString(format, null);
+        }
+        
+        /// <inheritdoc />
+        public string ToString(string format, IFormatProvider formatProvider)
+        {
+            return BytesFormatProvider.Singleton.Format(format, this.bytes, formatProvider);
         }
 
         /// <summary>
