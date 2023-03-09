@@ -6,8 +6,9 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.SDK
+namespace Microsoft.Performance.Toolkit.Plugins.Core
 {
     /// <summary>
     ///     Provides static methods for calculating hash.
