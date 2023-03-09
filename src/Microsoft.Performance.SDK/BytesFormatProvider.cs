@@ -96,7 +96,7 @@ namespace Microsoft.Performance.SDK
             {
                 //bytes = (arg is Int64Abs) ?
                 //((Int64Abs)arg).Value :
-                bytes = Convert.ToDecimal(arg, CultureInfo.InvariantCulture) / divisor;
+                bytes = Convert.ToDecimal(arg, formatProvider ?? CultureInfo.InvariantCulture) / divisor;
             }            
 
             return bytes.ToString(
