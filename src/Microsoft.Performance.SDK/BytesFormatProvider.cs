@@ -78,11 +78,11 @@ namespace Microsoft.Performance.SDK
             Decimal bytes;
             if (arg is Bytes)
             {
-                bytes = Convert.ToDecimal(((Bytes)arg).TotalBytes, CultureInfo.InvariantCulture) / divisor;
+                bytes = Convert.ToDecimal(((Bytes)arg).TotalBytes) / divisor;
             }
             else if(arg is SignedBytes)
             {
-                bytes = Convert.ToDecimal(((SignedBytes)arg).TotalBytes, CultureInfo.InvariantCulture) / divisor;
+                bytes = Convert.ToDecimal(((SignedBytes)arg).TotalBytes) / divisor;
             }
             else if(arg is LargeSignedBytes)
             {
@@ -96,12 +96,12 @@ namespace Microsoft.Performance.SDK
             {
                 //bytes = (arg is Int64Abs) ?
                 //((Int64Abs)arg).Value :
-                bytes = Convert.ToDecimal(arg, CultureInfo.InvariantCulture) / divisor;
+                bytes = Convert.ToDecimal(arg, formatProvider ?? CultureInfo.InvariantCulture) / divisor;
             }            
 
             return bytes.ToString(
                 "N" + fractionDigits,
-                CultureInfo.CurrentCulture);
+                formatProvider ?? CultureInfo.CurrentCulture);
         }
     }
 
