@@ -3,10 +3,10 @@
 
 using System;
 using System.Reflection;
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
-namespace Microsoft.Performance.SDK.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
 {
     /// <summary>
     ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> 
@@ -90,7 +90,7 @@ namespace Microsoft.Performance.SDK.Runtime
             reference = null;
             if (IsValidType(candidateType))
             {
-                if (candidateType.TryGetEmptyPublicConstructor(out ConstructorInfo constructor))
+                if (TryGetEmptyPublicConstructor(candidateType, out ConstructorInfo constructor))
                 {
                     PluginsManagerResourceAttribute metadataAttribute = candidateType.GetCustomAttribute<PluginsManagerResourceAttribute>();
                     if (metadataAttribute != null)
@@ -137,6 +137,18 @@ namespace Microsoft.Performance.SDK.Runtime
         public override int GetHashCode()
         {
             return this.Guid.GetHashCode();
+        }
+
+        private static bool TryGetEmptyPublicConstructor(Type type, out ConstructorInfo constructor)
+        {
+            constructor = type.GetConstructor(Type.EmptyTypes);
+            if (constructor != null && constructor.IsPublic)
+            {
+                return true;
+            }
+
+            constructor = null;
+            return false;
         }
     }
 }
