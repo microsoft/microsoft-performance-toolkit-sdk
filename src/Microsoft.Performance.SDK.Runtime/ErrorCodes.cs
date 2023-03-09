@@ -213,26 +213,6 @@ namespace Microsoft.Performance.SDK.Runtime
             "A requested dependency on an unknown data extension type is not supported.");
 
         //
-        // Plugins Manager Errors
-        //
-
-        /// <summary>
-        ///    An error occurred when interacting with a plugin source.
-        /// </summary>
-        public static ErrorCodes PLUGINS_MANAGER_PluginSourceException = new ErrorCodes(
-            50001,
-            "PLUGINS_MANAGER_PluginSourceException",
-            "An error occurred when interacting with a plugin source.");
-
-        /// <summary>
-        ///     No available plugin manager resource was found to perform requests against the plugin source.
-        /// </summary>
-        public static ErrorCodes PLUGINS_MANAGER_PluginsManagerResourceNotFound = new ErrorCodes(
-            50002,
-            "PLUGINS_MANAGER_PluginsManagerResourceNotFound",
-            "No available plugin manager resource was found to perform requests against the plugin source.");
-
-        //
         // Unexpected errors
         //
 

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
