@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
