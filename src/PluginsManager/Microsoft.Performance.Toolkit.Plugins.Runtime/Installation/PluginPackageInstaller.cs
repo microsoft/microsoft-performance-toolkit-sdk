@@ -78,7 +78,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             : this(
                 pluginRegistry,
                 new DataReaderFromFileAndStream<PluginMetadata>(SerializationUtils.JsonSerializerWithDefaultOptions),
-                new Common.DirectoryAccessor(),
+                new DirectoryAccessor(),
                 new SHA256DiretoryChecksumProvider(),
                 Logger.Create<PluginPackageInstaller>())
         {
