@@ -13,7 +13,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
@@ -27,6 +27,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly ZipArchive zip;
         private static readonly string pluginContentPath = "plugin/";
         private static readonly string pluginMetadataFileName = "pluginspec.json";
+
+        private readonly IStreamCopier<FileInfo> fileDropper;
         private bool disposedValue;
         private readonly ILogger logger;
 
@@ -50,11 +52,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </returns>
         public static bool TryCreate(
             Stream stream,
-            ISerializer<PluginMetadata> metadataSerializer,
+            IDataReader<Stream, PluginMetadata> metadataReader,
+            IStreamCopier<FileInfo> fileDropper,
             bool leaveOpen,
             out PluginPackage package)
         {
-            return TryCreate(stream, metadataSerializer, leaveOpen, Logger.Create<PluginPackage>(), out package);
+            return TryCreate(stream, metadataReader, fileDropper, leaveOpen, Logger.Create<PluginPackage>(), out package);
         }
 
         /// <summary>
@@ -81,14 +84,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </returns>
         public static bool TryCreate(
             Stream stream,
-            ISerializer<PluginMetadata> metadataSerializer,
+            IDataReader<Stream, PluginMetadata> metadataReader,
+            IStreamCopier<FileInfo> directoryAccessor,
             bool leaveOpen,     
             ILogger logger,
             out PluginPackage package)
         {
             try
             {
-                package = new PluginPackage(stream, metadataSerializer, leaveOpen, logger);
+                package = new PluginPackage(stream, metadataReader, directoryAccessor, leaveOpen, logger);
                 return true;
             }
             catch (Exception e)
@@ -134,7 +138,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </param>
         private PluginPackage(
             Stream stream,
-            ISerializer<PluginMetadata> metadataSerializer,
+            IDataReader<Stream, PluginMetadata> metadataReader,
+            IStreamCopier<FileInfo> fileDropper,
             bool leaveOpen,
             ILogger logger)
         {
@@ -143,9 +148,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.logger = logger;
             this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
             this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
-            this.PluginMetadata = ReadMetadata(metadataSerializer);
+            this.PluginMetadata = ReadMetadata(metadataReader);
+            this.fileDropper = fileDropper;
         }
-
+        
         /// <summary>
         ///     Gets the relative file path to plugin content.
         /// </summary>
@@ -291,7 +297,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             return $"{this.Id} - {this.Version}";
         }
 
-        private static async Task ExtractEntriesInternalAsync(
+        private async Task ExtractEntriesInternalAsync(
            IEnumerable<PluginPackageEntry> entries,
            string extractPath,
            ILogger logger,
@@ -299,9 +305,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
            IProgress<int> progress)
         {
             Guard.NotNull(extractPath, nameof(extractPath));
-
-            const int bufferSize = 4096;
-            const int defaultAsyncBufferSize = 81920;
 
             extractPath = Path.GetFullPath(extractPath);
             if (!extractPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
@@ -317,29 +320,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     cancellationToken.ThrowIfCancellationRequested();
 
                     string destPath = Path.GetFullPath(Path.Combine(extractPath, entry.RelativePath));
-                    if (entry.IsDirectory)
-                    {
-                        Directory.CreateDirectory(destPath);
-                    }
-                    else
-                    {
-                        string destDir = Path.GetDirectoryName(destPath);
-                        if (!string.IsNullOrEmpty(destDir))
-                        {
-                            Directory.CreateDirectory(destDir);
-                        }
+                    string destDir =  entry.IsDirectory ? destPath : Path.GetDirectoryName(destPath);
 
-                        using (Stream entryStream = entry.Open())
-                        using (var destStream = new FileStream(
-                            destPath,
-                            FileMode.Create,
-                            FileAccess.Write,
-                            FileShare.None,
-                            bufferSize,
-                            FileOptions.Asynchronous | FileOptions.SequentialScan))
-                        {
-                            await entryStream.CopyToAsync(destStream, defaultAsyncBufferSize, cancellationToken).ConfigureAwait(false);
-                        }
+                    using (Stream entryStream = entry.Open())
+                    {
+                        await this.fileDropper.CopyStreamAsync(
+                            new FileInfo(destPath),
+                            entryStream,
+                            cancellationToken);
                     }
                 }
             }
@@ -351,7 +339,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
         }
 
-        private PluginMetadata ReadMetadata(ISerializer<PluginMetadata> serializer)
+        private PluginMetadata ReadMetadata(IDataReader<Stream, PluginMetadata> metadataReader)
         {
             ZipArchiveEntry entry = this.zip.GetEntry(pluginMetadataFileName);
             if (entry == null)
@@ -361,7 +349,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             using (Stream stream = entry.Open())
             {
-                PluginMetadata pluginMetadata = serializer.Deserialize(stream);
+                PluginMetadata pluginMetadata = metadataReader.ReadData(stream);
                 return pluginMetadata;
             }
         }

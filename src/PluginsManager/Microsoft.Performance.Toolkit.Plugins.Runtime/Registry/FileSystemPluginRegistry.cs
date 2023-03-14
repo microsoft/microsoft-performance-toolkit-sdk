@@ -13,6 +13,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
@@ -22,14 +23,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     ///     and provides an ephemeral lock file that can be used to synchronize access to the registry.
     /// </summary>
     public sealed class FileSystemPluginRegistry
-        : IPluginRegistry
+        : IPluginRegistry<DirectoryInfo>
     {
         private static readonly string registryFileName = "installedPlugins.json";
         private static readonly string lockFileName = ".lockRegistry";
-        private readonly string registryFilePath;
+        private readonly FileInfo registryFileInfo;
         private readonly FileDistributedLock fileDistributedLock;
 
-        private readonly ISerializer<List<InstalledPluginInfo>> registryFileSerializer;
+        private readonly IDataReadWriteAsync<FileInfo, List<InstalledPluginInfo>> registryFileAccessor;
         private readonly ILogger logger;
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The root directory of the registry.
         /// </param>
         public FileSystemPluginRegistry(string registryRoot)
-            : this(registryRoot, SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>())
+            : this(registryRoot, new FileReadWriteAsync<List<InstalledPluginInfo>>(SerializationUtils.JsonSerializerWithDefaultOptions))
         {
         }
 
@@ -54,8 +55,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </param>
         public FileSystemPluginRegistry(
             string registryRoot,
-            ISerializer<List<InstalledPluginInfo>> serializer)
-            : this(registryRoot, serializer, Logger.Create(typeof(FileSystemPluginRegistry)))
+            IDataReadWriteAsync<FileInfo, List<InstalledPluginInfo>> fileProcessor)
+            : this(registryRoot, fileProcessor, Logger.Create(typeof(FileSystemPluginRegistry)))
         {
         }
 
@@ -76,7 +77,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </exception>  
         public FileSystemPluginRegistry(
             string registryRoot,
-            ISerializer<List<InstalledPluginInfo>> serializer, 
+            IDataReadWriteAsync<FileInfo, List<InstalledPluginInfo>> fileAccessor, 
             ILogger logger)
         {
             Guard.NotNull(registryRoot, nameof(registryRoot));
@@ -88,9 +89,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
 
             // TODO: #256 Create a backup registry
-            this.RegistryRoot = registryRoot;
-            this.registryFilePath = Path.Combine(registryRoot, registryFileName);
-            this.registryFileSerializer = serializer;
+            this.RegistryRoot = new DirectoryInfo(registryRoot);
+            this.registryFileInfo = new FileInfo(Path.Combine(this.RegistryRoot.FullName, registryFileName));
+            this.registryFileAccessor = fileAccessor;
             this.logger = logger;
 
             string lockFilePath = Path.Combine(registryRoot, lockFileName);
@@ -98,7 +99,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         /// <inheritdoc/>
-        public string RegistryRoot { get; }
+        public DirectoryInfo RegistryRoot { get; }
 
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<InstalledPluginInfo>> GetAllAsync(CancellationToken cancellationToken)
@@ -216,19 +217,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private async Task<List<InstalledPluginInfo>> ReadInstalledPlugins(
             CancellationToken cancellationToken)
         {
-            if (!File.Exists(this.registryFilePath))
+            if (!this.registryFileAccessor.CanReadData(this.registryFileInfo))
             {
                 return new List<InstalledPluginInfo>();
             }
 
             try
             {
-                using (var fileStream = new FileStream(this.registryFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    return await this.registryFileSerializer.DeserializeAsync(
-                        fileStream,
-                        cancellationToken);
-                }
+                return await this.registryFileAccessor.ReadDataAsync(this.registryFileInfo, cancellationToken);
             }
             catch (Exception e)
             {
@@ -239,7 +235,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 }
                 else if (e is IOException)
                 {
-                    errorMsg = $"Failed to read the plugin registry file at {this.registryFilePath}.";
+                    errorMsg = $"Failed to read the plugin registry file at {this.registryFileInfo}.";
                 }
 
                 if (errorMsg != null)
@@ -258,21 +254,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(installedPlugins, nameof(installedPlugins));
 
-            Directory.CreateDirectory(this.RegistryRoot);
+            this.RegistryRoot.Create();
 
             try
             {
-                using (var fileStream = new FileStream(this.registryFilePath, FileMode.Create, FileAccess.Write))
-                {
-                    await this.registryFileSerializer.SerializeAsync(
-                        fileStream,
-                        installedPlugins,
-                        cancellationToken);
-                }
+                await this.registryFileAccessor.WriteDataAsync(this.registryFileInfo, installedPlugins, cancellationToken);
             }
             catch (IOException e)
             {
-                string errorMsg = $"Failed to write to plugin registry file at {this.registryFilePath}.";
+                string errorMsg = $"Failed to write to plugin registry file at {this.registryFileInfo}.";
                 this.logger.Error(e, errorMsg);
                 throw new RepositoryDataAccessException(errorMsg, e);
             }
@@ -313,12 +303,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private RepositoryCorruptedException CreateDuplicatedRegisteredException(string pluginId)
         {
             return new RepositoryCorruptedException(
-                $"Duplicated records of plugin {pluginId} found in the plugin registry {this.registryFilePath}.");
+                $"Duplicated records of plugin {pluginId} found in the plugin registry {this.registryFileInfo}.");
         }
 
         private void LogDuplicatedRegistered(string pluginId)
         {
-            this.logger.Error($"Duplicated records of plugin {pluginId} found in the plugin registry {this.registryFilePath}");
+            this.logger.Error($"Duplicated records of plugin {pluginId} found in the plugin registry {this.registryFileInfo}");
         }
     }
 }

@@ -31,9 +31,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         private readonly DiscovererSourcesManager discovererSourcesManager;
 
-        private readonly IPluginInstaller pluginInstaller;
+        private readonly IPluginInstaller<DirectoryInfo> pluginInstaller;
+        private readonly IPluginStreamLoader<FileInfo> localPluginLoader;
 
-        private readonly string installationDir;
+        private readonly DirectoryInfo installationDir;
         private readonly ILogger logger;
 
         /// <summary>
@@ -54,12 +55,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginInstaller pluginInstaller,
+            IPluginInstaller<DirectoryInfo> pluginInstaller,
+            IPluginStreamLoader<FileInfo> localPluginLoader,
             string installationDir)
             : this(
                   discovererProviders,
                   fetchers,
                   pluginInstaller,
+                  localPluginLoader,
                   installationDir,
                   Logger.Create<PluginsManager>())
         {
@@ -86,7 +89,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginInstaller pluginInstaller,
+            IPluginInstaller<DirectoryInfo> pluginInstaller,
+            IPluginStreamLoader<FileInfo> localPluginLoader,
             string installationDir,
             ILogger logger)
         {
@@ -102,7 +106,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.discovererSourcesManager.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
 
             this.pluginInstaller = pluginInstaller;
-            this.installationDir = installationDir;
+            this.installationDir = new DirectoryInfo(installationDir);
+            this.localPluginLoader = localPluginLoader;
             this.logger = logger;
         }
 
@@ -447,7 +452,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
 
             string packageFullPath = Path.GetFullPath(pluginPackagePath);
-            using (var stream = new FileStream(pluginPackagePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            var fileInfo = new FileInfo(pluginPackagePath);
+
+            if (!await this.localPluginLoader.IsSupportedAsync(fileInfo))
+            {
+                throw new PluginLocalLoadingException(
+                    $"The plugin package {pluginPackagePath} is not supported by the local plugin loader.");
+            }
+
+            using (Stream stream = await this.localPluginLoader.GetPluginStreamAsync(fileInfo, cancellationToken, progress))
             {
                 return await this.pluginInstaller.InstallPluginAsync(
                     stream,
@@ -567,7 +580,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 }
             }
         }
-
 
         private void HandleResourceNotFoundError(PluginSource pluginSource, string errorMsg)
         {
