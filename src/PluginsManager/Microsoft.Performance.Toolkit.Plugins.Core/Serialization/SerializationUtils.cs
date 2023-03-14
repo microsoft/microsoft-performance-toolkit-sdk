@@ -13,11 +13,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
     public static class SerializationUtils
     {
         /// <summary>
-        ///     Creates a <see cref="ISerializer"/> that uses the default serialization options for the PluginsManager.
+        ///     A default <see cref="ISerializer"/> that uses the default serialization options for the PluginsManager.
         /// </summary>
-        /// <returns>
-        ///     A <see cref="ISerializer"/> that uses the default serialization options for the PluginsManager.
-        /// </returns>
         public static ISerializer JsonSerializerWithDefaultOptions = new TextJsonSerializer(PluginsManagerSerializerDefaultOptions);
 
         /// <summary>
@@ -29,13 +26,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         /// <returns>
         ///     A <see cref="ISerializer"/> that uses the specified serialization options.
         /// </returns>
-        public static ISerializer GetJsonSerializer(JsonSerializerOptions serializerOptions)
+        public static ISerializer GetJsonSerializerWithOptions(JsonSerializerOptions serializerOptions)
         {
             return new TextJsonSerializer(serializerOptions);
         }
 
         /// <summary>
-        ///     Gets the default serialization options for the PluginsManager.
+        ///     The default serialization options for the PluginsManager.
         /// </summary>
         public static readonly JsonSerializerOptions PluginsManagerSerializerDefaultOptions = new JsonSerializerOptions
         {

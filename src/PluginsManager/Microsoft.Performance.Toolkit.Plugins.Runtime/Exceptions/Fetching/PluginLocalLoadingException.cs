@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions
 {

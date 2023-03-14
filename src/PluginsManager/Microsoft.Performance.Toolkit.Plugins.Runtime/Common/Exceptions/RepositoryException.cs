@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common.Exceptions
 {
     /// <summary>
     ///     Base class for all exceptions that occur while interacting with a <see cref="IRepository{TEntity}"/>.

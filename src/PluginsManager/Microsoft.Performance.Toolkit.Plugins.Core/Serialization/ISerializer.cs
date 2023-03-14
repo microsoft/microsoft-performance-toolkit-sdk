@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
 {
     /// <summary>
-    ///     Represents a serializer that can serialize and deserialize objects of type <typeparamref name="T"/>.
+    ///     Represents a serializer that can serialize and deserialize objects.
     /// </summary>
-    /// <typeparam name="T">
-    ///     The type of object that can be serialized and deserialized.
-    /// </typeparam>
     public interface ISerializer
     {
         /// <summary>

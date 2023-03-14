@@ -14,6 +14,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
@@ -22,9 +23,12 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
-    /// <inheritdoc />
-    public sealed class PluginsManager
-        : IPluginsManager
+    /// <summary>
+    ///     Supports discovering and fetching plugins from remote sources and local file system,
+    ///     and installing/uninstalling plugins to the local file system.
+    /// </summary>
+    public sealed class FileSystemPluginsManager
+        : IPluginsManager<FileInfo>
     {
         private readonly PluginsManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
         private readonly PluginsManagerResourceRepository<IPluginFetcher> fetcherRepository;
@@ -32,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         private readonly DiscovererSourcesManager discovererSourcesManager;
 
         private readonly IPluginInstaller<DirectoryInfo> pluginInstaller;
-        private readonly IPluginStreamLoader<FileInfo> localPluginLoader;
+        private readonly IStreamLoader<FileInfo> localPluginLoader;
 
         private readonly DirectoryInfo installationDir;
         private readonly ILogger logger;
@@ -52,11 +56,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="installationDir">
         ///     The directory where the plugins will be installed to.
         /// </param>
-        public PluginsManager(
+        public FileSystemPluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
             IPluginInstaller<DirectoryInfo> pluginInstaller,
-            IPluginStreamLoader<FileInfo> localPluginLoader,
+            IStreamLoader<FileInfo> localPluginLoader,
             string installationDir)
             : this(
                   discovererProviders,
@@ -64,7 +68,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                   pluginInstaller,
                   localPluginLoader,
                   installationDir,
-                  Logger.Create<PluginsManager>())
+                  Logger.Create<FileSystemPluginsManager>())
         {
         }
 
@@ -86,11 +90,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="logger">
         ///     A logger used to log messages.
         /// </param>
-        public PluginsManager(
+        public FileSystemPluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
             IPluginInstaller<DirectoryInfo> pluginInstaller,
-            IPluginStreamLoader<FileInfo> localPluginLoader,
+            IStreamLoader<FileInfo> localPluginLoader,
             string installationDir,
             ILogger logger)
         {
@@ -445,27 +449,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         /// <inheritdoc />
         public async Task<InstalledPluginInfo> TryInstallLocalPluginAsync(
-            string pluginPackagePath,
+            FileInfo pluginPackageFileInfo,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            Guard.NotNull(pluginPackagePath, nameof(pluginPackagePath));
+            Guard.NotNull(pluginPackageFileInfo, nameof(pluginPackageFileInfo));
 
-            string packageFullPath = Path.GetFullPath(pluginPackagePath);
-            var fileInfo = new FileInfo(pluginPackagePath);
-
-            if (!await this.localPluginLoader.IsSupportedAsync(fileInfo))
+            if (!this.localPluginLoader.CanReadData(pluginPackageFileInfo))
             {
-                throw new PluginLocalLoadingException(
-                    $"The plugin package {pluginPackagePath} is not supported by the local plugin loader.");
+                throw new PluginLocalLoadingException($"Unable to read from {pluginPackageFileInfo.FullName}.");
             }
 
-            using (Stream stream = await this.localPluginLoader.GetPluginStreamAsync(fileInfo, cancellationToken, progress))
+            using (Stream stream = this.localPluginLoader.ReadData(pluginPackageFileInfo))
             {
                 return await this.pluginInstaller.InstallPluginAsync(
                     stream,
                     this.installationDir,
-                    new Uri(packageFullPath),
+                    new Uri(pluginPackageFileInfo.FullName),
                     cancellationToken,
                     progress);
             }

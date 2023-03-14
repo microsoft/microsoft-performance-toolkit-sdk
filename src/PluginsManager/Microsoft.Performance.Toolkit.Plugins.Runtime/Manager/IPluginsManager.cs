@@ -14,9 +14,13 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
     /// <summary>
-    ///     Contains logic for discovering, installing, uninstalling and updating plugins.
+    ///     Contains logic for discovering, installing, uninstalling and updating plugin.
     /// </summary>
-    public interface IPluginsManager
+    /// <typeparam name="TLocalPluginLocator">
+    ///     The type of the local plugin locator used by this plugins manager to install local plugins.
+    ///     e.g. A plugins manager that installs a plugin package stored on the file system will use <see cref="System.IO.FileInfo"/>.
+    /// </typeparam>
+    public interface IPluginsManager<TLocalPluginLocator>
     {
         /// <summary>
         ///     Gets all plugin sources managed by this plugins manager.
@@ -178,8 +182,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <summary>
         ///     Installs a local plugin package.
         /// </summary>
-        /// <param name="pluginPackagePath">
-        ///     The path to the plugin package to be installed.
+        /// <param name="localPluginLocator">
+        ///     An object that locates an local plugin package.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
@@ -191,7 +195,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     The <see cref="InstalledPluginInfo"/> if plugin is successfully installed.. <c>null</c> otherwise.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="pluginPackagePath"/> is <c>null</c>.
+        ///     Throws when <paramref name="localPluginLocator"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="PluginLocalLoadingException">
+        ///     Throws when the plugin package cannot be loaded locally.
         /// </exception>
         /// <exception cref="RepositoryDataAccessException">
         ///     Throws when there is an error reading or writing to plugin registry.
@@ -209,7 +216,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Throws when the operation was canceled.
         /// </exception>
         Task<InstalledPluginInfo> TryInstallLocalPluginAsync(
-           string pluginPackagePath,
+           TLocalPluginLocator localPluginLocator,
            CancellationToken cancellationToken,
            IProgress<int> progress);
 

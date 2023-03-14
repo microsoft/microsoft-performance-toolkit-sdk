@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common.Exceptions
 {
     /// <summary>
     ///     An exception that is thrown when the repository is in an invalid state.
