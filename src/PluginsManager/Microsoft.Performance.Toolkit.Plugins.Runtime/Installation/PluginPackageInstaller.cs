@@ -292,7 +292,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllAsync(cancellationToken);
                 IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
 
-                IEnumerable<DirectoryInfo> deletedDirs = this.directoryAccessor.CleanData(
+                IEnumerable<DirectoryInfo> deletedDirs = this.directoryAccessor.CleanDataAt(
                     installationDir,
                     dir => registeredInstallDirs.Any(d => d.Equals(dir.FullName, StringComparison.OrdinalIgnoreCase)),
                     cancellationToken);

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,18 +30,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         {
         }
 
-        public IEnumerable<DirectoryInfo> CleanData(DirectoryInfo targetDir, Func<DirectoryInfo, bool> subdirFilter = null, CancellationToken cancellationToken = default)
+        public IEnumerable<DirectoryInfo> CleanDataAt(
+            DirectoryInfo targetDir,
+            Func<DirectoryInfo, bool> subdirFilter,
+            CancellationToken cancellationToken = default)
         {
             if (!targetDir.Exists)
             {
                 return Enumerable.Empty<DirectoryInfo>();
-            }
-
-            if (subdirFilter == null)
-            {
-                this.logger.Info($"Deleting files in {targetDir.FullName}");
-                targetDir.Delete(true);
-                return new[] { targetDir };
             }
 
             var deletedDirs = new List<DirectoryInfo>();
@@ -55,6 +54,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
             }
 
             return deletedDirs;
+        }
+
+        public void CleanData(DirectoryInfo entity)
+        {
+            if (entity.Exists)
+            {
+                entity.Delete(true);
+            }
         }
 
         public Task CopyStreamAsync(FileInfo destFile, Stream stream, CancellationToken cancellationToken)

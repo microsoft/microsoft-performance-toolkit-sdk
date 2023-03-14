@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
 {
     /// <summary>
-    ///    Serializes and deserializes json objects using <see cref="JsonSerializer"/>.
+    ///    Serializes and deserializes Json objects using <see cref="JsonSerializer"/>.
     /// </summary>
     public sealed class TextJsonSerializer
         : ISerializer
