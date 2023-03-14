@@ -13,36 +13,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
     public static class SerializationUtils
     {
         /// <summary>
-        ///     Creates a <see cref="ISerializer{T}"/> that uses the default serialization options for the PluginsManager.
+        ///     Creates a <see cref="ISerializer"/> that uses the default serialization options for the PluginsManager.
         /// </summary>
-        /// <typeparam name="T">
-        ///     The type of object to serialize.
-        /// </typeparam>
         /// <returns>
-        ///     A <see cref="ISerializer{T}"/> that uses the default serialization options for the PluginsManager.
+        ///     A <see cref="ISerializer"/> that uses the default serialization options for the PluginsManager.
         /// </returns>
-        public static ISerializer<T> GetJsonSerializerWithDefaultOptions<T>()
-            where T : class
-        {
-            return new JsonSerializer<T>(PluginsManagerSerializerDefaultOptions);
-        }
+        public static ISerializer JsonSerializerWithDefaultOptions = new TextJsonSerializer(PluginsManagerSerializerDefaultOptions);
 
         /// <summary>
-        ///     Creates a <see cref="ISerializer{T}"/> that uses the specified serialization options.
+        ///     Creates a <see cref="ISerializer" /> that uses the specified serialization options.
         /// </summary>
-        /// <typeparam name="T">
-        ///     The type of object to serialize.
-        /// </typeparam>
         /// <param name="serializerOptions">
         ///     The serialization options to use.
         /// </param>
         /// <returns>
-        ///     A <see cref="ISerializer{T}"/> that uses the specified serialization options.
+        ///     A <see cref="ISerializer"/> that uses the specified serialization options.
         /// </returns>
-        public static ISerializer<T> GetJsonSerializer<T>(JsonSerializerOptions serializerOptions)
-            where T : class
+        public static ISerializer GetJsonSerializer(JsonSerializerOptions serializerOptions)
         {
-            return new JsonSerializer<T>(serializerOptions);
+            return new TextJsonSerializer(serializerOptions);
         }
 
         /// <summary>

@@ -11,36 +11,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
     /// <summary>
     ///    Serializes and deserializes objects using the JSON format.
     /// </summary>
-    /// <typeparam name="T">
-    ///     The type of object to serialize or deserialize.
-    /// </typeparam>
-    public sealed class JsonSerializer<T>
-        : ISerializer<T>
-        where T : class
+    public sealed class TextJsonSerializer
+        : ISerializer
     {
         private readonly JsonSerializerOptions serializerOptions;
 
         /// <summary>
-        ///    Creates an instance of <see cref="JsonSerializer{T}"/> with the given <see cref="JsonSerializerOptions"/>.
+        ///    Creates an instance of <see cref="JsonSerializer"/> with the given <see cref="JsonSerializerOptions"/>.
         /// </summary>
         /// <param name="options">
         ///    The options to use when serializing or deserializing.
         /// </param>
-        public JsonSerializer(JsonSerializerOptions options)
+        public TextJsonSerializer(JsonSerializerOptions options)
         {
             this.serializerOptions = options;
         }
 
         /// <summary>
-        ///    Creates an instance of <see cref="JsonSerializer{T}"/> with the default <see cref="JsonSerializerOptions"/>.
+        ///    Creates an instance of <see cref="JsonSerializer"/> with the default <see cref="JsonSerializerOptions"/>.
         /// </summary>
-        public JsonSerializer()
+        public TextJsonSerializer()
             : this(null)
         {
         }
 
         /// <inheritdoc>/>
-        public Task<T> DeserializeAsync(Stream sourceStream, CancellationToken cancellationToken)
+        public Task<T> DeserializeAsync<T>(Stream sourceStream, CancellationToken cancellationToken)
         {
             return JsonSerializer.DeserializeAsync<T>(
                 sourceStream,
@@ -49,7 +45,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         }
 
         /// <inheritdoc>/>
-        public Task SerializeAsync(Stream targetStrteam, T obj, CancellationToken cancellationToken)
+        public Task SerializeAsync<T>(Stream targetStrteam, T obj, CancellationToken cancellationToken)
         {
             return JsonSerializer.SerializeAsync<T>(
                 targetStrteam,
@@ -59,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         }
 
         /// <inheritdoc>/>
-        public T Deserialize(Stream sourceStream)
+        public T Deserialize<T>(Stream sourceStream)
         {
             return JsonSerializer.Deserialize<T>(
                 sourceStream,
@@ -67,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         }
 
         /// <inheritdoc>/>
-        public void Serialize(Stream targetStream, T obj)
+        public void Serialize<T>(Stream targetStream, T obj)
         {
             JsonSerializer.Serialize<T>(
                 targetStream,

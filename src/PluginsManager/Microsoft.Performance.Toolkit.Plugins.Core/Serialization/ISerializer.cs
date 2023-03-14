@@ -13,7 +13,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
     /// <typeparam name="T">
     ///     The type of object that can be serialized and deserialized.
     /// </typeparam>
-    public interface ISerializer<T>
+    public interface ISerializer
     {
         /// <summary>
         ///     Asynchronously deserializes an object of type <typeparamref name="T"/> from the given stream.
@@ -27,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         /// <returns>
         ///     A task that completes when the object has been deserialized. The task result is the deserialized object.
         /// </returns>
-        Task<T> DeserializeAsync(Stream sourceStream, CancellationToken cancellationToken);
+        Task<T> DeserializeAsync<T>(Stream sourceStream, CancellationToken cancellationToken);
 
         /// <summary>
         ///     Deserializes an object of type <typeparamref name="T"/> from the given stream.
@@ -38,7 +38,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         /// <returns>
         ///     The deserialized object.
         /// </returns>
-        T Deserialize(Stream sourceStream);
+        T Deserialize<T>(Stream sourceStream);
 
         /// <summary>
         ///     Asynchronously serializes the given object of type <typeparamref name="T"/> to the given stream.
@@ -55,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         /// <returns>
         ///     A task that completes when the object has been serialized.
         /// </returns>
-        Task SerializeAsync(Stream targetStream, T obj, CancellationToken cancellationToken);
+        Task SerializeAsync<T>(Stream targetStream, T obj, CancellationToken cancellationToken);
 
         /// <summary>
         ///     Serializes the given object of type <typeparamref name="T"/> to the given stream.
@@ -66,6 +66,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         /// <param name="obj">
         ///     The object to serialize.
         /// </param>
-        void Serialize(Stream targetStream, T obj);
+        void Serialize<T>(Stream targetStream, T obj);
     }
 }
