@@ -11,7 +11,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     /// <summary>
     ///     Represents an installer that supports listing, installing, uninstalling and cleaning up plugins.
     /// </summary>
-    public interface IPluginInstaller
+    public interface IPluginsInstaller
     {
         /// <summary>
         ///     Gets all installed plugins.
@@ -83,25 +83,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// </exception>
         Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken);
-
-        /// <summary>
-        ///     Attempts to clean up all obsolete (unreigstered) plugin files from the given installation directory.
-        /// </summary>
-        /// <param name="installationDir">
-        ///     The installation directory to clean up.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///     A task that completes when the cleanup is complete.
-        /// </returns>
-        /// <exception cref="OperationCanceledException">
-        ///     Throws when the operation was canceled.
-        /// </exception>
-        Task CleanupObsoletePluginsAsync(
-            string installationDir,
             CancellationToken cancellationToken);
     }
 }
