@@ -42,5 +42,4 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// </returns>
         bool CanReadData(TSource source);
     }
-
 }

@@ -25,5 +25,4 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// </param>
         void WriteData(TTarget target, TEntity entity);
     }
-
 }
