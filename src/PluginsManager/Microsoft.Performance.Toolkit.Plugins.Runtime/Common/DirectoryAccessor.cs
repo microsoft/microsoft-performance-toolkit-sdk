@@ -12,6 +12,7 @@ using Microsoft.Performance.SDK.Runtime;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
 {
+    /// <inheritdoc />
     public class DirectoryAccessor
         : IDirectoryAccessor
     {
