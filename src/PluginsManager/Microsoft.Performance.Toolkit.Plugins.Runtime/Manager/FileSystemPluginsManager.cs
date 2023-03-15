@@ -13,6 +13,8 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
@@ -37,9 +39,41 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         private readonly IPluginInstaller<DirectoryInfo> pluginInstaller;
         private readonly IStreamLoader<FileInfo> localPluginLoader;
+        private readonly IDataReaderFromFileAndStream<PluginMetadata> metadataReader;
 
         private readonly DirectoryInfo installationDir;
         private readonly ILogger logger;
+
+        /// <summary>
+        ///     Initializes a plugin manager instance.
+        /// </summary>
+        /// <param name="discovererProviders">
+        ///     A collection of discoverer providers.
+        /// </param>
+        /// <param name="fetchers">
+        ///     A collection of fetchers.
+        /// </param>
+        /// <param name="pluginRegistry">
+        ///     A plugin registry.
+        /// </param>
+        /// <param name="installationDir">
+        ///     The directory where plugins are installed.
+        /// </param>
+        public FileSystemPluginsManager(
+            IEnumerable<IPluginDiscovererProvider> discovererProviders,
+            IEnumerable<IPluginFetcher> fetchers,
+            IPluginRegistry<DirectoryInfo> pluginRegistry,
+            string installationDir)
+            : this(
+                  discovererProviders,
+                  fetchers,
+                  pluginRegistry,
+                  installationDir,
+                  new FileSystemPluginInstallerFactory(),
+                  new FileStreamLoader(),
+                  new DataReaderFromFileAndStream<PluginMetadata>(SerializationUtils.JsonSerializerWithDefaultOptions))
+        {
+        }
 
         /// <summary>
         ///     Initializes a plugin manager instance with a default <see cref="ILogger"/>.
@@ -50,25 +84,38 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="fetchers">
         ///     A collection of fetchers.
         /// </param>
+        /// <param name="pluginRegistry">
+        ///     A plugin registry.
+        /// </param>
         /// <param name="pluginInstaller">
         ///     A <see cref="IPluginInstaller"/> this plugin manager uses to install/unintall plugins.
         /// </param>
         /// <param name="installationDir">
         ///     The directory where the plugins will be installed to.
         /// </param>
+        /// <param name="localPluginLoader">
+        ///     A loader used to load plugins from the local file system.
+        /// </param>
+        /// <param name="metadataReader">
+        ///     A reader used to read plugin metadata from the local file system.
+        /// </param>
         public FileSystemPluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginInstaller<DirectoryInfo> pluginInstaller,
+            IPluginRegistry<DirectoryInfo> pluginRegistry,
+            string installationDir,
+            IFactory<IPluginInstaller<DirectoryInfo>, FileSystemPluginInstallerFactoryArgs> pluginInstallerFactory,
             IStreamLoader<FileInfo> localPluginLoader,
-            string installationDir)
-            : this(
-                  discovererProviders,
-                  fetchers,
-                  pluginInstaller,
-                  localPluginLoader,
-                  installationDir,
-                  Logger.Create<FileSystemPluginsManager>())
+            IDataReaderFromFileAndStream<PluginMetadata> metadataReader)
+                : this(
+                      discovererProviders,
+                      fetchers,
+                      pluginRegistry,
+                      installationDir,
+                      pluginInstallerFactory,
+                      localPluginLoader,
+                      metadataReader,
+                      Logger.Create<FileSystemPluginsManager>())
         {
         }
 
@@ -81,11 +128,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="fetchers">
         ///     A collection of fetchers.
         /// </param>
+        /// <param name="pluginRegistry">
+        ///     A plugin registry.
+        /// </param>
         /// <param name="pluginInstaller">
         ///     A <see cref="IPluginInstaller"/> this plugin manager uses to install/unintall plugins.
         /// </param>
         /// <param name="installationDir">
         ///     The directory where the plugins will be installed to.
+        /// </param>
+        /// <param name="localPluginLoader">
+        ///     A loader used to load plugins from the local file system.
+        /// </param>
+        /// <param name="metadataReader">
+        ///     A reader used to read plugin metadata from the local file system.
         /// </param>
         /// <param name="logger">
         ///     A logger used to log messages.
@@ -93,15 +149,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public FileSystemPluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginInstaller<DirectoryInfo> pluginInstaller,
-            IStreamLoader<FileInfo> localPluginLoader,
+            IPluginRegistry<DirectoryInfo> pluginRegistry,
             string installationDir,
+            IFactory<IPluginInstaller<DirectoryInfo>, FileSystemPluginInstallerFactoryArgs> pluginInstallerFactory,
+            IStreamLoader<FileInfo> localPluginLoader,
+            IDataReaderFromFileAndStream<PluginMetadata> metadataReader,
             ILogger logger)
         {
             Guard.NotNull(discovererProviders, nameof(discovererProviders));
             Guard.NotNull(fetchers, nameof(fetchers));
-            Guard.NotNull(pluginInstaller, nameof(pluginInstaller));
+            Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
             Guard.NotNullOrWhiteSpace(installationDir, nameof(installationDir));
+            Guard.NotNull(pluginInstallerFactory, nameof(pluginInstallerFactory));
+            Guard.NotNull(localPluginLoader, nameof(localPluginLoader));
+            Guard.NotNull(metadataReader, nameof(metadataReader));
             Guard.NotNull(logger, nameof(logger));
 
             this.discovererRepository = new PluginsManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
@@ -109,9 +170,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository);
             this.discovererSourcesManager.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
 
-            this.pluginInstaller = pluginInstaller;
+            this.pluginInstaller = pluginInstallerFactory.Create(new FileSystemPluginInstallerFactoryArgs(
+                    pluginRegistry,
+                    metadataReader));
+
             this.installationDir = new DirectoryInfo(installationDir);
             this.localPluginLoader = localPluginLoader;
+
+            this.metadataReader = metadataReader;
             this.logger = logger;
         }
 
@@ -436,10 +502,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 throw new PluginFetchingException(errorMsg, availablePlugin.AvailablePluginInfo, e);
             }
 
-            using (stream)
+            if (!PluginPackage.TryCreate(
+                stream,
+                this.metadataReader,
+                false,
+                out PluginPackage pluginPackage))
+            {
+                throw new PluginPackageCreationException(
+                      $"Failed to create plugin package from discovered plugin {availablePlugin.AvailablePluginInfo.Identity}");
+            }
+
+            using (pluginPackage)
             {
                 return await this.pluginInstaller.InstallPluginAsync(
-                    stream,
+                    pluginPackage,
                     this.installationDir,
                     availablePlugin.AvailablePluginInfo.PluginPackageUri,
                     cancellationToken,
@@ -460,10 +536,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 throw new PluginLocalLoadingException($"Unable to read from {pluginPackageFileInfo.FullName}.");
             }
 
-            using (Stream stream = this.localPluginLoader.ReadData(pluginPackageFileInfo))
+            Stream packageStream = this.localPluginLoader.ReadData(pluginPackageFileInfo);
+            if (!PluginPackage.TryCreate(
+                    packageStream,
+                    this.metadataReader,
+                    false,
+                    out PluginPackage pluginPackage))
+            {
+                throw new PluginPackageCreationException(
+                    $"Failed to create plugin package from local plugin {pluginPackageFileInfo.FullName}");
+            }
+
+            using (pluginPackage)
             {
                 return await this.pluginInstaller.InstallPluginAsync(
-                    stream,
+                    pluginPackage,
                     this.installationDir,
                     new Uri(pluginPackageFileInfo.FullName),
                     cancellationToken,

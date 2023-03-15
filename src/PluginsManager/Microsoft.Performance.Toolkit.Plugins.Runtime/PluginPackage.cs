@@ -7,8 +7,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
@@ -28,7 +26,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private static readonly string pluginContentPath = "plugin/";
         private static readonly string pluginMetadataFileName = "pluginspec.json";
 
-        private readonly IStreamCopier<FileInfo> fileDropper;
         private bool disposedValue;
         private readonly ILogger logger;
 
@@ -38,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
         /// </param>
-        /// <param name="metadataSerializer">
+        /// <param name="metadataReader">
         ///     Used to deserialize the plugin metadata.
         /// </param>
         /// <param name="leaveOpen">
@@ -53,11 +50,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public static bool TryCreate(
             Stream stream,
             IDataReader<Stream, PluginMetadata> metadataReader,
-            IStreamCopier<FileInfo> fileDropper,
             bool leaveOpen,
             out PluginPackage package)
         {
-            return TryCreate(stream, metadataReader, fileDropper, leaveOpen, Logger.Create<PluginPackage>(), out package);
+            return TryCreate(stream, metadataReader, leaveOpen, Logger.Create<PluginPackage>(), out package);
         }
 
         /// <summary>
@@ -66,7 +62,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
         /// </param>
-        /// <param name="metadataSerializer">
+        /// <param name="metadataReader">
         ///     Used to deserialize the plugin metadata.
         /// </param>
         /// <param name="leaveOpen">
@@ -85,14 +81,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public static bool TryCreate(
             Stream stream,
             IDataReader<Stream, PluginMetadata> metadataReader,
-            IStreamCopier<FileInfo> directoryAccessor,
             bool leaveOpen,     
             ILogger logger,
             out PluginPackage package)
         {
             try
             {
-                package = new PluginPackage(stream, metadataReader, directoryAccessor, leaveOpen, logger);
+                package = new PluginPackage(stream, metadataReader, leaveOpen, logger);
                 return true;
             }
             catch (Exception e)
@@ -126,8 +121,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="stream">
         ///     Stream for reading the plugin package file.
         /// </param>
-        /// <param name="metadataSerializer">
-        ///     Used to deserialize the plugin metadata.
+        /// <param name="metadataReader">
+        ///     Used to read the plugin metadata.
         /// </param>
         /// <param name="leaveOpen">
         ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
@@ -139,7 +134,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private PluginPackage(
             Stream stream,
             IDataReader<Stream, PluginMetadata> metadataReader,
-            IStreamCopier<FileInfo> fileDropper,
             bool leaveOpen,
             ILogger logger)
         {
@@ -149,7 +143,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
             this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
             this.PluginMetadata = ReadMetadata(metadataReader);
-            this.fileDropper = fileDropper;
         }
         
         /// <summary>
@@ -228,61 +221,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </summary>
         public PluginMetadata PluginMetadata { get; }
 
-        /// <summary>
-        ///     Extracts all files in this package.
-        /// </summary>
-        /// <param name="extractPath">
-        ///     The path to which the files will be extracted.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of the extraction.
-        /// </param>
-        /// <returns>
-        ///     An await-able task.
-        /// </returns>
-        public Task ExtractPackageAsync(
-            string extractPath,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
-        {
-            return ExtractEntriesAsync(extractPath, entry => true, cancellationToken, progress);
-        }
-
-        /// <summary>
-        ///     Extract certain entires from the package.
-        /// </summary>
-        /// <param name="extractPath">
-        ///     The path to which the files will be extracted.
-        /// </param>
-        /// <param name="predicate">
-        ///     A function whose result indicates whether an entry should be extracted.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of the extraction.
-        /// </param>
-        /// <returns>
-        ///     An await-able task.
-        /// </returns>
-        public Task ExtractEntriesAsync(
-            string extractPath,
-            Func<PluginPackageEntry, bool> predicate,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
-        {
-            return ExtractEntriesInternalAsync(
-                this.Entries.Where(e => predicate(e)),
-                extractPath,
-                this.logger,
-                cancellationToken,
-                progress);
-        }
-
         /// <inheritdoc />
         public void Dispose()
         {
@@ -295,48 +233,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public override string ToString()
         {
             return $"{this.Id} - {this.Version}";
-        }
-
-        private async Task ExtractEntriesInternalAsync(
-           IEnumerable<PluginPackageEntry> entries,
-           string extractPath,
-           ILogger logger,
-           CancellationToken cancellationToken,
-           IProgress<int> progress)
-        {
-            Guard.NotNull(extractPath, nameof(extractPath));
-
-            extractPath = Path.GetFullPath(extractPath);
-            if (!extractPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-            {
-                extractPath += Path.DirectorySeparatorChar;
-            }
-
-            // TODO: #257 Report progress
-            try
-            {
-                foreach (PluginPackageEntry entry in entries)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    string destPath = Path.GetFullPath(Path.Combine(extractPath, entry.RelativePath));
-                    string destDir =  entry.IsDirectory ? destPath : Path.GetDirectoryName(destPath);
-
-                    using (Stream entryStream = entry.Open())
-                    {
-                        await this.fileDropper.CopyStreamAsync(
-                            new FileInfo(destPath),
-                            entryStream,
-                            cancellationToken);
-                    }
-                }
-            }
-            catch (Exception e) when (!(e is OperationCanceledException))
-            {
-                string errorMsg = $"Unable to extract plugin content to {extractPath}";
-                logger.Error(e, errorMsg);
-                throw new PluginPackageExtractionException(errorMsg, e);
-            }
         }
 
         private PluginMetadata ReadMetadata(IDataReader<Stream, PluginMetadata> metadataReader)

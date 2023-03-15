@@ -11,7 +11,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
@@ -20,67 +19,81 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
-    ///     Represents a <see cref="IPluginInstaller"/> that installs plugins from a <see cref="PluginPackage"/> stream.
+    ///     Represents a plugin installer that installs plugins from a <see cref="PluginPackage"/> stream to a file directory.
     /// </summary>
-    public sealed class PluginPackageInstaller
+    public sealed class FileSystemPluginInstaller
         : IPluginInstaller<DirectoryInfo>
     {
         private readonly IPluginRegistry<DirectoryInfo> pluginRegistry;
         private readonly IDataReaderFromFileAndStream<PluginMetadata> metadataReader;
         private readonly IDirectoryAccessor directoryAccessor;
-
-        private IChecksumProvider<DirectoryInfo> checksumProvider;
+        private readonly IChecksumProvider<DirectoryInfo> checksumProvider;
+        private readonly IPluginPackageExtractor<DirectoryInfo> packageExtractor;
         private readonly ILogger logger;
 
-        ///// <summary>
-        /////     Creates an instance of a <see cref="PluginPackageInstaller"/>.
-        ///// </summary>
-        ///// <param name="pluginRegistry">
-        /////     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
-        ///// </param>
-        //public PluginPackageInstaller(IPluginRegistry pluginRegistry)
-        //    : this(
-        //          pluginRegistry,
-
-        //          SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
-        //{
-        //}
-
         /// <summary>
-        ///     Creates an instance of a <see cref="PluginPackageInstaller"/> with a <see cref="ISerializer{PluginMetadata}"/> object
-        ///     and a <see cref="ILogger"/> object.
+        ///     Creates an instance of a <see cref="FileSystemPluginInstaller"/>.
         /// </summary>
         /// <param name="pluginRegistry">
-        ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
+        ///     The <see cref="IPluginRegistry<DirectoryInfo>"/> this installer register/unregister plugin records to.
+        /// </param>
+        /// <param name="metadataReader">
+        ///     Used to read the metadata from the plugin package and the plugin directory.
+        /// </param>
+        /// <param name="directoryAccessor">
+        ///     Used to access file system directories.
+        /// </param>
+        /// <param name="packageExtractor">
+        ///     Used to extract the plugin package to a directory.
+        /// </param>
+        /// <param name="checksumProvider">
+        ///     Used to compute checksums of directories.
         /// </param>
         /// <param name="logger">
         ///     Used to log messages.
         /// </param>
-        public PluginPackageInstaller(
+        public FileSystemPluginInstaller(
             IPluginRegistry<DirectoryInfo> pluginRegistry,
             IDataReaderFromFileAndStream<PluginMetadata> metadataReader,
             IDirectoryAccessor directoryAccessor,
+            IPluginPackageExtractor<DirectoryInfo> packageExtractor,
             IChecksumProvider<DirectoryInfo> checksumProvider,
             ILogger logger)
         {
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
+            Guard.NotNull(metadataReader, nameof(metadataReader));
+            Guard.NotNull(directoryAccessor, nameof(directoryAccessor));
+            Guard.NotNull(packageExtractor, nameof(packageExtractor));
+            Guard.NotNull(checksumProvider, nameof(checksumProvider));
             Guard.NotNull(logger, nameof(logger));
 
             this.pluginRegistry = pluginRegistry;
             this.metadataReader = metadataReader;
             this.directoryAccessor = directoryAccessor;
+            this.packageExtractor = packageExtractor;
             this.checksumProvider = checksumProvider;
             this.logger = logger;
         }
 
-        public PluginPackageInstaller(
-            IPluginRegistry<DirectoryInfo> pluginRegistry)
+        /// <summary>
+        ///    Creates an instance of a <see cref="FileSystemPluginInstaller"/>.
+        /// </summary>
+        /// <param name="pluginRegistry">
+        ///     The <see cref="IPluginRegistry<DirectoryInfo>"/> this installer register/unregister plugin records to.
+        /// </param>
+        /// <param name="metadataReader">
+        ///     Used to read the metadata from the plugin package and the plugin directory.
+        /// </param>
+        public FileSystemPluginInstaller(
+            IPluginRegistry<DirectoryInfo> pluginRegistry,
+            IDataReaderFromFileAndStream<PluginMetadata> metadataReader)
             : this(
                 pluginRegistry,
-                new DataReaderFromFileAndStream<PluginMetadata>(SerializationUtils.JsonSerializerWithDefaultOptions),
+                metadataReader,
                 new DirectoryAccessor(),
+                new LocalPluginPackageExtractor(),
                 new SHA256DiretoryChecksumProvider(),
-                Logger.Create<PluginPackageInstaller>())
+                Logger.Create<FileSystemPluginInstaller>())
         {
         }
 
@@ -155,28 +168,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </remarks>
         /// <inheritdoc/>
         public async Task<InstalledPluginInfo> InstallPluginAsync(
-            Stream stream,
+            PluginPackage pluginPackage,
             DirectoryInfo installationRoot,
             Uri sourceUri,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
-            Guard.NotNull(stream, nameof(stream));
+            Guard.NotNull(pluginPackage, nameof(pluginPackage));
             Guard.NotNull(installationRoot, nameof(installationRoot));
             Guard.NotNull(sourceUri, nameof(sourceUri));
 
-            if (!PluginPackage.TryCreate(
-                stream,
-                this.metadataReader,
-                this.directoryAccessor,
-                false,
-                out PluginPackage pluginPackage))
-            {
-                throw new PluginPackageCreationException(
-                      $"Failed to create plugin package out of a package stream from {sourceUri}");
-            }
-
-            using (pluginPackage)
             using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 // Check if any version of this plugin is already installed.
@@ -204,23 +205,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 };
 
-                string installationDir = Path.GetFullPath(Path.Combine(installationRoot.FullName, $"{pluginPackage.Id}-{pluginPackage.Version}"));
+                var installationDir = new DirectoryInfo(Path.Combine(installationRoot.FullName, $"{pluginPackage.Id}-{pluginPackage.Version}"));
                 try
                 {
                     // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
                     // We need to revist this code once we have a mechanism for checking whether individual plugin are in use by plugin consumers.
                     this.logger.Info($"Extracting content of plugin {pluginPackage} to {installationDir}");
-                    await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
+                    await this.packageExtractor.ExtractPackageAsync(pluginPackage, installationDir, cancellationToken, progress);
                     this.logger.Info("Extraction completed.");
 
-                    string checksum = await this.checksumProvider.GetChecksumAsync(new DirectoryInfo(installationDir));
+                    string checksum = await this.checksumProvider.GetChecksumAsync(installationDir);
                     var pluginToInstall = new InstalledPluginInfo(
                         pluginPackage.Id,
                         pluginPackage.Version,
                         sourceUri,
                         pluginPackage.DisplayName,
                         pluginPackage.Description,
-                        installationDir,
+                        installationDir.FullName,
                         DateTime.UtcNow,
                         checksum);
 
@@ -257,7 +258,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
 
                     this.logger.Info($"Cleaning up extraction folder: {installationDir}");
-                    this.directoryAccessor.CleanData(new DirectoryInfo(installationDir));
+                    this.directoryAccessor.CleanData(installationDir);
 
                     throw;
                 }

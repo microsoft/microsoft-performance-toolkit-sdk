@@ -2,16 +2,18 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
     /// <summary>
-    ///     Represents an installer that supports listing, installing, uninstalling and cleaning up plugins.
+    ///     Represents an installer that supports listing, installing, uninstalling and cleaning up plugins at a given location.
     /// </summary>
-    public interface IPluginInstaller<T>
+    /// <typeparam name="TDestination">
+    ///     The type of the install location.
+    /// </typeparam>
+    public interface IPluginInstaller<TDestination>
     {
         /// <summary>
         ///     Gets all installed plugins.
@@ -31,11 +33,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <summary>
         ///     Installs a plugin from a stream.
         /// </summary>
-        /// <param name="pluginStream">
+        /// <param name="pluginPackage">
         ///     A stream containing the plugin to install.
         /// </param>
-        /// <param name="installationRoot">
-        ///     The root directory where the plugin will be installed.
+        /// <param name="installLocation">
+        ///     The location to install the plugin to.
         /// </param>
         /// <param name="sourceUri">
         ///     The URI of the <see cref="Core.Discovery.PluginSource"/> that the plugin was discovered from.
@@ -50,15 +52,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     The <see cref="InstalledPluginInfo"/> of the installed plugin if the installation was successful. Otherwise, null.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
+        ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installLocation"/> or
         ///      <paramref name="sourceUri"/> is null.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
         /// </exception>
         Task<InstalledPluginInfo> InstallPluginAsync(
-            Stream pluginStream,
-            T installationRoot,
+            PluginPackage pluginPackage,
+            TDestination installLocation,
             Uri sourceUri,
             CancellationToken cancellationToken,
             IProgress<int> progress);
@@ -86,10 +88,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Attempts to clean up all obsolete (unreigstered) plugin files from the given installation directory.
+        ///     Attempts to clean up all obsolete (unreigstered) plugin files from the given installation location.
         /// </summary>
-        /// <param name="installationDir">
-        ///     The installation directory to clean up.
+        /// <param name="installLocation">
+        ///     The installation location to clean up.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
@@ -101,7 +103,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     Throws when the operation was canceled.
         /// </exception>
         Task CleanupObsoletePluginsAsync(
-            T installationDir,
+            TDestination installLocation,
             CancellationToken cancellationToken);
     }
 }
