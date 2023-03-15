@@ -9,8 +9,11 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
 {
-    public class FileReadWriteAsync<T>
-        : IDataReadWriteAsync<FileInfo, T>
+    /// <summary>
+    ///     Represents a data reader and writer that can read and write data to a file.
+    /// </summary>
+    public class FileReadWriteAsync<TEntity>
+        : IDataReadWriteAsync<FileInfo, TEntity>
     {
         private readonly ISerializer serializer;
 
@@ -28,17 +31,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
             return fileInfo.Exists;
         }
 
-        public Task<T> ReadDataAsync(FileInfo fileInfo, CancellationToken cancellationToken)
+        public Task<TEntity> ReadDataAsync(FileInfo fileInfo, CancellationToken cancellationToken)
         {
             Guard.NotNull(fileInfo, nameof(fileInfo));
 
             using (FileStream stream = fileInfo.OpenRead())
             {
-                return this.serializer.DeserializeAsync<T>(stream, cancellationToken);
+                return this.serializer.DeserializeAsync<TEntity>(stream, cancellationToken);
             }
         }
 
-        public Task WriteDataAsync(FileInfo fileInfo, T entity, CancellationToken cancellationToken)
+        public Task WriteDataAsync(FileInfo fileInfo, TEntity entity, CancellationToken cancellationToken)
         {
             Guard.NotNull(fileInfo, nameof(fileInfo));
 

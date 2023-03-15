@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 
@@ -21,28 +22,43 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         const int bufferSize = 4096;
         const int defaultAsyncBufferSize = 81920;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="DirectoryAccessor"/> class.
+        /// </summary>
+        /// <param name="logger">
+        ///     The logger to use to log messages.
+        /// </param>
         public DirectoryAccessor(ILogger logger)
         {
+            Guard.NotNull(logger, nameof(logger));
+
             this.logger = logger;
         }
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="DirectoryAccessor"/> class.
+        /// </summary>
         public DirectoryAccessor()
             : this(Logger.Create<DirectoryAccessor>())
         {
         }
 
+        /// <inheritdoc/>
         public IEnumerable<DirectoryInfo> CleanDataAt(
-            DirectoryInfo targetDir,
+            DirectoryInfo targetDirInfo,
             Func<DirectoryInfo, bool> subdirFilter,
             CancellationToken cancellationToken = default)
         {
-            if (!targetDir.Exists)
+            Guard.NotNull(targetDirInfo, nameof(targetDirInfo));
+            Guard.NotNull(subdirFilter, nameof(subdirFilter));
+
+            if (!targetDirInfo.Exists)
             {
                 return Enumerable.Empty<DirectoryInfo>();
             }
 
             var deletedDirs = new List<DirectoryInfo>();
-            foreach (DirectoryInfo subDir in targetDir.GetDirectories())
+            foreach (DirectoryInfo subDir in targetDirInfo.GetDirectories())
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -57,20 +73,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
             return deletedDirs;
         }
 
-        public void CleanData(DirectoryInfo entity)
+        /// <inheritdoc/>
+        public void CleanData(DirectoryInfo dirInfo)
         {
-            if (entity.Exists)
+            Guard.NotNull(dirInfo, nameof(dirInfo));
+
+            if (dirInfo.Exists)
             {
-                entity.Delete(true);
+                dirInfo.Delete(true);
             }
         }
 
-        public Task CopyStreamAsync(FileInfo destFile, Stream stream, CancellationToken cancellationToken)
+        /// <inheritdoc/>
+        public Task CopyStreamAsync(FileInfo destFileInfo, Stream stream, CancellationToken cancellationToken)
         {
-            destFile.Create();
+            Guard.NotNull(destFileInfo, nameof(destFileInfo));
+            Guard.NotNull(stream, nameof(stream));
+
+            destFileInfo.Create();
 
             using (var deststream = new FileStream(
-                destFile.FullName,
+                destFileInfo.FullName,
                 FileMode.Create,
                 FileAccess.Write,
                 FileShare.None,
