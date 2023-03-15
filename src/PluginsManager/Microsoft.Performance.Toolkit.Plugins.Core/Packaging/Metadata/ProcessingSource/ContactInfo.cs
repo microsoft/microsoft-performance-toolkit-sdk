@@ -35,10 +35,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         /// </param>
         public ContactInfo(SDK.Processing.ContactInfo contactInfo)
             : this(
-                  contactInfo.Name,
-                  contactInfo.Address,
-                  contactInfo.EmailAddresses.ToArray(),
-                  contactInfo.PhoneNumbers.ToArray())
+                  contactInfo?.Name,
+                  contactInfo?.Address,
+                  contactInfo?.EmailAddresses?.ToArray(),
+                  contactInfo?.PhoneNumbers?.ToArray())
         {
         }
 

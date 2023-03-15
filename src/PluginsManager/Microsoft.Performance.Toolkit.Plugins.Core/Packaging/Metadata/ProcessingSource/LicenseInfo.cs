@@ -31,7 +31,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         ///     The license info to copy.
         /// </param>
         public LicenseInfo(SDK.Processing.LicenseInfo licenseInfo)
-            : this(licenseInfo.Name, licenseInfo.Uri, licenseInfo.Text)
+            : this(licenseInfo?.Name, licenseInfo?.Uri, licenseInfo?.Text)
         {
         }
 
