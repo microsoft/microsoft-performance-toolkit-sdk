@@ -35,11 +35,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         /// <param name="other"></param>
         public ProcessingSourceInfo(SDK.Processing.ProcessingSourceInfo other)
             : this(
-                  other.Owners.Select(x => new ContactInfo(x)).ToArray(),
-                  new ProjectInfo(other.ProjectInfo),
-                  new LicenseInfo(other.LicenseInfo),
-                  other.CopyrightNotice,
-                  other.AdditionalInformation.ToArray())
+                  other?.Owners?.Select(x => new ContactInfo(x)).ToArray(),
+                  new ProjectInfo(other?.ProjectInfo),
+                  new LicenseInfo(other?.LicenseInfo),
+                  other?.CopyrightNotice,
+                  other?.AdditionalInformation?.ToArray())
         {
         }
 
