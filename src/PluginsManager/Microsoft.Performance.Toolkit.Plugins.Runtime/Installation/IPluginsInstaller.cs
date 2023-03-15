@@ -34,9 +34,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <param name="pluginStream">
         ///     A stream containing the plugin to install.
         /// </param>
-        /// <param name="installationRoot">
-        ///     The root directory where the plugin will be installed.
-        /// </param>
         /// <param name="sourceUri">
         ///     The URI of the <see cref="Core.Discovery.PluginSource"/> that the plugin was discovered from.
         /// </param>
@@ -58,7 +55,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// </exception>
         Task<InstalledPluginInfo> InstallPluginAsync(
             Stream pluginStream,
-            string installationRoot,
             Uri sourceUri,
             CancellationToken cancellationToken,
             IProgress<int> progress);

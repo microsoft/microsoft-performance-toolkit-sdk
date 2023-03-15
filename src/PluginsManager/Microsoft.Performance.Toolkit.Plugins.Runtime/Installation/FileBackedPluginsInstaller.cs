@@ -24,6 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public sealed class FileBackedPluginsInstaller
         : IPluginsInstaller
     {
+        private readonly string installationRoot;
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
         private readonly ILogger logger;
@@ -34,8 +35,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
-        public FileBackedPluginsInstaller(IPluginRegistry pluginRegistry)
-            : this(pluginRegistry, SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
+        public FileBackedPluginsInstaller(
+            string installationRoot,
+            IPluginRegistry pluginRegistry)
+            : this(installationRoot, pluginRegistry, SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
         {
         }
 
@@ -49,9 +52,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The <see cref="ISerializer{PluginMetadata}"/> used to deserialize plugin metadata.
         /// </param> 
         public FileBackedPluginsInstaller(
+            string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer)
-            : this(pluginRegistry, metadataSerializer, Logger.Create<FileBackedPluginsInstaller>())
+            : this(installationRoot, pluginRegistry, metadataSerializer, Logger.Create<FileBackedPluginsInstaller>())
         {
         }
 
@@ -66,6 +70,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Used to log messages.
         /// </param>
         public FileBackedPluginsInstaller(
+            string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             ILogger logger)
@@ -74,6 +79,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(metadataSerializer, nameof(metadataSerializer));
             Guard.NotNull(logger, nameof(logger));
 
+            this.installationRoot = installationRoot;
             this.pluginRegistry = pluginRegistry;
             this.pluginMetadataSerializer = metadataSerializer;
             this.logger = logger;
@@ -91,7 +97,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 Task<InstalledPlugin>[] tasks = installedPluginsArray
                     .Select(p => CreateInstalledPluginAsync(p, cancellationToken))
                     .ToArray();
-
 
                 var task = Task.WhenAll(tasks);
 
@@ -151,13 +156,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <inheritdoc/>
         public async Task<InstalledPluginInfo> InstallPluginAsync(
             Stream stream,
-            string installationRoot,
             Uri sourceUri,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(stream, nameof(stream));
-            Guard.NotNull(installationRoot, nameof(installationRoot));
             Guard.NotNull(sourceUri, nameof(sourceUri));
 
             if (!PluginPackage.TryCreate(
@@ -198,7 +201,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 };
 
-                string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
+                string installationDir = Path.GetFullPath(Path.Combine(this.installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
                 try
                 {
                     // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.

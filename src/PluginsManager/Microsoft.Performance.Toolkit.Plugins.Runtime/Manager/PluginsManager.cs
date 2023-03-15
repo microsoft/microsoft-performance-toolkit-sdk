@@ -425,7 +425,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 return await this.pluginInstaller.InstallPluginAsync(
                     stream,
-                    this.installationDir,
                     availablePlugin.AvailablePluginInfo.PluginPackageUri,
                     cancellationToken,
                     progress);
@@ -445,28 +444,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 return await this.pluginInstaller.InstallPluginAsync(
                     stream,
-                    this.installationDir,
                     new Uri(packageFullPath),
                     cancellationToken,
                     progress);
             }
         }
 
+        /// <inheritdoc/>
         public Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(CancellationToken cancellationToken)
         {
             return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
         }
 
+        /// <inheritdoc/>
         public Task<InstalledPluginInfo> InstallPluginAsync(
             Stream pluginStream,
-            string installationRoot,
             Uri sourceUri,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             return this.pluginInstaller.InstallPluginAsync(
                 pluginStream,
-                installationRoot,
                 sourceUri,
                 cancellationToken,
                 progress);
