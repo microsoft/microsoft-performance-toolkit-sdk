@@ -32,8 +32,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         private readonly DiscovererSourcesManager discovererSourcesManager;
 
         private readonly IPluginsInstaller pluginInstaller;
-
-        private readonly string installationDir;
         private readonly ILogger logger;
 
         /// <summary>
@@ -54,13 +52,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginsInstaller pluginInstaller,
-            string installationDir)
+            IPluginsInstaller pluginInstaller)
             : this(
                   discovererProviders,
                   fetchers,
                   pluginInstaller,
-                  installationDir,
                   Logger.Create<PluginsManager>())
         {
         }
@@ -87,13 +83,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
             IPluginsInstaller pluginInstaller,
-            string installationDir,
             ILogger logger)
         {
             Guard.NotNull(discovererProviders, nameof(discovererProviders));
             Guard.NotNull(fetchers, nameof(fetchers));
             Guard.NotNull(pluginInstaller, nameof(pluginInstaller));
-            Guard.NotNullOrWhiteSpace(installationDir, nameof(installationDir));
             Guard.NotNull(logger, nameof(logger));
 
             this.discovererRepository = new PluginsManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
@@ -102,7 +96,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             this.discovererSourcesManager.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
 
             this.pluginInstaller = pluginInstaller;
-            this.installationDir = installationDir;
             this.logger = logger;
         }
 
