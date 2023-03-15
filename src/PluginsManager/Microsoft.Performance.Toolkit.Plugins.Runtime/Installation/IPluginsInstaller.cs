@@ -27,42 +27,34 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// </exception>
         Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken);
-        
+
         /// <summary>
-        ///     Installs an available plugin if no other versions of this plugin installed.
+        ///     Installs a plugin from a stream.
         /// </summary>
-        /// <param name="availablePlugin">
-        ///     The available plugin to be installed.
+        /// <param name="pluginStream">
+        ///     A stream containing the plugin to install.
+        /// </param>
+        /// <param name="installationRoot">
+        ///     The root directory where the plugin will be installed.
+        /// </param>
+        /// <param name="sourceUri">
+        ///     The URI of the <see cref="Core.Discovery.PluginSource"/> that the plugin was discovered from.
         /// </param>
         /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
+        ///     Indicates the progress of the installation.
         /// </param>
         /// <param name="progress">
-        ///     Indicates the progress of plugin installation.
+        ///     Indicates the progress of the installation.
         /// </param>
         /// <returns>
-        ///     The <see cref="InstalledPluginInfo"/> if plugin is successfully installed. <c>null</c> otherwise.
+        ///     The <see cref="InstalledPluginInfo"/> of the installed plugin if the installation was successful. Otherwise, null.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="availablePlugin"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="PluginFetchingException">
-        ///     Throws when the plugin package cannot be fetched.
-        /// </exception>
-        /// <exception cref="RepositoryDataAccessException">
-        ///     Throws when there is an error reading or writing to plugin registry.
-        /// </exception>
-        /// <exception cref="RepositoryCorruptedException">
-        ///     Throws when the plugin registry is in an invalid state.
-        /// </exception>
-        /// <exception cref="PluginPackageCreationException">
-        ///     Throws when there is an error creating plugin package.
-        /// </exception>
-        /// <exception cref="PluginPackageExtractionException">
-        ///     Throws when there is an error extracting plugin package.
+        ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
+        ///      <paramref name="sourceUri"/> is null.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        ///     Throws when the operation was canceled.
+        ///     Throws when the operation was cancelled.
         /// </exception>
         Task<InstalledPluginInfo> InstallPluginAsync(
             Stream pluginStream,
@@ -75,25 +67,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     Uninstalls a plugin.
         /// </summary>
         /// <param name="installedPlugin">
-        ///     The plugin to be uninstalled.
+        ///     The plugin to uninstall.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
+        ///     True if the uninstallation was successful. Otherwise, false.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="installedPlugin"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="RepositoryDataAccessException">
-        ///     Throws when there is an error reading or writing to plugin registry.
-        /// </exception>
-        /// <exception cref="RepositoryCorruptedException">
-        ///     Throws when the plugin registry is in an invalid state.
+        ///     Throws when <paramref name="installedPlugin"/> is null.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        ///     Throws when the operation was canceled.
+        ///     Throws when the operation was cancelled.
         /// </exception>
         Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
