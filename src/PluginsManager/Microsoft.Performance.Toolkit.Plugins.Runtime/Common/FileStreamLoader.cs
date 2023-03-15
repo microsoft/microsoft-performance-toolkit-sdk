@@ -5,17 +5,22 @@ using System.IO;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
 {
+    /// <summary>
+    ///     Represents a loader that can load stream from a file.
+    /// </summary>
     public class FileStreamLoader
         : IStreamLoader<FileInfo>
     {
-        public bool CanReadData(FileInfo source)
+        /// <inheritdoc/>
+        public bool CanReadData(FileInfo fileInfo)
         {
-            return source.Exists;
+            return fileInfo.Exists;
         }
 
-        public Stream ReadData(FileInfo source)
+        /// <inheritdoc>/>
+        public Stream ReadData(FileInfo fileInfo)
         {
-            return source.OpenRead();
+            return fileInfo.OpenRead();
         }
     }
 }
