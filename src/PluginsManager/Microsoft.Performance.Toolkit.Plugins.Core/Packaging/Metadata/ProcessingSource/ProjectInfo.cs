@@ -27,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         /// </summary>
         /// <param name="projectInfo"></param>
         public ProjectInfo(SDK.Processing.ProjectInfo projectInfo)
-            : this(projectInfo.Uri)
+            : this(projectInfo?.Uri)
         {
         }
 
