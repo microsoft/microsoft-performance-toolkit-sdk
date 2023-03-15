@@ -11,7 +11,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     /// <summary>
     ///     Represents an installer that supports listing, installing, uninstalling and cleaning up plugins.
     /// </summary>
-    public interface IPluginInstaller
+    public interface IPluginsInstaller
     {
         /// <summary>
         ///     Gets all installed plugins.
@@ -27,34 +27,42 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// </exception>
         Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken);
-
+        
         /// <summary>
-        ///     Installs a plugin from a stream.
+        ///     Installs an available plugin if no other versions of this plugin installed.
         /// </summary>
-        /// <param name="pluginStream">
-        ///     A stream containing the plugin to install.
-        /// </param>
-        /// <param name="installationRoot">
-        ///     The root directory where the plugin will be installed.
-        /// </param>
-        /// <param name="sourceUri">
-        ///     The URI of the <see cref="Core.Discovery.PluginSource"/> that the plugin was discovered from.
+        /// <param name="availablePlugin">
+        ///     The available plugin to be installed.
         /// </param>
         /// <param name="cancellationToken">
-        ///     Indicates the progress of the installation.
+        ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <param name="progress">
-        ///     Indicates the progress of the installation.
+        ///     Indicates the progress of plugin installation.
         /// </param>
         /// <returns>
-        ///     The <see cref="InstalledPluginInfo"/> of the installed plugin if the installation was successful. Otherwise, null.
+        ///     The <see cref="InstalledPluginInfo"/> if plugin is successfully installed. <c>null</c> otherwise.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
-        ///      <paramref name="sourceUri"/> is null.
+        ///     Throws when <paramref name="availablePlugin"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="PluginFetchingException">
+        ///     Throws when the plugin package cannot be fetched.
+        /// </exception>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="RepositoryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="PluginPackageCreationException">
+        ///     Throws when there is an error creating plugin package.
+        /// </exception>
+        /// <exception cref="PluginPackageExtractionException">
+        ///     Throws when there is an error extracting plugin package.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        ///     Throws when the operation was cancelled.
+        ///     Throws when the operation was canceled.
         /// </exception>
         Task<InstalledPluginInfo> InstallPluginAsync(
             Stream pluginStream,
@@ -67,41 +75,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     Uninstalls a plugin.
         /// </summary>
         /// <param name="installedPlugin">
-        ///     The plugin to uninstall.
+        ///     The plugin to be uninstalled.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     True if the uninstallation was successful. Otherwise, false.
+        ///     <c>true</c> if the plugin has been successfully uninstalled. <c>false</c> otherwise.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="installedPlugin"/> is null.
+        ///     Throws when <paramref name="installedPlugin"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="OperationCanceledException">
-        ///     Throws when the operation was cancelled.
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when there is an error reading or writing to plugin registry.
         /// </exception>
-        Task<bool> UninstallPluginAsync(
-            InstalledPlugin installedPlugin,
-            CancellationToken cancellationToken);
-
-        /// <summary>
-        ///     Attempts to clean up all obsolete (unreigstered) plugin files from the given installation directory.
-        /// </summary>
-        /// <param name="installationDir">
-        ///     The installation directory to clean up.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <returns>
-        ///     A task that completes when the cleanup is complete.
-        /// </returns>
+        /// <exception cref="RepositoryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.
         /// </exception>
-        Task CleanupObsoletePluginsAsync(
-            string installationDir,
+        Task<bool> UninstallPluginAsync(
+            InstalledPlugin installedPlugin,
             CancellationToken cancellationToken);
     }
 }

@@ -19,10 +19,10 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
-    ///     Represents a <see cref="IPluginInstaller"/> that installs plugins from a <see cref="PluginPackage"/> stream.
+    ///     Represents a <see cref="IPluginsInstaller"/> that installs plugins from a <see cref="PluginPackage"/> stream.
     /// </summary>
     public sealed class PluginPackageInstaller
-        : IPluginInstaller
+        : IPluginsInstaller
     {
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
@@ -286,7 +286,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Attempts to clean up all obsolete (unreigstered) plugin files.
+        ///     This method should be called safely by plugins consumers.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
+        /// </returns>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="RepositoryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was canceled.
+        /// </exception>
         public async Task CleanupObsoletePluginsAsync(string installationDir, CancellationToken cancellationToken)
         {
             if (!Directory.Exists(installationDir))

@@ -31,7 +31,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
         private readonly DiscovererSourcesManager discovererSourcesManager;
 
-        private readonly IPluginInstaller pluginInstaller;
+        private readonly IPluginsInstaller pluginInstaller;
 
         private readonly string installationDir;
         private readonly ILogger logger;
@@ -46,7 +46,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     A collection of fetchers.
         /// </param>
         /// <param name="pluginInstaller">
-        ///     A <see cref="IPluginInstaller"/> this plugin manager uses to install/unintall plugins.
+        ///     A <see cref="IPluginsInstaller"/> this plugin manager uses to install/unintall plugins.
         /// </param>
         /// <param name="installationDir">
         ///     The directory where the plugins will be installed to.
@@ -54,7 +54,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginInstaller pluginInstaller,
+            IPluginsInstaller pluginInstaller,
             string installationDir)
             : this(
                   discovererProviders,
@@ -75,7 +75,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     A collection of fetchers.
         /// </param>
         /// <param name="pluginInstaller">
-        ///     A <see cref="IPluginInstaller"/> this plugin manager uses to install/unintall plugins.
+        ///     A <see cref="IPluginsInstaller"/> this plugin manager uses to install/unintall plugins.
         /// </param>
         /// <param name="installationDir">
         ///     The directory where the plugins will be installed to.
@@ -86,7 +86,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
-            IPluginInstaller pluginInstaller,
+            IPluginsInstaller pluginInstaller,
             string installationDir,
             ILogger logger)
         {
@@ -394,12 +394,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         }
 
         /// <inheritdoc />
-        public Task<InstalledPluginsResults> GetInstalledPluginsAsync(CancellationToken cancellationToken)
-        {
-            return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
-        }
-
-        /// <inheritdoc />
         public async Task<InstalledPluginInfo> TryInstallAvailablePluginAsync(
             AvailablePlugin availablePlugin,
             CancellationToken cancellationToken,
@@ -458,6 +452,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             }
         }
 
+        public Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(CancellationToken cancellationToken)
+        {
+            return this.pluginInstaller.GetAllInstalledPluginsAsync(cancellationToken);
+        }
+
+        public Task<InstalledPluginInfo> InstallPluginAsync(
+            Stream pluginStream,
+            string installationRoot,
+            Uri sourceUri,
+            CancellationToken cancellationToken,
+            IProgress<int> progress)
+        {
+            return this.pluginInstaller.InstallPluginAsync(
+                pluginStream,
+                installationRoot,
+                sourceUri,
+                cancellationToken,
+                progress);
+        }
+
         /// <inheritdoc />
         public async Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
@@ -468,11 +482,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             return await this.pluginInstaller.UninstallPluginAsync(installedPlugin, cancellationToken);
         }
 
-        /// <inheritdoc />
-        public async Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken)
-        {
-            await this.pluginInstaller.CleanupObsoletePluginsAsync(this.installationDir, cancellationToken);
-        }
 
         private async Task<IPluginFetcher> TryGetPluginFetcher(AvailablePluginInfo availablePluginInfo)
         {
