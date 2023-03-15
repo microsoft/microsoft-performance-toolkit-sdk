@@ -787,8 +787,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     try
                     {
-                        cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
                         cds.Instance.SetLogger(instance.CreateLogger(cds.Instance.GetType()));
+                        cds.Instance.SetApplicationEnvironment(instance.applicationEnvironment);
                     }
                     catch (Exception e)
                     {
@@ -1028,7 +1028,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     ProcessorOptions processorOptions = ProcessorOptions.Default;
                     var dsg = new DataSourceGroup(dataSources, new DefaultProcessingMode()); // Todo #214
-                    
+
                     // Retrieve processor options
                     try
                     {
@@ -1054,7 +1054,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             var executors = new List<ProcessingSourceExecutor>();
-            
+
             // If unable to retrieve any options or invalid options, return early
             if (optionsFailure)
             {
@@ -1113,7 +1113,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private static bool AreUnsupportedOptions(
             ProcessingSourceReference processingSourceReference,
-            ProcessorOptions processorOptions, 
+            ProcessorOptions processorOptions,
             ILogger logger)
         {
             bool areUnsupportedOptions = false;
@@ -1131,7 +1131,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     areUnsupportedOptions = true;
                     logger.Error($"Provided option instance is null for ${processingSourceReference} (${processingSourceReference.Guid}).");
                     continue;
-                } 
+                }
 
                 if (!processingSourceReference.CommandLineOptions.Any(clo => clo.Id.Equals(optionInstance.Id)))
                 {
