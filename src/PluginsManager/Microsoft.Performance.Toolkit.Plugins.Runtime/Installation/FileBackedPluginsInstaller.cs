@@ -19,28 +19,28 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
-    ///     Represents a <see cref="IPluginInstaller"/> that installs plugins from a <see cref="PluginPackage"/> stream.
+    ///     Represents a <see cref="IPluginsInstaller"/> that installs plugins from a <see cref="PluginPackage"/> stream.
     /// </summary>
-    public sealed class PluginPackageInstaller
-        : IPluginInstaller
+    public sealed class FileBackedPluginsInstaller
+        : IPluginsInstaller
     {
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
         private readonly ILogger logger;
 
         /// <summary>
-        ///     Creates an instance of a <see cref="PluginPackageInstaller"/>.
+        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/>.
         /// </summary>
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
-        public PluginPackageInstaller(IPluginRegistry pluginRegistry)
+        public FileBackedPluginsInstaller(IPluginRegistry pluginRegistry)
             : this(pluginRegistry, SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
         {
         }
 
         /// <summary>
-        ///     Creates an instance of a <see cref="PluginPackageInstaller"/> with a <see cref="ISerializer{PluginMetadata}"/> object.
+        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/> with a <see cref="ISerializer{PluginMetadata}"/> object.
         /// </summary>
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
@@ -48,15 +48,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="metadataSerializer">
         ///     The <see cref="ISerializer{PluginMetadata}"/> used to deserialize plugin metadata.
         /// </param> 
-        public PluginPackageInstaller(
+        public FileBackedPluginsInstaller(
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer)
-            : this(pluginRegistry, metadataSerializer, Logger.Create<PluginPackageInstaller>())
+            : this(pluginRegistry, metadataSerializer, Logger.Create<FileBackedPluginsInstaller>())
         {
         }
 
         /// <summary>
-        ///     Creates an instance of a <see cref="PluginPackageInstaller"/> with a <see cref="ISerializer{PluginMetadata}"/> object
+        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/> with a <see cref="ISerializer{PluginMetadata}"/> object
         ///     and a <see cref="ILogger"/> object.
         /// </summary>
         /// <param name="pluginRegistry">
@@ -65,7 +65,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="logger">
         ///     Used to log messages.
         /// </param>
-        public PluginPackageInstaller(
+        public FileBackedPluginsInstaller(
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             ILogger logger)
@@ -286,7 +286,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Attempts to clean up all obsolete (unreigstered) plugin files.
+        ///     This method should be called safely by plugins consumers.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     An await-able <see cref="Task"/> that, upon completion, indicates the files have been cleaned up.
+        /// </returns>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when there is an error reading or writing to plugin registry.
+        /// </exception>
+        /// <exception cref="RepositoryCorruptedException">
+        ///     Throws when the plugin registry is in an invalid state.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was canceled.
+        /// </exception>
         public async Task CleanupObsoletePluginsAsync(string installationDir, CancellationToken cancellationToken)
         {
             if (!Directory.Exists(installationDir))
