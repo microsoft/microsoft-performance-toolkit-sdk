@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -18,7 +17,6 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
@@ -33,8 +31,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         private readonly PluginsManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
         private readonly PluginsManagerResourceRepository<IPluginFetcher> fetcherRepository;
         private readonly IReadonlyRepository<PluginSource> sourcesRepo;
-        private readonly DiscovererSourcesManager discovererSourcesManager;
-
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
 
         private readonly IPluginsInstaller pluginInstaller;
@@ -209,18 +205,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             {
                 return this.sourcesRepo.Items;
             }
-        }
-
-        /// <inheritdoc />
-        public void ClearPluginSources()
-        {
-            this.discovererSourcesManager.ClearPluginSources();
-        }
-
-        /// <inheritdoc />
-        public async Task AddPluginSourcesAsync(IEnumerable<PluginSource> sources)
-        {
-            await this.discovererSourcesManager.AddPluginSourcesAsync(sources);
         }
 
         // TODO: #271 Re-enable when we start to support loading additional resources.
