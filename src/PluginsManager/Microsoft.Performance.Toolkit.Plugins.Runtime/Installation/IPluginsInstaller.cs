@@ -47,8 +47,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     The <see cref="InstalledPluginInfo"/> of the installed plugin if the installation was successful. Otherwise, null.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
-        ///      <paramref name="sourceUri"/> is null.
+        ///     Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
+        ///     <paramref name="sourceUri"/> is null.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.

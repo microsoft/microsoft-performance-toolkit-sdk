@@ -1,33 +1,37 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core;
-using System.Threading;
-using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
-    public class PluginsDiscovery
-        : IPluginsDiscovery
+    /// <inheritdoc/>
+    public class PluginsDiscoveryManager
+        : IPluginsDiscoveryManager
     {
         private readonly IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo;
         private readonly IReadonlyRepository<PluginSource> pluginSourceRepo;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
         private readonly ILogger logger;
 
-        public PluginsDiscovery(
+        public PluginsDiscoveryManager(
             IReadonlyRepository<PluginSource> pluginSourceRepo,
-            IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo)
+            IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo,
+            ILogger logger)
         {
             this.pluginSourceRepo = pluginSourceRepo;
             this.discovererProvidersRepo = discovererProvidersRepo;
@@ -35,11 +39,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
             this.pluginSourceRepo.ItemsModified += OnSourcesChanged;
             this.discovererProvidersRepo.ResourcesAdded += OnNewProvidersAdded;
+            this.logger = logger;
+
+            //TODO: Initialize discoverers for existing sources
         }
 
         /// <inheritdoc />
         public event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
 
+        /// <inheritdoc />
         public IEnumerable<PluginSource> PluginSources
         {
             get
@@ -47,7 +55,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 return this.pluginSourceRepo.Items;
             }
         }
-
 
         /// <inheritdoc />
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(
@@ -327,7 +334,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
             }
         }
-        
+
         /// <summary>
         ///     Creates discoverer instances for a plugin source given a collection of providers.
         /// </summary>

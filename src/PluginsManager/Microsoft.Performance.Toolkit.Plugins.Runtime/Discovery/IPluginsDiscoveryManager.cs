@@ -1,17 +1,30 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System;
 using System.Collections.Generic;
-using Microsoft.Performance.Toolkit.Plugins.Core;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
-    public interface IPluginsDiscovery
+    /// <summary>
+    ///     Contains logic for discovering plugins.
+    /// </summary>
+    public interface IPluginsDiscoveryManager
     {
+        /// <summary>
+        ///     Gets all plugin sources that this plugin manager is configured to discover plugins from.
+        /// </summary>
         IEnumerable<PluginSource> PluginSources { get; }
 
+        /// <summary>
+        ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
+        ///    Subscribe to this event to handle errors related to a particular <see cref="PluginSource"/>.
+        /// </summary>
         event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
 
         /// <summary>
@@ -88,6 +101,5 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             PluginSource pluginSource,
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
-
     }
 }
