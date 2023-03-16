@@ -42,6 +42,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.pluginFetcher = fetcher;
         }
 
+        public AvailablePlugin(
+            AvailablePluginInfo pluginInfo,
+            IPluginDiscoverer discoverer)
+        {
+            this.AvailablePluginInfo = pluginInfo;
+            this.pluginDiscoverer = discoverer;
+        }
+
+
         /// <summary>
         ///     Gets the <see cref="AvailablePluginInfo"/> associated with this plugin.
         /// </summary>

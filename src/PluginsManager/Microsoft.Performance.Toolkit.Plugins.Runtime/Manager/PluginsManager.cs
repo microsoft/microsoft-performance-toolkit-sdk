@@ -96,6 +96,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             this.discovererRepository = new PluginsManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
             this.fetcherRepository = new PluginsManagerResourceRepository<IPluginFetcher>(fetchers);
+            this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
 
             this.sourcesRepo = sourcesRepo;
             this.sourcesRepo.ItemsModified += OnSourcesChanged;
