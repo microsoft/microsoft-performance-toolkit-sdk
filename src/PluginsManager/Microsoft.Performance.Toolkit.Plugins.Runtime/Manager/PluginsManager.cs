@@ -2,7 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -14,6 +17,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
@@ -28,8 +32,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
     {
         private readonly PluginsManagerResourceRepository<IPluginDiscovererProvider> discovererRepository;
         private readonly PluginsManagerResourceRepository<IPluginFetcher> fetcherRepository;
-
+        private readonly IReadonlyRepository<PluginSource> sourcesRepo;
         private readonly DiscovererSourcesManager discovererSourcesManager;
+
+        private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
 
         private readonly IPluginsInstaller pluginInstaller;
         private readonly ILogger logger;
@@ -56,6 +62,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             : this(
                   discovererProviders,
                   fetchers,
+                  new PluginSourceRepo(),
                   pluginInstaller,
                   Logger.Create<PluginsManager>())
         {
@@ -82,6 +89,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         public PluginsManager(
             IEnumerable<IPluginDiscovererProvider> discovererProviders,
             IEnumerable<IPluginFetcher> fetchers,
+            IReadonlyRepository<PluginSource> sourcesRepo,
             IPluginsInstaller pluginInstaller,
             ILogger logger)
         {
@@ -92,11 +100,103 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             this.discovererRepository = new PluginsManagerResourceRepository<IPluginDiscovererProvider>(discovererProviders);
             this.fetcherRepository = new PluginsManagerResourceRepository<IPluginFetcher>(fetchers);
-            this.discovererSourcesManager = new DiscovererSourcesManager(this.discovererRepository);
-            this.discovererSourcesManager.PluginSourceErrorOccured += (s, e) => PluginSourceErrorOccured?.Invoke(s, e);
+
+            this.sourcesRepo = sourcesRepo;
+            this.sourcesRepo.ItemsModified += OnSourcesChanged;
+            this.discovererRepository.ResourcesAdded += OnNewProvidersAdded;
 
             this.pluginInstaller = pluginInstaller;
             this.logger = logger;
+        }
+
+        private async void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
+        {
+            foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
+            {
+                kvp.Value.AddRange(await CreateDiscoverers(kvp.Key, e.NewPluginsManagerResources));
+            }
+        }
+
+        private async void OnSourcesChanged(object sender, EventArgs e)
+        {
+            this.sourceToDiscoverers.Clear();
+            foreach (PluginSource source in this.sourcesRepo.Items)
+            {
+                IEnumerable<IPluginDiscoverer> discoverers = await CreateDiscoverers(
+                    source,
+                    this.discovererRepository.Resources);
+
+                this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
+            }
+        }
+        /// <summary>
+        ///     Creates discoverer instances for a plugin source given a collection of providers.
+        /// </summary>
+        /// <param name="pluginSource">
+        ///     A plugin source.
+        /// </param>
+        /// <param name="providers">
+        ///     A collection of discoverer providers.
+        /// </param>
+        /// <returns>
+        ///     A collection of discoverers that can discover plugins from the given plugin source.
+        /// </returns>
+        private async Task<IEnumerable<IPluginDiscoverer>> CreateDiscoverers(
+           PluginSource pluginSource,
+           IEnumerable<IPluginDiscovererProvider> providers)
+        {
+            IList<IPluginDiscoverer> results = new List<IPluginDiscoverer>();
+            foreach (IPluginDiscovererProvider provider in providers)
+            {
+                try
+                {
+                    bool isSupported = await provider.IsSupportedAsync(pluginSource);
+                    if (!isSupported)
+                    {
+                        continue;
+                    }
+                }
+                catch (Exception e)
+                {
+                    string errorMsg = $"Error occurred when checking if {pluginSource} is supported by discoverer provider {provider.GetType().Name}.";
+                    var errorInfo = new ErrorInfo(
+                        ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                        errorMsg);
+
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
+
+                    this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
+
+                    continue;
+                }
+
+                IPluginDiscoverer discoverer = null;
+                try
+                {
+                    discoverer = provider.CreateDiscoverer(pluginSource);
+                }
+                catch (Exception e)
+                {
+                    string errorMsg = $"Error occurred when creating discoverer for {pluginSource}.";
+                    var errorInfo = new ErrorInfo(
+                       ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                       errorMsg);
+
+                    PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
+
+                    this.logger.Error($"{errorMsg} Skipping creating discoverers from this provider.");
+
+                    continue;
+                }
+
+                Debug.Assert(discoverer != null);
+
+                discoverer.SetLogger(Logger.Create(discoverer.GetType()));
+                results.Add(discoverer);
+            }
+
+            this.logger.Info($"{results.Count} discoverers are created for plugin source {pluginSource}");
+            return results;
         }
 
         /// <inheritdoc />
@@ -107,7 +207,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         {
             get
             {
-                return this.discovererSourcesManager.PluginSources;
+                return this.sourcesRepo.Items;
             }
         }
 
@@ -211,7 +311,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(pluginSource).ToArray();
+            IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[pluginSource].ToArray();
             if (!discoverers.Any())
             {
                 HandleResourceNotFoundError(
@@ -321,7 +421,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             Guard.NotNull(source, nameof(source));
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            IPluginDiscoverer[] discoverers = this.discovererSourcesManager.GetDiscoverersFromSource(source).ToArray();
+            IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[source].ToArray();
             if (!discoverers.Any())
             {
                 HandleResourceNotFoundError(

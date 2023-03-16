@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
 {
     /// <summary>
     ///     Represents a repository of <typeparamref name="TEntity"/> objects.

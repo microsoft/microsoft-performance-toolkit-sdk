@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
+
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>

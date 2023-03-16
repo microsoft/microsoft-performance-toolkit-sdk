@@ -24,22 +24,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         IEnumerable<PluginSource> PluginSources { get; }
 
         /// <summary>
-        ///     Adds a collection of plugin sources to the plugins manager.
-        /// </summary>
-        /// <param name="sources">
-        ///     The plugin sources to be added.
-        /// </param>
-        /// <returns>
-        ///     A task that completes when all plugin sources have been added.
-        /// </returns>
-        Task AddPluginSourcesAsync(IEnumerable<PluginSource> sources);
-
-        /// <summary>
-        ///     Clears all plugin sources in this plugin manager.
-        /// </summary>
-        void ClearPluginSources();
-
-        /// <summary>
         ///     Gets all available plugins in their latest versions.
         /// </summary>
         /// <param name="cancellationToken">
