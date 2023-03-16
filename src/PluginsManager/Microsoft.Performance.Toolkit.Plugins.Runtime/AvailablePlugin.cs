@@ -18,29 +18,29 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public sealed class AvailablePlugin
     {
         private readonly IPluginDiscoverer pluginDiscoverer;
-        private readonly IPluginFetcher pluginFetcher;
+        // dprivate readonly IPluginFetcher pluginFetcher;
 
-        /// <summary>
-        ///     Creates an instance of <see cref="AvailablePlugin"/>
-        /// </summary>
-        /// <param name="pluginInfo">
-        ///     The <see cref="AvailablePluginInfo"/> object cotaining information about this plugin.
-        /// </param>
-        /// <param name="discoverer">
-        ///     The <see cref="IPluginDiscoverer"/> this plugin is discovered by.
-        /// </param>
-        /// <param name="fetcher">
-        ///     The <see cref="IPluginFetcher"/> this plugin uses to fetch plugin content.
-        /// </param>
-        public AvailablePlugin(
-            AvailablePluginInfo pluginInfo,
-            IPluginDiscoverer discoverer,
-            IPluginFetcher fetcher)
-        {
-            this.AvailablePluginInfo = pluginInfo;
-            this.pluginDiscoverer = discoverer;
-            this.pluginFetcher = fetcher;
-        }
+        ///// <summary>
+        /////     Creates an instance of <see cref="AvailablePlugin"/>
+        ///// </summary>
+        ///// <param name="pluginInfo">
+        /////     The <see cref="AvailablePluginInfo"/> object cotaining information about this plugin.
+        ///// </param>
+        ///// <param name="discoverer">
+        /////     The <see cref="IPluginDiscoverer"/> this plugin is discovered by.
+        ///// </param>
+        ///// <param name="fetcher">
+        /////     The <see cref="IPluginFetcher"/> this plugin uses to fetch plugin content.
+        ///// </param>
+        //public AvailablePlugin(
+        //    AvailablePluginInfo pluginInfo,
+        //    IPluginDiscoverer discoverer,
+        //    IPluginFetcher fetcher)
+        //{
+        //    this.AvailablePluginInfo = pluginInfo;
+        //    this.pluginDiscoverer = discoverer;
+        //    this.pluginFetcher = fetcher;
+        //}
 
         public AvailablePlugin(
             AvailablePluginInfo pluginInfo,
@@ -49,7 +49,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.AvailablePluginInfo = pluginInfo;
             this.pluginDiscoverer = discoverer;
         }
-
 
         /// <summary>
         ///     Gets the <see cref="AvailablePluginInfo"/> associated with this plugin.
@@ -70,12 +69,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             return this.pluginDiscoverer.GetPluginMetadataAsync(this.AvailablePluginInfo.Identity, cancellationToken);
         }
 
-        internal Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
-        {
-            return this.pluginFetcher.GetPluginStreamAsync(
-                this.AvailablePluginInfo,
-                cancellationToken,
-                progress);
-        }
+        //internal Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
+        //{
+        //    return this.pluginFetcher.GetPluginStreamAsync(
+        //        this.AvailablePluginInfo,
+        //        cancellationToken,
+        //        progress);
+        //}
     }
 }
