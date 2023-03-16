@@ -14,7 +14,6 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Transport;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 {
@@ -24,7 +23,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
     {
         private readonly IPluginsDiscoveryManager pluginsDiscovery;
         private readonly IPluginsInstaller pluginsInstaller;
-        private readonly IPluginsFetchingManager pluginFetchingManager;
         private readonly ILogger logger;
 
         ///// <summary>
@@ -61,16 +59,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// <param name="pluginInstaller">
         ///     A <see cref="IPluginsInstaller"/> this plugin manager uses to install/unintall plugins.
         /// </param>
-        /// <param name="pluginFetchingManager">
-        ///     A <see cref="IPluginsFetchingManager"/> this plugin manager uses to fetch plugins.
-        /// </param>
         /// <param name="logger">
         ///     A logger used to log messages.
         /// </param>
         public PluginsManager(
             IPluginsDiscoveryManager pluginsDiscoveryManager,
             IPluginsInstaller pluginsInstaller,
-            IPluginsFetchingManager pluginFetchingManager,
             ILogger logger)
         {
             Guard.NotNull(pluginsInstaller, nameof(pluginsInstaller));
@@ -78,7 +72,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
 
             this.pluginsDiscovery = pluginsDiscoveryManager;
             this.pluginsInstaller = pluginsInstaller;
-            this.pluginFetchingManager = pluginFetchingManager;
             this.logger = logger;
         }
 
@@ -155,7 +148,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             Stream stream;
             try
             {
-                stream = await this.pluginFetchingManager.FetchPluginStream(availablePlugin, cancellationToken, progress);
+                stream = await availablePlugin.GetPluginPackageStream(cancellationToken, progress);
             }
             catch (OperationCanceledException)
             {

@@ -13,9 +13,11 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
@@ -24,17 +26,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         : IPluginsDiscoveryManager
     {
         private readonly IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo;
+        private IPluginsManagerResourceRepository<IPluginFetcher> fetchersRepo;
         private readonly IReadonlyRepository<PluginSource> pluginSourceRepo;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
         private readonly ILogger logger;
 
         public PluginsDiscoveryManager(
             IReadonlyRepository<PluginSource> pluginSourceRepo,
+            IPluginsManagerResourceRepository<IPluginFetcher> fetchersRepo,
             IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo,
             ILogger logger)
         {
             this.pluginSourceRepo = pluginSourceRepo;
             this.discovererProvidersRepo = discovererProvidersRepo;
+            this.fetchersRepo = fetchersRepo;
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
 
             this.pluginSourceRepo.ItemsModified += OnSourcesChanged;
@@ -419,16 +424,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 if (!results.TryGetValue(id, out (AvailablePlugin, IPluginDiscoverer) tuple) ||
                     tuple.Item1.AvailablePluginInfo.Identity.Version < pluginInfo.Identity.Version)
                 {
-                    //IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
-                    //if (fetcher == null)
-                    //{
-                    //    HandleResourceNotFoundError(
-                    //        source,
-                    //        $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
-                    //    continue;
-                    //}
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
+                    if (fetcher == null)
+                    {
+                        HandleResourceNotFoundError(
+                            source,
+                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                        continue;
+                    }
 
-                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer);
+                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
                     results[id] = (newPlugin, discoverer);
                 }
                 else if (tuple.Item1.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
@@ -449,15 +454,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             {
                 if (!results.TryGetValue(pluginInfo.Identity, out (AvailablePlugin, IPluginDiscoverer) tuple))
                 {
-                    //IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
-                    //if (fetcher == null)
-                    //{
-                    //    HandleResourceNotFoundError(
-                    //        source,
-                    //        $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
-                    //    continue;
-                    //}
-                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer);
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
+                    if (fetcher == null)
+                    {
+                        HandleResourceNotFoundError(
+                            source,
+                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                        continue;
+                    }
+                    
+                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
                     results[pluginInfo.Identity] = (newPlugin, discoverer);
                 }
                 else
@@ -468,7 +474,36 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             }
         }
 
+        private async Task<IPluginFetcher> TryGetPluginFetcher(AvailablePluginInfo availablePluginInfo)
+        {
+            IPluginFetcher fetcherToUse = this.fetchersRepo.Resources
+                .SingleOrDefault(fetcher => fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId);
 
+            if (fetcherToUse == null)
+            {
+                this.logger.Error($"Fetcher with ID {availablePluginInfo.FetcherResourceId} is not found.");
+                return null;
+            }
+
+            // Validate that the found fetcher actually supports fetching the given plugin.
+            Type fetcherType = fetcherToUse.GetType();
+            try
+            {
+                bool isSupported = await fetcherToUse.IsSupportedAsync(availablePluginInfo);
+                if (!isSupported)
+                {
+                    this.logger.Error($"Fetcher {fetcherType.Name} doesn't support fetching from {availablePluginInfo.PluginPackageUri}");
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                this.logger.Error($"Error occurred when checking if plugin {availablePluginInfo.Identity} is supported by {fetcherType.Name}.", e);
+                return null;
+            }
+
+            return fetcherToUse;
+        }
         private void HandleResourceNotFoundError(PluginSource pluginSource, string errorMsg)
         {
             var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginsManagerResourceNotFound, errorMsg);
