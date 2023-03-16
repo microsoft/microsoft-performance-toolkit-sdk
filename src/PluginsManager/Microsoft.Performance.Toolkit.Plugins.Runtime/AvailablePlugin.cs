@@ -18,7 +18,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public sealed class AvailablePlugin
     {
         private readonly IPluginDiscoverer pluginDiscoverer;
-        // dprivate readonly IPluginFetcher pluginFetcher;
+        // private readonly IPluginFetcher pluginFetcher;
 
         ///// <summary>
         /////     Creates an instance of <see cref="AvailablePlugin"/>
