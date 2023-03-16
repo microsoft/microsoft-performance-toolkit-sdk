@@ -17,7 +17,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
     /// <typeparam name="TIdentifier">
     ///     The type of the identifier used to retrieve <typeparamref name="TEntity"/> objects.
     /// </typeparam>
-    public interface IRepository<TEntity, TIdentifier>
+    public interface IKeyedRepository<TEntity, TIdentifier>
     {
         /// <summary>
         ///     Gets all <typeparamref name="TEntity"/> objects in the repository.

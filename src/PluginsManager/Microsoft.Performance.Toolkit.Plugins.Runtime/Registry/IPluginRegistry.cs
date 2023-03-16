@@ -10,7 +10,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     ///     This registry also provides a lock that can be used to synchronize access to the registry.
     /// </summary>
     public interface IPluginRegistry
-        : IRepository<InstalledPluginInfo, string>,
+        : IKeyedRepository<InstalledPluginInfo, string>,
           ISynchronizedObject
     {
         /// <summary>
