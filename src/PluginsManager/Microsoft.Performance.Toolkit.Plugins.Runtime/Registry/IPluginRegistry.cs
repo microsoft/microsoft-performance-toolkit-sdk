@@ -13,9 +13,5 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         : IKeyedRepository<InstalledPluginInfo, string>,
           ISynchronizedObject
     {
-        /// <summary>
-        ///     Gets the root path of the registry.
-        /// </summary>
-        string RegistryRoot { get; }
     }
 }

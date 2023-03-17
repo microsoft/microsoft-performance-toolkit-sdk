@@ -201,7 +201,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 };
 
-                string installationDir = Path.GetFullPath(Path.Combine(this.installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
+                string installationDir = GetInstallationDirOfPlugin(pluginPackage.Id, pluginPackage.Version);
                 try
                 {
                     // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
@@ -217,7 +217,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         sourceUri,
                         pluginPackage.DisplayName,
                         pluginPackage.Description,
-                        installationDir,
                         DateTime.UtcNow,
                         checksum);
 
@@ -318,7 +317,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllAsync(cancellationToken);
-                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
+                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => GetInstallationDirOfPlugin(p.Id, p.Version));
 
                 foreach (DirectoryInfo dir in new DirectoryInfo(installationDir).GetDirectories())
                 {
@@ -337,10 +336,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(plugin, nameof(plugin));
 
-            string installPath = plugin.InstallPath;
+            string installPath = GetInstallationDirOfPlugin(plugin.Id, plugin.Version);
             string checksum = await HashUtils.GetDirectoryHash(installPath);
 
             return checksum.Equals(plugin.Checksum);
+        }
+
+        private string GetInstallationDirOfPlugin(string pluginId, Version pluginVersion)
+        {
+            Guard.NotNull(pluginId, nameof(pluginId));
+            Guard.NotNull(pluginVersion, nameof(pluginVersion));
+
+            return Path.GetFullPath(Path.Combine(this.installationRoot, $"{pluginId}-{pluginVersion}"));
         }
 
         private async Task<InstalledPlugin> CreateInstalledPluginAsync(
@@ -362,7 +369,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     installedPlugin);
             }
 
-            string metadataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
+            string installPath = GetInstallationDirOfPlugin(installedPlugin.Id, installedPlugin.Version);
+            string metadataFileName = Path.Combine(installPath, PluginPackage.PluginMetadataFileName);
             PluginMetadata pluginMetadata;
             using (var fileStream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {

@@ -61,7 +61,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo,
             ILogger logger)
         {
-            IPluginRegistry registry = new FileSystemPluginRegistry(registryRoot);
+            IPluginRegistry registry = new FileBackedPluginRegistry(registryRoot);
             IPluginsInstaller installer = new FileBackedPluginsInstaller(registryRoot, registry);
             IPluginsDiscoveryManager discoverer = new PluginsDiscoveryManager(
                 pluginSourcesRepo,
