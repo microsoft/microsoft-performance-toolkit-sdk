@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
 {
@@ -13,16 +13,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
     /// <typeparam name="TEntity">
     ///     The type of the resources stored in this repository.
     /// </typeparam>
-    public interface IReadonlyRepository<TEntity>
+    public interface IRepository<TEntity>
+        : INotifyCollectionChanged
     {
         /// <summary>
-        ///     Gets all plugins manager resources contained in this repository.
+        ///     Gets all resources contained in this repository.
         /// </summary>
         IEnumerable<TEntity> Items { get; }
-
-        /// <summary>
-        ///    Raised when new resources are added to this repository.
-        /// </summary>
-        event EventHandler ItemsModified;
     }
 }

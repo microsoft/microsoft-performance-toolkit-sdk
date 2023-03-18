@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
         /// </exception>
-        Task<InstalledPluginInfo> InstallPluginAsync(
+        Task<InstalledPlugin> InstallPluginAsync(
             Stream pluginStream,
             Uri sourceUri,
             CancellationToken cancellationToken,

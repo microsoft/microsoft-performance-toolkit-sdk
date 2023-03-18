@@ -1,19 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <inheritdoc />
     public class PluginsManagerResourceRepository<T>
         : IPluginsManagerResourcesConsumer,
-          IPluginsManagerResourceRepository<T>
+          IRepository<T>
         where T : IPluginsManagerResource
     {
         private readonly HashSet<PluginsManagerResourceReference> resources;
@@ -33,7 +34,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public IEnumerable<T> Resources
+        public IEnumerable<T> Items
         {
             get
             {
@@ -56,14 +57,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
                 {
                     this.resources.UnionWith(newResources);
                     SetResourcesLoggers(newResources.Select(r => r.Instance).OfType<T>());
-                    ResourcesAdded?.Invoke(this, new NewResourcesEventArgs<T>(newResources.Select(r => r.Instance).OfType<T>()));
+                    CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
+                        NotifyCollectionChangedAction.Add,
+                        newResources));
                 }
             }
         }
 
-        /// <inheritdoc />
-        public event EventHandler<NewResourcesEventArgs<T>> ResourcesAdded;
-        
+        /// <inheritdoc/>
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+
         private void SetResourcesLoggers(IEnumerable<T> pluginsManagerResources)
         {
             foreach (T resource in pluginsManagerResources)

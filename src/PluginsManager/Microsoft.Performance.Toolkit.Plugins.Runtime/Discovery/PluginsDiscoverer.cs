@@ -16,34 +16,33 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using System.Collections.Specialized;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
     /// <inheritdoc/>
-    public class PluginsDiscoveryManager
-        : IPluginsDiscoveryManager
+    public class PluginsDiscoverer
+        : IPluginsDiscoverer
     {
-        private readonly IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo;
-        private IPluginsManagerResourceRepository<IPluginFetcher> fetchersRepo;
-        private readonly IReadonlyRepository<PluginSource> pluginSourceRepo;
+        private readonly IRepository<IPluginDiscovererProvider> discovererProvidersRepo;
+        private IRepository<IPluginFetcher> fetchersRepo;
+        private readonly IRepository<PluginSource> pluginSourceRepo;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
         private readonly ILogger logger;
 
-        public PluginsDiscoveryManager(
-            IReadonlyRepository<PluginSource> pluginSourceRepo,
-            IPluginsManagerResourceRepository<IPluginFetcher> fetchersRepo,
-            IPluginsManagerResourceRepository<IPluginDiscovererProvider> discovererProvidersRepo,
+        public PluginsDiscoverer(
+            IRepository<PluginSource> pluginSourceRepo,
+            IRepository<IPluginFetcher> fetchersRepo,
+            IRepository<IPluginDiscovererProvider> discovererProvidersRepo,
             ILogger logger)
         {
             this.pluginSourceRepo = pluginSourceRepo;
             this.discovererProvidersRepo = discovererProvidersRepo;
             this.fetchersRepo = fetchersRepo;
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
-
-            this.pluginSourceRepo.ItemsModified += OnSourcesChanged;
-            this.discovererProvidersRepo.ResourcesAdded += OnNewProvidersAdded;
+            this.pluginSourceRepo.CollectionChanged += OnSourcesChanged;
+            this.discovererProvidersRepo.CollectionChanged += OnNewProvidersAdded;
             this.logger = logger;
 
             //TODO: Initialize discoverers for existing sources
@@ -319,22 +318,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         }
 
 
-        private async void OnNewProvidersAdded(object sender, NewResourcesEventArgs<IPluginDiscovererProvider> e)
+        private async void OnNewProvidersAdded(object sender, NotifyCollectionChangedEventArgs e)
         {
-            foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
+            if (e.Action == NotifyCollectionChangedAction.Add)
             {
-                kvp.Value.AddRange(await CreateDiscoverers(kvp.Key, e.NewPluginsManagerResources));
+                foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
+                {
+                    kvp.Value.AddRange(await CreateDiscoverers(kvp.Key, e.NewItems.Cast<IPluginDiscovererProvider>()));
+                }
             }
         }
 
-        private async void OnSourcesChanged(object sender, EventArgs e)
-        {
+        private async void OnSourcesChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {   
             this.sourceToDiscoverers.Clear();
             foreach (PluginSource source in this.pluginSourceRepo.Items)
             {
                 IEnumerable<IPluginDiscoverer> discoverers = await CreateDiscoverers(
                     source,
-                    this.discovererProvidersRepo.Resources);
+                    this.discovererProvidersRepo.Items);
 
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
             }
@@ -476,7 +478,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private async Task<IPluginFetcher> TryGetPluginFetcher(AvailablePluginInfo availablePluginInfo)
         {
-            IPluginFetcher fetcherToUse = this.fetchersRepo.Resources
+            IPluginFetcher fetcherToUse = this.fetchersRepo.Items
                 .SingleOrDefault(fetcher => fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId);
 
             if (fetcherToUse == null)

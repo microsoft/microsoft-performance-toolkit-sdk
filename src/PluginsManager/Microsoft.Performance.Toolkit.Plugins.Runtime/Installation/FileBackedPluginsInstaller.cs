@@ -154,7 +154,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///        - If the plugin is corrupted or missing, it will be uninstalled and reinstalled.
         /// </remarks>
         /// <inheritdoc/>
-        public async Task<InstalledPluginInfo> InstallPluginAsync(
+        public async Task<InstalledPlugin> InstallPluginAsync(
             Stream stream,
             Uri sourceUri,
             CancellationToken cancellationToken,
@@ -231,7 +231,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Info($"{pluginToInstall} is registered in the plugin registry.");
                     }
 
-                    return pluginToInstall;
+                    return new InstalledPlugin(pluginToInstall, pluginPackage.PluginMetadata);
                 }
                 catch (Exception e)
                 {

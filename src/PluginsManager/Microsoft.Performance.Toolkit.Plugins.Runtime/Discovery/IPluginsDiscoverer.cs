@@ -14,7 +14,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     /// <summary>
     ///     Contains logic for discovering plugins.
     /// </summary>
-    public interface IPluginsDiscoveryManager
+    public interface IPluginsDiscoverer
     {
         /// <summary>
         ///     Gets all plugin sources that this plugin manager is configured to discover plugins from.
