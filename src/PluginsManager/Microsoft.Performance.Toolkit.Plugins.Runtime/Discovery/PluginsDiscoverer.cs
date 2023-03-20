@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -13,23 +14,24 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
-using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
-using System.Collections.Specialized;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
     /// <inheritdoc/>
-    public class PluginsDiscoverer
+    public sealed class PluginsDiscoverer
         : IPluginsDiscoverer
     {
         private readonly IRepository<IPluginDiscovererProvider> discovererProvidersRepo;
-        private IRepository<IPluginFetcher> fetchersRepo;
+        private readonly IRepository<IPluginFetcher> fetchersRepo;
         private readonly IRepository<PluginSource> pluginSourceRepo;
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
         private readonly ILogger logger;
+        private bool needsRefresh = true;
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         public PluginsDiscoverer(
             IRepository<PluginSource> pluginSourceRepo,
@@ -40,12 +42,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             this.pluginSourceRepo = pluginSourceRepo;
             this.discovererProvidersRepo = discovererProvidersRepo;
             this.fetchersRepo = fetchersRepo;
+            
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
-            this.pluginSourceRepo.CollectionChanged += OnSourcesChanged;
-            this.discovererProvidersRepo.CollectionChanged += OnNewProvidersAdded;
+            this.pluginSourceRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
+            this.discovererProvidersRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
             this.logger = logger;
-
-            //TODO: Initialize discoverers for existing sources
         }
 
         /// <inheritdoc />
@@ -64,6 +65,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(
             CancellationToken cancellationToken)
         {
+            await RefereshDiscoverersIfNeeded(cancellationToken);
+
             PluginSource[] pluginSources = this.PluginSources.ToArray();
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
                 .Select(s => GetAvailablePluginsLatestFromSourceAsync(s, cancellationToken))
@@ -141,6 +144,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
+            await RefereshDiscoverersIfNeeded(cancellationToken);
+
             IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[pluginSource].ToArray();
             if (!discoverers.Any())
             {
@@ -215,6 +220,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
+            await RefereshDiscoverersIfNeeded(cancellationToken);
+
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
                 .Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken))
                 .ToArray();
@@ -250,6 +257,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             Guard.NotNull(source, nameof(source));
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
+
+            await RefereshDiscoverersIfNeeded(cancellationToken);
 
             IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[source].ToArray();
             if (!discoverers.Any())
@@ -317,28 +326,41 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             return availablePlugins.AsReadOnly();
         }
 
-
-        private async void OnNewProvidersAdded(object sender, NotifyCollectionChangedEventArgs e)
+        private void OnResourcesOrPluginSourcesChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.Action == NotifyCollectionChangedAction.Add)
-            {
-                foreach (KeyValuePair<PluginSource, List<IPluginDiscoverer>> kvp in this.sourceToDiscoverers)
-                {
-                    kvp.Value.AddRange(await CreateDiscoverers(kvp.Key, e.NewItems.Cast<IPluginDiscovererProvider>()));
-                }
-            }
+            this.semaphore.Wait();
+            this.needsRefresh = true;
+            this.semaphore.Release();
         }
 
-        private async void OnSourcesChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {   
+        private async Task RefreshDiscoverers(CancellationToken cancellationToken)
+        {
             this.sourceToDiscoverers.Clear();
             foreach (PluginSource source in this.pluginSourceRepo.Items)
             {
                 IEnumerable<IPluginDiscoverer> discoverers = await CreateDiscoverers(
                     source,
-                    this.discovererProvidersRepo.Items);
+                    this.discovererProvidersRepo.Items,
+                    cancellationToken);
 
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
+            }
+        }
+
+        private async Task RefereshDiscoverersIfNeeded(CancellationToken cancellationToken)
+        {
+            await this.semaphore.WaitAsync(cancellationToken);
+            if (this.needsRefresh)
+            {
+                try
+                {
+                    await RefreshDiscoverers(cancellationToken);
+                }
+                finally
+                {
+                    this.needsRefresh = false;
+                    this.semaphore.Release();
+                }
             }
         }
 
@@ -356,7 +378,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// </returns>
         private async Task<IEnumerable<IPluginDiscoverer>> CreateDiscoverers(
            PluginSource pluginSource,
-           IEnumerable<IPluginDiscovererProvider> providers)
+           IEnumerable<IPluginDiscovererProvider> providers,
+           CancellationToken cancellationToken)
         {
             IList<IPluginDiscoverer> results = new List<IPluginDiscoverer>();
             foreach (IPluginDiscovererProvider provider in providers)
@@ -464,7 +487,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                             $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
                         continue;
                     }
-                    
+
                     var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
                     results[pluginInfo.Identity] = (newPlugin, discoverer);
                 }
@@ -506,6 +529,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
             return fetcherToUse;
         }
+        
         private void HandleResourceNotFoundError(PluginSource pluginSource, string errorMsg)
         {
             var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginsManagerResourceNotFound, errorMsg);
