@@ -25,24 +25,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     public sealed class PluginsDiscoverer
         : IPluginsDiscoverer
     {
-        private readonly IRepository<IPluginDiscovererProvider> discovererProvidersRepo;
-        private readonly IRepository<IPluginFetcher> fetchersRepo;
-        private readonly IRepository<PluginSource> pluginSourceRepo;
+        private readonly IRepositoryRO<IPluginDiscovererProvider> discovererProvidersRepo;
+        private readonly IRepositoryRO<IPluginFetcher> fetchersRepo;
+        private readonly IRepositoryRO<PluginSource> pluginSourceRepo;
+
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
-        private readonly ILogger logger;
-        private bool needsRefresh = true;
+        private bool requiresDiscoverersRefresh = true;
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
+        private readonly ILogger logger;
+
         public PluginsDiscoverer(
-            IRepository<PluginSource> pluginSourceRepo,
-            IRepository<IPluginFetcher> fetchersRepo,
-            IRepository<IPluginDiscovererProvider> discovererProvidersRepo,
+            IRepositoryRO<PluginSource> pluginSourceRepo,
+            IRepositoryRO<IPluginFetcher> fetchersRepo,
+            IRepositoryRO<IPluginDiscovererProvider> discovererProvidersRepo,
             ILogger logger)
         {
             this.pluginSourceRepo = pluginSourceRepo;
             this.discovererProvidersRepo = discovererProvidersRepo;
             this.fetchersRepo = fetchersRepo;
-            
+
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
             this.pluginSourceRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
             this.discovererProvidersRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
@@ -65,7 +67,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(
             CancellationToken cancellationToken)
         {
-            await RefereshDiscoverersIfNeeded(cancellationToken);
+            await RefereshDiscoverersIfNeededAsync(cancellationToken);
 
             PluginSource[] pluginSources = this.PluginSources.ToArray();
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
@@ -144,7 +146,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            await RefereshDiscoverersIfNeeded(cancellationToken);
+            await RefereshDiscoverersIfNeededAsync(cancellationToken);
 
             IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[pluginSource].ToArray();
             if (!discoverers.Any())
@@ -220,7 +222,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            await RefereshDiscoverersIfNeeded(cancellationToken);
+            await RefereshDiscoverersIfNeededAsync(cancellationToken);
 
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
                 .Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken))
@@ -258,7 +260,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             Guard.NotNull(source, nameof(source));
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            await RefereshDiscoverersIfNeeded(cancellationToken);
+            await RefereshDiscoverersIfNeededAsync(cancellationToken);
 
             IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[source].ToArray();
             if (!discoverers.Any())
@@ -329,11 +331,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         private void OnResourcesOrPluginSourcesChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             this.semaphore.Wait();
-            this.needsRefresh = true;
+            this.requiresDiscoverersRefresh = true;
             this.semaphore.Release();
         }
 
-        private async Task RefreshDiscoverers(CancellationToken cancellationToken)
+        private async Task RefreshDiscoverersAsync(CancellationToken cancellationToken)
         {
             this.sourceToDiscoverers.Clear();
             foreach (PluginSource source in this.pluginSourceRepo.Items)
@@ -347,18 +349,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             }
         }
 
-        private async Task RefereshDiscoverersIfNeeded(CancellationToken cancellationToken)
+        private async Task RefereshDiscoverersIfNeededAsync(CancellationToken cancellationToken)
         {
             await this.semaphore.WaitAsync(cancellationToken);
-            if (this.needsRefresh)
+            if (this.requiresDiscoverersRefresh)
             {
                 try
                 {
-                    await RefreshDiscoverers(cancellationToken);
+                    await RefreshDiscoverersAsync(cancellationToken);
                 }
                 finally
                 {
-                    this.needsRefresh = false;
+                    this.requiresDiscoverersRefresh = false;
                     this.semaphore.Release();
                 }
             }
@@ -529,7 +531,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
             return fetcherToUse;
         }
-        
+
         private void HandleResourceNotFoundError(PluginSource pluginSource, string errorMsg)
         {
             var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginsManagerResourceNotFound, errorMsg);

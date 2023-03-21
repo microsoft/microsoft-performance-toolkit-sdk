@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 
@@ -11,10 +12,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     /// <summary>
     ///    Represents a repository of <see cref="PluginSource"/>s.
     /// </summary>
-    public class PluginSourceRepository
+    public sealed class PluginSourceRepository
         : IRepository<PluginSource>
     {
-        private HashSet<PluginSource> currentSources;
+        private readonly HashSet<PluginSource> currentSources;
         private readonly object mutex = new object();
 
         /// <summary>
@@ -25,6 +26,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.currentSources = new HashSet<PluginSource>();
         }
 
+        /// <inheritdoc/>
         public IEnumerable<PluginSource> Items
         {
             get
@@ -34,39 +36,70 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     return this.currentSources;
                 }
             }
-            private set
-            {
-                if (this.currentSources != value)
-                {
-                    this.currentSources = new HashSet<PluginSource>(value);
+        }
 
+        /// <inheritdoc/>
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        /// <inheritdoc/>
+        public void Add(IEnumerable<PluginSource> pluginSources)
+        {
+            lock (this.mutex)
+            {
+                IEnumerable<PluginSource> addedItems = pluginSources.Where(x => this.currentSources.Add(x));
+
+                if (addedItems.Any())
+                {
                     CollectionChanged?.Invoke(
                         this,
-                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, addedItems.ToList()));
                 }
             }
         }
 
-        /// <summary>
-        ///    Occurs when the collection changes.
-        /// </summary>
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-
-        /// <summary>
-        ///     Adds the given <see cref="PluginSource"/>s to the repository.
-        /// </summary>
-        /// <param name="sources"></param>
-        public void AddPluginSourcesAsync(IEnumerable<PluginSource> sources)
+        /// <inheritdoc />
+        public void Add(PluginSource pluginSource)
         {
-            this.Items = sources;
+            lock (this.mutex)
+            {
+                bool success = this.currentSources.Add(pluginSource);
+                if (success)
+                {
+                    CollectionChanged?.Invoke(
+                        this,
+                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, pluginSource));
+                }
+            }
         }
 
-        /// <summary>
-        ///    Clears the repository of all <see cref="PluginSource"/>s.
-        /// </summary>
-        public void ClearPluginSources()
+        /// <inheritdoc/>
+        public void Remove(PluginSource pluginSource)
         {
-            this.Items = new List<PluginSource>();
+            lock (this.mutex)
+            {
+                bool success = this.currentSources.Remove(pluginSource);
+                if (success)
+                {
+                    CollectionChanged?.Invoke(
+                        this,
+                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, pluginSource));
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Remove(IEnumerable<PluginSource> pluginSources)
+        {
+            lock (this.mutex)
+            {
+                IEnumerable<PluginSource> removedItems = pluginSources.Where(x => this.currentSources.Remove(x));
+                if (removedItems.Any())
+                {
+                    CollectionChanged?.Invoke(
+                        this,
+                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removedItems.ToList()));
+                }
+            }
         }
     }
 }

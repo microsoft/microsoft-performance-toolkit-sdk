@@ -6,6 +6,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
@@ -26,10 +27,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// </param>
         private PluginsSystem(
             IPluginsInstaller installer,
-            IPluginsDiscoverer discoverer)
+            IPluginsDiscoverer discoverer,
+            IRepository<PluginSource> pluginSourceRepository,
+            IRepositoryRO<IPluginDiscovererProvider> pluginDiscovererProviderRepository,
+            IRepositoryRO<IPluginFetcher> pluginFetcherRepository)
         {
             this.Installer = installer;
             this.Discoverer = discoverer;
+            this.PluginSourcesRepository = pluginSourceRepository;
+            this.DiscovererProvidersRepository = pluginDiscovererProviderRepository;
+            this.FetchersRepository = pluginFetcherRepository;
         }
 
         /// <summary>
@@ -55,20 +62,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         /// </returns>
         public static PluginsSystem CreateFileBasedPluginsSystem(
             string root,
-            IRepository<PluginSource> pluginSourcesRepo,
-            IRepository<IPluginFetcher> fetchersRepo,
-            IRepository<IPluginDiscovererProvider> discovererProvidersRepo,
             ILogger logger)
         {
+            IRepository<PluginSource> pluginSourcesRepo = new PluginSourceRepository();
+            IRepositoryRO<IPluginFetcher> fetchersRepo = new PluginsManagerResourceRepository<IPluginFetcher>();
+            IRepositoryRO<IPluginDiscovererProvider> discovererProvidersRepo = new PluginsManagerResourceRepository<IPluginDiscovererProvider>();
+
+            IPluginsDiscoverer discoverer = new PluginsDiscoverer(
+              pluginSourcesRepo,
+              fetchersRepo,
+              discovererProvidersRepo,
+              logger);
+
+
             IPluginRegistry registry = new FileBackedPluginRegistry(root);
             IPluginsInstaller installer = new FileBackedPluginsInstaller(root, registry);
-            IPluginsDiscoverer discoverer = new PluginsDiscoverer(
+          
+            return new PluginsSystem(
+                installer,
+                discoverer,
                 pluginSourcesRepo,
-                fetchersRepo,
                 discovererProvidersRepo,
-                logger);
-
-            return new PluginsSystem(installer, discoverer);
+                fetchersRepo);
         }
 
         /// <summary>
@@ -80,5 +95,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
         ///     Gets the discoverer.
         /// </summary>
         public IPluginsDiscoverer Discoverer { get; }
+
+        /// <summary>
+        ///     Gets the repository of plugin fetchers.
+        /// </summary>
+        public IRepositoryRO<IPluginFetcher> FetchersRepository { get; }
+
+        /// <summary>
+        ///     Gets the repository of discoverer providers.
+        /// </summary>
+        public IRepositoryRO<IPluginDiscovererProvider> DiscovererProvidersRepository { get; }
+
+        /// <summary>
+        ///     Gets the repository of plugin sources.
+        /// </summary>
+        public IRepository<PluginSource> PluginSourcesRepository { get; }
     }
 }

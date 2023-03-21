@@ -12,12 +12,21 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <inheritdoc />
-    public class PluginsManagerResourceRepository<T>
+    public sealed class PluginsManagerResourceRepository<T>
         : IPluginsManagerResourcesConsumer,
-          IRepository<T>
+          IRepositoryRO<T>
         where T : IPluginsManagerResource
     {
         private readonly HashSet<PluginsManagerResourceReference> resources;
+        private readonly object mutex = new object();
+
+        /// <summary>
+        ///     Initializes a <see cref="PluginsManagerResourceRepository{T}"/> with an empty collection of resources.
+        /// </summary>
+        public PluginsManagerResourceRepository()
+            : this(Enumerable.Empty<T>())
+        {
+        }
 
         /// <summary>
         ///     Initializes a <see cref="PluginsManagerResourceRepository{T}"/> with an existing collection of <paramref name="resources"/>.
@@ -38,7 +47,51 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         {
             get
             {
-                return this.resources.Select(r => r.Instance).OfType<T>();
+                lock (this.mutex)
+                {
+                    return this.resources.Select(r => r.Instance).OfType<T>();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Adds a new resource to the repository.
+        /// </summary>
+        /// <param name="item">
+        ///     The resource to add.
+        /// </param>
+        public void Add(T item)
+        {
+            Guard.NotNull(item, nameof(item));
+
+            lock (this.mutex)
+            {
+                var resourceReference = new PluginsManagerResourceReference(item);
+
+                if (this.resources.Add(resourceReference))
+                {
+                    NewResourcesAddedCommon(new[] { resourceReference });
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Adds a collection of resources to the repository.
+        /// </summary>
+        /// <param name="items">
+        ///     The resources to add.
+        /// </param>
+        public void Add(IEnumerable<T> items)
+        {
+            Guard.NotNull(items, nameof(items));
+
+            lock (this.mutex)
+            {
+                IEnumerable<PluginsManagerResourceReference> newResources = items
+                    .Select(r => new PluginsManagerResourceReference(r))
+                    .Where(r => this.resources.Add(r));
+
+                NewResourcesAddedCommon(newResources);
             }
         }
 
@@ -47,26 +100,29 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         {
             Guard.NotNull(loadedResources, nameof(loadedResources));
 
-            lock (this.resources)
+            lock (this.mutex)
             {
                 IEnumerable<PluginsManagerResourceReference> newResources = loadedResources
                     .Where(r => r.Instance is T)
-                    .Except(this.resources);
-                
-                if (newResources.Any())
-                {
-                    this.resources.UnionWith(newResources);
-                    SetResourcesLoggers(newResources.Select(r => r.Instance).OfType<T>());
-                    CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
-                        NotifyCollectionChangedAction.Add,
-                        newResources));
-                }
+                    .Where(r => this.resources.Add(r));
+
+                NewResourcesAddedCommon(newResources);
             }
         }
 
         /// <inheritdoc/>
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
+        private void NewResourcesAddedCommon(IEnumerable<PluginsManagerResourceReference> newResources)
+        {
+            if (newResources.Any())
+            {
+                SetResourcesLoggers(newResources.Select(r => r.Instance).OfType<T>());
+                CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
+                    NotifyCollectionChangedAction.Add,
+                    newResources));
+            };
+        }
 
         private void SetResourcesLoggers(IEnumerable<T> pluginsManagerResources)
         {
