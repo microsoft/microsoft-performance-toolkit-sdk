@@ -35,16 +35,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
 
-        /// <summary>
-        ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root.
-        /// </summary>
-        /// <param name="registryRoot">
-        ///     The root directory of the registry.
-        /// </param>
-        public FileBackedPluginRegistry(string registryRoot)
-            : this(registryRoot, SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>())
-        {
-        }
 
         /// <summary>
         ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root and a serializer.
@@ -86,6 +76,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(registryRoot, nameof(registryRoot));
+            Guard.NotNull(serializer, nameof(serializer));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
             if (!Path.IsPathRooted(registryRoot))

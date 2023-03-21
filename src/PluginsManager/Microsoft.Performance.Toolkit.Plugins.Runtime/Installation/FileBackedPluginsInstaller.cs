@@ -27,45 +27,49 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly string installationRoot;
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
+        private readonly IInstalledPluginValidator installedPluginValidator;
+
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
 
         /// <summary>
-        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/>.
+        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/> with a default logger factory.
         /// </summary>
-        /// <param name="pluginRegistry">
-        ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
+        /// <param name="installationRoot">
+        ///     The root directory where plugins are installed.
         /// </param>
-        public FileBackedPluginsInstaller(
-            string installationRoot,
-            IPluginRegistry pluginRegistry)
-            : this(installationRoot, pluginRegistry, SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
-        {
-        }
-
-        /// <summary>
-        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/> with a <see cref="ISerializer{PluginMetadata}"/> object.
-        /// </summary>
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
         /// <param name="metadataSerializer">
         ///     The <see cref="ISerializer{PluginMetadata}"/> used to deserialize plugin metadata.
-        /// </param> 
+        /// </param>
+        /// <param name="installedPluginValidator">
+        ///     The <see cref="IInstalledPluginValidator"/> used to validate installed plugins.
+        /// </param>
         public FileBackedPluginsInstaller(
             string installationRoot,
             IPluginRegistry pluginRegistry,
-            ISerializer<PluginMetadata> metadataSerializer)
-            : this(installationRoot, pluginRegistry, metadataSerializer, Logger.Create)
+            ISerializer<PluginMetadata> metadataSerializer,
+            IInstalledPluginValidator installedPluginValidator)
+            : this(installationRoot, pluginRegistry, metadataSerializer, installedPluginValidator, Logger.Create)
         {
         }
 
         /// <summary>
-        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/> with a <see cref="ISerializer{PluginMetadata}"/> object
-        ///     and a <see cref="ILogger"/> object.
+        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/>.
         /// </summary>
+        /// <param name="installationRoot">
+        ///     The root directory where plugins are installed.
+        /// </param>
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
+        /// </param>
+        /// <param name="metadataSerializer">
+        ///     The <see cref="ISerializer{PluginMetadata}"/> used to deserialize plugin metadata.
+        /// </param>
+        /// <param name="installedPluginValidator">
+        ///     The <see cref="IInstalledPluginValidator"/> used to validate installed plugins.
         /// </param>
         /// <param name="loggerFactory">
         ///     The <see cref="Func{Type, ILogger}"/> used to create a logger.
@@ -74,6 +78,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
+            IInstalledPluginValidator installedPluginValidator,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
@@ -83,6 +88,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.installationRoot = installationRoot;
             this.pluginRegistry = pluginRegistry;
             this.pluginMetadataSerializer = metadataSerializer;
+            this.installedPluginValidator = installedPluginValidator;
+
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(FileBackedPluginsInstaller));
         }
@@ -192,7 +199,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                     else
                     {
-                        if (await ValidateInstalledPluginAsync(installedPlugin))
+                        if (await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin))
                         {
                             this.logger.Warn($"Attempted to install an already installed and valid plugin.");
                             return null;
@@ -203,7 +210,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 };
 
-                string installationDir = GetInstallationDirOfPlugin(pluginPackage.Id, pluginPackage.Version);
+                string installationDir = PathUtils.GetPluginInstallDirectory(
+                    this.installationRoot,
+                    new PluginIdentity(pluginPackage.Id, pluginPackage.Version));
+
                 try
                 {
                     // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
@@ -212,7 +222,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
                     this.logger.Info("Extraction completed.");
 
-                    string checksum = await HashUtils.GetDirectoryHash(installationDir);
+                    string checksum = await HashUtils.GetDirectoryHashAsync(installationDir);
                     var pluginToInstall = new InstalledPluginInfo(
                         pluginPackage.Id,
                         pluginPackage.Version,
@@ -309,9 +319,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was canceled.
         /// </exception>
-        public async Task CleanupObsoletePluginsAsync(string installationDir, CancellationToken cancellationToken)
+        public async Task CleanupObsoletePluginsAsync(CancellationToken cancellationToken)
         {
-            if (!Directory.Exists(installationDir))
+            if (!Directory.Exists(this.installationRoot))
             {
                 return;
             }
@@ -319,9 +329,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllAsync(cancellationToken);
-                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => GetInstallationDirOfPlugin(p.Id, p.Version));
+                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(
+                    p => PathUtils.GetPluginInstallDirectory(this.installationRoot, new PluginIdentity(p.Id, p.Version)));
 
-                foreach (DirectoryInfo dir in new DirectoryInfo(installationDir).GetDirectories())
+                foreach (DirectoryInfo dir in new DirectoryInfo(this.installationRoot).GetDirectories())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -332,24 +343,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 }
             }
-        }
-
-        private async Task<bool> ValidateInstalledPluginAsync(InstalledPluginInfo plugin)
-        {
-            Guard.NotNull(plugin, nameof(plugin));
-
-            string installPath = GetInstallationDirOfPlugin(plugin.Id, plugin.Version);
-            string checksum = await HashUtils.GetDirectoryHash(installPath);
-
-            return checksum.Equals(plugin.Checksum);
-        }
-
-        private string GetInstallationDirOfPlugin(string pluginId, Version pluginVersion)
-        {
-            Guard.NotNull(pluginId, nameof(pluginId));
-            Guard.NotNull(pluginVersion, nameof(pluginVersion));
-
-            return Path.GetFullPath(Path.Combine(this.installationRoot, $"{pluginId}-{pluginVersion}"));
         }
 
         private async Task<InstalledPlugin> CreateInstalledPluginAsync(
@@ -364,15 +357,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     $"Plugin {installedPlugin} is no longer registered in the plugin registry");
             }
 
-            if (!await ValidateInstalledPluginAsync(installedPlugin))
+            if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin))
             {
                 throw new InstalledPluginCorruptedOrMissingException(
                     $"Plugin {installedPlugin} is corrupted or missing.",
                     installedPlugin);
             }
 
-            string installPath = GetInstallationDirOfPlugin(installedPlugin.Id, installedPlugin.Version);
+            string installPath = PathUtils.GetPluginInstallDirectory(
+                this.installationRoot,
+                new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
+            
             string metadataFileName = Path.Combine(installPath, PluginPackage.PluginMetadataFileName);
+            
             PluginMetadata pluginMetadata;
             using (var fileStream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
