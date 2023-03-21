@@ -7,7 +7,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
     ///    Represents a loader that supports loading plugins manager resources of type <typeparamref name="T"/>
-    ///    from a collection of <see cref="PluginsManagerResourceReference"/> provided by the <see cref="IPluginsManagerResourceDirectoryLoader"/>,
+    ///    from a collection of <see cref="PluginsSystemResourceReference"/> provided by the <see cref="IPluginsSystemResourceDirectoryLoader"/>,
     ///    or from this loader itself.
     /// </summary>
     /// <typeparam name="T">

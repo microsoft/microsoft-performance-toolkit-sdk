@@ -398,7 +398,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 {
                     string errorMsg = $"Error occurred when checking if {pluginSource} is supported by discoverer provider {provider.GetType().Name}.";
                     var errorInfo = new ErrorInfo(
-                        ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                        ErrorCodes.PLUGINS_SYSTEM_PluginSourceException,
                         errorMsg);
 
                     PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
@@ -417,7 +417,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 {
                     string errorMsg = $"Error occurred when creating discoverer for {pluginSource}.";
                     var errorInfo = new ErrorInfo(
-                       ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                       ErrorCodes.PLUGINS_SYSTEM_PluginSourceException,
                        errorMsg);
 
                     PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
@@ -534,7 +534,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private void HandleResourceNotFoundError(PluginSource pluginSource, string errorMsg)
         {
-            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginsManagerResourceNotFound, errorMsg);
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_SYSTEM_PluginsSystemResourceNotFound, errorMsg);
             PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo));
 
             this.logger.Error(errorMsg);
@@ -542,7 +542,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private void HandlePluginSourceException(PluginSource pluginSource, string errorMsg, Exception exception)
         {
-            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginSourceException, errorMsg);
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_SYSTEM_PluginSourceException, errorMsg);
             PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, exception));
 
             this.logger.Error(errorMsg, exception);

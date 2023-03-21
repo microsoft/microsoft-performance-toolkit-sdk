@@ -6,8 +6,8 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
-    ///     Process a collection of <see cref="PluginsManagerResourceReference"/> provided by the
-    ///     <see cref="IPluginsManagerResourceDirectoryLoader"/>.
+    ///     Process a collection of <see cref="PluginsSystemResourceReference"/> provided by the
+    ///     <see cref="IPluginsSystemResourceDirectoryLoader"/>.
     /// </summary>
     public interface IPluginsManagerResourcesReferenceConsumer
     {
@@ -15,8 +15,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         ///    Called when new resources are loaded.
         /// </summary>
         /// <param name="loadedResources">
-        ///    The newly loaded <see cref="PluginsManagerResourceReference"/> from the <see cref="IPluginsManagerResourceDirectoryLoader"/>.
+        ///    The newly loaded <see cref="PluginsSystemResourceReference"/> from the <see cref="IPluginsSystemResourceDirectoryLoader"/>.
         /// </param>
-        void OnNewResourcesLoaded(IEnumerable<PluginsManagerResourceReference> loadedResources);
+        void OnNewResourcesLoaded(IEnumerable<PluginsSystemResourceReference> loadedResources);
     }
 }

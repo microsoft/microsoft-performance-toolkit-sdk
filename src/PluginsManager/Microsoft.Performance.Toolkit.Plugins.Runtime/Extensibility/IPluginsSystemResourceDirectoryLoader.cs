@@ -9,7 +9,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
     ///     Represents a loader that facilitates the loading of <see cref="IPluginsManagerResource"/>s.
     ///     to its consumers.
     /// </summary>
-    public interface IPluginsManagerResourceDirectoryLoader
+    public interface IPluginsSystemResourceDirectoryLoader
     {
         /// <summary>
         ///     Tries to load <see cref="IPluginsManagerResource"/>s from the given directory

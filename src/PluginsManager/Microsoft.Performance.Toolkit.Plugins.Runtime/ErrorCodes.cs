@@ -10,31 +10,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
     ///     This class represents all of the error codes that can be
-    ///     emitted by the plugins manager runtime. This class acts as a "type-safe"
+    ///     emitted by the plugins system runtime. This class acts as a "type-safe"
     ///     enumeration. All new explicit error conditions should be
     ///     added to this class.
     /// </summary>
     public sealed class ErrorCodes
     {
         //
-        // Plugins Manager Errors
+        // Plugins System Errors
         //
 
         /// <summary>
         ///    An error occurred when interacting with a plugin source.
         /// </summary>
-        public static ErrorCodes PLUGINS_MANAGER_PluginSourceException = new ErrorCodes(
+        public static ErrorCodes PLUGINS_SYSTEM_PluginSourceException = new ErrorCodes(
             50001,
             "PLUGINS_MANAGER_PluginSourceException",
             "An error occurred when interacting with a plugin source.");
 
         /// <summary>
-        ///     No available plugin manager resource was found to perform requests against the plugin source.
+        ///     No available plugin system resource was found to perform requests against the plugin source.
         /// </summary>
-        public static ErrorCodes PLUGINS_MANAGER_PluginsManagerResourceNotFound = new ErrorCodes(
+        public static ErrorCodes PLUGINS_SYSTEM_PluginsSystemResourceNotFound = new ErrorCodes(
             50002,
-            "PLUGINS_MANAGER_PluginsManagerResourceNotFound",
-            "No available plugin manager resource was found to perform requests against the plugin source.");
+            "PLUGINS_SYSTEM_PluginsSystemResourceNotFound",
+            "No available plugin system resource was found to perform requests against the plugin source.");
 
         //
         // We do duplicate checking on the numeric and string codes

@@ -49,18 +49,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             PluginSource pluginSource,
             CancellationToken cancellationToken);
 
-        // TODO: Re-enable when we start to support loading additional resources.
-        ///// <summary>
-        /////     Loads additional <see cref="IPluginsManagerResource"/>s from <paramref name="directory"/> to this plugin manager.
-        ///// </summary>
-        ///// <param name="directory">
-        /////     The directory to load resource assemblies from.
-        ///// </param>
-        ///// <returns>
-        /////     Whether the loading was successful.
-        ///// </returns>
-        //bool LoadAdditionalPluginResources(string directory);
-
         /// <summary>
         ///     Gets all available versions of a plugin by discovering from all plugin sources.
         /// </summary>

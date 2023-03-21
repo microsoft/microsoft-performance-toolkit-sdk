@@ -9,7 +9,7 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
     ///    Represents a plugins system that can be used to discover and install plugins.
@@ -65,15 +65,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             ILogger logger)
         {
             var pluginSourcesRepo = new PluginSourceRepository();
-            var fetchersRepo = new PluginsManagerResourceRepository<IPluginFetcher>();
-            var discovererProvidersRepo = new PluginsManagerResourceRepository<IPluginDiscovererProvider>();
+            var fetchersRepo = new PluginsSystemResourceRepository<IPluginFetcher>();
+            var discovererProvidersRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
 
             var discoverer = new PluginsDiscoverer(
               pluginSourcesRepo,
               fetchersRepo,
               discovererProvidersRepo,
               logger);
-
 
             var registry = new FileBackedPluginRegistry(root);
             var installer = new FileBackedPluginsInstaller(root, registry);
