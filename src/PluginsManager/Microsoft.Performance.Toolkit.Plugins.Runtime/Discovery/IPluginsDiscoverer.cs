@@ -17,11 +17,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     public interface IPluginsDiscoverer
     {
         /// <summary>
-        ///     Gets all plugin sources that this plugin manager is configured to discover plugins from.
-        /// </summary>
-        IEnumerable<PluginSource> PluginSources { get; }
-
-        /// <summary>
         ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
         ///    Subscribe to this event to handle errors related to a particular <see cref="PluginSource"/>.
         /// </summary>

@@ -55,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         public event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
 
         /// <inheritdoc />
-        public IEnumerable<PluginSource> PluginSources
+        private IEnumerable<PluginSource> PluginSources
         {
             get
             {
