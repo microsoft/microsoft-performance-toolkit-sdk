@@ -97,7 +97,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             var installer = new FileBackedPluginsInstaller(
                 root,
                 registry,
-                SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>());
+                SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
+                new InstalledPluginDirectoryChecksumValidator(root));
 
             return new PluginsSystem(
                 installer,
