@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
@@ -38,13 +40,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="pluginFetcherRepository">
         ///     The repository of fetchers.
         /// </param>
-        private PluginsSystem(
+        public PluginsSystem(
             IPluginsInstaller installer,
             IPluginsDiscoverer discoverer,
             IRepository<PluginSource> pluginSourceRepository,
             IPluginsManagerResourceLoader<IPluginDiscovererProvider> pluginDiscovererProviderLoader,
             IPluginsManagerResourceLoader<IPluginFetcher> pluginFetcherLoader)
         {
+            Guard.NotNull(installer, nameof(installer));
+            Guard.NotNull(discoverer, nameof(discoverer));
+            Guard.NotNull(pluginSourceRepository, nameof(pluginSourceRepository));
+            Guard.NotNull(pluginDiscovererProviderRepository, nameof(pluginDiscovererProviderRepository));
+            Guard.NotNull(pluginFetcherRepository, nameof(pluginFetcherRepository));
+
             this.Installer = installer;
             this.Discoverer = discoverer;
             this.PluginSourceRepository = pluginSourceRepository;
@@ -77,6 +85,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string root,
             Func<Type, ILogger> loggerFactory)
         {
+            Guard.NotNullOrWhiteSpace(root, nameof(root));
+            Guard.NotNull(loggerFactory, nameof(loggerFactory));
+
+            string pluginsSystemRoot = Path.GetFullPath(root);
+            
             var pluginSourcesRepo = new PluginSourceRepository();
             var fetchersRepo = new PluginsSystemResourceRepository<IPluginFetcher>();
             var discovererProvidersRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
@@ -86,19 +99,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
               fetcherRepo,
               discovererProviderRepo,
               loggerFactory);
-            
 
-          
+
             var registry = new FileBackedPluginRegistry(
-                root,
+                pluginsSystemRoot,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>(),
                 loggerFactory);
-
+            
             var installer = new FileBackedPluginsInstaller(
-                root,
+                pluginsSystemRoot,
                 registry,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
-                new InstalledPluginDirectoryChecksumValidator(root));
+                new InstalledPluginDirectoryChecksumValidator(pluginsSystemRoot));
 
             return new PluginsSystem(
                 installer,

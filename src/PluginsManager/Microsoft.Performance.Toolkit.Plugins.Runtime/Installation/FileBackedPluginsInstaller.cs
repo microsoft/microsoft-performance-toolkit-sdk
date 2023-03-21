@@ -81,9 +81,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IInstalledPluginValidator installedPluginValidator,
             Func<Type, ILogger> loggerFactory)
         {
+            Guard.NotNullOrWhiteSpace(installationRoot, nameof(installationRoot));
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
             Guard.NotNull(metadataSerializer, nameof(metadataSerializer));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
+
+
+            if (!Path.IsPathRooted(installationRoot))
+            {
+                throw new ArgumentException("The root of a file based plugin installer must be rooted.", nameof(installationRoot));
+            }
 
             this.installationRoot = installationRoot;
             this.pluginRegistry = pluginRegistry;
