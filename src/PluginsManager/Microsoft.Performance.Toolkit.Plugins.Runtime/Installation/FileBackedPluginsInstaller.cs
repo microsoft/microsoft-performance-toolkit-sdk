@@ -28,6 +28,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
         private readonly ILogger logger;
+        private readonly Func<Type, ILogger> loggerFactory;
 
         /// <summary>
         ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/>.
@@ -55,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer)
-            : this(installationRoot, pluginRegistry, metadataSerializer, Logger.Create<FileBackedPluginsInstaller>())
+            : this(installationRoot, pluginRegistry, metadataSerializer, Logger.Create)
         {
         }
 
@@ -66,23 +67,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
-        /// <param name="logger">
-        ///     Used to log messages.
+        /// <param name="loggerFactory">
+        ///     The <see cref="Func{Type, ILogger}"/> used to create a logger.
         /// </param>
         public FileBackedPluginsInstaller(
             string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
-            ILogger logger)
+            Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
             Guard.NotNull(metadataSerializer, nameof(metadataSerializer));
-            Guard.NotNull(logger, nameof(logger));
+            Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
             this.installationRoot = installationRoot;
             this.pluginRegistry = pluginRegistry;
             this.pluginMetadataSerializer = metadataSerializer;
-            this.logger = logger;
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory(typeof(FileBackedPluginsInstaller));
         }
 
         /// <inheritdoc/>

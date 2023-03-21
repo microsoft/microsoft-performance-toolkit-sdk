@@ -31,7 +31,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
         private readonly string registryRoot;
         private readonly ISerializer<List<InstalledPluginInfo>> registryFileSerializer;
+
         private readonly ILogger logger;
+        private readonly Func<Type, ILogger> loggerFactory;
 
         /// <summary>
         ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root.
@@ -56,7 +58,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public FileBackedPluginRegistry(
             string registryRoot,
             ISerializer<List<InstalledPluginInfo>> serializer)
-            : this(registryRoot, serializer, Logger.Create(typeof(FileBackedPluginRegistry)))
+            : this(registryRoot, serializer, Logger.Create)
         {
         }
 
@@ -69,8 +71,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="serializer">
         ///     Used to serialize and deserialize the registry file.
         /// </param>
-        /// <param name="logger">
-        ///     Used to log information.
+        /// <param name="loggerFactory">
+        ///     Used to create a logger for the given type.
         /// </param>
         /// <exception cref="ArgumentException">
         ///     Throws when <paramref name="registryRoot"/> is not a rooted path.
@@ -80,11 +82,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </exception>  
         public FileBackedPluginRegistry(
             string registryRoot,
-            ISerializer<List<InstalledPluginInfo>> serializer, 
-            ILogger logger)
+            ISerializer<List<InstalledPluginInfo>> serializer,
+            Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(registryRoot, nameof(registryRoot));
-            Guard.NotNull(logger, nameof(logger));
+            Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
             if (!Path.IsPathRooted(registryRoot))
             {
@@ -95,7 +97,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.registryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.registryFileSerializer = serializer;
-            this.logger = logger;
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory(typeof(FileBackedPluginRegistry));
 
             string lockFilePath = Path.Combine(registryRoot, lockFileName);
             this.fileDistributedLock = new FileDistributedLock(new FileInfo(lockFilePath));

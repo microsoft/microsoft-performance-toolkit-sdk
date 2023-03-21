@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
@@ -24,6 +28,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </param>
         /// <param name="discoverer">
         ///     The discoverer to use.
+        /// </param>
+        /// <param name="pluginSourceRepository">
+        ///     The repository of plugin sources.
+        /// </param>
+        /// <param name="pluginDiscovererProviderRepository">
+        ///     The repository of discoverer providers.
+        /// </param>
+        /// <param name="pluginFetcherRepository">
+        ///     The repository of fetchers.
         /// </param>
         private PluginsSystem(
             IPluginsInstaller installer,
@@ -54,35 +67,44 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="discovererProvidersRepo">
         ///     The repository of discoverer providers.
         /// </param>
-        /// <param name="logger">
-        ///     The logger to use.
+        /// <param name="loggerFactory">
+        ///     Used to create a logger for the given type.
         /// </param>
         /// <returns>
         ///     The created plugins system.
         /// </returns>
         public static PluginsSystem CreateFileBasedPluginsSystem(
             string root,
-            ILogger logger)
+            Func<Type, ILogger> loggerFactory)
         {
             var pluginSourcesRepo = new PluginSourceRepository();
             var fetchersRepo = new PluginsSystemResourceRepository<IPluginFetcher>();
             var discovererProvidersRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
 
             var discoverer = new PluginsDiscoverer(
-              pluginSourcesRepo,
-              fetchersRepo,
-              discovererProvidersRepo,
-              logger);
+              pluginSourceRepo,
+              fetcherRepo,
+              discovererProviderRepo,
+              loggerFactory);
+            
 
-            var registry = new FileBackedPluginRegistry(root);
-            var installer = new FileBackedPluginsInstaller(root, registry);
           
+            var registry = new FileBackedPluginRegistry(
+                root,
+                SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>(),
+                loggerFactory);
+
+            var installer = new FileBackedPluginsInstaller(
+                root,
+                registry,
+                SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>());
+
             return new PluginsSystem(
                 installer,
                 discoverer,
-                pluginSourcesRepo,
-                discovererProvidersRepo,
-                fetchersRepo);
+                pluginSourceRepo,
+                discovererProviderRepo,
+                fetcherRepo);
         }
 
         /// <summary>

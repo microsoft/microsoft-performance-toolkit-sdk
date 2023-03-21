@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
@@ -18,13 +20,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         where T : IPluginsSystemResource
     {
         private readonly HashSet<PluginsSystemResourceReference> resources;
+        private readonly ILogger logger;
+        private readonly Func<Type, ILogger> loggerFactory;
         private readonly object mutex = new object();
 
         /// <summary>
         ///     Initializes a <see cref="PluginsSystemResourceRepository{T}"/> with an empty collection of resources.
         /// </summary>
         public PluginsSystemResourceRepository()
-            : this(Enumerable.Empty<T>())
+            : this(Logger.Create)
         {
         }
 
@@ -34,10 +38,41 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// <param name="resources">
         ///     A collection of <see cref="IPluginsSystemResource"s of type <see cref="T"/>.
         /// </param>
-        public PluginsSystemResourceRepository(IEnumerable<T> resources)
+        public PluginsSystemResourceRepository(
+            IEnumerable<T> resources)
+            : this(resources, Logger.Create)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a <see cref="PluginsSystemResourceRepository{T}"/> with an empty collection of resources and a logger factory.
+        /// </summary>
+        /// <param name="loggerFactory">
+        ///     A factory that creates loggers for the given type.
+        /// </param>
+        public PluginsSystemResourceRepository(Func<Type, ILogger> loggerFactory)
+            : this(Enumerable.Empty<T>(), loggerFactory)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a <see cref="PluginsSystemResourceRepository{T}"/> with an existing collection of <paramref name="resources"/>
+        ///     and a logger factory.
+        /// </summary>
+        /// <param name="resources">
+        ///     A collection of <see cref="IPluginsSystemResource"s of type <see cref="T"/>.
+        /// </param>
+        /// <param name="loggerFactory">
+        ///     A factory that creates loggers for the given type.
+        /// </param>
+        public PluginsSystemResourceRepository(
+            IEnumerable<T> resources,
+            Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(resources, nameof(resources));
 
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory(typeof(PluginsSystemResourceRepository<T>));
             SetResourcesLoggers(resources);
             this.resources = new HashSet<PluginsSystemResourceReference>(resources.Select(r => new PluginsSystemResourceReference(r)));
         }
