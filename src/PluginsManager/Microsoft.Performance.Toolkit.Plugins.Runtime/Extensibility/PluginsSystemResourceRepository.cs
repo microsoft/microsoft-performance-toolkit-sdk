@@ -163,7 +163,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         {
             foreach (T resource in pluginsSystemResources)
             {
-                resource.SetLogger(Logger.Create(resource.GetType()));
+                resource.SetLogger(this.loggerFactory(resource.GetType()));
             }
         }
     }
