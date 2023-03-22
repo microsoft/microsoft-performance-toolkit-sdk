@@ -6,18 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Runtime.Discovery;
-using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <inheritdoc />
     public sealed class PluginsManagerResourceLoader
-        : IPluginsManagerResourceLoader
+        : IPluginsManagerResourceDirectoryLoader
     {
         private readonly object mutex = new object();
         private readonly AssemblyExtensionDiscovery extensionDiscovery;
 
-        private readonly HashSet<IPluginsManagerResourcesConsumer> subscribers;
+        private readonly HashSet<IPluginsManagerResourcesReferenceConsumer> subscribers;
         private readonly PluginsManagerResourceReflector resourcesReflector;
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
             IAssemblyLoader assemblyLoader,
             Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
         {
-            this.subscribers = new HashSet<IPluginsManagerResourcesConsumer>();
+            this.subscribers = new HashSet<IPluginsManagerResourcesReferenceConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
             this.resourcesReflector = new PluginsManagerResourceReflector(this.extensionDiscovery);
         }
@@ -61,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public bool Subscribe(IPluginsManagerResourcesConsumer consumer)
+        public bool Subscribe(IPluginsManagerResourcesReferenceConsumer consumer)
         {
             Guard.NotNull(consumer, nameof(consumer));
 
@@ -82,7 +81,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public bool Unsubscribe(IPluginsManagerResourcesConsumer consumer)
+        public bool Unsubscribe(IPluginsManagerResourcesReferenceConsumer consumer)
         {
             Guard.NotNull(consumer, nameof(consumer));
 
@@ -94,7 +93,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
         private void NotifyResourceLoaded(IEnumerable<PluginsManagerResourceReference> resources)
         {
-            foreach (IPluginsManagerResourcesConsumer subscriber in this.subscribers)
+            foreach (IPluginsManagerResourcesReferenceConsumer subscriber in this.subscribers)
             {
                 subscriber.OnNewResourcesLoaded(resources);
             }
