@@ -11,23 +11,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
     ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> 
-    ///     where T is <see cref="IPluginsManagerResource"/> and Derived is <see cref="PluginsManagerResourceReference"/>.
+    ///     where T is <see cref="IPluginsSystemResource"/> and Derived is <see cref="PluginsSystemResourceReference"/>.
     /// </summary>
-    public sealed class PluginsManagerResourceReference
-         : AssemblyTypeReferenceWithInstance<IPluginsManagerResource, PluginsManagerResourceReference>
+    public sealed class PluginsSystemResourceReference
+         : AssemblyTypeReferenceWithInstance<IPluginsSystemResource, PluginsSystemResourceReference>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginsManagerResourceReference"/> class.
+        ///     Initializes a new instance of the <see cref="PluginsSystemResourceReference"/> class.
         /// </summary>
         /// <param name="type">
         ///     The <see cref="Type"/> of instance being referenced by this instance.
         /// </param>
         /// <param name="metadata">
-        ///     The <see cref="IPluginsManagerResource"/> metadata.
+        ///     The <see cref="IPluginsSystemResource"/> metadata.
         /// </param>
-        public PluginsManagerResourceReference(
+        public PluginsSystemResourceReference(
             Type type,
-            PluginsManagerResourceAttribute metadata)
+            PluginsSystemResourceAttribute metadata)
             : base(type)
         {
             Guard.NotNull(type, nameof(type));
@@ -37,13 +37,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginsManagerResourceReference"/>
+        ///     Initializes a new instance of the <see cref="PluginsSystemResourceReference"/>
         ///     class with the given instance.
         /// </summary>
         /// <param name="instance">
-        ///     An existing instance of <see cref="IPluginsManagerResource"/>
+        ///     An existing instance of <see cref="IPluginsSystemResource"/>
         /// </param>
-        public PluginsManagerResourceReference(IPluginsManagerResource instance)
+        public PluginsSystemResourceReference(IPluginsSystemResource instance)
             : base(instance.GetType(), () => instance)
         {
             Guard.NotNull(instance, nameof(instance));
@@ -52,13 +52,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginsManagerResourceReference"/>
+        ///     Initializes a new instance of the <see cref="PluginsSystemResourceReference"/>
         ///     class as a copy of the given instance.
         /// </summary>
         /// <param name="other">
         ///      The instance from which to make a copy.
         /// </param>
-        public PluginsManagerResourceReference(PluginsManagerResourceReference other)
+        public PluginsSystemResourceReference(PluginsSystemResourceReference other)
             : base(other.Type)
         {
             Guard.NotNull(other, nameof(other));
@@ -69,22 +69,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <summary>
-        ///     Tries to create an instance of <see cref="PluginsManagerResourceReference"/> 
+        ///     Tries to create an instance of <see cref="PluginsSystemResourceReference"/> 
         ///     based on the <paramref name="candidateType"/>.
         /// </summary>
         /// <param name="candidateType">
-        ///      Candidate <see cref="Type"/> for the <see cref="PluginsManagerResourceReference"/>
+        ///      Candidate <see cref="Type"/> for the <see cref="PluginsSystemResourceReference"/>
         /// </param>
         /// <param name="reference">
-        ///      Out <see cref="PluginsManagerResourceReference"/>
+        ///      Out <see cref="PluginsSystemResourceReference"/>
         /// </param>
         /// <returns>
         ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of 
-        ///     <see cref="PluginsManagerResourceReference"/>; <c>false</c> otherwise.
+        ///     <see cref="PluginsSystemResourceReference"/>; <c>false</c> otherwise.
         /// </returns>
         public static bool TryCreateReference(
             Type candidateType,
-            out PluginsManagerResourceReference reference)
+            out PluginsSystemResourceReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
 
@@ -93,10 +93,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
             {
                 if (TryGetEmptyPublicConstructor(candidateType, out ConstructorInfo constructor))
                 {
-                    PluginsManagerResourceAttribute metadataAttribute = candidateType.GetCustomAttribute<PluginsManagerResourceAttribute>();
+                    PluginsSystemResourceAttribute metadataAttribute = candidateType.GetCustomAttribute<PluginsSystemResourceAttribute>();
                     if (metadataAttribute != null)
                     {
-                        reference = new PluginsManagerResourceReference(
+                        reference = new PluginsSystemResourceReference(
                             candidateType,
                             metadataAttribute);
                     }
@@ -107,14 +107,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <summary>
-        ///     Gets the Guid of this <see cref="IPluginsManagerResource"/>.
+        ///     Gets the Guid of this <see cref="IPluginsSystemResource"/>.
         /// </summary>
         public Guid Guid { get; }
 
         /// <inheritdoc />
-        public override PluginsManagerResourceReference CloneT()
+        public override PluginsSystemResourceReference CloneT()
         {
-            return new PluginsManagerResourceReference(this);
+            return new PluginsSystemResourceReference(this);
         }
 
         /// <inheritdoc />
@@ -130,7 +130,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
                 return true;
             }
 
-            return obj is PluginsManagerResourceReference other &&
+            return obj is PluginsSystemResourceReference other &&
                 this.Guid.Equals(other.Guid);
         }
 

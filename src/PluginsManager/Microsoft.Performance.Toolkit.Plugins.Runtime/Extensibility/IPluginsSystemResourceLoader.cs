@@ -6,15 +6,15 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
-    ///    Represents a loader that supports loading plugins manager resources of type <typeparamref name="T"/>
-    ///    from a collection of <see cref="PluginsManagerResourceReference"/> provided by the <see cref="IPluginsManagerResourceDirectoryLoader"/>,
+    ///    Represents a loader that supports loading plugins system resources of type <typeparamref name="T"/>
+    ///    from a collection of <see cref="PluginsSystemResourceReference"/> provided by the <see cref="IPluginsSystemResourceDirectoryLoader"/>,
     ///    or from this loader itself.
     /// </summary>
     /// <typeparam name="T">
     ///     The type of the resources loaded by this loader.
     /// </typeparam>
-    public interface IPluginsManagerResourceLoader<T>
-        : IPluginsManagerResourcesReferenceConsumer
+    public interface IPluginsSystemResourceLoader<T>
+        : IPluginsSystemResourcesReferenceConsumer
     {
         /// <summary>
         ///     Add a new item.
