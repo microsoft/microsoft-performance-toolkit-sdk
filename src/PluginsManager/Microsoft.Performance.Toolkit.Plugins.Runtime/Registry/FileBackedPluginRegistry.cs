@@ -35,7 +35,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
 
-
         /// <summary>
         ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root and a serializer.
         /// </summary>
@@ -68,7 +67,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Throws when <paramref name="registryRoot"/> is not a rooted path.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///    Throws when <paramref name="registryRoot"/> or <paramref name="logger"/> is null.
+        ///     Throws when <paramref name="registryRoot"/> or <paramref name="logger"/> is null.
         /// </exception>  
         public FileBackedPluginRegistry(
             string registryRoot,
@@ -79,13 +78,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(serializer, nameof(serializer));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
-            if (!Path.IsPathRooted(registryRoot))
-            {
-                throw new ArgumentException("Registry root must be a rooted path.");
-            }
-
             // TODO: #256 Create a backup registry
-            this.registryRoot = registryRoot;
+            this.registryRoot = Path.GetFullPath(registryRoot);
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.registryFileSerializer = serializer;
             this.loggerFactory = loggerFactory;
@@ -93,6 +87,39 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             string lockFilePath = Path.Combine(registryRoot, lockFileName);
             this.fileDistributedLock = new FileDistributedLock(new FileInfo(lockFilePath));
+        }
+
+        /// <summary>
+        ///     Gets the name of the registry file.
+        /// </summary>
+        public static string RegistryFileName
+        {
+            get
+            {
+                return registryFileName;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the name of the lock file.
+        /// </summary>
+        public static string LockFileName
+        {
+            get
+            {
+                return lockFileName;
+            }
+        }
+
+        /// <summary>
+        ///     Gets the root directory of the registry.
+        /// </summary>
+        public string RegistryRoot
+        {
+            get
+            {
+                return this.registryRoot;
+            }
         }
 
         /// <inheritdoc/>

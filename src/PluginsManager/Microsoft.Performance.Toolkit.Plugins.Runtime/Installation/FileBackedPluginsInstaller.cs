@@ -86,13 +86,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(metadataSerializer, nameof(metadataSerializer));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
+            this.installationRoot = Path.GetFullPath(installationRoot);
 
-            if (!Path.IsPathRooted(installationRoot))
-            {
-                throw new ArgumentException("The root of a file based plugin installer must be rooted.", nameof(installationRoot));
-            }
-
-            this.installationRoot = installationRoot;
             this.pluginRegistry = pluginRegistry;
             this.pluginMetadataSerializer = metadataSerializer;
             this.installedPluginValidator = installedPluginValidator;
