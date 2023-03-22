@@ -1,50 +1,35 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
-    ///     Represents a loader that facilitates the loading of <see cref="IPluginsManagerResource"/>s.
-    ///     to its consumers.
+    ///    Represents a loader that supports loading plugins manager resources of type <typeparamref name="T"/>
+    ///    from a collection of <see cref="PluginsManagerResourceReference"/> provided by the <see cref="IPluginsManagerResourceDirectoryLoader"/>,
+    ///    or from this loader itself.
     /// </summary>
-    public interface IPluginsManagerResourceLoader
+    /// <typeparam name="T">
+    ///     The type of the resources loaded by this loader.
+    /// </typeparam>
+    public interface IPluginsManagerResourceLoader<T>
+        : IPluginsManagerResourcesReferenceConsumer
     {
         /// <summary>
-        ///     Tries to load <see cref="IPluginsManagerResource"/>s from the given directory
-        ///     to the subscribed <see cref="IPluginsManagerResourcesConsumer">s.
-        /// <param name="directory">
-        ///     The directoty to load resouces from.
+        ///     Add a new item.
+        /// </summary>
+        /// <param name="item">
+        ///     The item to add.
         /// </param>
-        /// <returns>
-        ///     <c>true</c> if all resources are successfully loaded from the directory. <c>false</c>
-        ///     otherwise.
-        /// </returns>
-        bool TryLoad(string directory);
+        void Add(T item);
 
         /// <summary>
-        ///     Registers a <see cref="IPluginsManagerResourcesConsumer}"/> to receive all future loaded resources
-        ///     and sends all previously loaded plugins to its <see cref="IPluginsManagerResourcesConsumer.OnNewResourcesLoaded(
-        ///     System.Collections.Generic.IEnumerable{SDK.Runtime.PluginsManagerResourceReference})"/> handler.
+        ///     Add a collection of new items.
         /// </summary>
-        /// <param name="consumer">
-        ///     The <see cref="IPluginsManagerResourcesConsumer"/> to be registered to this loader.
+        /// <param name="items">
+        ///     The items to add.
         /// </param>
-        /// <returns>
-        ///     Whether or not the <paramref name="consumer"/> is successfully subscribed.
-        /// </returns>
-        bool Subscribe(IPluginsManagerResourcesConsumer consumer);
-
-        /// <summary>
-        ///     Unregisters a <see cref="IPluginsManagerResourcesConsumer"/> from receiving future loaded resources.
-        /// </summary>
-        /// <param name="consumer">
-        ///     The <see cref="IPluginsManagerResourcesConsumer"/> to be unregistered from this loader.
-        /// </param>
-        /// <returns>
-        ///     Whether or not the <paramref name="consumer"/> is successfully unsubscribed.
-        /// </returns>
-        bool Unsubscribe(IPluginsManagerResourcesConsumer consumer);
+        void Add(IEnumerable<T> items);
     }
 }

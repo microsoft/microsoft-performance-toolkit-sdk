@@ -8,36 +8,19 @@ using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
     /// <summary>
-    ///     Contains logic for discovering, installing, uninstalling and updating plugins.
+    ///     Contains logic for discovering plugins.
     /// </summary>
-    public interface IPluginsManager
-        : IPluginsInstaller
+    public interface IPluginsDiscoverer
     {
         /// <summary>
-        ///     Gets all plugin sources managed by this plugins manager.
+        ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
+        ///    Subscribe to this event to handle errors related to a particular <see cref="PluginSource"/>.
         /// </summary>
-        IEnumerable<PluginSource> PluginSources { get; }
-
-        /// <summary>
-        ///     Adds a collection of plugin sources to the plugins manager.
-        /// </summary>
-        /// <param name="sources">
-        ///     The plugin sources to be added.
-        /// </param>
-        /// <returns>
-        ///     A task that completes when all plugin sources have been added.
-        /// </returns>
-        Task AddPluginSourcesAsync(IEnumerable<PluginSource> sources);
-
-        /// <summary>
-        ///     Clears all plugin sources in this plugin manager.
-        /// </summary>
-        void ClearPluginSources();
+        event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
 
         /// <summary>
         ///     Gets all available plugins in their latest versions.
@@ -113,11 +96,5 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
             PluginSource pluginSource,
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
-
-        /// <summary>
-        ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.
-        ///    Subsribe to this event to handle errors related to a particular <see cref="PluginSource"/>.
-        /// </summary>
-        event EventHandler<PluginSourceErrorEventArgs> PluginSourceErrorOccured;
     }
 }
