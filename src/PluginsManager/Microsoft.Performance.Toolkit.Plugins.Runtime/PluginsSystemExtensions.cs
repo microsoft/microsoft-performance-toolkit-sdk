@@ -9,7 +9,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Manager
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
     ///     Extension methods for <see cref="PluginsSystem"/>.
