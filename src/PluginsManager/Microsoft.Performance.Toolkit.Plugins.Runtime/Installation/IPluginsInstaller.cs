@@ -34,9 +34,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <param name="pluginStream">
         ///     A stream containing the plugin to install.
         /// </param>
-        /// <param name="installationRoot">
-        ///     The root directory where the plugin will be installed.
-        /// </param>
         /// <param name="sourceUri">
         ///     The URI of the <see cref="Core.Discovery.PluginSource"/> that the plugin was discovered from.
         /// </param>
@@ -50,15 +47,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     The <see cref="InstalledPluginInfo"/> of the installed plugin if the installation was successful. Otherwise, null.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///      Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
-        ///      <paramref name="sourceUri"/> is null.
+        ///     Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
+        ///     <paramref name="sourceUri"/> is null.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
         /// </exception>
-        Task<InstalledPluginInfo> InstallPluginAsync(
+        Task<InstalledPlugin> InstallPluginAsync(
             Stream pluginStream,
-            string installationRoot,
             Uri sourceUri,
             CancellationToken cancellationToken,
             IProgress<int> progress);

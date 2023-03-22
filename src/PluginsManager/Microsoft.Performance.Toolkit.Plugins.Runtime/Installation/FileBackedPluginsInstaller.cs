@@ -24,6 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public sealed class FileBackedPluginsInstaller
         : IPluginsInstaller
     {
+        private readonly string installationRoot;
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
         private readonly ILogger logger;
@@ -34,8 +35,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
         /// </param>
-        public FileBackedPluginsInstaller(IPluginRegistry pluginRegistry)
-            : this(pluginRegistry, SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
+        public FileBackedPluginsInstaller(
+            string installationRoot,
+            IPluginRegistry pluginRegistry)
+            : this(installationRoot, pluginRegistry, SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
         {
         }
 
@@ -49,9 +52,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The <see cref="ISerializer{PluginMetadata}"/> used to deserialize plugin metadata.
         /// </param> 
         public FileBackedPluginsInstaller(
+            string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer)
-            : this(pluginRegistry, metadataSerializer, Logger.Create<FileBackedPluginsInstaller>())
+            : this(installationRoot, pluginRegistry, metadataSerializer, Logger.Create<FileBackedPluginsInstaller>())
         {
         }
 
@@ -66,6 +70,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Used to log messages.
         /// </param>
         public FileBackedPluginsInstaller(
+            string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             ILogger logger)
@@ -74,6 +79,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(metadataSerializer, nameof(metadataSerializer));
             Guard.NotNull(logger, nameof(logger));
 
+            this.installationRoot = installationRoot;
             this.pluginRegistry = pluginRegistry;
             this.pluginMetadataSerializer = metadataSerializer;
             this.logger = logger;
@@ -91,7 +97,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 Task<InstalledPlugin>[] tasks = installedPluginsArray
                     .Select(p => CreateInstalledPluginAsync(p, cancellationToken))
                     .ToArray();
-
 
                 var task = Task.WhenAll(tasks);
 
@@ -149,15 +154,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///        - If the plugin is corrupted or missing, it will be uninstalled and reinstalled.
         /// </remarks>
         /// <inheritdoc/>
-        public async Task<InstalledPluginInfo> InstallPluginAsync(
+        public async Task<InstalledPlugin> InstallPluginAsync(
             Stream stream,
-            string installationRoot,
             Uri sourceUri,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(stream, nameof(stream));
-            Guard.NotNull(installationRoot, nameof(installationRoot));
             Guard.NotNull(sourceUri, nameof(sourceUri));
 
             if (!PluginPackage.TryCreate(
@@ -198,7 +201,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 };
 
-                string installationDir = Path.GetFullPath(Path.Combine(installationRoot, $"{pluginPackage.Id}-{pluginPackage.Version}"));
+                string installationDir = GetInstallationDirOfPlugin(pluginPackage.Id, pluginPackage.Version);
                 try
                 {
                     // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
@@ -214,7 +217,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         sourceUri,
                         pluginPackage.DisplayName,
                         pluginPackage.Description,
-                        installationDir,
                         DateTime.UtcNow,
                         checksum);
 
@@ -229,7 +231,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Info($"{pluginToInstall} is registered in the plugin registry.");
                     }
 
-                    return pluginToInstall;
+                    return new InstalledPlugin(pluginToInstall, pluginPackage.PluginMetadata);
                 }
                 catch (Exception e)
                 {
@@ -315,7 +317,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllAsync(cancellationToken);
-                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => Path.GetFullPath(p.InstallPath));
+                IEnumerable<string> registeredInstallDirs = installedPlugins.Select(p => GetInstallationDirOfPlugin(p.Id, p.Version));
 
                 foreach (DirectoryInfo dir in new DirectoryInfo(installationDir).GetDirectories())
                 {
@@ -334,10 +336,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(plugin, nameof(plugin));
 
-            string installPath = plugin.InstallPath;
+            string installPath = GetInstallationDirOfPlugin(plugin.Id, plugin.Version);
             string checksum = await HashUtils.GetDirectoryHash(installPath);
 
             return checksum.Equals(plugin.Checksum);
+        }
+
+        private string GetInstallationDirOfPlugin(string pluginId, Version pluginVersion)
+        {
+            Guard.NotNull(pluginId, nameof(pluginId));
+            Guard.NotNull(pluginVersion, nameof(pluginVersion));
+
+            return Path.GetFullPath(Path.Combine(this.installationRoot, $"{pluginId}-{pluginVersion}"));
         }
 
         private async Task<InstalledPlugin> CreateInstalledPluginAsync(
@@ -359,7 +369,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     installedPlugin);
             }
 
-            string metadataFileName = Path.Combine(installedPlugin.InstallPath, PluginPackage.PluginMetadataFileName);
+            string installPath = GetInstallationDirOfPlugin(installedPlugin.Id, installedPlugin.Version);
+            string metadataFileName = Path.Combine(installPath, PluginPackage.PluginMetadataFileName);
             PluginMetadata pluginMetadata;
             using (var fileStream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
