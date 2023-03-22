@@ -10,7 +10,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions
     ///     Exception that occurs when the plugin cannot be fetched.
     /// </summary>
     public class PluginFetchingException
-       : PluginsManagerException
+       : PluginsSystemException
     {
         public PluginFetchingException()
         {

@@ -6,21 +6,21 @@ using System;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions
 {
     /// <summary>
-    ///    Base exception type for the PluginsManager.
+    ///    Base exception type for the <see cref="Runtime.PluginsSystem"/>.
     /// </summary>
-    public abstract class PluginsManagerException
+    public abstract class PluginsSystemException
        : Exception
     {
-        protected PluginsManagerException()
+        protected PluginsSystemException()
         {
         }
 
-        protected PluginsManagerException(string message)
+        protected PluginsSystemException(string message)
             : base(message)
         {
         }
 
-        protected PluginsManagerException(string message, Exception innerException)
+        protected PluginsSystemException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

@@ -9,7 +9,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions
     ///    Base exception type for installed plugins.
     /// </summary>
     public abstract class InstalledPluginException
-        : PluginsManagerException
+        : PluginsSystemException
     {
         protected InstalledPluginException()
         {
