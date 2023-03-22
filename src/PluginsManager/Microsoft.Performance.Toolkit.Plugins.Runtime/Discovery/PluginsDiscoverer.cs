@@ -25,8 +25,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
     public sealed class PluginsDiscoverer
         : IPluginsDiscoverer
     {
-        private readonly IRepositoryRO<IPluginDiscovererProvider> discovererProvidersRepo;
-        private readonly IRepositoryRO<IPluginFetcher> fetchersRepo;
+        private readonly IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo;
+        private readonly IRepositoryRO<IPluginFetcher> fetcherRepo;
         private readonly IRepositoryRO<PluginSource> pluginSourceRepo;
 
         private readonly ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>> sourceToDiscoverers;
@@ -34,21 +34,68 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         private readonly ILogger logger;
+        private readonly Func<Type, ILogger> loggerFactory;
 
+
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginsDiscoverer"/>.
+        /// </summary>
+        /// <param name="pluginSourceRepo">
+        ///     A repository containing all available <see cref="PluginSource"/>s.
+        /// </param>
+        /// <param name="fetcherRepo">
+        ///     A repository containing all available <see cref="IPluginFetcher"/>s.
+        /// </param>
+        /// <param name="discovererProviderRepo">
+        ///     A repository containing all available <see cref="IPluginDiscovererProvider"/>s.
+        /// </param>
         public PluginsDiscoverer(
             IRepositoryRO<PluginSource> pluginSourceRepo,
-            IRepositoryRO<IPluginFetcher> fetchersRepo,
-            IRepositoryRO<IPluginDiscovererProvider> discovererProvidersRepo,
-            ILogger logger)
+            IRepositoryRO<IPluginFetcher> fetcherRepo,
+            IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo)
+            : this(
+                  pluginSourceRepo,
+                  fetcherRepo,
+                  discovererProviderRepo,
+                  Logger.Create)
         {
+        }
+
+        /// <summary>
+        ///     Creates an instance of <see cref="PluginsDiscoverer"/> with the given logger factory.
+        /// </summary>
+        /// <param name="pluginSourceRepo">
+        ///     A repository containing all available <see cref="PluginSource"/>s.
+        /// </param>
+        /// <param name="fetcherRepo">
+        ///     A repository containing all available <see cref="IPluginFetcher"/>s.
+        /// </param>
+        /// <param name="discovererProviderRepo">
+        ///     A repository containing all available <see cref="IPluginDiscovererProvider"/>s.
+        /// </param>
+        /// <param name="loggerFactory">
+        ///     A factory that creates loggers for the given type.
+        /// </param>
+        public PluginsDiscoverer(
+            IRepositoryRO<PluginSource> pluginSourceRepo,
+            IRepositoryRO<IPluginFetcher> fetcherRepo,
+            IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo,
+            Func<Type, ILogger> loggerFactory)
+        {
+            Guard.NotNull(pluginSourceRepo, nameof(pluginSourceRepo));
+            Guard.NotNull(fetcherRepo, nameof(fetcherRepo));
+            Guard.NotNull(discovererProviderRepo, nameof(discovererProviderRepo));
+            Guard.NotNull(loggerFactory, nameof(loggerFactory));
+
             this.pluginSourceRepo = pluginSourceRepo;
-            this.discovererProvidersRepo = discovererProvidersRepo;
-            this.fetchersRepo = fetchersRepo;
+            this.discovererProviderRepo = discovererProviderRepo;
+            this.fetcherRepo = fetcherRepo;
 
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
             this.pluginSourceRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
-            this.discovererProvidersRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
-            this.logger = logger;
+            this.discovererProviderRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory(typeof(PluginsDiscoverer));
         }
 
         /// <inheritdoc />
@@ -342,7 +389,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             {
                 IEnumerable<IPluginDiscoverer> discoverers = await CreateDiscoverers(
                     source,
-                    this.discovererProvidersRepo.Items,
+                    this.discovererProviderRepo.Items,
                     cancellationToken);
 
                 this.sourceToDiscoverers.TryAdd(source, discoverers.ToList());
@@ -398,7 +445,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 {
                     string errorMsg = $"Error occurred when checking if {pluginSource} is supported by discoverer provider {provider.GetType().Name}.";
                     var errorInfo = new ErrorInfo(
-                        ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                        ErrorCodes.PLUGINS_SYSTEM_PluginSourceException,
                         errorMsg);
 
                     PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
@@ -417,7 +464,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 {
                     string errorMsg = $"Error occurred when creating discoverer for {pluginSource}.";
                     var errorInfo = new ErrorInfo(
-                       ErrorCodes.PLUGINS_MANAGER_PluginSourceException,
+                       ErrorCodes.PLUGINS_SYSTEM_PluginSourceException,
                        errorMsg);
 
                     PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, e));
@@ -503,7 +550,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private async Task<IPluginFetcher> TryGetPluginFetcher(AvailablePluginInfo availablePluginInfo)
         {
-            IPluginFetcher fetcherToUse = this.fetchersRepo.Items
+            IPluginFetcher fetcherToUse = this.fetcherRepo.Items
                 .SingleOrDefault(fetcher => fetcher.TryGetGuid() == availablePluginInfo.FetcherResourceId);
 
             if (fetcherToUse == null)
@@ -534,7 +581,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private void HandleResourceNotFoundError(PluginSource pluginSource, string errorMsg)
         {
-            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginsManagerResourceNotFound, errorMsg);
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_SYSTEM_PluginsSystemResourceNotFound, errorMsg);
             PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo));
 
             this.logger.Error(errorMsg);
@@ -542,7 +589,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private void HandlePluginSourceException(PluginSource pluginSource, string errorMsg, Exception exception)
         {
-            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_MANAGER_PluginSourceException, errorMsg);
+            var errorInfo = new ErrorInfo(ErrorCodes.PLUGINS_SYSTEM_PluginSourceException, errorMsg);
             PluginSourceErrorOccured?.Invoke(this, new PluginSourceErrorEventArgs(pluginSource, errorInfo, exception));
 
             this.logger.Error(errorMsg, exception);
