@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="fetcher">
         ///     The <see cref="IPluginFetcher"/> this plugin uses to fetch plugin content.
         /// </param>
-        public AvailablePlugin(
+        internal AvailablePlugin(
             AvailablePluginInfo pluginInfo,
             IPluginDiscoverer discoverer,
             IPluginFetcher fetcher)
@@ -61,7 +61,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             return this.pluginDiscoverer.GetPluginMetadataAsync(this.AvailablePluginInfo.Identity, cancellationToken);
         }
 
-        internal Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
+        /// <summary>
+        ///     Gets stream to this plugin that can be installed via IPluginsInstaller.Install()
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <param name="progress">
+        ///     Indicates the progress of plugin package fetching.
+        /// </param>
+        /// <returns>
+        ///     The stream of the plugin package file.
+        /// </returns>
+        public Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
         {
             return this.pluginFetcher.GetPluginStreamAsync(
                 this.AvailablePluginInfo,

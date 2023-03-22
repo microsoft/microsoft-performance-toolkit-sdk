@@ -5,7 +5,7 @@ using System;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
 {
     /// <summary>	
     ///     Represents an object that facilitates grouping method calls into one synchronization region.	

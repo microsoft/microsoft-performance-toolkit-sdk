@@ -19,7 +19,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Uri sourceUri,
             string displayName,
             string description,
-            string installPath,
             DateTimeOffset installedOn,
             string checksum)
         {
@@ -28,7 +27,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.SourceUri = sourceUri;
             this.DisplayName = displayName;
             this.Description = description;
-            this.InstallPath = installPath;
             this.InstalledOn = installedOn;
             this.Checksum = checksum;
         }
@@ -59,11 +57,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public string Description { get; }
 
         /// <summary>
-        ///     Gets or sets the path to where the plugin is installed.
-        /// </summary>
-        public string InstallPath { get; }
-
-        /// <summary>
         ///     Gets the timestamp when the plugin is installed.
         /// </summary>
         public DateTimeOffset InstalledOn { get; }
@@ -91,7 +84,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                    Equals(this.SourceUri, other.SourceUri) &&
                    string.Equals(this.DisplayName, other.DisplayName, StringComparison.OrdinalIgnoreCase) &&
                    string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(this.InstallPath, other.InstallPath, StringComparison.OrdinalIgnoreCase) &&
                    DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn) &&
                    string.Equals(this.Checksum, other.Checksum);
         }

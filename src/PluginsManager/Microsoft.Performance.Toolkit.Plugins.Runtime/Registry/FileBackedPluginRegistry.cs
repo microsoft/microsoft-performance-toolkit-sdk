@@ -21,7 +21,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     ///     Represents a file system based plugin registry that records information of installed plugins
     ///     and provides an ephemeral lock file that can be used to synchronize access to the registry.
     /// </summary>
-    public sealed class FileSystemPluginRegistry
+    public sealed class FileBackedPluginRegistry
         : IPluginRegistry
     {
         private static readonly string registryFileName = "installedPlugins.json";
@@ -29,22 +29,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly string registryFilePath;
         private readonly FileDistributedLock fileDistributedLock;
 
+        private readonly string registryRoot;
         private readonly ISerializer<List<InstalledPluginInfo>> registryFileSerializer;
         private readonly ILogger logger;
 
         /// <summary>
-        ///     Creates an instance of <see cref="FileSystemPluginRegistry"/> with a registry root.
+        ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root.
         /// </summary>
         /// <param name="registryRoot">
         ///     The root directory of the registry.
         /// </param>
-        public FileSystemPluginRegistry(string registryRoot)
+        public FileBackedPluginRegistry(string registryRoot)
             : this(registryRoot, SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>())
         {
         }
 
         /// <summary>
-        ///     Creates an instance of <see cref="FileSystemPluginRegistry"/> with a registry root and a serializer.
+        ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root and a serializer.
         /// </summary>
         /// <param name="registryRoot">
         ///     The root directory of the registry.
@@ -52,18 +53,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="serializer">
         ///     Used to serialize and deserialize the registry file.
         /// </param>
-        public FileSystemPluginRegistry(
+        public FileBackedPluginRegistry(
             string registryRoot,
             ISerializer<List<InstalledPluginInfo>> serializer)
-            : this(registryRoot, serializer, Logger.Create(typeof(FileSystemPluginRegistry)))
+            : this(registryRoot, serializer, Logger.Create(typeof(FileBackedPluginRegistry)))
         {
         }
 
         /// <summary>
-        ///     Creates an instance of <see cref="FileSystemPluginRegistry"/> with a registry root and a logger.
+        ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root and a logger.
         /// </summary>
         /// <param name="registryRoot">
         ///     The root directory of the registry.
+        /// </param>
+        /// <param name="serializer">
+        ///     Used to serialize and deserialize the registry file.
         /// </param>
         /// <param name="logger">
         ///     Used to log information.
@@ -74,7 +78,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <exception cref="ArgumentNullException">
         ///    Throws when <paramref name="registryRoot"/> or <paramref name="logger"/> is null.
         /// </exception>  
-        public FileSystemPluginRegistry(
+        public FileBackedPluginRegistry(
             string registryRoot,
             ISerializer<List<InstalledPluginInfo>> serializer, 
             ILogger logger)
@@ -88,7 +92,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
 
             // TODO: #256 Create a backup registry
-            this.RegistryRoot = registryRoot;
+            this.registryRoot = registryRoot;
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.registryFileSerializer = serializer;
             this.logger = logger;
@@ -96,9 +100,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string lockFilePath = Path.Combine(registryRoot, lockFileName);
             this.fileDistributedLock = new FileDistributedLock(new FileInfo(lockFilePath));
         }
-
-        /// <inheritdoc/>
-        public string RegistryRoot { get; }
 
         /// <inheritdoc/>
         public async Task<IReadOnlyCollection<InstalledPluginInfo>> GetAllAsync(CancellationToken cancellationToken)
@@ -258,7 +259,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(installedPlugins, nameof(installedPlugins));
 
-            Directory.CreateDirectory(this.RegistryRoot);
+            Directory.CreateDirectory(this.registryRoot);
 
             try
             {

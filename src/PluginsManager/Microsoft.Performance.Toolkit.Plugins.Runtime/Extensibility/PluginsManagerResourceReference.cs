@@ -5,8 +5,9 @@ using System;
 using System.Reflection;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Extensibility
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <summary>
     ///     Creates a <see cref="AssemblyTypeReferenceWithInstance{T, Derived}"/> 
