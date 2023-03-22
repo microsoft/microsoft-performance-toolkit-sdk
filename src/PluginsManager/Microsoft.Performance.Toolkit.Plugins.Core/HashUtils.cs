@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <returns>
         ///     The combined SHA256 hash of all files including the file paths.
         /// </returns>
-        public static async Task<string> GetDirectoryHash(string directory)
+        public static async Task<string> GetDirectoryHashAsync(string directory)
         {
             Guard.NotNull(directory, nameof(directory));
             Guard.IsTrue(Directory.Exists(directory), $"Directory {directory} doesn't exist.");

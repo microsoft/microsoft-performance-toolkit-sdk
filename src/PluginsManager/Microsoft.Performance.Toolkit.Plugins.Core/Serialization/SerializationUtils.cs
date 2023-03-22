@@ -8,23 +8,23 @@ using System.Text.Json.Serialization;
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
 {
     /// <summary>
-    ///     Provides utility methods and default configuration for serialization in the plugins manager.
+    ///     Provides utility methods and default configuration for serialization in the plugins system.
     /// </summary>
     public static class SerializationUtils
     {
         /// <summary>
-        ///     Creates a <see cref="ISerializer{T}"/> that uses the default serialization options for the PluginsManager.
+        ///     Creates a <see cref="ISerializer{T}"/> that uses the default serialization options for the plugins system.
         /// </summary>
         /// <typeparam name="T">
         ///     The type of object to serialize.
         /// </typeparam>
         /// <returns>
-        ///     A <see cref="ISerializer{T}"/> that uses the default serialization options for the PluginsManager.
+        ///     A <see cref="ISerializer{T}"/> that uses the default serialization options for the plugins system.
         /// </returns>
         public static ISerializer<T> GetJsonSerializerWithDefaultOptions<T>()
             where T : class
         {
-            return new JsonSerializer<T>(PluginsManagerSerializerDefaultOptions);
+            return new JsonSerializer<T>(PluginsSystemSerializerDefaultOptions);
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
         }
 
         /// <summary>
-        ///     Gets the default serialization options for the PluginsManager.
+        ///     Gets the default serialization options for the plugins system.
         /// </summary>
-        public static readonly JsonSerializerOptions PluginsManagerSerializerDefaultOptions = new JsonSerializerOptions
+        public static readonly JsonSerializerOptions PluginsSystemSerializerDefaultOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
             Converters =
