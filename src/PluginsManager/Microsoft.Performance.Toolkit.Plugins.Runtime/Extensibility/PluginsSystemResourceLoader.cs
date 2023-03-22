@@ -16,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         private readonly object mutex = new object();
         private readonly AssemblyExtensionDiscovery extensionDiscovery;
 
-        private readonly HashSet<IPluginsManagerResourcesReferenceConsumer> subscribers;
+        private readonly HashSet<IPluginsSystemResourcesReferenceConsumer> subscribers;
         private readonly PluginsSystemResourceReflector resourcesReflector;
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
             IAssemblyLoader assemblyLoader,
             Func<IEnumerable<string>, IPreloadValidator> validatorFactory)
         {
-            this.subscribers = new HashSet<IPluginsManagerResourcesReferenceConsumer>();
+            this.subscribers = new HashSet<IPluginsSystemResourcesReferenceConsumer>();
             this.extensionDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
             this.resourcesReflector = new PluginsSystemResourceReflector(this.extensionDiscovery);
         }
@@ -60,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public bool Subscribe(IPluginsManagerResourcesReferenceConsumer consumer)
+        public bool Subscribe(IPluginsSystemResourcesReferenceConsumer consumer)
         {
             Guard.NotNull(consumer, nameof(consumer));
 
@@ -81,7 +81,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         }
 
         /// <inheritdoc />
-        public bool Unsubscribe(IPluginsManagerResourcesReferenceConsumer consumer)
+        public bool Unsubscribe(IPluginsSystemResourcesReferenceConsumer consumer)
         {
             Guard.NotNull(consumer, nameof(consumer));
 
@@ -93,7 +93,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
         private void NotifyResourceLoaded(IEnumerable<PluginsSystemResourceReference> resources)
         {
-            foreach (IPluginsManagerResourcesReferenceConsumer subscriber in this.subscribers)
+            foreach (IPluginsSystemResourcesReferenceConsumer subscriber in this.subscribers)
             {
                 subscriber.OnNewResourcesLoaded(resources);
             }

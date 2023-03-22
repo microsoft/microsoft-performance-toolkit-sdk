@@ -15,7 +15,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 {
     /// <inheritdoc />
     public sealed class PluginsSystemResourceRepository<T>
-        : IPluginsManagerResourceLoader<T>,
+        : IPluginsSystemResourceLoader<T>,
           IRepositoryRO<T>
         where T : IPluginsSystemResource
     {

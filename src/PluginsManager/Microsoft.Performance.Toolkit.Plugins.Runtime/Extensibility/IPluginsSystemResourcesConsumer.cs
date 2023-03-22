@@ -9,7 +9,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
     ///     Process a collection of <see cref="PluginsSystemResourceReference"/> provided by the
     ///     <see cref="IPluginsSystemResourceDirectoryLoader"/>.
     /// </summary>
-    public interface IPluginsManagerResourcesReferenceConsumer
+    public interface IPluginsSystemResourcesReferenceConsumer
     {
         /// <summary>
         ///    Called when new resources are loaded.
