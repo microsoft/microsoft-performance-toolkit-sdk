@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </summary>
         public PluginSourceRepository()
             : this(Logger.Create)
-        {          
+        {
         }
 
         /// <summary>
