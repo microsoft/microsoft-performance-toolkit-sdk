@@ -67,13 +67,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             lock (this.mutex)
             {
-                IEnumerable<PluginSource> addedItems = pluginSources.Where(x => this.currentSources.Add(x));
+                var addedItems = pluginSources.Where(x => this.currentSources.Add(x)).ToList();
 
                 if (addedItems.Any())
                 {
                     CollectionChanged?.Invoke(
                         this,
-                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, addedItems.ToList()));
+                        new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, addedItems));
                 }
             }
         }
@@ -113,7 +113,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             lock (this.mutex)
             {
-                IEnumerable<PluginSource> removedItems = pluginSources.Where(x => this.currentSources.Remove(x));
+                var removedItems = pluginSources.Where(x => this.currentSources.Remove(x)).ToList();
                 if (removedItems.Any())
                 {
                     CollectionChanged?.Invoke(

@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.Performance.Testing\Microsoft.Performance.Testing.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Toolkit.Plugins.Runtime\Microsoft.Performance.Toolkit.Plugins.Runtime.csproj" />
   </ItemGroup>
 
 </Project>
