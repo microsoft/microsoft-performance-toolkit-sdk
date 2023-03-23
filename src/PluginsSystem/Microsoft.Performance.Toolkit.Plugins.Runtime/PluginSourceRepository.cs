@@ -63,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
         /// <inheritdoc/>
-        public void Add(IEnumerable<PluginSource> pluginSources)
+        public IEnumerable<PluginSource> Add(IEnumerable<PluginSource> pluginSources)
         {
             lock (this.mutex)
             {
@@ -75,11 +75,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this,
                         new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, addedItems));
                 }
+
+                return addedItems;
             }
         }
 
         /// <inheritdoc />
-        public void Add(PluginSource pluginSource)
+        public bool Add(PluginSource pluginSource)
         {
             lock (this.mutex)
             {
@@ -90,11 +92,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this,
                         new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, pluginSource));
                 }
+
+                return success;
             }
         }
 
         /// <inheritdoc/>
-        public void Remove(PluginSource pluginSource)
+        public bool Remove(PluginSource pluginSource)
         {
             lock (this.mutex)
             {
@@ -105,11 +109,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this,
                         new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, pluginSource));
                 }
+
+                return success;
             }
         }
 
         /// <inheritdoc/>
-        public void Remove(IEnumerable<PluginSource> pluginSources)
+        public IEnumerable<PluginSource> Remove(IEnumerable<PluginSource> pluginSources)
         {
             lock (this.mutex)
             {
@@ -120,6 +126,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this,
                         new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removedItems.ToList()));
                 }
+
+                return removedItems;
             }
         }
     }
