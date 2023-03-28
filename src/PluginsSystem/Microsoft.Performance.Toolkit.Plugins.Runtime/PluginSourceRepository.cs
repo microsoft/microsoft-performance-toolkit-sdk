@@ -65,6 +65,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <inheritdoc/>
         public IEnumerable<PluginSource> Add(IEnumerable<PluginSource> pluginSources)
         {
+            Guard.NotNull(pluginSources, nameof(pluginSources));
+
             lock (this.mutex)
             {
                 var addedItems = pluginSources.Where(x => this.currentSources.Add(x)).ToList();
@@ -83,6 +85,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <inheritdoc />
         public bool Add(PluginSource pluginSource)
         {
+            Guard.NotNull(pluginSource, nameof(pluginSource));
+
             lock (this.mutex)
             {
                 bool success = this.currentSources.Add(pluginSource);
@@ -100,6 +104,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <inheritdoc/>
         public bool Remove(PluginSource pluginSource)
         {
+            Guard.NotNull(pluginSource, nameof(pluginSource));
+
             lock (this.mutex)
             {
                 bool success = this.currentSources.Remove(pluginSource);
@@ -117,6 +123,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <inheritdoc/>
         public IEnumerable<PluginSource> Remove(IEnumerable<PluginSource> pluginSources)
         {
+            Guard.NotNull(pluginSources, nameof(pluginSources));
+
             lock (this.mutex)
             {
                 var removedItems = pluginSources.Where(x => this.currentSources.Remove(x)).ToList();
