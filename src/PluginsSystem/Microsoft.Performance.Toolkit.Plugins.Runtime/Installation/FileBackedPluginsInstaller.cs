@@ -19,7 +19,7 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
-    ///     Represents a <see cref="IPluginsInstaller"/> that installs plugins from a <see cref="PluginPackage"/> stream.
+    ///     Represents a <see cref="IPluginsInstaller"/> that installs plugins from a <see cref="PluginPackage"/> stream to a file system.
     /// </summary>
     public sealed class FileBackedPluginsInstaller
         : IPluginsInstaller
@@ -28,6 +28,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
         private readonly IInstalledPluginValidator installedPluginValidator;
+        private readonly IPluginPackageReader pluginPackageReader;
 
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
@@ -51,8 +52,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
-            IInstalledPluginValidator installedPluginValidator)
-            : this(installationRoot, pluginRegistry, metadataSerializer, installedPluginValidator, Logger.Create)
+            IInstalledPluginValidator installedPluginValidator,
+            IPluginPackageReader packageReader)
+            : this(installationRoot, pluginRegistry, metadataSerializer, installedPluginValidator, packageReader, Logger.Create)
         {
         }
 
@@ -79,6 +81,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             IInstalledPluginValidator installedPluginValidator,
+            IPluginPackageReader packageReader,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNullOrWhiteSpace(installationRoot, nameof(installationRoot));
@@ -91,6 +94,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.pluginRegistry = pluginRegistry;
             this.pluginMetadataSerializer = metadataSerializer;
             this.installedPluginValidator = installedPluginValidator;
+            this.pluginPackageReader = packageReader;
 
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(FileBackedPluginsInstaller));
@@ -174,14 +178,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(stream, nameof(stream));
             Guard.NotNull(sourceUri, nameof(sourceUri));
 
-            if (!PluginPackage.TryCreate(
-                stream,
-                this.pluginMetadataSerializer,
-                false,
-                out PluginPackage pluginPackage))
+            PluginPackage pluginPackage = await this.pluginPackageReader.TryReadPackageAsync(stream, cancellationToken);
+            if (pluginPackage == null)
             {
                 throw new PluginPackageCreationException(
-                      $"Failed to create plugin package out of a package stream from {sourceUri}");
+                    $"Failed to create plugin package out of a package stream from {sourceUri}");
             }
 
             using (pluginPackage)
@@ -303,7 +304,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         /// <summary>
-        ///     Attempts to clean up all obsolete (unreigstered) plugin files.
+        ///     Attempts to clean up all obsolete (unregistered) plugin files.
         ///     This method should be called safely by plugins consumers.
         /// </summary>
         /// <param name="cancellationToken">
@@ -369,9 +370,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string installPath = PathUtils.GetPluginInstallDirectory(
                 this.installationRoot,
                 new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
-            
-            string metadataFileName = Path.Combine(installPath, PluginPackage.PluginMetadataFileName);
-            
+
+            string metadataFileName = Path.Combine(installPath, ZipPluginPackage.PluginMetadataFileName);
+
             PluginMetadata pluginMetadata;
             using (var fileStream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
             {

@@ -2,171 +2,42 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
     /// <summary>
     ///     Represents a read-only plugin package.
     /// </summary>
-    public sealed class PluginPackage
+    public abstract class PluginPackage
         : IDisposable
     {
-        private readonly ZipArchive zip;
-        private static readonly string pluginContentPath = "plugin/";
-        private static readonly string pluginMetadataFileName = "pluginspec.json";
-        private bool disposedValue;
-        private readonly ILogger logger;
+        public static readonly string PluginContentPath = "plugin/";
+        public static readonly string PluginMetadataFileName = "pluginspec.json";
 
-        /// <summary>
-        ///     Tries to create an instance of <see cref="PluginPackage"/> with the specified parameters.
-        /// </summary>
-        /// <param name="stream">
-        ///     Stream for reading the plugin package file.
-        /// </param>
-        /// <param name="metadataSerializer">
-        ///     Used to deserialize the plugin metadata.
-        /// </param>
-        /// <param name="leaveOpen">
-        ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
-        /// </param>
-        /// <param name="package">
-        ///     The created <see cref="PluginPackage"/> instance.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the <see cref="PluginPackage"/> was created successfully. <c>false</c> otherwise.
-        /// </returns>
-        public static bool TryCreate(
-            Stream stream,
-            ISerializer<PluginMetadata> metadataSerializer,
-            bool leaveOpen,
-            out PluginPackage package)
+        private readonly Func<Type, ILogger> loggerFactory;
+        protected readonly ILogger logger;
+
+        protected PluginPackage(
+            PluginMetadata pluginMetadata,
+            Func<Type, ILogger> loggerFactory)
         {
-            return TryCreate(stream, metadataSerializer, leaveOpen, Logger.Create<PluginPackage>(), out package);
+            Guard.NotNull(pluginMetadata, nameof(pluginMetadata));
+            Guard.NotNull(loggerFactory, nameof(loggerFactory));
+
+            this.PluginMetadata = pluginMetadata;
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory(GetType());
         }
 
         /// <summary>
-        ///     Creates an instance of <see cref="PluginPackage"/> with the specified parameters.
+        ///    Gets the plugin metadata.
         /// </summary>
-        /// <param name="stream">
-        ///     Stream for reading the plugin package file.
-        /// </param>
-        /// <param name="metadataSerializer">
-        ///     Used to deserialize the plugin metadata.
-        /// </param>
-        /// <param name="leaveOpen">
-        ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
-        ///     <c>false</c> otherwise.
-        /// </param>
-        /// <param name="logger">
-        ///     Used to log information.
-        /// </param>
-        /// <param name="package">
-        ///     The created <see cref="PluginPackage"/> instance.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if the <see cref="PluginPackage"/> was created successfully. <c>false</c> otherwise.
-        /// </returns>
-        public static bool TryCreate(
-            Stream stream,
-            ISerializer<PluginMetadata> metadataSerializer,
-            bool leaveOpen,     
-            ILogger logger,
-            out PluginPackage package)
-        {
-            try
-            {
-                package = new PluginPackage(stream, metadataSerializer, leaveOpen, logger);
-                return true;
-            }
-            catch (Exception e)
-            {
-                if (!leaveOpen)
-                {
-                    stream.Dispose();
-                }
-
-                if (e is MalformedPluginPackageException)
-                {
-                    logger.Error(e, e.Message);
-                }
-                else if (e is JsonException)
-                {
-                    logger.Error(e, $"Deserialization failed due to invalid JSON text in plugin metadata");
-                }
-                else if (e is InvalidDataException)
-                {
-                    logger.Error(e, $"Invalid stream for a plugin package.");
-                }
-
-                package = null;
-                return false;
-            }
-        }
-
-        /// <summary>
-        ///     Creates an instance of <see cref="PluginPackage"/>.
-        /// </summary>
-        /// <param name="stream">
-        ///     Stream for reading the plugin package file.
-        /// </param>
-        /// <param name="metadataSerializer">
-        ///     Used to deserialize the plugin metadata.
-        /// </param>
-        /// <param name="leaveOpen">
-        ///     <c>true</c> to leave <paramref name = "stream" /> open after <see cref="PluginPackage"/> is disposed.
-        ///     <c>false</c> otherwise.
-        /// </param>
-        /// <param name="logger">
-        ///     Used to log information.
-        /// </param>
-        private PluginPackage(
-            Stream stream,
-            ISerializer<PluginMetadata> metadataSerializer,
-            bool leaveOpen,
-            ILogger logger)
-        {
-            Guard.NotNull(stream, nameof(stream));
-
-            this.logger = logger;
-            this.zip = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen);
-            this.Entries = this.zip.Entries.Select(e => new PluginPackageEntry(e)).ToList().AsReadOnly();
-            this.PluginMetadata = ReadMetadata(metadataSerializer);
-        }
-
-        /// <summary>
-        ///     Gets the relative file path to plugin content.
-        /// </summary>
-        public static string PluginContentPath
-        {
-            get
-            {
-                return pluginContentPath;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the name of the metadata file.
-        /// </summary>
-        public static string PluginMetadataFileName
-        {
-            get
-            {
-                return pluginMetadataFileName;
-            }
-        }
+        public PluginMetadata PluginMetadata { get; }
 
         /// <summary>
         ///     Gets the plugin ID.
@@ -212,70 +83,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
         }
 
-        /// <summary>
-        ///     Gets all entries (files and directories) contained in this plugin package.
-        /// </summary>
-        public IReadOnlyCollection<PluginPackageEntry> Entries { get; }
-
-        /// <summary>
-        ///     Gets the plugin metadata object.
-        /// </summary>
-        public PluginMetadata PluginMetadata { get; }
-
-        /// <summary>
-        ///     Extracts all files in this package.
-        /// </summary>
-        /// <param name="extractPath">
-        ///     The path to which the files will be extracted.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of the extraction.
-        /// </param>
-        /// <returns>
-        ///     An await-able task.
-        /// </returns>
-        public Task ExtractPackageAsync(
-            string extractPath,
-            CancellationToken cancellationToken,
-            IProgress<int> progress)
+        /// <inheritdoc />
+        public override string ToString()
         {
-            return ExtractEntriesAsync(extractPath, entry => true, cancellationToken, progress);
+            return $"{this.Id} - {this.Version}";
         }
 
-        /// <summary>
-        ///     Extract certain entires from the package.
-        /// </summary>
-        /// <param name="extractPath">
-        ///     The path to which the files will be extracted.
-        /// </param>
-        /// <param name="predicate">
-        ///     A function whose result indicates whether an entry should be extracted.
-        /// </param>
-        /// <param name="cancellationToken">
-        ///     Signals that the caller wishes to cancel the operation.
-        /// </param>
-        /// <param name="progress">
-        ///     Indicates the progress of the extraction.
-        /// </param>
-        /// <returns>
-        ///     An await-able task.
-        /// </returns>
-        public Task ExtractEntriesAsync(
+        public abstract Task ExtractPackageAsync(
             string extractPath,
-            Func<PluginPackageEntry, bool> predicate,
             CancellationToken cancellationToken,
-            IProgress<int> progress)
-        {
-            return ExtractEntriesInternalAsync(
-                this.Entries.Where(e => predicate(e)),
-                extractPath,
-                this.logger,
-                cancellationToken,
-                progress);
-        }
+            IProgress<int> progress);
 
         /// <inheritdoc />
         public void Dispose()
@@ -285,98 +102,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             GC.SuppressFinalize(this);
         }
 
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return $"{this.Id} - {this.Version}";
-        }
-
-        private static async Task ExtractEntriesInternalAsync(
-           IEnumerable<PluginPackageEntry> entries,
-           string extractPath,
-           ILogger logger,
-           CancellationToken cancellationToken,
-           IProgress<int> progress)
-        {
-            Guard.NotNull(extractPath, nameof(extractPath));
-
-            const int bufferSize = 4096;
-            const int defaultAsyncBufferSize = 81920;
-
-            extractPath = Path.GetFullPath(extractPath);
-            if (!extractPath.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
-            {
-                extractPath += Path.DirectorySeparatorChar;
-            }
-
-            // TODO: #257 Report progress
-            try
-            {
-                foreach (PluginPackageEntry entry in entries)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    string destPath = Path.GetFullPath(Path.Combine(extractPath, entry.RelativePath));
-                    if (entry.IsDirectory)
-                    {
-                        Directory.CreateDirectory(destPath);
-                    }
-                    else
-                    {
-                        string destDir = Path.GetDirectoryName(destPath);
-                        if (!string.IsNullOrEmpty(destDir))
-                        {
-                            Directory.CreateDirectory(destDir);
-                        }
-
-                        using (Stream entryStream = entry.Open())
-                        using (var destStream = new FileStream(
-                            destPath,
-                            FileMode.Create,
-                            FileAccess.Write,
-                            FileShare.None,
-                            bufferSize,
-                            FileOptions.Asynchronous | FileOptions.SequentialScan))
-                        {
-                            await entryStream.CopyToAsync(destStream, defaultAsyncBufferSize, cancellationToken).ConfigureAwait(false);
-                        }
-                    }
-                }
-            }
-            catch (Exception e) when (!(e is OperationCanceledException))
-            {
-                string errorMsg = $"Unable to extract plugin content to {extractPath}";
-                logger.Error(e, errorMsg);
-                throw new PluginPackageExtractionException(errorMsg, e);
-            }
-        }
-
-        private PluginMetadata ReadMetadata(ISerializer<PluginMetadata> serializer)
-        {
-            ZipArchiveEntry entry = this.zip.GetEntry(pluginMetadataFileName);
-            if (entry == null)
-            {
-                throw new MalformedPluginPackageException($"{pluginMetadataFileName} not found in the plugin package.");
-            }
-
-            using (Stream stream = entry.Open())
-            {
-                PluginMetadata pluginMetadata = serializer.Deserialize(stream);
-                return pluginMetadata;
-            }
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (!this.disposedValue)
-            {
-                if (disposing)
-                {
-                    this.zip.Dispose();
-                }
-
-                this.disposedValue = true;
-            }
-        }
+        protected abstract void Dispose(bool disposing);
     }
 }
