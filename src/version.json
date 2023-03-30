@@ -10,7 +10,8 @@
   ],
   "pathFilters": [
     ".",
-    ":!*.sln"
+    ":!SDK.sln",
+    ":!PluginsSystem"
   ],
   "cloudBuild": {
     "buildNumber": {
