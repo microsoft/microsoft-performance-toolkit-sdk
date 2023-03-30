@@ -15,33 +15,81 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        [DynamicData(nameof(GetAddSingleTestCases), DynamicDataSourceType.Method)]
-        public void Add_Single_Returns(PluginSourceRepoTestCase repoTestCase)
+        public void Add_Single_New_Added()
         {
-            var sourceToAdd = repoTestCase?.PluginSourcesToChange?.Single();
-            var repo = CreateSut(repoTestCase?.ExistingRepoSources);
+            var repo = new PluginSourceRepository();
+            var source = new PluginSource(FakeUris.Uri1);
+
+            bool success = repo.Add(source);
+
+            Assert.IsTrue(success);
+            Assert.IsTrue(repo.Items.Contains(source));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Add_Single_Exisiting_NotAdded()
+        {
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new PluginSource[] { source });
+
+            bool success = repo.Add(source);
+
+            Assert.IsFalse(success);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Add_Single_Duplicate_NotAdded()
+        {
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new PluginSource[] { source });
+
+            bool success = repo.Add(new PluginSource(FakeUris.Uri1));
+
+            Assert.IsFalse(success);
+        }
+
+
+        [TestMethod]
+        [UnitTest]
+        public void Add_Single_CollectionChangedInvoked()
+        {
+            var repo = new PluginSourceRepository();
+            var source = new PluginSource(FakeUris.Uri1);
             bool raised = false;
 
             repo.CollectionChanged += (s, e) =>
             {
                 raised = true;
-                Assert.AreEqual(NotifyCollectionChangedAction.Add, e.Action);
-                CollectionAssert.AreEquivalent(repoTestCase?.PluginSourcesToChange, e.NewItems?.Cast<PluginSource>().ToArray());
             };
 
-            bool success = repo.Add(sourceToAdd);
+            repo.Add(source);
 
-            Assert.AreEqual(success, repoTestCase?.ExpectedResult);
-            if (repoTestCase?.ExpectedResult == true)
-            {
-                Assert.IsTrue(repo.Items.Contains(sourceToAdd));
-                Assert.IsTrue(raised);
-            }
+            Assert.IsTrue(raised);
         }
 
         [TestMethod]
         [UnitTest]
-        public void Add_SingleNullItem_ThrowsArgumentNullException()
+        public void Add_Single_Fails_CollectionChangedNotInvoked()
+        {
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new PluginSource[] { source });
+            bool raised = false;
+
+            repo.CollectionChanged += (s, e) =>
+            {
+                raised = true;
+            };
+
+            repo.Add(source);
+
+            Assert.IsFalse(raised);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Add_Single_NullItem_ThrowsArgumentNullException()
         {
             var repo = new PluginSourceRepository();
 
@@ -54,27 +102,74 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        [DynamicData(nameof(GetAddMultipleTestCases), DynamicDataSourceType.Method)]
-        public void Add_Multiple_Returns(PluginSourceRepoTestCase repoTestCase)
+        public void Add_Multiple_New_Added()
         {
-            var repo = CreateSut(repoTestCase.ExistingRepoSources);
+            var repo = new PluginSourceRepository();
+            var sources = new PluginSource[]
+            {
+                new PluginSource(FakeUris.Uri1),
+                new PluginSource(FakeUris.Uri2)
+            };
+
+            IEnumerable<PluginSource> addedItems = repo.Add(sources);
+
+            CollectionAssert.AreEquivalent(sources, addedItems.ToArray());
+            CollectionAssert.AreEquivalent(sources, repo.Items.ToArray());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Add_Multiple_Existing_NewItemsAdded()
+        {
+            var source1 = new PluginSource(FakeUris.Uri1);
+            var source2 = new PluginSource(FakeUris.Uri2);
+            var source1_duplicate = new PluginSource(FakeUris.Uri1);
+
+            var repo = CreateSut(new PluginSource[] { source1 });
+
+            IEnumerable<PluginSource> addedItems = repo.Add(new PluginSource[] { source1, source2, source1, source1_duplicate });
+
+            CollectionAssert.AreEquivalent(new PluginSource[] { source2 }, addedItems.ToArray());
+            CollectionAssert.AreEquivalent(new PluginSource[] { source1, source2 }, repo.Items.ToArray());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Add_Multiple_CollectionChangedInvoked()
+        {
+            var repo = new PluginSourceRepository();
+            var sources = new PluginSource[]
+            {
+                new PluginSource(FakeUris.Uri1),
+                new PluginSource(FakeUris.Uri2)
+            };
             bool raised = false;
 
             repo.CollectionChanged += (s, e) =>
             {
                 raised = true;
-                Assert.AreEqual(NotifyCollectionChangedAction.Add, e.Action);
-                CollectionAssert.AreEquivalent(repoTestCase.ExpectedIChangedtems, e.NewItems?.Cast<PluginSource>().ToArray());
             };
 
-            IEnumerable<PluginSource> addedItems = repo.Add(repoTestCase.PluginSourcesToChange);
+            repo.Add(sources);
 
-            CollectionAssert.AreEquivalent(repoTestCase.ExpectedIChangedtems, addedItems.ToArray());
-            CollectionAssert.IsSubsetOf(repoTestCase.ExpectedIChangedtems, repo.Items.ToArray());
-            if (repoTestCase?.ExpectedIChangedtems?.Any() ?? false)
+            Assert.IsTrue(raised);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Add_Multiple_NoneAdded_CollectionChangedNotInvoked()
+        {
+            var repo = CreateSut(Array.Empty<PluginSource>());
+            bool raised = false;
+
+            repo.CollectionChanged += (s, e) =>
             {
-                Assert.IsTrue(raised);
-            }
+                raised = true;
+            };
+
+            repo.Add(Array.Empty<PluginSource>());
+
+            Assert.IsFalse(raised);
         }
 
         [TestMethod]
@@ -93,28 +188,79 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        [DynamicData(nameof(GetRemoveSingleTestCases), DynamicDataSourceType.Method)]
-        public void Remove_Single_Returns(PluginSourceRepoTestCase repoTestCase)
+        public void Remove_Single_Removed()
         {
-            var sourceToRemove = repoTestCase?.PluginSourcesToChange?.Single();
-            var repo = CreateSut(repoTestCase?.ExistingRepoSources);
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new PluginSource[] { source });
+
+            bool success = repo.Remove(source);
+
+            Assert.IsTrue(success);
+            Assert.IsFalse(repo.Items.Contains(source));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Single_Duplicate_Removed()
+        {
+            var source = new PluginSource(FakeUris.Uri1);
+            var source_duplicate = new PluginSource(FakeUris.Uri1);
+
+            var repo = CreateSut(new PluginSource[] { source });
+
+            bool success = repo.Remove(source_duplicate);
+
+            Assert.IsTrue(success);
+            Assert.IsFalse(repo.Items.Contains(source));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Single_NoneExisting_NotRemoved()
+        {
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new PluginSource[] { source });
+
+            bool success = repo.Remove(new PluginSource(FakeUris.Uri2));
+
+            Assert.IsFalse(success);
+            Assert.IsTrue(repo.Items.Contains(source));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Single_CollectionChangedInvoked()
+        {
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new PluginSource[] { source });
             bool raised = false;
 
             repo.CollectionChanged += (s, e) =>
             {
                 raised = true;
-                Assert.AreEqual(NotifyCollectionChangedAction.Remove, e.Action);
-                CollectionAssert.AreEquivalent(repoTestCase?.PluginSourcesToChange, e.OldItems?.Cast<PluginSource>().ToArray());
             };
 
-            bool success = repo.Remove(sourceToRemove);
+            repo.Remove(source);
 
-            Assert.AreEqual(success, repoTestCase?.ExpectedResult);
-            if (repoTestCase?.ExpectedResult == true)
+            Assert.IsTrue(raised);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Single_NoneRemoved_CollectionChangedNotInvoked()
+        {
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new PluginSource[] { source });
+            bool raised = false;
+
+            repo.CollectionChanged += (s, e) =>
             {
-                Assert.IsFalse(repo.Items.Contains(sourceToRemove));
-                Assert.IsTrue(raised);
-            }
+                raised = true;
+            };
+
+            repo.Remove(new PluginSource(FakeUris.Uri2));
+
+            Assert.IsFalse(raised);
         }
 
         [TestMethod]
@@ -133,27 +279,82 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        [DynamicData(nameof(GetRemoveMultipleTestCases), DynamicDataSourceType.Method)]
-        public void Remove_Multiple_Returns(PluginSourceRepoTestCase repoTestCase)
+        public void Remove_Multiple_Removed()
         {
-            var repo = CreateSut(repoTestCase.ExistingRepoSources);
+            var source1 = new PluginSource(FakeUris.Uri1);
+            var source2 = new PluginSource(FakeUris.Uri2);
+            var repo = CreateSut(new PluginSource[] { source1, source2 });
+
+            IEnumerable<PluginSource> removedItems = repo.Remove(new PluginSource[] { source1, source2 });
+
+            CollectionAssert.AreEquivalent(new PluginSource[] { source1, source2 }, removedItems.ToArray());
+            Assert.IsFalse(repo.Items.Any());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Multiple_Duplicate_Removed()
+        {
+            var source1 = new PluginSource(FakeUris.Uri1);
+            var source1_duplicate = new PluginSource(FakeUris.Uri1);
+            var source2 = new PluginSource(FakeUris.Uri2);
+            var repo = CreateSut(new PluginSource[] { source1, source2 });
+
+            IEnumerable<PluginSource> removedItems = repo.Remove(new PluginSource[] { source1_duplicate, source2 });
+
+            CollectionAssert.AreEquivalent(new PluginSource[] { source1_duplicate, source2 }, removedItems.ToArray());
+            Assert.IsFalse(repo.Items.Any());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Multiple_NoneExisting_NotRemoved()
+        {
+            var source1 = new PluginSource(FakeUris.Uri1);
+            var source2 = new PluginSource(FakeUris.Uri2);
+            var repo = CreateSut(new PluginSource[] { source1 });
+
+            IEnumerable<PluginSource> removedItems = repo.Remove(new PluginSource[] { source2 });
+
+            Assert.IsFalse(removedItems.Any());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Multiple_CollectionChangedInvoked()
+        {
+            var source1 = new PluginSource(FakeUris.Uri1);
+            var source2 = new PluginSource(FakeUris.Uri2);
+            var repo = CreateSut(new PluginSource[] { source1, source2 });
             bool raised = false;
 
             repo.CollectionChanged += (s, e) =>
             {
                 raised = true;
-                Assert.AreEqual(NotifyCollectionChangedAction.Remove, e.Action);
-                CollectionAssert.AreEquivalent(repoTestCase.ExpectedIChangedtems, e.OldItems?.Cast<PluginSource>().ToArray());
             };
 
-            IEnumerable<PluginSource> removedItems = repo.Remove(repoTestCase.PluginSourcesToChange);
+            repo.Remove(new PluginSource[] { source1, source2 });
 
-            CollectionAssert.AreEquivalent(repoTestCase.ExpectedIChangedtems, removedItems.ToArray());
-            CollectionAssert.DoesNotContain(repo.Items.ToArray(), repoTestCase.ExpectedIChangedtems);
-            if (repoTestCase?.ExpectedIChangedtems?.Any() ?? false)
+            Assert.IsTrue(raised);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void Remove_Multiple_NoneRemoved_CollectionChangedNotInvoked()
+        {
+            var source1 = new PluginSource(FakeUris.Uri1);
+            var source2 = new PluginSource(FakeUris.Uri2);
+            var repo = CreateSut(new PluginSource[] { source1 });
+            bool raised = false;
+
+            repo.CollectionChanged += (s, e) =>
             {
-                Assert.IsTrue(raised);
-            }
+                raised = true;
+            };
+
+            repo.Remove(new PluginSource[] { source2 });
+
+            Assert.IsFalse(raised);
         }
 
         [TestMethod]
@@ -168,263 +369,84 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         #endregion
 
-        #region Test Data And Helper Methods
 
-        public sealed class PluginSourceRepoTestCase
+        #region Collection Changed
+
+        [TestMethod]
+        [UnitTest]
+        public void CollectionChanged_NewItem_Correct()
         {
-            public PluginSource[]? ExistingRepoSources { get; set; }
+            var repo = new PluginSourceRepository();
+            var source = new PluginSource(FakeUris.Uri1);
 
-            public PluginSource[]? PluginSourcesToChange { get; set; }
+            repo.CollectionChanged += (s, e) =>
+            {
+                Assert.AreEqual(NotifyCollectionChangedAction.Add, e.Action);
+                Assert.AreEqual(source, e.NewItems?.Cast<PluginSource>().Single());
+            };
 
-            public bool ExpectedResult { get; set; }
-
-            public PluginSource[]? ExpectedIChangedtems { get; set; }
+            repo.Add(source);
         }
 
-        private static IEnumerable<object[]> GetAddSingleTestCases()
+        [TestMethod]
+        [UnitTest]
+        public void CollectionChanged_NewItems_Correct()
         {
-            // Add new
-            yield return new object[]
+            var repo = new PluginSourceRepository();
+            var sources = new[]
             {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = Array.Empty<PluginSource>(),
-                    PluginSourcesToChange = new PluginSource[] { new PluginSource(FakeUris.Uri1) },
-                    ExpectedResult = true,
-                },
+                new PluginSource(FakeUris.Uri1),
+                new PluginSource(FakeUris.Uri2),
+                new PluginSource(FakeUris.Uri3),
             };
 
-            // Duplicate
-            yield return new object[]
+            repo.CollectionChanged += (s, e) =>
             {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        new PluginSource(FakeUris.Uri1),
-                    },
-                    PluginSourcesToChange = new PluginSource[] { new PluginSource(FakeUris.Uri1) },
-                    ExpectedResult = false,
-                },
+                Assert.AreEqual(NotifyCollectionChangedAction.Add, e.Action);
+                CollectionAssert.AreEquivalent(sources, e.NewItems?.Cast<PluginSource>().ToArray());
             };
+
+            repo.Add(sources);
         }
 
-        private static IEnumerable<object[]> GetAddMultipleTestCases()
+        [TestMethod]
+        [UnitTest]
+        public void CollectionChanged_OldItem_Correct()
         {
-            var pluginSource1 = new PluginSource(FakeUris.Uri1);
-            var pluginSource2 = new PluginSource(FakeUris.Uri2);
-            var pluginSource1_duplicate = new PluginSource(FakeUris.Uri1);
+            var source = new PluginSource(FakeUris.Uri1);
+            var repo = CreateSut(new[] { source });
 
-            // Add new
-            yield return new object[]
+            repo.CollectionChanged += (s, e) =>
             {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = Array.Empty<PluginSource>(),
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                    ExpectedIChangedtems = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                },
+                Assert.AreEqual(NotifyCollectionChangedAction.Remove, e.Action);
+                Assert.AreEqual(source, e.OldItems?.Cast<PluginSource>().Single());
             };
 
-            // Duplicate
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource1_duplicate,
-                        pluginSource2,
-                    },
-                    ExpectedIChangedtems = new PluginSource[]
-                    {
-                        pluginSource2,
-                    },
-                },
-            };
-
-            // Duplicate and new
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource2
-                    },
-                    ExpectedIChangedtems = Array.Empty<PluginSource>(),
-                },
-            };
-
-            // Empty
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = Array.Empty<PluginSource>(),
-                    PluginSourcesToChange =  Array.Empty<PluginSource>(),
-                    ExpectedIChangedtems = Array.Empty<PluginSource>(),
-                },
-            };
+            repo.Remove(source);
         }
 
-        private static IEnumerable<object[]> GetRemoveSingleTestCases()
+        [TestMethod]
+        [UnitTest]
+        public void CollectionChanged_OldItems_Correct()
         {
-            var pluginSource1 = new PluginSource(FakeUris.Uri1);
-            var pluginSource1_duplicate = new PluginSource(FakeUris.Uri1); // same as pluginSource1
-
-            // Remove existing
-            yield return new object[]
+            var sources = new[]
             {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                    ExpectedResult = true,
-                },
+                new PluginSource(FakeUris.Uri1),
+                new PluginSource(FakeUris.Uri2),
+                new PluginSource(FakeUris.Uri3),
+            };
+            var repo = CreateSut(sources);
+
+            repo.CollectionChanged += (s, e) =>
+            {
+                Assert.AreEqual(NotifyCollectionChangedAction.Remove, e.Action);
+                CollectionAssert.AreEquivalent(sources, e.OldItems?.Cast<PluginSource>().ToArray());
             };
 
-            // Remove existing duplicate
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1_duplicate,
-                    },
-                    ExpectedResult = true,
-                },
-            };
-
-            // Remove non-existing
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = Array.Empty<PluginSource>(),
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                    ExpectedResult = false,
-                },
-            };
+            repo.Remove(sources);
         }
 
-        private static IEnumerable<object[]> GetRemoveMultipleTestCases()
-        {
-            var pluginSource1 = new PluginSource(FakeUris.Uri1);
-            var pluginSource2 = new PluginSource(FakeUris.Uri2);
-            var pluginSource1_duplicate = new PluginSource(FakeUris.Uri1); // same as pluginSource1
-
-            // Remove existing
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                    ExpectedIChangedtems = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                },
-            };
-
-            // Remove existing duplicate
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1_duplicate,
-                    },
-                    ExpectedIChangedtems = new PluginSource[]
-                    {
-                        pluginSource1_duplicate,
-                    },
-                },
-            };
-
-            // Remove existing and  non-existing
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1,
-                        pluginSource2,
-                    },
-                    ExpectedIChangedtems = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                },
-            };
-
-            // Remove non-existing
-            yield return new object[]
-            {
-                new PluginSourceRepoTestCase
-                {
-                    ExistingRepoSources = Array.Empty<PluginSource>(),
-                    PluginSourcesToChange = new PluginSource[]
-                    {
-                        pluginSource1,
-                    },
-                    ExpectedIChangedtems = Array.Empty<PluginSource>(),
-                },
-            };
-        }
+        #endregion
 
         private PluginSourceRepository CreateSut(IEnumerable<PluginSource>? existingPluginSources)
         {
@@ -436,7 +458,5 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             return repo;
         }
-
-        #endregion
     }
 }
