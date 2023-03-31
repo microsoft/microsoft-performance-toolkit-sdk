@@ -2,11 +2,16 @@
   "$schema": "https://raw.githubusercontent.com/dotnet/Nerdbank.GitVersioning/master/src/NerdBank.GitVersioning/version.schema.json",
   "version": "1.1",
   "assemblyVersion": {
-      "precision": "revision"
+    "precision": "revision"
   },
   "publicReleaseRefSpec": [
     "^refs/heads/main$",
     "^refs/heads/release/v?\\d+(?:\\.\\d+)?$"
+  ],
+  "pathFilters": [
+    ".",
+    ":!SDK.sln",
+    ":!PluginsSystem"
   ],
   "cloudBuild": {
     "buildNumber": {
