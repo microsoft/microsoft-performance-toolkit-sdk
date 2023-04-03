@@ -12,11 +12,14 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
 {
     public sealed class ZipPluginPackageReader
         : IPluginPackageReader
     {
+        public static readonly string PluginContentPath = "plugin/";
+        public static readonly string PluginMetadataFileName = "pluginspec.json";
+
         private readonly ISerializer<PluginMetadata> metadataSerializer;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
@@ -58,18 +61,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             try
             {
                 // Check that the plugin content folder exists
-                ZipArchiveEntry contentFolderEntry = zip.GetEntry(PluginPackage.PluginContentPath);
+                ZipArchiveEntry contentFolderEntry = zip.GetEntry(PluginContentPath);
                 if (contentFolderEntry == null)
                 {
-                    this.logger.Error($"Plugin content folder {PluginPackage.PluginContentPath} not found in the plugin package.");
+                    this.logger.Error($"Plugin content folder {PluginContentPath} not found in the plugin package.");
                     return null;
                 }
 
                 // Check that the plugin metadata file exists
-                ZipArchiveEntry metadataEntry = zip.GetEntry(PluginPackage.PluginMetadataFileName);
+                ZipArchiveEntry metadataEntry = zip.GetEntry(PluginMetadataFileName);
                 if (metadataEntry == null)
                 {
-                    this.logger.Error($"Plugin metadata file {PluginPackage.PluginMetadataFileName} not found in the plugin package.");
+                    this.logger.Error($"Plugin metadata file {PluginMetadataFileName} not found in the plugin package.");
                     return null;
                 }
 
@@ -97,7 +100,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 {
                     zip.Dispose();
                 }
-            }  
+            }
         }
     }
 }

@@ -2,13 +2,15 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
 {
     /// <summary>
     ///     Represents a read-only plugin package.
@@ -16,9 +18,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public abstract class PluginPackage
         : IDisposable
     {
-        public static readonly string PluginContentPath = "plugin/";
-        public static readonly string PluginMetadataFileName = "pluginspec.json";
-
         private readonly Func<Type, ILogger> loggerFactory;
         protected readonly ILogger logger;
 
@@ -29,15 +28,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(pluginMetadata, nameof(pluginMetadata));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.PluginMetadata = pluginMetadata;
+            this.PluginMetadata = pluginMetadata;       
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(GetType());
         }
+
+        public abstract IReadOnlyCollection<PluginPackageEntry> Entries { get; }
 
         /// <summary>
         ///    Gets the plugin metadata.
         /// </summary>
         public PluginMetadata PluginMetadata { get; }
+
+        public PluginIdentity PluginIdentity { get; }
 
         /// <summary>
         ///     Gets the plugin ID.

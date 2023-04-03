@@ -4,16 +4,17 @@
 using System.IO;
 using System.IO.Compression;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
 {
     /// <summary>
     ///     Represents a file or directory contained in a <see cref="PluginPackage"/>.
     /// </summary>
-    public sealed class PluginPackageEntry
+    public sealed class ZipPluginPackageEntry
+        : PluginPackageEntry
     {
         private readonly ZipArchiveEntry zipEntry;
 
-        internal PluginPackageEntry(ZipArchiveEntry zipEntry)
+        internal ZipPluginPackageEntry(ZipArchiveEntry zipEntry)
         {
             this.zipEntry = zipEntry;
         }
@@ -21,11 +22,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <summary>
         ///     Gets the relative path of this entry to the package.
         /// </summary>
-        public string RelativePath
+        public override string RelativePath
         {
             get
             {
-                return this.zipEntry.FullName.Replace('\\', '/');
+                return this.zipEntry.FullName;
             }
         }
 
@@ -46,7 +47,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     The stream that represents the contents of the entry.
         /// </returns>
-        public Stream Open()
+        public override Stream Open()
         {
             return this.zipEntry.Open();
         }

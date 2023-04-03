@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
@@ -11,7 +13,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
 {
     /// <summary>
     ///     Represents a read-only plugin package.
@@ -24,7 +26,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
         private bool disposedValue;
         private readonly ZipArchive zip;
-        
+        private readonly Lazy<IReadOnlyCollection<PluginPackageEntry>> zipEntries;
+
         /// <summary>
         ///     Creates an instance of <see cref="ZipPluginPackage"/>.
         /// </summary>
@@ -50,6 +53,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(zip, nameof(zip));
 
             this.zip = zip;
+            this.zipEntries = new Lazy<IReadOnlyCollection<PluginPackageEntry>>(
+                () => this.zip.Entries.Select(e => new ZipPluginPackageEntry(e)).ToList().AsReadOnly());
+        }
+
+        public override IReadOnlyCollection<PluginPackageEntry> Entries
+        {
+            get
+            {
+                return this.zipEntries.Value;
+            }
         }
 
         /// <summary>
