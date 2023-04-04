@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.IO.Compression;
 
@@ -12,6 +13,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
     public sealed class ZipPluginPackageEntry
         : PluginPackageEntry
     {
+        public static readonly string PluginMetadataFileName = "pluginspec.json";
+        public static readonly string PluginContentPath = "plugin/";
+
         private readonly ZipArchiveEntry zipEntry;
 
         internal ZipPluginPackageEntry(ZipArchiveEntry zipEntry)
@@ -19,10 +23,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             this.zipEntry = zipEntry;
         }
 
-        /// <summary>
-        ///     Gets the relative path of this entry to the package.
-        /// </summary>
-        public override string RelativePath
+        public override string RawPath
         {
             get
             {
@@ -30,14 +31,34 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             }
         }
 
-        /// <summary>
-        ///     Gets whether this entry is a directory.
-        /// </summary>
-        public bool IsDirectory
+        public override bool IsMetadataFile
         {
             get
             {
-                return this.RelativePath?.EndsWith("/") == true;
+                return this.RawPath.Equals(PluginMetadataFileName, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        public override bool IsPluginContentFile
+        {
+            get
+            {
+                return this.RawPath.StartsWith(PluginContentPath, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        public override string RelativePath
+        {
+            get
+            {
+                if (this.IsPluginContentFile)
+                {
+                    return this.RawPath.Substring(PluginContentPath.Length);
+                }
+                else
+                {
+                    return this.RawPath;
+                }
             }
         }
 

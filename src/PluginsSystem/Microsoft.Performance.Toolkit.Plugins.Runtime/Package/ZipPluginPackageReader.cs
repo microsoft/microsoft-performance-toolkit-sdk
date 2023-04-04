@@ -14,16 +14,25 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
 {
+    /// <summary>
+    ///     Reads a plugin package from a zip archive.
+    /// </summary>
     public sealed class ZipPluginPackageReader
         : IPluginPackageReader
     {
-        public static readonly string PluginContentPath = "plugin/";
-        public static readonly string PluginMetadataFileName = "pluginspec.json";
-
         private readonly ISerializer<PluginMetadata> metadataSerializer;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ZipPluginPackageReader"/>
+        /// </summary>
+        /// <param name="metadataSerializer">
+        ///     The serializer to use to deserialize the plugin metadata.
+        /// </param>
+        /// <param name="loggerFactory">
+        ///     The logger factory to use to create loggers.
+        /// </param>
         public ZipPluginPackageReader(
             ISerializer<PluginMetadata> metadataSerializer,
             Func<Type, ILogger> loggerFactory)
@@ -33,6 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             this.logger = loggerFactory(typeof(ZipPluginPackageReader));
         }
 
+        /// <inheritdoc/>
         public async Task<PluginPackage> TryReadPackageAsync(
             Stream stream,
             CancellationToken cancellationToken)
@@ -61,18 +71,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             try
             {
                 // Check that the plugin content folder exists
-                ZipArchiveEntry contentFolderEntry = zip.GetEntry(PluginContentPath);
+                ZipArchiveEntry contentFolderEntry = zip.GetEntry(ZipPluginPackageEntry.PluginContentPath);
                 if (contentFolderEntry == null)
                 {
-                    this.logger.Error($"Plugin content folder {PluginContentPath} not found in the plugin package.");
+                    this.logger.Error($"Plugin content folder {ZipPluginPackageEntry.PluginContentPath} not found in the plugin package.");
                     return null;
                 }
 
                 // Check that the plugin metadata file exists
-                ZipArchiveEntry metadataEntry = zip.GetEntry(PluginMetadataFileName);
+                ZipArchiveEntry metadataEntry = zip.GetEntry(ZipPluginPackageEntry.PluginMetadataFileName);
                 if (metadataEntry == null)
                 {
-                    this.logger.Error($"Plugin metadata file {PluginMetadataFileName} not found in the plugin package.");
+                    this.logger.Error($"Plugin metadata file {ZipPluginPackageEntry.PluginMetadataFileName} not found in the plugin package.");
                     return null;
                 }
 

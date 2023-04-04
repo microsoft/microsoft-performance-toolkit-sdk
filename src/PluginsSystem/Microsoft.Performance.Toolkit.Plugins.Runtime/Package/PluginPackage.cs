@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core;
@@ -21,6 +19,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         private readonly Func<Type, ILogger> loggerFactory;
         protected readonly ILogger logger;
 
+        /// <summary>
+        ///     Creates an instance of the <see cref="PluginPackage"/>.
+        /// </summary>
+        /// <param name="pluginMetadata">
+        ///     The plugin metadata.
+        /// </param>
+        /// <param name="loggerFactory">
+        ///     The logger factory.
+        /// </param>
         protected PluginPackage(
             PluginMetadata pluginMetadata,
             Func<Type, ILogger> loggerFactory)
@@ -28,19 +35,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             Guard.NotNull(pluginMetadata, nameof(pluginMetadata));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.PluginMetadata = pluginMetadata;       
+            this.PluginMetadata = pluginMetadata;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(GetType());
         }
 
+        /// <summary>
+        ///     Gets the entries in the plugin package.
+        /// </summary>
         public abstract IReadOnlyCollection<PluginPackageEntry> Entries { get; }
 
         /// <summary>
-        ///    Gets the plugin metadata.
+        ///     Gets the plugin metadata.
         /// </summary>
         public PluginMetadata PluginMetadata { get; }
 
-        public PluginIdentity PluginIdentity { get; }
+        /// <summary>
+        ///     Gets the plugin identity.
+        /// </summary>
+        public PluginIdentity PluginIdentity
+        {
+            get
+            {
+                return this.PluginMetadata.Identity;
+            }
+        }
 
         /// <summary>
         ///     Gets the plugin ID.
@@ -49,7 +68,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                return this.PluginMetadata.Id;
+                return this.PluginIdentity.Id;
             }
         }
 
@@ -60,7 +79,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                return this.PluginMetadata.Version;
+                return this.PluginIdentity.Version;
             }
         }
 
@@ -89,13 +108,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{this.Id} - {this.Version}";
+            return this.PluginIdentity.ToString();
         }
-
-        public abstract Task ExtractPackageAsync(
-            string extractPath,
-            CancellationToken cancellationToken,
-            IProgress<int> progress);
 
         /// <inheritdoc />
         public void Dispose()
