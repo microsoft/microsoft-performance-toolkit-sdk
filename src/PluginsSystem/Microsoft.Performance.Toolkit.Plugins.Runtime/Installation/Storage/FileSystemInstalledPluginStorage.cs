@@ -113,7 +113,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 
         private string GetInstallDirectory(PluginIdentity pluginIdentity)
         {
-            return Path.GetFullPath(Path.Combine(this.rootDirectory, $"{pluginIdentity.Id}-{pluginIdentity.Version}"));
+            return PathUtils.GetPluginInstallDirectory(this.rootDirectory, pluginIdentity);
         }
 
         private string GetMetadataFilePath(PluginIdentity pluginIdentity)

@@ -36,6 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
             this.PluginMetadata = pluginMetadata;
+            this.PluginIdentity = new PluginIdentity(pluginMetadata.Id, pluginMetadata.Version);
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(GetType());
         }
@@ -53,13 +54,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <summary>
         ///     Gets the plugin identity.
         /// </summary>
-        public PluginIdentity PluginIdentity
-        {
-            get
-            {
-                return this.PluginMetadata.Identity;
-            }
-        }
+        public PluginIdentity PluginIdentity { get; }
 
         /// <summary>
         ///     Gets the plugin ID.

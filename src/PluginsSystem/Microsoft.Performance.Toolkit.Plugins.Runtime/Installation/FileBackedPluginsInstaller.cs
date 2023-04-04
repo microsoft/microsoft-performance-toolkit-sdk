@@ -236,7 +236,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
                 string installationDir = PathUtils.GetPluginInstallDirectory(
                     this.installationRoot,
-                    new PluginIdentity(pluginPackage.Id, pluginPackage.Version));
+                    pluginPackage.PluginIdentity);
 
                 try
                 {

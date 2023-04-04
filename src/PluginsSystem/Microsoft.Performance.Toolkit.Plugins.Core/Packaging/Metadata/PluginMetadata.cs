@@ -45,8 +45,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         {  
         }
 
-        public PluginIdentity Identity { get; }
-
         /// <summary>
         ///     Gets or sets the identifer of this plugin.
         /// </summary>
