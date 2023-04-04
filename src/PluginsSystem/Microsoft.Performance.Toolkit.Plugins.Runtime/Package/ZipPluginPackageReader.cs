@@ -71,18 +71,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             try
             {
                 // Check that the plugin content folder exists
-                ZipArchiveEntry contentFolderEntry = zip.GetEntry(ZipPluginPackageEntry.PluginContentPath);
+                ZipArchiveEntry contentFolderEntry = zip.GetEntry(PackageConstants.PluginContentPath);
                 if (contentFolderEntry == null)
                 {
-                    this.logger.Error($"Plugin content folder {ZipPluginPackageEntry.PluginContentPath} not found in the plugin package.");
+                    this.logger.Error($"Plugin content folder {PackageConstants.PluginContentPath} not found in the plugin package.");
                     return null;
                 }
 
                 // Check that the plugin metadata file exists
-                ZipArchiveEntry metadataEntry = zip.GetEntry(ZipPluginPackageEntry.PluginMetadataFileName);
+                ZipArchiveEntry metadataEntry = zip.GetEntry(PackageConstants.PluginMetadataFileName);
                 if (metadataEntry == null)
                 {
-                    this.logger.Error($"Plugin metadata file {ZipPluginPackageEntry.PluginMetadataFileName} not found in the plugin package.");
+                    this.logger.Error($"Plugin metadata file {PackageConstants.PluginMetadataFileName} not found in the plugin package.");
                     return null;
                 }
 

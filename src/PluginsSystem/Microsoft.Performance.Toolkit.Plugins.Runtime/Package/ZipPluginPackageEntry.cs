@@ -13,9 +13,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
     public sealed class ZipPluginPackageEntry
         : PluginPackageEntry
     {
-        public static readonly string PluginMetadataFileName = "pluginspec.json";
-        public static readonly string PluginContentPath = "plugin/";
-
         private readonly ZipArchiveEntry zipEntry;
 
         internal ZipPluginPackageEntry(ZipArchiveEntry zipEntry)
@@ -23,6 +20,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             this.zipEntry = zipEntry;
         }
 
+        /// <inheritdoc/>
         public override string RawPath
         {
             get
@@ -31,34 +29,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             }
         }
 
+        /// <inheritdoc/>
         public override bool IsMetadataFile
         {
             get
             {
-                return this.RawPath.Equals(PluginMetadataFileName, StringComparison.OrdinalIgnoreCase);
+                return this.RawPath.Equals(PackageConstants.PluginMetadataFileName, StringComparison.OrdinalIgnoreCase);
             }
         }
 
+        /// <inheritdoc/>
         public override bool IsPluginContentFile
         {
             get
             {
-                return this.RawPath.StartsWith(PluginContentPath, StringComparison.OrdinalIgnoreCase);
+                return this.RawPath.StartsWith(PackageConstants.PluginContentPath, StringComparison.OrdinalIgnoreCase);
             }
         }
 
-        public override string RelativePath
+        /// <inheritdoc/>
+        public override string ContentRelativePath
         {
             get
             {
-                if (this.IsPluginContentFile)
-                {
-                    return this.RawPath.Substring(PluginContentPath.Length);
-                }
-                else
-                {
-                    return this.RawPath;
-                }
+                return this.IsPluginContentFile ? this.RawPath.Substring(PackageConstants.PluginContentPath.Length) : null;
             }
         }
 

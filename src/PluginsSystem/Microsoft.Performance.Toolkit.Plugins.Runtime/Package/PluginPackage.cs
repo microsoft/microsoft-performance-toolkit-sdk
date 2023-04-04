@@ -16,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
     public abstract class PluginPackage
         : IDisposable
     {
-        private readonly Func<Type, ILogger> loggerFactory;
+        protected readonly Func<Type, ILogger> loggerFactory;
         protected readonly ILogger logger;
 
         /// <summary>

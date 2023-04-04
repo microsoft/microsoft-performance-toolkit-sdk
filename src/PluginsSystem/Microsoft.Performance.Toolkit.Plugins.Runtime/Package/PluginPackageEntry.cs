@@ -16,10 +16,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         public abstract string RawPath { get; }
 
         /// <summary>
-        ///     Gets the path of the file relative to the plugin content folder if it is a plugin file.
-        ///     Otherwise, it is the path of the file relative to the root of the plugin package.
+        ///     Gets the path of the file relative to the plugin content folder if it is a plugin content file.
+        ///     Otherwise, <c>null</c>.
         /// </summary>
-        public abstract string RelativePath { get; }
+        public abstract string ContentRelativePath { get; }
 
         /// <summary>
         ///    Gets a value indicating whether the entry is a metadata file.
