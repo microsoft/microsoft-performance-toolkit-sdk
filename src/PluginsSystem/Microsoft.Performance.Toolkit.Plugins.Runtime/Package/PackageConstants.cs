@@ -9,6 +9,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
     public static class PackageConstants
     {
         public const string PluginMetadataFileName = "pluginspec.json";
-        public const string PluginContentPath = "plugin/";
+        public const string PluginContentFolderName = "plugin/";
     }
 }

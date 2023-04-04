@@ -14,6 +14,7 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -109,11 +110,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
                 loggerFactory);
 
+            var installedPluginStorage = new FileSystemInstalledPluginStorage(
+                pluginsSystemRoot,
+                loggerFactory);
+
             var installer = new FileBackedPluginsInstaller(
                 pluginsSystemRoot,
                 registry,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
                 new InstalledPluginDirectoryChecksumValidator(pluginsSystemRoot),
+                installedPluginStorage,
                 packageReader,
                 loggerFactory);
 

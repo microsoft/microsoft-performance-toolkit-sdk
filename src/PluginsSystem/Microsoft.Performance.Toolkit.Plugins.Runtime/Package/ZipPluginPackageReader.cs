@@ -71,10 +71,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             try
             {
                 // Check that the plugin content folder exists
-                ZipArchiveEntry contentFolderEntry = zip.GetEntry(PackageConstants.PluginContentPath);
+                ZipArchiveEntry contentFolderEntry = zip.GetEntry(PackageConstants.PluginContentFolderName);
                 if (contentFolderEntry == null)
                 {
-                    this.logger.Error($"Plugin content folder {PackageConstants.PluginContentPath} not found in the plugin package.");
+                    this.logger.Error($"Plugin content folder {PackageConstants.PluginContentFolderName} not found in the plugin package.");
                     return null;
                 }
 

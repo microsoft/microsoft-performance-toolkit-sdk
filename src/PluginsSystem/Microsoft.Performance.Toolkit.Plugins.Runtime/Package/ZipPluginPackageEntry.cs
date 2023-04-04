@@ -43,7 +43,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                return this.RawPath.StartsWith(PackageConstants.PluginContentPath, StringComparison.OrdinalIgnoreCase);
+                return this.RawPath.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -52,7 +52,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                return this.IsPluginContentFile ? this.RawPath.Substring(PackageConstants.PluginContentPath.Length) : null;
+                return this.IsPluginContentFile ? this.RawPath.Substring(PackageConstants.PluginContentFolderName.Length) : null;
             }
         }
 

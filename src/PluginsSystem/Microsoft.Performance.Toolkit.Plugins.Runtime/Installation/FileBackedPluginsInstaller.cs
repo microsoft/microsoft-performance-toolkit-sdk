@@ -15,6 +15,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -28,6 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly IPluginRegistry pluginRegistry;
         private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
         private readonly IInstalledPluginValidator installedPluginValidator;
+        private readonly IInstalledPluginStorage installedPluginStorage;
         private readonly IPluginPackageReader pluginPackageReader;
 
         private readonly ILogger logger;
@@ -48,13 +50,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="installedPluginValidator">
         ///     The <see cref="IInstalledPluginValidator"/> used to validate installed plugins.
         /// </param>
+        /// <param name="packageReader">
+        ///     The <see cref="IPluginPackageReader"/> used to read plugin packages.
+        /// </param>
         public FileBackedPluginsInstaller(
             string installationRoot,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             IInstalledPluginValidator installedPluginValidator,
+            IInstalledPluginStorage installedPluginStorage,
             IPluginPackageReader packageReader)
-            : this(installationRoot, pluginRegistry, metadataSerializer, installedPluginValidator, packageReader, Logger.Create)
+            : this(
+                  installationRoot,
+                  pluginRegistry,
+                  metadataSerializer,
+                  installedPluginValidator,
+                  installedPluginStorage,
+                  packageReader,
+                  Logger.Create)
         {
         }
 
@@ -73,6 +86,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="installedPluginValidator">
         ///     The <see cref="IInstalledPluginValidator"/> used to validate installed plugins.
         /// </param>
+        /// <param name="installedPluginStorage">
+        ///     The <see cref="IInstalledPluginStorage"/> used to store installed plugins.
+        /// </param>
+        /// <param name="packageReader">
+        ///     The <see cref="IPluginPackageReader"/> used to read plugin packages.
+        /// </param>
         /// <param name="loggerFactory">
         ///     The <see cref="Func{Type, ILogger}"/> used to create a logger.
         /// </param>
@@ -81,6 +100,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             IInstalledPluginValidator installedPluginValidator,
+            IInstalledPluginStorage installedPluginStorage,
             IPluginPackageReader packageReader,
             Func<Type, ILogger> loggerFactory)
         {
@@ -94,6 +114,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.pluginRegistry = pluginRegistry;
             this.pluginMetadataSerializer = metadataSerializer;
             this.installedPluginValidator = installedPluginValidator;
+            this.installedPluginStorage = installedPluginStorage;
             this.pluginPackageReader = packageReader;
 
             this.loggerFactory = loggerFactory;
@@ -222,7 +243,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     // TODO: #245 This could overwrite binaries that have been unregistered but have not been cleaned up.
                     // We need to revist this code once we have a mechanism for checking whether individual plugin are in use by plugin consumers.
                     this.logger.Info($"Extracting content of plugin {pluginPackage} to {installationDir}");
-                    await pluginPackage.ExtractPackageAsync(installationDir, cancellationToken, progress);
+                    await this.installedPluginStorage.AddAsync(pluginPackage, cancellationToken, progress);
                     this.logger.Info("Extraction completed.");
 
                     string checksum = await HashUtils.GetDirectoryHashAsync(installationDir);
@@ -371,7 +392,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 this.installationRoot,
                 new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
 
-            string metadataFileName = Path.Combine(installPath, ZipPluginPackage.PluginMetadataFileName);
+            string metadataFileName = Path.Combine(installPath, PackageConstants.PluginMetadataFileName);
 
             PluginMetadata pluginMetadata;
             using (var fileStream = new FileStream(metadataFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
