@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
@@ -19,26 +18,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     public class FileSystemInstalledPluginStorage
         : IInstalledPluginStorage
     {
-        private readonly string rootDirectory;
+        private readonly IFileSystemInstalledPluginLocator locator;
         private readonly ILogger logger;
 
         /// <summary>
         ///     Creates an instance of the <see cref="FileSystemInstalledPluginStorage"/>.
         /// </summary>
-        /// <param name="rootDirectory">
-        ///     The root directory of the storage.
+        /// <param name="locator">
+        ///     The file system plugin locator.
         /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory.
         /// </param>
         public FileSystemInstalledPluginStorage(
-            string rootDirectory,
+            IFileSystemInstalledPluginLocator locator,
             Func<Type, ILogger> loggerFactory)
         {
+            Guard.NotNull(locator, nameof(locator));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            Guard.NotNullOrWhiteSpace(rootDirectory, nameof(rootDirectory));
 
-            this.rootDirectory = Path.GetFullPath(rootDirectory);
+            this.locator = locator;
             this.logger = loggerFactory(typeof(FileSystemInstalledPluginStorage));
         }
 
@@ -53,7 +52,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             const int bufferSize = 4096;
             const int defaultAsyncBufferSize = 81920;
 
-            string installDir = GetPluginContentDirectory(package.PluginIdentity);
+            string installDir = this.locator.GetPluginContentDirectory(package.PluginIdentity);
 
             Guard.NotNullOrWhiteSpace(installDir, nameof(installDir));
 
@@ -79,7 +78,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     }
                     else
                     {
-                        destPath = GetMetadataFilePath(package.PluginIdentity);
+                        destPath = this.locator.GetPluginMetadataFilePath(package.PluginIdentity);
                     }
 
                     string destDir = isDirectory ? destPath : Path.GetDirectoryName(destPath);
@@ -109,22 +108,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                 this.logger.Error(e, errorMsg);
                 throw new PluginPackageExtractionException(errorMsg, e);
             }
-        }
-
-        private string GetInstallDirectory(PluginIdentity pluginIdentity)
-        {
-            return PathUtils.GetPluginInstallDirectory(this.rootDirectory, pluginIdentity);
-        }
-
-        private string GetMetadataFilePath(PluginIdentity pluginIdentity)
-        {
-            return Path.Combine(GetInstallDirectory(pluginIdentity), PackageConstants.PluginMetadataFileName);
-        }
-
-        private string GetPluginContentDirectory(PluginIdentity pluginIdentity)
-        {
-            string directory = GetInstallDirectory(pluginIdentity);
-            return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginContentFolderName));
         }
     }
 }

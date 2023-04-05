@@ -110,8 +110,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
                 loggerFactory);
 
+            var locator = new DefaultInstalledPluginLocator(pluginsSystemRoot);
+
             var installedPluginStorage = new FileSystemInstalledPluginStorage(
-                pluginsSystemRoot,
+                locator,
                 loggerFactory);
 
             var installer = new FileBackedPluginsInstaller(

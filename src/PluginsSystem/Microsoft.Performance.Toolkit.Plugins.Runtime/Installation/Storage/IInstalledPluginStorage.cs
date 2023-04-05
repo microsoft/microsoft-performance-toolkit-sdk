@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
