@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -71,8 +72,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             try
             {
                 // Check that the plugin content folder exists
-                ZipArchiveEntry contentFolderEntry = zip.GetEntry(PackageConstants.PluginContentFolderName);
-                if (contentFolderEntry == null)
+                bool hasContentFolder = zip.Entries.Any(e => e.FullName.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase));
+                if (!hasContentFolder)
                 {
                     this.logger.Error($"Plugin content folder {PackageConstants.PluginContentFolderName} not found in the plugin package.");
                     return null;

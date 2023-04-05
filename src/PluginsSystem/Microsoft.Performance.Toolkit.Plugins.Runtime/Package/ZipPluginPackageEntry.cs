@@ -25,7 +25,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                return this.zipEntry.FullName;
+                return this.zipEntry.FullName.Replace('\\', '/');
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ContentRelativePath
+        {
+            get
+            {
+                return this.IsPluginContentFile ? this.RawPath.Substring(PackageConstants.PluginContentFolderName.Length) : null;
             }
         }
 
@@ -44,15 +53,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             get
             {
                 return this.RawPath.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override string ContentRelativePath
-        {
-            get
-            {
-                return this.IsPluginContentFile ? this.RawPath.Substring(PackageConstants.PluginContentFolderName.Length) : null;
             }
         }
 

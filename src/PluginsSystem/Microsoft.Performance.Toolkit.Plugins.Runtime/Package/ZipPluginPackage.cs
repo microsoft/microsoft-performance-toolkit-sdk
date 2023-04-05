@@ -30,10 +30,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <param name="zip">
         ///     The zip archive that contains the plugin.
         /// </param>
-        /// <param name="logger">
-        ///     Used to log information.
+        /// <param name="loggerFactory">
+        ///     A factory that creates loggers for the given type.
         /// </param>
-        public ZipPluginPackage(
+        internal ZipPluginPackage(
             PluginMetadata metadata,
             ZipArchive zip,
             Func<Type, ILogger> loggerFactory)
