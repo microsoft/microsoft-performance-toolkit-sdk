@@ -14,6 +14,7 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -95,21 +96,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             var discovererProviderRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
 
             var discoverer = new PluginsDiscoverer(
-              pluginSourceRepo,
-              fetcherRepo,
-              discovererProviderRepo,
-              loggerFactory);
+                pluginSourceRepo,
+                fetcherRepo,
+                discovererProviderRepo,
+                loggerFactory);
 
             var registry = new FileBackedPluginRegistry(
                 pluginsSystemRoot,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>(),
                 loggerFactory);
 
+            var packageReader = new ZipPluginPackageReader(
+                SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
+                loggerFactory);
+
+            var installedPluginStorage = new FileSystemInstalledPluginStorage(
+                pluginsSystemRoot,
+                loggerFactory);
+
             var installer = new FileBackedPluginsInstaller(
                 pluginsSystemRoot,
                 registry,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
-                new InstalledPluginDirectoryChecksumValidator(pluginsSystemRoot));
+                new InstalledPluginDirectoryChecksumValidator(pluginsSystemRoot),
+                installedPluginStorage,
+                packageReader,
+                loggerFactory);
 
             return new PluginsSystem(
                 installer,
