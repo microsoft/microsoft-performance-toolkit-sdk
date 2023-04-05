@@ -16,6 +16,33 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="includeSubdirectories">
         ///     Indicates whether subdirectories will be searched.
         /// </param>
+        public AssemblyDiscoverySettings(bool includeSubdirectories)
+            : this(includeSubdirectories, null, null, false)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of this class.
+        /// </summary>
+        /// <param name="includeSubdirectories">
+        ///     Indicates whether subdirectories will be searched.
+        /// </param>
+        /// <param name="searchPatterns">
+        ///     The search patterns to use. If <c>null</c> or empty, defaults to "*.dll" and "*.exe".
+        /// </param>
+        public AssemblyDiscoverySettings(
+            bool includeSubdirectories,
+            IEnumerable<string> searchPatterns)
+            : this(includeSubdirectories, searchPatterns, null, false)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of this class.
+        /// </summary>
+        /// <param name="includeSubdirectories">
+        ///     Indicates whether subdirectories will be searched.
+        /// </param>
         /// <param name="searchPatterns">
         ///     The search patterns to use. If <c>null</c> or empty, defaults to "*.dll" and "*.exe".
         /// </param>
