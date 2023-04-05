@@ -1,15 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.IO.Compression;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Tests.TestData;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.IO.Compression;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {

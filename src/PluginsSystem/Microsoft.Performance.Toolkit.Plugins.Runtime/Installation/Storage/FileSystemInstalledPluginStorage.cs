@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
-using System;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             const int bufferSize = 4096;
             const int defaultAsyncBufferSize = 81920;
 
-            var installDir = GetPluginContentDirectory(package.PluginIdentity);
+            string installDir = GetPluginContentDirectory(package.PluginIdentity);
 
             Guard.NotNullOrWhiteSpace(installDir, nameof(installDir));
 
@@ -123,7 +123,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 
         private string GetPluginContentDirectory(PluginIdentity pluginIdentity)
         {
-            var directory = GetInstallDirectory(pluginIdentity);
+            string directory = GetInstallDirectory(pluginIdentity);
             return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginContentFolderName));
         }
     }
