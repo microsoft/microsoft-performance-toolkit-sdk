@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
@@ -224,6 +225,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             return Load(extensionDirectories, null);
         }
+
         /// <summary>
         ///     Creates a new <see cref="PluginSet"/>, loading all plugins found
         ///     in the given directories, using the given loading function.
@@ -258,6 +260,54 @@ namespace Microsoft.Performance.Toolkit.Engine
         public static PluginSet Load(
             IEnumerable<string> extensionDirectories,
             IAssemblyLoader assemblyLoader)
+        {
+            return Load(extensionDirectories, assemblyLoader, null, null);
+        }
+
+        /// <summary>
+        ///     Creates a new <see cref="PluginSet"/>, loading all plugins found
+        ///     in the given directories, using the given loading function.
+        /// </summary>
+        /// <param name="extensionDirectories">
+        ///     The directories to search for plugins.
+        /// </param>
+        /// <param name="assemblyLoader">
+        ///     The loader to use to load plugin assemblies. This parameter may be
+        ///     <c>null</c>. If this parameter is <c>null</c>, then the default
+        ///     loader will be used.
+        ///     <remarks>
+        ///         The default loader provides no isolation.
+        ///     </remarks>
+        /// </param>
+        /// <param name="discoverySettings">
+        ///      Configures how plugins and plugin extensions are discovered.
+        ///      May be <c>null</c>.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log any messages.
+        ///     May be <c>null</c>.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the <see cref="PluginSet"/> class containing all
+        ///     of the successfully discovered plugins. The returned instance will
+        ///     also contain a collection of non-fatal errors that occurred when
+        ///     creating this data set (e.g. a plugin failed to load.)
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="extensionDirectories"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        ///     <paramref name="extensionDirectories"/> is empty.
+        /// </exception>
+        /// <exception cref="InvalidExtensionDirectoryException">
+        ///     One or more directory paths in <paramref name="extensionDirectories"/>
+        ///     is invalid or does not exist.
+        /// </exception>
+        public static PluginSet Load(
+            IEnumerable<string> extensionDirectories,
+            IAssemblyLoader assemblyLoader,
+            AssemblyDiscoverySettings discoverySettings,
+            ILogger logger)
         {
             Guard.NotNull(extensionDirectories, nameof(extensionDirectories));
             Guard.Any(extensionDirectories, nameof(extensionDirectories));
@@ -298,7 +348,16 @@ namespace Microsoft.Performance.Toolkit.Engine
                 assemblyLoader ??= new AssemblyLoader();
                 var validatorFactory = new Func<IEnumerable<string>, IPreloadValidator>(_ => new NullValidator());
 
-                var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
+                AssemblyExtensionDiscovery assemblyDiscovery;
+
+                if (logger != null)
+                {
+                    assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory, logger);
+                }
+                else
+                {
+                    assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
+                }
 
                 catalog = new ReflectionProcessingSourceCatalog(assemblyDiscovery);
 
@@ -307,7 +366,21 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 var reflector = new DataExtensionReflector(assemblyDiscovery, repo);
 
-                assemblyDiscovery.ProcessAssemblies(extensionDirectoriesFullPaths, out var discoveryError);
+                ErrorInfo discoveryError;
+                if (discoverySettings != null)
+                {
+                    assemblyDiscovery.ProcessAssemblies(
+                        extensionDirectoriesFullPaths,
+                        discoverySettings.IncludeSubdirectories,
+                        discoverySettings.SearchPatterns,
+                        discoverySettings.ExclusionFileNames,
+                        discoverySettings.ExclusionsAreCaseSensitive,
+                        out discoveryError);
+                }
+                else
+                {
+                    assemblyDiscovery.ProcessAssemblies(extensionDirectoriesFullPaths, out discoveryError);
+                }
 
                 repo.FinalizeDataExtensions();
 
@@ -361,7 +434,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             {
                 throw new ObjectDisposedException(nameof(PluginSet));
             }
-        }        
+        }
 
         private sealed class NullValidator
             : IPreloadValidator

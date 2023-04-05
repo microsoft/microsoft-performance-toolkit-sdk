@@ -42,6 +42,8 @@
     <ProjectReference Include="..\Microsoft.Performance.Testing.SDK\Microsoft.Performance.Testing.SDK.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Toolkit.Engine\Microsoft.Performance.Toolkit.Engine.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Testing\Microsoft.Performance.Testing.csproj" />
+    <ProjectReference Include="..\TestPluginAssembly1\TestPluginAssembly1.csproj" />
+    <ProjectReference Include="..\TestPluginAssembly2\TestPluginAssembly2.csproj" />
   </ItemGroup>
 
   <ItemGroup>

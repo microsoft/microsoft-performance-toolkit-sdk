@@ -3,12 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using TestPluginAssembly1;
+using TestPluginAssembly2;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests
 {
@@ -16,6 +19,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
     public class PluginSetTests
         : EngineFixture
     {
+        private static string TestMethodName
+        {
+            get
+            {
+                var stackTrace = new StackTrace();
+                return stackTrace.GetFrame(1).GetMethod().Name;
+            }
+        }
+
         [TestMethod]
         [IntegrationTest]
         public void Ctor_ExtensionDirectory_IsCurrent()
@@ -129,7 +141,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(firstEngine.SourceDataCookers.Any(x => x == expectedSourceCookerPath));
             var firstInstances = firstEngine.ProcessingSourceReferences.Where(x => x.Instance is Source123DataSource).ToList();
 
-            var tempDir = this.Scratch.CreateSubdirectory(nameof(Load_MultipleCallsWithDifferentPath_LoadsFromExtensionPath));
+            var tempDir = this.Scratch.CreateSubdirectory(TestMethodName);
 
             CopyAssemblyContainingType(typeof(Source123DataSource), tempDir);
             CopyAssemblyContainingType(typeof(FakePlugin), tempDir);
@@ -152,6 +164,148 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             {
                 Assert.IsFalse(firstInstances.Any(x => ReferenceEquals(x, instance)));
             }
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_SubDirectoryIncluded_LoadsFromExtensionPath()
+        {
+            DirectoryInfo includedDir = this.Scratch.CreateSubdirectory(TestMethodName + @"\Included");
+            DirectoryInfo targetDir = Directory.GetParent(includedDir.FullName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), includedDir);
+
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, null, false);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin1));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_SubDirectoryNotIncluded_SkipsSubDirectory()
+        {
+            DirectoryInfo notIncludedDir = this.Scratch.CreateSubdirectory(TestMethodName + @"\NotIncluded");
+            DirectoryInfo targetDir = Directory.GetParent(notIncludedDir.FullName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), notIncludedDir);
+
+            var discoverySettings = new AssemblyDiscoverySettings(false, null, null, false);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsFalse(firstEngine.ProcessingSourceReferences.Any());
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_SearchPatternExe_SkipsDll()
+        {
+            DirectoryInfo targetDir = this.Scratch.CreateSubdirectory(TestMethodName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
+
+            string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
+            string plugin2ExePath = plugin2Path.Replace(".dll", ".exe");
+            File.Move(plugin2Path, plugin2ExePath);
+
+            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.exe" }, null, false);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin2));
+            Assert.IsFalse(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin1));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_SearchPatternDll_LoadsFromExtensionPath()
+        {
+            DirectoryInfo targetDir = this.Scratch.CreateSubdirectory(TestMethodName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
+
+            string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
+            string plugin2ExePath = plugin2Path.Replace(".dll", ".exe");
+            File.Move(plugin2Path, plugin2ExePath);
+
+            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.dll" }, null, false);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin1));
+            Assert.IsFalse(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin2));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_SearchPatternDllExe_LoadsFromExtensionPath()
+        {
+            DirectoryInfo targetDir = this.Scratch.CreateSubdirectory(TestMethodName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
+
+            string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
+            string plugin2ExePath = plugin2Path.Replace(".dll", ".exe");
+            File.Move(plugin2Path, plugin2ExePath);
+
+            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.dll", "*.exe" }, null, false);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin1));
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin2));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_ExcludeFakePlugin2_ExcludesFakePlugin2()
+        {
+            DirectoryInfo targetDir = this.Scratch.CreateSubdirectory(TestMethodName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
+            string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
+
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path) }, false);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin1));
+            Assert.IsFalse(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin2));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_ExcludeCaseSensitive_ExcludesFakePlugin2()
+        {
+            DirectoryInfo targetDir = this.Scratch.CreateSubdirectory(TestMethodName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
+            string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
+
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path) }, true);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin1));
+            Assert.IsFalse(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin2));
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Load_ExcludeCaseSensitive_LoadsFakePlugin2()
+        {
+            DirectoryInfo targetDir = this.Scratch.CreateSubdirectory(TestMethodName);
+
+            CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
+            string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
+
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path).ToUpper() }, true);
+
+            using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin1));
+            Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any(x => x.Instance is FakePlugin2));
         }
 
         [ProcessingSource(

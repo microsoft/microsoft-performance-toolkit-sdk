@@ -79,13 +79,15 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
         }
 
-        protected static void CopyAssemblyContainingType(Type type, DirectoryInfo destDir)
+        protected static string CopyAssemblyContainingType(Type type, DirectoryInfo destDir)
         {
             Assert.IsNotNull(type);
 
             var assemblyFile = type.Assembly.GetCodeBaseAsLocalPath();
             var assemblyFileName = Path.GetFileName(assemblyFile);
-            File.Copy(assemblyFile, Path.Combine(destDir.FullName, assemblyFileName), true);
+            string targetFilePath = Path.Combine(destDir.FullName, assemblyFileName);
+            File.Copy(assemblyFile, targetFilePath, true);
+            return targetFilePath;
         }
     }
 }
