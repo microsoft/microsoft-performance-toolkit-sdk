@@ -373,8 +373,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                         extensionDirectoriesFullPaths,
                         discoverySettings.IncludeSubdirectories,
                         discoverySettings.SearchPatterns,
-                        discoverySettings.ExclusionFileNames,
-                        discoverySettings.ExclusionsAreCaseSensitive,
+                        discoverySettings.ExclusionPatterns,
+                        discoverySettings.FileNameCaseSensitivity,
                         out discoveryError);
                 }
                 else

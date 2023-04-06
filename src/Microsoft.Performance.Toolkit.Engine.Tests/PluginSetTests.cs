@@ -175,7 +175,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             CopyAssemblyContainingType(typeof(FakePlugin1), includedDir);
 
-            var discoverySettings = new AssemblyDiscoverySettings(true, null, null, false);
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, null, MatchCasing.CaseInsensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
@@ -191,7 +191,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             CopyAssemblyContainingType(typeof(FakePlugin1), notIncludedDir);
 
-            var discoverySettings = new AssemblyDiscoverySettings(false, null, null, false);
+            var discoverySettings = new AssemblyDiscoverySettings(false, null, null, MatchCasing.CaseInsensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsFalse(firstEngine.ProcessingSourceReferences.Any());
@@ -209,7 +209,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             string plugin2ExePath = plugin2Path.Replace(".dll", ".exe");
             File.Move(plugin2Path, plugin2ExePath);
 
-            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.exe" }, null, false);
+            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.exe" }, null, MatchCasing.CaseInsensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
@@ -229,7 +229,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             string plugin2ExePath = plugin2Path.Replace(".dll", ".exe");
             File.Move(plugin2Path, plugin2ExePath);
 
-            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.dll" }, null, false);
+            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.dll" }, null, MatchCasing.CaseInsensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
@@ -249,7 +249,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             string plugin2ExePath = plugin2Path.Replace(".dll", ".exe");
             File.Move(plugin2Path, plugin2ExePath);
 
-            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.dll", "*.exe" }, null, false);
+            var discoverySettings = new AssemblyDiscoverySettings(true, new[] { "*.dll", "*.exe" }, null, MatchCasing.CaseInsensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
@@ -266,7 +266,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
             string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
 
-            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path) }, false);
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path) }, MatchCasing.CaseInsensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
@@ -283,7 +283,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
             string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
 
-            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path) }, true);
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path) }, MatchCasing.CaseSensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());
@@ -300,7 +300,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             CopyAssemblyContainingType(typeof(FakePlugin1), targetDir);
             string plugin2Path = CopyAssemblyContainingType(typeof(FakePlugin2), targetDir);
 
-            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path).ToUpper() }, true);
+            var discoverySettings = new AssemblyDiscoverySettings(true, null, new[] { Path.GetFileName(plugin2Path).ToUpper() }, MatchCasing.CaseSensitive);
 
             using var firstEngine = PluginSet.Load(new[] { targetDir.FullName }, null, discoverySettings, null);
             Assert.IsTrue(firstEngine.ProcessingSourceReferences.Any());

@@ -15,16 +15,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
     internal class TestFindFiles
         : AssemblyExtensionDiscovery.IFindFiles
     {
-        public Func<string, string, SearchOption, IEnumerable<string>> enumerateFiles;
+        public Func<string, string, EnumerationOptions, IEnumerable<string>> enumerateFiles;
 
-        public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption)
+        public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, EnumerationOptions enumerationOptions)
         {
             if (enumerateFiles == null)
             {
                 return new List<string>();
             }
 
-            return this.enumerateFiles.Invoke(directoryPath, searchPattern, searchOption);
+            return this.enumerateFiles.Invoke(directoryPath, searchPattern, enumerationOptions);
         }
     }
 
@@ -135,7 +135,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     false,
                     null,
                     null,
-                    false,
+                    MatchCasing.CaseInsensitive,
                     out _));
         }
 
@@ -149,7 +149,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     false,
                     null,
                     null,
-                    false,
+                    MatchCasing.CaseInsensitive,
                     out _));
         }
 
@@ -188,7 +188,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
             RegisterObservers();
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, false, out _);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, MatchCasing.CaseInsensitive, out _);
 
             Assert.AreEqual(searchPatterns.Length, patternsSearched.Count);
             foreach (var pattern in searchPatterns)
@@ -216,7 +216,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                     return null;
                 };
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, false, out _);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, MatchCasing.CaseInsensitive, out _);
         }
 
         [TestMethod]
@@ -226,7 +226,16 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             var exclusions = new[] { "Blawp.dll", };
 
             this.FindFiles.enumerateFiles =
-                (directory, searchPattern, searchOptions) => new List<string>() { exclusions[0].ToLower(), };
+                (directory, searchPattern, searchOptions) =>
+                {
+                    var results = new List<string>();
+                    if (searchPattern == "*.dll")
+                    {
+                        results.Add(exclusions[0].ToLower());
+                    }
+
+                    return results;
+                };
 
             this.Observers.Add(new TestExtensionObserver());
             RegisterObservers();
@@ -238,7 +247,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
                 return this.GetType().Assembly;
             };
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true, out _);
+            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, MatchCasing.CaseSensitive, out _);
 
             Assert.IsTrue(assemblyLoaded);
         }

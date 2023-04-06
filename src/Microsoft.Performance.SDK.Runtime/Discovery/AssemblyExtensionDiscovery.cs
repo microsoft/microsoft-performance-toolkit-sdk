@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
 
@@ -139,7 +138,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </returns>
         public bool ProcessAssemblies(IEnumerable<string> directoryPaths, out ErrorInfo error)
         {
-            return this.ProcessAssemblies(directoryPaths, true, null, null, false, out error);
+            return this.ProcessAssemblies(directoryPaths, true, null, null, MatchCasing.PlatformDefault, out error);
         }
 
         /// <summary>
@@ -155,11 +154,13 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="searchPatterns">
         ///     The search patterns to use. If null or empty, defaults to "*.dll" and "*.exe".
         /// </param>
-        /// <param name="exclusionFileNames">
-        ///     A set of files names to exclude from the search. May be null.
+        /// <param name="exclusionPatterns">
+        ///     Files paths that match these patterns will not be processed.
+        ///     May be <c>null</c>.
+        ///     e.g. { "excludeMe*.dll", "blob.dll" }
         /// </param>
-        /// <param name="exclusionsAreCaseSensitive">
-        ///     Indicates whether files names should be treated as case sensitive.
+        /// <param name="fileNameCaseSensitivity">
+        ///     Indicates whether files name pattern matching should be case sensitive.
         /// </param>
         /// <param name="error">
         ///     If this method returns <c>false</c>, then this parameter receives
@@ -172,23 +173,26 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             string directoryPath,
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns,
-            IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive,
+            IEnumerable<string> exclusionPatterns,
+            MatchCasing fileNameCaseSensitivity,
             out ErrorInfo error)
         {
             return this.ProcessAssemblies(
                 new[] { directoryPath, },
                 includeSubdirectories,
                 searchPatterns,
-                exclusionFileNames,
-                exclusionsAreCaseSensitive,
+                exclusionPatterns,
+                fileNameCaseSensitivity,
                 out error);
         }
 
         /// <summary>
         ///     This method scans the given directory for modules to search for extensibility types. All types found will
         ///     be passed along to any observers.
-        /// </summary>        
+        /// </summary>
+        /// <remarks>
+        ///     For more on search patterns, see <seealso cref="Directory.EnumerateFiles(string, string)"/>.
+        /// </remarks>
         /// <param name="directoryPaths">
         ///     Directories to process.
         /// </param>
@@ -198,11 +202,13 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// <param name="searchPatterns">
         ///     The search patterns to use. If null or empty, defaults to "*.dll" and "*.exe".
         /// </param>
-        /// <param name="exclusionFileNames">
-        ///     A set of files names to exclude from the search. May be null.
+        /// <param name="exclusionPatterns">
+        ///     Files paths that match these patterns will not be processed.
+        ///     May be <c>null</c>.
+        ///     e.g. { "excludeMe*.dll", "blob.dll" }
         /// </param>
-        /// <param name="exclusionsAreCaseSensitive">
-        ///     Indicates whether files names should be treated as case sensitive.
+        /// <param name="fileNameCaseSensitivity">
+        ///     Indicates whether files name pattern matching should be case sensitive.
         /// </param>
         /// <param name="error">
         ///     If this method returns <c>false</c>, then this parameter receives
@@ -215,8 +221,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             IEnumerable<string> directoryPaths,
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns,
-            IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive,
+            IEnumerable<string> exclusionPatterns,
+            MatchCasing fileNameCaseSensitivity,
             out ErrorInfo error)
         {
             Guard.NotNull(directoryPaths, nameof(directoryPaths));
@@ -231,11 +237,9 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 searchPatterns = new[] { "*.dll", "*.exe" };
             }
 
-            var exclusionSet = exclusionFileNames != null
-                ? new HashSet<string>(exclusionFileNames, exclusionsAreCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase)
-                : new HashSet<string>();
-
-            var searchOption = includeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            var enumerationOptions = new EnumerationOptions();
+            enumerationOptions.RecurseSubdirectories = includeSubdirectories;
+            enumerationOptions.MatchCasing = fileNameCaseSensitivity;
 
             var loaded = new List<Assembly>();
 
@@ -265,56 +269,62 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                         continue;
                     }
 
+                    HashSet<string> inclusionFiles = new HashSet<string>(StringComparer.Ordinal);
                     foreach (var searchPattern in searchPatterns)
                     {
-                        var filePaths = this.FindFiles.EnumerateFiles(directoryPath, searchPattern, searchOption)
-                            .Where(x => !exclusionSet.Contains(Path.GetFileName(x)))
-                            .ToArray();
+                        this.FindFiles.EnumerateFiles(directoryPath, searchPattern, enumerationOptions)
+                            .ForEach(x => inclusionFiles.Add(x));
+                    }
 
-                        if (filePaths.Length == 0)
+                    HashSet<string> exclusionFiles = new HashSet<string>(StringComparer.Ordinal);
+                    if (exclusionPatterns != null)
+                    {
+                        foreach (var searchPattern in exclusionPatterns)
                         {
-                            continue;
+                            this.FindFiles.EnumerateFiles(directoryPath, searchPattern, enumerationOptions)
+                                .ForEach(x => exclusionFiles.Add(x));
+                        }
+                    }
+
+                    string[] filePaths = inclusionFiles.Except(exclusionFiles).ToArray();
+                    using (var validator = this.validatorFactory(filePaths))
+                    {
+                        if (validator is null)
+                        {
+                            Debug.Fail("Validator factory should never return null");
+                            allLoaded = false;
+                            assemblyErrors.Add(
+                                new ErrorInfo(
+                                    ErrorCodes.InvalidArgument,
+                                    "The preload validator factory returned null, which is not valid."));
                         }
 
-                        using (var validator = this.validatorFactory(filePaths))
+                        loaded.EnsureCapacity(loaded.Capacity + filePaths.Length);
+
+                        foreach (var filePath in filePaths.Where(this.assemblyLoader.IsAssembly))
                         {
-                            if (validator is null)
+                            if (validator.IsAssemblyAcceptable(filePath, out var validationError))
                             {
-                                Debug.Fail("Validator factory should never return null");
-                                allLoaded = false;
-                                assemblyErrors.Add(
-                                    new ErrorInfo(
-                                        ErrorCodes.InvalidArgument,
-                                        "The preload validator factory returned null, which is not valid."));
-                            }
-
-                            loaded.EnsureCapacity(loaded.Capacity + filePaths.Length);
-
-                            foreach (var filePath in filePaths.Where(this.assemblyLoader.IsAssembly))
-                            {
-                                if (validator.IsAssemblyAcceptable(filePath, out var validationError))
+                                var assembly = this.assemblyLoader.LoadAssembly(filePath, out var loadError);
+                                if (!(assembly is null))
                                 {
-                                    var assembly = this.assemblyLoader.LoadAssembly(filePath, out var loadError);
-                                    if (!(assembly is null))
-                                    {
-                                        if (!ProcessAssembly(assembly, out var assemblyError))
-                                        {
-                                            allLoaded = false;
-                                            Debug.Assert(assemblyError != null);
-                                            assemblyErrors.Add(assemblyError);
-                                        }
-                                    }
-                                    else
+                                    if (!ProcessAssembly(assembly, out var assemblyError))
                                     {
                                         allLoaded = false;
-                                        assemblyErrors.Add(loadError);
+                                        Debug.Assert(assemblyError != null);
+                                        assemblyErrors.Add(assemblyError);
                                     }
                                 }
                                 else
                                 {
                                     allLoaded = false;
-                                    assemblyErrors.Add(validationError);
+                                    assemblyErrors.Add(loadError);
                                 }
+                            }
+                            else
+                            {
+                                allLoaded = false;
+                                assemblyErrors.Add(validationError);
                             }
                         }
                     }
@@ -343,8 +353,8 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             directoryPaths,
                             includeSubdirectories,
                             searchPatterns,
-                            exclusionFileNames,
-                            exclusionsAreCaseSensitive)
+                            exclusionPatterns,
+                            fileNameCaseSensitivity)
                 {
                     Target = string.Empty,
                     Details = directoryErrors.ToArray(),
@@ -457,7 +467,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </summary>
         internal interface IFindFiles
         {
-            IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption);
+            IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, EnumerationOptions enumerationOption);
         }
 
         /// <summary>
@@ -465,9 +475,9 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </summary>
         private class DirectorySearch : IFindFiles
         {
-            public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption)
+            public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, EnumerationOptions enumerationOption)
             {
-                return Directory.EnumerateFiles(directoryPath, searchPattern, searchOption);
+                return Directory.EnumerateFiles(directoryPath, searchPattern, enumerationOption);
             }
         }
 
@@ -534,14 +544,14 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 bool includeSubdirectories,
                 IEnumerable<string> searchPatterns,
                 IEnumerable<string> exclusionFileNames,
-                bool exclusionsAreCaseSensitive)
+                MatchCasing fileMatchCaseSensitivity)
                 : base(ErrorCodes.DiscoveryFailed, ErrorCodes.DiscoveryFailed.Description)
             {
                 this.DirectoryPaths = directoryPaths?.ToList() ?? new List<string>();
                 this.IncludeSubDirectories = includeSubdirectories;
                 this.SearchPatterns = searchPatterns?.ToList() ?? new List<string>();
                 this.ExclusionFileNames = exclusionFileNames?.ToList() ?? new List<string>();
-                this.ExclusionsAreCaseSensitive = exclusionsAreCaseSensitive;
+                this.FileMatchCaseSensitivity = fileMatchCaseSensitivity;
             }
 
             protected DiscoveryError(
@@ -553,7 +563,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 this.IncludeSubDirectories = info.GetBoolean(nameof(this.IncludeSubDirectories));
                 this.SearchPatterns = (List<string>)info.GetValue(nameof(this.SearchPatterns), typeof(List<string>));
                 this.ExclusionFileNames = (List<string>)info.GetValue(nameof(this.ExclusionFileNames), typeof(List<string>));
-                this.ExclusionsAreCaseSensitive = info.GetBoolean(nameof(this.ExclusionsAreCaseSensitive));
+                this.FileMatchCaseSensitivity = (MatchCasing)info.GetValue(nameof(this.FileMatchCaseSensitivity), typeof(MatchCasing));
             }
 
             public List<string> DirectoryPaths { get; }
@@ -564,7 +574,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             public List<string> ExclusionFileNames { get; }
 
-            public bool ExclusionsAreCaseSensitive { get; }
+            public MatchCasing FileMatchCaseSensitivity { get; }
 
             [SecurityPermission(
                 SecurityAction.LinkDemand,
@@ -577,7 +587,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 info.AddValue(nameof(this.IncludeSubDirectories), this.IncludeSubDirectories);
                 info.AddValue(nameof(this.SearchPatterns), this.SearchPatterns);
                 info.AddValue(nameof(this.ExclusionFileNames), this.ExclusionFileNames);
-                info.AddValue(nameof(this.ExclusionsAreCaseSensitive), this.ExclusionsAreCaseSensitive);
+                info.AddValue(nameof(this.FileMatchCaseSensitivity), this.FileMatchCaseSensitivity);
             }
 
             void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)

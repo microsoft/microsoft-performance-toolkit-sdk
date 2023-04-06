@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.IO;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Indicates whether subdirectories will be searched.
         /// </param>
         public AssemblyDiscoverySettings(bool includeSubdirectories)
-            : this(includeSubdirectories, null, null, false)
+            : this(includeSubdirectories, null)
         {
         }
 
@@ -28,12 +29,13 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Indicates whether subdirectories will be searched.
         /// </param>
         /// <param name="searchPatterns">
-        ///     The search patterns to use. If <c>null</c> or empty, defaults to "*.dll" and "*.exe".
+        ///     The search patterns used to find files to process. If <c>null</c> or empty, defaults to "*.dll" and 
+        ///     "*.exe".
         /// </param>
         public AssemblyDiscoverySettings(
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns)
-            : this(includeSubdirectories, searchPatterns, null, false)
+            : this(includeSubdirectories, searchPatterns, null, MatchCasing.PlatformDefault)
         {
         }
 
@@ -44,24 +46,28 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Indicates whether subdirectories will be searched.
         /// </param>
         /// <param name="searchPatterns">
-        ///     The search patterns to use. If <c>null</c> or empty, defaults to "*.dll" and "*.exe".
+        ///     The search patterns used to find files to process. If <c>null</c> or empty, defaults to "*.dll" and 
+        ///     "*.exe".
         /// </param>
-        /// <param name="exclusionFileNames">
-        ///     A set of files names to exclude from the search. May be <c>null</c>.
+        /// <param name="exclusionPatterns">
+        ///     Files paths that match these patterns will not be processed.
+        ///     May be <c>null</c>.
+        ///     e.g. { "excludeMe*.dll", "blob.dll" }
         /// </param>
-        /// <param name="exclusionsAreCaseSensitive">
-        ///     Indicates whether exclusion file names should be treated as case sensitive.
+        /// <param name="fileNameCaseSensitivity">
+        ///     Indicates how case sensitivity will be applied to
+        ///     <paramref name="searchPatterns"/> and <paramref name="exclusionPatterns"/>.
         /// </param>
         public AssemblyDiscoverySettings(
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns,
-            IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive)
+            IEnumerable<string> exclusionPatterns,
+            MatchCasing fileNameCaseSensitivity)
         {
             IncludeSubdirectories = includeSubdirectories;
             SearchPatterns = searchPatterns;
-            ExclusionFileNames = exclusionFileNames;
-            ExclusionsAreCaseSensitive = exclusionsAreCaseSensitive;
+            ExclusionPatterns = exclusionPatterns;
+            FileNameCaseSensitivity = fileNameCaseSensitivity;
         }
 
         /// <summary>
@@ -75,13 +81,17 @@ namespace Microsoft.Performance.Toolkit.Engine
         public IEnumerable<string> SearchPatterns { get; }
 
         /// <summary>
-        ///     Gets a set of files names to exclude from the search. May be <c>null</c>.
+        ///     Gets patterns to exclude matching file names from being processed.
+        ///     May be <c>null</c>.
+        ///     e.g. { "excludeMe*.dll", "blob.dll" }
         /// </summary>
-        public IEnumerable<string> ExclusionFileNames { get; }
+        public IEnumerable<string> ExclusionPatterns { get; }
 
         /// <summary>
-        ///     Gets indicating whether exclusion file names should be treated as case sensitive.
+        ///     Gets a value that indicates whether files name pattern matching should be case sensitive.
+        ///     <seealso cref="SearchPatterns"/>
+        ///     <seealso cref="ExclusionPatterns"/>
         /// </summary>
-        public bool ExclusionsAreCaseSensitive { get; }
+        public MatchCasing FileNameCaseSensitivity { get; }
     }
 }
