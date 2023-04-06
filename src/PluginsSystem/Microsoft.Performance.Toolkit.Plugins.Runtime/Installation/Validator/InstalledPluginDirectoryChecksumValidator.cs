@@ -14,17 +14,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     public sealed class InstalledPluginDirectoryChecksumValidator
         : IInstalledPluginValidator
     {
-        private readonly string installationRoot;
+        private readonly IFileSystemInstalledPluginLocator locator;
 
         /// <summary>
         ///     Creates an instance of the <see cref="InstalledPluginDirectoryChecksumValidator"/>.
         /// </summary>
         public InstalledPluginDirectoryChecksumValidator(
-            string installationRoot)
+            IFileSystemInstalledPluginLocator locator)
         {
-            Guard.NotNullOrWhiteSpace(installationRoot, nameof(installationRoot));
+            Guard.NotNull(locator, nameof(locator));
 
-            this.installationRoot = installationRoot;
+            this.locator = locator;
         }
 
         /// <inheritdoc/>
@@ -32,9 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            string installDirectory = PathUtils.GetPluginInstallDirectory(
-                this.installationRoot,
-                new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
+            string installDirectory = this.locator.GetPluginRootDirectory(new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
 
             if (!Directory.Exists(installDirectory))
             {

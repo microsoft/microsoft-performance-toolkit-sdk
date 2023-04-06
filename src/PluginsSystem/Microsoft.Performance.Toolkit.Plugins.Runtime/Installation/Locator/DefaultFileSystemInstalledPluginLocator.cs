@@ -33,7 +33,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            string directory = GetInstallDirectory(pluginIdentity);
+            string directory = GetPluginRootDirectory(pluginIdentity);
             return Path.GetFullPath(Path.Combine(directory, pluginContentFolder));
         }
 
@@ -42,11 +42,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            string directory = GetInstallDirectory(pluginIdentity);
+            string directory = GetPluginRootDirectory(pluginIdentity);
             return Path.GetFullPath(Path.Combine(directory, pluginMetadataFileName));
         }
 
-        private string GetInstallDirectory(PluginIdentity pluginIdentity)
+        public string GetPluginRootDirectory(PluginIdentity pluginIdentity)
         {
             return Path.GetFullPath(Path.Combine(this.rootDirectory, $"{pluginIdentity.Id}-{pluginIdentity.Version}"));
         }

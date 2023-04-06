@@ -120,7 +120,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 pluginsSystemRoot,
                 registry,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
-                new InstalledPluginDirectoryChecksumValidator(pluginsSystemRoot),
+                new InstalledPluginDirectoryChecksumValidator(locator),
                 installedPluginStorage,
                 packageReader,
                 loggerFactory);
