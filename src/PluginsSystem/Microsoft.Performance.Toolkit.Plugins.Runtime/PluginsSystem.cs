@@ -112,17 +112,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             var locator = new DefaultInstalledPluginLocator(pluginsSystemRoot);
 
+            var checsumCalculator = new SHA256ChecksumCalculator();
+
             var installedPluginStorage = new FileSystemInstalledPluginStorage(
                 locator,
                 loggerFactory);
 
             var installer = new FileBackedPluginsInstaller(
                 pluginsSystemRoot,
+                locator,
                 registry,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
-                new InstalledPluginDirectoryChecksumValidator(locator),
+                new InstalledPluginDirectoryChecksumValidator(locator, checsumCalculator),
                 installedPluginStorage,
                 packageReader,
+                checsumCalculator,
                 loggerFactory);
 
             return new PluginsSystem(

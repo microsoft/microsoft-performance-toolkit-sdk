@@ -31,6 +31,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly IInstalledPluginValidator installedPluginValidator;
         private readonly IInstalledPluginStorage installedPluginStorage;
         private readonly IPluginPackageReader pluginPackageReader;
+        private readonly IChecksumCalculator checksumCalculator;
+        private readonly IFileSystemInstalledPluginLocator locator;
 
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
@@ -40,6 +42,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </summary>
         /// <param name="installationRoot">
         ///     The root directory where plugins are installed.
+        /// </param>
+        /// <param name="locator">
+        ///     The <see cref="IFileSystemInstalledPluginLocator"/> used to locate installed plugins.
         /// </param>
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
@@ -53,20 +58,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="packageReader">
         ///     The <see cref="IPluginPackageReader"/> used to read plugin packages.
         /// </param>
+        /// <param name="checksumCalculator">
+        ///     The <see cref="IChecksumCalculator"/> used to calculate installed plugin checksum.
+        /// </param>
         public FileBackedPluginsInstaller(
             string installationRoot,
+            IFileSystemInstalledPluginLocator locator,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             IInstalledPluginValidator installedPluginValidator,
             IInstalledPluginStorage installedPluginStorage,
-            IPluginPackageReader packageReader)
+            IPluginPackageReader packageReader,
+            IChecksumCalculator checksumCalculator)
             : this(
                   installationRoot,
+                  locator,
                   pluginRegistry,
                   metadataSerializer,
                   installedPluginValidator,
                   installedPluginStorage,
                   packageReader,
+                  checksumCalculator,
                   Logger.Create)
         {
         }
@@ -76,6 +88,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </summary>
         /// <param name="installationRoot">
         ///     The root directory where plugins are installed.
+        /// </param>
+        /// <param name="locator">
+        ///     The <see cref="IFileSystemInstalledPluginLocator"/> used to locate installed plugins.
         /// </param>
         /// <param name="pluginRegistry">
         ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
@@ -92,16 +107,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="packageReader">
         ///     The <see cref="IPluginPackageReader"/> used to read plugin packages.
         /// </param>
+        /// <param name="checksumCalculator">
+        ///     The <see cref="IChecksumCalculator"/> used to calculate installed plugin checksum.
+        /// </param>
         /// <param name="loggerFactory">
         ///     The <see cref="Func{Type, ILogger}"/> used to create a logger.
         /// </param>
         public FileBackedPluginsInstaller(
             string installationRoot,
+            IFileSystemInstalledPluginLocator locator,
             IPluginRegistry pluginRegistry,
             ISerializer<PluginMetadata> metadataSerializer,
             IInstalledPluginValidator installedPluginValidator,
             IInstalledPluginStorage installedPluginStorage,
             IPluginPackageReader packageReader,
+            IChecksumCalculator checksumCalculator,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNullOrWhiteSpace(installationRoot, nameof(installationRoot));
@@ -116,6 +136,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.installedPluginValidator = installedPluginValidator;
             this.installedPluginStorage = installedPluginStorage;
             this.pluginPackageReader = packageReader;
+            this.checksumCalculator = checksumCalculator;
 
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(FileBackedPluginsInstaller));
@@ -234,9 +255,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     }
                 };
 
-                string installationDir = PathUtils.GetPluginInstallDirectory(
-                    this.installationRoot,
-                    pluginPackage.PluginIdentity);
+                string installationDir = this.locator.GetPluginRootDirectory(pluginPackage.PluginIdentity);
 
                 try
                 {
@@ -246,7 +265,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     await this.installedPluginStorage.AddAsync(pluginPackage, cancellationToken, progress);
                     this.logger.Info("Extraction completed.");
 
-                    string checksum = await HashUtils.GetDirectoryHashAsync(installationDir);
+                    string checksum = await this.checksumCalculator.GetDirectoryChecksumAsync(installationDir);
+                    
                     var pluginToInstall = new InstalledPluginInfo(
                         pluginPackage.Id,
                         pluginPackage.Version,

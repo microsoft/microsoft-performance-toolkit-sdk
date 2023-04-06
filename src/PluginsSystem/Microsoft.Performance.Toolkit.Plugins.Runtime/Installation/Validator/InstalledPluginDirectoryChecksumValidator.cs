@@ -15,12 +15,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         : IInstalledPluginValidator
     {
         private readonly IFileSystemInstalledPluginLocator locator;
+        private readonly IChecksumCalculator checksumCalculator;
 
         /// <summary>
         ///     Creates an instance of the <see cref="InstalledPluginDirectoryChecksumValidator"/>.
         /// </summary>
         public InstalledPluginDirectoryChecksumValidator(
-            IFileSystemInstalledPluginLocator locator)
+            IFileSystemInstalledPluginLocator locator,
+            IChecksumCalculator checksumCalculator)
         {
             Guard.NotNull(locator, nameof(locator));
 
@@ -32,14 +34,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            string installDirectory = this.locator.GetPluginRootDirectory(new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
+            string installDirectory = this.locator.GetPluginRootDirectory(
+                new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
 
             if (!Directory.Exists(installDirectory))
             {
                 return false;
             }
 
-            string checksum = await HashUtils.GetDirectoryHashAsync(installDirectory);
+            string checksum = await this.checksumCalculator.GetDirectoryChecksumAsync(installDirectory);
 
             return checksum.Equals(installedPlugin.Checksum);
         }
