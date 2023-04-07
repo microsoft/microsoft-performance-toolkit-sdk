@@ -14,17 +14,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     public sealed class InstalledPluginDirectoryChecksumValidator
         : IInstalledPluginValidator
     {
-        private readonly string installationRoot;
+        private readonly IPluginsStorageDirectory pluginsStorageDirectory;
+        private readonly IDirectoryChecksumCalculator checksumCalculator;
 
         /// <summary>
         ///     Creates an instance of the <see cref="InstalledPluginDirectoryChecksumValidator"/>.
         /// </summary>
         public InstalledPluginDirectoryChecksumValidator(
-            string installationRoot)
+            IPluginsStorageDirectory pluginsStorageDirectory,
+            IDirectoryChecksumCalculator checksumCalculator)
         {
-            Guard.NotNullOrWhiteSpace(installationRoot, nameof(installationRoot));
+            Guard.NotNull(pluginsStorageDirectory, nameof(pluginsStorageDirectory));
+            Guard.NotNull(checksumCalculator, nameof(checksumCalculator));
 
-            this.installationRoot = installationRoot;
+            this.pluginsStorageDirectory = pluginsStorageDirectory;
+            this.checksumCalculator = checksumCalculator;
         }
 
         /// <inheritdoc/>
@@ -32,8 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            string installDirectory = PathUtils.GetPluginInstallDirectory(
-                this.installationRoot,
+            string installDirectory = this.pluginsStorageDirectory.GetPluginRootDirectory(
                 new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
 
             if (!Directory.Exists(installDirectory))
@@ -41,7 +44,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                 return false;
             }
 
-            string checksum = await HashUtils.GetDirectoryHashAsync(installDirectory);
+            string checksum = await this.checksumCalculator.GetDirectoryChecksumAsync(installDirectory);
 
             return checksum.Equals(installedPlugin.Checksum);
         }
