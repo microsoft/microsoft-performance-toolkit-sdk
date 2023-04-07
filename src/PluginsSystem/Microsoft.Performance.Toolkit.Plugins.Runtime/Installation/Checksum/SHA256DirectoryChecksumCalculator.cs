@@ -8,12 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core
+namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
     /// <summary>
-    ///     Provides static methods for calculating hash.
+    ///     Represents a checksum calculator that uses SHA256.
     /// </summary>
-    public static class HashUtils
+    public sealed class SHA256DirectoryChecksumCalculator
+        : IDirectoryChecksumCalculator
     {
         /// <summary>
         ///     Calculates the hash of all files under the given directory including the file paths.
@@ -24,7 +25,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <returns>
         ///     The combined SHA256 hash of all files including the file paths.
         /// </returns>
-        public static async Task<string> GetDirectoryHashAsync(string directory)
+        public async Task<string> GetDirectoryChecksumAsync(string directory)
         {
             Guard.NotNull(directory, nameof(directory));
             Guard.IsTrue(Directory.Exists(directory), $"Directory {directory} doesn't exist.");
