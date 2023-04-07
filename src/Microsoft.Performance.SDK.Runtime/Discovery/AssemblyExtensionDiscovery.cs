@@ -138,7 +138,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </returns>
         public bool ProcessAssemblies(IEnumerable<string> directoryPaths, out ErrorInfo error)
         {
-            return this.ProcessAssemblies(directoryPaths, true, null, null, MatchCasing.PlatformDefault, out error);
+            return this.ProcessAssemblies(directoryPaths, true, null, null, MatchCasing.CaseInsensitive, out error);
         }
 
         /// <summary>

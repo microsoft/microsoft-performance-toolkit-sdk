@@ -35,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public AssemblyDiscoverySettings(
             bool includeSubdirectories,
             IEnumerable<string> searchPatterns)
-            : this(includeSubdirectories, searchPatterns, null, MatchCasing.PlatformDefault)
+            : this(includeSubdirectories, searchPatterns, null, MatchCasing.CaseInsensitive)
         {
         }
 
