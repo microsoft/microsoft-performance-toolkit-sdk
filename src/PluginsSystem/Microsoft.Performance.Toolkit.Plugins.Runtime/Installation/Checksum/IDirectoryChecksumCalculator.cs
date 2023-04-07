@@ -8,7 +8,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     /// <summary>
     ///     Represents a checksum calculator.
     /// </summary>
-    public interface IChecksumCalculator
+    public interface IDirectoryChecksumCalculator
     {
         /// <summary>
         ///     Calculates the checksum of the given file directory.

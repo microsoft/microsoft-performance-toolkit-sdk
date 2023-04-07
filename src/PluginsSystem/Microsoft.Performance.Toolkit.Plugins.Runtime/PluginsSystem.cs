@@ -46,7 +46,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IPluginsDiscoverer discoverer,
             IRepository<PluginSource> pluginSourceRepository,
             IPluginsSystemResourceLoader<IPluginDiscovererProvider> pluginDiscovererProviderLoader,
-            IPluginsSystemResourceLoader<IPluginFetcher> pluginFetcherLoader)
+            IPluginsSystemResourceLoader<IPluginFetcher> pluginFetcherLoader,
+            IObsoletePluginsRemover obsoletePluginsRemover)
         {
             Guard.NotNull(installer, nameof(installer));
             Guard.NotNull(discoverer, nameof(discoverer));
@@ -59,6 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.PluginSourceRepository = pluginSourceRepository;
             this.DiscovererProviderResourceLoader = pluginDiscovererProviderLoader;
             this.FetcherResourceLoader = pluginFetcherLoader;
+            this.ObsoletePluginsRemover = obsoletePluginsRemover;
         }
 
         /// <summary>
@@ -91,6 +93,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             string pluginsSystemRoot = Path.GetFullPath(root);
 
+            // Initializes components for plugis discoverery
             var pluginSourceRepo = new PluginSourceRepository();
             var fetcherRepo = new PluginsSystemResourceRepository<IPluginFetcher>();
             var discovererProviderRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
@@ -101,32 +104,39 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 discovererProviderRepo,
                 loggerFactory);
 
+            // Initializes components for plugins installation.
             var registry = new FileBackedPluginRegistry(
                 pluginsSystemRoot,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>(),
                 loggerFactory);
 
+            ISerializer<PluginMetadata> metadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
+
             var packageReader = new ZipPluginPackageReader(
-                SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
+                metadataSerializer,
                 loggerFactory);
 
-            var locator = new DefaultInstalledPluginLocator(pluginsSystemRoot);
+            var storageDirectory = new DefaultPluginsStorageDirectory(pluginsSystemRoot);
 
-            var checsumCalculator = new SHA256ChecksumCalculator();
+            var checsumCalculator = new SHA256DirectoryChecksumCalculator();
 
             var installedPluginStorage = new FileSystemInstalledPluginStorage(
-                locator,
+                storageDirectory,
+                metadataSerializer,
+                checsumCalculator,
                 loggerFactory);
 
             var installer = new FileBackedPluginsInstaller(
-                pluginsSystemRoot,
-                locator,
                 registry,
-                SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>(),
-                new InstalledPluginDirectoryChecksumValidator(locator, checsumCalculator),
+                new InstalledPluginDirectoryChecksumValidator(storageDirectory, checsumCalculator),
                 installedPluginStorage,
                 packageReader,
-                checsumCalculator,
+                loggerFactory);
+
+
+            var obsoletePluginsRemover = new FileSystemObsoletePluginsRemover(
+                registry,
+                storageDirectory,
                 loggerFactory);
 
             return new PluginsSystem(
@@ -134,7 +144,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 discoverer,
                 pluginSourceRepo,
                 discovererProviderRepo,
-                fetcherRepo);
+                fetcherRepo,
+                obsoletePluginsRemover);
         }
 
         /// <summary>
@@ -161,5 +172,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Gets the repository of plugin sources.
         /// </summary>
         public IRepository<PluginSource> PluginSourceRepository { get; }
+
+        /// <summary>
+        ///     Gets the remover of obsolete plugins.
+        /// </summary>
+        public IObsoletePluginsRemover ObsoletePluginsRemover { get; }
     }
 }

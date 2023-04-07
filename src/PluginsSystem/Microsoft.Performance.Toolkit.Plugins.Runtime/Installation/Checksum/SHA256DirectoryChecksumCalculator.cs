@@ -9,8 +9,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     /// <summary>
     ///     Represents a checksum calculator that uses SHA256.
     /// </summary>
-    public sealed class SHA256ChecksumCalculator
-        : IChecksumCalculator
+    public sealed class SHA256DirectoryChecksumCalculator
+        : IDirectoryChecksumCalculator
     {
         /// <inheritdoc />
         public async Task<string> GetDirectoryChecksumAsync(string directory)

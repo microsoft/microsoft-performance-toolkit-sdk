@@ -7,6 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
@@ -15,44 +18,56 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     /// <summary>
     ///     A file system based implementation of <see cref="IInstalledPluginStorage"/>.
     /// </summary>
-    public class FileSystemInstalledPluginStorage
+    public sealed class FileSystemInstalledPluginStorage
         : IInstalledPluginStorage
     {
-        private readonly IFileSystemInstalledPluginLocator locator;
+        private readonly IPluginsStorageDirectory pluginStorageDirectory;
+        private readonly ISerializer<PluginMetadata> pluginMetadataSerializer;
+        private readonly IDirectoryChecksumCalculator checksumCalculator;
         private readonly ILogger logger;
 
         /// <summary>
         ///     Creates an instance of the <see cref="FileSystemInstalledPluginStorage"/>.
         /// </summary>
-        /// <param name="locator">
-        ///     The file system plugin locator.
+        /// <param name="pluginStorageDirectory">
+        ///     The directory where the plugins are stored.
+        /// </param>
+        /// <param name="metadataSerializer">
+        ///     The serializer to use to serialize and deserialize the plugin metadata.
         /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory.
         /// </param>
-        public FileSystemInstalledPluginStorage(
-            IFileSystemInstalledPluginLocator locator,
+        internal FileSystemInstalledPluginStorage(
+            IPluginsStorageDirectory pluginStorageDirectory,
+            ISerializer<PluginMetadata> metadataSerializer,
+            IDirectoryChecksumCalculator checksumCalculator,
             Func<Type, ILogger> loggerFactory)
         {
-            Guard.NotNull(locator, nameof(locator));
+            Guard.NotNull(pluginStorageDirectory, nameof(pluginStorageDirectory));
+            Guard.NotNull(checksumCalculator, nameof(checksumCalculator));
+            Guard.NotNull(metadataSerializer, nameof(metadataSerializer));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.locator = locator;
+            this.pluginStorageDirectory = pluginStorageDirectory;
+            this.pluginMetadataSerializer = metadataSerializer;
+            this.checksumCalculator = checksumCalculator;
             this.logger = loggerFactory(typeof(FileSystemInstalledPluginStorage));
         }
 
         /// <inheritdoc/>
-        public async Task AddAsync(
+        public async Task<string> AddAsync(
             PluginPackage package,
             CancellationToken cancellationToken,
             IProgress<int> progress)
         {
             Guard.NotNull(package, nameof(package));
+            Guard.NotNull(cancellationToken, nameof(cancellationToken));
 
             const int bufferSize = 4096;
             const int defaultAsyncBufferSize = 81920;
 
-            string installDir = this.locator.GetPluginContentDirectory(package.PluginIdentity);
+            string installDir = this.pluginStorageDirectory.GetPluginContentDirectory(package.PluginIdentity);
 
             Guard.NotNullOrWhiteSpace(installDir, nameof(installDir));
 
@@ -78,7 +93,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     }
                     else
                     {
-                        destPath = this.locator.GetPluginMetadataFilePath(package.PluginIdentity);
+                        destPath = this.pluginStorageDirectory.GetPluginMetadataFilePath(package.PluginIdentity);
                     }
 
                     string destDir = isDirectory ? destPath : Path.GetDirectoryName(destPath);
@@ -108,6 +123,51 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                 this.logger.Error(e, errorMsg);
                 throw new PluginPackageExtractionException(errorMsg, e);
             }
+
+            string checksum = await this.checksumCalculator.GetDirectoryChecksumAsync(installDir);
+
+            return checksum;
+        }
+
+        /// <inheritdoc/>
+        public Task RemoveAsync(PluginIdentity pluginIdentity, CancellationToken cancellationToken)
+        {
+            Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
+
+            string installDir = this.pluginStorageDirectory.GetPluginRootDirectory(pluginIdentity);
+
+            return Task.Run(() =>
+            {
+                if (Directory.Exists(installDir))
+                {
+                    Directory.Delete(installDir, true);
+                }
+            }, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public async Task<PluginMetadata> TryGetPluginMetadataAsync(
+            PluginIdentity installedPlugin,
+            CancellationToken cancellationToken)
+        {
+            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+
+            string metadataPath = this.pluginStorageDirectory.GetPluginMetadataFilePath(installedPlugin);
+
+            if (!File.Exists(metadataPath))
+            {
+                return null;
+            }
+
+            PluginMetadata pluginMetadata;
+            using (var fileStream = new FileStream(metadataPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                pluginMetadata = await this.pluginMetadataSerializer.DeserializeAsync(
+                    fileStream,
+                    cancellationToken);
+            }
+
+            return pluginMetadata;
         }
     }
 }

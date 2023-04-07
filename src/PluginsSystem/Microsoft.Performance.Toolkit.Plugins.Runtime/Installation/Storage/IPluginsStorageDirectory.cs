@@ -1,40 +1,41 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
     /// <summary>
-    ///     Represents a locator that can locate installed plugins on the file system.
+    ///     Represents the structure of the directory on a file system where installed plugins are stored or should be stored.
+    ///     All installed plugins of a given plugins system should be stored under the same root directory.
     /// </summary>
-    public interface IFileSystemInstalledPluginLocator
+    public interface IPluginsStorageDirectory
     {
         /// <summary>
-        ///     Gets the root directory where the plugin is installed.
-        ///     This should be a dedicated directory for the given plugin.
+        ///     Gets the dedicated directory where the given plugin is installed or should be installed.
         /// </summary>
         /// <param name="pluginIdentity">
         ///     The identity of the plugin.
         /// </param>
         /// <returns>
-        ///     The root directory where the plugin is installed.
+        ///     The directory where the given plugin is installed or should be installed.
         /// </returns>
         string GetPluginRootDirectory(PluginIdentity pluginIdentity);
 
         /// <summary>
-        ///     Gets the sub-directory where the plugin content files are installed.
+        ///     Gets the directory where the plugin content files are located or should be located.
         /// </summary>
         /// <param name="pluginIdentity">
         ///     The identity of the plugin.
         /// </param>
         /// <returns>
-        ///     The directory where the plugin content is installed.
+        ///     The directory where the plugin content files are located or should be located.
         /// </returns>
         string GetPluginContentDirectory(PluginIdentity pluginIdentity);
 
         /// <summary>
-        ///     Gets the path to the plugin metadata file.
+        ///     Gets the path to the plugin metadata file for the given plugin.
         /// </summary>
         /// <param name="pluginIdentity">
         ///     The identity of the plugin.
@@ -43,5 +44,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     The path to the plugin metadata file.
         /// </returns>
         string GetPluginMetadataFilePath(PluginIdentity pluginIdentity);
+
+        /// <summary>
+        ///     Gets the directories of all installed plugins under the root directory.
+        /// </summary>
+        /// <returns>
+        ///     The directories of all installed plugins under the root directory.
+        /// </returns>
+        IEnumerable<string> GetAllPluginRootDirectories();
     }
 }

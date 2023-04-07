@@ -4,6 +4,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
@@ -17,7 +19,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     Adds the given plugin package to the storage.
         /// </summary>
         /// <param name="package">
-        ///     The plugin package to add.
+        ///     The plugin package to add to the storage.
         /// </param>
         /// <param name="cancellationToken">
         ///     The cancellation token.
@@ -26,11 +28,44 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     The progress of the operation.
         /// </param>
         /// <returns>
-        ///     The installed plugin.
+        ///     A task that completes when the plugin has been added to the storage.
+        ///     The task returns the checksum of the added plugin.
         /// </returns>
-        Task AddAsync(
+        Task<string> AddAsync(
             PluginPackage package,
             CancellationToken cancellationToken,
             IProgress<int> progress);
+
+        /// <summary>
+        ///     Removes the given plugin from the storage.
+        /// </summary>
+        /// <param name="pluginIdentity">
+        ///     The plugin identity.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     The cancellation token.
+        /// </param>
+        /// <returns>
+        ///     A task that completes when the plugin has been removed.
+        /// </returns>
+        Task RemoveAsync(
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Tries to get the plugin metadata for the given plugin identity.
+        /// </summary>
+        /// <param name="pluginIdentity">
+        ///     The plugin identity.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     The cancellation token.
+        /// </param>
+        /// <returns>
+        ///     A task that completes when the plugin metadata has been retrieved.
+        /// </returns>
+        Task<PluginMetadata> TryGetPluginMetadataAsync(
+            PluginIdentity pluginIdentity,
+            CancellationToken cancellationToken);
     }
 }
