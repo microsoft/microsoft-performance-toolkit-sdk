@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
 {
@@ -19,6 +20,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// </param>
         public PluginSource(Uri uri)
         {
+            Guard.NotNull(uri, nameof(uri));
+            
             this.Uri = uri;
         }
 
@@ -28,37 +31,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         public Uri Uri { get; }
 
         /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return Equals(this, obj as PluginSource);
+        }   
+
+        /// <inheritdoc />
         public bool Equals(PluginSource other)
         {
-            return Equals(this, other);
-        }
-
-        /// <summary>
-        ///     Determines whether the specified <see cref="PluginSource"/> instances are considered equal.
-        /// </summary>
-        /// <param name="a">
-        ///     The first plugin source to compare.  
-        /// </param>
-        /// <param name="b">
-        ///     The second plugin source to compare.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if a and b are considered equal; <c>false</c> otherwise.
-        ///     If a or b is null, the method returns <c>false</c>.
-        /// </returns>
-        public static bool Equals(PluginSource a, PluginSource b)
-        {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            if (a is null || b is null)
+            if (other is null)
             {
                 return false;
             }
 
-            return a.Uri == b.Uri;
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Uri == other.Uri;
         }
 
         /// <inheritdoc />
