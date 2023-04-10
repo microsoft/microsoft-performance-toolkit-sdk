@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
@@ -11,7 +12,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     ///     Represents the metadata of a plugin.
     /// </summary>
     public sealed class PluginMetadata
+        : IEquatable<PluginMetadata>
     {
+        private readonly Lazy<PluginIdentity> identity;
+
         /// <summary>
         ///     Intializes a new instance of the <see cref="PluginMetadata"/> class with the specified parameters.
         /// </summary>
@@ -27,6 +31,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             IEnumerable<DataCookerMetadata> dataCookers,
             IEnumerable<TableMetadata> extensibleTables)
         {
+            Guard.NotNull(id, nameof(id));
+            Guard.NotNull(version, nameof(version));
+
             this.Id = id;
             this.Version = version;
             this.DisplayName = displayName;
@@ -36,13 +43,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             this.ProcessingSources = processingSources;
             this.DataCookers = dataCookers;
             this.ExtensibleTables = extensibleTables;
+
+            this.identity = new Lazy<PluginIdentity>(() => new PluginIdentity(id, version));
         }
 
         /// <summary>
-        ///     Intializes a new instance of the <see cref="PluginMetadata"/> class.
+        ///     Gets or sets the identity of this processing source.
         /// </summary>
-        public PluginMetadata()
-        {  
+        [JsonIgnore]
+        public PluginIdentity Identity
+        {
+            get
+            {
+                return this.identity.Value;
+            }
         }
 
         /// <summary>
@@ -89,5 +103,80 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         ///     Gets or sets the metadata of the extensible tables contained in this plugin.
         /// </summary>
         public IEnumerable<TableMetadata> ExtensibleTables { get; }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as PluginMetadata);
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(PluginMetadata other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return string.Equals(this.Id, other.Id, StringComparison.Ordinal)
+                && this.Version.Equals(other.Version)
+                && string.Equals(this.DisplayName, other.DisplayName, StringComparison.Ordinal)
+                && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
+                && this.Owners.EnumerableEqual(other.Owners)
+                && this.SdkVersion?.Equals(other.SdkVersion) == true
+                && this.ProcessingSources.EnumerableEqual(other.ProcessingSources)
+                && this.DataCookers.EnumerableEqual(other.DataCookers)
+                && this.ExtensibleTables.EnumerableEqual(other.ExtensibleTables);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            int result = HashCodeUtils.CombineHashCodeValues(
+                this.Id.GetHashCode(),
+                this.Version.GetHashCode(),
+                this.DisplayName?.GetHashCode() ?? 0,
+                this.Description?.GetHashCode() ?? 0,
+                this.SdkVersion?.GetHashCode() ?? 0);
+
+            if (this.Owners != null)
+            {
+                foreach (PluginOwner owner in this.Owners)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, owner.GetHashCode());
+                }
+            }
+
+            if (this.ProcessingSources != null)
+            {
+                foreach (ProcessingSourceMetadata source in this.ProcessingSources)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, source.GetHashCode());
+                }
+            }
+
+            if (this.DataCookers != null)
+            {
+                foreach (DataCookerMetadata cooker in this.DataCookers)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, cooker.GetHashCode());
+                }
+            }
+
+            if (this.ExtensibleTables != null)
+            {
+                foreach (TableMetadata table in this.ExtensibleTables)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, table.GetHashCode());
+                }
+            }
+
+            return result;
+        }
     }
 }

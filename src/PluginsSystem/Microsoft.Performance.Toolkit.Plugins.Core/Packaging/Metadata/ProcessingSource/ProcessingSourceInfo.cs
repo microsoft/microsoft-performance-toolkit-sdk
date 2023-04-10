@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
@@ -10,6 +12,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     ///     Represents information about a processing source.
     /// </summary>
     public sealed class ProcessingSourceInfo
+        : IEquatable<ProcessingSourceInfo>
     {
         /// <summary>
         ///    Initializes a new instance of the <see cref="ProcessingSourceInfo"/> class with the specified parameters.
@@ -69,5 +72,59 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         ///     Each entry in the array is logically a new paragraph.
         /// </summary>
         public string[] AdditionalInformation { get; }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ProcessingSourceInfo);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(ProcessingSourceInfo other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Owners.EnumerableEqual(other.Owners)
+                && this.ProjectInfo?.Equals(other.ProjectInfo) == true
+                && this.LicenseInfo?.Equals(other.LicenseInfo) == true
+                && string.Equals(this.CopyrightNotice, other.CopyrightNotice)
+                && this.AdditionalInformation.SequenceEqual(other.AdditionalInformation);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            int result = HashCodeUtils.CombineHashCodeValues(
+                this.ProjectInfo?.GetHashCode() ?? 0,
+                this.LicenseInfo?.GetHashCode() ?? 0,
+                this.CopyrightNotice?.GetHashCode() ?? 0);
+
+
+            if (this.Owners != null)
+            {
+                foreach (ContactInfo owner in this.Owners)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, owner?.GetHashCode() ?? 0);
+                }
+            }
+
+            if (this.AdditionalInformation != null)
+            {
+                foreach (string additionalInfo in this.AdditionalInformation)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, additionalInfo?.GetHashCode() ?? 0);
+                }
+            }
+
+            return result;
+        }
     }
 }

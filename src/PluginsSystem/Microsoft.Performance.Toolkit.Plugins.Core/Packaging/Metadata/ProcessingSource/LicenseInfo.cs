@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Text.Json.Serialization;
+using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
@@ -9,6 +11,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     ///     Represents the license information for a processing source.
     /// </summary>
     public sealed class LicenseInfo
+        : IEquatable<LicenseInfo>
     {
         /// <summary>
         ///   Initializes a new instance of the <see cref="LicenseInfo"/> class with the specified parameters.
@@ -50,5 +53,38 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         ///     This property may be <c>null</c>.
         /// </summary>
         public string Text { get; }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as LicenseInfo);
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(LicenseInfo other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return string.Equals(this.Name, other.Name, StringComparison.Ordinal)
+                && string.Equals(this.Uri, other.Uri, StringComparison.Ordinal)
+                && string.Equals(this.Text, other.Text, StringComparison.Ordinal);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCodeUtils.CombineHashCodeValues(
+                this.Name?.GetHashCode() ?? 0,
+                this.Uri?.GetHashCode() ?? 0,
+                this.Text?.GetHashCode() ?? 0);
+        }
     }
 }
