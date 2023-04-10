@@ -26,6 +26,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             Uri pluginPackageUri,
             Guid fetcherResourceId)
         {
+            Guard.NotNull(Identity, nameof(Identity));
+            Guard.NotNull(pluginSource, nameof(pluginSource));
+            Guard.NotNullOrWhiteSpace(displayName, nameof(displayName));
+            Guard.NotNull(description, nameof(description));
+            Guard.NotNull(pluginPackageUri, nameof(pluginPackageUri));
+
             this.Identity = Identity;
             this.PluginSource = pluginSource;
             this.DisplayName = displayName;
@@ -65,43 +71,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         public Guid FetcherResourceId { get; }
 
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AvailablePluginInfo);
+        }
+
         /// <inheritdoc />
         public bool Equals(AvailablePluginInfo other)
         {
-            return Equals(this, other);
-        }
-
-        /// <summary>
-        ///     Determines whether the specified <see cref="AvailablePluginInfo"/> instances are considered equal.
-        /// </summary>
-        /// <param name="a">
-        ///     The first available plugin info to compare.  
-        /// </param>
-        /// <param name="b">
-        ///     The second available plugin info to compare.
-        /// </param>
-        /// <returns>
-        ///     <c>true</c> if a and b are considered equal; <c>false</c> otherwise.
-        ///     If a or b is null, the method returns <c>false</c>.
-        /// </returns>
-        public static bool Equals(AvailablePluginInfo a, AvailablePluginInfo b)
-        {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            if (a is null || b is null)
+            if (other is null)
             {
                 return false;
             }
 
-            return a.Identity.Equals(b.Identity) &&
-                a.PluginSource.Equals(b.PluginSource) &&
-                a.DisplayName.Equals(b.DisplayName, StringComparison.OrdinalIgnoreCase) &&
-                a.Description.Equals(b.Description, StringComparison.OrdinalIgnoreCase) &&
-                a.PluginPackageUri.Equals(b.PluginPackageUri) &&
-                a.FetcherResourceId.Equals(b.FetcherResourceId);
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Identity.Equals(other.Identity)
+                && this.PluginSource.Equals(other.PluginSource)
+                && this.DisplayName.Equals(other.DisplayName, StringComparison.Ordinal)
+                && this.Description.Equals(other.Description, StringComparison.Ordinal)
+                && this.PluginPackageUri.Equals(other.PluginPackageUri)
+                && this.FetcherResourceId.Equals(other.FetcherResourceId);
         }
 
         /// <inheritdoc />
