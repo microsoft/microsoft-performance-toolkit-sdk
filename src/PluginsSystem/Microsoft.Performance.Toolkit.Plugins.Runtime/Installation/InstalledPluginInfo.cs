@@ -46,13 +46,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Gets the identifier of this plugin.
         /// </summary>
         [JsonIgnore]
-        public string Id { get; }
+        public string Id
+        {
+            get
+            {
+                return this.Identity.Id;
+            }
+        }
 
         /// <summary>
         ///     Gets the version of this plugin.
         /// </summary>
         [JsonIgnore]
-        public Version Version { get; }
+        public Version Version
+        {
+            get
+            {
+                return this.Identity.Version;
+            }
+        }
 
         /// <summary>
         ///     Gets the source Uri of this plugin.
