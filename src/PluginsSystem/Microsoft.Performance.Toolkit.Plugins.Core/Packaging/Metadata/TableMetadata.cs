@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         /// <summary>
         ///     Gets or sets a boolean indicating whether this table is a metadata table.
         /// </summary>
-        public bool IsMetadataTable{ get; }
+        public bool IsMetadataTable { get; }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
@@ -74,11 +74,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
                 return true;
             }
 
-            return this.Guid == other.Guid
+            return this.Guid.Equals(other.Guid)
                 && string.Equals(this.Name, other.Name, StringComparison.Ordinal)
                 && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
                 && string.Equals(this.Category, other.Category, StringComparison.Ordinal)
-                && this.IsMetadataTable == other.IsMetadataTable;
+                && this.IsMetadataTable.Equals(other.IsMetadataTable);
         }
 
         /// <inheritdoc />

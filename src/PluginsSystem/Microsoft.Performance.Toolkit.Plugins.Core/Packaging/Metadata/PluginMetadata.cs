@@ -130,8 +130,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         public override int GetHashCode()
         {
             int result = HashCodeUtils.CombineHashCodeValues(
-                this.Id.GetHashCode(),
-                this.Version.GetHashCode(),
+                this.Id?.GetHashCode() ?? 0,
+                this.Version?.GetHashCode() ?? 0,
                 this.DisplayName?.GetHashCode() ?? 0,
                 this.Description?.GetHashCode() ?? 0,
                 this.SdkVersion?.GetHashCode() ?? 0);
@@ -140,7 +140,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             {
                 foreach (PluginOwner owner in this.Owners)
                 {
-                    result = HashCodeUtils.CombineHashCodeValues(result, owner.GetHashCode());
+                    result = HashCodeUtils.CombineHashCodeValues(result, owner?.GetHashCode() ?? 0);
                 }
             }
 
@@ -148,7 +148,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             {
                 foreach (ProcessingSourceMetadata source in this.ProcessingSources)
                 {
-                    result = HashCodeUtils.CombineHashCodeValues(result, source.GetHashCode());
+                    result = HashCodeUtils.CombineHashCodeValues(result, source?.GetHashCode() ?? 0);
                 }
             }
 
@@ -156,7 +156,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             {
                 foreach (DataCookerMetadata cooker in this.DataCookers)
                 {
-                    result = HashCodeUtils.CombineHashCodeValues(result, cooker.GetHashCode());
+                    result = HashCodeUtils.CombineHashCodeValues(result, cooker?.GetHashCode() ?? 0);
                 }
             }
 
@@ -164,7 +164,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             {
                 foreach (TableMetadata table in this.ExtensibleTables)
                 {
-                    result = HashCodeUtils.CombineHashCodeValues(result, table.GetHashCode());
+                    result = HashCodeUtils.CombineHashCodeValues(result, table?.GetHashCode() ?? 0);
                 }
             }
 

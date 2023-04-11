@@ -21,7 +21,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         public PluginSource(Uri uri)
         {
             Guard.NotNull(uri, nameof(uri));
-            
+
             this.Uri = uri;
         }
 
@@ -34,7 +34,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         public override bool Equals(object obj)
         {
             return Equals(this, obj as PluginSource);
-        }   
+        }
 
         /// <inheritdoc />
         public bool Equals(PluginSource other)

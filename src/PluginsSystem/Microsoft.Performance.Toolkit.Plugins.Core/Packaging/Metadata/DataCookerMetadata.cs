@@ -60,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             {
                 return true;
             }
-            
+
             return string.Equals(this.Name, other.Name, StringComparison.Ordinal)
                 && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
                 && this.ProcessingSourceGuid == other.ProcessingSourceGuid;

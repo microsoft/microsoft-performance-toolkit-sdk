@@ -89,9 +89,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
                 return true;
             }
 
-            return this.Guid == other.Guid
+            return this.Guid.Equals(other.Guid)
                 && string.Equals(this.Name, other.Name, StringComparison.Ordinal)
-                && this.Version == other.Version
+                && this.Version?.Equals(other.Version) == true
                 && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
                 && Equals(this.AboutInfo, other.AboutInfo)
                 && this.AvailableTables.EnumerableEqual(other.AvailableTables)

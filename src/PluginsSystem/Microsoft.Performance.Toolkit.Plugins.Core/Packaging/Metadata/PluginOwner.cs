@@ -97,7 +97,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
                     HashCodeUtils.CombineHashCodeValues(result, email?.GetHashCode() ?? 0);
                 }
             }
-            
+
             return result;
         }
     }

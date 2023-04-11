@@ -95,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             return this.Owners.EnumerableEqual(other.Owners)
                 && this.ProjectInfo?.Equals(other.ProjectInfo) == true
                 && this.LicenseInfo?.Equals(other.LicenseInfo) == true
-                && string.Equals(this.CopyrightNotice, other.CopyrightNotice)
+                && string.Equals(this.CopyrightNotice, other.CopyrightNotice, StringComparison.Ordinal)
                 && this.AdditionalInformation.SequenceEqual(other.AdditionalInformation);
         }
 

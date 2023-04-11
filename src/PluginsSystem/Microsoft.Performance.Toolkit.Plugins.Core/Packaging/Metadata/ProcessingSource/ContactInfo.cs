@@ -79,7 +79,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             {
                 return false;
             }
-            
+
             if (ReferenceEquals(this, other))
             {
                 return true;
