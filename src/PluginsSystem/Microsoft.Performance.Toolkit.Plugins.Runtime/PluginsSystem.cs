@@ -100,7 +100,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             string pluginsSystemRoot = Path.GetFullPath(root);
 
-            // Initializes components for plugis discoverery
+            // Initializes components for plugins discovery
             var pluginSourceRepo = new PluginSourceRepository();
             var fetcherRepo = new PluginsSystemResourceRepository<IPluginFetcher>();
             var discovererProviderRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
@@ -111,7 +111,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 discovererProviderRepo,
                 loggerFactory);
 
-            // Initializes components for plugins installation.
+            // Initializes components for plugins installation
             var registry = new FileBackedPluginRegistry(
                 pluginsSystemRoot,
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>(),
