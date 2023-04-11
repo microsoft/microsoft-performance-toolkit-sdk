@@ -3,6 +3,8 @@
 
 using System;
 using System.Text.Json.Serialization;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -14,16 +16,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     {
         [JsonConstructor]
         public InstalledPluginInfo(
-            string id,
-            Version version,
+            PluginIdentity identity,
             Uri sourceUri,
             string displayName,
             string description,
             DateTimeOffset installedOn,
             string checksum)
         {
-            this.Id = id;
-            this.Version = version;
+            Guard.NotNull(identity, nameof(identity));
+            Guard.NotNull(sourceUri, nameof(sourceUri));
+            Guard.NotNullOrWhiteSpace(displayName, nameof(displayName));
+            Guard.NotNull(description, nameof(description));
+            Guard.NotNullOrWhiteSpace(checksum, nameof(checksum));
+
+            this.Identity = identity;
             this.SourceUri = sourceUri;
             this.DisplayName = displayName;
             this.Description = description;
@@ -34,12 +40,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <summary>
         ///     Gets the identifier of this plugin.
         /// </summary>
-        public string Id { get; }
+        public PluginIdentity Identity { get; }
+
+        /// <summary>
+        ///     Gets the identifier of this plugin.
+        /// </summary>
+        [JsonIgnore]
+        public string Id
+        {
+            get
+            {
+                return this.Identity.Id;
+            }
+        }
 
         /// <summary>
         ///     Gets the version of this plugin.
         /// </summary>
-        public Version Version { get; }
+        [JsonIgnore]
+        public Version Version
+        {
+            get
+            {
+                return this.Identity.Version;
+            }
+        }
 
         /// <summary>
         ///     Gets the source Uri of this plugin.
@@ -66,26 +91,43 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </summary>
         public string Checksum { get; }
 
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as InstalledPluginInfo);
+        }
+
         /// <inheritdoc />
         public bool Equals(InstalledPluginInfo other)
         {
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
             if (other == null)
             {
                 return false;
             }
 
-            return string.Equals(this.Id, this.Id, StringComparison.OrdinalIgnoreCase) &&
-                   Equals(this.Version, other.Version) &&
-                   Equals(this.SourceUri, other.SourceUri) &&
-                   string.Equals(this.DisplayName, other.DisplayName, StringComparison.OrdinalIgnoreCase) &&
-                   string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase) &&
-                   DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn) &&
-                   string.Equals(this.Checksum, other.Checksum);
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Identity.Equals(other.Identity)
+                && Equals(this.SourceUri, other.SourceUri)
+                && string.Equals(this.DisplayName, other.DisplayName, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase)
+                && DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn)
+                && string.Equals(this.Checksum, other.Checksum);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCodeUtils.CombineHashCodeValues(
+                this.Identity.GetHashCode(),
+                this.SourceUri.GetHashCode(),
+                this.DisplayName.GetHashCode(),
+                this.Description.GetHashCode(),
+                this.InstalledOn.GetHashCode(),
+                this.Checksum.GetHashCode());
         }
 
         /// <inheritdoc />

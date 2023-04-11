@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.Json.Serialization;
+using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
@@ -10,6 +11,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     ///     Represents the metadata of a table.
     /// </summary>
     public sealed class TableMetadata
+        : IEquatable<TableMetadata>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="TableMetadata"/> class.
@@ -51,6 +53,43 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         /// <summary>
         ///     Gets or sets a boolean indicating whether this table is a metadata table.
         /// </summary>
-        public bool IsMetadataTable{ get; }
+        public bool IsMetadataTable { get; }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as TableMetadata);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(TableMetadata other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Guid.Equals(other.Guid)
+                && string.Equals(this.Name, other.Name, StringComparison.Ordinal)
+                && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
+                && string.Equals(this.Category, other.Category, StringComparison.Ordinal)
+                && this.IsMetadataTable.Equals(other.IsMetadataTable);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return HashCodeUtils.CombineHashCodeValues(
+                this.Guid.GetHashCode(),
+                this.Name?.GetHashCode() ?? 0,
+                this.Description?.GetHashCode() ?? 0,
+                this.Category?.GetHashCode() ?? 0,
+                this.IsMetadataTable.GetHashCode());
+        }
     }
 }
