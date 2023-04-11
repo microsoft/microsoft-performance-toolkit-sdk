@@ -14,8 +14,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     public sealed class PluginMetadata
         : IEquatable<PluginMetadata>
     {
-        private readonly Lazy<PluginIdentity> identity;
-
         /// <summary>
         ///     Intializes a new instance of the <see cref="PluginMetadata"/> class with the specified parameters.
         /// </summary>
@@ -44,20 +42,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             this.DataCookers = dataCookers;
             this.ExtensibleTables = extensibleTables;
 
-            this.identity = new Lazy<PluginIdentity>(() => new PluginIdentity(id, version));
+            this.Identity = new PluginIdentity(id, version);
         }
 
         /// <summary>
         ///     Gets or sets the identity of this processing source.
         /// </summary>
         [JsonIgnore]
-        public PluginIdentity Identity
-        {
-            get
-            {
-                return this.identity.Value;
-            }
-        }
+        public PluginIdentity Identity { get; }
 
         /// <summary>
         ///     Gets or sets the identifer of this plugin.
