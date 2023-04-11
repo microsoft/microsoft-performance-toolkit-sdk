@@ -71,7 +71,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         public Guid FetcherResourceId { get; }
 
-
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
