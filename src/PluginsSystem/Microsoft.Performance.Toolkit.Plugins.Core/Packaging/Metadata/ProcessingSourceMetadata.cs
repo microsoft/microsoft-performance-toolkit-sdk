@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Microsoft.Performance.SDK;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
@@ -11,6 +12,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
     ///     Represents the metadata of a processing source.
     /// </summary>
     public sealed class ProcessingSourceMetadata
+        : IEquatable<ProcessingSourceMetadata>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSourceMetadata"/> class.
@@ -67,5 +69,62 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         ///     Gets or sets the metadata of the data sources supported by this processing source.
         /// </summary>
         public IEnumerable<DataSourceMetadata> SupportedDataSources { get; }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as ProcessingSourceMetadata);
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(ProcessingSourceMetadata other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Guid.Equals(other.Guid)
+                && string.Equals(this.Name, other.Name, StringComparison.Ordinal)
+                && this.Version?.Equals(other.Version) == true
+                && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
+                && Equals(this.AboutInfo, other.AboutInfo)
+                && this.AvailableTables.EnumerableEqual(other.AvailableTables)
+                && this.SupportedDataSources.EnumerableEqual(other.SupportedDataSources);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            int result = HashCodeUtils.CombineHashCodeValues(
+                this.Guid.GetHashCode(),
+                this.Name?.GetHashCode() ?? 0,
+                this.Version?.GetHashCode() ?? 0,
+                this.Description?.GetHashCode() ?? 0,
+                this.AboutInfo?.GetHashCode() ?? 0);
+
+            if (this.AvailableTables != null)
+            {
+                foreach (TableMetadata table in this.AvailableTables)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, table?.GetHashCode() ?? 0);
+                }
+            }
+
+            if (this.SupportedDataSources != null)
+            {
+                foreach (DataSourceMetadata dataSource in this.SupportedDataSources)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, dataSource?.GetHashCode() ?? 0);
+                }
+            }
+
+            return result;
+        }
     }
 }

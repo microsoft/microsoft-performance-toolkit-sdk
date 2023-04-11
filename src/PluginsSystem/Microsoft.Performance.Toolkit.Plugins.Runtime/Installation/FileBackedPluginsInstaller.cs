@@ -222,8 +222,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     this.logger.Info("Extraction completed.");
 
                     var pluginToInstall = new InstalledPluginInfo(
-                        pluginPackage.Id,
-                        pluginPackage.Version,
+                        pluginPackage.PluginIdentity,
                         sourceUri,
                         pluginPackage.DisplayName,
                         pluginPackage.Description,
@@ -299,31 +298,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         private async Task<InstalledPlugin> CreateInstalledPluginAsync(
-            InstalledPluginInfo installedPlugin,
+            InstalledPluginInfo installedPluginInfo,
             CancellationToken cancellationToken)
         {
-            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+            Guard.NotNull(installedPluginInfo, nameof(installedPluginInfo));
 
-            if (!await this.pluginRegistry.ExistsAsync(installedPlugin, cancellationToken))
+            if (!await this.pluginRegistry.ExistsAsync(installedPluginInfo, cancellationToken))
             {
                 throw new InvalidOperationException(
-                    $"Plugin {installedPlugin} is no longer registered in the plugin registry");
+                    $"Plugin {installedPluginInfo} is no longer registered in the plugin registry");
             }
 
-            if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin))
+            if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPluginInfo))
             {
                 throw new InstalledPluginCorruptedOrMissingException(
-                    $"Plugin {installedPlugin} is corrupted or missing.",
-                    installedPlugin);
+                    $"Plugin {installedPluginInfo} is corrupted or missing.",
+                    installedPluginInfo);
             }
 
             PluginMetadata pluginMetadata = await this.installedPluginStorage.TryGetPluginMetadataAsync(
-                new PluginIdentity(installedPlugin.Id, installedPlugin.Version),
+                installedPluginInfo.Identity,
                 cancellationToken);
 
             Debug.Assert(pluginMetadata != null);
 
-            return new InstalledPlugin(installedPlugin, pluginMetadata);
+            return new InstalledPlugin(installedPluginInfo, pluginMetadata);
         }
     }
 }

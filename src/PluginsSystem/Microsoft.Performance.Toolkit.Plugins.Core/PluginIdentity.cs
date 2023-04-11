@@ -9,7 +9,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
     /// <summary>
     ///     Represents the core identity of a plugin.
     /// </summary>
-    public class PluginIdentity
+    public sealed class PluginIdentity
         : IEquatable<PluginIdentity>
     {
         /// <summary>

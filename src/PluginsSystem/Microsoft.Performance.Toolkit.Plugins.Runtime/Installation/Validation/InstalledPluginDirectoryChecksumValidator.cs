@@ -4,7 +4,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
@@ -32,12 +31,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ValidateInstalledPluginAsync(InstalledPluginInfo installedPlugin)
+        public async Task<bool> ValidateInstalledPluginAsync(InstalledPluginInfo installedPluginInfo)
         {
-            Guard.NotNull(installedPlugin, nameof(installedPlugin));
+            Guard.NotNull(installedPluginInfo, nameof(installedPluginInfo));
 
-            string installDirectory = this.pluginsStorageDirectory.GetPluginRootDirectory(
-                new PluginIdentity(installedPlugin.Id, installedPlugin.Version));
+            string installDirectory = this.pluginsStorageDirectory.GetPluginRootDirectory(installedPluginInfo.Identity);
 
             if (!Directory.Exists(installDirectory))
             {
@@ -46,7 +44,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 
             string checksum = await this.checksumCalculator.GetDirectoryChecksumAsync(installDirectory);
 
-            return checksum.Equals(installedPlugin.Checksum);
+            return checksum.Equals(installedPluginInfo.Checksum);
         }
     }
 }
