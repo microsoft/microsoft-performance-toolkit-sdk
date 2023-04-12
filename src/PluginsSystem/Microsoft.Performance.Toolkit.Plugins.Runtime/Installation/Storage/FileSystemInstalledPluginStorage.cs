@@ -67,9 +67,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             const int bufferSize = 4096;
             const int defaultAsyncBufferSize = 81920;
 
-            string installDir = this.pluginStorageDirectory.GetPluginContentDirectory(package.PluginIdentity);
-
-            Guard.NotNullOrWhiteSpace(installDir, nameof(installDir));
+            string installDir = this.pluginStorageDirectory.GetPluginRootDirectory(package.PluginIdentity);
 
             // TODO: #257 Report progress
             try
@@ -88,7 +86,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 
                     if (entry.IsPluginContentFile)
                     {
-                        destPath = Path.GetFullPath(Path.Combine(installDir, entry.ContentRelativePath));
+                        string contentDir = this.pluginStorageDirectory.GetPluginContentDirectory(package.PluginIdentity);
+                        destPath = Path.GetFullPath(Path.Combine(contentDir, entry.ContentRelativePath));
                         isDirectory = entry.RawPath.EndsWith("/");
                     }
                     else
