@@ -175,7 +175,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins(cancellationToken);
 
-            ThrowIfAlreadyRegistered(installedPlugins, plugin);
+            ThrowIfIdExists(installedPlugins, plugin.Id);
             installedPlugins.Add(plugin);
 
             await WriteInstalledPlugins(installedPlugins, cancellationToken);
@@ -300,11 +300,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
         }
 
+        private void ThrowIfIdExists(
+            IEnumerable<InstalledPluginInfo> installedPluginInfos,
+            string pluginId)
+        {
+            int installedCount = installedPluginInfos.Count(p => p.Id.Equals(pluginId));
+            if (installedCount > 0)
+            {
+                if (installedCount > 1)
+                {
+                    LogDuplicatedRegistered(pluginId);
+                }
+
+                throw new InvalidOperationException($"Failed to add plugin {pluginId} as it is already registered.");
+            }
+        }
+        
         private void ThrowIfAlreadyRegistered(
             IEnumerable<InstalledPluginInfo> installedPluginInfos,
             InstalledPluginInfo pluginToInstall)
         {
-            int installedCount = installedPluginInfos.Count(p => p.Id.Equals(pluginToInstall.Id));
+            int installedCount = installedPluginInfos.Count(p => p.Equals(pluginToInstall));
             if (installedCount >= 1)
             {
                 if (installedCount > 1)
@@ -312,7 +328,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     LogDuplicatedRegistered(pluginToInstall.Id);
                 }
 
-                throw new InvalidOperationException($"Failed to register plugin {pluginToInstall} as it is already registered.");
+                throw new InvalidOperationException($"Failed to update plugin {pluginToInstall} as it is already registered.");
             }
         }
 
