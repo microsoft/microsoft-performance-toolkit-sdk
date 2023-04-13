@@ -3,9 +3,9 @@
 
 **Processing Source** - An entry point for a plugin. A processing source declares a human-readable name and description, defines the data sources it supports, creates the data processor that will process instances of supported data sources and advertises the tables that may be built in response to data sources being processed
 
-**Plugin Package** - A zip file with a custom extension (e.g. *.plugin*) containing the content of a plugin along with a metadata file that describes the plugin(s).  A plugin package may contain only one plugin. In other words, whatever is packaged into a plugin package by the the plugin author will be called **a** plugin in our new ecosystem. For v1, a plugin package will be self-contained in the way that it doesn�t have dependencies on any other non-plugin packages. For example, a plugin must include Newtonsoft.Json if it requires it for JSON parsing.
+**Plugin Package** - A zip file with a custom extension (e.g. *.plugin*) containing the content of a plugin along with a metadata file that describes the plugin(s).  A plugin package may contain only one plugin. In other words, whatever is packaged into a plugin package by the the plugin author will be called **a** plugin in our new ecosystem. For v1, a plugin package will be self-contained in the way that it doesn't have dependencies on any other non-plugin packages. For example, a plugin must include Newtonsoft.Json if it requires it for JSON parsing.
 
-**Plugin Metadata** - Information of a plugin. Contains the plugin�s name, version, description, owners, SDK version and information about the processing sources and data cookers it provides.
+**Plugin Metadata** - Information of a plugin. Contains the plugin's name, version, description, owners, SDK version and information about the processing sources and data cookers it provides.
 
 **Plugin Consumer** - A client software that consumes a plugin package to get access to plugins and their processing sources. E.g., wpa.exe, the Engine.
 - **Plugin Loader** - Used by the plugin consumer to load a set of plugins supplied by the plugin packages.
@@ -14,7 +14,7 @@
 
 #### Different Forms of Plugin
  - **Available Plugin**  - A plugin package discovered from a plugin source that is available for a plugin consumer to install.
- - **Installed Plugin** - A plugin that a user has opted to install. Installed plugins reside on the user�s machine and can be loaded by a plugin consumer.
+ - **Installed Plugin** - A plugin that a user has opted to install. Installed plugins reside on the user's machine and can be loaded by a plugin consumer.
   - **Loaded Plugin** - A plugin that has been previously installed from a plugin package and has been loaded by the plugin loader for trace processing within an instance of a plugin consumer being opened.
 
 **Plugin Source** - A source (e.g. a NuGet feed, a REST API, a text file) where plugins can be discovered from. The source provides information about how a plugin package can be transported to a plugin consumer.
