@@ -112,8 +112,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             return this.Identity.Equals(other.Identity)
                 && Equals(this.SourceUri, other.SourceUri)
-                && string.Equals(this.DisplayName, other.DisplayName, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(this.DisplayName, other.DisplayName, StringComparison.Ordinal)
+                && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
                 && DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn)
                 && string.Equals(this.Checksum, other.Checksum);
         }

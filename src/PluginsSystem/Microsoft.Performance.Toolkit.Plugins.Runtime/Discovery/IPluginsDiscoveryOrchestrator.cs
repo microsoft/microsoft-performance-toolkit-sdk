@@ -12,9 +12,9 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
     /// <summary>
-    ///     Contains logic for discovering plugins.
+    ///    Orchestrates the discovery of plugins from all available <see cref="PluginSource"/>s.
     /// </summary>
-    public interface IPluginsDiscoverer
+    public interface IPluginsDiscoveryOrchestrator
     {
         /// <summary>
         ///    Raised when an error occurs interacting with a paticular <see cref="PluginSource"/>.

@@ -140,7 +140,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             try
             {
                 return installedPlugins.SingleOrDefault(
-                    plugin => plugin.Id.Equals(pluginId, StringComparison.OrdinalIgnoreCase));
+                    plugin => plugin.Id.Equals(pluginId, StringComparison.Ordinal));
             }
             catch
             {
@@ -205,7 +205,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
             Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
 
-            if (!string.Equals(currentPlugin.Id, updatedPlugin.Id, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(currentPlugin.Id, updatedPlugin.Id, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(
                     $"{currentPlugin.Id} cannot be updated with a plugin with a different ID: {updatedPlugin.Id}");

@@ -22,8 +22,8 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
     /// <inheritdoc/>
-    public sealed class PluginsDiscoverer
-        : IPluginsDiscoverer
+    public sealed class PluginsDiscoveryOrchestrator
+        : IPluginsDiscoveryOrchestrator
     {
         private readonly IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo;
         private readonly IRepositoryRO<IPluginFetcher> fetcherRepo;
@@ -38,7 +38,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
 
         /// <summary>
-        ///     Creates an instance of <see cref="PluginsDiscoverer"/>.
+        ///     Creates an instance of <see cref="PluginsDiscoveryOrchestrator"/>.
         /// </summary>
         /// <param name="pluginSourceRepo">
         ///     A repository containing all available <see cref="PluginSource"/>s.
@@ -49,7 +49,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <param name="discovererProviderRepo">
         ///     A repository containing all available <see cref="IPluginDiscovererProvider"/>s.
         /// </param>
-        public PluginsDiscoverer(
+        public PluginsDiscoveryOrchestrator(
             IRepositoryRO<PluginSource> pluginSourceRepo,
             IRepositoryRO<IPluginFetcher> fetcherRepo,
             IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo)
@@ -62,7 +62,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         }
 
         /// <summary>
-        ///     Creates an instance of <see cref="PluginsDiscoverer"/> with the given logger factory.
+        ///     Creates an instance of <see cref="PluginsDiscoveryOrchestrator"/> with the given logger factory.
         /// </summary>
         /// <param name="pluginSourceRepo">
         ///     A repository containing all available <see cref="PluginSource"/>s.
@@ -76,7 +76,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <param name="loggerFactory">
         ///     A factory that creates loggers for the given type.
         /// </param>
-        public PluginsDiscoverer(
+        public PluginsDiscoveryOrchestrator(
             IRepositoryRO<PluginSource> pluginSourceRepo,
             IRepositoryRO<IPluginFetcher> fetcherRepo,
             IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo,
@@ -95,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             this.pluginSourceRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
             this.discovererProviderRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
             this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory(typeof(PluginsDiscoverer));
+            this.logger = loggerFactory(typeof(PluginsDiscoveryOrchestrator));
         }
 
         /// <inheritdoc />
