@@ -35,6 +35,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <param name="metadataSerializer">
         ///     The serializer to use to serialize and deserialize the plugin metadata.
         /// </param>
+        /// <param name="checksumCalculator">
+        ///     The checksum calculator to use to calculate the checksum of the plugin content.
+        /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory.
         /// </param>

@@ -71,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return false;
             }
 
-            return string.Equals(a.Id, b.Id, StringComparison.OrdinalIgnoreCase) &&
+            return string.Equals(a.Id, b.Id, StringComparison.Ordinal) &&
                 Version.Equals(a.Version, b.Version);
         }
 

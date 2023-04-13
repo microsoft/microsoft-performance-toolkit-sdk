@@ -51,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </param>
         public PluginsSystem(
             IPluginsInstaller installer,
-            IPluginsDiscoverer discoverer,
+            IPluginsDiscoveryOrchestrator discoverer,
             IRepository<PluginSource> pluginSourceRepository,
             IPluginsSystemResourceLoader<IPluginDiscovererProvider> pluginDiscovererProviderLoader,
             IPluginsSystemResourceLoader<IPluginFetcher> pluginFetcherLoader,
@@ -105,7 +105,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             var fetcherRepo = new PluginsSystemResourceRepository<IPluginFetcher>();
             var discovererProviderRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
 
-            var discoverer = new PluginsDiscoverer(
+            var discoverer = new PluginsDiscoveryOrchestrator(
                 pluginSourceRepo,
                 fetcherRepo,
                 discovererProviderRepo,
@@ -171,7 +171,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <summary>
         ///     Gets the discoverer.
         /// </summary>
-        public IPluginsDiscoverer Discoverer { get; }
+        public IPluginsDiscoveryOrchestrator Discoverer { get; }
 
         /// <summary>
         ///     Gets the loader of fetchers.
