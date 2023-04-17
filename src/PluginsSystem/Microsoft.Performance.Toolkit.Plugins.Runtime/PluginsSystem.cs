@@ -101,9 +101,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string pluginsSystemRoot = Path.GetFullPath(root);
 
             // Initializes components for plugins discovery
-            var pluginSourceRepo = new PluginSourceRepository();
-            var fetcherRepo = new PluginsSystemResourceRepository<IPluginFetcher>();
-            var discovererProviderRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>();
+            var pluginSourceRepo = new PluginSourceRepository(loggerFactory);
+            var fetcherRepo = new PluginsSystemResourceRepository<IPluginFetcher>(loggerFactory);
+            var discovererProviderRepo = new PluginsSystemResourceRepository<IPluginDiscovererProvider>(loggerFactory);
 
             var discoverer = new PluginsDiscoveryOrchestrator(
                 pluginSourceRepo,
