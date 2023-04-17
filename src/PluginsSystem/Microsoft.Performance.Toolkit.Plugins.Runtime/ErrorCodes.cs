@@ -8,6 +8,7 @@ using System.Reflection;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
+    // TODO: #293 This class should be moved to the SDK.
     /// <summary>
     ///     This class represents all of the error codes that can be
     ///     emitted by the plugins system runtime. This class acts as a "type-safe"

@@ -7,6 +7,7 @@ using System.Linq;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core
 {
+    // TODO:  #293 This should be moved to the SDK.
     /// <summary>
     ///     Provides extension methods for <see cref="IEnumerable{T}"/>.
     /// </summary>
