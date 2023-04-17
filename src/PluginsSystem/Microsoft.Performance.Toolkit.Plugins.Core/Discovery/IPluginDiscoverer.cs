@@ -21,10 +21,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     The <see cref="AvailablePluginInfo"/> of all discovered plugin grouped by plugin identifiers.
+        ///     The <see cref="AvailablePluginInfo"/> of all discovered plugins.
         /// </returns>
         /// TODO: 243 Add search
-        Task<IReadOnlyDictionary<string, AvailablePluginInfo>> DiscoverPluginsLatestAsync(CancellationToken cancellationToken);
+        Task<IReadOnlyCollection<AvailablePluginInfo>> DiscoverPluginsLatestAsync(CancellationToken cancellationToken);
 
         /// <summary>
         ///     Discovers all versions of the given plugin.

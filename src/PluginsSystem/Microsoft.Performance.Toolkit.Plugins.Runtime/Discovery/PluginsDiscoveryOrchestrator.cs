@@ -204,7 +204,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 return Array.Empty<AvailablePlugin>();
             }
 
-            Task<IReadOnlyDictionary<string, AvailablePluginInfo>>[] tasks = discoverers
+            Task<IReadOnlyCollection<AvailablePluginInfo>>[] tasks = discoverers
                 .Select(d => d.DiscoverPluginsLatestAsync(cancellationToken))
                 .ToArray();
 
@@ -223,10 +223,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 // Exeptions from each tasks are handled in the loop below.
             }
 
-            var results = new Dictionary<string, (AvailablePlugin, IPluginDiscoverer)>();
+            var results = new Dictionary<string, (AvailablePlugin plugin, IPluginDiscoverer)>();
             for (int i = 0; i < tasks.Length; i++)
             {
-                Task<IReadOnlyDictionary<string, AvailablePluginInfo>> t = tasks[i];
+                Task<IReadOnlyCollection<AvailablePluginInfo>> t = tasks[i];
                 IPluginDiscoverer discoverer = discoverers[i];
                 string discovererTypeStr = discoverer.GetType().Name;
 
@@ -258,7 +258,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 }
             }
 
-            AvailablePlugin[] availablePlugins = results.Values.Select(tuple => tuple.Item1).ToArray();
+            AvailablePlugin[] availablePlugins = results.Values.Select(tuple => tuple.plugin).ToArray();
             return availablePlugins.AsReadOnly();
         }
 
@@ -336,7 +336,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 // Exceptions from each tasks are handled in the loop below.
             }
 
-            var results = new Dictionary<PluginIdentity, (AvailablePlugin, IPluginDiscoverer)>();
+            var results = new Dictionary<PluginIdentity, (AvailablePlugin plugin, IPluginDiscoverer)>();
             for (int i = 0; i < tasks.Length; i++)
             {
                 Task<IReadOnlyCollection<AvailablePluginInfo>> t = tasks[i];
@@ -349,7 +349,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
                     // Combines plugins discovered from the same plugin source but by different discoverers.
                     // If more than one available plugin with the same identity are discovered, the first of them will be returned.
-                    await ProcessDiscoverAllVersionsResult(t.Result, discoverer, source, results);
+                    await ProcessDiscoverAllVersionsResult(pluginIdentity.Id, t.Result, discoverer, source, results);
                 }
                 else if (t.IsFaulted)
                 {
@@ -371,7 +371,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 }
             }
 
-            AvailablePlugin[] availablePlugins = results.Values.Select(tuple => tuple.Item1).ToArray();
+            AvailablePlugin[] availablePlugins = results.Values.Select(tuple => tuple.plugin).ToArray();
             return availablePlugins.AsReadOnly();
         }
 
@@ -485,18 +485,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         }
 
         private async Task ProcessDiscoverAllResult(
-            IReadOnlyDictionary<string, AvailablePluginInfo> discoveryResult,
+            IReadOnlyCollection<AvailablePluginInfo> discoveryResult,
             IPluginDiscoverer discoverer,
             PluginSource source,
             IDictionary<string, (AvailablePlugin, IPluginDiscoverer)> results)
         {
-            foreach (KeyValuePair<string, AvailablePluginInfo> kvp in discoveryResult)
-            {
-                string id = kvp.Key;
-                AvailablePluginInfo pluginInfo = kvp.Value;
+            // Make sure only the latest version of each plugin is used.
+            IEnumerable<AvailablePluginInfo> distinctPluginInfos = discoveryResult
+                .GroupBy(pluginInfo => pluginInfo.Identity.Id)
+                .Select(group => group.OrderByDescending(pluginInfo => pluginInfo.Identity.Version).First());
 
-                if (!results.TryGetValue(id, out (AvailablePlugin, IPluginDiscoverer) tuple) ||
-                    tuple.Item1.AvailablePluginInfo.Identity.Version < pluginInfo.Identity.Version)
+            foreach (AvailablePluginInfo pluginInfo in distinctPluginInfos)
+            {
+                string id = pluginInfo.Identity.Id;
+                if (!results.TryGetValue(id, out (AvailablePlugin plugin, IPluginDiscoverer discoverer) tuple) ||
+                    tuple.plugin.AvailablePluginInfo.Identity.Version < pluginInfo.Identity.Version)
                 {
                     IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
                     if (fetcher == null)
@@ -510,23 +513,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                     var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
                     results[id] = (newPlugin, discoverer);
                 }
-                else if (tuple.Item1.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
+                else if (tuple.plugin.AvailablePluginInfo.Identity.Equals(pluginInfo.Identity))
                 {
                     this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
-                        $"Using the first found discoverer: {tuple.Item2.GetType().Name}.");
+                        $"Using the first found discoverer: {tuple.discoverer.GetType().Name}.");
                 }
             }
         }
 
         private async Task ProcessDiscoverAllVersionsResult(
+            string pluginId,
             IReadOnlyCollection<AvailablePluginInfo> discoveryResult,
             IPluginDiscoverer discoverer,
             PluginSource source,
-            IDictionary<PluginIdentity, (AvailablePlugin, IPluginDiscoverer)> results)
+            IDictionary<PluginIdentity, (AvailablePlugin, IPluginDiscoverer discoverer)> results)
         {
-            foreach (AvailablePluginInfo pluginInfo in discoveryResult)
+            // Make sure the result contains only the specified plugin and no duplicates are included.
+            IEnumerable<AvailablePluginInfo> distinctPluginInfos = discoveryResult
+                .Where(p => p.Identity.Id.Equals(pluginId))
+                .GroupBy(pluginInfo => pluginInfo.Identity)
+                .Select(group => group.First());
+
+            foreach (AvailablePluginInfo pluginInfo in distinctPluginInfos)
             {
-                if (!results.TryGetValue(pluginInfo.Identity, out (AvailablePlugin, IPluginDiscoverer) tuple))
+                if (!results.TryGetValue(pluginInfo.Identity, out (AvailablePlugin, IPluginDiscoverer discoverer) tuple))
                 {
                     IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
                     if (fetcher == null)
@@ -543,7 +553,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 else
                 {
                     this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
-                       $"Using the first found discoverer: {tuple.Item2.GetType().Name}.");
+                       $"Using the first found discoverer: {tuple.discoverer.GetType().Name}.");
                 }
             }
         }
