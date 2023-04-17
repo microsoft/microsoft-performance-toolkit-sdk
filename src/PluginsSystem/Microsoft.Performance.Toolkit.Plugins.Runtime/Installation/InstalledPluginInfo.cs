@@ -25,8 +25,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(identity, nameof(identity));
             Guard.NotNull(sourceUri, nameof(sourceUri));
-            Guard.NotNullOrWhiteSpace(displayName, nameof(displayName));
-            Guard.NotNull(description, nameof(description));
             Guard.NotNullOrWhiteSpace(checksum, nameof(checksum));
 
             this.Identity = identity;

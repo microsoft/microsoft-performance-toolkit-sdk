@@ -72,7 +72,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             try
             {
                 // Check that the plugin content folder exists
-                bool hasContentFolder = zip.Entries.Any(e => e.FullName.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase));
+                bool hasContentFolder = zip.Entries.Any(
+                    e => e.FullName.Replace('\\', '/').StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase));
+                
                 if (!hasContentFolder)
                 {
                     this.logger.Error($"Plugin content folder {PackageConstants.PluginContentFolderName} not found in the plugin package.");
@@ -93,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 {
                     using (Stream metadataStream = metadataEntry.Open())
                     {
-                        metadata = await this.metadataSerializer.DeserializeAsync(stream, cancellationToken);
+                        metadata = await this.metadataSerializer.DeserializeAsync(metadataStream, cancellationToken);
                     }
                 }
                 catch (JsonException e)
