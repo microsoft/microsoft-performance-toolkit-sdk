@@ -43,7 +43,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         /// <summary>
-        ///     Gets the <see cref="Info"/> associated with this plugin.
+        ///     Gets the <see cref="AvailablePluginInfo"/> associated with this plugin.
         /// </summary>
         public AvailablePluginInfo Info { get; }
 
@@ -62,7 +62,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         }
 
         /// <summary>
-        ///     Gets stream to this plugin that can be installed via IPluginsInstaller.Install()
+        ///     Gets stream to this plugin that can be installed via 
+        ///     <see cref="Installation.IPluginsInstaller.InstallPluginAsync(Stream, Uri, CancellationToken, IProgress{int})"/>.
         /// </summary>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
