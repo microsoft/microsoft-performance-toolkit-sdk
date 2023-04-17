@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Creates an instance of <see cref="AvailablePlugin"/>
         /// </summary>
         /// <param name="pluginInfo">
-        ///     The <see cref="AvailablePluginInfo"/> object cotaining information about this plugin.
+        ///     The <see cref="Info"/> object cotaining information about this plugin.
         /// </param>
         /// <param name="discoverer">
         ///     The <see cref="IPluginDiscoverer"/> this plugin is discovered by.
@@ -37,15 +37,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IPluginDiscoverer discoverer,
             IPluginFetcher fetcher)
         {
-            this.AvailablePluginInfo = pluginInfo;
+            this.Info = pluginInfo;
             this.pluginDiscoverer = discoverer;
             this.pluginFetcher = fetcher;
         }
 
         /// <summary>
-        ///     Gets the <see cref="AvailablePluginInfo"/> associated with this plugin.
+        ///     Gets the <see cref="Info"/> associated with this plugin.
         /// </summary>
-        public AvailablePluginInfo AvailablePluginInfo { get; }
+        public AvailablePluginInfo Info { get; }
 
         /// <summary>
         ///     Gets the metadata of this plugin.
@@ -58,7 +58,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// </returns>
         public Task<PluginMetadata> GetPluginMetadata(CancellationToken cancellationToken)
         {
-            return this.pluginDiscoverer.GetPluginMetadataAsync(this.AvailablePluginInfo.Identity, cancellationToken);
+            return this.pluginDiscoverer.GetPluginMetadataAsync(this.Info.Identity, cancellationToken);
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public Task<Stream> GetPluginPackageStream(CancellationToken cancellationToken, IProgress<int> progress)
         {
             return this.pluginFetcher.GetPluginStreamAsync(
-                this.AvailablePluginInfo,
+                this.Info,
                 cancellationToken,
                 progress);
         }

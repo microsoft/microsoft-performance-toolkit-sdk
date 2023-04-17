@@ -285,13 +285,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
-                if (!await this.pluginRegistry.ExistsAsync(installedPlugin.PluginInfo, cancellationToken))
+                if (!await this.pluginRegistry.ExistsAsync(installedPlugin.Info, cancellationToken))
                 {
-                    this.logger.Warn($"Unable to uninstall plugin {installedPlugin.PluginInfo} because it is not currently registered.");
+                    this.logger.Warn($"Unable to uninstall plugin {installedPlugin.Info} because it is not currently registered.");
                     return false;
                 }
 
-                await this.pluginRegistry.DeleteAsync(installedPlugin.PluginInfo, cancellationToken);
+                await this.pluginRegistry.DeleteAsync(installedPlugin.Info, cancellationToken);
                 return true;
             }
         }

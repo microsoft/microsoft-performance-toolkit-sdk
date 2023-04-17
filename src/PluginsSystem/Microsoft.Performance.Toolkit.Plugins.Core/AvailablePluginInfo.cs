@@ -33,10 +33,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             Guard.NotNull(pluginPackageUri, nameof(pluginPackageUri));
 
             this.Identity = Identity;
-            this.PluginSource = pluginSource;
+            this.Source = pluginSource;
             this.DisplayName = displayName;
             this.Description = description;
-            this.PluginPackageUri = pluginPackageUri;
+            this.PackageUri = pluginPackageUri;
             this.FetcherResourceId = fetcherResourceId;
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <summary>
         ///     Gets the souce where this plugin is discovered.
         /// </summary>
-        public PluginSource PluginSource { get; }
+        public PluginSource Source { get; }
 
         /// <summary>
         ///     Gets the human-readable name of this plugin.
@@ -63,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <summary>
         ///     Gets the URI where the plugin package can be fetched.
         /// </summary>
-        public Uri PluginPackageUri { get; }
+        public Uri PackageUri { get; }
 
         /// <summary>
         ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resouce
@@ -91,10 +91,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             }
 
             return this.Identity.Equals(other.Identity)
-                && this.PluginSource.Equals(other.PluginSource)
+                && this.Source.Equals(other.Source)
                 && this.DisplayName.Equals(other.DisplayName, StringComparison.Ordinal)
                 && this.Description.Equals(other.Description, StringComparison.Ordinal)
-                && this.PluginPackageUri.Equals(other.PluginPackageUri)
+                && this.PackageUri.Equals(other.PackageUri)
                 && this.FetcherResourceId.Equals(other.FetcherResourceId);
         }
 
@@ -103,10 +103,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         {
             return HashCodeUtils.CombineHashCodeValues(
                 this.Identity.GetHashCode(),
-                this.PluginSource.GetHashCode(),
+                this.Source.GetHashCode(),
                 this.DisplayName.GetHashCode(),
                 this.Description.GetHashCode(),
-                this.PluginPackageUri.GetHashCode(),
+                this.PackageUri.GetHashCode(),
                 this.FetcherResourceId.GetHashCode());
         }
     }

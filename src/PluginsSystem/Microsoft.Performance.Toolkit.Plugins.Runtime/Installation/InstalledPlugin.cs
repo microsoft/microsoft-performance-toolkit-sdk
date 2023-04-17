@@ -23,18 +23,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             InstalledPluginInfo installedPluginInfo,
             PluginMetadata pluginMetadata)
         {
-            this.PluginInfo = installedPluginInfo;
-            this.PluginMetadata = pluginMetadata;
+            this.Info = installedPluginInfo;
+            this.Metadata = pluginMetadata;
         }
 
         /// <summary>
         ///     Gets the information of the installed plugin.
         /// </summary>
-        public InstalledPluginInfo PluginInfo { get; }
+        public InstalledPluginInfo Info { get; }
 
         /// <summary>
         ///     Gets the metadata of the installed plugin.
         /// </summary>
-        public PluginMetadata PluginMetadata { get; }
+        public PluginMetadata Metadata { get; }
     }
 }

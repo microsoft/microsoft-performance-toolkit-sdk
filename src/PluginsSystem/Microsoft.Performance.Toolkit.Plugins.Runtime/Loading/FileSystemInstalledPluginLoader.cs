@@ -60,10 +60,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            PluginIdentity pluginIdentity = installedPlugin.PluginInfo.Identity;
+            PluginIdentity pluginIdentity = installedPlugin.Info.Identity;
             string pluginDirectory = this.pluginsStorageDirectory.GetPluginContentDirectory(pluginIdentity);
 
-            if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin.PluginInfo))
+            if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin.Info))
             {
                 this.logger.Error($"Plugin {pluginIdentity} is not valid. It will not be loaded.");
                 return false;
