@@ -86,7 +86,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{this.Id} - {this.Version}";
+            return $"{this.Id}-{this.Version}";
         }
     }
 }
