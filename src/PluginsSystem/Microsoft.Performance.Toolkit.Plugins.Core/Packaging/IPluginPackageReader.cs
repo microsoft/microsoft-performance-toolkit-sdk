@@ -5,7 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
 {
     /// <summary>
     ///     Represents a reader that can read a <see cref="PluginPackage"/> from a stream.

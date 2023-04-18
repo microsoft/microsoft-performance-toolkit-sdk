@@ -5,10 +5,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
 {
     /// <summary>
     ///     Represents a read-only plugin package.

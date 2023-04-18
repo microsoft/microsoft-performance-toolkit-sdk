@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
 {
     /// <summary>
     ///     Represents an entry in a plugin package.

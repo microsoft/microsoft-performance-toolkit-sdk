@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
 {

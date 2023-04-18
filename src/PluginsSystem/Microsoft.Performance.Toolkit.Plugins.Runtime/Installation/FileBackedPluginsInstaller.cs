@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {

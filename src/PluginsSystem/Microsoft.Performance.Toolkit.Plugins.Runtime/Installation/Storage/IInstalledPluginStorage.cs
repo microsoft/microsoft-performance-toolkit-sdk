@@ -5,8 +5,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
