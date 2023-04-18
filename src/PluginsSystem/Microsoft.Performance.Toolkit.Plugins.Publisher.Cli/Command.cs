@@ -196,7 +196,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 
         public string GetUsage()
         {
-            var s = new StringBuilder("pluginTool ");
+            var s = new StringBuilder("plugintool ");
 
             s.Append(this.DisplayName);
 
