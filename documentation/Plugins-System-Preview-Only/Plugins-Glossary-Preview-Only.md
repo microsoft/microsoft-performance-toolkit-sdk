@@ -3,7 +3,7 @@
 
 **Processing Source** - An entry point for a plugin. A processing source declares a human-readable name and description, defines the data sources it supports, creates the data processor that will process instances of supported data sources and advertises the tables that may be built in response to data sources being processed
 
-**Plugin Package** - A zip file with a custom extension (e.g. *.plugin*) containing the content of a plugin along with a metadata file that describes the plugin.  A plugin package may contain only one plugin. In other words, whatever is packaged into a plugin package by the the plugin author will be called **a** plugin in our new ecosystem. For v1, a plugin package will be self-contained in the way that it doesn't have dependencies on any other non-plugin packages. For example, a plugin must include Newtonsoft.Json if it requires it for JSON parsing.
+**Plugin Package** - A zip file with a custom extension (e.g. *.plugin*) containing the content of a plugin along with a metadata file that describes the plugin.  A plugin package may contain exactly one plugin. In other words, whatever is packaged into a plugin package by the the plugin author will be called **a** plugin in our new ecosystem. For v1, a plugin package will be self-contained in the way that it doesn't have dependencies on any other non-plugin packages. For example, a plugin must include Newtonsoft.Json if it requires it for JSON parsing.
 
 **Plugin Metadata** - Information of a plugin. Contains the plugin's name, version, description, owners, SDK version and information about the processing sources and data cookers it provides.
 

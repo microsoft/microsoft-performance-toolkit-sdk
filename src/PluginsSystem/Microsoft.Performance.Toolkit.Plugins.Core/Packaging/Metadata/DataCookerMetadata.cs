@@ -14,7 +14,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         : IEquatable<DataCookerMetadata>
     {
         /// <summary>
-        ///     Initializes an instance of <see cref="DataCookerMetadata".s
+        ///     Initializes an instance of <see cref="DataCookerMetadata".
         /// </summary>
         [JsonConstructor]
         public DataCookerMetadata(
