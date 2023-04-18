@@ -12,7 +12,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
         {
             get
             {
-                return new(typeof(Pack), typeof(GenerateMetadata));
+                return new(typeof(Pack), typeof(GenerateMetadata), typeof(Push));
             }
         }
 

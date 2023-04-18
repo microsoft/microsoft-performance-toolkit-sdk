@@ -1,7 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -199,7 +196,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 
         public string GetUsage()
         {
-            var s = new StringBuilder("pluginCli ");
+            var s = new StringBuilder("pluginTool ");
 
             s.Append(this.DisplayName);
 

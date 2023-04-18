@@ -2,17 +2,15 @@
 // Licensed under the MIT License.
 
 using System.ComponentModel;
-using Microsoft.Performance.Toolkit.PluginManager.Cli;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using SystemVersion = System.Version;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 {
-    [DisplayName("generateMetadata")]
-    [Description("Generates metadata for a plugin.")]
-    internal class GenerateMetadata
+    [DisplayName("pack")]
+    [Description("Creates a new .ptpck package using specified metadata and source directory.")]
+    internal sealed class Pack
         : Command
     {
         [DisplayName("source")]
@@ -22,10 +20,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
         public string? SourceDirectory { get; set; }
 
         [DisplayName("target")]
-        [Description("Directory where the metadata file will be created. If not specified, the current directory will be used.")]
+        [Description("Directory where the .ptpck file will be created. If not specified, the current directory will be used.")]
         [ExtraArgument]
         [ExpandPath]
         public string? TargetDirectory { get; set; }
+
+        [DisplayName("metadata")]
+        [Description("Path to the pluginspec.json file. If not specified, the metadata will be generated from the binaries in the source directory.")]
+        [ExtraArgument]
+        [ExpandPath]
+        public string? MetadataPath { get; set; }
 
         [DisplayName("id")]
         [Description("Id of the packed plugin.")]
@@ -58,6 +62,37 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             PluginMetadata? metadata = null;
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
 
+            if (!string.IsNullOrEmpty(this.MetadataPath))
+            {
+                if (!File.Exists(this.MetadataPath))
+                {
+                    Console.Error.WriteLine($"The metadata file '{this.MetadataPath}' does not exist.");
+                    return 1;
+                }
+
+                try
+                {
+                    string path = Path.GetFullPath(this.MetadataPath);
+                    using (FileStream stream = File.OpenRead(path))
+                    {
+                        metadata = serializer.Deserialize(stream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Failed to read metadata file '{this.MetadataPath}': {ex.Message}");
+                    return 1;
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(this.Id) || string.IsNullOrEmpty(this.Version))
+                {
+                    Console.Error.WriteLine("When no metadata file is specified, both id and version must be specified.");
+                    return 1;
+                }
+            }
+
             PluginMetadataInit metadataInit = metadata == null ? new PluginMetadataInit() : PluginMetadataInit.FromPluginMetadata(metadata);
 
             // Override metadata with command line arguments if specified
@@ -73,7 +108,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
                     Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
                     return 1;
                 }
-
+                
                 metadataInit.Version = version;
             }
 
@@ -94,18 +129,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             }
 
             metadata = metadataInit.ToPluginMetadata();
+            string relativePackageFileName = $"{metadata.Identity}.ptpck";
+            string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
 
+            string tmpPath = Path.GetTempFileName();
+            using (var builder = new PluginPackageBuilder(tmpPath, serializer))
+            {
+                builder.AddMetadata(metadata);
+                builder.AddContent(this.SourceDirectory, cancellationToken);
+            }
 
-            var fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
-            string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, fileName);
-            
             string? targetDirectory = Path.GetDirectoryName(targetFileName);
             Directory.CreateDirectory(targetDirectory);
+            
+            File.Delete(targetFileName);
+            File.Move(tmpPath, targetFileName);
 
-            using (var fileStream = File.Open(targetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                await serializer.SerializeAsync(fileStream, metadata, cancellationToken);
-            }
+            Console.WriteLine($"{metadata.Identity} packed to {targetFileName}");
 
             return 0;
         }
