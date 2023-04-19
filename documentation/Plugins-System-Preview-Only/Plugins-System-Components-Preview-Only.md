@@ -75,7 +75,7 @@ var plugins_allVersions = await ps.Discoverer.GetAllVersionsOfPluginAsync(
     plugins_latest.First().Info.Identity, CancellationToken.None);
 ```
 
-### Install and Uninstall Plugins
+#### Install and Uninstall Plugins
 1. Install a discovered plugin
 ```CSharp
 await ps.InstallAvailablePlugin(
@@ -99,12 +99,10 @@ var installedPlugin = await ps.Installer.InstallPluginAsync(
 ```CSharp
 await ps.Installer.UninstallPluginAsync(
     installedPlugin,
-    CancellationToken.None
-)
+    CancellationToken.None)
 ```
 4. List all installed plugins
 ```CSharp
 var allInstalledPlugins = await ps.Installer.GetAllInstalledPluginsAsync(
-    CancellationToken.None
-)
+    CancellationToken.None)
 ```
