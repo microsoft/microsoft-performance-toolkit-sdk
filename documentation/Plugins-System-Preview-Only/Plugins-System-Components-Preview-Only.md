@@ -18,7 +18,7 @@ The Plugin System consists of the following components:
     The `IPluginsSystemResourceLoader<T>` interface is responsible for loading resources required by the plugin system, such as assemblies, configuration files, or other resources, from different sources. The T type parameter represents the type of resources to be loaded, such as `IPluginDiscovererProvider` or `IPluginFetcher`.
     
     - **IPluginDiscovererProvider** represents a plugin system resource that creates `IPluginDiscoverer` for supported plugin sources.
-        - **IPluginDiscover** represents a component that discovers available plugins from a *single* plugin source.
+        - **IPluginDiscoverer** represents a component that discovers available plugins from a *single* plugin source.
 
     - **IPluginFetcher** represents a plugin system resource that is capable of fetching the plugin package from a discovered plugin. 
     
