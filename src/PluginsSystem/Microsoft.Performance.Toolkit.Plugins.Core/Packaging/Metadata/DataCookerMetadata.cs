@@ -20,11 +20,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         public DataCookerMetadata(
             string name,
             string description,
-            Guid processingSourceGuid)
+            string sourceParserId)
         {
             this.Name = name;
             this.Description = description;
-            this.ProcessingSourceGuid = processingSourceGuid;
+            this.SourceParserId = sourceParserId;
         }
 
         /// <summary>
@@ -38,9 +38,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         public string Description { get; }
 
         /// <summary>
-        ///     Gets the Guid of the processing source this data cooker roots from.
+        ///     Gets the ID of the source parser this data cooker is associated with.
         /// </summary>
-        public Guid ProcessingSourceGuid { get; }
+        public string SourceParserId { get; }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
@@ -63,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 
             return string.Equals(this.Name, other.Name, StringComparison.Ordinal)
                 && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
-                && this.ProcessingSourceGuid == other.ProcessingSourceGuid;
+                && string.Equals(this.SourceParserId, other.SourceParserId, StringComparison.Ordinal);
         }
 
         /// <inheritdoc />
@@ -72,7 +72,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             return HashCodeUtils.CombineHashCodeValues(
                 this.Name?.GetHashCode() ?? 0,
                 this.Description?.GetHashCode() ?? 0,
-                this.ProcessingSourceGuid.GetHashCode());
+                this.SourceParserId.GetHashCode());
         }
     }
 }
