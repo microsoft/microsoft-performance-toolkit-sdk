@@ -73,7 +73,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(PluginsSystemResourceRepository<T>));
-            SetResourcesLoggers(resources);
+            SetResourcesLoggers(resources.ToArray());
             this.resources = new HashSet<PluginsSystemResourceReference>(resources.Select(r => new PluginsSystemResourceReference(r)));
         }
 
@@ -122,9 +122,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
             lock (this.mutex)
             {
-                IEnumerable<PluginsSystemResourceReference> newResources = items
+                PluginsSystemResourceReference[] newResources = items
                     .Select(r => new PluginsSystemResourceReference(r))
-                    .Where(r => this.resources.Add(r));
+                    .Where(r => this.resources.Add(r))
+                    .ToArray();
 
                 NewResourcesAddedCommon(newResources);
             }
@@ -137,9 +138,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
 
             lock (this.mutex)
             {
-                IEnumerable<PluginsSystemResourceReference> newResources = loadedResources
+                PluginsSystemResourceReference[] newResources = loadedResources
                     .Where(r => r.Instance is T)
-                    .Where(r => this.resources.Add(r));
+                    .Where(r => this.resources.Add(r))
+                    .ToArray();
 
                 NewResourcesAddedCommon(newResources);
             }
@@ -148,18 +150,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility
         /// <inheritdoc/>
         public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-        private void NewResourcesAddedCommon(IEnumerable<PluginsSystemResourceReference> newResources)
+        private void NewResourcesAddedCommon(PluginsSystemResourceReference[] newResources)
         {
             if (newResources.Any())
             {
-                SetResourcesLoggers(newResources.Select(r => r.Instance).OfType<T>());
+                SetResourcesLoggers(newResources.Select(r => r.Instance).OfType<T>().ToArray());
                 CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(
                     NotifyCollectionChangedAction.Add,
                     newResources));
             };
         }
 
-        private void SetResourcesLoggers(IEnumerable<T> pluginsSystemResources)
+        private void SetResourcesLoggers(T[] pluginsSystemResources)
         {
             foreach (T resource in pluginsSystemResources)
             {
