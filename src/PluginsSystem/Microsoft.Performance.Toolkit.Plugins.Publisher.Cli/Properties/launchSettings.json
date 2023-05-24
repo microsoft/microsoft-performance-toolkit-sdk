@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Microsoft.Performance.Toolkit.Plugins.Publisher.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "push --source=\"\""
+    }
+  }
+}
