@@ -19,24 +19,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         [JsonConstructor]
         public AvailablePluginInfo(
-            PluginIdentity Identity,
-            PluginSource pluginSource,
+            PluginIdentity identity,
+            PluginSource source,
             string displayName,
             string description,
-            Uri pluginPackageUri,
+            Uri packageUri,
             Guid fetcherResourceId)
         {
-            Guard.NotNull(Identity, nameof(Identity));
-            Guard.NotNull(pluginSource, nameof(pluginSource));
+            Guard.NotNull(identity, nameof(identity));
+            Guard.NotNull(source, nameof(source));
             Guard.NotNullOrWhiteSpace(displayName, nameof(displayName));
             Guard.NotNull(description, nameof(description));
-            Guard.NotNull(pluginPackageUri, nameof(pluginPackageUri));
+            Guard.NotNull(packageUri, nameof(packageUri));
 
-            this.Identity = Identity;
-            this.Source = pluginSource;
+            this.Identity = identity;
+            this.Source = source;
             this.DisplayName = displayName;
             this.Description = description;
-            this.PackageUri = pluginPackageUri;
+            this.PackageUri = packageUri;
             this.FetcherResourceId = fetcherResourceId;
         }
 
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
         /// <summary>
         ///     Gets the user friendly description of this plugin.
-        /// </summary>   
+        /// </summary>
         public string Description { get; }
 
         /// <summary>
