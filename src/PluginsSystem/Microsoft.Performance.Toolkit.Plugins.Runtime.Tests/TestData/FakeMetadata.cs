@@ -12,7 +12,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public static PluginMetadata GetFakePluginMetadataWithOnlyIdentity()
         {
             return new PluginMetadata(
-                "fake_id", new Version("1.0.0"), null, null, null, null, null, null, null);
+                "fake_id", new Version("1.0.0"), 0, null, null, null, null, null, null, null);
         }
     }
 }
