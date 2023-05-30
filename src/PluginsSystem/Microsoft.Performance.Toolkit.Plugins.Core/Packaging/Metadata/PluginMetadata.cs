@@ -21,7 +21,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         public PluginMetadata(
             string id,
             Version version,
-            ulong size,
+            ulong installedSize,
             string displayName,
             string description,
             IEnumerable<PluginOwner> owners,
@@ -35,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 
             this.Id = id;
             this.Version = version;
-            this.Size = size;
+            this.InstalledSize = installedSize;
             this.DisplayName = displayName;
             this.Description = description;
             this.Owners = owners;
@@ -64,9 +64,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         public Version Version { get; }
 
         /// <summary>
-        ///     Gets the number of bytes that constitute this plugin.
+        ///     Gets the size, in number of bytes, of this plugin once it has been installed.
         /// </summary>
-        public ulong Size { get; }
+        public ulong InstalledSize { get; }
 
         /// <summary>
         ///     Gets the human-readable name of this plugin.
@@ -124,7 +124,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 
             return string.Equals(this.Id, other.Id, StringComparison.Ordinal)
                 && this.Version.Equals(other.Version)
-                && this.Size.Equals(other.Size)
+                && this.InstalledSize.Equals(other.InstalledSize)
                 && string.Equals(this.DisplayName, other.DisplayName, StringComparison.Ordinal)
                 && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
                 && this.Owners.EnumerableEqual(other.Owners)
@@ -140,7 +140,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             int result = HashCodeUtils.CombineHashCodeValues(
                 this.Id?.GetHashCode() ?? 0,
                 this.Version?.GetHashCode() ?? 0,
-                this.Size.GetHashCode(),
+                this.InstalledSize.GetHashCode(),
                 this.DisplayName?.GetHashCode() ?? 0,
                 this.Description?.GetHashCode() ?? 0,
                 this.SdkVersion?.GetHashCode() ?? 0);

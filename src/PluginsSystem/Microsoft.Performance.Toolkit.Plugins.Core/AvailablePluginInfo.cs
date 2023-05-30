@@ -21,7 +21,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public AvailablePluginInfo(
             PluginIdentity identity,
             PluginSource source,
-            ulong size,
+            ulong packageSize,
+            ulong installedSize,
             string displayName,
             string description,
             Uri packageUri,
@@ -35,7 +36,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
             this.Identity = identity;
             this.Source = source;
-            this.Size = size;
+            this.PackageSize = packageSize;
+            this.InstalledSize = installedSize;
             this.DisplayName = displayName;
             this.Description = description;
             this.PackageUri = packageUri;
@@ -53,9 +55,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public PluginSource Source { get; }
 
         /// <summary>
-        ///     Gets the number of bytes that constitute this plugin.
+        ///     Gets the size, in number of bytes, of the package that makes up this plugin.
         /// </summary>
-        public ulong Size { get; }
+        public ulong PackageSize { get; }
+
+        /// <summary>
+        ///     Gets the size, in number of bytes, of this plugin once it has been installed.
+        /// </summary>
+        public ulong InstalledSize { get; }
 
         /// <summary>
         ///     Gets the human-readable name of this plugin.
@@ -99,7 +106,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
             return this.Identity.Equals(other.Identity)
                 && this.Source.Equals(other.Source)
-                && this.Size.Equals(other.Size)
+                && this.PackageSize.Equals(other.PackageSize)
+                && this.InstalledSize.Equals(other.InstalledSize)
                 && this.DisplayName.Equals(other.DisplayName, StringComparison.Ordinal)
                 && this.Description.Equals(other.Description, StringComparison.Ordinal)
                 && this.PackageUri.Equals(other.PackageUri)
@@ -112,6 +120,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             return HashCodeUtils.CombineHashCodeValues(
                 this.Identity.GetHashCode(),
                 this.Source.GetHashCode(),
+                this.PackageSize.GetHashCode(),
+                this.InstalledSize.GetHashCode(),
                 this.DisplayName.GetHashCode(),
                 this.Description.GetHashCode(),
                 this.PackageUri.GetHashCode(),
