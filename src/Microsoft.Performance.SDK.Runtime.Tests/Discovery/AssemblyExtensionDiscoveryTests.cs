@@ -127,34 +127,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
         [TestMethod]
         [UnitTest]
-        public void ProcessAssemblies_NullDirectoryPath2()
-        {
-            Assert.ThrowsException<ArgumentNullException>(
-                () => this.Discovery.ProcessAssemblies(
-                    (string)null,
-                    false,
-                    null,
-                    null,
-                    false,
-                    out _));
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void ProcessAssemblies_EmptyDirectoryPath()
-        {
-            Assert.ThrowsException<ArgumentException>(
-                () => this.Discovery.ProcessAssemblies(
-                    string.Empty,
-                    false,
-                    null,
-                    null,
-                    false,
-                    out _));
-        }
-
-        [TestMethod]
-        [UnitTest]
         public void ProcessAssemblies_NoObservers()
         {
             this.FindFiles.enumerateFiles = (directory, searchPattern, searchOptions) =>
@@ -167,80 +139,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             var testAssemblyDirectory = Path.GetDirectoryName(testAssembly.GetCodeBaseAsLocalPath());
 
             this.Discovery.ProcessAssemblies(testAssemblyDirectory, out _);
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void ProcessAssemblies_SpecificSearchPattern()
-        {
-            var searchPatterns = new[] { "*.elephant", "*.bananas" };
-            var patternsSearched = new List<string>(searchPatterns.Length);
-
-            this.FindFiles.enumerateFiles = (directory, searchPattern, searchOptions) =>
-            {
-                Assert.IsTrue(
-                    searchPattern == searchPatterns[0] || searchPattern == searchPatterns[1]);
-                patternsSearched.Add(searchPattern);
-                return new List<string>();
-            };
-
-            this.Observers.Add(new TestExtensionObserver());
-
-            RegisterObservers();
-
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, false, out _);
-
-            Assert.AreEqual(searchPatterns.Length, patternsSearched.Count);
-            foreach (var pattern in searchPatterns)
-            {
-                Assert.IsTrue(patternsSearched.Contains(pattern));
-            }
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void ProcessAssemblies_SpecifyExclusions()
-        {
-            var exclusions = new[] { "Blawp.dll", };
-
-            this.FindFiles.enumerateFiles =
-                (directory, searchPattern, searchOptions) => new List<string>() { exclusions[0].ToLower(), };
-
-            this.Observers.Add(new TestExtensionObserver());
-
-            RegisterObservers();
-            this.Loader.LoadAssemblyFunc =
-                s =>
-                {
-                    Assert.Fail("LoadAssembly should not be called, the file should be excluded.");
-                    return null;
-                };
-
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, false, out _);
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void ProcessAssemblies_SpecifyCaseSensitiveExclusions()
-        {
-            var exclusions = new[] { "Blawp.dll", };
-
-            this.FindFiles.enumerateFiles =
-                (directory, searchPattern, searchOptions) => new List<string>() { exclusions[0].ToLower(), };
-
-            this.Observers.Add(new TestExtensionObserver());
-            RegisterObservers();
-
-            bool assemblyLoaded = false;
-            this.Loader.LoadAssemblyFunc = s =>
-            {
-                assemblyLoaded = true;
-                return this.GetType().Assembly;
-            };
-
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true, out _);
-
-            Assert.IsTrue(assemblyLoaded);
         }
 
         [TestMethod]

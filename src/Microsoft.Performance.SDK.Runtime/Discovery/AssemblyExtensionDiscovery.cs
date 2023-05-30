@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
 
@@ -139,86 +138,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </returns>
         public bool ProcessAssemblies(IEnumerable<string> directoryPaths, out ErrorInfo error)
         {
-            return this.ProcessAssemblies(directoryPaths, true, null, null, false, out error);
-        }
-
-        /// <summary>
-        ///     This method scans the given directory for modules to search for extensibility types. All types found will
-        ///     be passed along to any observers.
-        /// </summary>
-        /// <param name="directoryPath">
-        ///     Directory to process.
-        /// </param>
-        /// <param name="includeSubdirectories">
-        ///     Indicates whether subdirectories will be searched.
-        /// </param>
-        /// <param name="searchPatterns">
-        ///     The search patterns to use. If null or empty, defaults to "*.dll" and "*.exe".
-        /// </param>
-        /// <param name="exclusionFileNames">
-        ///     A set of files names to exclude from the search. May be null.
-        /// </param>
-        /// <param name="exclusionsAreCaseSensitive">
-        ///     Indicates whether files names should be treated as case sensitive.
-        /// </param>
-        /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter receives
-        ///     information about the error(s) that occurred.
-        /// </param>
-        /// <returns>
-        ///     Whether or not all assemblies in the given directory were processed successfully.
-        /// </returns>
-        public bool ProcessAssemblies(
-            string directoryPath,
-            bool includeSubdirectories,
-            IEnumerable<string> searchPatterns,
-            IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive,
-            out ErrorInfo error)
-        {
-            return this.ProcessAssemblies(
-                new[] { directoryPath, },
-                includeSubdirectories,
-                searchPatterns,
-                exclusionFileNames,
-                exclusionsAreCaseSensitive,
-                out error);
-        }
-
-        /// <summary>
-        ///     This method scans the given directory for modules to search for extensibility types. All types found will
-        ///     be passed along to any observers.
-        /// </summary>        
-        /// <param name="directoryPaths">
-        ///     Directories to process.
-        /// </param>
-        /// <param name="includeSubdirectories">
-        ///     Indicates whether subdirectories will be searched.
-        /// </param>
-        /// <param name="searchPatterns">
-        ///     The search patterns to use. If null or empty, defaults to "*.dll" and "*.exe".
-        /// </param>
-        /// <param name="exclusionFileNames">
-        ///     A set of files names to exclude from the search. May be null.
-        /// </param>
-        /// <param name="exclusionsAreCaseSensitive">
-        ///     Indicates whether files names should be treated as case sensitive.
-        /// </param>
-        /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter receives
-        ///     information about the error(s) that occurred.
-        /// </param>
-        /// <returns>
-        ///     Whether or not all assemblies in the given directories were processed successfully.
-        /// </returns>
-        public bool ProcessAssemblies(
-            IEnumerable<string> directoryPaths,
-            bool includeSubdirectories,
-            IEnumerable<string> searchPatterns,
-            IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive,
-            out ErrorInfo error)
-        {
             Guard.NotNull(directoryPaths, nameof(directoryPaths));
             directoryPaths.ForEach(x => Guard.NotNullOrWhiteSpace(x, nameof(directoryPaths)));
 
@@ -226,16 +145,9 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             var watch = Stopwatch.StartNew();
 
-            if (searchPatterns == null || !searchPatterns.Any())
-            {
-                searchPatterns = new[] { "*.dll", "*.exe" };
-            }
-
-            var exclusionSet = exclusionFileNames != null
-                ? new HashSet<string>(exclusionFileNames, exclusionsAreCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase)
-                : new HashSet<string>();
-
-            var searchOption = includeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+            var searchPatterns = new[] { "*.dll", "*.exe" };
+            var exclusionSet = new HashSet<string>(StringComparer.CurrentCulture);
+            var searchOption = SearchOption.AllDirectories;
 
             var loaded = new List<Assembly>();
 
@@ -341,10 +253,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 Debug.Assert(!allLoaded);
                 error = new DiscoveryError(
                             directoryPaths,
-                            includeSubdirectories,
+                            true,
                             searchPatterns,
-                            exclusionFileNames,
-                            exclusionsAreCaseSensitive)
+                            null,
+                            true)
                 {
                     Target = string.Empty,
                     Details = directoryErrors.ToArray(),
