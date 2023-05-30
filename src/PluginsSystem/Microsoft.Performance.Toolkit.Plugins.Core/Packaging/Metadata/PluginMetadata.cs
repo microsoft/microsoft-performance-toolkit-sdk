@@ -15,12 +15,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         : IEquatable<PluginMetadata>
     {
         /// <summary>
-        ///     Intializes a new instance of the <see cref="PluginMetadata"/> class with the specified parameters.
+        ///     Initializes a new instance of the <see cref="PluginMetadata"/> class with the specified parameters.
         /// </summary>
         [JsonConstructor]
         public PluginMetadata(
             string id,
             Version version,
+            ulong size,
             string displayName,
             string description,
             IEnumerable<PluginOwner> owners,
@@ -34,6 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 
             this.Id = id;
             this.Version = version;
+            this.Size = size;
             this.DisplayName = displayName;
             this.Description = description;
             this.Owners = owners;
@@ -46,53 +48,58 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         }
 
         /// <summary>
-        ///     Gets or sets the identity of this processing source.
+        ///     Gets the identity of this processing source.
         /// </summary>
         [JsonIgnore]
         public PluginIdentity Identity { get; }
 
         /// <summary>
-        ///     Gets or sets the identifer of this plugin.
+        ///     Gets the identifier of this plugin.
         /// </summary>
         public string Id { get; }
 
         /// <summary>
-        ///     Gets or sets the version of this plugin.
+        ///     Gets the version of this plugin.
         /// </summary>
         public Version Version { get; }
 
         /// <summary>
-        ///     Gets or sets the human-readable name of this plugin.
+        ///     Gets the number of bytes that constitute this plugin.
+        /// </summary>
+        public ulong Size { get; }
+
+        /// <summary>
+        ///     Gets the human-readable name of this plugin.
         /// </summary>
         public string DisplayName { get; }
 
         /// <summary>
-        ///     Gets or sets the user friendly description of this plugin.
+        ///     Gets the user friendly description of this plugin.
         /// </summary>
         public string Description { get; }
 
         /// <summary>
-        ///     Gets or sets the owners of this plugin.
+        ///     Gets the owners of this plugin.
         /// </summary>
         public IEnumerable<PluginOwner> Owners { get; }
 
         /// <summary>
-        ///     Gets or sets the version of the performance SDK which this plugin depends upon.
+        ///     Gets the version of the performance SDK which this plugin depends upon.
         /// </summary>
         public Version SdkVersion { get; }
 
         /// <summary>
-        ///     Gets or sets the metadata of the processing sources contained in this plugin.
+        ///     Gets the metadata of the processing sources contained in this plugin.
         /// </summary>
         public IEnumerable<ProcessingSourceMetadata> ProcessingSources { get; }
 
         /// <summary>
-        ///     Gets or sets the metadata of the data cookers contained in this plugin.
+        ///     Gets the metadata of the data cookers contained in this plugin.
         /// </summary>
         public IEnumerable<DataCookerMetadata> DataCookers { get; }
 
         /// <summary>
-        ///     Gets or sets the metadata of the extensible tables contained in this plugin.
+        ///     Gets the metadata of the extensible tables contained in this plugin.
         /// </summary>
         public IEnumerable<TableMetadata> ExtensibleTables { get; }
 
@@ -117,6 +124,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 
             return string.Equals(this.Id, other.Id, StringComparison.Ordinal)
                 && this.Version.Equals(other.Version)
+                && this.Size.Equals(other.Size)
                 && string.Equals(this.DisplayName, other.DisplayName, StringComparison.Ordinal)
                 && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
                 && this.Owners.EnumerableEqual(other.Owners)
@@ -132,6 +140,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
             int result = HashCodeUtils.CombineHashCodeValues(
                 this.Id?.GetHashCode() ?? 0,
                 this.Version?.GetHashCode() ?? 0,
+                this.Size.GetHashCode(),
                 this.DisplayName?.GetHashCode() ?? 0,
                 this.Description?.GetHashCode() ?? 0,
                 this.SdkVersion?.GetHashCode() ?? 0);

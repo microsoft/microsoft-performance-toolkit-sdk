@@ -21,6 +21,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public AvailablePluginInfo(
             PluginIdentity identity,
             PluginSource source,
+            ulong size,
             string displayName,
             string description,
             Uri packageUri,
@@ -34,6 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
             this.Identity = identity;
             this.Source = source;
+            this.Size = size;
             this.DisplayName = displayName;
             this.Description = description;
             this.PackageUri = packageUri;
@@ -46,9 +48,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public PluginIdentity Identity { get; }
 
         /// <summary>
-        ///     Gets the souce where this plugin is discovered.
+        ///     Gets the source where this plugin is discovered.
         /// </summary>
         public PluginSource Source { get; }
+
+        /// <summary>
+        ///     Gets the number of bytes that constitute this plugin.
+        /// </summary>
+        public ulong Size { get; }
 
         /// <summary>
         ///     Gets the human-readable name of this plugin.
@@ -66,7 +73,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public Uri PackageUri { get; }
 
         /// <summary>
-        ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resouce
+        ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resource
         ///     the plugin package should be fetched from.
         /// </summary>
         public Guid FetcherResourceId { get; }
@@ -92,6 +99,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
             return this.Identity.Equals(other.Identity)
                 && this.Source.Equals(other.Source)
+                && this.Size.Equals(other.Size)
                 && this.DisplayName.Equals(other.DisplayName, StringComparison.Ordinal)
                 && this.Description.Equals(other.Description, StringComparison.Ordinal)
                 && this.PackageUri.Equals(other.PackageUri)
