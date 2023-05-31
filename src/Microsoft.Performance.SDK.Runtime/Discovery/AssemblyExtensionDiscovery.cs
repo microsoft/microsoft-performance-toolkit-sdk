@@ -192,11 +192,16 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                     HashSet<string> toIgnore = GetToIgnore(directoryPath, this.logger);
 
                     IEnumerable<string> subDirectories = this.FindFiles
-                        .EnumerateFolders(directoryPath)
-                        .Where(x => !toIgnore.Contains(Path.GetDirectoryName(x)));
+                        .EnumerateFolders(directoryPath);
 
                     foreach (string subDirectory in subDirectories)
                     {
+                        if (toIgnore.Contains(Path.GetDirectoryName(subDirectory)))
+                        {
+                            this.logger?.Verbose("Process assemblies: excluding directory '{0}'.", subDirectory);
+                            continue;
+                        }
+
                         if (!foldersSearched.Contains(subDirectory))
                         {
                             foldersToSearch.Push(subDirectory);
@@ -205,9 +210,21 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
                     foreach (var searchPattern in SearchPatterns)
                     {
-                        var filePaths = this.FindFiles.EnumerateFiles(directoryPath, searchPattern)
+                        string[] allFilePaths = this.FindFiles
+                            .EnumerateFiles(directoryPath, searchPattern)
+                            .ToArray();
+
+                        string[] filePaths = allFilePaths
                             .Where(x => !toIgnore.Contains(Path.GetFileName(x)))
                             .ToArray();
+
+                        if (this.logger != null && allFilePaths.Length > 0)
+                        {
+                            foreach (string fileToSkip in allFilePaths.Except(filePaths))
+                            {
+                                this.logger.Verbose("Process assemblies: excluding file '{0}'.", fileToSkip);
+                            }
+                        }
 
                         if (filePaths.Length == 0)
                         {
@@ -404,6 +421,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 try
                 {
                     var toIgnore = new HashSet<string>(File.ReadAllLines(configurationFile));
+                    logger?.Verbose("Successfully parsed {0}", configurationFile);
                     return toIgnore;
                 }
                 catch (Exception ex)
