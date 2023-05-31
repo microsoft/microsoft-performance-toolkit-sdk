@@ -414,11 +414,9 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             Debug.Assert(!string.IsNullOrWhiteSpace(targetDirectory), $"{nameof(targetDirectory)} is null.");
             Debug.Assert(Directory.Exists(targetDirectory), $"{nameof(targetDirectory)} is invalid.");
 
-            string configurationFile = Directory
-                .GetFiles(targetDirectory, AssemblyExtensionDiscovery.ExclusionsFilename)
-                .FirstOrDefault();
+            string configurationFile = Path.Combine(targetDirectory, AssemblyExtensionDiscovery.ExclusionsFilename);
 
-            if (configurationFile != null)
+            if (File.Exists(configurationFile))
             {
                 try
                 {
