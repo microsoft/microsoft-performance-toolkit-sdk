@@ -189,14 +189,14 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                         continue;
                     }
 
-                    HashSet<string> toIgnore = GetToIgnore(directoryPath, this.logger);
+                    HashSet<string> exclusions = GetExclusionValues(directoryPath, this.logger);
 
                     IEnumerable<string> subDirectories = this.FindFiles
                         .EnumerateFolders(directoryPath);
 
                     foreach (string subDirectory in subDirectories)
                     {
-                        if (toIgnore.Contains(Path.GetDirectoryName(subDirectory)))
+                        if (exclusions.Contains(Path.GetDirectoryName(subDirectory)))
                         {
                             this.logger?.Verbose("Process assemblies: excluding directory '{0}'.", subDirectory);
                             continue;
@@ -215,7 +215,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                             .ToArray();
 
                         string[] filePaths = allFilePaths
-                            .Where(x => !toIgnore.Contains(Path.GetFileName(x)))
+                            .Where(x => !exclusions.Contains(Path.GetFileName(x)))
                             .ToArray();
 
                         if (this.logger != null && allFilePaths.Length > 0)
@@ -407,7 +407,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             return true;
         }
 
-        private static HashSet<string> GetToIgnore(string targetDirectory, ILogger logger)
+        private static HashSet<string> GetExclusionValues(string targetDirectory, ILogger logger)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(targetDirectory), $"{nameof(targetDirectory)} is null.");
             Debug.Assert(Directory.Exists(targetDirectory), $"{nameof(targetDirectory)} is invalid.");
@@ -420,13 +420,22 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             {
                 try
                 {
-                    var toIgnore = new HashSet<string>(File.ReadAllLines(configurationFile));
-                    logger?.Verbose("Successfully parsed {0}", configurationFile);
-                    return toIgnore;
+                    IEnumerable<string> lines = File
+                        .ReadAllLines(configurationFile)
+                        .Where(x => !string.IsNullOrWhiteSpace(x));
+
+                    HashSet<string> exclusions = new HashSet<string>(lines, StringComparer.CurrentCulture);
+
+                    logger?.Verbose(
+                        "Process assemblies: successfully parsed {0} with {1} exclusions.",
+                        configurationFile,
+                        exclusions.Count);
+
+                    return exclusions;
                 }
                 catch (Exception ex)
                 {
-                    logger?.Warn($"Failed to parse {configurationFile}: {ex}");
+                    logger?.Warn($"Process assemblies: failed to parse {configurationFile}: {ex}");
                 }
             }
 
