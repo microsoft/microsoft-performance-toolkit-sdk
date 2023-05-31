@@ -22,6 +22,9 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     public class AssemblyExtensionDiscovery
         : IExtensionTypeProvider
     {
+        public static readonly string ExclusionsFilename = "PluginLoadExclusions";
+        private static readonly string[] SearchPatterns = new[] { "*.dll", "*.exe" };
+
         private readonly IAssemblyLoader assemblyLoader;
         private readonly Func<IEnumerable<string>, IPreloadValidator> validatorFactory;
         private readonly ILogger logger;
@@ -145,15 +148,15 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             var watch = Stopwatch.StartNew();
 
-            var searchPatterns = new[] { "*.dll", "*.exe" };
-            var exclusionSet = new HashSet<string>(StringComparer.CurrentCulture);
-            var searchOption = SearchOption.AllDirectories;
-
             var loaded = new List<Assembly>();
 
             bool allLoaded = true;
 
             var directoryErrors = new List<ErrorInfo>();
+
+            HashSet<string> foldersSearched = new HashSet<string>(StringComparer.CurrentCulture);
+            Stack<string> foldersToSearch = new Stack<string>(directoryPaths);
+
             lock (this.observers)
             {
                 if (!this.observers.Any())
@@ -163,8 +166,17 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                     return false;
                 }
 
-                foreach (var directoryPath in directoryPaths)
+                while (foldersToSearch.Any())
                 {
+                    string directoryPath = foldersToSearch.Pop();
+
+                    if (foldersSearched.Contains(directoryPath))
+                    {
+                        continue;
+                    }
+
+                    foldersSearched.Add(directoryPath);
+
                     var assemblyErrors = new List<ErrorInfo>();
                     if (!Directory.Exists(directoryPath))
                     {
@@ -177,10 +189,24 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                         continue;
                     }
 
-                    foreach (var searchPattern in searchPatterns)
+                    HashSet<string> toIgnore = GetToIgnore(directoryPath, this.logger);
+
+                    IEnumerable<string> subDirectories = this.FindFiles
+                        .EnumerateFolders(directoryPath)
+                        .Where(x => !toIgnore.Contains(Path.GetDirectoryName(x)));
+
+                    foreach (string subDirectory in subDirectories)
                     {
-                        var filePaths = this.FindFiles.EnumerateFiles(directoryPath, searchPattern, searchOption)
-                            .Where(x => !exclusionSet.Contains(Path.GetFileName(x)))
+                        if (!foldersSearched.Contains(subDirectory))
+                        {
+                            foldersToSearch.Push(subDirectory);
+                        }
+                    }
+
+                    foreach (var searchPattern in SearchPatterns)
+                    {
+                        var filePaths = this.FindFiles.EnumerateFiles(directoryPath, searchPattern)
+                            .Where(x => !toIgnore.Contains(Path.GetFileName(x)))
                             .ToArray();
 
                         if (filePaths.Length == 0)
@@ -254,7 +280,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 error = new DiscoveryError(
                             directoryPaths,
                             true,
-                            searchPatterns,
+                            SearchPatterns,
                             null,
                             true)
                 {
@@ -364,22 +390,55 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             return true;
         }
 
+        private static HashSet<string> GetToIgnore(string targetDirectory, ILogger logger)
+        {
+            Debug.Assert(!string.IsNullOrWhiteSpace(targetDirectory), $"{nameof(targetDirectory)} is null.");
+            Debug.Assert(Directory.Exists(targetDirectory), $"{nameof(targetDirectory)} is invalid.");
+
+            string configurationFile = Directory
+                .GetFiles(targetDirectory, AssemblyExtensionDiscovery.ExclusionsFilename)
+                .FirstOrDefault();
+
+            if (configurationFile != null)
+            {
+                try
+                {
+                    var toIgnore = new HashSet<string>(File.ReadAllLines(configurationFile));
+                    return toIgnore;
+                }
+                catch (Exception ex)
+                {
+                    logger?.Warn($"Failed to parse {configurationFile}: {ex}");
+                }
+            }
+
+            return new HashSet<string>();
+        }
+
         /// <summary>
         ///     This is used to enable unit testing by avoiding the actual file system.
         /// </summary>
         internal interface IFindFiles
         {
-            IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption);
+            IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern);
+
+            IEnumerable<string> EnumerateFolders(string directoryPath);
         }
 
         /// <summary>
         ///     This provides the default behavior in all but the unit test case.
         /// </summary>
-        private class DirectorySearch : IFindFiles
+        private class DirectorySearch
+            : IFindFiles
         {
-            public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption)
+            public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern)
             {
-                return Directory.EnumerateFiles(directoryPath, searchPattern, searchOption);
+                return Directory.EnumerateFiles(directoryPath, searchPattern, SearchOption.TopDirectoryOnly);
+            }
+
+            public IEnumerable<string> EnumerateFolders(string directoryPath)
+            {
+                return Directory.EnumerateDirectories(directoryPath);
             }
         }
 
