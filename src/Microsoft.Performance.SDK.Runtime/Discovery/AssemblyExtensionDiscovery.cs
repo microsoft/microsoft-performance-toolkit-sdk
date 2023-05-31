@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     public class AssemblyExtensionDiscovery
         : IExtensionTypeProvider
     {
-        public static readonly string ExclusionsFilename = "PluginLoadExclusions";
+        internal static readonly string ExclusionsFilename = "PluginLoadExclusions";
         private static readonly string[] SearchPatterns = new[] { "*.dll", "*.exe" };
 
         private readonly IAssemblyLoader assemblyLoader;
