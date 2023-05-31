@@ -196,9 +196,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
                     foreach (string subDirectory in subDirectories)
                     {
-                        if (exclusions.Contains(Path.GetDirectoryName(subDirectory)))
+                        string directoryName = new DirectoryInfo(subDirectory).Name;
+
+                        if (exclusions.Contains(directoryName))
                         {
-                            this.logger?.Verbose("Process assemblies: excluding directory '{0}'.", subDirectory);
+                            this.logger?.Verbose("Process assemblies: excluding directory '{0}'.", directoryName);
                             continue;
                         }
 
