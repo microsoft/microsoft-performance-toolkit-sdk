@@ -10,7 +10,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
 
@@ -23,6 +22,9 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
     public class AssemblyExtensionDiscovery
         : IExtensionTypeProvider
     {
+        internal static readonly string ExclusionsFilename = "PluginLoadExclusions";
+        private static readonly string[] SearchPatterns = new[] { "*.dll", "*.exe" };
+
         private readonly IAssemblyLoader assemblyLoader;
         private readonly Func<IEnumerable<string>, IPreloadValidator> validatorFactory;
         private readonly ILogger logger;
@@ -139,86 +141,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         /// </returns>
         public bool ProcessAssemblies(IEnumerable<string> directoryPaths, out ErrorInfo error)
         {
-            return this.ProcessAssemblies(directoryPaths, true, null, null, false, out error);
-        }
-
-        /// <summary>
-        ///     This method scans the given directory for modules to search for extensibility types. All types found will
-        ///     be passed along to any observers.
-        /// </summary>
-        /// <param name="directoryPath">
-        ///     Directory to process.
-        /// </param>
-        /// <param name="includeSubdirectories">
-        ///     Indicates whether subdirectories will be searched.
-        /// </param>
-        /// <param name="searchPatterns">
-        ///     The search patterns to use. If null or empty, defaults to "*.dll" and "*.exe".
-        /// </param>
-        /// <param name="exclusionFileNames">
-        ///     A set of files names to exclude from the search. May be null.
-        /// </param>
-        /// <param name="exclusionsAreCaseSensitive">
-        ///     Indicates whether files names should be treated as case sensitive.
-        /// </param>
-        /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter receives
-        ///     information about the error(s) that occurred.
-        /// </param>
-        /// <returns>
-        ///     Whether or not all assemblies in the given directory were processed successfully.
-        /// </returns>
-        public bool ProcessAssemblies(
-            string directoryPath,
-            bool includeSubdirectories,
-            IEnumerable<string> searchPatterns,
-            IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive,
-            out ErrorInfo error)
-        {
-            return this.ProcessAssemblies(
-                new[] { directoryPath, },
-                includeSubdirectories,
-                searchPatterns,
-                exclusionFileNames,
-                exclusionsAreCaseSensitive,
-                out error);
-        }
-
-        /// <summary>
-        ///     This method scans the given directory for modules to search for extensibility types. All types found will
-        ///     be passed along to any observers.
-        /// </summary>        
-        /// <param name="directoryPaths">
-        ///     Directories to process.
-        /// </param>
-        /// <param name="includeSubdirectories">
-        ///     Indicates whether subdirectories will be searched.
-        /// </param>
-        /// <param name="searchPatterns">
-        ///     The search patterns to use. If null or empty, defaults to "*.dll" and "*.exe".
-        /// </param>
-        /// <param name="exclusionFileNames">
-        ///     A set of files names to exclude from the search. May be null.
-        /// </param>
-        /// <param name="exclusionsAreCaseSensitive">
-        ///     Indicates whether files names should be treated as case sensitive.
-        /// </param>
-        /// <param name="error">
-        ///     If this method returns <c>false</c>, then this parameter receives
-        ///     information about the error(s) that occurred.
-        /// </param>
-        /// <returns>
-        ///     Whether or not all assemblies in the given directories were processed successfully.
-        /// </returns>
-        public bool ProcessAssemblies(
-            IEnumerable<string> directoryPaths,
-            bool includeSubdirectories,
-            IEnumerable<string> searchPatterns,
-            IEnumerable<string> exclusionFileNames,
-            bool exclusionsAreCaseSensitive,
-            out ErrorInfo error)
-        {
             Guard.NotNull(directoryPaths, nameof(directoryPaths));
             directoryPaths.ForEach(x => Guard.NotNullOrWhiteSpace(x, nameof(directoryPaths)));
 
@@ -226,22 +148,15 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
             var watch = Stopwatch.StartNew();
 
-            if (searchPatterns == null || !searchPatterns.Any())
-            {
-                searchPatterns = new[] { "*.dll", "*.exe" };
-            }
-
-            var exclusionSet = exclusionFileNames != null
-                ? new HashSet<string>(exclusionFileNames, exclusionsAreCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase)
-                : new HashSet<string>();
-
-            var searchOption = includeSubdirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-
             var loaded = new List<Assembly>();
 
             bool allLoaded = true;
 
             var directoryErrors = new List<ErrorInfo>();
+
+            HashSet<string> foldersSearched = new HashSet<string>(StringComparer.CurrentCulture);
+            Stack<string> foldersToSearch = new Stack<string>(directoryPaths);
+
             lock (this.observers)
             {
                 if (!this.observers.Any())
@@ -251,8 +166,17 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                     return false;
                 }
 
-                foreach (var directoryPath in directoryPaths)
+                while (foldersToSearch.Any())
                 {
+                    string directoryPath = foldersToSearch.Pop();
+
+                    if (foldersSearched.Contains(directoryPath))
+                    {
+                        continue;
+                    }
+
+                    foldersSearched.Add(directoryPath);
+
                     var assemblyErrors = new List<ErrorInfo>();
                     if (!Directory.Exists(directoryPath))
                     {
@@ -265,11 +189,44 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                         continue;
                     }
 
-                    foreach (var searchPattern in searchPatterns)
+                    HashSet<string> exclusions = GetExclusionValues(directoryPath, this.logger);
+
+                    IEnumerable<string> subDirectories = this.FindFiles
+                        .EnumerateFolders(directoryPath);
+
+                    foreach (string subDirectory in subDirectories)
                     {
-                        var filePaths = this.FindFiles.EnumerateFiles(directoryPath, searchPattern, searchOption)
-                            .Where(x => !exclusionSet.Contains(Path.GetFileName(x)))
+                        string directoryName = new DirectoryInfo(subDirectory).Name;
+
+                        if (exclusions.Contains(directoryName))
+                        {
+                            this.logger?.Verbose("Process assemblies: excluding directory '{0}'.", directoryName);
+                            continue;
+                        }
+
+                        if (!foldersSearched.Contains(subDirectory))
+                        {
+                            foldersToSearch.Push(subDirectory);
+                        }
+                    }
+
+                    foreach (var searchPattern in SearchPatterns)
+                    {
+                        string[] allFilePaths = this.FindFiles
+                            .EnumerateFiles(directoryPath, searchPattern)
                             .ToArray();
+
+                        string[] filePaths = allFilePaths
+                            .Where(x => !exclusions.Contains(Path.GetFileName(x)))
+                            .ToArray();
+
+                        if (this.logger != null && allFilePaths.Length > 0)
+                        {
+                            foreach (string fileToSkip in allFilePaths.Except(filePaths))
+                            {
+                                this.logger.Verbose("Process assemblies: excluding file '{0}'.", fileToSkip);
+                            }
+                        }
 
                         if (filePaths.Length == 0)
                         {
@@ -341,10 +298,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 Debug.Assert(!allLoaded);
                 error = new DiscoveryError(
                             directoryPaths,
-                            includeSubdirectories,
-                            searchPatterns,
-                            exclusionFileNames,
-                            exclusionsAreCaseSensitive)
+                            true,
+                            SearchPatterns,
+                            null,
+                            true)
                 {
                     Target = string.Empty,
                     Details = directoryErrors.ToArray(),
@@ -452,22 +409,63 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             return true;
         }
 
+        private static HashSet<string> GetExclusionValues(string targetDirectory, ILogger logger)
+        {
+            Debug.Assert(!string.IsNullOrWhiteSpace(targetDirectory), $"{nameof(targetDirectory)} is null.");
+            Debug.Assert(Directory.Exists(targetDirectory), $"{nameof(targetDirectory)} is invalid.");
+
+            string configurationFile = Path.Combine(targetDirectory, AssemblyExtensionDiscovery.ExclusionsFilename);
+
+            if (File.Exists(configurationFile))
+            {
+                try
+                {
+                    IEnumerable<string> lines = File
+                        .ReadAllLines(configurationFile)
+                        .Where(x => !string.IsNullOrWhiteSpace(x));
+
+                    HashSet<string> exclusions = new HashSet<string>(lines, StringComparer.CurrentCulture);
+
+                    logger?.Verbose(
+                        "Process assemblies: successfully parsed {0} with {1} exclusions.",
+                        configurationFile,
+                        exclusions.Count);
+
+                    return exclusions;
+                }
+                catch (Exception ex)
+                {
+                    logger?.Warn($"Process assemblies: failed to parse {configurationFile}: {ex}");
+                }
+            }
+
+            return new HashSet<string>();
+        }
+
         /// <summary>
         ///     This is used to enable unit testing by avoiding the actual file system.
         /// </summary>
         internal interface IFindFiles
         {
-            IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption);
+            IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern);
+
+            IEnumerable<string> EnumerateFolders(string directoryPath);
         }
 
         /// <summary>
         ///     This provides the default behavior in all but the unit test case.
         /// </summary>
-        private class DirectorySearch : IFindFiles
+        private class DirectorySearch
+            : IFindFiles
         {
-            public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption)
+            public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern)
             {
-                return Directory.EnumerateFiles(directoryPath, searchPattern, searchOption);
+                return Directory.EnumerateFiles(directoryPath, searchPattern, SearchOption.TopDirectoryOnly);
+            }
+
+            public IEnumerable<string> EnumerateFolders(string directoryPath)
+            {
+                return Directory.EnumerateDirectories(directoryPath);
             }
         }
 

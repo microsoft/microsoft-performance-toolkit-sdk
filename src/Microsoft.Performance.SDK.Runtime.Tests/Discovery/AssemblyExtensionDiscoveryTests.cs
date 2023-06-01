@@ -15,16 +15,28 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
     internal class TestFindFiles
         : AssemblyExtensionDiscovery.IFindFiles
     {
-        public Func<string, string, SearchOption, IEnumerable<string>> enumerateFiles;
+        public Func<string, string, IEnumerable<string>> enumerateFiles;
 
-        public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern, SearchOption searchOption)
+        public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern)
         {
             if (enumerateFiles == null)
             {
                 return new List<string>();
             }
 
-            return this.enumerateFiles.Invoke(directoryPath, searchPattern, searchOption);
+            return this.enumerateFiles.Invoke(directoryPath, searchPattern);
+        }
+
+        public Func<string, IEnumerable<string>> enumerateFolders;
+
+        public IEnumerable<string> EnumerateFolders(string directoryPath)
+        {
+            if (enumerateFolders == null)
+            {
+                return new List<string>();
+            }
+
+            return this.enumerateFolders.Invoke(directoryPath);
         }
     }
 
@@ -127,39 +139,17 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
         [TestMethod]
         [UnitTest]
-        public void ProcessAssemblies_NullDirectoryPath2()
-        {
-            Assert.ThrowsException<ArgumentNullException>(
-                () => this.Discovery.ProcessAssemblies(
-                    (string)null,
-                    false,
-                    null,
-                    null,
-                    false,
-                    out _));
-        }
-
-        [TestMethod]
-        [UnitTest]
-        public void ProcessAssemblies_EmptyDirectoryPath()
-        {
-            Assert.ThrowsException<ArgumentException>(
-                () => this.Discovery.ProcessAssemblies(
-                    string.Empty,
-                    false,
-                    null,
-                    null,
-                    false,
-                    out _));
-        }
-
-        [TestMethod]
-        [UnitTest]
         public void ProcessAssemblies_NoObservers()
         {
-            this.FindFiles.enumerateFiles = (directory, searchPattern, searchOptions) =>
+            this.FindFiles.enumerateFiles = (directory, searchPattern) =>
             {
                 Assert.Fail("EnumerateFiles shouldn't be called if there are no observers.");
+                return new List<string>();
+            };
+
+            this.FindFiles.enumerateFolders = (directory) =>
+            {
+                Assert.Fail("EnumerateFolders shouldn't be called if there are no observers.");
                 return new List<string>();
             };
 
@@ -171,76 +161,149 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
 
         [TestMethod]
         [UnitTest]
-        public void ProcessAssemblies_SpecificSearchPattern()
+        public void ProcessAssemblies_SpecifyExclusions()
         {
-            var searchPatterns = new[] { "*.elephant", "*.bananas" };
-            var patternsSearched = new List<string>(searchPatterns.Length);
+            var exclusions = new[] { "Blawp.dll", };
 
-            this.FindFiles.enumerateFiles = (directory, searchPattern, searchOptions) =>
+            string configPath = Path.Combine(this.TestAssemblyDirectory, AssemblyExtensionDiscovery.ExclusionsFilename);
+
+            try
             {
-                Assert.IsTrue(
-                    searchPattern == searchPatterns[0] || searchPattern == searchPatterns[1]);
-                patternsSearched.Add(searchPattern);
-                return new List<string>();
-            };
+                {
+                    using StreamWriter writer = File.CreateText(configPath);
+                    writer.WriteLine(exclusions[0]);
+                    writer.Flush();
+                }
 
-            this.Observers.Add(new TestExtensionObserver());
+                this.FindFiles.enumerateFiles =
+                    (directory, searchPattern) => new List<string>() { exclusions[0], };
 
-            RegisterObservers();
+                this.Observers.Add(new TestExtensionObserver());
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, searchPatterns, null, false, out _);
+                RegisterObservers();
+                this.Loader.LoadAssemblyFunc =
+                    s =>
+                    {
+                        Assert.Fail("LoadAssembly should not be called, the file should be excluded.");
+                        return null;
+                    };
 
-            Assert.AreEqual(searchPatterns.Length, patternsSearched.Count);
-            foreach (var pattern in searchPatterns)
+                this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, out _);
+            }
+            finally
             {
-                Assert.IsTrue(patternsSearched.Contains(pattern));
+                File.Delete(configPath);
             }
         }
 
         [TestMethod]
         [UnitTest]
-        public void ProcessAssemblies_SpecifyExclusions()
+        public void ProcessAssemblies_SpecifyExclusions_DifferingCase()
         {
             var exclusions = new[] { "Blawp.dll", };
 
-            this.FindFiles.enumerateFiles =
-                (directory, searchPattern, searchOptions) => new List<string>() { exclusions[0].ToLower(), };
+            string configPath = Path.Combine(this.TestAssemblyDirectory, AssemblyExtensionDiscovery.ExclusionsFilename);
 
-            this.Observers.Add(new TestExtensionObserver());
-
-            RegisterObservers();
-            this.Loader.LoadAssemblyFunc =
-                s =>
+            try
+            {
                 {
-                    Assert.Fail("LoadAssembly should not be called, the file should be excluded.");
-                    return null;
+                    using StreamWriter writer = File.CreateText(configPath);
+                    writer.WriteLine(exclusions[0]);
+                    writer.Flush();
+                }
+
+                // exclusions are case sensitive. using ToLower here should make it so that we still receive a callback
+                this.FindFiles.enumerateFiles =
+                    (directory, searchPattern) =>
+                    {
+                        if (searchPattern.EndsWith(".dll"))
+                        {
+                            return new List<string>() { exclusions[0].ToLower(), };
+                        }
+
+                        return new List<string>();
+                    };
+
+                var observer = new TestExtensionObserver();
+                this.Observers.Add(observer);
+
+                var assembly = new FakeAssembly
+                {
+                    TypesToReturn = new[]
+                    {
+                    typeof(int),
+                    typeof(bool),
+                    typeof(string),
+                    },
                 };
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, false, out _);
+                int callbackCount = 0;
+                RegisterObservers();
+                this.Loader.LoadAssemblyFunc =
+                    s =>
+                    {
+                        callbackCount++;
+                        return assembly;
+                    };
+
+                this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, out _);
+
+                Assert.AreEqual(1, callbackCount);
+                Assert.AreEqual(0, observer.ProcessTypes.Count);
+            }
+            finally
+            {
+                File.Delete(configPath);
+            }
         }
 
         [TestMethod]
         [UnitTest]
-        public void ProcessAssemblies_SpecifyCaseSensitiveExclusions()
+        public void ProcessAssemblies_SpecifyExclusions_Folder()
         {
-            var exclusions = new[] { "Blawp.dll", };
+            var exclusions = new[] { "SubFolder", };
 
-            this.FindFiles.enumerateFiles =
-                (directory, searchPattern, searchOptions) => new List<string>() { exclusions[0].ToLower(), };
+            string configPath = Path.Combine(this.TestAssemblyDirectory, AssemblyExtensionDiscovery.ExclusionsFilename);
+            string subFolderPath = Path.Combine(this.TestAssemblyDirectory, exclusions[0]);
 
-            this.Observers.Add(new TestExtensionObserver());
-            RegisterObservers();
-
-            bool assemblyLoaded = false;
-            this.Loader.LoadAssemblyFunc = s =>
+            try
             {
-                assemblyLoaded = true;
-                return this.GetType().Assembly;
-            };
+                {
+                    using StreamWriter writer = File.CreateText(configPath);
+                    writer.WriteLine(exclusions[0]);
+                    writer.Flush();
+                }
 
-            this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, false, null, exclusions, true, out _);
+                this.FindFiles.enumerateFiles =
+                    (directory, searchPattern) =>
+                    {
+                        Assert.AreNotEqual(directory, subFolderPath);
+                        return new List<string>();
+                    };
 
-            Assert.IsTrue(assemblyLoaded);
+                this.FindFiles.enumerateFolders =
+                    (directory) =>
+                    {
+                        Assert.AreNotEqual(directory, subFolderPath);
+                        return new List<string> { subFolderPath };
+                    };
+
+                this.Observers.Add(new TestExtensionObserver());
+
+                RegisterObservers();
+                this.Loader.LoadAssemblyFunc =
+                    s =>
+                    {
+                        Assert.Fail("LoadAssembly should not be called, the folder should be excluded.");
+                        return null;
+                    };
+
+                this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, out _);
+            }
+            finally
+            {
+                File.Delete(configPath);
+            }
         }
 
         [TestMethod]
@@ -249,7 +312,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             var files = new[] { "Blawp.dll", };
             this.FindFiles.enumerateFiles =
-                (directory, searchPattern, searchOptions) =>
+                (directory, searchPattern) =>
                     searchPattern.EndsWith(".dll")
                         ? new List<string>() { files[0].ToLower(), }
                         : new List<string>();
@@ -281,7 +344,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         {
             var files = new[] { "Blawp.dll", };
             this.FindFiles.enumerateFiles =
-                (directory, searchPattern, searchOptions) =>
+                (directory, searchPattern) =>
                     searchPattern.EndsWith(".dll")
                         ? new List<string>() { files[0].ToLower(), }
                         : new List<string>();
@@ -307,6 +370,72 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
             this.Loader.LoadAssemblyFunc = s => assembly;
 
             this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, out _);
+
+            CollectionAssert.AreEquivalent(assembly.TypesToReturn, observer.ProcessTypes);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void ProcessAssemblies_ValidAssemblyThatReferencesSdk_TypesEnumerated_SubFolder()
+        {
+            const string subFolderName = "SubFolder";
+
+            string subFolderPath = Path.Combine(this.TestAssemblyDirectory, subFolderName);
+            var files = new[] { "Blawp.dll", };
+
+            this.FindFiles.enumerateFiles =
+                (directory, searchPattern) =>
+                {
+                    if (directory == subFolderPath)
+                    {
+                        return searchPattern.EndsWith(".dll")
+                            ? new List<string>() { files[0].ToLower(), }
+                            : new List<string>();
+                    }
+
+                    return new List<string>();
+                };
+
+            this.FindFiles.enumerateFolders =
+                (directory) =>
+                {
+                    if (directory == this.TestAssemblyDirectory)
+                    {
+                        return new List<string> { subFolderPath };
+                    }
+
+                    return new List<string>();
+                };
+
+            var observer = new TestExtensionObserver();
+            this.Observers.Add(observer);
+            RegisterObservers();
+
+            var assembly = new FakeAssembly
+            {
+                ReferencedAssemblies = new[]
+                {
+                    SdkAssembly.Assembly.GetName(),
+                },
+                TypesToReturn = new[]
+                {
+                    typeof(int),
+                    typeof(bool),
+                    typeof(string),
+                },
+            };
+
+            this.Loader.LoadAssemblyFunc = s => assembly;
+
+            try
+            {
+                Directory.CreateDirectory(subFolderPath);
+                this.Discovery.ProcessAssemblies(this.TestAssemblyDirectory, out _);
+            }
+            finally
+            {
+                Directory.Delete(subFolderPath, true);
+            }
 
             CollectionAssert.AreEquivalent(assembly.TypesToReturn, observer.ProcessTypes);
         }
