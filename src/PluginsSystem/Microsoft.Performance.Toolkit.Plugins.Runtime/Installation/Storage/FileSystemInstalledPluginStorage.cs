@@ -128,6 +128,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                         int read = 0;
                         while ((read = await entryStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
                         {
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                throw new OperationCanceledException();
+                            }
+
                             totalCopied += read;
                             await destStream.WriteAsync(buffer, 0, read, cancellationToken);
 
