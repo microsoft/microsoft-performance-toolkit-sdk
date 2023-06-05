@@ -27,7 +27,7 @@ namespace Microsoft.Performance.SDK.Runtime.Progress
         {
             foreach (IProgress<T> child in this.children)
             {
-                child.Report(value);
+                child?.Report(value);
             }
         }
     }

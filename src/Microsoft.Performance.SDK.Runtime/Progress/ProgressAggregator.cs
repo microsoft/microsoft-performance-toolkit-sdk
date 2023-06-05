@@ -77,7 +77,7 @@ namespace Microsoft.Performance.SDK.Runtime.Progress
             }
 
             this.currentValues.Clear();
-            this.aggregateTo.Report(finalValue);
+            this.aggregateTo?.Report(finalValue);
         }
 
         private void OnProgressChanged(object sender, T e)
@@ -93,7 +93,7 @@ namespace Microsoft.Performance.SDK.Runtime.Progress
             // This should be impossible, since we only call this method after a child is created
             Debug.Assert(currentValues.Count > 0);
 
-            this.aggregateTo.Report(this.aggregateDelegate(this.currentValues.Values));
+            this.aggregateTo?.Report(this.aggregateDelegate(this.currentValues.Values));
         }
     }
 }
