@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System.Threading;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Fixtures;
