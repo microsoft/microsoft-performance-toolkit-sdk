@@ -32,6 +32,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         public abstract bool IsPluginContentFile { get; }
 
         /// <summary>
+        ///     Gets a value indicating the size of this entry, in bytes, after it is installed.
+        /// </summary>
+        public abstract long InstalledSize { get; }
+
+        /// <summary>
         ///     Opens the entry from the plugin package.
         /// </summary>
         /// <returns>

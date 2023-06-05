@@ -57,6 +57,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             }
         }
 
+        /// <inheritdoc/>
+        public override long InstalledSize
+        {
+            get
+            {
+                if (this.IsMetadataFile || !this.IsPluginContentFile)
+                {
+                    // These entries are not installed
+                    return 0;
+                }
+
+                return this.zipEntry.Length;
+            }
+        }
+
         /// <summary>
         ///     Opens the entry from the plugin package.
         /// </summary>
