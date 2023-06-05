@@ -77,7 +77,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             long totalCopied = 0;
             long totalBytesToCopy = package.Entries.Select(e => e.InstalledSize).Sum();
 
-            progress.Report(0);
+            progress?.Report(0);
 
             try
             {
@@ -132,12 +132,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                             await destStream.WriteAsync(buffer, 0, read, cancellationToken);
 
                             // report progress back
-                            progress.Report((int)(totalCopied / (double)totalBytesToCopy * 100));
+                            progress?.Report((int)(totalCopied / (double)totalBytesToCopy * 100));
                         }
                     }
                 }
 
-                progress.Report(100);
+                progress?.Report(100);
             }
             catch (Exception e) when (!(e is OperationCanceledException))
             {
