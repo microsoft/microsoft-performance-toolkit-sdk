@@ -7,7 +7,7 @@ using System.Linq;
 namespace Microsoft.Performance.SDK.Runtime.Progress
 {
     /// <summary>
-    ///     An <see cref="ProgressAggregator{TAggregate,T}"/> that aggregates integer-based percentages (0-100) to a new
+    ///     A <see cref="ProgressAggregator{TAggregate,T}"/> that aggregates integer-based percentages (0-100) to a new
     ///     aggregated integer-based percentage. The aggregated percentage reported is defined as the average percentage
     ///     across all children (i.e. SUM(children)/COUNT(children)).
     /// </summary>
