@@ -3,10 +3,12 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Progress;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
@@ -72,7 +74,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 
             string installDir = this.pluginStorageDirectory.GetPluginRootDirectory(package.PluginIdentity);
 
-            // TODO: #257 Report progress
+            long totalCopied = 0;
+            long totalBytesToCopy = package.Entries.Select(e => e.InstalledSize).Sum();
+
+            progress?.Report(0);
+
             try
             {
                 foreach (PluginPackageEntry entry in package.Entries)
@@ -115,9 +121,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                         bufferSize,
                         FileOptions.Asynchronous | FileOptions.SequentialScan))
                     {
-                        await entryStream.CopyToAsync(destStream, defaultAsyncBufferSize, cancellationToken).ConfigureAwait(false);
+                        long entryLength = entry.InstalledSize;
+
+                        byte[] buffer = new byte[defaultAsyncBufferSize];
+
+                        int read = 0;
+                        while ((read = await entryStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) > 0)
+                        {
+                            if (cancellationToken.IsCancellationRequested)
+                            {
+                                throw new OperationCanceledException();
+                            }
+
+                            totalCopied += read;
+                            await destStream.WriteAsync(buffer, 0, read, cancellationToken);
+
+                            // report progress back
+                            progress?.Report((int)(totalCopied / (double)totalBytesToCopy * 100));
+                        }
                     }
                 }
+
+                progress?.Report(100);
             }
             catch (Exception e) when (!(e is OperationCanceledException))
             {
