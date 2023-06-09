@@ -295,7 +295,10 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                assemblyLoader ??= new AssemblyLoader();
+                assemblyLoader ??= logger is null
+                    ? new AssemblyLoader()
+                    : new AssemblyLoader(logger);
+
                 var validatorFactory = new Func<IEnumerable<string>, IPreloadValidator>(_ => new NullValidator());
 
                 var assemblyDiscovery = new AssemblyExtensionDiscovery(assemblyLoader, validatorFactory);
