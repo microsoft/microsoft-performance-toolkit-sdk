@@ -133,7 +133,7 @@ namespace plugin.tool
             }
 
             metadata = metadataInit.ToPluginMetadata();
-            string relativePackageFileName = $"{metadata.Identity}.ptpck";
+            string relativePackageFileName = $"{metadata.Identity}.ptix";
             string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
 
             string tmpPath = Path.GetTempFileName();
