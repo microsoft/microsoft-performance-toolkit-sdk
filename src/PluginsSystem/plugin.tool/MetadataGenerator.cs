@@ -83,7 +83,7 @@ namespace plugin.tool
 
             // TODO: #294 Figure out how to extract Description and ProcessingSourceGuid of a datacooker.
             pluginMetaData.DataCookers = pluginLoader.Extensions.SourceDataCookers.Concat(pluginLoader.Extensions.CompositeDataCookers)
-                .Select(x => new DataCookerMetadata(x.DataCookerId, string.Empty, Guid.Empty)).ToList();
+                .Select(x => new DataCookerMetadata(x.DataCookerId, string.Empty, string.Empty)).ToList();
 
             pluginMetaData.ExtensibleTables = pluginLoader.Extensions.TablesById.Values
                 .Select(x => new TableMetadata(

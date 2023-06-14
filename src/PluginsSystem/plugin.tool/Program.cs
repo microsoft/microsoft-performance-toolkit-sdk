@@ -9,7 +9,7 @@ namespace plugin.tool
     {
         public static int Main(string[] args)
         {
-            ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, PushOptions>(args);
+            ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, PushOptions, MetadataGenOptions>(args);
 
             return result.MapResult(
                 (PackOptions opts) => opts.Run(),
