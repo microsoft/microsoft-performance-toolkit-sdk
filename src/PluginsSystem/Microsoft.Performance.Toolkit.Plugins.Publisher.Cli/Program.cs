@@ -20,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 
         static int HandleParseError(IEnumerable<Error> errs)
         {
-            Console.WriteLine("error");
+            Console.WriteLine(errs);
 
             return 1;
         }
