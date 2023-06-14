@@ -1,57 +1,61 @@
-﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
-using System.ComponentModel;
+﻿using CommandLine;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using SystemVersion = System.Version;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 {
-    [DisplayName("pack")]
-    [Description("Creates a new .ptpck package using specified metadata and source directory.")]
-    internal sealed class Pack
-        : Command
+    [Verb("pack", HelpText = "Creates a new .ptpck package using specified metadata and source directory.")]
+    internal class PackOptions
     {
-        [DisplayName("source")]
-        [Description("The directory containing the plugin binaries.")]
-        [PositionalArgument(0)]
-        [ExpandPath]
+        [Option(
+            's',
+            "source",
+            Required = true,
+            HelpText = "The directory containing the plugin binaries.")]
         public string? SourceDirectory { get; set; }
-
-        [DisplayName("target")]
-        [Description("Directory where the .ptpck file will be created. If not specified, the current directory will be used.")]
-        [ExtraArgument]
-        [ExpandPath]
-        public string? TargetDirectory { get; set; }
-
-        [DisplayName("metadata")]
-        [Description("Path to the pluginspec.json file. If not specified, the metadata will be generated from the binaries in the source directory.")]
-        [ExtraArgument]
-        [ExpandPath]
+        
+        [Option(
+            't',
+            "target",
+            Required = false,
+            HelpText = "Directory where the .ptpck file will be created. If not specified, the current directory will be used.")]
+        public string? TargetDirectory { get; set; } = Directory.GetCurrentDirectory();
+        
+        [Option(
+            'm',
+            "metadata",
+            Required = false,
+            HelpText = "Path to the pluginspec.json file. If not specified, the metadata will be generated from the binaries in the source directory.")]
         public string? MetadataPath { get; set; }
 
-        [DisplayName("id")]
-        [Description("Id of the packed plugin.")]
-        [ExtraArgument]
+        [Option(
+            "id",
+            Required = false,
+            HelpText = "Id of the packed plugin.")]
         public string? Id { get; set; }
 
-        [DisplayName("version")]
-        [Description("Version of the packed plugin. Must be a valid System.Version string.")]
-        [ExtraArgument]
+        [Option(
+            'v',
+            "version",
+            Required = false,
+            HelpText = "Version of the packed plugin. Must be a valid System.Version string.")]
         public string? Version { get; set; }
 
-        [DisplayName("displayName")]
-        [Description("Display name of the packed plugin")]
-        [ExtraArgument]
+        [Option(
+            "displayName",
+            Required = false,
+            HelpText = "Display name of the packed plugin")]
         public string? PluginDisplayName { get; set; }
 
-        [DisplayName("description")]
-        [Description("Description of the packed plugin")]
-        [ExtraArgument]
+        [Option(
+            "description",
+        Required = false,
+            HelpText = "Description of the packed plugin")]
         public string? PluginDescription { get; set; }
 
-        public override async Task<int> RunAsync(CancellationToken cancellationToken)
+        public int Run()
         {
             if (!Directory.Exists(this.SourceDirectory))
             {
@@ -108,7 +112,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
                     Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
                     return 1;
                 }
-                
+
                 metadataInit.Version = version;
             }
 
@@ -129,19 +133,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             }
 
             metadata = metadataInit.ToPluginMetadata();
-            string relativePackageFileName = $"{metadata.Identity}.ptpck";
+            string relativePackageFileName = $"{metadata.Identity}.ptix";
             string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
 
             string tmpPath = Path.GetTempFileName();
             using (var builder = new PluginPackageBuilder(tmpPath, serializer))
             {
                 builder.AddMetadata(metadata);
-                builder.AddContent(this.SourceDirectory, cancellationToken);
+                builder.AddContent(this.SourceDirectory, CancellationToken.None);
             }
 
             string? targetDirectory = Path.GetDirectoryName(targetFileName);
             Directory.CreateDirectory(targetDirectory);
-            
+
             File.Delete(targetFileName);
             File.Move(tmpPath, targetFileName);
 

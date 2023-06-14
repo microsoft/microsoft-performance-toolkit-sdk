@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins;
@@ -14,7 +15,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
         public static bool TryExtractFromAssembly(string assemblyDir, PluginMetadataInit pluginMetaData)
         {
             using var pluginLoader = new PluginsLoader();
-            if (!pluginLoader.TryLoadPlugin(assemblyDir, out SDK.ErrorInfo errorInfo))
+            if (!pluginLoader.TryLoadPlugin(assemblyDir, out ErrorInfo errorInfo))
             {
                 Console.WriteLine($"Failed to load plugin: {errorInfo}");
                 return false;
@@ -31,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
                 var version = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Patch);
                 sdkVersion = sdkVersion == null ? version : version > sdkVersion ? version : sdkVersion;
 
-                SDK.Processing.ProcessingSourceInfo sourceInfo = source.Instance.GetAboutInfo();
+                Microsoft.Performance.SDK.Processing.ProcessingSourceInfo sourceInfo = source.Instance.GetAboutInfo();
 
                 IEnumerable<TableMetadata> dataTables = source.Instance.DataTables.Select(x => new TableMetadata(
                     x.Guid,
@@ -82,7 +83,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 
             // TODO: #294 Figure out how to extract Description and ProcessingSourceGuid of a datacooker.
             pluginMetaData.DataCookers = pluginLoader.Extensions.SourceDataCookers.Concat(pluginLoader.Extensions.CompositeDataCookers)
-                .Select(x => new DataCookerMetadata(x.DataCookerId, string.Empty, Guid.Empty)).ToList();
+                .Select(x => new DataCookerMetadata(x.DataCookerId, string.Empty, string.Empty)).ToList();
 
             pluginMetaData.ExtensibleTables = pluginLoader.Extensions.TablesById.Values
                 .Select(x => new TableMetadata(

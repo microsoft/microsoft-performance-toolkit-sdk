@@ -21,6 +21,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
         public Version? Version { get; set; }
 
         /// <summary>
+        ///     Gets or sets the size of this plugin when installed.
+        /// </summary>
+        public ulong InstalledSize { get; set; }
+
+        /// <summary>
         ///     Gets or sets the human-readable name of this plugin.
         /// </summary>
         public string? DisplayName { get; set; }
@@ -66,6 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             return new PluginMetadata(
                 this.Id,
                 this.Version,
+                this.InstalledSize,
                 this.DisplayName,
                 this.Description,
                 this.Owners,
@@ -90,6 +96,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             {
                 Id = pluginMetadata.Id,
                 Version = pluginMetadata.Version,
+                InstalledSize = pluginMetadata.InstalledSize,
                 DisplayName = pluginMetadata.DisplayName,
                 Description = pluginMetadata.Description,
                 Owners = pluginMetadata.Owners,

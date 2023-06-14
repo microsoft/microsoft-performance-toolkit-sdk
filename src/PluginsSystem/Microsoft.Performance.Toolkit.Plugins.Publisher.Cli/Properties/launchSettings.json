@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "Microsoft.Performance.Toolkit.Plugins.Publisher.Cli": {
+    "plugin.tool": {
       "commandName": "Project",
-      "commandLineArgs": "push --source=\"\""
+      "commandLineArgs": "pack -s \"D:\\TestXadView\\a\" -t \"D:\\TestXadView\\target\" -m \"D:\\TestXadView\\pluginspec.json\"\r\n"
     }
   }
 }

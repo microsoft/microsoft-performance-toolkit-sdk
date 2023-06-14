@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "plugin.tool": {
-      "commandName": "Project",
-      "commandLineArgs": "pack -s \"D:\\test\\PluginManagerTest\\xperf-3.0.0.ptpck\\plugin\" -t \"D:\\test\\PluginManagerTest\\PluginsPacked\" -m \"D:\\test\\PluginManagerTest\\xperf-3.0.0.ptpck\\pluginspec.json\""
-    }
-  }
-}

@@ -5,6 +5,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
+using Microsoft.Performance.Toolkit.Plugins.Publisher;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 {

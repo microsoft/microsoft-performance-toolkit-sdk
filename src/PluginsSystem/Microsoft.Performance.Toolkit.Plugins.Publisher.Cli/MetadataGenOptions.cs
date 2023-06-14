@@ -9,7 +9,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using SystemVersion = System.Version;
 
-namespace plugin.tool
+namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 {
     [Verb("metadata-gen", HelpText = "Generates a pluginspec.json file from the specified source directory.")]
     internal class MetadataGenOptions
