@@ -3,7 +3,7 @@
 
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     /// <summary>
     ///    Represents the metadata of a plugin that is used during initialization.

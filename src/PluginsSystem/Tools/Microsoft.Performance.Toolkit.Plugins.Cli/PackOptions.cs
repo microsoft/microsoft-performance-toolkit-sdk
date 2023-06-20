@@ -1,18 +1,13 @@
-﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
-using System.ComponentModel;
-using CommandLine;
+﻿using CommandLine;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using SystemVersion = System.Version;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
-    [Verb("metadata-gen", HelpText = "Generates a pluginspec.json file from the specified source directory.")]
-    internal class MetadataGenOptions
+    [Verb("pack", HelpText = $"Creates a new {Constants.PluginPackageExtension} package using specified metadata and source directory.")]
+    internal class PackOptions
     {
         [Option(
             's',
@@ -20,23 +15,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             Required = true,
             HelpText = "The directory containing the plugin binaries.")]
         public string? SourceDirectory { get; set; }
-
+        
         [Option(
             't',
             "target",
             Required = false,
-            HelpText = "Directory where the metadata file will be created. If not specified, the current directory will be used.")]
-        public string? TargetDirectory { get; set; }
+            HelpText = $"Directory where the {Constants.PluginPackageExtension} file will be created. If not specified, the current directory will be used.")]
+        public string? TargetDirectory { get; set; } = Directory.GetCurrentDirectory();
+        
+        [Option(
+            'm',
+            "metadata",
+            Required = false,
+            HelpText = "Path to the pluginspec.json file. If not specified, the metadata will be generated from the binaries in the source directory.")]
+        public string? MetadataPath { get; set; }
 
         [Option(
             "id",
-            Required = true,
+            Required = false,
             HelpText = "Id of the packed plugin.")]
         public string? Id { get; set; }
 
         [Option(
             'v',
-            Required = true,
+            "version",
+            Required = false,
             HelpText = "Version of the packed plugin. Must be a valid System.Version string.")]
         public string? Version { get; set; }
 
@@ -46,11 +49,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             HelpText = "Display name of the packed plugin")]
         public string? PluginDisplayName { get; set; }
 
-        [DisplayName("description")]
-        [Description("Description of the packed plugin")]
         [Option(
             "description",
-            Required = false,
+        Required = false,
             HelpText = "Description of the packed plugin")]
         public string? PluginDescription { get; set; }
 
@@ -64,7 +65,38 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 
             PluginMetadata? metadata = null;
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
-            
+
+            if (!string.IsNullOrEmpty(this.MetadataPath))
+            {
+                if (!File.Exists(this.MetadataPath))
+                {
+                    Console.Error.WriteLine($"The metadata file '{this.MetadataPath}' does not exist.");
+                    return 1;
+                }
+
+                try
+                {
+                    string path = Path.GetFullPath(this.MetadataPath);
+                    using (FileStream stream = File.OpenRead(path))
+                    {
+                        metadata = serializer.Deserialize(stream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Failed to read metadata file '{this.MetadataPath}': {ex.Message}");
+                    return 1;
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(this.Id) || string.IsNullOrEmpty(this.Version))
+                {
+                    Console.Error.WriteLine("When no metadata file is specified, both id and version must be specified.");
+                    return 1;
+                }
+            }
+
             PluginMetadataInit metadataInit = metadata == null ? new PluginMetadataInit() : PluginMetadataInit.FromPluginMetadata(metadata);
 
             // Override metadata with command line arguments if specified
@@ -80,6 +112,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
                     Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
                     return 1;
                 }
+
                 metadataInit.Version = version;
             }
 
@@ -100,18 +133,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             }
 
             metadata = metadataInit.ToPluginMetadata();
+            string relativePackageFileName = $"{metadata.Identity}{Constants.PluginPackageExtension}";
+            string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
 
-            
-            var fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
-            string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, fileName);
+            string tmpPath = Path.GetTempFileName();
+            using (var builder = new PluginPackageBuilder(tmpPath, serializer))
+            {
+                builder.AddMetadata(metadata);
+                builder.AddContent(this.SourceDirectory, CancellationToken.None);
+            }
 
             string? targetDirectory = Path.GetDirectoryName(targetFileName);
             Directory.CreateDirectory(targetDirectory);
 
-            using (var fileStream = File.Open(targetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                serializer.Serialize(fileStream, metadata);
-            }
+            File.Delete(targetFileName);
+            File.Move(tmpPath, targetFileName);
+
+            Console.WriteLine($"{metadata.Identity} packed to {targetFileName}");
 
             return 0;
         }

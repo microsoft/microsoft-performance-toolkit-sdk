@@ -9,7 +9,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     [Verb("push", HelpText = "Push the plugin package to a plugin source")]
     internal class PushOptions

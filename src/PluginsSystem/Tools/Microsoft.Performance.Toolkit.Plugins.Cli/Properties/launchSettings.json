@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "pack": {
+      "commandName": "Project",
+      "commandLineArgs": "pack -s \"D:\\TestXadView\\a\" -t \"D:\\TestXadView\\target\" -m \"D:\\TestXadView\\pluginspec.json\"\r\n"
+    },
+    "metadata": {
+      "commandName": "Project",
+      "commandLineArgs": "metadata-gen -s \"D:\\TestXadView\\a\" -t \"D:\\TestXadView\\target\" --id \"XadView\" --owners \"Helen\" \"email\""
+    }
+  }
+}

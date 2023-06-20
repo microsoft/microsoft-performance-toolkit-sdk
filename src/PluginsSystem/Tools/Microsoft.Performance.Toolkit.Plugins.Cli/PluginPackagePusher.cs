@@ -7,7 +7,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Publisher;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     public sealed class PluginPackagePusher
         : IPluginPackagePusher

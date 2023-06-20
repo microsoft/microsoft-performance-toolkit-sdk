@@ -8,7 +8,7 @@ using Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata.ProcessingSourceInfo;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     internal static class MetadataGenerator
     {

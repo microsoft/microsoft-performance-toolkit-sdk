@@ -3,7 +3,7 @@
 
 using CommandLine;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     public sealed class Program
     {
