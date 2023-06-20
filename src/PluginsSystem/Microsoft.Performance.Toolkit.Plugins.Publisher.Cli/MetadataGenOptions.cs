@@ -30,13 +30,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 
         [Option(
             "id",
-            Required = false,
+            Required = true,
             HelpText = "Id of the packed plugin.")]
         public string? Id { get; set; }
 
         [Option(
             'v',
-            Required = false,
+            Required = true,
             HelpText = "Version of the packed plugin. Must be a valid System.Version string.")]
         public string? Version { get; set; }
 
@@ -49,7 +49,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
         [DisplayName("description")]
         [Description("Description of the packed plugin")]
         [Option(
-        "description",
+            "description",
             Required = false,
             HelpText = "Description of the packed plugin")]
         public string? PluginDescription { get; set; }
