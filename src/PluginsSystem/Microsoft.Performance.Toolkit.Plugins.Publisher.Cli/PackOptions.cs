@@ -6,7 +6,7 @@ using SystemVersion = System.Version;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
 {
-    [Verb("pack", HelpText = "Creates a new .ptpck package using specified metadata and source directory.")]
+    [Verb("pack", HelpText = $"Creates a new {Constants.PluginPackageExtension} package using specified metadata and source directory.")]
     internal class PackOptions
     {
         [Option(
@@ -20,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             't',
             "target",
             Required = false,
-            HelpText = "Directory where the .ptpck file will be created. If not specified, the current directory will be used.")]
+            HelpText = $"Directory where the {Constants.PluginPackageExtension} file will be created. If not specified, the current directory will be used.")]
         public string? TargetDirectory { get; set; } = Directory.GetCurrentDirectory();
         
         [Option(
@@ -133,7 +133,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
             }
 
             metadata = metadataInit.ToPluginMetadata();
-            string relativePackageFileName = $"{metadata.Identity}.ptix";
+            string relativePackageFileName = $"{metadata.Identity}{Constants.PluginPackageExtension}";
             string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
 
             string tmpPath = Path.GetTempFileName();

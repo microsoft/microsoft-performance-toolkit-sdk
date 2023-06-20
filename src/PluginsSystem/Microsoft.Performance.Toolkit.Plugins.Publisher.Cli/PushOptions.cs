@@ -17,7 +17,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Publisher.Cli
         [Option('f', "feed", Required = true, HelpText = "The source feed to push the plugin package to.")]
         public string? PluginSourceFeed { get; set; }
 
-        [Option('p', "package", Required = true, HelpText = "The file path of the .ptpck package.")]
+        [Option('p', "package", Required = true, HelpText = $"The file path of the {Constants.PluginPackageExtension} package.")]
         public string? PluginPackagePath { get; set; }
 
         public int Run()
