@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema",
+  "title": "JSON Schema a plugin manifest",
+
+  "type": "object",
+  "required": [
+    "id",
+    "displayName",
+    "version",
+    "description",
+    "projectUrl",
+    "manifestVersion"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The unique identifier for a plugin."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(\\d+\\.\\d+\\.\\d+)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$",
+      "description": "The version number of the plugin."
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of the plugin."
+    },
+    "displayName": {
+      "type": "string",
+      "description": "This shows up in tooltips for the 'name' property."
+    },
+    "projectUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL of the project's home page."
+    },
+    "owners": {
+      "type": "array",
+      "description": "The owners of the plugin.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the owner."
+          },
+          "address": {
+            "type": "string",
+            "description": "The address of the owner."
+          },
+          "emailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email",
+              "description": "The email address of the owner."
+            }
+          },
+          "phoneNumbers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "The phone number of the owner."
+            }
+          }
+        }
+      }
+    }
+    "manifestVersion": {
+      "type": "number",
+      "description": "The version of the manifest schema."
+    }
+  }
+}
