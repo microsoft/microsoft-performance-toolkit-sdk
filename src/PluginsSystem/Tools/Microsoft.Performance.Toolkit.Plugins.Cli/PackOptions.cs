@@ -2,6 +2,7 @@
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using SystemVersion = System.Version;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
@@ -27,19 +28,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             'm',
             "metadata",
             Required = false,
-            HelpText = "Path to the pluginspec.json file. If not specified, the metadata will be generated from the binaries in the source directory.")]
+            HelpText = $"Path to the {PackageConstants.PluginMetadataFileName} file. If not specified, the metadata will be generated from the binaries in the source directory.")]
+
         public string? MetadataPath { get; set; }
 
         [Option(
             "id",
-            Required = false,
+            Required = true,
             HelpText = "Id of the packed plugin.")]
         public string? Id { get; set; }
 
         [Option(
             'v',
             "version",
-            Required = false,
+            Required = true,
             HelpText = "Version of the packed plugin. Must be a valid System.Version string.")]
         public string? Version { get; set; }
 
@@ -97,7 +99,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 }
             }
 
-            PluginMetadataInit metadataInit = metadata == null ? new PluginMetadataInit() : PluginMetadataInit.FromPluginMetadata(metadata);
+            PluginMetadataInit metadataInit = new PluginMetadataInit();
 
             // Override metadata with command line arguments if specified
             if (!string.IsNullOrEmpty(this.Id))

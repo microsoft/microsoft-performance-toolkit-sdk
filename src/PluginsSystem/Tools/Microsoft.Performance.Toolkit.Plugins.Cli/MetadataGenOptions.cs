@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.ComponentModel;
+using System.Text.Json;
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
@@ -11,95 +11,140 @@ using SystemVersion = System.Version;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
-    [Verb("metadata-gen", HelpText = "Generates a pluginspec.json file from the specified source directory.")]
+    [Verb("metadata-gen", HelpText = $"Generates a {PackageConstants.PluginMetadataFileName} file from the specified source directory.")]
     internal class MetadataGenOptions
     {
+        public MetadataGenOptions(
+            string sourceDirectory,
+            string targetDirectory,
+            string manifestFilePath,
+            string id,
+            string version,
+            string pluginDisplayName,
+            string pluginDescription)
+        {
+            this.SourceDirectory = sourceDirectory;
+            this.TargetDirectory = targetDirectory;
+            this.ManifestFilePath = manifestFilePath;
+            this.Id = id;
+            this.Version = version;
+            this.PluginDisplayName = pluginDisplayName;
+            this.PluginDescription = pluginDescription;
+        }
+
         [Option(
             's',
             "source",
             Required = true,
             HelpText = "The directory containing the plugin binaries.")]
-        public string? SourceDirectory { get; set; }
+        public string SourceDirectory { get;  }
 
         [Option(
             't',
             "target",
             Required = false,
             HelpText = "Directory where the metadata file will be created. If not specified, the current directory will be used.")]
-        public string? TargetDirectory { get; set; }
+        public string TargetDirectory { get; }
+
+        [Option(
+            'm',
+            "manifest",
+            SetName = "manifest",
+            Required = false,
+            HelpText = "Path to the plugin manifest file. If not specified, command line arguments will be used.")]
+        public string? ManifestFilePath { get; }
 
         [Option(
             "id",
-            Required = true,
-            HelpText = "Id of the packed plugin.")]
-        public string? Id { get; set; }
+            SetName = "no-manifest",
+            // Required = true,
+            HelpText = "Id of the plugin.")]
+        public string? Id { get; }
 
         [Option(
             'v',
-            Required = true,
-            HelpText = "Version of the packed plugin. Must be a valid System.Version string.")]
-        public string? Version { get; set; }
+            "version",
+            SetName = "no-manifest",
+            // Required = true,
+            HelpText = "Version of the packaged plugin. Must be a valid System.Version string.")]
+        public string? Version { get; }
 
         [Option(
             "displayName",
-            Required = false,
-            HelpText = "Display name of the packed plugin")]
-        public string? PluginDisplayName { get; set; }
+            SetName = "no-manifest",
+            // Required = true,
+            HelpText = "Display name of the plugin")]
+        public string? PluginDisplayName { get; }
 
-        [DisplayName("description")]
-        [Description("Description of the packed plugin")]
         [Option(
             "description",
-            Required = false,
-            HelpText = "Description of the packed plugin")]
-        public string? PluginDescription { get; set; }
+            SetName = "no-manifest",
+            // Required = true,
+            HelpText = "Description of the plugin")]
+        public string? PluginDescription { get; }
 
-        public int Run()
+        public int Run(
+            Func<Type, ILogger> loggerFactory,
+            IPluginSourceFilesValidator sourceDirValidator,
+            IPluginManifestValidator manifestValidator,
+            IMetadataGenerator metadataGenerator)
         {
-            if (!Directory.Exists(this.SourceDirectory))
+
+            ILogger logger = loggerFactory(typeof(MetadataGenOptions));
+
+            if (!sourceDirValidator.Validate(this.SourceDirectory))
             {
-                Console.Error.WriteLine($"The source directory '{this.SourceDirectory}' does not exist.");
+                logger.Error($"Invalid plugin source files in: {this.SourceDirectory}");
                 return 1;
             }
 
-            PluginMetadata? metadata = null;
-            ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
-            
-            PluginMetadataInit metadataInit = metadata == null ? new PluginMetadataInit() : PluginMetadataInit.FromPluginMetadata(metadata);
-
-            // Override metadata with command line arguments if specified
-            if (!string.IsNullOrEmpty(this.Id))
+            PluginMetadataInit metadataInit = new();
+            if (!metadataGenerator.TryCreateMetadata(this.SourceDirectory, out metadataInit))
             {
-                metadataInit.Id = this.Id;
+                logger.Error("Failed to extract metadata from assembly.");
+                return 1;
             }
 
-            if (!string.IsNullOrEmpty(this.Version))
+            PluginManifest? pluginManifest = null;
+            if (this.ManifestFilePath != null)
+            {
+                if (!manifestValidator.Validate(this.ManifestFilePath))
+                {
+                    logger.Error($"Invalid plugin manifest file: {this.ManifestFilePath}");
+                    return 1;
+                }
+
+                // If a manifest file was specified, use it to generate the metadata file
+                var options  = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                };
+
+                using (FileStream manifestStream = File.OpenRead(this.ManifestFilePath))
+                {
+                    pluginManifest = JsonSerializer.Deserialize<PluginManifest>(manifestStream, options: options);
+                }
+            }
+            else
             {
                 if (!SystemVersion.TryParse(this.Version, out SystemVersion? version))
                 {
                     Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
                     return 1;
                 }
-                metadataInit.Version = version;
+
+                pluginManifest = new PluginManifest(this.Id, version, this.PluginDisplayName, this.PluginDescription, null, null);
             }
 
-            if (!string.IsNullOrEmpty(this.PluginDisplayName))
-            {
-                metadataInit.DisplayName = this.PluginDisplayName;
-            }
 
-            if (!string.IsNullOrEmpty(this.PluginDescription))
-            {
-                metadataInit.Description = this.PluginDescription;
-            }
+            metadataInit.Id = pluginManifest.Id;
+            metadataInit.Version = pluginManifest.Version;
+            metadataInit.Description = pluginManifest.Description;
+            metadataInit.DisplayName = pluginManifest.DisplayName;
+            metadataInit.Owners = pluginManifest.Owners;
 
-            if (!MetadataGenerator.TryExtractFromAssembly(this.SourceDirectory, metadataInit))
-            {
-                Console.Error.WriteLine("Failed to extract metadata from assembly.");
-                return 1;
-            }
-
-            metadata = metadataInit.ToPluginMetadata();
+            var metadata = metadataInit.ToPluginMetadata();
 
             
             var fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
@@ -107,7 +152,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
             string? targetDirectory = Path.GetDirectoryName(targetFileName);
             Directory.CreateDirectory(targetDirectory);
-
+            
+            ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
             using (var fileStream = File.Open(targetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 serializer.Serialize(fileStream, metadata);

@@ -11,7 +11,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
     internal class PluginMetadataInit
     {
         /// <summary>
-        ///     Gets or sets the identifer of this plugin.
+        ///     Gets or sets the identifier of this plugin.
         /// </summary>
         public string? Id { get; set; }
 
@@ -81,30 +81,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 this.ExtensibleTables);
         }
 
-        /// <summary>
-        ///     Creates a new <see cref="PluginMetadataInit"/> from the given <see cref="PluginMetadata"/>.
-        /// </summary>
-        /// <param name="pluginMetadata">
-        ///     The <see cref="PluginMetadata"/> to convert.
-        /// </param>
-        /// <returns>
-        ///     A new <see cref="PluginMetadataInit"/> that represents the given <see cref="PluginMetadata"/>.
-        /// </returns>
-        public static PluginMetadataInit FromPluginMetadata(PluginMetadata pluginMetadata)
-        {
-            return new PluginMetadataInit
-            {
-                Id = pluginMetadata.Id,
-                Version = pluginMetadata.Version,
-                InstalledSize = pluginMetadata.InstalledSize,
-                DisplayName = pluginMetadata.DisplayName,
-                Description = pluginMetadata.Description,
-                Owners = pluginMetadata.Owners,
-                SdkVersion = pluginMetadata.SdkVersion,
-                ProcessingSources = pluginMetadata.ProcessingSources,
-                DataCookers = pluginMetadata.DataCookers,
-                ExtensibleTables = pluginMetadata.ExtensibleTables,
-            };
-        }
+        ///// <summary>
+        /////     Creates a new <see cref="PluginMetadataInit"/> from the given <see cref="PluginMetadata"/>.
+        ///// </summary>
+        ///// <param name="pluginMetadata">
+        /////     The <see cref="PluginMetadata"/> to convert.
+        ///// </param>
+        ///// <returns>
+        /////     A new <see cref="PluginMetadataInit"/> that represents the given <see cref="PluginMetadata"/>.
+        ///// </returns>
+        //public static PluginMetadataInit FromPluginMetadata(PluginMetadata pluginMetadata)
+        //{
+        //    return new PluginMetadataInit
+        //    {
+        //        Id = pluginMetadata.Id,
+        //        Version = pluginMetadata.Version,
+        //        InstalledSize = pluginMetadata.InstalledSize,
+        //        DisplayName = pluginMetadata.DisplayName,
+        //        Description = pluginMetadata.Description,
+        //        Owners = pluginMetadata.Owners,
+        //        SdkVersion = pluginMetadata.SdkVersion,
+        //        ProcessingSources = pluginMetadata.ProcessingSources,
+        //        DataCookers = pluginMetadata.DataCookers,
+        //        ExtensibleTables = pluginMetadata.ExtensibleTables,
+        //    };
+        //}
     }
 }
