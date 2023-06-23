@@ -65,7 +65,7 @@
           }
         }
       }
-    }
+    },
     "manifestVersion": {
       "type": "number",
       "description": "The version of the manifest schema."
