@@ -4,6 +4,7 @@
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
@@ -13,14 +14,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         {
             ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, MetadataGenOptions>(args);
             Func<Type, ILogger> loggerFactory = ConsoleLogger.Create;
+            var metadataGenerator = new MetadataGenerator(loggerFactory);
 
             return result.MapResult(
-                (PackOptions opts) => opts.Run(),
+                (PackOptions opts) => opts.Run(metadataGenerator),
                 (MetadataGenOptions opts) => opts.Run(
                     loggerFactory,
                     new PluginSourceFilesValidator(loggerFactory),
                     new PluginManifestValidator(),
-                    new MetadataGenerator()),
+                    metadataGenerator),
                 errs => HandleParseError(errs));
         }
 

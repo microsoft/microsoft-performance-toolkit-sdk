@@ -5,7 +5,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using SystemVersion = System.Version;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 {
     [Verb("pack", HelpText = $"Creates a new {Constants.PluginPackageExtension} package using specified metadata and source directory.")]
     internal class PackOptions
@@ -16,14 +16,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             Required = true,
             HelpText = "The directory containing the plugin binaries.")]
         public string? SourceDirectory { get; set; }
-        
+
         [Option(
             't',
             "target",
             Required = false,
             HelpText = $"Directory where the {Constants.PluginPackageExtension} file will be created. If not specified, the current directory will be used.")]
         public string? TargetDirectory { get; set; } = Directory.GetCurrentDirectory();
-        
+
         [Option(
             'm',
             "metadata",
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             HelpText = "Description of the packed plugin")]
         public string? PluginDescription { get; set; }
 
-        public int Run()
+        public int Run(IMetadataGenerator metadataGenerator)
         {
             if (!Directory.Exists(this.SourceDirectory))
             {
@@ -99,40 +99,44 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 }
             }
 
-            PluginMetadataInit metadataInit = new PluginMetadataInit();
-
-            // Override metadata with command line arguments if specified
-            if (!string.IsNullOrEmpty(this.Id))
-            {
-                metadataInit.Id = this.Id;
-            }
-
-            if (!string.IsNullOrEmpty(this.Version))
-            {
-                if (!SystemVersion.TryParse(this.Version, out SystemVersion? version))
-                {
-                    Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
-                    return 1;
-                }
-
-                metadataInit.Version = version;
-            }
-
-            if (!string.IsNullOrEmpty(this.PluginDisplayName))
-            {
-                metadataInit.DisplayName = this.PluginDisplayName;
-            }
-
-            if (!string.IsNullOrEmpty(this.PluginDescription))
-            {
-                metadataInit.Description = this.PluginDescription;
-            }
-
-            if (!MetadataGenerator.TryExtractFromAssembly(this.SourceDirectory, metadataInit))
+            if (metadataGenerator.TryCreateMetadata(this.SourceDirectory, out PluginMetadataInit? metadataInit))
             {
                 Console.Error.WriteLine("Failed to extract metadata from assembly.");
                 return 1;
             }
+
+            //// Override metadata with command line arguments if specified
+            //if (!string.IsNullOrEmpty(this.Id))
+            //{
+            //    metadataInit.Id = this.Id;
+            //}
+
+            //if (!string.IsNullOrEmpty(this.Version))
+            //{
+            //    if (!SystemVersion.TryParse(this.Version, out SystemVersion? version))
+            //    {
+            //        Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
+            //        return 1;
+            //    }
+
+            //    metadataInit.Version = version;
+            //}
+
+            //if (!string.IsNullOrEmpty(this.PluginDisplayName))
+            //{
+            //    metadataInit.DisplayName = this.PluginDisplayName;
+            //}
+
+            //if (!string.IsNullOrEmpty(this.PluginDescription))
+            //{
+            //    metadataInit.Description = this.PluginDescription;
+            //}
+
+            //if (!MetadataGenerator.TryExtractFromAssembly(this.SourceDirectory, metadataInit))
+            //{
+            //    Console.Error.WriteLine("Failed to extract metadata from assembly.");
+            //    return 1;
+            //}
 
             metadata = metadataInit.ToPluginMetadata();
             string relativePackageFileName = $"{metadata.Identity}{Constants.PluginPackageExtension}";

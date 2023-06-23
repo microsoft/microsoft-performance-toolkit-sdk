@@ -9,7 +9,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using SystemVersion = System.Version;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 {
     [Verb("metadata-gen", HelpText = $"Generates a {PackageConstants.PluginMetadataFileName} file from the specified source directory.")]
     internal class MetadataGenOptions
@@ -37,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             "source",
             Required = true,
             HelpText = "The directory containing the plugin binaries.")]
-        public string SourceDirectory { get;  }
+        public string SourceDirectory { get; }
 
         [Option(
             't',
@@ -115,7 +115,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 }
 
                 // If a manifest file was specified, use it to generate the metadata file
-                var options  = new JsonSerializerOptions
+                var options = new JsonSerializerOptions
                 {
                     WriteIndented = true,
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -146,13 +146,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
             var metadata = metadataInit.ToPluginMetadata();
 
-            
+
             var fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
             string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, fileName);
 
             string? targetDirectory = Path.GetDirectoryName(targetFileName);
             Directory.CreateDirectory(targetDirectory);
-            
+
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
             using (var fileStream = File.Open(targetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {

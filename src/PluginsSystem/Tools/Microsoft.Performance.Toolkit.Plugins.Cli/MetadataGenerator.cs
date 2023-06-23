@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Data;
+using System.Diagnostics;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
@@ -13,85 +15,63 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
     internal class MetadataGenerator
         : IMetadataGenerator
     {
-        public MetadataGenerator()
+        private readonly ILogger logger;
+
+        public MetadataGenerator(Func<Type, ILogger> loggerFactory)
         {
+            this.logger = loggerFactory(typeof(MetadataGenerator));
         }
 
 
         public bool TryCreateMetadata(string assemblyDir, out PluginMetadataInit pluginMetadata)
         {
             pluginMetadata = new();
-            
+
             using var pluginLoader = new PluginsLoader();
             if (!pluginLoader.TryLoadPlugin(assemblyDir, out ErrorInfo errorInfo))
             {
-                Console.WriteLine($"Failed to load plugin: {errorInfo}");
+                this.logger.Error($"Failed to load plugin: {errorInfo}");
                 return false;
             }
 
-            Version? sdkVersion = null;
+            Version sdkVersion = null;
             var versionChecker = VersionChecker.Create();
-            IEnumerable<ProcessingSourceReference> processingSources = pluginLoader.LoadedProcessingSources;
-            var processingSourceMetadatas = new List<ProcessingSourceMetadata>();
-
-            foreach (ProcessingSourceReference source in processingSources)
+            var processingSourcesMetadata = new List<ProcessingSourceMetadata>();
+            foreach (ProcessingSourceReference source in pluginLoader.LoadedProcessingSources)
             {
-                NuGet.Versioning.SemanticVersion nugetVersion = versionChecker.FindReferencedSdkVersion(source.Type.Assembly);
-                var version = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Patch);
+                // Version (use the latest version if different across processing sources)
+                Version version = GetSDKVersion(source, versionChecker);
                 sdkVersion = sdkVersion == null ? version : version > sdkVersion ? version : sdkVersion;
 
-                Microsoft.Performance.SDK.Processing.ProcessingSourceInfo sourceInfo = source.Instance.GetAboutInfo();
-
-                IEnumerable<TableMetadata> dataTables = source.Instance.DataTables.Select(x => new TableMetadata(
-                    x.Guid,
-                    x.Name,
-                    x.Description,
-                    x.Category,
-                    false));
-
-                IEnumerable<TableMetadata> metadataTables = source.Instance.MetadataTables.Select(x => new TableMetadata(
-                    x.Guid,
-                    x.Name,
-                    x.Description,
-                    x.Category,
-                    true));
-
-
-                var dsMetadata = new List<DataSourceMetadata>();
-                foreach (DataSourceAttribute? ds in source.DataSources)
+                try
                 {
-                    if (ds is FileDataSourceAttribute fds)
-                    {
-                        dsMetadata.Add(new DataSourceMetadata(fds.FileExtension, fds.Description));
-                    }
-                    else if (ds is DirectoryDataSourceAttribute)
-                    {
-                        dsMetadata.Add(new DataSourceMetadata("directory", ds.Description));
-                    }
-                    else if (ds is ExtensionlessFileDataSourceAttribute)
-                    {
-                        dsMetadata.Add(new DataSourceMetadata("extensionless", ds.Description));
-                    }
+                    ProcessingSourceMetadata metadata = CreateProcessingSourceMetadata(source);
+
+                    processingSourcesMetadata.Add(metadata);
                 }
-
-                var metadata = new ProcessingSourceMetadata(
-                    version: Version.Parse(source.Version),
-                    name: source.Name,
-                    description: source.Description,
-                    guid: source.Instance.TryGetGuid(),
-                    aboutInfo: new ProcessingSourceInfo(sourceInfo),
-                    availableTables: dataTables.Concat(metadataTables),
-                    supportedDataSources: dsMetadata);
-
-                processingSourceMetadatas.Add(metadata);
+                catch (Exception e)
+                {
+                    this.logger.Error($"Failed to create metadata for processing source {source.Type.Name}: {e}");
+                    return false;
+                }
             }
 
-            pluginMetadata.ProcessingSources = processingSourceMetadatas;
+            try
+            {
+                pluginMetadata.InstalledSize = (ulong)CalculateFolderSize(assemblyDir);
+            }
+            catch (Exception e)
+            {
+                this.logger.Error($"Failed to calculate the installed size of this plugin: {e}");
+                return false;
+            }
+
+            pluginMetadata.ProcessingSources = processingSourcesMetadata;
             pluginMetadata.SdkVersion = sdkVersion;
 
-            // TODO: #294 Figure out how to extract Description and ProcessingSourceGuid of a datacooker.
+            // TODO: #294 Figure out how to extract description of a datacooker.
             pluginMetadata.DataCookers = pluginLoader.Extensions.SourceDataCookers.Concat(pluginLoader.Extensions.CompositeDataCookers)
-                .Select(x => new DataCookerMetadata(x.DataCookerId, string.Empty, string.Empty)).ToList();
+                .Select(x => new DataCookerMetadata(x.DataCookerId, null, x.SourceParserId)).ToList();
 
             pluginMetadata.ExtensibleTables = pluginLoader.Extensions.TablesById.Values
                 .Select(x => new TableMetadata(
@@ -104,88 +84,79 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             return true;
         }
 
-        public static bool TryExtractFromAssembly(string assemblyDir, PluginMetadataInit pluginMetaData)
+        private static long CalculateFolderSize(string folderPath)
         {
-            using var pluginLoader = new PluginsLoader();
-            if (!pluginLoader.TryLoadPlugin(assemblyDir, out ErrorInfo errorInfo))
+            long totalSize = 0;
+
+            if (!Directory.Exists(folderPath))
             {
-                Console.WriteLine($"Failed to load plugin: {errorInfo}");
-                return false;
+                return totalSize;
             }
 
-            Version? sdkVersion = null;
-            var versionChecker = VersionChecker.Create();
-            IEnumerable<ProcessingSourceReference> processingSources = pluginLoader.LoadedProcessingSources;
-            var processingSourceMetadatas = new List<ProcessingSourceMetadata>();
-
-            foreach (ProcessingSourceReference source in processingSources)
+            foreach (string file in Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories))
             {
-                NuGet.Versioning.SemanticVersion nugetVersion = versionChecker.FindReferencedSdkVersion(source.Type.Assembly);
-                var version = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Patch);
-                sdkVersion = sdkVersion == null ? version : version > sdkVersion ? version : sdkVersion;
+                totalSize += new FileInfo(file).Length;
+            }
 
-                Microsoft.Performance.SDK.Processing.ProcessingSourceInfo sourceInfo = source.Instance.GetAboutInfo();
+            return totalSize;
+        }
 
-                IEnumerable<TableMetadata> dataTables = source.Instance.DataTables.Select(x => new TableMetadata(
-                    x.Guid,
-                    x.Name,
-                    x.Description,
-                    x.Category,
-                    false));
+        private static Version GetSDKVersion(ProcessingSourceReference psr, VersionChecker versionChecker)
+        {
+            NuGet.Versioning.SemanticVersion nugetVersion = versionChecker.FindReferencedSdkVersion(psr.Type.Assembly);
+            var version = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Patch);
+            return version;
+        }
 
-                IEnumerable<TableMetadata> metadataTables = source.Instance.MetadataTables.Select(x => new TableMetadata(
-                    x.Guid,
-                    x.Name,
-                    x.Description,
-                    x.Category,
-                    true));
+        private static ProcessingSourceMetadata CreateProcessingSourceMetadata(ProcessingSourceReference psr)
+        {
+            // Tables
+            IEnumerable<TableMetadata> dataTables = psr.Instance.DataTables.Select(x => new TableMetadata(
+                x.Guid,
+                x.Name,
+                x.Description,
+                x.Category,
+                false));
 
+            IEnumerable<TableMetadata> metadataTables = psr.Instance.MetadataTables.Select(x => new TableMetadata(
+                x.Guid,
+                x.Name,
+                x.Description,
+                x.Category,
+                true));
 
-                var dsMetadata = new List<DataSourceMetadata>();
-                foreach (DataSourceAttribute? ds in source.DataSources)
+            // Data Sources
+            var dataSourcesMetadata = new List<DataSourceMetadata>();
+            foreach (DataSourceAttribute? ds in psr.DataSources)
+            {
+                if (ds is FileDataSourceAttribute fds)
                 {
-                    if (ds is FileDataSourceAttribute fds)
-                    {
-                        dsMetadata.Add(new DataSourceMetadata(fds.FileExtension, fds.Description));
-                    }
-                    else if (ds is DirectoryDataSourceAttribute)
-                    {
-                        dsMetadata.Add(new DataSourceMetadata("directory", ds.Description));
-                    }
-                    else if (ds is ExtensionlessFileDataSourceAttribute)
-                    {
-                        dsMetadata.Add(new DataSourceMetadata("extensionless", ds.Description));
-                    }
+                    dataSourcesMetadata.Add(new DataSourceMetadata(fds.FileExtension, fds.Description));
                 }
-
-                var metadata = new ProcessingSourceMetadata(
-                    version: Version.Parse(source.Version),
-                    name: source.Name,
-                    description: source.Description,
-                    guid: source.Instance.TryGetGuid(),
-                    aboutInfo: new ProcessingSourceInfo(sourceInfo),
-                    availableTables: dataTables.Concat(metadataTables),
-                    supportedDataSources: dsMetadata);
-
-                processingSourceMetadatas.Add(metadata);
+                else if (ds is DirectoryDataSourceAttribute)
+                {
+                    dataSourcesMetadata.Add(new DataSourceMetadata(Constants.DirectoryDataSourceName, ds.Description));
+                }
+                else if (ds is ExtensionlessFileDataSourceAttribute)
+                {
+                    dataSourcesMetadata.Add(new DataSourceMetadata(Constants.ExtensionlessDataSourceName, ds.Description));
+                }
+                else
+                {
+                    Debug.Assert(false, "Unknown DataSourceAttribute type");
+                }
             }
 
-            pluginMetaData.ProcessingSources = processingSourceMetadatas;
-            pluginMetaData.SdkVersion = sdkVersion;
+            var metadata = new ProcessingSourceMetadata(
+                version: Version.Parse(psr.Version),
+                name: psr.Name,
+                description: psr.Description,
+                guid: psr.Instance.TryGetGuid(),
+                aboutInfo: new ProcessingSourceInfo(psr.Instance.GetAboutInfo()),
+                availableTables: dataTables.Concat(metadataTables),
+                supportedDataSources: dataSourcesMetadata);
 
-            // TODO: #294 Figure out how to extract Description and ProcessingSourceGuid of a datacooker.
-            pluginMetaData.DataCookers = pluginLoader.Extensions.SourceDataCookers.Concat(pluginLoader.Extensions.CompositeDataCookers)
-                .Select(x => new DataCookerMetadata(x.DataCookerId, string.Empty, string.Empty)).ToList();
-
-            pluginMetaData.ExtensibleTables = pluginLoader.Extensions.TablesById.Values
-                .Select(x => new TableMetadata(
-                    x.TableDescriptor.Guid,
-                    x.TableDescriptor.Name,
-                    x.TableDescriptor.Description,
-                    x.TableDescriptor.Category,
-                    x.TableDescriptor.IsMetadataTable)).ToList();
-
-            return true;
+            return metadata;
         }
     }
 }
