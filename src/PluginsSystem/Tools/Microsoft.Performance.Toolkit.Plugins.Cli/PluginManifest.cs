@@ -1,4 +1,5 @@
-﻿using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {

@@ -50,14 +50,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             'm',
             "manifest",
             SetName = "manifest",
-            Required = false,
             HelpText = "Path to the plugin manifest file. If not specified, command line arguments will be used.")]
         public string? ManifestFilePath { get; }
 
         [Option(
             "id",
             SetName = "no-manifest",
-            // Required = true,
             HelpText = "Id of the plugin.")]
         public string? Id { get; }
 
@@ -65,21 +63,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             'v',
             "version",
             SetName = "no-manifest",
-            // Required = true,
             HelpText = "Version of the packaged plugin. Must be a valid System.Version string.")]
         public string? Version { get; }
 
         [Option(
             "displayName",
             SetName = "no-manifest",
-            // Required = true,
             HelpText = "Display name of the plugin")]
         public string? PluginDisplayName { get; }
 
         [Option(
             "description",
             SetName = "no-manifest",
-            // Required = true,
             HelpText = "Description of the plugin")]
         public string? PluginDescription { get; }
 
@@ -128,6 +123,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             }
             else
             {
+                if (this.Id == null
+                    || this.Version == null
+                    || this.PluginDisplayName == null
+                    || this.PluginDescription == null)
+                {
+                    logger.Error($"Missing required arguments. Must specify either a manifest file or all of the following: --id, --version, --displayName, --description");
+                    return 1;
+                }
+
                 if (!SystemVersion.TryParse(this.Version, out SystemVersion? version))
                 {
                     Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
@@ -137,7 +141,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                 pluginManifest = new PluginManifest(this.Id, version, this.PluginDisplayName, this.PluginDescription, null, null);
             }
 
-
             metadataInit.Id = pluginManifest.Id;
             metadataInit.Version = pluginManifest.Version;
             metadataInit.Description = pluginManifest.Description;
@@ -146,15 +149,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 
             var metadata = metadataInit.ToPluginMetadata();
 
-
-            var fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
+            string fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
             string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, fileName);
-
             string? targetDirectory = Path.GetDirectoryName(targetFileName);
             Directory.CreateDirectory(targetDirectory);
 
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
-            using (var fileStream = File.Open(targetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+            using (FileStream fileStream = File.Open(targetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 serializer.Serialize(fileStream, metadata);
             }

@@ -16,12 +16,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             Func<Type, ILogger> loggerFactory = ConsoleLogger.Create;
             var metadataGenerator = new MetadataGenerator(loggerFactory);
 
+            var schemaFilePath = @"D:\CleanRepos\microsoft-performance-toolkit-sdk\src\PluginsSystem\Schemas\PluginManifestSchema.json";
+            var manifestSchema = File.ReadAllText(schemaFilePath);
+
             return result.MapResult(
                 (PackOptions opts) => opts.Run(metadataGenerator),
                 (MetadataGenOptions opts) => opts.Run(
                     loggerFactory,
                     new PluginSourceFilesValidator(loggerFactory),
-                    new PluginManifestValidator(),
+                    new PluginManifestValidator(manifestSchema, loggerFactory),
                     metadataGenerator),
                 errs => HandleParseError(errs));
         }
