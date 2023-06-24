@@ -1,35 +1,37 @@
-﻿using Microsoft.Performance.SDK.Processing;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Interfaces;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     public class PluginManifestValidator
         : IPluginManifestValidator
     {
-        private readonly JSchema schema;
         private readonly ILogger logger;
 
-        public PluginManifestValidator(string schemaString, Func<Type, ILogger> loggerFactory)
+        public PluginManifestValidator(Func<Type, ILogger> loggerFactory)
         {
-            this.schema = JSchema.Parse(schemaString);
             this.logger = loggerFactory(typeof(PluginManifestValidator));
         }
 
-        public bool Validate(string pluginManifestPath)
+        public bool Validate(
+            PluginManifest pluginManifest)
         {
-            var jsonData = JToken.Parse(File.ReadAllText(pluginManifestPath));
-            bool isValid = jsonData.IsValid(this.schema, out IList<string> errors);
+            var validationContext = new ValidationContext(pluginManifest);
+            var validationResults = new List<ValidationResult>();
 
+            bool isValid = Validator.TryValidateObject(pluginManifest, validationContext, validationResults, true);
             if (!isValid)
             {
-                foreach (string error in errors)
+                foreach (var validationResult in validationResults)
                 {
-                    this.logger.Error($"Plugin manifest validation error: {error}");
+                    this.logger.Error(validationResult.ErrorMessage);
                 }
+
+                return false;
             }
 
-            return isValid;
+            return true;
         }
     }
 }

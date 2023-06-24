@@ -3,7 +3,7 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
-    public interface IPluginManifestValidator
+    public interface IPluginManifestFileValidator
     {
         bool Validate(string pluginManifestPath);
     }

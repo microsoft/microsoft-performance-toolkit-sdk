@@ -7,7 +7,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
     {
         public PluginManifest(
             string id,
-            Version version,
+            string version,
             string displayName,
             string description,
             IEnumerable<PluginOwner> owners,
@@ -24,21 +24,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         /// <summary>
         ///     Gets or sets the identifier of this plugin.
         /// </summary>
+        [Required(ErrorMessage = "The plugin ID is required.")]
         public string Id { get; }
 
         /// <summary>
         ///     Gets or sets the version of this plugin.
         /// </summary>
-        public Version Version { get; }
+        [Required(ErrorMessage = "The plugin version is required.")]
+        public string Version { get; }
 
         /// <summary>
         ///     Gets or sets the human-readable name of this plugin.
         /// </summary>
+        [Required(ErrorMessage = "The plugin display name is required.")]
         public string DisplayName { get; }
 
         /// <summary>
         ///     Gets or sets the user friendly description of this plugin.
         /// </summary>
+        [Required(ErrorMessage = "The plugin description is required.")]
         public string Description { get; }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 (MetadataGenOptions opts) => opts.Run(
                     loggerFactory,
                     new PluginSourceFilesValidator(loggerFactory),
-                    new PluginManifestValidator(manifestSchema, loggerFactory),
+                    new PluginManifestJsonValidator(manifestSchema, loggerFactory),
                     metadataGenerator),
                 errs => HandleParseError(errs));
         }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
@@ -84,7 +85,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             IPluginManifestValidator manifestValidator,
             IMetadataGenerator metadataGenerator)
         {
-
             ILogger logger = loggerFactory(typeof(MetadataGenOptions));
 
             if (!sourceDirValidator.Validate(this.SourceDirectory))
@@ -93,8 +93,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                 return 1;
             }
 
-            PluginMetadataInit metadataInit = new();
-            if (!metadataGenerator.TryCreateMetadata(this.SourceDirectory, out metadataInit))
+            if (!metadataGenerator.TryCreateMetadata(this.SourceDirectory, out PluginMetadataInit metadataInit))
             {
                 logger.Error("Failed to extract metadata from assembly.");
                 return 1;
@@ -103,22 +102,37 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             PluginManifest? pluginManifest = null;
             if (this.ManifestFilePath != null)
             {
-                if (!manifestValidator.Validate(this.ManifestFilePath))
+                if (!File.Exists(this.ManifestFilePath))
                 {
-                    logger.Error($"Invalid plugin manifest file: {this.ManifestFilePath}");
+                    logger.Error($"Plugin manifest file does not exist: {this.ManifestFilePath}");
                     return 1;
                 }
 
-                // If a manifest file was specified, use it to generate the metadata file
-                var options = new JsonSerializerOptions
+                try
                 {
-                    WriteIndented = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                };
+                    // If a manifest file was specified, use it to generate the metadata file
+                    var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    };
 
-                using (FileStream manifestStream = File.OpenRead(this.ManifestFilePath))
+                    using (FileStream manifestStream = File.OpenRead(this.ManifestFilePath))
+                    {
+                        pluginManifest = JsonSerializer.Deserialize<PluginManifest>(manifestStream, options: options);
+                    }
+                }
+                catch (JsonException ex)
                 {
-                    pluginManifest = JsonSerializer.Deserialize<PluginManifest>(manifestStream, options: options);
+                    logger.Error($"Invalid plugin manifest file: {this.ManifestFilePath}");
+                    logger.Error(ex.Message);
+                    return 1;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error($"Failed to read plugin manifest file: {this.ManifestFilePath}");
+                    logger.Error(ex.Message);
+                    return 1;
                 }
             }
             else
@@ -138,11 +152,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                     return 1;
                 }
 
-                pluginManifest = new PluginManifest(this.Id, version, this.PluginDisplayName, this.PluginDescription, null, null);
+                pluginManifest = new PluginManifest(this.Id, this.Version, this.PluginDisplayName, this.PluginDescription, null, null);
+            }
+
+            if (!manifestValidator.Validate(pluginManifest))
+            {
+                logger.Error("Invalid plugin manifest. See errors above.");
+                return 1;
             }
 
             metadataInit.Id = pluginManifest.Id;
-            metadataInit.Version = pluginManifest.Version;
+            metadataInit.Version = SystemVersion.Parse(pluginManifest.Version);
             metadataInit.Description = pluginManifest.Description;
             metadataInit.DisplayName = pluginManifest.DisplayName;
             metadataInit.Owners = pluginManifest.Owners;
