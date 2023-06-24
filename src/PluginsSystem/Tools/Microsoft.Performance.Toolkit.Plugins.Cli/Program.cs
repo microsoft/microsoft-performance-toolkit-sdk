@@ -15,16 +15,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, MetadataGenOptions>(args);
             Func<Type, ILogger> loggerFactory = ConsoleLogger.Create;
             var metadataGenerator = new MetadataGenerator(loggerFactory);
+            var manifestValidator = new PluginManifestValidator(loggerFactory);
+            var sourceFilesValidator = new PluginSourceFilesValidator(loggerFactory);
 
             var schemaFilePath = @"D:\CleanRepos\microsoft-performance-toolkit-sdk\src\PluginsSystem\Schemas\PluginManifestSchema.json";
             var manifestSchema = File.ReadAllText(schemaFilePath);
 
             return result.MapResult(
-                (PackOptions opts) => opts.Run(metadataGenerator),
+                (PackOptions opts) => opts.Run(
+                    loggerFactory,
+                    sourceFilesValidator,
+                    manifestValidator,
+                    metadataGenerator),
                 (MetadataGenOptions opts) => opts.Run(
                     loggerFactory,
-                    new PluginSourceFilesValidator(loggerFactory),
-                    new PluginManifestJsonValidator(manifestSchema, loggerFactory),
+                    sourceFilesValidator,
+                    manifestValidator,
                     metadataGenerator),
                 errs => HandleParseError(errs));
         }

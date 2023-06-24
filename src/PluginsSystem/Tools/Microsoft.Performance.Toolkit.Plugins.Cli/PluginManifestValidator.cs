@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Interfaces;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {

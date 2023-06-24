@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
