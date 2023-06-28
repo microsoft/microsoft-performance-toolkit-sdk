@@ -21,11 +21,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task TryReadPackageAsync_InvalidZip_FailsWithErrorLogged()
         {
             var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsSerializer.Object, fakeLoggerFactory);
+            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsInfoSerializer.Object, fakeLoggerFactory);
 
             using var stream = new MemoryStream();
             var package = await sut.TryReadPackageAsync(stream, CancellationToken.None);
@@ -39,11 +39,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task TryReadPackageAsync_StreamClosed_FailsWithErrorLogged()
         {
             var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsSerializer.Object, fakeLoggerFactory);
+            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsInfoSerializer.Object, fakeLoggerFactory);
 
             using var stream = new MemoryStream();
             stream.Close();
@@ -58,11 +58,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task TryReadPackageAsync_NoContentsFile_FailsWithErrorLogged()
         {
             var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsSerializer.Object, fakeLoggerFactory);
+            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsInfoSerializer.Object, fakeLoggerFactory);
 
             using (var memoryStream = new MemoryStream())
             {
@@ -84,11 +84,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task TryReadPackageAsync_NoContentFolder_FailsWithErrorLogged()
         {
             var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsSerializer.Object, fakeLoggerFactory);
+            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsInfoSerializer.Object, fakeLoggerFactory);
 
             using (var memoryStream = new MemoryStream())
             {
@@ -109,13 +109,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task TryReadPackageAsync_DeserializationThrows_FailedWithErrorLogged()
         {
             var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsSerializer.Object, fakeLoggerFactory);
+            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsInfoSerializer.Object, fakeLoggerFactory);
 
-            fakeContentsSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Throws<System.Text.Json.JsonException>();
+            fakeContentsInfoSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Throws<System.Text.Json.JsonException>();
             fakeInfoSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Throws<System.Text.Json.JsonException>();
 
             using (var memoryStream = new MemoryStream())
@@ -139,7 +139,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task PluginPackage_ValidPackage_Succeeds()
         {
             var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -147,9 +147,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeInfoSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(info));
 
             var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
-            fakeContentsSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(contents));
+            fakeContentsInfoSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(contents));
 
-            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsSerializer.Object, fakeLoggerFactory);
+            var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsInfoSerializer.Object, fakeLoggerFactory);
 
             using (var memoryStream = new MemoryStream())
             {
