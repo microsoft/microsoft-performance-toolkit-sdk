@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         /// <summary>
         ///     Gets a value indicating the type of this entry.
         /// </summary>
-        public abstract PluginPackageEntryType Type { get; }
+        public abstract PluginPackageEntryType EntryType { get; }
 
         /// <summary>
         ///     Gets a value indicating the size of this entry, in bytes, after it is installed.

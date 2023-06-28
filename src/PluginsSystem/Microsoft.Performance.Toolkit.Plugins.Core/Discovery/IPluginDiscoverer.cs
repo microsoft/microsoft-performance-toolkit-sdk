@@ -51,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     The metadata of the given plugin.
+        ///     The contents of the given plugin.
         /// </returns>
         Task<PluginContents> GetPluginContentsAsync(
             PluginIdentity pluginIdentity,

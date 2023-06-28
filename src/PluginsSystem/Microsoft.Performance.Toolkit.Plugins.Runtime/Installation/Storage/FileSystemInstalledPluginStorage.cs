@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         : IInstalledPluginStorage
     {
         private readonly IPluginsStorageDirectory pluginStorageDirectory;
-        private readonly ISerializer<PluginContents> pluginMetadataSerializer;
+        private readonly ISerializer<PluginContents> pluginContentsSerializer;
         private readonly IDirectoryChecksumCalculator checksumCalculator;
         private readonly ILogger logger;
 
@@ -34,8 +34,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <param name="pluginStorageDirectory">
         ///     The directory where the plugins are stored.
         /// </param>
-        /// <param name="metadataSerializer">
-        ///     The serializer to use to serialize and deserialize the plugin metadata.
+        /// <param name="contentsSerializer">
+        ///     The serializer to use to serialize and deserialize the plugin contents.
         /// </param>
         /// <param name="checksumCalculator">
         ///     The checksum calculator to use to calculate the checksum of the plugin content.
@@ -45,17 +45,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// </param>
         internal FileSystemInstalledPluginStorage(
             IPluginsStorageDirectory pluginStorageDirectory,
-            ISerializer<PluginContents> metadataSerializer,
+            ISerializer<PluginContents> contentsSerializer,
             IDirectoryChecksumCalculator checksumCalculator,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginStorageDirectory, nameof(pluginStorageDirectory));
             Guard.NotNull(checksumCalculator, nameof(checksumCalculator));
-            Guard.NotNull(metadataSerializer, nameof(metadataSerializer));
+            Guard.NotNull(contentsSerializer, nameof(contentsSerializer));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
             this.pluginStorageDirectory = pluginStorageDirectory;
-            this.pluginMetadataSerializer = metadataSerializer;
+            this.pluginContentsSerializer = contentsSerializer;
             this.checksumCalculator = checksumCalculator;
             this.logger = loggerFactory(typeof(FileSystemInstalledPluginStorage));
         }
@@ -88,7 +88,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     string destPath;
                     bool isDirectory = false;
 
-                    switch (entry.Type)
+                    switch (entry.EntryType)
                     {
                         case PluginPackageEntryType.ContentFile:
                             string contentDir = this.pluginStorageDirectory.GetPluginContentDirectory(package.PluginInfo.Identity);
@@ -179,17 +179,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            string metadataPath = this.pluginStorageDirectory.GetPluginContentsFilePath(installedPlugin);
+            string contentsFilePath = this.pluginStorageDirectory.GetPluginContentsFilePath(installedPlugin);
 
-            if (!File.Exists(metadataPath))
+            if (!File.Exists(contentsFilePath))
             {
                 return null;
             }
 
             PluginContents pluginContents;
-            using (var fileStream = new FileStream(metadataPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var fileStream = new FileStream(contentsFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                pluginContents = await this.pluginMetadataSerializer.DeserializeAsync(
+                pluginContents = await this.pluginContentsSerializer.DeserializeAsync(
                     fileStream,
                     cancellationToken);
             }

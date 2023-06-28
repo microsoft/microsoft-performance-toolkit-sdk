@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         : IPluginPackageReader
     {
         private readonly ISerializer<PluginInfo> infoSerializer;
-        private readonly ISerializer<PluginContents> metadataSerializer;
+        private readonly ISerializer<PluginContents> contentsSerializer;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
 
@@ -34,7 +34,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <param name="infoSerializer">
         ///     The serializer to use to deserialize the plugin info.
         /// </param>
-        /// <param name="metadataSerializer">
+        /// <param name="contentsSerializer">
         ///     The serializer to use to deserialize the plugin contents.
         /// </param>
         /// <param name="loggerFactory">
@@ -42,11 +42,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// </param>
         public ZipPluginPackageReader(
             ISerializer<PluginInfo> infoSerializer,
-            ISerializer<PluginContents> metadataSerializer,
+            ISerializer<PluginContents> contentsSerializer,
             Func<Type, ILogger> loggerFactory)
         {
             this.infoSerializer = infoSerializer;
-            this.metadataSerializer = metadataSerializer;
+            this.contentsSerializer = contentsSerializer;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(ZipPluginPackageReader));
         }
@@ -112,7 +112,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                     return null;
                 }
 
-                // Check that the plugin metadata file exists
+                // Check that the plugin contents file exists
                 ZipArchiveEntry contentsFileEntry = zip.GetEntry(PackageConstants.PluginContentsFileName);
                 if (contentsFileEntry == null)
                 {
@@ -120,13 +120,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                     return null;
                 }
 
-                // Try to read plugin metadata
+                // Try to read plugin contents
                 PluginContents contents;
                 try
                 {
                     using (Stream contentsFileStream = contentsFileEntry.Open())
                     {
-                        contents = await this.metadataSerializer.DeserializeAsync(contentsFileStream, cancellationToken);
+                        contents = await this.contentsSerializer.DeserializeAsync(contentsFileStream, cancellationToken);
                     }
                 }
                 catch (JsonException e)

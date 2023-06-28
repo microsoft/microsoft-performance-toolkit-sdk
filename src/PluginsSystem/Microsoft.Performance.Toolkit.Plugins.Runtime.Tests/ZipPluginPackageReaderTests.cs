@@ -55,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public async Task TryReadPackageAsync_NoMetadata_FailsWithErrorLogged()
+        public async Task TryReadPackageAsync_NoContentsFile_FailsWithErrorLogged()
         {
             var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
             var fakeContentsSerializer = new Mock<ISerializer<PluginContents>>();
@@ -68,6 +68,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
+                    archive.CreateEntry(PackageConstants.PluginInfoFileName);
                     archive.CreateEntry(PackageConstants.PluginContentFolderName);
                 }
 
@@ -145,8 +146,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
             fakeInfoSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(info));
 
-            var metadata = FakeContents.GetFakeEmptyPluginContents();
-            fakeContentsSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(metadata));
+            var contents = FakeContents.GetFakeEmptyPluginContents();
+            fakeContentsSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(contents));
 
             var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsSerializer.Object, fakeLoggerFactory);
 
@@ -162,7 +163,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 var package = await sut.TryReadPackageAsync(memoryStream, CancellationToken.None);
 
                 Assert.IsNotNull(package);
-                Assert.AreEqual(metadata, package.PluginContents);
+                Assert.AreEqual(contents, package.PluginContents);
             }
         }
     }

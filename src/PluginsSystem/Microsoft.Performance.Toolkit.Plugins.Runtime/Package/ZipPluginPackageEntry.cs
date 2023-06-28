@@ -35,11 +35,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                return this.Type == PluginPackageEntryType.ContentFile ? this.RawPath.Substring(PackageConstants.PluginContentFolderName.Length) : null;
+                return this.EntryType == PluginPackageEntryType.ContentFile ? this.RawPath.Substring(PackageConstants.PluginContentFolderName.Length) : null;
             }
         }
 
-        public override PluginPackageEntryType Type
+        public override PluginPackageEntryType EntryType
         {
             get
             {

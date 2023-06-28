@@ -17,7 +17,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The information of the installed plugin.
         /// </param>
         /// <param name="pluginContents">
-        ///     The metadata of the installed plugin.
+        ///     The contents of the installed plugin.
         /// </param>
         public InstalledPlugin(
             InstalledPluginInfo installedPluginInfo,

@@ -65,7 +65,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             string fileName = "bar.txt";
 
             fakePluginPackageEntry.Setup(x => x.Open()).Returns(stream);
-            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.ContentFile);
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns(fileName);
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
@@ -104,7 +104,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
             string folderName = "foo/bar/";
-            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.ContentFile);
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns(folderName);
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns(folderName);
 
@@ -132,7 +132,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public async Task AddAsync_Metadata_AddedToCorrectPath()
+        public async Task AddAsync_ContentsFile_AddedToCorrectPath()
         {
             // Arrange
             var fakeLogger = new Mock<ILogger>();
@@ -145,7 +145,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             using var stream = new MemoryStream();
 
             fakePluginPackageEntry.Setup(x => x.Open()).Returns(stream);
-            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentsJsonFile);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.ContentsJsonFile);
 
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
@@ -154,8 +154,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            string metadataDestPath = Path.Combine(this.tempDirectory, "metadata.txt");
-            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginPackage.Object.PluginInfo.Identity)).Returns(metadataDestPath);
+            string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");
+            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginPackage.Object.PluginInfo.Identity)).Returns(contentsFileDestPath);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -167,7 +167,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             await sut.AddAsync(fakePluginPackage.Object, CancellationToken.None, null);
 
             // Assert
-            Assert.IsTrue(File.Exists(metadataDestPath));
+            Assert.IsTrue(File.Exists(contentsFileDestPath));
         }
 
         [TestMethod]
@@ -183,7 +183,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
 
-            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.Unknown);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.Unknown);
 
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
@@ -230,7 +230,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             stream.Seek(0, SeekOrigin.Begin);
             fakePluginPackageEntry.Setup(x => x.Open()).Returns(stream);
-            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.ContentFile);
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns(fileName);
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
@@ -276,7 +276,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
             var exception = new Exception("foo");
             fakePluginPackageEntry.Setup(x => x.Open()).Throws(exception);
-            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.ContentFile);
 
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns("");
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
@@ -317,7 +317,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeSerializer = new Mock<ISerializer<PluginContents>>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
-            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.Unknown);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.Unknown);
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
             PluginContents fakeContents = new Fixture().Create<PluginContents>();
@@ -386,7 +386,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public async Task TryGetPluginContentsAsync_PluginMetadataFileExists_PluginMetadataReturned()
+        public async Task TryGetPluginContentsAsync_PluginContentsFileExists_PluginContentsReturned()
         {
             // Arrange
             var fakeLogger = new Mock<ILogger>();
@@ -401,10 +401,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            string metadataDestPath = Path.Combine(this.tempDirectory, "metadata.txt");
-            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(metadataDestPath);
+            string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");
+            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(contentsFileDestPath);
 
-            string tempFile = metadataDestPath;
+            string tempFile = contentsFileDestPath;
             using (FileStream _ = File.Create(tempFile))
             {
             }
@@ -424,7 +424,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public async Task TryGetPluginContentsAsync_PluginMetadataFileDoesNotExist_NullReturned()
+        public async Task TryGetPluginContentsAsync_PluginContentsFileDoesNotExist_NullReturned()
         {
             // Arrange
             var fakeLogger = new Mock<ILogger>();
@@ -435,8 +435,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            string metadataDestPath = Path.Combine(this.tempDirectory, "metadata.txt");
-            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(metadataDestPath);
+            string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");
+            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(contentsFileDestPath);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,

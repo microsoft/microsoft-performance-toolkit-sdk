@@ -21,10 +21,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [DataRow(PackageConstants.PluginContentsFileName, true)]
         [DataRow(@$"somefolder/{PackageConstants.PluginContentsFileName}", false)]
         [DataRow(@"foo.json", false)]
-        public void IsMetadataFile_ReturnsExpectedResult(string entryPath, bool expected)
+        public void ContentsFile_EntryType_ReturnsExpectedResult(string entryPath, bool expected)
         {
             var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var metadata = FakeContents.GetFakeEmptyPluginContents();
+            var contents = FakeContents.GetFakeEmptyPluginContents();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -37,9 +37,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))
                 {
-                    var sut = new ZipPluginPackage(info, metadata, archive, fakeLoggerFactory);
+                    var sut = new ZipPluginPackage(info, contents, archive, fakeLoggerFactory);
 
-                    Assert.AreEqual(sut.Entries.Single().Type == PluginPackageEntryType.ContentsJsonFile, expected);
+                    Assert.AreEqual(sut.Entries.Single().EntryType == PluginPackageEntryType.ContentsJsonFile, expected);
                 }
             }
         }
@@ -49,10 +49,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [DataRow(PackageConstants.PluginContentFolderName, true)]
         [DataRow(@$"{PackageConstants.PluginContentFolderName}foo.txt", true)]
         [DataRow(@"somefolder/", false)]
-        public void IsContentFile_ReturnsExpectedResult(string entryPath, bool expected)
+        public void ContentFile_EntryType_ReturnsExpectedResult(string entryPath, bool expected)
         {
             var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var metadata = FakeContents.GetFakeEmptyPluginContents();
+            var contents = FakeContents.GetFakeEmptyPluginContents();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -65,9 +65,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))
                 {
-                    var sut = new ZipPluginPackage(info, metadata, archive, fakeLoggerFactory);
+                    var sut = new ZipPluginPackage(info, contents, archive, fakeLoggerFactory);
 
-                    Assert.AreEqual(sut.Entries.Single().Type == PluginPackageEntryType.ContentFile, expected);
+                    Assert.AreEqual(sut.Entries.Single().EntryType == PluginPackageEntryType.ContentFile, expected);
                 }
             }
         }
@@ -81,7 +81,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public void RawPath_ReturnsExpectedResult(string entryPath, string expectedRawPath)
         {
             var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var metadata = FakeContents.GetFakeEmptyPluginContents();
+            var contents = FakeContents.GetFakeEmptyPluginContents();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -94,7 +94,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))
                 {
-                    var sut = new ZipPluginPackage(info, metadata, archive, fakeLoggerFactory);
+                    var sut = new ZipPluginPackage(info, contents, archive, fakeLoggerFactory);
 
                     Assert.AreEqual(sut.Entries.Single().RawPath, expectedRawPath);
                 }
@@ -109,7 +109,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public void ContentRelativePath_ReturnsExpectedResult(string entryPath, string expectedContentRelativePath)
         {
             var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var metadata = FakeContents.GetFakeEmptyPluginContents();
+            var contents = FakeContents.GetFakeEmptyPluginContents();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -122,7 +122,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))
                 {
-                    var sut = new ZipPluginPackage(info, metadata, archive, fakeLoggerFactory);
+                    var sut = new ZipPluginPackage(info, contents, archive, fakeLoggerFactory);
 
                     Assert.AreEqual(sut.Entries.Single().ContentRelativePath, expectedContentRelativePath);
                 }
@@ -134,7 +134,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public void Open_ReturnsExpectedResult()
         {
             var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var metadata = FakeContents.GetFakeEmptyPluginContents();
+            var contents = FakeContents.GetFakeEmptyPluginContents();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -153,7 +153,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))
                 {
-                    var sut = new ZipPluginPackage(info, metadata, archive, fakeLoggerFactory);
+                    var sut = new ZipPluginPackage(info, contents, archive, fakeLoggerFactory);
 
                     using var openedStream = sut.Entries.Single().Open();
                     using var expectedStream = archive.GetEntry("foo.txt")?.Open();
