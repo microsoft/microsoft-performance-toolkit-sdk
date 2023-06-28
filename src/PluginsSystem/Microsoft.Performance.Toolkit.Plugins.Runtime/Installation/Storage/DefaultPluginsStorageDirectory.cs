@@ -15,6 +15,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     public sealed class DefaultPluginsStorageDirectory
         : IPluginsStorageDirectory
     {
+        private const string pluginInfoFileName = "plugininfo.json";
+        private const string pluginContentsInfoFileName = "plugincontents.json";
+        private const string pluginContentFolderName = "plugin/";
+
         private readonly string rootDirectory;
 
         /// <summary>
@@ -36,7 +40,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
             string directory = GetPluginRootDirectory(pluginIdentity);
-            return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginContentFolderName));
+            return Path.GetFullPath(Path.Combine(directory, pluginContentFolderName));
         }
 
         /// <inheritdoc/>
@@ -45,16 +49,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
             string directory = GetPluginRootDirectory(pluginIdentity);
-            return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginInfoFileName));
+            return Path.GetFullPath(Path.Combine(directory, pluginInfoFileName));
         }
 
         /// <inheritdoc/>
-        public string GetPluginContentsFilePath(PluginIdentity pluginIdentity)
+        public string GetPluginContentsInfoFilePath(PluginIdentity pluginIdentity)
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
             string directory = GetPluginRootDirectory(pluginIdentity);
-            return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginContentsFileName));
+            return Path.GetFullPath(Path.Combine(directory, pluginContentsInfoFileName));
         }
 
         /// <inheritdoc/>

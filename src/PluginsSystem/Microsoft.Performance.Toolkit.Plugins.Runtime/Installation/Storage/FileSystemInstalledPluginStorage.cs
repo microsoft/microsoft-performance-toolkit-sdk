@@ -99,7 +99,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                             destPath = this.pluginStorageDirectory.GetPluginInfoFilePath(package.PluginInfo.Identity);
                             break;
                         case PluginPackageEntryType.ContentsJsonFile:
-                            destPath = this.pluginStorageDirectory.GetPluginContentsFilePath(package.PluginInfo.Identity);
+                            destPath = this.pluginStorageDirectory.GetPluginContentsInfoFilePath(package.PluginInfo.Identity);
                             break;
                         case PluginPackageEntryType.Unknown:
                         default:
@@ -179,7 +179,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            string contentsFilePath = this.pluginStorageDirectory.GetPluginContentsFilePath(installedPlugin);
+            string contentsFilePath = this.pluginStorageDirectory.GetPluginContentsInfoFilePath(installedPlugin);
 
             if (!File.Exists(contentsFilePath))
             {

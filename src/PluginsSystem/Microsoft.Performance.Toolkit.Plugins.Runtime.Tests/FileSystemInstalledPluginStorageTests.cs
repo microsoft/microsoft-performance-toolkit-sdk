@@ -155,7 +155,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");
-            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginPackage.Object.PluginInfo.Identity)).Returns(contentsFileDestPath);
+            fakeDir.Setup(d => d.GetPluginContentsInfoFilePath(fakePluginPackage.Object.PluginInfo.Identity)).Returns(contentsFileDestPath);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -402,7 +402,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");
-            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(contentsFileDestPath);
+            fakeDir.Setup(d => d.GetPluginContentsInfoFilePath(fakePluginIdentity)).Returns(contentsFileDestPath);
 
             string tempFile = contentsFileDestPath;
             using (FileStream _ = File.Create(tempFile))
@@ -436,7 +436,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");
-            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(contentsFileDestPath);
+            fakeDir.Setup(d => d.GetPluginContentsInfoFilePath(fakePluginIdentity)).Returns(contentsFileDestPath);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,

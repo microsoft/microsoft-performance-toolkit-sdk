@@ -54,7 +54,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <returns>
         ///     The path to the plugin contents file.
         /// </returns>
-        string GetPluginContentsFilePath(PluginIdentity pluginIdentity);
+        string GetPluginContentsInfoFilePath(PluginIdentity pluginIdentity);
 
         /// <summary>
         ///     Gets the directories of all installed plugins under the root directory.
