@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// <returns>
         ///     The contents of the given plugin.
         /// </returns>
-        Task<PluginContents> GetPluginContentsAsync(
+        Task<PluginContentsInfo> GetPluginContentsInfoAsync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
 

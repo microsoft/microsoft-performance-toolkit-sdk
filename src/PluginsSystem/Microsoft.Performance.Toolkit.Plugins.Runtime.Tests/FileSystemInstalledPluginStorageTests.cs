@@ -57,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
@@ -70,8 +70,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContentsInfo, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
@@ -99,7 +99,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
@@ -109,8 +109,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns(folderName);
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContentsInfo, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
@@ -138,19 +138,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
             using var stream = new MemoryStream();
 
             fakePluginPackageEntry.Setup(x => x.Open()).Returns(stream);
-            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.ContentsJsonFile);
+            fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.ContentsInfoJsonFile);
 
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContentsInfo, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
@@ -178,7 +178,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
@@ -187,8 +187,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContentsInfo, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
@@ -215,7 +215,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
@@ -235,8 +235,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContentsInfo, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
@@ -270,7 +270,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
@@ -282,8 +282,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContentsInfo, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
@@ -314,14 +314,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
             fakePluginPackageEntry.SetupGet(x => x.EntryType).Returns(PluginPackageEntryType.Unknown);
 
             PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContentsInfo, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(Array.Empty<PluginPackageEntry>());
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
@@ -355,7 +355,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
 
@@ -382,20 +382,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         #endregion
 
-        #region TryGetPluginContentsAsync
+        #region TryGetPluginContentsInfoAsync
 
         [TestMethod]
         [UnitTest]
-        public async Task TryGetPluginContentsAsync_PluginContentsFileExists_PluginContentsReturned()
+        public async Task TryGetPluginContentsInfoAsync_PluginContentsInfoFileExists_PluginContentsInfoReturned()
         {
             // Arrange
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            PluginContentsInfo fakeContentsInfo = new Fixture().Create<PluginContentsInfo>();
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
-            fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())).ReturnsAsync(fakeContents);
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())).ReturnsAsync(fakeContentsInfo);
 
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
@@ -416,21 +416,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeLoggerFactory);
 
             // Act
-            PluginContents result = await sut.TryGetPluginContentsAsync(fakePluginIdentity, CancellationToken.None);
+            PluginContentsInfo result = await sut.TryGetPluginContentsInfoAsync(fakePluginIdentity, CancellationToken.None);
 
             // Assert
-            Assert.AreEqual(result, fakeContents);
+            Assert.AreEqual(result, fakeContentsInfo);
         }
 
         [TestMethod]
         [UnitTest]
-        public async Task TryGetPluginContentsAsync_PluginContentsFileDoesNotExist_NullReturned()
+        public async Task TryGetPluginContentsInfoAsync_PluginContentsInfoFileDoesNotExist_NullReturned()
         {
             // Arrange
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContentsInfo>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
 
@@ -445,7 +445,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeLoggerFactory);
 
             // Act
-            PluginContents result = await sut.TryGetPluginContentsAsync(fakePluginIdentity, CancellationToken.None);
+            PluginContentsInfo result = await sut.TryGetPluginContentsInfoAsync(fakePluginIdentity, CancellationToken.None);
 
             // Assert
             Assert.IsNull(result);

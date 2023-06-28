@@ -18,7 +18,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public void Constructor_EntriesCreated()
         {
             var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var contents = FakeContents.GetFakeEmptyPluginContents();
+            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -26,7 +26,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    archive.CreateEntry(PackageConstants.PluginContentsFileName);
+                    archive.CreateEntry(PackageConstants.PluginContentsInfoFileName);
                 }
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))

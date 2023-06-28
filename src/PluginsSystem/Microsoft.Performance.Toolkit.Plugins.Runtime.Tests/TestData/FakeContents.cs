@@ -7,9 +7,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
     internal static class FakeContents
     {
-        public static PluginContents GetFakeEmptyPluginContents()
+        public static PluginContentsInfo GetFakeEmptyPluginContentsInfo()
         {
-            return new PluginContents(
+            return new PluginContentsInfo(
                 null,
                 null,
                 null);

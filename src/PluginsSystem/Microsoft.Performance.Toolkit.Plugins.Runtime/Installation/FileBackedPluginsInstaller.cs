@@ -237,7 +237,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Info($"{pluginToInstall} is registered in the plugin registry.");
                     }
 
-                    return new InstalledPlugin(pluginToInstall, pluginPackage.PluginContents);
+                    return new InstalledPlugin(pluginToInstall, pluginPackage.PluginContentsInfo);
                 }
                 catch (Exception e)
                 {
@@ -313,13 +313,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     installedPluginInfo);
             }
 
-            PluginContents pluginContents = await this.installedPluginStorage.TryGetPluginContentsAsync(
+            PluginContentsInfo pluginContentsInfo = await this.installedPluginStorage.TryGetPluginContentsInfoAsync(
                 installedPluginInfo.PluginInfo.Identity,
                 cancellationToken);
 
-            Debug.Assert(pluginContents != null);
+            Debug.Assert(pluginContentsInfo != null);
 
-            return new InstalledPlugin(installedPluginInfo, pluginContents);
+            return new InstalledPlugin(installedPluginInfo, pluginContentsInfo);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         /// <param name="pluginInfo">
         ///     The plugin info.
         /// </param>
-        /// <param name="pluginContents">
+        /// <param name="pluginContentsInfo">
         ///     The plugin contents.
         /// </param>
         /// <param name="loggerFactory">
@@ -32,15 +32,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         /// </param>
         protected PluginPackage(
             PluginInfo pluginInfo,
-            PluginContents pluginContents,
+            PluginContentsInfo pluginContentsInfo,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginInfo, nameof(pluginInfo));
-            Guard.NotNull(pluginContents, nameof(pluginContents));
+            Guard.NotNull(pluginContentsInfo, nameof(pluginContentsInfo));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
             this.PluginInfo = pluginInfo;
-            this.PluginContents = pluginContents;
+            this.PluginContentsInfo = pluginContentsInfo;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(GetType());
         }
@@ -58,7 +58,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         /// <summary>
         ///     Gets the plugin contents.
         /// </summary>
-        public PluginContents PluginContents { get; }
+        public PluginContentsInfo PluginContentsInfo { get; }
 
         /// <inheritdoc />
         public override string ToString()

@@ -21,9 +21,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         InfoJsonFile,
 
         /// <summary>
-        ///     The entry is for the <see cref="PluginContents"/>.
+        ///     The entry is for the <see cref="PluginContentsInfo"/>.
         /// </summary>
-        ContentsJsonFile,
+        ContentsInfoJsonFile,
 
         /// <summary>
         ///     The entry is a file for the plugin itself (e.g. one of its binaries).

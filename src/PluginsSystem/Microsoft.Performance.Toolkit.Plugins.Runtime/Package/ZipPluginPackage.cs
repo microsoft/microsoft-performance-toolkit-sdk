@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <param name="pluginInfo">
         ///     The info of the plugin.
         /// </param>
-        /// <param name="pluginContents">
+        /// <param name="pluginContentsInfo">
         ///     The contents of the plugin.
         /// </param>
         /// <param name="zip">
@@ -40,10 +40,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// </param>
         internal ZipPluginPackage(
             PluginInfo pluginInfo,
-            PluginContents pluginContents,
+            PluginContentsInfo pluginContentsInfo,
             ZipArchive zip,
             Func<Type, ILogger> loggerFactory)
-            : base(pluginInfo, pluginContents, loggerFactory)
+            : base(pluginInfo, pluginContentsInfo, loggerFactory)
         {
             Guard.NotNull(zip, nameof(zip));
 

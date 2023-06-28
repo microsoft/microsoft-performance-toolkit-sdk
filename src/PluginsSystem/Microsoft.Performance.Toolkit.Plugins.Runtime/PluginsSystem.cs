@@ -119,7 +119,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 loggerFactory);
 
             ISerializer<PluginInfo> infoSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginInfo>();
-            ISerializer<PluginContents> contentsSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContents>();
+            ISerializer<PluginContentsInfo> contentsSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsInfo>();
 
             var packageReader = new ZipPluginPackageReader(
                 infoSerializer,

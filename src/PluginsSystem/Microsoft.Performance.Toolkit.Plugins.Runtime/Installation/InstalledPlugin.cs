@@ -16,15 +16,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="installedPluginInfo">
         ///     The information of the installed plugin.
         /// </param>
-        /// <param name="pluginContents">
+        /// <param name="pluginContentsInfo">
         ///     The contents of the installed plugin.
         /// </param>
         public InstalledPlugin(
             InstalledPluginInfo installedPluginInfo,
-            PluginContents pluginContents)
+            PluginContentsInfo pluginContentsInfo)
         {
             this.Info = installedPluginInfo;
-            this.Contents = pluginContents;
+            this.ContentsInfo = pluginContentsInfo;
         }
 
         /// <summary>
@@ -35,6 +35,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <summary>
         ///     Gets the contents of the installed plugin.
         /// </summary>
-        public PluginContents Contents { get; }
+        public PluginContentsInfo ContentsInfo { get; }
     }
 }

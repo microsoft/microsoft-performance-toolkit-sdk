@@ -56,9 +56,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     The contents of a plugin.
         /// </returns>
-        public Task<PluginContents> GetPluginContents(CancellationToken cancellationToken)
+        public Task<PluginContentsInfo> GetPluginContentsInfo(CancellationToken cancellationToken)
         {
-            return this.pluginDiscoverer.GetPluginContentsAsync(this.AvailablePluginInfo.PluginInfo.Identity, cancellationToken);
+            return this.pluginDiscoverer.GetPluginContentsInfoAsync(this.AvailablePluginInfo.PluginInfo.Identity, cancellationToken);
         }
 
         /// <summary>

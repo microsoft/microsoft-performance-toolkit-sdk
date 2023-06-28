@@ -9,16 +9,16 @@ using Microsoft.Performance.SDK;
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
 {
     /// <summary>
-    ///     Represents the contents of a plugin.
+    ///     Contains information about the contents of a plugin.
     /// </summary>
-    public sealed class PluginContents
-        : IEquatable<PluginContents>
+    public sealed class PluginContentsInfo
+        : IEquatable<PluginContentsInfo>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginContents"/> class with the specified parameters.
+        ///     Initializes a new instance of the <see cref="PluginContentsInfo"/> class with the specified parameters.
         /// </summary>
         [JsonConstructor]
-        public PluginContents(
+        public PluginContentsInfo(
             IEnumerable<ProcessingSourceMetadata> processingSources,
             IEnumerable<DataCookerMetadata> dataCookers,
             IEnumerable<TableMetadata> extensibleTables)
@@ -46,11 +46,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            return Equals(obj as PluginContents);
+            return Equals(obj as PluginContentsInfo);
         }
 
         /// <inheritdoc/>
-        public bool Equals(PluginContents other)
+        public bool Equals(PluginContentsInfo other)
         {
             if (other is null)
             {

@@ -47,9 +47,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 {
                     return PluginPackageEntryType.InfoJsonFile;
                 }
-                else if (this.RawPath.Equals(PackageConstants.PluginContentsFileName, StringComparison.OrdinalIgnoreCase))
+                else if (this.RawPath.Equals(PackageConstants.PluginContentsInfoFileName, StringComparison.OrdinalIgnoreCase))
                 {
-                    return PluginPackageEntryType.ContentsJsonFile;
+                    return PluginPackageEntryType.ContentsInfoJsonFile;
                 }
                 else if (this.RawPath.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase))
                 {

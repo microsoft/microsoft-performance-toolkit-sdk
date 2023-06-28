@@ -64,7 +64,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <returns>
         ///     A task that completes when the plugin contents has been retrieved.
         /// </returns>
-        Task<PluginContents> TryGetPluginContentsAsync(
+        Task<PluginContentsInfo> TryGetPluginContentsInfoAsync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
     }

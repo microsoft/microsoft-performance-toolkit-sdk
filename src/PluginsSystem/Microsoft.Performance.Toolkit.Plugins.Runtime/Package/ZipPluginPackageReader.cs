@@ -24,7 +24,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         : IPluginPackageReader
     {
         private readonly ISerializer<PluginInfo> infoSerializer;
-        private readonly ISerializer<PluginContents> contentsSerializer;
+        private readonly ISerializer<PluginContentsInfo> contentsSerializer;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
 
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// </param>
         public ZipPluginPackageReader(
             ISerializer<PluginInfo> infoSerializer,
-            ISerializer<PluginContents> contentsSerializer,
+            ISerializer<PluginContentsInfo> contentsSerializer,
             Func<Type, ILogger> loggerFactory)
         {
             this.infoSerializer = infoSerializer;
@@ -113,20 +113,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 }
 
                 // Check that the plugin contents file exists
-                ZipArchiveEntry contentsFileEntry = zip.GetEntry(PackageConstants.PluginContentsFileName);
+                ZipArchiveEntry contentsFileEntry = zip.GetEntry(PackageConstants.PluginContentsInfoFileName);
                 if (contentsFileEntry == null)
                 {
-                    this.logger.Error($"Plugin contents file {PackageConstants.PluginContentsFileName} not found in the plugin package.");
+                    this.logger.Error($"Plugin contents file {PackageConstants.PluginContentsInfoFileName} not found in the plugin package.");
                     return null;
                 }
 
                 // Try to read plugin contents
-                PluginContents contents;
+                PluginContentsInfo contentsInfo;
                 try
                 {
                     using (Stream contentsFileStream = contentsFileEntry.Open())
                     {
-                        contents = await this.contentsSerializer.DeserializeAsync(contentsFileStream, cancellationToken);
+                        contentsInfo = await this.contentsSerializer.DeserializeAsync(contentsFileStream, cancellationToken);
                     }
                 }
                 catch (JsonException e)
@@ -136,7 +136,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 }
 
                 success = true;
-                return new ZipPluginPackage(info, contents, zip, this.loggerFactory);
+                return new ZipPluginPackage(info, contentsInfo, zip, this.loggerFactory);
             }
             finally
             {
