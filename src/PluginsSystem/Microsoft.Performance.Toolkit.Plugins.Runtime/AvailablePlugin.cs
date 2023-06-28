@@ -23,7 +23,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <summary>
         ///     Creates an instance of <see cref="AvailablePlugin"/>
         /// </summary>
-        /// <param name="pluginAvailablePluginInfo">
+        /// <param name="availablePluginInfo">
         ///     The <see cref="AvailablePluginInfo"/> object cotaining information about this plugin.
         /// </param>
         /// <param name="discoverer">
@@ -33,11 +33,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The <see cref="IPluginFetcher"/> this plugin uses to fetch plugin content.
         /// </param>
         internal AvailablePlugin(
-            AvailablePluginInfo pluginAvailablePluginInfo,
+            AvailablePluginInfo availablePluginInfo,
             IPluginDiscoverer discoverer,
             IPluginFetcher fetcher)
         {
-            this.AvailablePluginInfo = pluginAvailablePluginInfo;
+            this.AvailablePluginInfo = availablePluginInfo;
             this.pluginDiscoverer = discoverer;
             this.pluginFetcher = fetcher;
         }
