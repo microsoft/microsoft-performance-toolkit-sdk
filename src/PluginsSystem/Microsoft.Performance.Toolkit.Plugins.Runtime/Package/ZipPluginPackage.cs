@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
@@ -25,8 +26,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <summary>
         ///     Creates an instance of <see cref="ZipPluginPackage"/>.
         /// </summary>
-        /// <param name="metadata">
-        ///     The metadata of the plugin.
+        /// <param name="pluginInfo">
+        ///     The info of the plugin.
+        /// </param>
+        /// <param name="pluginContents">
+        ///     The contents of the plugin.
         /// </param>
         /// <param name="zip">
         ///     The zip archive that contains the plugin.
@@ -35,13 +39,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         ///     A factory that creates loggers for the given type.
         /// </param>
         internal ZipPluginPackage(
-            PluginMetadata metadata,
+            PluginInfo pluginInfo,
+            PluginContents pluginContents,
             ZipArchive zip,
             Func<Type, ILogger> loggerFactory)
-            : base(metadata, loggerFactory)
+            : base(pluginInfo, pluginContents, loggerFactory)
         {
             Guard.NotNull(zip, nameof(zip));
-            
+
             this.zip = zip;
             this.zipEntries = new Lazy<IReadOnlyCollection<PluginPackageEntry>>(
                 () => this.zip.Entries.Select(e => new ZipPluginPackageEntry(e)).ToList());

@@ -19,35 +19,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         [JsonConstructor]
         public AvailablePluginInfo(
-            PluginIdentity identity,
+            PluginInfo pluginInfo,
             PluginSource source,
             ulong packageSize,
-            ulong installedSize,
-            string displayName,
-            string description,
             Uri packageUri,
             Guid fetcherResourceId)
         {
-            Guard.NotNull(identity, nameof(identity));
+            Guard.NotNull(pluginInfo, nameof(pluginInfo));
             Guard.NotNull(source, nameof(source));
-            Guard.NotNullOrWhiteSpace(displayName, nameof(displayName));
-            Guard.NotNull(description, nameof(description));
             Guard.NotNull(packageUri, nameof(packageUri));
 
-            this.Identity = identity;
+            this.PluginInfo = pluginInfo;
             this.Source = source;
             this.PackageSize = packageSize;
-            this.InstalledSize = installedSize;
-            this.DisplayName = displayName;
-            this.Description = description;
             this.PackageUri = packageUri;
             this.FetcherResourceId = fetcherResourceId;
         }
 
         /// <summary>
-        ///     Gets the identity of this plugin.
+        ///     Gets the information for this plugin.
         /// </summary>
-        public PluginIdentity Identity { get; }
+        public PluginInfo PluginInfo { get; }
 
         /// <summary>
         ///     Gets the source where this plugin is discovered.
@@ -59,20 +51,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         public ulong PackageSize { get; }
 
-        /// <summary>
-        ///     Gets the size, in number of bytes, of this plugin once it has been installed.
-        /// </summary>
-        public ulong InstalledSize { get; }
-
-        /// <summary>
-        ///     Gets the human-readable name of this plugin.
-        /// </summary>
-        public string DisplayName { get; }
-
-        /// <summary>
-        ///     Gets the user friendly description of this plugin.
-        /// </summary>
-        public string Description { get; }
 
         /// <summary>
         ///     Gets the URI where the plugin package can be fetched.
@@ -104,12 +82,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return true;
             }
 
-            return this.Identity.Equals(other.Identity)
+            return this.PluginInfo.Equals(other.PluginInfo)
                 && this.Source.Equals(other.Source)
                 && this.PackageSize.Equals(other.PackageSize)
-                && this.InstalledSize.Equals(other.InstalledSize)
-                && this.DisplayName.Equals(other.DisplayName, StringComparison.Ordinal)
-                && this.Description.Equals(other.Description, StringComparison.Ordinal)
                 && this.PackageUri.Equals(other.PackageUri)
                 && this.FetcherResourceId.Equals(other.FetcherResourceId);
         }
@@ -118,12 +93,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
-                this.Identity.GetHashCode(),
+                this.PluginInfo.GetHashCode(),
                 this.Source.GetHashCode(),
                 this.PackageSize.GetHashCode(),
-                this.InstalledSize.GetHashCode(),
-                this.DisplayName.GetHashCode(),
-                this.Description.GetHashCode(),
                 this.PackageUri.GetHashCode(),
                 this.FetcherResourceId.GetHashCode());
         }

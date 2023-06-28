@@ -52,7 +52,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllAsync(cancellationToken);
-                IEnumerable<PluginIdentity> installedPluginIds = installedPlugins.Select(p => p.Identity);
+                IEnumerable<PluginIdentity> installedPluginIds = installedPlugins.Select(p => p.PluginInfo.Identity);
 
                 IEnumerable<string> dirsInUse = installedPluginIds.Select(
                    p => this.pluginsStorageDirectory.GetPluginRootDirectory(p));

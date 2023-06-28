@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
@@ -15,8 +16,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         : IPluginsStorageDirectory
     {
         private readonly string rootDirectory;
-        private static readonly string pluginMetadataFileName = @"pluginspec.json";
-        private static readonly string pluginContentFolder = @"plugin/";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DefaultPluginsStorageDirectory"/>
@@ -37,16 +36,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
             string directory = GetPluginRootDirectory(pluginIdentity);
-            return Path.GetFullPath(Path.Combine(directory, pluginContentFolder));
+            return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginContentFolderName));
         }
 
         /// <inheritdoc/>
-        public string GetPluginMetadataFilePath(PluginIdentity pluginIdentity)
+        public string GetPluginInfoFilePath(PluginIdentity pluginIdentity)
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
             string directory = GetPluginRootDirectory(pluginIdentity);
-            return Path.GetFullPath(Path.Combine(directory, pluginMetadataFileName));
+            return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginInfoFileName));
+        }
+
+        /// <inheritdoc/>
+        public string GetPluginContentsFilePath(PluginIdentity pluginIdentity)
+        {
+            Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
+
+            string directory = GetPluginRootDirectory(pluginIdentity);
+            return Path.GetFullPath(Path.Combine(directory, PackageConstants.PluginContentsFileName));
         }
 
         /// <inheritdoc/>

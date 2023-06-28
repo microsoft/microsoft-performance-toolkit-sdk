@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// <summary>
         ///     Discovers all versions of the given plugin.
         /// <param name="pluginIdentity">
-        ///     The target plugin to look up for.    
+        ///     The target plugin to look up for.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Returns the metadata of a given plugin. 
+        ///     Returns the content of a given plugin.
         /// </summary>
         /// <param name="pluginIdentity">
         ///     The identity of the requested plugin.
@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         /// <returns>
         ///     The metadata of the given plugin.
         /// </returns>
-        Task<PluginMetadata> GetPluginMetadataAsync(
+        Task<PluginContents> GetPluginContentsAsync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
 

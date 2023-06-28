@@ -62,7 +62,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// <summary>
         ///     Checks if the given <typeparamref name="TEntity"/> exists in the repository.
         /// </summary>
-        /// <param name="entity">
+        /// <param name="installedPluginInfo">
         ///     The <see cref="TEntity"/> to check for.
         /// </param>
         /// <param name="cancellationToken">
@@ -78,14 +78,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         ///     Throws when the repository cannot be read or written.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="entity"/> is null.
+        ///     Throws when <paramref name="installedPluginInfo"/> is null.
         /// </exception>
-        Task<bool> ExistsAsync(TEntity entity, CancellationToken cancellationToken);
+        Task<bool> ExistsAsync(TEntity installedPluginInfo, CancellationToken cancellationToken);
 
         /// <summary>
         ///     Adds a new entity to the repository.
         /// </summary>
-        /// <param name="entity">
+        /// <param name="installedPluginInfo">
         ///     The entity to add.
         /// </param>
         /// <param name="cancellationToken">
@@ -104,9 +104,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         ///     Throws when the repository cannot be read or written.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="entity"/> is null.
+        ///     Throws when <paramref name="installedPluginInfo"/> is null.
         /// </exception>
-        Task AddAsync(TEntity entity, CancellationToken cancellationToken);
+        Task AddAsync(TEntity installedPluginInfo, CancellationToken cancellationToken);
 
         /// <summary>
         ///     Deletes an existing entity in the repository.

@@ -60,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            PluginIdentity pluginIdentity = installedPlugin.Info.Identity;
+            PluginIdentity pluginIdentity = installedPlugin.Info.PluginInfo.Identity;
             string pluginDirectory = this.pluginsStorageDirectory.GetPluginContentDirectory(pluginIdentity);
 
             if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin.Info))

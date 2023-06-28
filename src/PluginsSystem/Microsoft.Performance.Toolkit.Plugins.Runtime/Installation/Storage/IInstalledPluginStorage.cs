@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Tries to get the plugin metadata for the given plugin identity.
+        ///     Tries to get the plugin contents for the given plugin identity.
         /// </summary>
         /// <param name="pluginIdentity">
         ///     The plugin identity.
@@ -62,9 +62,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     The cancellation token.
         /// </param>
         /// <returns>
-        ///     A task that completes when the plugin metadata has been retrieved.
+        ///     A task that completes when the plugin contents has been retrieved.
         /// </returns>
-        Task<PluginMetadata> TryGetPluginMetadataAsync(
+        Task<PluginContents> TryGetPluginContentsAsync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
     }

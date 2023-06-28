@@ -57,7 +57,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
@@ -65,18 +65,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             string fileName = "bar.txt";
 
             fakePluginPackageEntry.Setup(x => x.Open()).Returns(stream);
-            fakePluginPackageEntry.SetupGet(x => x.IsPluginContentFile).Returns(true);
-            fakePluginPackageEntry.SetupGet(x => x.IsMetadataFile).Returns(false);
+            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns(fileName);
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeMetadata, fakeLoggerFactory);
+            PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginIdentity)).Returns(this.tempDirectory);
-            
+            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginInfo.Identity)).Returns(this.tempDirectory);
+
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
                 fakeSerializer.Object,
@@ -99,22 +99,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
             string folderName = "foo/bar/";
-            fakePluginPackageEntry.SetupGet(x => x.IsPluginContentFile).Returns(true);
-            fakePluginPackageEntry.SetupGet(x => x.IsMetadataFile).Returns(false);
+            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns(folderName);
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns(folderName);
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeMetadata, fakeLoggerFactory);
+            PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginIdentity)).Returns(this.tempDirectory);
+            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginInfo.Identity)).Returns(this.tempDirectory);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -138,23 +138,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
             using var stream = new MemoryStream();
 
             fakePluginPackageEntry.Setup(x => x.Open()).Returns(stream);
-            fakePluginPackageEntry.SetupGet(x => x.IsPluginContentFile).Returns(false);
-            fakePluginPackageEntry.SetupGet(x => x.IsMetadataFile).Returns(true);
+            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentsJsonFile);
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeMetadata, fakeLoggerFactory);
+
+            PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string metadataDestPath = Path.Combine(this.tempDirectory, "metadata.txt");
-            fakeDir.Setup(d => d.GetPluginMetadataFilePath(fakePluginPackage.Object.PluginIdentity)).Returns(metadataDestPath);
+            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginPackage.Object.PluginInfo.Identity)).Returns(metadataDestPath);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -177,20 +178,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
 
-            fakePluginPackageEntry.SetupGet(x => x.IsPluginContentFile).Returns(false);
-            fakePluginPackageEntry.SetupGet(x => x.IsMetadataFile).Returns(false);
+            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.Unknown);
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeMetadata, fakeLoggerFactory);
+
+            PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginIdentity)).Returns(this.tempDirectory);
+            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginInfo.Identity)).Returns(this.tempDirectory);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -213,7 +215,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
@@ -228,17 +230,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             stream.Seek(0, SeekOrigin.Begin);
             fakePluginPackageEntry.Setup(x => x.Open()).Returns(stream);
-            fakePluginPackageEntry.SetupGet(x => x.IsPluginContentFile).Returns(true);
-            fakePluginPackageEntry.SetupGet(x => x.IsMetadataFile).Returns(false);
+            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns(fileName);
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeMetadata, fakeLoggerFactory);
+            PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginIdentity)).Returns(this.tempDirectory);
+            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginInfo.Identity)).Returns(this.tempDirectory);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -268,23 +270,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
 
             var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
             var exception = new Exception("foo");
             fakePluginPackageEntry.Setup(x => x.Open()).Throws(exception);
-            fakePluginPackageEntry.SetupGet(x => x.IsPluginContentFile).Returns(true);
-            fakePluginPackageEntry.SetupGet(x => x.IsMetadataFile).Returns(false);
+            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.ContentFile);
+
             fakePluginPackageEntry.SetupGet(x => x.ContentRelativePath).Returns("");
             fakePluginPackageEntry.SetupGet(x => x.RawPath).Returns("");
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeMetadata, fakeLoggerFactory);
+            PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(new[] { fakePluginPackageEntry.Object });
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginIdentity)).Returns(this.tempDirectory);
+            fakeDir.Setup(d => d.GetPluginContentDirectory(fakePluginPackage.Object.PluginInfo.Identity)).Returns(this.tempDirectory);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -311,18 +314,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
-            
-            var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
-            fakePluginPackageEntry.SetupGet(x => x.IsPluginContentFile).Returns(false);
-            fakePluginPackageEntry.SetupGet(x => x.IsMetadataFile).Returns(false);
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
-            var fakePluginPackage = new Mock<PluginPackage>(fakeMetadata, fakeLoggerFactory);
+            var fakePluginPackageEntry = new Mock<PluginPackageEntry>();
+            fakePluginPackageEntry.SetupGet(x => x.Type).Returns(PluginPackageEntryType.Unknown);
+
+            PluginInfo fakeInfo = new Fixture().Create<PluginInfo>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
+            var fakePluginPackage = new Mock<PluginPackage>(fakeInfo, fakeContents, fakeLoggerFactory);
             fakePluginPackage.Setup(x => x.Entries).Returns(Array.Empty<PluginPackageEntry>());
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
-            fakeDir.Setup(d => d.GetPluginRootDirectory(fakePluginPackage.Object.PluginIdentity)).Returns(this.tempDirectory);
+            fakeDir.Setup(d => d.GetPluginRootDirectory(fakePluginPackage.Object.PluginInfo.Identity)).Returns(this.tempDirectory);
 
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
             fakeChecksumCalculator.Setup(c => c.GetDirectoryChecksumAsync(this.tempDirectory)).ReturnsAsync("foo");
@@ -352,7 +355,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
 
@@ -379,27 +382,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         #endregion
 
-        #region TryGetPluginMetadataAsync
+        #region TryGetPluginContentsAsync
 
         [TestMethod]
         [UnitTest]
-        public async Task TryGetPluginMetadataAsync_PluginMetadataFileExists_PluginMetadataReturned()
+        public async Task TryGetPluginContentsAsync_PluginMetadataFileExists_PluginMetadataReturned()
         {
             // Arrange
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            PluginMetadata fakeMetadata = new Fixture().Create<PluginMetadata>();
+            PluginContents fakeContents = new Fixture().Create<PluginContents>();
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
-            fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())).ReturnsAsync(fakeMetadata);
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
+            fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())).ReturnsAsync(fakeContents);
 
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string metadataDestPath = Path.Combine(this.tempDirectory, "metadata.txt");
-            fakeDir.Setup(d => d.GetPluginMetadataFilePath(fakePluginIdentity)).Returns(metadataDestPath);
+            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(metadataDestPath);
 
             string tempFile = metadataDestPath;
             using (FileStream _ = File.Create(tempFile))
@@ -413,27 +416,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeLoggerFactory);
 
             // Act
-            PluginMetadata result = await sut.TryGetPluginMetadataAsync(fakePluginIdentity, CancellationToken.None);
+            PluginContents result = await sut.TryGetPluginContentsAsync(fakePluginIdentity, CancellationToken.None);
 
             // Assert
-            Assert.AreEqual(result, fakeMetadata);
+            Assert.AreEqual(result, fakeContents);
         }
 
         [TestMethod]
         [UnitTest]
-        public async Task TryGetPluginMetadataAsync_PluginMetadataFileDoesNotExist_NullReturned()
+        public async Task TryGetPluginContentsAsync_PluginMetadataFileDoesNotExist_NullReturned()
         {
             // Arrange
             var fakeLogger = new Mock<ILogger>();
             Func<Type, ILogger> fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeSerializer = new Mock<ISerializer<PluginContents>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
             var fakePluginIdentity = new PluginIdentity("foo", new Version(1, 0, 0));
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string metadataDestPath = Path.Combine(this.tempDirectory, "metadata.txt");
-            fakeDir.Setup(d => d.GetPluginMetadataFilePath(fakePluginIdentity)).Returns(metadataDestPath);
+            fakeDir.Setup(d => d.GetPluginContentsFilePath(fakePluginIdentity)).Returns(metadataDestPath);
 
             var sut = new FileSystemInstalledPluginStorage(
                 fakeDir.Object,
@@ -442,7 +445,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeLoggerFactory);
 
             // Act
-            PluginMetadata result = await sut.TryGetPluginMetadataAsync(fakePluginIdentity, CancellationToken.None);
+            PluginContents result = await sut.TryGetPluginContentsAsync(fakePluginIdentity, CancellationToken.None);
 
             // Assert
             Assert.IsNull(result);

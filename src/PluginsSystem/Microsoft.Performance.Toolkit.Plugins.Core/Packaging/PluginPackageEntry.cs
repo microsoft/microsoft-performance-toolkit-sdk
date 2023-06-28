@@ -22,14 +22,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         public abstract string ContentRelativePath { get; }
 
         /// <summary>
-        ///    Gets a value indicating whether the entry is a metadata file.
+        ///     Gets a value indicating the type of this entry.
         /// </summary>
-        public abstract bool IsMetadataFile { get; }
-
-        /// <summary>
-        ///    Gets a value indicating whether the entry is a plugin file.
-        /// </summary>
-        public abstract bool IsPluginContentFile { get; }
+        public abstract PluginPackageEntryType Type { get; }
 
         /// <summary>
         ///     Gets a value indicating the size of this entry, in bytes, after it is installed.

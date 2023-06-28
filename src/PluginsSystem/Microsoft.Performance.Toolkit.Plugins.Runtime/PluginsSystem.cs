@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
@@ -37,11 +38,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="pluginSourceRepository">
         ///     The repository of plugin sources.
         /// </param>
-        /// <param name="pluginDiscovererProviderRepository">
-        ///     The repository of discoverer providers.
+        /// <param name="pluginDiscovererProviderLoader">
+        ///     The resource loader for <see cref="IPluginDiscovererProvider"/>s.
         /// </param>
-        /// <param name="pluginFetcherRepository">
-        ///     The repository of fetchers.
+        /// <param name="pluginFetcherLoader">
+        ///     The resource loader for <see cref="IPluginFetcher"/>s.
         /// </param>
         /// <param name="obsoletePluginsRemover">
         ///     The obsolete plugins remover.
@@ -117,10 +118,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>(),
                 loggerFactory);
 
-            ISerializer<PluginMetadata> metadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
+            ISerializer<PluginInfo> infoSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginInfo>();
+            ISerializer<PluginContents> contentsSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContents>();
 
             var packageReader = new ZipPluginPackageReader(
-                metadataSerializer,
+                infoSerializer,
+                contentsSerializer,
                 loggerFactory);
 
             var storageDirectory = new DefaultPluginsStorageDirectory(pluginsSystemRoot);
@@ -129,7 +132,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             var installedPluginStorage = new FileSystemInstalledPluginStorage(
                 storageDirectory,
-                metadataSerializer,
+                contentsSerializer,
                 checsumCalculator,
                 loggerFactory);
 

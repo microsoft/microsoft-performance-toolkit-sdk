@@ -19,22 +19,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Constructor_EntriesCreated()
         {
-            var metadata = FakeMetadata.GetFakePluginMetadataWithOnlyIdentity();
-            var fakeSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
+            var metadata = FakeContents.GetFakeEmptyPluginContents();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
-            
+
             using (var memoryStream = new MemoryStream())
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    archive.CreateEntry(PackageConstants.PluginMetadataFileName);
+                    archive.CreateEntry(PackageConstants.PluginContentsFileName);
                 }
-                
+
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))
                 {
-                    var sut = new ZipPluginPackage(metadata, archive, fakeLoggerFactory);
-                    
+                    var sut = new ZipPluginPackage(info, metadata, archive, fakeLoggerFactory);
+
                     Assert.AreEqual(sut.Entries.Count, 1);
                 }
             }
