@@ -62,12 +62,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// <summary>
         ///     Checks if the given <typeparamref name="TEntity"/> exists in the repository.
         /// </summary>
-        /// <param name="installedPluginInfo">
+        /// <param name="entity">
         ///     The <see cref="TEntity"/> to check for.
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
-        /// </param>    
+        /// </param>
         /// <returns>
         ///     <c>true</c> if the <see cref="TEntity"/> exists in the repository, <c>false</c> otherwise.
         /// </returns>
@@ -78,9 +78,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         ///     Throws when the repository cannot be read or written.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="installedPluginInfo"/> is null.
+        ///     Throws when <paramref name="entity"/> is null.
         /// </exception>
-        Task<bool> ExistsAsync(TEntity installedPluginInfo, CancellationToken cancellationToken);
+        Task<bool> ExistsAsync(TEntity entity, CancellationToken cancellationToken);
 
         /// <summary>
         ///     Adds a new entity to the repository.
@@ -128,7 +128,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// </exception>
         /// <exception cref="Exceptions.RepositoryDataAccessException">
         ///     Throws when the repository cannot be read or written.
-        /// </exception>  
+        /// </exception>
         Task DeleteAsync(TEntity entity, CancellationToken cancellationToken);
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="currentEntity"/> or <paramref name="updatedEntity"/> is null.
-        /// </exception>   
+        /// </exception>
         Task UpdateAsync(TEntity currentEntity, TEntity updatedEntity, CancellationToken cancellationToken);
     }
 }
