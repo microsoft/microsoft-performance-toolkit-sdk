@@ -21,8 +21,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [DataRow(@"foo.json", false)]
         public void ContentsFile_EntryType_ReturnsExpectedResult(string entryPath, bool expected)
         {
-            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
+            var info = FakeMetadata.GetFakeMetadataWithOnlyIdentityAndSdkVersion();
+            var contents = FakeContentsMetadata.GetFakeEmptyPluginContentsMetadata();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -49,8 +49,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [DataRow(@"somefolder/", false)]
         public void ContentFile_EntryType_ReturnsExpectedResult(string entryPath, bool expected)
         {
-            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
+            var info = FakeMetadata.GetFakeMetadataWithOnlyIdentityAndSdkVersion();
+            var contents = FakeContentsMetadata.GetFakeEmptyPluginContentsMetadata();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -78,8 +78,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [DataRow(@"plugins\foo.txt", @"plugins/foo.txt")]
         public void RawPath_ReturnsExpectedResult(string entryPath, string expectedRawPath)
         {
-            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
+            var info = FakeMetadata.GetFakeMetadataWithOnlyIdentityAndSdkVersion();
+            var contents = FakeContentsMetadata.GetFakeEmptyPluginContentsMetadata();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -106,8 +106,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [DataRow(@$"{PackageConstants.PluginContentFolderName}foo.txt", @"foo.txt")]
         public void ContentRelativePath_ReturnsExpectedResult(string entryPath, string expectedContentRelativePath)
         {
-            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
+            var info = FakeMetadata.GetFakeMetadataWithOnlyIdentityAndSdkVersion();
+            var contents = FakeContentsMetadata.GetFakeEmptyPluginContentsMetadata();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -131,8 +131,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Open_ReturnsExpectedResult()
         {
-            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
+            var info = FakeMetadata.GetFakeMetadataWithOnlyIdentityAndSdkVersion();
+            var contents = FakeContentsMetadata.GetFakeEmptyPluginContentsMetadata();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 

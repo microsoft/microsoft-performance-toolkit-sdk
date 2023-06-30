@@ -17,8 +17,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Constructor_EntriesCreated()
         {
-            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
-            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
+            var info = FakeMetadata.GetFakeMetadataWithOnlyIdentityAndSdkVersion();
+            var contents = FakeContentsMetadata.GetFakeEmptyPluginContentsMetadata();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 

@@ -5,9 +5,9 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
-    internal static class FakeContents
+    internal static class FakeContentsMetadata
     {
-        public static PluginContentsMetadata GetFakeEmptyPluginContentsInfo()
+        public static PluginContentsMetadata GetFakeEmptyPluginContentsMetadata()
         {
             return new PluginContentsMetadata(
                 null,

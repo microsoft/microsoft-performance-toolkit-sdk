@@ -6,9 +6,9 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests;
 
-internal static class FakeInfo
+internal static class FakeMetadata
 {
-    public static PluginMetadata GetFakePluginInfoWithOnlyIdentityAndSdkVersion()
+    public static PluginMetadata GetFakeMetadataWithOnlyIdentityAndSdkVersion()
     {
         return new PluginMetadata(
             new PluginIdentity("fake_id", new Version("1.0.0")),

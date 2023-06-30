@@ -142,10 +142,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
-            var info = FakeInfo.GetFakePluginInfoWithOnlyIdentityAndSdkVersion();
+            var info = FakeMetadata.GetFakeMetadataWithOnlyIdentityAndSdkVersion();
             fakeInfoSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(info));
 
-            var contents = FakeContents.GetFakeEmptyPluginContentsInfo();
+            var contents = FakeContentsMetadata.GetFakeEmptyPluginContentsMetadata();
             fakeContentsInfoSerializer.Setup(s => s.DeserializeAsync(It.IsAny<Stream>(), CancellationToken.None)).Returns(Task.FromResult(contents));
 
             var sut = new ZipPluginPackageReader(fakeInfoSerializer.Object, fakeContentsInfoSerializer.Object, fakeLoggerFactory);
