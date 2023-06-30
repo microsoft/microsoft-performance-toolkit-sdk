@@ -68,7 +68,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
             catch (Exception e)
             {
-                string errorMsg = $"Fails to fetch plugin {availablePlugin.Info.Identity} " +
+                string errorMsg = $"Fails to fetch plugin {availablePlugin.Info.Metadata.Identity} " +
                     $"from {availablePlugin.Info.PackageUri}";
 
                 logger.Error(e, errorMsg);
@@ -90,7 +90,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 }
                 catch (Exception e)
                 {
-                    string errorMsg = $"Fails to install plugin {availablePlugin.Info.Identity} " +
+                    string errorMsg = $"Fails to install plugin {availablePlugin.Info.Metadata.Identity} " +
                                       $"from {availablePlugin.Info.PackageUri}";
 
                     logger.Error(e, errorMsg);

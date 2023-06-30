@@ -168,12 +168,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             foreach (IReadOnlyCollection<AvailablePlugin> taskResult in discoveredAvailablePlugins)
             {
                 IEnumerable<KeyValuePair<string, AvailablePlugin>> kvps = taskResult
-                    .Select(p => new KeyValuePair<string, AvailablePlugin>(p.Info.Identity.Id, p));
+                    .Select(p => new KeyValuePair<string, AvailablePlugin>(p.Info.Metadata.Identity.Id, p));
 
                 results = results.Union(kvps)
                        .GroupBy(g => g.Key)
                        .ToDictionary(g => g.Key, g => g.Select(kvp => kvp.Value)
-                                                       .OrderByDescending(x => x.Info.Identity.Version)
+                                                       .OrderByDescending(x => x.Info.Metadata.Identity.Version)
                                                        .ThenBy(x => x.Info.Source.Uri)
                                                        .First());
             }
@@ -291,7 +291,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             //      1. Duplicates (same version) maybe discovered from different sources.
             //      2. In the case when duplicated versions are discovered, only one of them will be returned.
             var results = task.Result.SelectMany(x => x)
-                                .GroupBy(x => x.Info.Identity)
+                                .GroupBy(x => x.Info.Metadata.Identity)
                                 .ToDictionary(g => g.Key, g => g.OrderBy(x => x.Info.Source.Uri)
                                                                 .First());
 
@@ -492,30 +492,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             // Make sure only the latest version of each plugin is used.
             IEnumerable<AvailablePluginInfo> distinctPluginInfos = discoveryResult
-                .GroupBy(pluginInfo => pluginInfo.Identity.Id)
-                .Select(group => group.OrderByDescending(pluginInfo => pluginInfo.Identity.Version).First());
+                .GroupBy(availablePluginInfo => availablePluginInfo.Metadata.Identity.Id)
+                .Select(group => group.OrderByDescending(pluginInfo => pluginInfo.Metadata.Identity.Version).First());
 
-            foreach (AvailablePluginInfo pluginInfo in distinctPluginInfos)
+            foreach (AvailablePluginInfo availablePluginInfo in distinctPluginInfos)
             {
-                string id = pluginInfo.Identity.Id;
+                string id = availablePluginInfo.Metadata.Identity.Id;
                 if (!results.TryGetValue(id, out (AvailablePlugin plugin, IPluginDiscoverer discoverer) tuple) ||
-                    tuple.plugin.Info.Identity.Version < pluginInfo.Identity.Version)
+                    tuple.plugin.Info.Metadata.Identity.Version < availablePluginInfo.Metadata.Identity.Version)
                 {
-                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(availablePluginInfo);
                     if (fetcher == null)
                     {
                         HandleResourceNotFoundError(
                             source,
-                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                            $"No fetcher is found that supports fetching plugin {availablePluginInfo.Metadata.Identity}.");
                         continue;
                     }
 
-                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
+                    var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher);
                     results[id] = (newPlugin, discoverer);
                 }
-                else if (tuple.plugin.Info.Identity.Equals(pluginInfo.Identity))
+                else if (tuple.plugin.Info.Metadata.Identity.Equals(availablePluginInfo.Metadata.Identity))
                 {
-                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
+                    this.logger.Warn($"Duplicate plugin {availablePluginInfo.Metadata.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
                         $"Using the first found discoverer: {tuple.discoverer.GetType().Name}.");
                 }
             }
@@ -530,29 +530,29 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             // Make sure the result contains only the specified plugin and no duplicates are included.
             IEnumerable<AvailablePluginInfo> distinctPluginInfos = discoveryResult
-                .Where(p => p.Identity.Id.Equals(pluginId))
-                .GroupBy(pluginInfo => pluginInfo.Identity)
+                .Where(p => p.Metadata.Identity.Id.Equals(pluginId))
+                .GroupBy(availablePluginInfo => availablePluginInfo.Metadata.Identity)
                 .Select(group => group.First());
 
-            foreach (AvailablePluginInfo pluginInfo in distinctPluginInfos)
+            foreach (AvailablePluginInfo availablePluginInfo in distinctPluginInfos)
             {
-                if (!results.TryGetValue(pluginInfo.Identity, out (AvailablePlugin, IPluginDiscoverer discoverer) tuple))
+                if (!results.TryGetValue(availablePluginInfo.Metadata.Identity, out (AvailablePlugin, IPluginDiscoverer discoverer) tuple))
                 {
-                    IPluginFetcher fetcher = await TryGetPluginFetcher(pluginInfo);
+                    IPluginFetcher fetcher = await TryGetPluginFetcher(availablePluginInfo);
                     if (fetcher == null)
                     {
                         HandleResourceNotFoundError(
                             source,
-                            $"No fetcher is found that supports fetching plugin {pluginInfo.Identity}.");
+                            $"No fetcher is found that supports fetching plugin {availablePluginInfo.Metadata.Identity}.");
                         continue;
                     }
 
-                    var newPlugin = new AvailablePlugin(pluginInfo, discoverer, fetcher);
-                    results[pluginInfo.Identity] = (newPlugin, discoverer);
+                    var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher);
+                    results[availablePluginInfo.Metadata.Identity] = (newPlugin, discoverer);
                 }
                 else
                 {
-                    this.logger.Warn($"Duplicate plugin {pluginInfo.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
+                    this.logger.Warn($"Duplicate plugin {availablePluginInfo.Metadata.Identity} is discovered from {source} by {discoverer.GetType().Name}." +
                        $"Using the first found discoverer: {tuple.discoverer.GetType().Name}.");
                 }
             }
@@ -582,7 +582,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             }
             catch (Exception e)
             {
-                this.logger.Error($"Error occurred when checking if plugin {availablePluginInfo.Identity} is supported by {fetcherType.Name}.", e);
+                this.logger.Error($"Error occurred when checking if plugin {availablePluginInfo.Metadata.Identity} is supported by {fetcherType.Name}.", e);
                 return null;
             }
 

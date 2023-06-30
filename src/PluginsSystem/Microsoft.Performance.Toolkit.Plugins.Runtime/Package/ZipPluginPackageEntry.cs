@@ -35,25 +35,30 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                return this.IsPluginContentFile ? this.RawPath.Substring(PackageConstants.PluginContentFolderName.Length) : null;
+                return this.EntryType == PluginPackageEntryType.ContentFile ? this.RawPath.Substring(PackageConstants.PluginContentFolderName.Length) : null;
             }
         }
 
-        /// <inheritdoc/>
-        public override bool IsMetadataFile
+        public override PluginPackageEntryType EntryType
         {
             get
             {
-                return this.RawPath.Equals(PackageConstants.PluginMetadataFileName, StringComparison.OrdinalIgnoreCase);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override bool IsPluginContentFile
-        {
-            get
-            {
-                return this.RawPath.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase);
+                if (this.RawPath.Equals(PackageConstants.PluginMetadataFileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return PluginPackageEntryType.MetadataJsonFile;
+                }
+                else if (this.RawPath.Equals(PackageConstants.PluginContentsMetadataFileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return PluginPackageEntryType.ContentsMetadataJsonFile;
+                }
+                else if (this.RawPath.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return PluginPackageEntryType.ContentFile;
+                }
+                else
+                {
+                    return PluginPackageEntryType.Unknown;
+                }
             }
         }
 
@@ -62,12 +67,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                if (this.IsMetadataFile || !this.IsPluginContentFile)
-                {
-                    // These entries are not installed
-                    return 0;
-                }
-
                 return this.zipEntry.Length;
             }
         }

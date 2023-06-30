@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
     /// <summary>
     ///     Represents information about a processing source.

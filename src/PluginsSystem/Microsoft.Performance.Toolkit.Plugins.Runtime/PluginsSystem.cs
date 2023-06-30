@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
@@ -37,11 +37,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="pluginSourceRepository">
         ///     The repository of plugin sources.
         /// </param>
-        /// <param name="pluginDiscovererProviderRepository">
-        ///     The repository of discoverer providers.
+        /// <param name="pluginDiscovererProviderLoader">
+        ///     The resource loader for <see cref="IPluginDiscovererProvider"/>s.
         /// </param>
-        /// <param name="pluginFetcherRepository">
-        ///     The repository of fetchers.
+        /// <param name="pluginFetcherLoader">
+        ///     The resource loader for <see cref="IPluginFetcher"/>s.
         /// </param>
         /// <param name="obsoletePluginsRemover">
         ///     The obsolete plugins remover.
@@ -118,9 +118,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 loggerFactory);
 
             ISerializer<PluginMetadata> metadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
+            ISerializer<PluginContentsMetadata> contentsMetadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>();
 
             var packageReader = new ZipPluginPackageReader(
                 metadataSerializer,
+                contentsMetadataSerializer,
                 loggerFactory);
 
             var storageDirectory = new DefaultPluginsStorageDirectory(pluginsSystemRoot);
@@ -129,7 +131,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             var installedPluginStorage = new FileSystemInstalledPluginStorage(
                 storageDirectory,
-                metadataSerializer,
+                contentsMetadataSerializer,
                 checsumCalculator,
                 loggerFactory);
 

@@ -10,8 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
@@ -23,6 +23,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         : IPluginPackageReader
     {
         private readonly ISerializer<PluginMetadata> metadataSerializer;
+        private readonly ISerializer<PluginContentsMetadata> contentsMetadataSerializer;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
 
@@ -32,14 +33,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <param name="metadataSerializer">
         ///     The serializer to use to deserialize the plugin metadata.
         /// </param>
+        /// <param name="contentsMetadataSerializer">
+        ///     The serializer to use to deserialize the plugin contents metadata.
+        /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory to use to create loggers.
         /// </param>
         public ZipPluginPackageReader(
             ISerializer<PluginMetadata> metadataSerializer,
+            ISerializer<PluginContentsMetadata> contentsMetadataSerializer,
             Func<Type, ILogger> loggerFactory)
         {
             this.metadataSerializer = metadataSerializer;
+            this.contentsMetadataSerializer = contentsMetadataSerializer;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(ZipPluginPackageReader));
         }
@@ -75,7 +81,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 // Check that the plugin content folder exists
                 bool hasContentFolder = zip.Entries.Any(
                     e => e.FullName.Replace('\\', '/').StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (!hasContentFolder)
                 {
                     this.logger.Error($"Plugin content folder {PackageConstants.PluginContentFolderName} not found in the plugin package.");
@@ -83,8 +89,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 }
 
                 // Check that the plugin metadata file exists
-                ZipArchiveEntry metadataEntry = zip.GetEntry(PackageConstants.PluginMetadataFileName);
-                if (metadataEntry == null)
+                ZipArchiveEntry metadataFileEntry = zip.GetEntry(PackageConstants.PluginMetadataFileName);
+                if (metadataFileEntry == null)
                 {
                     this.logger.Error($"Plugin metadata file {PackageConstants.PluginMetadataFileName} not found in the plugin package.");
                     return null;
@@ -94,19 +100,42 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 PluginMetadata metadata;
                 try
                 {
-                    using (Stream metadataStream = metadataEntry.Open())
+                    using (Stream metadataStream = metadataFileEntry.Open())
                     {
                         metadata = await this.metadataSerializer.DeserializeAsync(metadataStream, cancellationToken);
                     }
                 }
                 catch (JsonException e)
                 {
-                    this.logger.Error(e, $"Deserialization failed due to invalid JSON text in plugin metadata");
+                    this.logger.Error(e, $"Deserialization failed due to invalid JSON text in plugin metadata file");
+                    return null;
+                }
+
+                // Check that the plugin contents metadata file exists
+                ZipArchiveEntry contentsFileEntry = zip.GetEntry(PackageConstants.PluginContentsMetadataFileName);
+                if (contentsFileEntry == null)
+                {
+                    this.logger.Error($"Plugin contents metadata file {PackageConstants.PluginContentsMetadataFileName} not found in the plugin package.");
+                    return null;
+                }
+
+                // Try to read plugin contents metadata.
+                PluginContentsMetadata contentsMetadata;
+                try
+                {
+                    using (Stream contentsFileStream = contentsFileEntry.Open())
+                    {
+                        contentsMetadata = await this.contentsMetadataSerializer.DeserializeAsync(contentsFileStream, cancellationToken);
+                    }
+                }
+                catch (JsonException e)
+                {
+                    this.logger.Error(e, $"Deserialization failed due to invalid JSON text in plugin contents file");
                     return null;
                 }
 
                 success = true;
-                return new ZipPluginPackage(metadata, zip, this.loggerFactory);
+                return new ZipPluginPackage(metadata, contentsMetadata, zip, this.loggerFactory);
             }
             finally
             {

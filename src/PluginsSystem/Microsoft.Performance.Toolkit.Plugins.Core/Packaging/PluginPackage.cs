@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
 {
@@ -21,20 +21,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         /// <summary>
         ///     Creates an instance of the <see cref="PluginPackage"/>.
         /// </summary>
-        /// <param name="pluginMetadata">
+        /// <param name="metadata">
         ///     The plugin metadata.
+        /// </param>
+        /// <param name="contentsMetadata">
+        ///     The plugin contents metadata.
         /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory.
         /// </param>
         protected PluginPackage(
-            PluginMetadata pluginMetadata,
+            PluginMetadata metadata,
+            PluginContentsMetadata contentsMetadata,
             Func<Type, ILogger> loggerFactory)
         {
-            Guard.NotNull(pluginMetadata, nameof(pluginMetadata));
+            Guard.NotNull(metadata, nameof(metadata));
+            Guard.NotNull(contentsMetadata, nameof(contentsMetadata));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.PluginMetadata = pluginMetadata;
+            this.Metadata = metadata;
+            this.ContentsMetadata = contentsMetadata;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(GetType());
         }
@@ -45,69 +51,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         public abstract IReadOnlyCollection<PluginPackageEntry> Entries { get; }
 
         /// <summary>
-        ///     Gets the plugin metadata.
+        ///     Gets the metadata of this plugin.
         /// </summary>
-        public PluginMetadata PluginMetadata { get; }
+        public PluginMetadata Metadata { get; }
 
         /// <summary>
-        ///     Gets the plugin identity.
+        ///     Gets the metadata of the plugin contents.
         /// </summary>
-        public PluginIdentity PluginIdentity
-        {
-            get
-            {
-                return this.PluginMetadata.Identity;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the plugin ID.
-        /// </summary>
-        public string Id
-        {
-            get
-            {
-                return this.PluginIdentity.Id;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the plugin version.
-        /// </summary>
-        public Version Version
-        {
-            get
-            {
-                return this.PluginIdentity.Version;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the plugin display name.
-        /// </summary>
-        public string DisplayName
-        {
-            get
-            {
-                return this.PluginMetadata.DisplayName;
-            }
-        }
-
-        /// <summary>
-        ///     Gets the plugin description.
-        /// </summary>
-        public string Description
-        {
-            get
-            {
-                return this.PluginMetadata.Description;
-            }
-        }
+        public PluginContentsMetadata ContentsMetadata { get; }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.PluginIdentity.ToString();
+            return this.Metadata.Identity.ToString();
         }
 
         /// <inheritdoc />

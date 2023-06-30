@@ -14,9 +14,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     public sealed class DefaultPluginsStorageDirectory
         : IPluginsStorageDirectory
     {
+        private const string pluginMetadataFileName = "metadata.json";
+        private const string pluginContentsMetadataFileName = "contentsmetadata.json";
+        private const string pluginContentFolderName = "plugin/";
+
         private readonly string rootDirectory;
-        private static readonly string pluginMetadataFileName = @"pluginspec.json";
-        private static readonly string pluginContentFolder = @"plugin/";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="DefaultPluginsStorageDirectory"/>
@@ -32,25 +34,34 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         }
 
         /// <inheritdoc/>
-        public string GetPluginContentDirectory(PluginIdentity pluginIdentity)
+        public string GetContentDirectory(PluginIdentity pluginIdentity)
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            string directory = GetPluginRootDirectory(pluginIdentity);
-            return Path.GetFullPath(Path.Combine(directory, pluginContentFolder));
+            string directory = GetRootDirectory(pluginIdentity);
+            return Path.GetFullPath(Path.Combine(directory, pluginContentFolderName));
         }
 
         /// <inheritdoc/>
-        public string GetPluginMetadataFilePath(PluginIdentity pluginIdentity)
+        public string GetMetadataFilePath(PluginIdentity pluginIdentity)
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            string directory = GetPluginRootDirectory(pluginIdentity);
+            string directory = GetRootDirectory(pluginIdentity);
             return Path.GetFullPath(Path.Combine(directory, pluginMetadataFileName));
         }
 
         /// <inheritdoc/>
-        public string GetPluginRootDirectory(PluginIdentity pluginIdentity)
+        public string GetContentsMetadataFilePath(PluginIdentity pluginIdentity)
+        {
+            Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
+
+            string directory = GetRootDirectory(pluginIdentity);
+            return Path.GetFullPath(Path.Combine(directory, pluginContentsMetadataFileName));
+        }
+
+        /// <inheritdoc/>
+        public string GetRootDirectory(PluginIdentity pluginIdentity)
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
@@ -58,7 +69,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         }
 
         /// <inheritdoc/>
-        public IEnumerable<string> GetAllPluginRootDirectories()
+        public IEnumerable<string> GetAllRootDirectories()
         {
             return Directory.GetDirectories(this.rootDirectory);
         }

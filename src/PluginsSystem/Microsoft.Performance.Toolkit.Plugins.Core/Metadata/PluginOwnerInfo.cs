@@ -6,19 +6,19 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
     /// <summary>
     ///     Gets or sets the information of a plugin owner.
     /// </summary>
-    public sealed class PluginOwner
-        : IEquatable<PluginOwner>
+    public sealed class PluginOwnerInfo
+        : IEquatable<PluginOwnerInfo>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginOwner"/> class.
+        ///     Initializes a new instance of the <see cref="PluginOwnerInfo"/> class.
         /// </summary>
         [JsonConstructor]
-        public PluginOwner(
+        public PluginOwnerInfo(
             string name,
             string address,
             IEnumerable<string> emailAddresses,
@@ -53,11 +53,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return Equals(obj as PluginOwner);
+            return Equals(obj as PluginOwnerInfo);
         }
 
         /// <inheritdoc/>
-        public bool Equals(PluginOwner other)
+        public bool Equals(PluginOwnerInfo other)
         {
             if (other is null)
             {

@@ -11,6 +11,7 @@ using System.Text.Json;
 using AutoFixture;
 using Fixture = AutoFixture.Fixture;
 using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
@@ -147,7 +148,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Id, CancellationToken.None);
+            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None);
 
             Assert.AreEqual(fakeInstalledPluginInfo, actualResult);
         }
@@ -165,7 +166,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Id, CancellationToken.None);
+            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None);
 
             Assert.IsNull(actualResult);
         }
@@ -183,7 +184,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.TryGetByIdAsync(fakeInstalledPluginInfo.Id, CancellationToken.None));
+            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None));
         }
 
         #endregion
@@ -299,13 +300,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fixture = new Fixture();
             InstalledPluginInfo plugin1 = fixture.Create<InstalledPluginInfo>();
-            var plugin2 = new InstalledPluginInfo(
-                new PluginIdentity(plugin1.Identity.Id, new Version(plugin1.Identity.Version.Major + 1, 0, 0, 0)),
-                plugin1.SourceUri,
-                plugin1.DisplayName,
-                plugin1.Description,
-                plugin1.InstalledOn,
-                plugin1.Checksum);
+
+            var plugin2 = CreatePluginWithBumpedVersion(plugin1);
 
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
@@ -395,13 +391,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fixture = new Fixture();
             InstalledPluginInfo plugin1 = fixture.Create<InstalledPluginInfo>();
-            var plugin2 = new InstalledPluginInfo(
-                new PluginIdentity(plugin1.Identity.Id, new Version(plugin1.Identity.Version.Major + 1, 0, 0, 0)),
-                plugin1.SourceUri,
-                plugin1.DisplayName,
-                plugin1.Description,
-                plugin1.InstalledOn,
-                plugin1.Checksum);
+            var plugin2 = CreatePluginWithBumpedVersion(plugin1);
 
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
@@ -426,13 +416,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
 
             InstalledPluginInfo fakeInstalledPluginInfo = new Fixture().Create<InstalledPluginInfo>();
-            var fakeUpdatedPluginInfo = new InstalledPluginInfo(
-                new PluginIdentity(fakeInstalledPluginInfo.Identity.Id + "1", fakeInstalledPluginInfo.Identity.Version),
-                fakeInstalledPluginInfo.SourceUri,
-                fakeInstalledPluginInfo.DisplayName,
-                fakeInstalledPluginInfo.Description,
-                fakeInstalledPluginInfo.InstalledOn,
-                fakeInstalledPluginInfo.Checksum);
+            var fakeUpdatedPluginInfo = CreatePluginWithDifferentIdVersion(fakeInstalledPluginInfo);
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
@@ -447,13 +431,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
 
             InstalledPluginInfo fakeInstalledPluginInfo = new Fixture().Create<InstalledPluginInfo>();
-            var toUpdate = new InstalledPluginInfo(
-                new PluginIdentity(fakeInstalledPluginInfo.Identity.Id, fakeInstalledPluginInfo.Identity.Version),
-                fakeInstalledPluginInfo.SourceUri,
-                fakeInstalledPluginInfo.DisplayName,
-                fakeInstalledPluginInfo.Description,
-                DateTime.UtcNow,
-                fakeInstalledPluginInfo.Checksum);
+            var toUpdate = CreatePluginWithDifferentInstallDate(fakeInstalledPluginInfo);
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
@@ -467,15 +445,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         {
             File.Create(this.registryFilePath).Close();
 
-            var fixture = new Fixture();
             InstalledPluginInfo current = new Fixture().Create<InstalledPluginInfo>();
-            var toUpdate = new InstalledPluginInfo(
-                new PluginIdentity(current.Identity.Id, current.Identity.Version),
-                current.SourceUri,
-                current.DisplayName,
-                current.Description,
-                DateTime.UtcNow,
-                current.Checksum);
+            var toUpdate = CreatePluginWithDifferentInstallDate(current);
 
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
@@ -492,15 +463,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         {
             File.Create(this.registryFilePath).Close();
 
-            var fixture = new Fixture();
             InstalledPluginInfo current = new Fixture().Create<InstalledPluginInfo>();
-            var toUpdate = new InstalledPluginInfo(
-                new PluginIdentity(current.Identity.Id, current.Identity.Version),
-                current.SourceUri,
-                current.DisplayName,
-                current.Description,
-                DateTime.UtcNow,
-                current.Checksum);
+            var toUpdate = CreatePluginWithDifferentInstallDate(current);
 
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
@@ -520,15 +484,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         {
             File.Create(this.registryFilePath).Close();
 
-            var fixture = new Fixture();
-            InstalledPluginInfo plugin1 = fixture.Create<InstalledPluginInfo>();
-            var plugin2 = new InstalledPluginInfo(
-                new PluginIdentity(plugin1.Identity.Id, plugin1.Identity.Version),
-                plugin1.SourceUri,
-                plugin1.DisplayName,
-                plugin1.Description,
-                DateTime.UtcNow,
-                plugin1.Checksum);
+            InstalledPluginInfo plugin1 = new Fixture().Create<InstalledPluginInfo>();
+            var plugin2 = CreatePluginWithDifferentInstallDate(plugin1);
 
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
@@ -588,5 +545,56 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         }
 
         #endregion
+
+        private InstalledPluginInfo CreatePluginWithBumpedVersion(InstalledPluginInfo plugin)
+        {
+            return new InstalledPluginInfo(
+                new PluginMetadata(
+                    new PluginIdentity(
+                        plugin.Metadata.Identity.Id,
+                        new Version(plugin.Metadata.Identity.Version.Major + 1, 0, 0, 0)),
+                    plugin.Metadata.InstalledSize,
+                    plugin.Metadata.DisplayName,
+                    plugin.Metadata.Description,
+                    plugin.Metadata.SdkVersion,
+                    plugin.Metadata.Owners),
+                plugin.SourceUri,
+                plugin.InstalledOn,
+                plugin.Checksum);
+        }
+
+        private InstalledPluginInfo CreatePluginWithDifferentIdVersion(InstalledPluginInfo plugin)
+        {
+            return new InstalledPluginInfo(
+                new PluginMetadata(
+                    new PluginIdentity(
+                        plugin.Metadata.Identity.Id + "1",
+                        plugin.Metadata.Identity.Version),
+                    plugin.Metadata.InstalledSize,
+                    plugin.Metadata.DisplayName,
+                    plugin.Metadata.Description,
+                    plugin.Metadata.SdkVersion,
+                    plugin.Metadata.Owners),
+                plugin.SourceUri,
+                plugin.InstalledOn,
+                plugin.Checksum);
+        }
+
+        private InstalledPluginInfo CreatePluginWithDifferentInstallDate(InstalledPluginInfo plugin)
+        {
+            return new InstalledPluginInfo(
+                new PluginMetadata(
+                    new PluginIdentity(
+                        plugin.Metadata.Identity.Id,
+                        plugin.Metadata.Identity.Version),
+                    plugin.Metadata.InstalledSize,
+                    plugin.Metadata.DisplayName,
+                    plugin.Metadata.Description,
+                    plugin.Metadata.SdkVersion,
+                    plugin.Metadata.Owners),
+                plugin.SourceUri,
+                DateTime.UtcNow,
+                plugin.Checksum);
+        }
     }
 }

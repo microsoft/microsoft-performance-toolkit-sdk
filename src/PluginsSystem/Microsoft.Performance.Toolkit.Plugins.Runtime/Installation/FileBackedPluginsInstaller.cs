@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
@@ -90,7 +90,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(installedPluginStorage, nameof(installedPluginStorage));
             Guard.NotNull(packageReader, nameof(packageReader));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
-            
+
             this.pluginRegistry = pluginRegistry;
             this.installedPluginValidator = installedPluginValidator;
             this.installedPluginStorage = installedPluginStorage;
@@ -153,7 +153,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         }
 
                         failedResults.Add((plugin, t.Exception));
-                    };
+                    }
                 }
 
                 return new InstalledPluginsResults(results, failedResults);
@@ -189,13 +189,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             {
                 // Check if any version of this plugin is already installed.
                 InstalledPluginInfo installedPlugin = await this.pluginRegistry.TryGetByIdAsync(
-                    pluginPackage.Id,
+                    pluginPackage.Metadata.Identity.Id,
                     cancellationToken);
 
                 bool needsUninstall = false;
                 if (installedPlugin != null)
                 {
-                    if (!installedPlugin.Version.Equals(pluginPackage.Version))
+                    if (!installedPlugin.Metadata.Identity.Version.Equals(pluginPackage.Metadata.Identity.Version))
                     {
                         needsUninstall = true;
                     }
@@ -210,7 +210,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Warn($"Installer is going to reinstall {installedPlugin} because it is tampered.");
                         needsUninstall = true;
                     }
-                };
+                }
 
                 try
                 {
@@ -221,10 +221,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     this.logger.Info("Extraction completed.");
 
                     var pluginToInstall = new InstalledPluginInfo(
-                        pluginPackage.PluginIdentity,
+                        pluginPackage.Metadata,
                         sourceUri,
-                        pluginPackage.DisplayName,
-                        pluginPackage.Description,
                         DateTime.UtcNow,
                         checksum);
 
@@ -239,7 +237,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Info($"{pluginToInstall} is registered in the plugin registry.");
                     }
 
-                    return new InstalledPlugin(pluginToInstall, pluginPackage.PluginMetadata);
+                    return new InstalledPlugin(pluginToInstall, pluginPackage.ContentsMetadata);
                 }
                 catch (Exception e)
                 {
@@ -260,15 +258,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Error(e, $"Failed to install plugin {pluginPackage}.");
                     }
 
-                    this.logger.Info($"Cleaning up extraction folder of {pluginPackage.PluginIdentity}");
-                    
+                    this.logger.Info($"Cleaning up extraction folder of {pluginPackage.Metadata.Identity}");
+
                     try
                     {
-                        await this.installedPluginStorage.RemoveAsync(pluginPackage.PluginIdentity, cancellationToken);
+                        await this.installedPluginStorage.RemoveAsync(pluginPackage.Metadata.Identity, cancellationToken);
                     }
                     catch (Exception ex)
                     {
-                        this.logger.Error(ex, $"Failed to clean up extraction folder of {pluginPackage.PluginIdentity}");
+                        this.logger.Error(ex, $"Failed to clean up extraction folder of {pluginPackage.Metadata.Identity}");
                     }
 
                     throw;
@@ -315,13 +313,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     installedPluginInfo);
             }
 
-            PluginMetadata pluginMetadata = await this.installedPluginStorage.TryGetPluginMetadataAsync(
-                installedPluginInfo.Identity,
+            PluginContentsMetadata contentsMetadata = await this.installedPluginStorage.TryGetPluginContentsMetadataAsync(
+                installedPluginInfo.Metadata.Identity,
                 cancellationToken);
 
-            Debug.Assert(pluginMetadata != null);
+            Debug.Assert(contentsMetadata != null);
 
-            return new InstalledPlugin(installedPluginInfo, pluginMetadata);
+            return new InstalledPlugin(installedPluginInfo, contentsMetadata);
         }
     }
 }

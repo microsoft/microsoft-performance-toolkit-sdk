@@ -67,7 +67,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// </param>
         /// <param name="cancellationToken">
         ///     Signals that the caller wishes to cancel the operation.
-        /// </param>    
+        /// </param>
         /// <returns>
         ///     <c>true</c> if the <see cref="TEntity"/> exists in the repository, <c>false</c> otherwise.
         /// </returns>
@@ -128,7 +128,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// </exception>
         /// <exception cref="Exceptions.RepositoryDataAccessException">
         ///     Throws when the repository cannot be read or written.
-        /// </exception>  
+        /// </exception>
         Task DeleteAsync(TEntity entity, CancellationToken cancellationToken);
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Common
         /// </exception>
         /// <exception cref="ArgumentNullException">
         ///     Throws when <paramref name="currentEntity"/> or <paramref name="updatedEntity"/> is null.
-        /// </exception>   
+        /// </exception>
         Task UpdateAsync(TEntity currentEntity, TEntity updatedEntity, CancellationToken cancellationToken);
     }
 }

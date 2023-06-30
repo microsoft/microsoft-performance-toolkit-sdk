@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -13,18 +13,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <summary>
         ///     Creates an instance of the <see cref="InstalledPlugin"/>.
         /// </summary>
-        /// <param name="installedPluginInfo">
+        /// <param name="info">
         ///     The information of the installed plugin.
         /// </param>
-        /// <param name="pluginMetadata">
-        ///     The metadata of the installed plugin.
+        /// <param name="contentsMetadata">
+        ///     The contents metadata of the installed plugin.
         /// </param>
         public InstalledPlugin(
-            InstalledPluginInfo installedPluginInfo,
-            PluginMetadata pluginMetadata)
+            InstalledPluginInfo info,
+            PluginContentsMetadata contentsMetadata)
         {
-            this.Info = installedPluginInfo;
-            this.Metadata = pluginMetadata;
+            this.Info = info;
+            this.ContentsMetadata = contentsMetadata;
         }
 
         /// <summary>
@@ -33,8 +33,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public InstalledPluginInfo Info { get; }
 
         /// <summary>
-        ///     Gets the metadata of the installed plugin.
+        ///     Gets the contents metatdata of the installed plugin.
         /// </summary>
-        public PluginMetadata Metadata { get; }
+        public PluginContentsMetadata ContentsMetadata { get; }
     }
 }
