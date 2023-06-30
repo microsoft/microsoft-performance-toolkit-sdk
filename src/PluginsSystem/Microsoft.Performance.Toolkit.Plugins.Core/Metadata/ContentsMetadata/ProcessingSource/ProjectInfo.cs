@@ -4,7 +4,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
     /// <summary>
     ///     Represents project information about a processing source.

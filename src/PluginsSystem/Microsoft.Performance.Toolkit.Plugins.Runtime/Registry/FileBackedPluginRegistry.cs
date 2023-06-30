@@ -140,7 +140,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             try
             {
                 return installedPlugins.SingleOrDefault(
-                    installedPluginInfo => installedPluginInfo.PluginInfo.Identity.Id.Equals(pluginId, StringComparison.Ordinal));
+                    installedPluginInfo => installedPluginInfo.Metadata.Identity.Id.Equals(pluginId, StringComparison.Ordinal));
             }
             catch
             {
@@ -159,8 +159,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             int installedCount = installedPlugins.Count(p => p.Equals(installedPluginInfo));
             if (installedCount > 1)
             {
-                LogDuplicatedRegistered(installedPluginInfo.PluginInfo.Identity.Id);
-                throw CreateDuplicatedRegisteredException(installedPluginInfo.PluginInfo.Identity.Id);
+                LogDuplicatedRegistered(installedPluginInfo.Metadata.Identity.Id);
+                throw CreateDuplicatedRegisteredException(installedPluginInfo.Metadata.Identity.Id);
             }
 
             return installedCount == 1;
@@ -175,7 +175,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins(cancellationToken);
 
-            ThrowIfIdExists(installedPlugins, installedPluginInfo.PluginInfo.Identity.Id);
+            ThrowIfIdExists(installedPlugins, installedPluginInfo.Metadata.Identity.Id);
             installedPlugins.Add(installedPluginInfo);
 
             await WriteInstalledPlugins(installedPlugins, cancellationToken);
@@ -205,10 +205,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(currentPlugin, nameof(currentPlugin));
             Guard.NotNull(updatedPlugin, nameof(updatedPlugin));
 
-            if (!string.Equals(currentPlugin.PluginInfo.Identity.Id, updatedPlugin.PluginInfo.Identity.Id, StringComparison.Ordinal))
+            if (!string.Equals(currentPlugin.Metadata.Identity.Id, updatedPlugin.Metadata.Identity.Id, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(
-                    $"{currentPlugin.PluginInfo.Identity.Id} cannot be updated with a plugin with a different ID: {updatedPlugin.PluginInfo.Identity.Id}");
+                    $"{currentPlugin.Metadata.Identity.Id} cannot be updated with a plugin with a different ID: {updatedPlugin.Metadata.Identity.Id}");
             }
 
             List<InstalledPluginInfo> installedPlugins = await ReadInstalledPlugins(cancellationToken);
@@ -304,7 +304,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IEnumerable<InstalledPluginInfo> installedPluginInfos,
             string pluginId)
         {
-            int installedCount = installedPluginInfos.Count(p => p.PluginInfo.Identity.Id.Equals(pluginId));
+            int installedCount = installedPluginInfos.Count(p => p.Metadata.Identity.Id.Equals(pluginId));
             if (installedCount > 0)
             {
                 if (installedCount > 1)
@@ -325,7 +325,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             {
                 if (installedCount > 1)
                 {
-                    LogDuplicatedRegistered(pluginToInstall.PluginInfo.Identity.Id);
+                    LogDuplicatedRegistered(pluginToInstall.Metadata.Identity.Id);
                 }
 
                 throw new InvalidOperationException($"Failed to update plugin {pluginToInstall} as it is already registered.");
@@ -344,7 +344,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             if (installedCount > 1)
             {
-                LogDuplicatedRegistered(pluginToRemove.PluginInfo.Identity.Id);
+                LogDuplicatedRegistered(pluginToRemove.Metadata.Identity.Id);
             }
         }
 

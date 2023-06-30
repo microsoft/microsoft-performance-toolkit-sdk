@@ -11,6 +11,7 @@ using System.Text.Json;
 using AutoFixture;
 using Fixture = AutoFixture.Fixture;
 using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
@@ -147,7 +148,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.PluginInfo.Identity.Id, CancellationToken.None);
+            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None);
 
             Assert.AreEqual(fakeInstalledPluginInfo, actualResult);
         }
@@ -165,7 +166,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.PluginInfo.Identity.Id, CancellationToken.None);
+            InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None);
 
             Assert.IsNull(actualResult);
         }
@@ -183,7 +184,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.TryGetByIdAsync(fakeInstalledPluginInfo.PluginInfo.Identity.Id, CancellationToken.None));
+            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None));
         }
 
         #endregion
@@ -548,15 +549,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         private InstalledPluginInfo CreatePluginWithBumpedVersion(InstalledPluginInfo plugin)
         {
             return new InstalledPluginInfo(
-                new PluginInfo(
+                new PluginMetadata(
                     new PluginIdentity(
-                        plugin.PluginInfo.Identity.Id,
-                        new Version(plugin.PluginInfo.Identity.Version.Major + 1, 0, 0, 0)),
-                    plugin.PluginInfo.InstalledSize,
-                    plugin.PluginInfo.DisplayName,
-                    plugin.PluginInfo.Description,
-                    plugin.PluginInfo.SdkVersion,
-                    plugin.PluginInfo.Owners),
+                        plugin.Metadata.Identity.Id,
+                        new Version(plugin.Metadata.Identity.Version.Major + 1, 0, 0, 0)),
+                    plugin.Metadata.InstalledSize,
+                    plugin.Metadata.DisplayName,
+                    plugin.Metadata.Description,
+                    plugin.Metadata.SdkVersion,
+                    plugin.Metadata.Owners),
                 plugin.SourceUri,
                 plugin.InstalledOn,
                 plugin.Checksum);
@@ -565,15 +566,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         private InstalledPluginInfo CreatePluginWithDifferentIdVersion(InstalledPluginInfo plugin)
         {
             return new InstalledPluginInfo(
-                new PluginInfo(
+                new PluginMetadata(
                     new PluginIdentity(
-                        plugin.PluginInfo.Identity.Id + "1",
-                        plugin.PluginInfo.Identity.Version),
-                    plugin.PluginInfo.InstalledSize,
-                    plugin.PluginInfo.DisplayName,
-                    plugin.PluginInfo.Description,
-                    plugin.PluginInfo.SdkVersion,
-                    plugin.PluginInfo.Owners),
+                        plugin.Metadata.Identity.Id + "1",
+                        plugin.Metadata.Identity.Version),
+                    plugin.Metadata.InstalledSize,
+                    plugin.Metadata.DisplayName,
+                    plugin.Metadata.Description,
+                    plugin.Metadata.SdkVersion,
+                    plugin.Metadata.Owners),
                 plugin.SourceUri,
                 plugin.InstalledOn,
                 plugin.Checksum);
@@ -582,15 +583,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         private InstalledPluginInfo CreatePluginWithDifferentInstallDate(InstalledPluginInfo plugin)
         {
             return new InstalledPluginInfo(
-                new PluginInfo(
+                new PluginMetadata(
                     new PluginIdentity(
-                        plugin.PluginInfo.Identity.Id,
-                        plugin.PluginInfo.Identity.Version),
-                    plugin.PluginInfo.InstalledSize,
-                    plugin.PluginInfo.DisplayName,
-                    plugin.PluginInfo.Description,
-                    plugin.PluginInfo.SdkVersion,
-                    plugin.PluginInfo.Owners),
+                        plugin.Metadata.Identity.Id,
+                        plugin.Metadata.Identity.Version),
+                    plugin.Metadata.InstalledSize,
+                    plugin.Metadata.DisplayName,
+                    plugin.Metadata.Description,
+                    plugin.Metadata.SdkVersion,
+                    plugin.Metadata.Owners),
                 plugin.SourceUri,
                 DateTime.UtcNow,
                 plugin.Checksum);

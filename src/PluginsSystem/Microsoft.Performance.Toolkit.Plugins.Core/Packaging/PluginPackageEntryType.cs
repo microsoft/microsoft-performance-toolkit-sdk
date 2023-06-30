@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
 {
@@ -16,14 +16,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         Unknown,
 
         /// <summary>
-        ///     The entry is for the <see cref="PluginInfo"/>.
+        ///     The entry is for the <see cref="PluginMetadata"/>.
         /// </summary>
-        InfoJsonFile,
+        MetadataJsonFile,
 
         /// <summary>
-        ///     The entry is for the <see cref="PluginContentsInfo"/>.
+        ///     The entry is for the <see cref="PluginContentsMetadata"/>.
         /// </summary>
-        ContentsInfoJsonFile,
+        ContentsMetadataJsonFile,
 
         /// <summary>
         ///     The entry is a file for the plugin itself (e.g. one of its binaries).

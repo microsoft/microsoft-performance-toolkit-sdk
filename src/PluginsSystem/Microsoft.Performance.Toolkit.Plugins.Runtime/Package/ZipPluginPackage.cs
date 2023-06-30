@@ -7,9 +7,8 @@ using System.IO.Compression;
 using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
 {
@@ -26,11 +25,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <summary>
         ///     Creates an instance of <see cref="ZipPluginPackage"/>.
         /// </summary>
-        /// <param name="pluginInfo">
-        ///     The info of the plugin.
+        /// <param name="metadata">
+        ///     The metadata of the plugin.
         /// </param>
-        /// <param name="pluginContentsInfo">
-        ///     The contents of the plugin.
+        /// <param name="contentsMetadata">
+        ///     The metadata of the plugin contents.
         /// </param>
         /// <param name="zip">
         ///     The zip archive that contains the plugin.
@@ -39,11 +38,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         ///     A factory that creates loggers for the given type.
         /// </param>
         internal ZipPluginPackage(
-            PluginInfo pluginInfo,
-            PluginContentsInfo pluginContentsInfo,
+            PluginMetadata metadata,
+            PluginContentsMetadata contentsMetadata,
             ZipArchive zip,
             Func<Type, ILogger> loggerFactory)
-            : base(pluginInfo, pluginContentsInfo, loggerFactory)
+            : base(metadata, contentsMetadata, loggerFactory)
         {
             Guard.NotNull(zip, nameof(zip));
 

@@ -5,6 +5,7 @@ using System;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core
 {
@@ -19,17 +20,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         [JsonConstructor]
         public AvailablePluginInfo(
-            PluginInfo pluginInfo,
+            PluginMetadata metadata,
             PluginSource source,
             ulong packageSize,
             Uri packageUri,
             Guid fetcherResourceId)
         {
-            Guard.NotNull(pluginInfo, nameof(pluginInfo));
+            Guard.NotNull(metadata, nameof(metadata));
             Guard.NotNull(source, nameof(source));
             Guard.NotNull(packageUri, nameof(packageUri));
 
-            this.PluginInfo = pluginInfo;
+            this.Metadata = metadata;
             this.Source = source;
             this.PackageSize = packageSize;
             this.PackageUri = packageUri;
@@ -37,9 +38,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         }
 
         /// <summary>
-        ///     Gets the information for this plugin.
+        ///     Gets the metadata for this plugin.
         /// </summary>
-        public PluginInfo PluginInfo { get; }
+        public PluginMetadata Metadata { get; }
 
         /// <summary>
         ///     Gets the source where this plugin is discovered.
@@ -50,7 +51,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         ///     Gets the size, in number of bytes, of the package that makes up this plugin.
         /// </summary>
         public ulong PackageSize { get; }
-
 
         /// <summary>
         ///     Gets the URI where the plugin package can be fetched.
@@ -82,7 +82,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return true;
             }
 
-            return this.PluginInfo.Equals(other.PluginInfo)
+            return this.Metadata.Equals(other.Metadata)
                 && this.Source.Equals(other.Source)
                 && this.PackageSize.Equals(other.PackageSize)
                 && this.PackageUri.Equals(other.PackageUri)
@@ -93,7 +93,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
-                this.PluginInfo.GetHashCode(),
+                this.Metadata.GetHashCode(),
                 this.Source.GetHashCode(),
                 this.PackageSize.GetHashCode(),
                 this.PackageUri.GetHashCode(),

@@ -4,7 +4,7 @@
 using System;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -16,25 +16,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     {
         [JsonConstructor]
         public InstalledPluginInfo(
-            PluginInfo pluginInfo,
+            PluginMetadata metadata,
             Uri sourceUri,
             DateTimeOffset installedOn,
             string checksum)
         {
-            Guard.NotNull(pluginInfo, nameof(pluginInfo));
+            Guard.NotNull(metadata, nameof(metadata));
             Guard.NotNull(sourceUri, nameof(sourceUri));
             Guard.NotNullOrWhiteSpace(checksum, nameof(checksum));
 
-            this.PluginInfo = pluginInfo;
+            this.Metadata = metadata;
             this.SourceUri = sourceUri;
             this.InstalledOn = installedOn;
             this.Checksum = checksum;
         }
 
         /// <summary>
-        ///     Gets the information for this plugin.
+        ///     Gets the metadata for this plugin.
         /// </summary>
-        public PluginInfo PluginInfo { get; }
+        public PluginMetadata Metadata { get; }
 
         /// <summary>
         ///     Gets the source Uri of this plugin.
@@ -70,7 +70,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 return true;
             }
 
-            return this.PluginInfo.Equals(other.PluginInfo)
+            return this.Metadata.Equals(other.Metadata)
                 && Equals(this.SourceUri, other.SourceUri)
                 && DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn)
                 && string.Equals(this.Checksum, other.Checksum);
@@ -80,7 +80,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
-                this.PluginInfo.GetHashCode(),
+                this.Metadata.GetHashCode(),
                 this.SourceUri.GetHashCode(),
                 this.InstalledOn.GetHashCode(),
                 this.Checksum.GetHashCode());
@@ -89,7 +89,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.PluginInfo.Identity.ToString();
+            return this.Metadata.Identity.ToString();
         }
     }
 }

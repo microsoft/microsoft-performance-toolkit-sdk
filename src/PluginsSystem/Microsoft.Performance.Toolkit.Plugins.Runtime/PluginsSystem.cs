@@ -7,9 +7,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
@@ -118,12 +117,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 SerializationUtils.GetJsonSerializerWithDefaultOptions<List<InstalledPluginInfo>>(),
                 loggerFactory);
 
-            ISerializer<PluginInfo> infoSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginInfo>();
-            ISerializer<PluginContentsInfo> contentsSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsInfo>();
+            ISerializer<PluginMetadata> metadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
+            ISerializer<PluginContentsMetadata> contentsMetadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>();
 
             var packageReader = new ZipPluginPackageReader(
-                infoSerializer,
-                contentsSerializer,
+                metadataSerializer,
+                contentsMetadataSerializer,
                 loggerFactory);
 
             var storageDirectory = new DefaultPluginsStorageDirectory(pluginsSystemRoot);
@@ -132,7 +131,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             var installedPluginStorage = new FileSystemInstalledPluginStorage(
                 storageDirectory,
-                contentsSerializer,
+                contentsMetadataSerializer,
                 checsumCalculator,
                 loggerFactory);
 

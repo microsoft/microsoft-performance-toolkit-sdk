@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
     internal static class FakeContents
     {
-        public static PluginContentsInfo GetFakeEmptyPluginContentsInfo()
+        public static PluginContentsMetadata GetFakeEmptyPluginContentsInfo()
         {
-            return new PluginContentsInfo(
+            return new PluginContentsMetadata(
                 null,
                 null,
                 null);

@@ -68,12 +68,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
             catch (Exception e)
             {
-                string errorMsg = $"Fails to fetch plugin {availablePlugin.AvailablePluginInfo.PluginInfo.Identity} " +
-                    $"from {availablePlugin.AvailablePluginInfo.PackageUri}";
+                string errorMsg = $"Fails to fetch plugin {availablePlugin.Info.Metadata.Identity} " +
+                    $"from {availablePlugin.Info.PackageUri}";
 
                 logger.Error(e, errorMsg);
 
-                throw new PluginFetchingException(errorMsg, availablePlugin.AvailablePluginInfo, e);
+                throw new PluginFetchingException(errorMsg, availablePlugin.Info, e);
             }
 
             getStreamProgress.Report(100);
@@ -84,14 +84,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 {
                     return await pluginsSystem.Installer.InstallPluginAsync(
                         stream,
-                        availablePlugin.AvailablePluginInfo.PackageUri,
+                        availablePlugin.Info.PackageUri,
                         cancellationToken,
                         new ProgressRepeater<int>(installProgress0, installProgress1));
                 }
                 catch (Exception e)
                 {
-                    string errorMsg = $"Fails to install plugin {availablePlugin.AvailablePluginInfo.PluginInfo.Identity} " +
-                                      $"from {availablePlugin.AvailablePluginInfo.PackageUri}";
+                    string errorMsg = $"Fails to install plugin {availablePlugin.Info.Metadata.Identity} " +
+                                      $"from {availablePlugin.Info.PackageUri}";
 
                     logger.Error(e, errorMsg);
                     throw;

@@ -26,7 +26,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    archive.CreateEntry(PackageConstants.PluginContentsInfoFileName);
+                    archive.CreateEntry(PackageConstants.PluginContentsMetadataFileName);
                 }
 
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read, false))

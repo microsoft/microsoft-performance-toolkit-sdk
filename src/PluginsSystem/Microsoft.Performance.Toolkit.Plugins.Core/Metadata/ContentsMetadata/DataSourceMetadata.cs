@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
     /// <summary>
     ///     Represents the metadata of a supported data source.

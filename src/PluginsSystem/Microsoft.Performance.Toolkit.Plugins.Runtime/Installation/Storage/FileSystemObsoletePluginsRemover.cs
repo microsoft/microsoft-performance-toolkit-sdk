@@ -52,12 +52,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
             {
                 IReadOnlyCollection<InstalledPluginInfo> installedPlugins = await this.pluginRegistry.GetAllAsync(cancellationToken);
-                IEnumerable<PluginIdentity> installedPluginIds = installedPlugins.Select(p => p.PluginInfo.Identity);
+                IEnumerable<PluginIdentity> installedPluginIds = installedPlugins.Select(p => p.Metadata.Identity);
 
                 IEnumerable<string> dirsInUse = installedPluginIds.Select(
-                   p => this.pluginsStorageDirectory.GetPluginRootDirectory(p));
+                   p => this.pluginsStorageDirectory.GetRootDirectory(p));
 
-                IEnumerable<string> dirsToRemove = this.pluginsStorageDirectory.GetAllPluginRootDirectories()
+                IEnumerable<string> dirsToRemove = this.pluginsStorageDirectory.GetAllRootDirectories()
                     .Where(d => !dirsInUse.Contains(d, StringComparer.OrdinalIgnoreCase));
 
                 IEnumerable<(string dirToRemove, Task task)> dirTaskTuples = dirsToRemove

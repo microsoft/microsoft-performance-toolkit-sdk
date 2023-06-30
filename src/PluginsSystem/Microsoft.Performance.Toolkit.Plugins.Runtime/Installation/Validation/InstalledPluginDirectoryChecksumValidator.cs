@@ -35,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         {
             Guard.NotNull(installedPluginInfo, nameof(installedPluginInfo));
 
-            string installDirectory = this.pluginsStorageDirectory.GetPluginRootDirectory(installedPluginInfo.PluginInfo.Identity);
+            string installDirectory = this.pluginsStorageDirectory.GetRootDirectory(installedPluginInfo.Metadata.Identity);
 
             if (!Directory.Exists(installDirectory))
             {

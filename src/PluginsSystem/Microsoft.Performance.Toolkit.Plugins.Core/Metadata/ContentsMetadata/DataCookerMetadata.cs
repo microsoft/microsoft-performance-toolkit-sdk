@@ -5,7 +5,7 @@ using System;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
     /// <summary>
     ///     Represents the metadata of a data cooker.

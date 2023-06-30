@@ -5,27 +5,26 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Core
+namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
     /// <summary>
     ///     Represents the information/metadata of a plugin.
     /// </summary>
-    public class PluginInfo
-        : IEquatable<PluginInfo>
+    public class PluginMetadata
+        : IEquatable<PluginMetadata>
     {
         /// <summary>
-        ///     Initializes an instance of <see cref="AvailablePluginInfo"/>.
+        ///     Initializes an instance of <see cref="PluginMetadata"/>.
         /// </summary>
         [JsonConstructor]
-        public PluginInfo(
+        public PluginMetadata(
             PluginIdentity identity,
             ulong installedSize,
             string displayName,
             string description,
             Version sdkVersion,
-            IEnumerable<PluginOwner> owners)
+            IEnumerable<PluginOwnerInfo> owners)
         {
             Identity = identity;
             InstalledSize = installedSize;
@@ -63,16 +62,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <summary>
         ///     Gets the owners of this plugin.
         /// </summary>
-        public IEnumerable<PluginOwner> Owners { get; }
+        public IEnumerable<PluginOwnerInfo> Owners { get; }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return Equals(obj as PluginInfo);
+            return Equals(obj as PluginMetadata);
         }
 
         /// <inheritdoc />
-        public bool Equals(PluginInfo other)
+        public bool Equals(PluginMetadata other)
         {
             if (other is null)
             {
@@ -84,12 +83,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return true;
             }
 
-            return this.Identity.Equals(other.Identity)
+            return (this.Identity?.Equals(other.Identity) == true || this.Identity is null && other.Identity is null)
                    && this.InstalledSize.Equals(other.InstalledSize)
-                   && this.DisplayName.Equals(other.DisplayName)
-                   && this.Description.Equals(other.Description)
-                   && this.SdkVersion.Equals(other.SdkVersion)
-                   && this.Owners.EnumerableEqual(other.Owners);
+                   && string.Equals(this.DisplayName, other.DisplayName, StringComparison.Ordinal)
+                   && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
+                   && (this.SdkVersion?.Equals(other.SdkVersion) == true || this.SdkVersion is null && other.SdkVersion is null)
+                   && (this.Owners?.EnumerableEqual(other.Owners) == true || this.Owners is null && other.Owners is null);
         }
 
         /// <inheritdoc />
@@ -104,7 +103,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
 
             if (this.Owners != null)
             {
-                foreach (PluginOwner owner in this.Owners)
+                foreach (PluginOwnerInfo owner in this.Owners)
                 {
                     result = HashCodeUtils.CombineHashCodeValues(result, owner?.GetHashCode() ?? 0);
                 }

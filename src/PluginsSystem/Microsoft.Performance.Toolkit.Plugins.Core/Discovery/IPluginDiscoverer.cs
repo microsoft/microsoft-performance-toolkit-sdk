@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
 {
@@ -42,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
             CancellationToken cancellationToken);
 
         /// <summary>
-        ///     Returns the content of a given plugin.
+        ///     Returns the contents metadata of a given plugin.
         /// </summary>
         /// <param name="pluginIdentity">
         ///     The identity of the requested plugin.
@@ -51,9 +51,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Discovery
         ///     Signals that the caller wishes to cancel the operation.
         /// </param>
         /// <returns>
-        ///     The contents of the given plugin.
+        ///     The contents metadata of the given plugin.
         /// </returns>
-        Task<PluginContentsInfo> GetPluginContentsInfoAsync(
+        Task<PluginContentsMetadata> GetPluginContentsMetadataAsync(
             PluginIdentity pluginIdentity,
             CancellationToken cancellationToken);
 

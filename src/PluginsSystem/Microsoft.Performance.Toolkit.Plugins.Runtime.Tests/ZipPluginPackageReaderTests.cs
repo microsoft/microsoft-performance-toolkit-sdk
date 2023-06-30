@@ -4,8 +4,7 @@
 using System.IO.Compression;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
-using Microsoft.Performance.Toolkit.Plugins.Core;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -20,8 +19,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public async Task TryReadPackageAsync_InvalidZip_FailsWithErrorLogged()
         {
-            var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeInfoSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -38,8 +37,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public async Task TryReadPackageAsync_StreamClosed_FailsWithErrorLogged()
         {
-            var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeInfoSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -57,8 +56,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public async Task TryReadPackageAsync_NoContentsFile_FailsWithErrorLogged()
         {
-            var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeInfoSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -68,7 +67,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    archive.CreateEntry(PackageConstants.PluginInfoFileName);
+                    archive.CreateEntry(PackageConstants.PluginMetadataFileName);
                     archive.CreateEntry(PackageConstants.PluginContentFolderName);
                 }
 
@@ -83,8 +82,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public async Task TryReadPackageAsync_NoContentFolder_FailsWithErrorLogged()
         {
-            var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeInfoSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -94,7 +93,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    archive.CreateEntry(PackageConstants.PluginContentsInfoFileName);
+                    archive.CreateEntry(PackageConstants.PluginContentsMetadataFileName);
                 }
 
                 var package = await sut.TryReadPackageAsync(memoryStream, CancellationToken.None);
@@ -108,8 +107,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public async Task TryReadPackageAsync_DeserializationThrows_FailedWithErrorLogged()
         {
-            var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeInfoSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -122,8 +121,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    archive.CreateEntry(PackageConstants.PluginInfoFileName);
-                    archive.CreateEntry(PackageConstants.PluginContentsInfoFileName);
+                    archive.CreateEntry(PackageConstants.PluginMetadataFileName);
+                    archive.CreateEntry(PackageConstants.PluginContentsMetadataFileName);
                     archive.CreateEntry(PackageConstants.PluginContentFolderName);
                 }
 
@@ -138,8 +137,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public async Task PluginPackage_ValidPackage_Succeeds()
         {
-            var fakeInfoSerializer = new Mock<ISerializer<PluginInfo>>();
-            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsInfo>>();
+            var fakeInfoSerializer = new Mock<ISerializer<PluginMetadata>>();
+            var fakeContentsInfoSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeLogger = new Mock<ILogger>();
             var fakeLoggerFactory = (Type t) => fakeLogger.Object;
 
@@ -155,15 +154,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             {
                 using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
                 {
-                    archive.CreateEntry(PackageConstants.PluginInfoFileName);
-                    archive.CreateEntry(PackageConstants.PluginContentsInfoFileName);
+                    archive.CreateEntry(PackageConstants.PluginMetadataFileName);
+                    archive.CreateEntry(PackageConstants.PluginContentsMetadataFileName);
                     archive.CreateEntry(PackageConstants.PluginContentFolderName);
                 }
 
                 var package = await sut.TryReadPackageAsync(memoryStream, CancellationToken.None);
 
                 Assert.IsNotNull(package);
-                Assert.AreEqual(contents, package.PluginContentsInfo);
+                Assert.AreEqual(contents, package.ContentsMetadata);
             }
         }
     }

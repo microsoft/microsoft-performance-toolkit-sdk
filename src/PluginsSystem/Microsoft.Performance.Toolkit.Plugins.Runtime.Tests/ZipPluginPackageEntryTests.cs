@@ -5,8 +5,6 @@ using System.IO.Compression;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -18,8 +16,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
     {
         [TestMethod]
         [UnitTest]
-        [DataRow(PackageConstants.PluginContentsInfoFileName, true)]
-        [DataRow(@$"somefolder/{PackageConstants.PluginContentsInfoFileName}", false)]
+        [DataRow(PackageConstants.PluginContentsMetadataFileName, true)]
+        [DataRow(@$"somefolder/{PackageConstants.PluginContentsMetadataFileName}", false)]
         [DataRow(@"foo.json", false)]
         public void ContentsFile_EntryType_ReturnsExpectedResult(string entryPath, bool expected)
         {
@@ -39,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 {
                     var sut = new ZipPluginPackage(info, contents, archive, fakeLoggerFactory);
 
-                    Assert.AreEqual(sut.Entries.Single().EntryType == PluginPackageEntryType.ContentsInfoJsonFile, expected);
+                    Assert.AreEqual(sut.Entries.Single().EntryType == PluginPackageEntryType.ContentsMetadataJsonFile, expected);
                 }
             }
         }
@@ -103,7 +101,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        [DataRow(PackageConstants.PluginContentsInfoFileName, null)]
+        [DataRow(PackageConstants.PluginContentsMetadataFileName, null)]
         [DataRow(PackageConstants.PluginContentFolderName, "")]
         [DataRow(@$"{PackageConstants.PluginContentFolderName}foo.txt", @"foo.txt")]
         public void ContentRelativePath_ReturnsExpectedResult(string entryPath, string expectedContentRelativePath)

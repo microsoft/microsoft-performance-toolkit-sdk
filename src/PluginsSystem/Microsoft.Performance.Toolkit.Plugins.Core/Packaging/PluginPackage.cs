@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
 {
@@ -21,26 +21,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         /// <summary>
         ///     Creates an instance of the <see cref="PluginPackage"/>.
         /// </summary>
-        /// <param name="pluginInfo">
-        ///     The plugin info.
+        /// <param name="metadata">
+        ///     The plugin metadata.
         /// </param>
-        /// <param name="pluginContentsInfo">
-        ///     The plugin contents.
+        /// <param name="contentsMetadata">
+        ///     The plugin contents metadata.
         /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory.
         /// </param>
         protected PluginPackage(
-            PluginInfo pluginInfo,
-            PluginContentsInfo pluginContentsInfo,
+            PluginMetadata metadata,
+            PluginContentsMetadata contentsMetadata,
             Func<Type, ILogger> loggerFactory)
         {
-            Guard.NotNull(pluginInfo, nameof(pluginInfo));
-            Guard.NotNull(pluginContentsInfo, nameof(pluginContentsInfo));
+            Guard.NotNull(metadata, nameof(metadata));
+            Guard.NotNull(contentsMetadata, nameof(contentsMetadata));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
-            this.PluginInfo = pluginInfo;
-            this.PluginContentsInfo = pluginContentsInfo;
+            this.Metadata = metadata;
+            this.ContentsMetadata = contentsMetadata;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(GetType());
         }
@@ -51,19 +51,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Packaging
         public abstract IReadOnlyCollection<PluginPackageEntry> Entries { get; }
 
         /// <summary>
-        ///     Gets the plugin information.
+        ///     Gets the metadata of this plugin.
         /// </summary>
-        public PluginInfo PluginInfo { get; }
+        public PluginMetadata Metadata { get; }
 
         /// <summary>
-        ///     Gets the plugin contents.
+        ///     Gets the metadata of the plugin contents.
         /// </summary>
-        public PluginContentsInfo PluginContentsInfo { get; }
+        public PluginContentsMetadata ContentsMetadata { get; }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.PluginInfo.Identity.ToString();
+            return this.Metadata.Identity.ToString();
         }
 
         /// <inheritdoc />

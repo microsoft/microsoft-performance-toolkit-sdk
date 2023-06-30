@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 
@@ -189,13 +189,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             {
                 // Check if any version of this plugin is already installed.
                 InstalledPluginInfo installedPlugin = await this.pluginRegistry.TryGetByIdAsync(
-                    pluginPackage.PluginInfo.Identity.Id,
+                    pluginPackage.Metadata.Identity.Id,
                     cancellationToken);
 
                 bool needsUninstall = false;
                 if (installedPlugin != null)
                 {
-                    if (!installedPlugin.PluginInfo.Identity.Version.Equals(pluginPackage.PluginInfo.Identity.Version))
+                    if (!installedPlugin.Metadata.Identity.Version.Equals(pluginPackage.Metadata.Identity.Version))
                     {
                         needsUninstall = true;
                     }
@@ -221,7 +221,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     this.logger.Info("Extraction completed.");
 
                     var pluginToInstall = new InstalledPluginInfo(
-                        pluginPackage.PluginInfo,
+                        pluginPackage.Metadata,
                         sourceUri,
                         DateTime.UtcNow,
                         checksum);
@@ -237,7 +237,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Info($"{pluginToInstall} is registered in the plugin registry.");
                     }
 
-                    return new InstalledPlugin(pluginToInstall, pluginPackage.PluginContentsInfo);
+                    return new InstalledPlugin(pluginToInstall, pluginPackage.ContentsMetadata);
                 }
                 catch (Exception e)
                 {
@@ -258,15 +258,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         this.logger.Error(e, $"Failed to install plugin {pluginPackage}.");
                     }
 
-                    this.logger.Info($"Cleaning up extraction folder of {pluginPackage.PluginInfo.Identity}");
+                    this.logger.Info($"Cleaning up extraction folder of {pluginPackage.Metadata.Identity}");
 
                     try
                     {
-                        await this.installedPluginStorage.RemoveAsync(pluginPackage.PluginInfo.Identity, cancellationToken);
+                        await this.installedPluginStorage.RemoveAsync(pluginPackage.Metadata.Identity, cancellationToken);
                     }
                     catch (Exception ex)
                     {
-                        this.logger.Error(ex, $"Failed to clean up extraction folder of {pluginPackage.PluginInfo.Identity}");
+                        this.logger.Error(ex, $"Failed to clean up extraction folder of {pluginPackage.Metadata.Identity}");
                     }
 
                     throw;
@@ -313,13 +313,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                     installedPluginInfo);
             }
 
-            PluginContentsInfo pluginContentsInfo = await this.installedPluginStorage.TryGetPluginContentsInfoAsync(
-                installedPluginInfo.PluginInfo.Identity,
+            PluginContentsMetadata contentsMetadata = await this.installedPluginStorage.TryGetPluginContentsMetadataAsync(
+                installedPluginInfo.Metadata.Identity,
                 cancellationToken);
 
-            Debug.Assert(pluginContentsInfo != null);
+            Debug.Assert(contentsMetadata != null);
 
-            return new InstalledPlugin(installedPluginInfo, pluginContentsInfo);
+            return new InstalledPlugin(installedPluginInfo, contentsMetadata);
         }
     }
 }

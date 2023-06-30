@@ -43,13 +43,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             get
             {
-                if (this.RawPath.Equals(PackageConstants.PluginInfoFileName, StringComparison.OrdinalIgnoreCase))
+                if (this.RawPath.Equals(PackageConstants.PluginMetadataFileName, StringComparison.OrdinalIgnoreCase))
                 {
-                    return PluginPackageEntryType.InfoJsonFile;
+                    return PluginPackageEntryType.MetadataJsonFile;
                 }
-                else if (this.RawPath.Equals(PackageConstants.PluginContentsInfoFileName, StringComparison.OrdinalIgnoreCase))
+                else if (this.RawPath.Equals(PackageConstants.PluginContentsMetadataFileName, StringComparison.OrdinalIgnoreCase))
                 {
-                    return PluginPackageEntryType.ContentsInfoJsonFile;
+                    return PluginPackageEntryType.ContentsMetadataJsonFile;
                 }
                 else if (this.RawPath.StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase))
                 {
