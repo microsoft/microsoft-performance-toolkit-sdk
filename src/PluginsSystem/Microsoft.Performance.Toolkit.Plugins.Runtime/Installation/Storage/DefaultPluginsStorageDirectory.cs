@@ -14,8 +14,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
     public sealed class DefaultPluginsStorageDirectory
         : IPluginsStorageDirectory
     {
-        private const string pluginMetadataFileName = "ptix.metadata.json";
-        private const string pluginContentsMetadataFileName = "ptix.contentsmetadata.json";
+        private const string pluginMetadataFileName = "metadata.json";
+        private const string pluginContentsMetadataFileName = "contentsmetadata.json";
         private const string pluginContentFolderName = "plugin/";
 
         private readonly string rootDirectory;
