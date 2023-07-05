@@ -7,6 +7,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Validation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
 {
@@ -21,6 +22,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         private readonly Func<string, Task<bool>> loadPluginFromDirectory;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
+        private readonly IPluginValidator validator;
+        private readonly IInvalidPluginsGate invalidGate;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="FileSystemInstalledPluginLoader"/>
@@ -34,6 +37,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         /// <param name="loadPluginFromDirectory">
         ///     The function to use to load a plugin from a directory.
         /// </param>
+        /// <param name="validator">
+        ///     The <see cref="IPluginValidator"/> for validating a plugin that is being loaded.
+        /// </param>
+        /// <param name="invalidGate">
+        ///     The <see cref="IInvalidPluginsGate"/> to bypass plugin validation errors and continue
+        ///     plugin loading.
+        /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory to use to create loggers.
         /// </param>
@@ -41,6 +51,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
             IPluginsStorageDirectory pluginsStorageDirectory,
             IInstalledPluginValidator installedPluginValidator,
             Func<string, Task<bool>> loadPluginFromDirectory,
+            IPluginValidator validator,
+            IInvalidPluginsGate invalidGate,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginsStorageDirectory, nameof(pluginsStorageDirectory));
@@ -52,6 +64,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
             this.loadPluginFromDirectory = loadPluginFromDirectory;
             this.installedPluginValidator = installedPluginValidator;
             this.loggerFactory = loggerFactory;
+            this.validator = validator;
+            this.invalidGate = invalidGate;
             this.logger = loggerFactory(typeof(FileSystemInstalledPluginLoader));
         }
 
@@ -59,6 +73,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         public async Task<bool> LoadPluginAsync(InstalledPlugin installedPlugin)
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
+
+            if (!this.validator.IsValid(installedPlugin.Info.Metadata, out ErrorInfo[] errors))
+            {
+                if (!await this.invalidGate.ShouldProceedDespiteFailures(
+                        PluginsSystemOperation.Load,
+                        new[] { new PluginValidationFailures(installedPlugin.Info.Metadata.Identity, errors) }))
+                {
+                    return false;
+                }
+            }
 
             PluginIdentity pluginIdentity = installedPlugin.Info.Metadata.Identity;
             string pluginDirectory = this.pluginsStorageDirectory.GetContentDirectory(pluginIdentity);

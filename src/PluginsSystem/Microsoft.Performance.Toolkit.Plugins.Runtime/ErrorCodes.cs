@@ -37,6 +37,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             "PLUGINS_SYSTEM_PluginsSystemResourceNotFound",
             "No available plugin system resource was found to perform requests against the plugin source.");
 
+        /// <summary>
+        ///     The plugin is not compatible with the current running version of the SDK.
+        /// </summary>
+        public static ErrorCodes PLUGINS_VALIDATION_UnsupportedSdkVersion = new ErrorCodes(
+            60001,
+            "PLUGINS_VALIDATION_UnsupportedSdkVersion",
+            "The plugin is not compatible with the current running version of the SDK.");
+
         //
         // We do duplicate checking on the numeric and string codes
         // as part of construction of this collection. If there are

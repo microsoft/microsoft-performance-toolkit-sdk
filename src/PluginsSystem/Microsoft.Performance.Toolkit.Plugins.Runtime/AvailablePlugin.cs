@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
@@ -24,7 +26,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Creates an instance of <see cref="AvailablePlugin"/>
         /// </summary>
         /// <param name="info">
-        ///     The <see cref="Info"/> object cotaining information about this plugin.
+        ///     The <see cref="Info"/> object containing information about this plugin.
         /// </param>
         /// <param name="discoverer">
         ///     The <see cref="IPluginDiscoverer"/> this plugin is discovered by.
@@ -32,15 +34,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="fetcher">
         ///     The <see cref="IPluginFetcher"/> this plugin uses to fetch plugin content.
         /// </param>
+        /// <param name="validationFailures">
+        ///     The <see cref="ErrorInfo"/>s associated with validation failures for this plugin.
+        /// </param>
         internal AvailablePlugin(
             AvailablePluginInfo info,
             IPluginDiscoverer discoverer,
-            IPluginFetcher fetcher)
+            IPluginFetcher fetcher,
+            IReadOnlyCollection<ErrorInfo> validationFailures)
         {
             this.Info = info;
             this.discoverer = discoverer;
             this.fetcher = fetcher;
+            this.ValidationFailures = validationFailures;
         }
+
+        /// <summary>
+        ///     Gets the <see cref="ErrorInfo"/>s associated with validation failures for this plugin,
+        ///     if any.
+        /// </summary>
+        public IReadOnlyCollection<ErrorInfo> ValidationFailures { get; }
 
         /// <summary>
         ///     Gets the <see cref="Core.AvailablePluginInfo"/> associated with this plugin.
