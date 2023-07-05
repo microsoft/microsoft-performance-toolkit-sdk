@@ -17,7 +17,62 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <summary>
         ///     Initializes an instance of <see cref="PluginMetadata"/>.
         /// </summary>
+        /// <param name="schemaVersion">
+        ///     The version of the schema used to serialize this metadata.
+        /// </param>
+        /// <param name="identity">
+        ///     The identity of the plugin.
+        /// </param>
+        /// <param name="installedSize">
+        ///     The size, in number of bytes, of this plugin once it has been installed.
+        /// </param>
+        /// <param name="displayName">
+        ///     The human-readable name of this plugin.
+        /// </param>
+        /// <param name="description">
+        ///     The user friendly description of this plugin.
+        /// </param>
+        /// <param name="sdkVersion">
+        ///     The version of the performance SDK which this plugin depends upon.
+        /// </param>
+        /// <param name="owners">
+        ///     The owners information of this plugin.
+        /// </param>
         [JsonConstructor]
+        public PluginMetadata(
+            Version schemaVersion,
+            PluginIdentity identity,
+            ulong installedSize,
+            string displayName,
+            string description,
+            Version sdkVersion,
+            IEnumerable<PluginOwnerInfo> owners)
+            : this(identity, installedSize, displayName, description, sdkVersion, owners)
+        {
+            this.SchemaVersion = schemaVersion;
+        }
+
+        /// <summary>
+        ///     Initializes an instance of <see cref="PluginMetadata"/>.
+        /// </summary>
+        /// <param name="identity">
+        ///     The identity of the plugin.
+        /// </param>
+        /// <param name="installedSize">
+        ///     The size, in number of bytes, of this plugin once it has been installed.
+        /// </param>
+        /// <param name="displayName">
+        ///     The human-readable name of this plugin.
+        /// </param>
+        /// <param name="description">
+        ///     The user friendly description of this plugin.
+        /// </param>
+        /// <param name="sdkVersion">
+        ///     The version of the performance SDK which this plugin depends upon.
+        /// </param>
+        /// <param name="owners">
+        ///     The owners information of this plugin.
+        /// </param>
         public PluginMetadata(
             PluginIdentity identity,
             ulong installedSize,
@@ -26,13 +81,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             Version sdkVersion,
             IEnumerable<PluginOwnerInfo> owners)
         {
-            Identity = identity;
-            InstalledSize = installedSize;
-            DisplayName = displayName;
-            Description = description;
-            SdkVersion = sdkVersion;
-            Owners = owners;
+            this.Identity = identity;
+            this.InstalledSize = installedSize;
+            this.DisplayName = displayName;
+            this.Description = description;
+            this.SdkVersion = sdkVersion;
+            this.Owners = owners;
         }
+
+        /// <summary>
+        ///     Gets the schema version of plugin metadata.
+        /// </summary>
+        public Version SchemaVersion { get; } = new Version(1, 0);
 
         /// <summary>
         ///     Gets the identity of this plugin.
@@ -60,7 +120,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         public Version SdkVersion { get; }
 
         /// <summary>
-        ///     Gets the owners of this plugin.
+        ///     Gets the owners information of this plugin.
         /// </summary>
         public IEnumerable<PluginOwnerInfo> Owners { get; }
 

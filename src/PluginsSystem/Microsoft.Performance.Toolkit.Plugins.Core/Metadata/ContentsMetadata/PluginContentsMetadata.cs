@@ -11,13 +11,47 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
     /// <summary>
     ///     Contains information about the contents of a plugin.
     /// </summary>
-    public sealed class PluginContentsMetadata
+    public class PluginContentsMetadata
         : IEquatable<PluginContentsMetadata>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="PluginContentsMetadata"/> class with the specified parameters.
         /// </summary>
+        /// <param name="schemaVersion">
+        ///     The version of the schema used to serialize this contents metadata.
+        /// </param>
+        /// <param name="processingSources">
+        ///     The metadata of the processing sources contained in this plugin.
+        /// </param>
+        /// <param name="dataCookers">
+        ///     The metadata of the data cookers contained in this plugin.
+        /// </param>
+        /// <param name="extensibleTables">
+        ///     The metadata of the extensible tables contained in this plugin.
+        /// </param>
         [JsonConstructor]
+        public PluginContentsMetadata(
+            Version schemaVersion,
+            IEnumerable<ProcessingSourceMetadata> processingSources,
+            IEnumerable<DataCookerMetadata> dataCookers,
+            IEnumerable<TableMetadata> extensibleTables)
+            : this(processingSources, dataCookers, extensibleTables)
+        {
+            this.SchemaVersion = schemaVersion;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PluginContentsMetadata"/> class with the specified parameters.
+        /// </summary>
+        /// <param name="processingSources">
+        ///     The metadata of the processing sources contained in this plugin.
+        /// </param>
+        /// <param name="dataCookers">
+        ///     The metadata of the data cookers contained in this plugin.
+        /// </param>
+        /// <param name="extensibleTables">
+        ///     The metadata of the extensible tables contained in this plugin.
+        /// </param>
         public PluginContentsMetadata(
             IEnumerable<ProcessingSourceMetadata> processingSources,
             IEnumerable<DataCookerMetadata> dataCookers,
@@ -27,6 +61,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             this.DataCookers = dataCookers;
             this.ExtensibleTables = extensibleTables;
         }
+
+        /// <summary>
+        ///     Gets the schema version of the contents metadata.
+        /// </summary>
+        public Version SchemaVersion { get; } = new Version(1, 0);
 
         /// <summary>
         ///     Gets the metadata of the processing sources contained in this plugin.
