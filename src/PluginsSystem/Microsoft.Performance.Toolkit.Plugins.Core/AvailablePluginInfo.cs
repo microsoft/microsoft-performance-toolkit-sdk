@@ -18,6 +18,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <summary>
         ///     Initializes an instance of <see cref="AvailablePluginInfo"/>.
         /// </summary>
+        /// TODO: We need this constructor as this is used to deserialize the response from the server. We should move this to a separate class.
         [JsonConstructor]
         public AvailablePluginInfo(
             double schemaVersion,
@@ -29,6 +30,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             DateTimeOffset publishedOn)
             : this(metadata, source, packageSize, packageUri, fetcherResourceId, publishedOn)
         {
+            Guard.NotNull(schemaVersion, nameof(schemaVersion));
+
             if (schemaVersion != this.SchemaVersion)
             {
                 throw new ArgumentOutOfRangeException(
@@ -38,6 +41,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             }
         }
 
+        /// <summary>
+        ///     Initializes an instance of <see cref="AvailablePluginInfo"/>.
+        /// </summary>
+        /// <param name="metadata">
+        ///     The metadata of the plugin.
+        /// </param>
+        /// <param name="source">
+        ///     The source where this plugin is discovered.
+        /// </param>
+        /// <param name="packageSize">
+        ///     The size, in number of bytes, of the package that makes up this plugin.
+        /// </param>
+        /// <param name="packageUri">
+        ///     The URI to the package that makes up this plugin.
+        /// </param>
+        /// <param name="fetcherResourceId">
+        ///     The resource ID of the fetcher that can be used to download the package.
+        /// </param>
+        /// <param name="publishedOn">
+        ///     The date and time when this plugin was published.
+        /// </param>
         public AvailablePluginInfo(
             PluginMetadata metadata,
             PluginSource source,

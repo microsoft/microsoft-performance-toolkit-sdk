@@ -14,6 +14,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
     public class PluginContentsMetadata
         : IEquatable<PluginContentsMetadata>
     {
+        // TODO: Move this constructor to a separate class for deserialization purposes.
         /// <summary>
         ///     Initializes a new instance of the <see cref="PluginContentsMetadata"/> class with the specified parameters.
         /// </summary>
@@ -37,6 +38,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             IEnumerable<TableMetadata> extensibleTables)
             : this(processingSources, dataCookers, extensibleTables)
         {
+            Guard.NotNull(schemaVersion, nameof(schemaVersion));
+
             if (schemaVersion != this.SchemaVersion)
             {
                 throw new ArgumentOutOfRangeException(

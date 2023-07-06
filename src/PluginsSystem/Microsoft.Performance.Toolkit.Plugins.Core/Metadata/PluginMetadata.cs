@@ -14,6 +14,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
     public class PluginMetadata
         : IEquatable<PluginMetadata>
     {
+        // TODO: Move this constructor to a separate class for deserialization purposes.
         /// <summary>
         ///     Initializes an instance of <see cref="PluginMetadata"/>.
         /// </summary>
@@ -53,6 +54,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             IEnumerable<PluginOwnerInfo> owners)
             : this(identity, installedSize, displayName, description, sdkVersion, projectUrl, owners)
         {
+            Guard.NotNull(schemaVersion, nameof(schemaVersion));
+
             if (schemaVersion != this.SchemaVersion)
             {
                 throw new ArgumentOutOfRangeException(
