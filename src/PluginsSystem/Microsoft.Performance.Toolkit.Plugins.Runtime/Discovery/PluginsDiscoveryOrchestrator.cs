@@ -36,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
-        private readonly IPluginValidator validator;
+        private readonly IPluginValidator pluginMetadataValidator;
 
         /// <summary>
         ///     Creates an instance of <see cref="PluginsDiscoveryOrchestrator"/> with the given logger factory.
@@ -50,7 +50,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <param name="discovererProviderRepo">
         ///     A repository containing all available <see cref="IPluginDiscovererProvider"/>s.
         /// </param>
-        /// <param name="validator">
+        /// <param name="pluginMetadataValidator">
         ///     The <see cref="IPluginValidator"/> for validating fetched plugins.
         /// </param>
         /// <param name="loggerFactory">
@@ -60,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             IRepositoryRO<PluginSource> pluginSourceRepo,
             IRepositoryRO<IPluginFetcher> fetcherRepo,
             IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo,
-            IPluginValidator validator,
+            IPluginValidator pluginMetadataValidator,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginSourceRepo, nameof(pluginSourceRepo));
@@ -74,7 +74,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
             this.pluginSourceRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
-            this.validator = validator;
+            this.pluginMetadataValidator = pluginMetadataValidator;
             this.discovererProviderRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(PluginsDiscoveryOrchestrator));
@@ -492,7 +492,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                         continue;
                     }
 
-                    this.validator.IsValid(availablePluginInfo.Metadata, out ErrorInfo[] errors);
+                    ErrorInfo[] errors = this.pluginMetadataValidator.ValidationErrors(availablePluginInfo.Metadata);
 
                     var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher, errors ?? Array.Empty<ErrorInfo>());
                     results[id] = (newPlugin, discoverer);
@@ -531,7 +531,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                         continue;
                     }
 
-                    this.validator.IsValid(availablePluginInfo.Metadata, out ErrorInfo[] errors);
+                    ErrorInfo[] errors = this.pluginMetadataValidator.ValidationErrors(availablePluginInfo.Metadata);
 
                     var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher, errors ?? Array.Empty<ErrorInfo>());
                     results[availablePluginInfo.Metadata.Identity] = (newPlugin, discoverer);

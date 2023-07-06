@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using NuGet.Versioning;
@@ -16,10 +18,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
         : IPluginValidator
     {
         private readonly VersionChecker versionChecker = VersionChecker.Create();
+        private readonly ILogger logger;
 
-        public bool IsValid(PluginMetadata pluginMetadata, out ErrorInfo[] errorInfos)
+        public SdkVersionValidator(ILogger logger)
         {
-            errorInfos = new ErrorInfo[] { };
+            this.logger = logger;
+        }
+
+        public ErrorInfo[] ValidationErrors(PluginMetadata pluginMetadata)
+        {
             SemanticVersion pluginSdkVersion = new SemanticVersion(
                 pluginMetadata.SdkVersion.Major,
                 pluginMetadata.SdkVersion.Minor,
@@ -31,9 +38,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
             {
                 string errorMessage =
                     $"This plugin depends on SDK version {pluginSdkVersion}, which is incompatible with the current SDK version ({versionChecker.Sdk})";
-                errorInfos = new []{ new ErrorInfo(ErrorCodes.PLUGINS_VALIDATION_UnsupportedSdkVersion, errorMessage) };
+
+                this.logger.Error(errorMessage);
+
+                return new []{ new ErrorInfo(ErrorCodes.PLUGINS_VALIDATION_UnsupportedSdkVersion, errorMessage) };
             }
-            return valid;
+            return Array.Empty<ErrorInfo>();
         }
     }
 }

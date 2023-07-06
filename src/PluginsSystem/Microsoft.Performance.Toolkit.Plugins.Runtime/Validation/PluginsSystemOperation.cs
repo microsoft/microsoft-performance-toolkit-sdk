@@ -9,12 +9,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
     public enum PluginsSystemOperation
     {
         /// <summary>
-        ///     One or more plugins are attempting to be installed.
+        ///     The plugins system is attempting to install one or more plugins.
         /// </summary>
         Install,
 
         /// <summary>
-        ///  One or more plugins are attempting to be loaded.
+        ///  The plugins system is attempting to load one or more plugins.
         /// </summary>
         Load,
     }

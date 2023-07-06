@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
@@ -38,7 +39,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         ///     The function to use to load a plugin from a directory.
         /// </param>
         /// <param name="pluginMetadataValidator">
-        ///     The <see cref="IPluginValidator"/> for validating a plugin that is being loaded.
+        ///     The <see cref="IPluginValidator"/> for validating a plugin that is attempting to be loaded.
         /// </param>
         /// <param name="invalidGate">
         ///     The <see cref="IInvalidPluginsGate"/> to bypass plugin validation errors and continue
@@ -79,11 +80,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
 
             if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin.Info))
             {
-                this.logger.Error($"Plugin {pluginIdentity} is not valid installed plugin. It will not be loaded. Has it been corrupted?");
+                this.logger.Error($"Plugin {pluginIdentity} is not valid installed plugin. It will not be loaded. Please see other logs.");
                 return false;
             }
 
-            if (!this.pluginMetadataValidator.IsValid(installedPlugin.Info.Metadata, out ErrorInfo[] errors))
+            ErrorInfo[] errors = this.pluginMetadataValidator.ValidationErrors(installedPlugin.Info.Metadata);
+            if (errors?.Any() ?? false)
             {
                 if (!await this.invalidGate.ShouldProceedDespiteFailures(
                         PluginsSystemOperation.Load,

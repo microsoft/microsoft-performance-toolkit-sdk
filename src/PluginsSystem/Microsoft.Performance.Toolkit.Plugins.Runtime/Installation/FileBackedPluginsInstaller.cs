@@ -49,7 +49,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     The <see cref="IPluginPackageReader"/> used to read plugin packages.
         /// </param>
         /// <param name="validator">
-        ///     The <see cref="IPluginValidator"/> for validating a plugin that is being installed.
+        ///     The <see cref="IPluginValidator"/> for validating a plugin that is attempting to be installed.
         /// </param>
         /// <param name="invalidGate">
         ///     The <see cref="IInvalidPluginsGate"/> to bypass plugin validation errors and continue
@@ -163,7 +163,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             PluginPackage pluginPackage = await this.pluginPackageReader.TryReadPackageAsync(stream, cancellationToken);
 
-            if (!this.validator.IsValid(pluginPackage.Metadata, out ErrorInfo[] errors))
+            ErrorInfo[] errors = this.validator.ValidationErrors(pluginPackage.Metadata);
+            if (errors?.Any() ?? false)
             {
                 if (!await this.invalidGate.ShouldProceedDespiteFailures(
                         PluginsSystemOperation.Install,

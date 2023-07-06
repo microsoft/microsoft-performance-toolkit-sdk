@@ -12,17 +12,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
     public interface IPluginValidator
     {
         /// <summary>
-        ///     Determines whether or not a plugin can be used.
+        ///     Validates a plugin based on its metadata, returning <see cref="ErrorInfo"/>s for
+        ///     any validation issues found.
         /// </summary>
         /// <param name="pluginMetadata">
-        ///     The metadata for the plugin attempting to be used.
-        /// </param>
-        /// <param name="errorInfos">
-        ///     <see cref="ErrorInfo"/>s describing why <paramref name="pluginMetadata"/> is invalid.
+        ///     The metadata for the plugin to validate.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if <paramref name="pluginMetadata"/> is valid, <c>false</c> otherwise.
+        ///     <see cref="ErrorInfo"/>s describing why <paramref name="pluginMetadata"/> is invalid.
         /// </returns>
-        bool IsValid(PluginMetadata pluginMetadata, out ErrorInfo[] errorInfos);
+        ErrorInfo[] ValidationErrors(PluginMetadata pluginMetadata);
     }
 }

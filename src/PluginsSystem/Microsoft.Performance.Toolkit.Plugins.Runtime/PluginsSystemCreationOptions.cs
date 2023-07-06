@@ -29,7 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <summary>
         ///     Gets or sets an <see cref="IInvalidPluginsGate"/> to use when determining whether
         ///     to continue a plugins system operation despite plugin validation errors.
-        ///     If a value is not set, operations will *never* continue if validation errors occur.
+        ///     The default behavior is that operations will *never* continue if validation errors occur.
         /// </summary>
         public IInvalidPluginsGate InvalidPluginsGate { get; set; } = new NeverPassInvalidPluginsGate();
     }

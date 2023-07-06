@@ -109,7 +109,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             if (options.ValidateSdkVersion)
             {
-                validatorsToUse.Add(new SdkVersionValidator());
+                validatorsToUse.Add(new SdkVersionValidator(loggerFactory(typeof(SdkVersionValidator))));
             }
 
             validatorsToUse.AddRange(options.AdditionalValidators);
@@ -152,7 +152,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 checsumCalculator,
                 loggerFactory);
 
-            var validator = new InstalledPluginDirectoryChecksumValidator(storageDirectory, checsumCalculator);
+            var validator = new InstalledPluginDirectoryChecksumValidator(storageDirectory, checsumCalculator, loggerFactory(typeof(InstalledPluginDirectoryChecksumValidator)));
 
             var installer = new FileBackedPluginsInstaller(
                 registry,

@@ -21,22 +21,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
         }
 
         /// <inheritdoc />
-        public bool IsValid(PluginMetadata pluginMetadata, out ErrorInfo[] errorInfos)
+        public ErrorInfo[] ValidationErrors(PluginMetadata pluginMetadata)
         {
             List<ErrorInfo> errors = new List<ErrorInfo>();
-            bool isValid = true;
 
             foreach (var validator in this.validators)
             {
-                if (!validator.IsValid(pluginMetadata, out ErrorInfo[] innerErrors))
+                ErrorInfo[] innerErrors = validator.ValidationErrors(pluginMetadata);
+
+                if (innerErrors != null)
                 {
-                    isValid = false;
                     errors.AddRange(innerErrors);
                 }
             }
 
-            errorInfos = errors.ToArray();
-            return isValid;
+            return errors.ToArray();
         }
     }
 }
