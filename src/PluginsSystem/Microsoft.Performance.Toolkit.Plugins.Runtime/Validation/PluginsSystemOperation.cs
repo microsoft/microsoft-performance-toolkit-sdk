@@ -14,7 +14,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
         Install,
 
         /// <summary>
-        ///  One or more plugins are attempting to be loaded..
+        ///  One or more plugins are attempting to be loaded.
         /// </summary>
         Load,
     }
