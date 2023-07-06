@@ -20,11 +20,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// </summary>
         [JsonConstructor]
         public AvailablePluginInfo(
+            double schemaVersion,
             PluginMetadata metadata,
             PluginSource source,
             ulong packageSize,
             Uri packageUri,
-            Guid fetcherResourceId)
+            Guid fetcherResourceId,
+            DateTimeOffset publishedOn)
+            : this(metadata, source, packageSize, packageUri, fetcherResourceId, publishedOn)
+        {
+            if (schemaVersion != this.SchemaVersion)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(schemaVersion),
+                    schemaVersion,
+                    $"The schema version {schemaVersion} is not supported.");
+            }
+        }
+
+        public AvailablePluginInfo(
+            PluginMetadata metadata,
+            PluginSource source,
+            ulong packageSize,
+            Uri packageUri,
+            Guid fetcherResourceId,
+            DateTimeOffset publishedOn)
         {
             Guard.NotNull(metadata, nameof(metadata));
             Guard.NotNull(source, nameof(source));
@@ -35,7 +55,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             this.PackageSize = packageSize;
             this.PackageUri = packageUri;
             this.FetcherResourceId = fetcherResourceId;
+            this.PublishedOn = publishedOn;
         }
+
+        /// <summary>
+        ///    Gets the schema version of this plugin info.
+        /// </summary>
+        public double SchemaVersion { get; } = 0.1;
 
         /// <summary>
         ///     Gets the metadata for this plugin.
@@ -56,6 +82,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         ///     Gets the URI where the plugin package can be fetched.
         /// </summary>
         public Uri PackageUri { get; }
+
+        /// <summary>
+        ///     Gets the date and time when the plugin package was published.
+        /// </summary>
+        public DateTimeOffset PublishedOn { get; }
 
         /// <summary>
         ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resource
