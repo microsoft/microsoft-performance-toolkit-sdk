@@ -113,22 +113,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return true;
             }
 
-            return this.Metadata.Equals(other.Metadata)
+            return this.SchemaVersion.Equals(other.SchemaVersion)
+                && this.Metadata.Equals(other.Metadata)
                 && this.Source.Equals(other.Source)
                 && this.PackageSize.Equals(other.PackageSize)
                 && this.PackageUri.Equals(other.PackageUri)
-                && this.FetcherResourceId.Equals(other.FetcherResourceId);
+                && this.FetcherResourceId.Equals(other.FetcherResourceId)
+                && this.PublishedOn.Equals(other.PublishedOn);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
+                this.SchemaVersion.GetHashCode(),
                 this.Metadata.GetHashCode(),
                 this.Source.GetHashCode(),
                 this.PackageSize.GetHashCode(),
                 this.PackageUri.GetHashCode(),
-                this.FetcherResourceId.GetHashCode());
+                this.FetcherResourceId.GetHashCode(),
+                this.PublishedOn.GetHashCode());
         }
     }
 }
