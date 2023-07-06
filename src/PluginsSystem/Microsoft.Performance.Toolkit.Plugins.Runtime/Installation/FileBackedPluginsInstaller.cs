@@ -169,6 +169,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                         PluginsSystemOperation.Install,
                         new[] { new PluginValidationFailures(pluginPackage.Metadata.Identity, errors) }))
                 {
+                    this.logger.Error($"Plugin {pluginPackage.Metadata.Identity} is invalid and will not be installed.");
                     return null;
                 }
             }

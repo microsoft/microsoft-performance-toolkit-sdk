@@ -22,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         private readonly Func<string, Task<bool>> loadPluginFromDirectory;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
-        private readonly IPluginValidator validator;
+        private readonly IPluginValidator pluginMetadataValidator;
         private readonly IInvalidPluginsGate invalidGate;
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         /// <param name="loadPluginFromDirectory">
         ///     The function to use to load a plugin from a directory.
         /// </param>
-        /// <param name="validator">
+        /// <param name="pluginMetadataValidator">
         ///     The <see cref="IPluginValidator"/> for validating a plugin that is being loaded.
         /// </param>
         /// <param name="invalidGate">
@@ -51,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
             IPluginsStorageDirectory pluginsStorageDirectory,
             IInstalledPluginValidator installedPluginValidator,
             Func<string, Task<bool>> loadPluginFromDirectory,
-            IPluginValidator validator,
+            IPluginValidator pluginMetadataValidator,
             IInvalidPluginsGate invalidGate,
             Func<Type, ILogger> loggerFactory)
         {
@@ -64,7 +64,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
             this.loadPluginFromDirectory = loadPluginFromDirectory;
             this.installedPluginValidator = installedPluginValidator;
             this.loggerFactory = loggerFactory;
-            this.validator = validator;
+            this.pluginMetadataValidator = pluginMetadataValidator;
             this.invalidGate = invalidGate;
             this.logger = loggerFactory(typeof(FileSystemInstalledPluginLoader));
         }
@@ -74,23 +74,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         {
             Guard.NotNull(installedPlugin, nameof(installedPlugin));
 
-            if (!this.validator.IsValid(installedPlugin.Info.Metadata, out ErrorInfo[] errors))
-            {
-                if (!await this.invalidGate.ShouldProceedDespiteFailures(
-                        PluginsSystemOperation.Load,
-                        new[] { new PluginValidationFailures(installedPlugin.Info.Metadata.Identity, errors) }))
-                {
-                    return false;
-                }
-            }
-
             PluginIdentity pluginIdentity = installedPlugin.Info.Metadata.Identity;
             string pluginDirectory = this.pluginsStorageDirectory.GetContentDirectory(pluginIdentity);
 
             if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin.Info))
             {
-                this.logger.Error($"Plugin {pluginIdentity} is not valid. It will not be loaded.");
+                this.logger.Error($"Plugin {pluginIdentity} is not valid installed plugin. It will not be loaded. Has it been corrupted?");
                 return false;
+            }
+
+            if (!this.pluginMetadataValidator.IsValid(installedPlugin.Info.Metadata, out ErrorInfo[] errors))
+            {
+                if (!await this.invalidGate.ShouldProceedDespiteFailures(
+                        PluginsSystemOperation.Load,
+                        new[] { new PluginValidationFailures(installedPlugin.Info.Metadata.Identity, errors) }))
+                {
+                    this.logger.Error($"Plugin {pluginIdentity} is not valid. It will not be loaded.");
+                    return false;
+                }
             }
 
             return await this.loadPluginFromDirectory(pluginDirectory);

@@ -20,6 +20,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
             this.validators = validators;
         }
 
+        /// <inheritdoc />
         public bool IsValid(PluginMetadata pluginMetadata, out ErrorInfo[] errorInfos)
         {
             List<ErrorInfo> errors = new List<ErrorInfo>();
