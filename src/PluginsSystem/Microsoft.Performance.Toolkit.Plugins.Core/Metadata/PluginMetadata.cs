@@ -54,15 +54,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             IEnumerable<PluginOwnerInfo> owners)
             : this(identity, installedSize, displayName, description, sdkVersion, projectUrl, owners)
         {
-            Guard.NotNull(schemaVersion, nameof(schemaVersion));
-
-            if (schemaVersion != this.SchemaVersion)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(schemaVersion),
-                    schemaVersion,
-                    $"The schema version {schemaVersion} is not supported.");
-            }
+            this.SchemaVersion = schemaVersion;
         }
 
         /// <summary>

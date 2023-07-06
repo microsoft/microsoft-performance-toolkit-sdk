@@ -42,18 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             string checksum)
             : this(metadata, sourceUri, installedOn, checksum)
         {
-            Guard.NotNull(schemaVersion, nameof(schemaVersion));
-            Guard.NotNull(metadata, nameof(metadata));
-            Guard.NotNull(sourceUri, nameof(sourceUri));
-            Guard.NotNullOrWhiteSpace(checksum, nameof(checksum));
-
-            if (schemaVersion != this.SchemaVersion)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(schemaVersion),
-                    schemaVersion,
-                    $"The schema version {schemaVersion} is not supported.");
-            }
+            this.SchemaVersion = schemaVersion;
         }
 
         /// <summary>

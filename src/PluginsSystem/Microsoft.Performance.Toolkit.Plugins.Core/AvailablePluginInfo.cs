@@ -30,15 +30,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             DateTimeOffset publishedOn)
             : this(metadata, source, packageSize, packageUri, fetcherResourceId, publishedOn)
         {
-            Guard.NotNull(schemaVersion, nameof(schemaVersion));
-
-            if (schemaVersion != this.SchemaVersion)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(schemaVersion),
-                    schemaVersion,
-                    $"The schema version {schemaVersion} is not supported.");
-            }
+            this.SchemaVersion = schemaVersion;
         }
 
         /// <summary>

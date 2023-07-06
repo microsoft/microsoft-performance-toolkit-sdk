@@ -40,13 +40,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         {
             Guard.NotNull(schemaVersion, nameof(schemaVersion));
 
-            if (schemaVersion != this.SchemaVersion)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(schemaVersion),
-                    schemaVersion,
-                    $"The schema version {schemaVersion} is not supported.");
-            }
+            this.SchemaVersion = schemaVersion;
         }
 
         /// <summary>
