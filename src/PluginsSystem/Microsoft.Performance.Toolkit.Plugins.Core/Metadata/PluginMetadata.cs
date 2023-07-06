@@ -35,6 +35,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <param name="sdkVersion">
         ///     The version of the performance SDK which this plugin depends upon.
         /// </param>
+        /// <param name="projectUrl">
+        ///     The project URL of this plugin.
+        /// </param>
         /// <param name="owners">
         ///     The owners information of this plugin.
         /// </param>
@@ -46,8 +49,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             string displayName,
             string description,
             Version sdkVersion,
+            Uri projectUrl,
             IEnumerable<PluginOwnerInfo> owners)
-            : this(identity, installedSize, displayName, description, sdkVersion, owners)
+            : this(identity, installedSize, displayName, description, sdkVersion, projectUrl, owners)
         {
             if (schemaVersion != this.SchemaVersion)
             {
@@ -76,6 +80,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <param name="sdkVersion">
         ///     The version of the performance SDK which this plugin depends upon.
         /// </param>
+        /// <param name="projectUrl">
+        ///     The project URL of this plugin.
+        /// </param>
         /// <param name="owners">
         ///     The owners information of this plugin.
         /// </param>
@@ -85,6 +92,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             string displayName,
             string description,
             Version sdkVersion,
+            Uri projectUrl,
             IEnumerable<PluginOwnerInfo> owners)
         {
             this.Identity = identity;
@@ -92,6 +100,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             this.DisplayName = displayName;
             this.Description = description;
             this.SdkVersion = sdkVersion;
+            this.ProjectUrl = projectUrl;
             this.Owners = owners;
         }
 
@@ -130,6 +139,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// </summary>
         public IEnumerable<PluginOwnerInfo> Owners { get; }
 
+        /// <summary>
+        ///     Gets the project URL of this plugin.
+        /// </summary>
+        public Uri ProjectUrl { get; }
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
@@ -149,11 +163,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
                 return true;
             }
 
-            return (this.Identity?.Equals(other.Identity) == true || this.Identity is null && other.Identity is null)
+            return this.SchemaVersion.Equals(other.SchemaVersion)
+                   && (this.Identity?.Equals(other.Identity) == true || this.Identity is null && other.Identity is null)
                    && this.InstalledSize.Equals(other.InstalledSize)
                    && string.Equals(this.DisplayName, other.DisplayName, StringComparison.Ordinal)
                    && string.Equals(this.Description, other.Description, StringComparison.Ordinal)
                    && (this.SdkVersion?.Equals(other.SdkVersion) == true || this.SdkVersion is null && other.SdkVersion is null)
+                   && (this.ProjectUrl?.Equals(other.ProjectUrl) == true || this.ProjectUrl is null && other.ProjectUrl is null)
                    && (this.Owners?.EnumerableEqual(other.Owners) == true || this.Owners is null && other.Owners is null);
         }
 
@@ -161,11 +177,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         public override int GetHashCode()
         {
             int result = HashCodeUtils.CombineHashCodeValues(
+                this.SchemaVersion.GetHashCode(),
                 this.Identity?.GetHashCode() ?? 0,
                 this.InstalledSize.GetHashCode(),
                 this.DisplayName?.GetHashCode() ?? 0,
                 this.Description?.GetHashCode() ?? 0,
-                this.SdkVersion?.GetHashCode() ?? 0);
+                this.SdkVersion?.GetHashCode() ?? 0,
+                this.ProjectUrl?.GetHashCode() ?? 0);
 
             if (this.Owners != null)
             {
