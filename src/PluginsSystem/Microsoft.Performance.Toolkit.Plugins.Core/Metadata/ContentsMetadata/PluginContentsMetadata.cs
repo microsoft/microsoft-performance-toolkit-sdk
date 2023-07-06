@@ -31,13 +31,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// </param>
         [JsonConstructor]
         public PluginContentsMetadata(
-            Version schemaVersion,
+            double schemaVersion,
             IEnumerable<ProcessingSourceMetadata> processingSources,
             IEnumerable<DataCookerMetadata> dataCookers,
             IEnumerable<TableMetadata> extensibleTables)
             : this(processingSources, dataCookers, extensibleTables)
         {
-            this.SchemaVersion = schemaVersion;
+            if (schemaVersion != this.SchemaVersion)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(schemaVersion),
+                    schemaVersion,
+                    $"The schema version {schemaVersion} is not supported.");
+            }
         }
 
         /// <summary>
@@ -65,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <summary>
         ///     Gets the schema version of the contents metadata.
         /// </summary>
-        public Version SchemaVersion { get; } = new Version(1, 0);
+        public double SchemaVersion { get; } = 0.1;
 
         /// <summary>
         ///     Gets the metadata of the processing sources contained in this plugin.

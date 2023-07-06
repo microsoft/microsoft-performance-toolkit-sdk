@@ -40,7 +40,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// </param>
         [JsonConstructor]
         public PluginMetadata(
-            Version schemaVersion,
+            double schemaVersion,
             PluginIdentity identity,
             ulong installedSize,
             string displayName,
@@ -49,7 +49,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             IEnumerable<PluginOwnerInfo> owners)
             : this(identity, installedSize, displayName, description, sdkVersion, owners)
         {
-            this.SchemaVersion = schemaVersion;
+            if (schemaVersion != this.SchemaVersion)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(schemaVersion),
+                    schemaVersion,
+                    $"The schema version {schemaVersion} is not supported.");
+            }
         }
 
         /// <summary>
@@ -92,7 +98,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <summary>
         ///     Gets the schema version of plugin metadata.
         /// </summary>
-        public Version SchemaVersion { get; } = new Version(1, 0);
+        public double SchemaVersion { get; } = 0.1;
 
         /// <summary>
         ///     Gets the identity of this plugin.
