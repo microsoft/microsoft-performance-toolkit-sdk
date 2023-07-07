@@ -14,13 +14,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
     public class PluginMetadata
         : IEquatable<PluginMetadata>
     {
-        // TODO: Move this constructor to a separate class for deserialization purposes.
         /// <summary>
         ///     Initializes an instance of <see cref="PluginMetadata"/>.
         /// </summary>
-        /// <param name="schemaVersion">
-        ///     The version of the schema used to serialize this metadata.
-        /// </param>
         /// <param name="identity">
         ///     The identity of the plugin.
         /// </param>
@@ -43,44 +39,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         ///     The owners information of this plugin.
         /// </param>
         [JsonConstructor]
-        public PluginMetadata(
-            double schemaVersion,
-            PluginIdentity identity,
-            ulong installedSize,
-            string displayName,
-            string description,
-            Version sdkVersion,
-            Uri projectUrl,
-            IEnumerable<PluginOwnerInfo> owners)
-            : this(identity, installedSize, displayName, description, sdkVersion, projectUrl, owners)
-        {
-            this.SchemaVersion = schemaVersion;
-        }
-
-        /// <summary>
-        ///     Initializes an instance of <see cref="PluginMetadata"/>.
-        /// </summary>
-        /// <param name="identity">
-        ///     The identity of the plugin.
-        /// </param>
-        /// <param name="installedSize">
-        ///     The size, in number of bytes, of this plugin once it has been installed.
-        /// </param>
-        /// <param name="displayName">
-        ///     The human-readable name of this plugin.
-        /// </param>
-        /// <param name="description">
-        ///     The user friendly description of this plugin.
-        /// </param>
-        /// <param name="sdkVersion">
-        ///     The version of the performance SDK which this plugin depends upon.
-        /// </param>
-        /// <param name="projectUrl">
-        ///     The project URL of this plugin.
-        /// </param>
-        /// <param name="owners">
-        ///     The owners information of this plugin.
-        /// </param>
         public PluginMetadata(
             PluginIdentity identity,
             ulong installedSize,

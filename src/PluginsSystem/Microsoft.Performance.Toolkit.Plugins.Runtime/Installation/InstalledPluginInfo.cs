@@ -14,37 +14,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public sealed class InstalledPluginInfo
         : IEquatable<InstalledPluginInfo>
     {
-        // TODO: Move this to a separate class that is versioned for deserialization purposes.
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="InstalledPluginInfo"/> class with the specified parameters.
-        /// </summary>
-        /// <param name="schemaVersion">
-        ///     The version of the schema used to serialize this plugin info.
-        /// </param>
-        /// <param name="metadata">
-        ///     The metadata of the installed plugin.
-        /// </param>
-        /// <param name="sourceUri">
-        ///     The source Uri of the installed plugin.
-        /// </param>
-        /// <param name="installedOn">
-        ///     The timestamp when the plugin is installed.
-        /// </param>
-        /// <param name="checksum">
-        ///     The checksum of the installed plugin.
-        /// </param>
-        [JsonConstructor]
-        public InstalledPluginInfo(
-            double schemaVersion,
-            PluginMetadata metadata,
-            Uri sourceUri,
-            DateTimeOffset installedOn,
-            string checksum)
-            : this(metadata, sourceUri, installedOn, checksum)
-        {
-            this.SchemaVersion = schemaVersion;
-        }
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="InstalledPluginInfo"/> class with the specified parameters.
         /// </summary>
@@ -60,6 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="checksum">
         ///     The checksum of the installed plugin.
         /// </param>
+        [JsonConstructor]
         public InstalledPluginInfo(
             PluginMetadata metadata,
             Uri sourceUri,

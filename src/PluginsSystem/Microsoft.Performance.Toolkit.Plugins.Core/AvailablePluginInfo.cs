@@ -18,24 +18,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <summary>
         ///     Initializes an instance of <see cref="AvailablePluginInfo"/>.
         /// </summary>
-        /// TODO: We need this constructor as this is used to deserialize the response from the server. We should move this to a separate class.
-        [JsonConstructor]
-        public AvailablePluginInfo(
-            double schemaVersion,
-            PluginMetadata metadata,
-            PluginSource source,
-            ulong packageSize,
-            Uri packageUri,
-            Guid fetcherResourceId,
-            DateTimeOffset publishedOn)
-            : this(metadata, source, packageSize, packageUri, fetcherResourceId, publishedOn)
-        {
-            this.SchemaVersion = schemaVersion;
-        }
-
-        /// <summary>
-        ///     Initializes an instance of <see cref="AvailablePluginInfo"/>.
-        /// </summary>
         /// <param name="metadata">
         ///     The metadata of the plugin.
         /// </param>
@@ -54,6 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <param name="publishedOn">
         ///     The date and time when this plugin was published.
         /// </param>
+        [JsonConstructor]
         public AvailablePluginInfo(
             PluginMetadata metadata,
             PluginSource source,

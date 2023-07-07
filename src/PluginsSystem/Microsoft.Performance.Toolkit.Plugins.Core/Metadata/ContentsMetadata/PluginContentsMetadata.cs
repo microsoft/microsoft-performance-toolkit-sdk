@@ -14,13 +14,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
     public class PluginContentsMetadata
         : IEquatable<PluginContentsMetadata>
     {
-        // TODO: Move this constructor to a separate class for deserialization purposes.
         /// <summary>
         ///     Initializes a new instance of the <see cref="PluginContentsMetadata"/> class with the specified parameters.
         /// </summary>
-        /// <param name="schemaVersion">
-        ///     The version of the schema used to serialize this contents metadata.
-        /// </param>
         /// <param name="processingSources">
         ///     The metadata of the processing sources contained in this plugin.
         /// </param>
@@ -31,30 +27,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         ///     The metadata of the extensible tables contained in this plugin.
         /// </param>
         [JsonConstructor]
-        public PluginContentsMetadata(
-            double schemaVersion,
-            IEnumerable<ProcessingSourceMetadata> processingSources,
-            IEnumerable<DataCookerMetadata> dataCookers,
-            IEnumerable<TableMetadata> extensibleTables)
-            : this(processingSources, dataCookers, extensibleTables)
-        {
-            Guard.NotNull(schemaVersion, nameof(schemaVersion));
-
-            this.SchemaVersion = schemaVersion;
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="PluginContentsMetadata"/> class with the specified parameters.
-        /// </summary>
-        /// <param name="processingSources">
-        ///     The metadata of the processing sources contained in this plugin.
-        /// </param>
-        /// <param name="dataCookers">
-        ///     The metadata of the data cookers contained in this plugin.
-        /// </param>
-        /// <param name="extensibleTables">
-        ///     The metadata of the extensible tables contained in this plugin.
-        /// </param>
         public PluginContentsMetadata(
             IEnumerable<ProcessingSourceMetadata> processingSources,
             IEnumerable<DataCookerMetadata> dataCookers,
