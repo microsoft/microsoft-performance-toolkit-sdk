@@ -18,13 +18,32 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <summary>
         ///     Initializes an instance of <see cref="AvailablePluginInfo"/>.
         /// </summary>
+        /// <param name="metadata">
+        ///     The metadata of the plugin.
+        /// </param>
+        /// <param name="source">
+        ///     The source where this plugin is discovered.
+        /// </param>
+        /// <param name="packageSize">
+        ///     The size, in number of bytes, of the package that makes up this plugin.
+        /// </param>
+        /// <param name="packageUri">
+        ///     The URI to the package that makes up this plugin.
+        /// </param>
+        /// <param name="fetcherResourceId">
+        ///     The resource ID of the fetcher that can be used to download the package.
+        /// </param>
+        /// <param name="publishedOn">
+        ///     The date and time when this plugin was published.
+        /// </param>
         [JsonConstructor]
         public AvailablePluginInfo(
             PluginMetadata metadata,
             PluginSource source,
             ulong packageSize,
             Uri packageUri,
-            Guid fetcherResourceId)
+            Guid fetcherResourceId,
+            DateTimeOffset publishedOn)
         {
             Guard.NotNull(metadata, nameof(metadata));
             Guard.NotNull(source, nameof(source));
@@ -35,7 +54,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             this.PackageSize = packageSize;
             this.PackageUri = packageUri;
             this.FetcherResourceId = fetcherResourceId;
+            this.PublishedOn = publishedOn;
         }
+
+        /// <summary>
+        ///    Gets the schema version of this plugin info.
+        /// </summary>
+        public double SchemaVersion { get; } = 0.1;
 
         /// <summary>
         ///     Gets the metadata for this plugin.
@@ -56,6 +81,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         ///     Gets the URI where the plugin package can be fetched.
         /// </summary>
         public Uri PackageUri { get; }
+
+        /// <summary>
+        ///     Gets the date and time when the plugin package was published.
+        /// </summary>
+        public DateTimeOffset PublishedOn { get; }
 
         /// <summary>
         ///     Gets the Guid which identifies the unique <see cref="Transport.IPluginFetcher"/> resource
@@ -82,22 +112,26 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return true;
             }
 
-            return this.Metadata.Equals(other.Metadata)
+            return this.SchemaVersion.Equals(other.SchemaVersion)
+                && this.Metadata.Equals(other.Metadata)
                 && this.Source.Equals(other.Source)
                 && this.PackageSize.Equals(other.PackageSize)
                 && this.PackageUri.Equals(other.PackageUri)
-                && this.FetcherResourceId.Equals(other.FetcherResourceId);
+                && this.FetcherResourceId.Equals(other.FetcherResourceId)
+                && this.PublishedOn.Equals(other.PublishedOn);
         }
 
         /// <inheritdoc />
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
+                this.SchemaVersion.GetHashCode(),
                 this.Metadata.GetHashCode(),
                 this.Source.GetHashCode(),
                 this.PackageSize.GetHashCode(),
                 this.PackageUri.GetHashCode(),
-                this.FetcherResourceId.GetHashCode());
+                this.FetcherResourceId.GetHashCode(),
+                this.PublishedOn.GetHashCode());
         }
     }
 }

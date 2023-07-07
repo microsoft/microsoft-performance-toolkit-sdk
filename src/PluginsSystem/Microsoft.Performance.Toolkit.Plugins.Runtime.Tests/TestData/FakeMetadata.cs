@@ -16,6 +16,7 @@ internal static class FakeMetadata
             null,
             null,
             new Version("1.0.0"),
+            null,
             null);
     }
 }

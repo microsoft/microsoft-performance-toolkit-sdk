@@ -14,6 +14,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
     public sealed class InstalledPluginInfo
         : IEquatable<InstalledPluginInfo>
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="InstalledPluginInfo"/> class with the specified parameters.
+        /// </summary>
+        /// <param name="metadata">
+        ///     The metadata of the plugin.
+        /// </param>
+        /// <param name="sourceUri">
+        ///     The source Uri of the plugin.
+        /// </param>
+        /// <param name="installedOn">
+        ///     The timestamp when the plugin is installed.
+        /// </param>
+        /// <param name="checksum">
+        ///     The checksum of the installed plugin.
+        /// </param>
         [JsonConstructor]
         public InstalledPluginInfo(
             PluginMetadata metadata,
@@ -23,6 +38,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         {
             Guard.NotNull(metadata, nameof(metadata));
             Guard.NotNull(sourceUri, nameof(sourceUri));
+            Guard.NotNull(installedOn, nameof(installedOn));
             Guard.NotNullOrWhiteSpace(checksum, nameof(checksum));
 
             this.Metadata = metadata;
@@ -30,6 +46,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.InstalledOn = installedOn;
             this.Checksum = checksum;
         }
+
+        /// <summary>
+        ///     Gets the schema version of plugin metadata.
+        /// </summary>
+        public double SchemaVersion { get; } = 0.1;
 
         /// <summary>
         ///     Gets the metadata for this plugin.
@@ -70,7 +91,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 return true;
             }
 
-            return this.Metadata.Equals(other.Metadata)
+            return this.SchemaVersion.Equals(other.SchemaVersion)
+                && this.Metadata.Equals(other.Metadata)
                 && Equals(this.SourceUri, other.SourceUri)
                 && DateTimeOffset.Equals(this.InstalledOn, other.InstalledOn)
                 && string.Equals(this.Checksum, other.Checksum);
@@ -80,6 +102,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
+                this.SchemaVersion.GetHashCode(),
                 this.Metadata.GetHashCode(),
                 this.SourceUri.GetHashCode(),
                 this.InstalledOn.GetHashCode(),
