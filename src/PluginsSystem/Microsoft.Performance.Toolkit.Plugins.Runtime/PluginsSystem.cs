@@ -17,6 +17,7 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Loading;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Validation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -84,6 +85,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="loadPluginFromDirectory">
         ///     A function that loads a plugin from a given directory.
         /// </param>
+        /// <param name="options">
+        ///     General options for the created <see cref="PluginsSystem"/>.
+        /// </param>
         /// <param name="loggerFactory">
         ///     Used to create a logger for the given type.
         /// </param>
@@ -93,12 +97,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         public static PluginsSystem CreateFileBasedPluginsSystem(
             string root,
             Func<string, Task<bool>> loadPluginFromDirectory,
+            PluginsSystemCreationOptions options,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNullOrWhiteSpace(root, nameof(root));
             Guard.NotNull(loggerFactory, nameof(loggerFactory));
 
             string pluginsSystemRoot = Path.GetFullPath(root);
+
+            List<IPluginValidator> validatorsToUse = new List<IPluginValidator>();
+
+            if (options.ValidateSdkVersion)
+            {
+                validatorsToUse.Add(new SdkVersionValidator(loggerFactory(typeof(SdkVersionValidator))));
+            }
+
+            validatorsToUse.AddRange(options.AdditionalValidators);
+
+            IPluginValidator compositePluginValidator = new CompositePluginValidator(validatorsToUse);
 
             // Initializes components for plugins discovery
             var pluginSourceRepo = new PluginSourceRepository(loggerFactory);
@@ -109,6 +125,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 pluginSourceRepo,
                 fetcherRepo,
                 discovererProviderRepo,
+                compositePluginValidator,
                 loggerFactory);
 
             // Initializes components for plugins installation
@@ -135,13 +152,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 checsumCalculator,
                 loggerFactory);
 
-            var validator = new InstalledPluginDirectoryChecksumValidator(storageDirectory, checsumCalculator);
+            var validator = new InstalledPluginDirectoryChecksumValidator(storageDirectory, checsumCalculator, loggerFactory(typeof(InstalledPluginDirectoryChecksumValidator)));
 
             var installer = new FileBackedPluginsInstaller(
                 registry,
                 validator,
                 installedPluginStorage,
                 packageReader,
+                compositePluginValidator,
+                options.InvalidPluginsGate,
                 loggerFactory);
 
             var obsoletePluginsRemover = new FileSystemObsoletePluginsRemover(
@@ -153,6 +172,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 storageDirectory,
                 validator,
                 loadPluginFromDirectory,
+                compositePluginValidator,
+                options.InvalidPluginsGate,
                 loggerFactory);
 
             return new PluginsSystem(

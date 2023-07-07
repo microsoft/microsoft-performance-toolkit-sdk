@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Validation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
 {
@@ -21,6 +23,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         private readonly Func<string, Task<bool>> loadPluginFromDirectory;
         private readonly Func<Type, ILogger> loggerFactory;
         private readonly ILogger logger;
+        private readonly IPluginValidator pluginMetadataValidator;
+        private readonly IInvalidPluginsGate invalidGate;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="FileSystemInstalledPluginLoader"/>
@@ -34,6 +38,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
         /// <param name="loadPluginFromDirectory">
         ///     The function to use to load a plugin from a directory.
         /// </param>
+        /// <param name="pluginMetadataValidator">
+        ///     The <see cref="IPluginValidator"/> for validating a plugin that is attempting to be loaded.
+        /// </param>
+        /// <param name="invalidGate">
+        ///     The <see cref="IInvalidPluginsGate"/> to bypass plugin validation errors and continue
+        ///     plugin loading.
+        /// </param>
         /// <param name="loggerFactory">
         ///     The logger factory to use to create loggers.
         /// </param>
@@ -41,6 +52,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
             IPluginsStorageDirectory pluginsStorageDirectory,
             IInstalledPluginValidator installedPluginValidator,
             Func<string, Task<bool>> loadPluginFromDirectory,
+            IPluginValidator pluginMetadataValidator,
+            IInvalidPluginsGate invalidGate,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginsStorageDirectory, nameof(pluginsStorageDirectory));
@@ -52,6 +65,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
             this.loadPluginFromDirectory = loadPluginFromDirectory;
             this.installedPluginValidator = installedPluginValidator;
             this.loggerFactory = loggerFactory;
+            this.pluginMetadataValidator = pluginMetadataValidator;
+            this.invalidGate = invalidGate;
             this.logger = loggerFactory(typeof(FileSystemInstalledPluginLoader));
         }
 
@@ -65,8 +80,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
 
             if (!await this.installedPluginValidator.ValidateInstalledPluginAsync(installedPlugin.Info))
             {
-                this.logger.Error($"Plugin {pluginIdentity} is not valid. It will not be loaded.");
+                this.logger.Error($"Plugin {pluginIdentity} is not valid installed plugin. It will not be loaded. Please see other logs.");
                 return false;
+            }
+
+            ErrorInfo[] errors = this.pluginMetadataValidator.GetValidationErrors(installedPlugin.Info.Metadata);
+            if (errors?.Any() ?? false)
+            {
+                if (!await this.invalidGate.ShouldProceedDespiteFailures(
+                        PluginsSystemOperation.Load,
+                        new[] { new PluginValidationFailures(installedPlugin.Info.Metadata.Identity, errors) }))
+                {
+                    this.logger.Error($"Plugin {pluginIdentity} is not valid. It will not be loaded.");
+                    return false;
+                }
             }
 
             return await this.loadPluginFromDirectory(pluginDirectory);

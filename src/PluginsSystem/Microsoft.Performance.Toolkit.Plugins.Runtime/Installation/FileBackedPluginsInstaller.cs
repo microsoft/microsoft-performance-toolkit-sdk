@@ -10,11 +10,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Validation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -30,35 +30,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly IPluginPackageReader pluginPackageReader;
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
-
-        /// <summary>
-        ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/> with a default logger factory.
-        /// </summary>
-        /// <param name="pluginRegistry">
-        ///     The <see cref="IPluginRegistry"/> this installer register/unregister plugin records to.
-        /// </param>
-        /// <param name="installedPluginValidator">
-        ///     The <see cref="IInstalledPluginValidator"/> used to validate installed plugins.
-        /// </param>
-        /// <param name="installedPluginStorage">
-        ///     The <see cref="IInstalledPluginStorage"/> used to store installed plugins.
-        /// </param>
-        /// <param name="packageReader">
-        ///     The <see cref="IPluginPackageReader"/> used to read plugin packages.
-        /// </param>
-        public FileBackedPluginsInstaller(
-            IPluginRegistry pluginRegistry,
-            IInstalledPluginValidator installedPluginValidator,
-            IInstalledPluginStorage installedPluginStorage,
-            IPluginPackageReader packageReader)
-            : this(
-                  pluginRegistry,
-                  installedPluginValidator,
-                  installedPluginStorage,
-                  packageReader,
-                  Logger.Create)
-        {
-        }
+        private readonly IPluginValidator validator;
+        private readonly IInvalidPluginsGate invalidGate;
 
         /// <summary>
         ///     Creates an instance of a <see cref="FileBackedPluginsInstaller"/>.
@@ -75,6 +48,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="packageReader">
         ///     The <see cref="IPluginPackageReader"/> used to read plugin packages.
         /// </param>
+        /// <param name="validator">
+        ///     The <see cref="IPluginValidator"/> for validating a plugin that is attempting to be installed.
+        /// </param>
+        /// <param name="invalidGate">
+        ///     The <see cref="IInvalidPluginsGate"/> to bypass plugin validation errors and continue
+        ///     plugin installation.
+        /// </param>
         /// <param name="loggerFactory">
         ///     The <see cref="Func{Type, ILogger}"/> used to create a logger.
         /// </param>
@@ -83,6 +63,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IInstalledPluginValidator installedPluginValidator,
             IInstalledPluginStorage installedPluginStorage,
             IPluginPackageReader packageReader,
+            IPluginValidator validator,
+            IInvalidPluginsGate invalidGate,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginRegistry, nameof(pluginRegistry));
@@ -95,7 +77,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.installedPluginValidator = installedPluginValidator;
             this.installedPluginStorage = installedPluginStorage;
             this.pluginPackageReader = packageReader;
+            this.validator = validator;
             this.loggerFactory = loggerFactory;
+            this.invalidGate = invalidGate;
             this.logger = loggerFactory(typeof(FileBackedPluginsInstaller));
         }
 
@@ -178,6 +162,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(sourceUri, nameof(sourceUri));
 
             PluginPackage pluginPackage = await this.pluginPackageReader.TryReadPackageAsync(stream, cancellationToken);
+
+            ErrorInfo[] errors = this.validator.GetValidationErrors(pluginPackage.Metadata);
+            if (errors?.Any() ?? false)
+            {
+                if (!await this.invalidGate.ShouldProceedDespiteFailures(
+                        PluginsSystemOperation.Install,
+                        new[] { new PluginValidationFailures(pluginPackage.Metadata.Identity, errors) }))
+                {
+                    this.logger.Error($"Plugin {pluginPackage.Metadata.Identity} is invalid and will not be installed.");
+                    return null;
+                }
+            }
+
             if (pluginPackage == null)
             {
                 throw new PluginPackageCreationException(

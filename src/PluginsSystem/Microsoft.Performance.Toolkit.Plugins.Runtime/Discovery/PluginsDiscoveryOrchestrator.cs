@@ -18,6 +18,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Events;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Validation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 {
@@ -35,31 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
         private readonly ILogger logger;
         private readonly Func<Type, ILogger> loggerFactory;
-
-
-        /// <summary>
-        ///     Creates an instance of <see cref="PluginsDiscoveryOrchestrator"/>.
-        /// </summary>
-        /// <param name="pluginSourceRepo">
-        ///     A repository containing all available <see cref="PluginSource"/>s.
-        /// </param>
-        /// <param name="fetcherRepo">
-        ///     A repository containing all available <see cref="IPluginFetcher"/>s.
-        /// </param>
-        /// <param name="discovererProviderRepo">
-        ///     A repository containing all available <see cref="IPluginDiscovererProvider"/>s.
-        /// </param>
-        public PluginsDiscoveryOrchestrator(
-            IRepositoryRO<PluginSource> pluginSourceRepo,
-            IRepositoryRO<IPluginFetcher> fetcherRepo,
-            IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo)
-            : this(
-                  pluginSourceRepo,
-                  fetcherRepo,
-                  discovererProviderRepo,
-                  Logger.Create)
-        {
-        }
+        private readonly IPluginValidator pluginMetadataValidator;
 
         /// <summary>
         ///     Creates an instance of <see cref="PluginsDiscoveryOrchestrator"/> with the given logger factory.
@@ -73,6 +50,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         /// <param name="discovererProviderRepo">
         ///     A repository containing all available <see cref="IPluginDiscovererProvider"/>s.
         /// </param>
+        /// <param name="pluginMetadataValidator">
+        ///     The <see cref="IPluginValidator"/> for validating fetched plugins.
+        /// </param>
         /// <param name="loggerFactory">
         ///     A factory that creates loggers for the given type.
         /// </param>
@@ -80,6 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             IRepositoryRO<PluginSource> pluginSourceRepo,
             IRepositoryRO<IPluginFetcher> fetcherRepo,
             IRepositoryRO<IPluginDiscovererProvider> discovererProviderRepo,
+            IPluginValidator pluginMetadataValidator,
             Func<Type, ILogger> loggerFactory)
         {
             Guard.NotNull(pluginSourceRepo, nameof(pluginSourceRepo));
@@ -93,6 +74,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
             this.sourceToDiscoverers = new ConcurrentDictionary<PluginSource, List<IPluginDiscoverer>>();
             this.pluginSourceRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
+            this.pluginMetadataValidator = pluginMetadataValidator;
             this.discovererProviderRepo.CollectionChanged += OnResourcesOrPluginSourcesChanged;
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(PluginsDiscoveryOrchestrator));
@@ -136,7 +118,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             // For each discovered plugin, the latest version across all sources will be returned.
             // For now, we assume:
             //      1. Duplicates (plugins with same id and version) maybe be discovered from different sources.
-            //      2. In the case when duplicated "lastest" are discovered, only one of the duplicates will be returned.
+            //      2. In the case when duplicated "latest" are discovered, only one of the duplicates will be returned.
             var discoveredAvailablePlugins = new List<IReadOnlyCollection<AvailablePlugin>>();
             for (int i = 0; i < tasks.Length; i++)
             {
@@ -155,7 +137,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 }
                 else if (t.IsCanceled)
                 {
-                    this.logger.Info($"The request to get lastest available plugins from source {pluginSource} is cancelled.");
+                    this.logger.Info($"The request to get latest available plugins from source {pluginSource} is cancelled.");
                     continue;
                 }
                 else
@@ -510,7 +492,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                         continue;
                     }
 
-                    var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher);
+                    ErrorInfo[] errors = this.pluginMetadataValidator.GetValidationErrors(availablePluginInfo.Metadata);
+
+                    var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher, errors ?? Array.Empty<ErrorInfo>());
                     results[id] = (newPlugin, discoverer);
                 }
                 else if (tuple.plugin.Info.Metadata.Identity.Equals(availablePluginInfo.Metadata.Identity))
@@ -547,7 +531,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                         continue;
                     }
 
-                    var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher);
+                    ErrorInfo[] errors = this.pluginMetadataValidator.GetValidationErrors(availablePluginInfo.Metadata);
+
+                    var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher, errors ?? Array.Empty<ErrorInfo>());
                     results[availablePluginInfo.Metadata.Identity] = (newPlugin, discoverer);
                 }
                 else
