@@ -84,7 +84,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Loading
                 return false;
             }
 
-            ErrorInfo[] errors = this.pluginMetadataValidator.ValidationErrors(installedPlugin.Info.Metadata);
+            ErrorInfo[] errors = this.pluginMetadataValidator.GetValidationErrors(installedPlugin.Info.Metadata);
             if (errors?.Any() ?? false)
             {
                 if (!await this.invalidGate.ShouldProceedDespiteFailures(

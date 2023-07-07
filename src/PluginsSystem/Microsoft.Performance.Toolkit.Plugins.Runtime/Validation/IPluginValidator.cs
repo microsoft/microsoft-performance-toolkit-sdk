@@ -19,8 +19,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
         ///     The metadata for the plugin to validate.
         /// </param>
         /// <returns>
-        ///     <see cref="ErrorInfo"/>s describing why <paramref name="pluginMetadata"/> is invalid.
+        ///     <see cref="ErrorInfo"/>s describing why <paramref name="pluginMetadata"/> is invalid,
+        ///     or an empty array if the plugin valid.
         /// </returns>
-        ErrorInfo[] ValidationErrors(PluginMetadata pluginMetadata);
+        ErrorInfo[] GetValidationErrors(PluginMetadata pluginMetadata);
     }
 }

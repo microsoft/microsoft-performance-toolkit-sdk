@@ -492,7 +492,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                         continue;
                     }
 
-                    ErrorInfo[] errors = this.pluginMetadataValidator.ValidationErrors(availablePluginInfo.Metadata);
+                    ErrorInfo[] errors = this.pluginMetadataValidator.GetValidationErrors(availablePluginInfo.Metadata);
 
                     var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher, errors ?? Array.Empty<ErrorInfo>());
                     results[id] = (newPlugin, discoverer);
@@ -531,7 +531,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                         continue;
                     }
 
-                    ErrorInfo[] errors = this.pluginMetadataValidator.ValidationErrors(availablePluginInfo.Metadata);
+                    ErrorInfo[] errors = this.pluginMetadataValidator.GetValidationErrors(availablePluginInfo.Metadata);
 
                     var newPlugin = new AvailablePlugin(availablePluginInfo, discoverer, fetcher, errors ?? Array.Empty<ErrorInfo>());
                     results[availablePluginInfo.Metadata.Identity] = (newPlugin, discoverer);

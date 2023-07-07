@@ -163,7 +163,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             PluginPackage pluginPackage = await this.pluginPackageReader.TryReadPackageAsync(stream, cancellationToken);
 
-            ErrorInfo[] errors = this.validator.ValidationErrors(pluginPackage.Metadata);
+            ErrorInfo[] errors = this.validator.GetValidationErrors(pluginPackage.Metadata);
             if (errors?.Any() ?? false)
             {
                 if (!await this.invalidGate.ShouldProceedDespiteFailures(

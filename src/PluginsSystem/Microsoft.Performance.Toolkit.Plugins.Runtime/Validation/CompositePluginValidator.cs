@@ -21,13 +21,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
         }
 
         /// <inheritdoc />
-        public ErrorInfo[] ValidationErrors(PluginMetadata pluginMetadata)
+        public ErrorInfo[] GetValidationErrors(PluginMetadata pluginMetadata)
         {
             List<ErrorInfo> errors = new List<ErrorInfo>();
 
             foreach (var validator in this.validators)
             {
-                ErrorInfo[] innerErrors = validator.ValidationErrors(pluginMetadata);
+                ErrorInfo[] innerErrors = validator.GetValidationErrors(pluginMetadata);
 
                 if (innerErrors != null)
                 {

@@ -25,7 +25,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
             this.logger = logger;
         }
 
-        public ErrorInfo[] ValidationErrors(PluginMetadata pluginMetadata)
+        public ErrorInfo[] GetValidationErrors(PluginMetadata pluginMetadata)
         {
             SemanticVersion pluginSdkVersion = new SemanticVersion(
                 pluginMetadata.SdkVersion.Major,
