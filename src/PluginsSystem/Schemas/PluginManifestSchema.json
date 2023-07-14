@@ -7,7 +7,8 @@
     "displayName",
     "description",
     "projectUrl",
-    "owners"
+    "owners",
+    "manifestVersion"
   ],
   "properties": {
     "identity": {
