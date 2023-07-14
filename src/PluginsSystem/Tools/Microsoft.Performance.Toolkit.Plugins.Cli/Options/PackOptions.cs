@@ -174,6 +174,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 
             metadataInit.SdkVersion = extracted.SdkVersion;
             metadataInit.InstalledSize = extracted.InstalledSize;
+            metadataInit.ProcessingSources = extracted.ProcessingSources;
+            metadataInit.DataCookers = extracted.DataCookers;
+            metadataInit.ExtensibleTables = extracted.ExtensibleTables;
+
 
             //if (!manifestValidator.Validate(pluginManifest))
             //{
