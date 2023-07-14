@@ -5,7 +5,7 @@ using CommandLine;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
@@ -33,10 +33,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             }
 
             var metadataReader = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
+            var contentsMetadataReader = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>();
             Func<Type, ILogger> loggerFactory = x => ConsoleLogger.Create(x.GetType());
 
             var zipPluginPackageReader = new ZipPluginPackageReader(
                 metadataReader,
+                contentsMetadataReader,
                 loggerFactory);
 
             var pusher = new PluginPackagePusher(

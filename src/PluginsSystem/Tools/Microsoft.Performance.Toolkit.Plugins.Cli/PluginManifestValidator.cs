@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
-    public class PluginManifestValidator
+    internal class PluginManifestValidator
         : IPluginManifestValidator
     {
         private readonly ILogger logger;

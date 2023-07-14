@@ -7,8 +7,8 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
-using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata.ProcessingSourceInfo;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
+using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProcessingSourceInfo;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
@@ -22,11 +22,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             this.logger = loggerFactory(typeof(MetadataGenerator));
         }
 
-
-        public bool TryCreateMetadata(string assemblyDir, out PluginMetadataInit pluginMetadata)
+        public bool TryCreateMetadata(string assemblyDir, out ExtractedMetadata pluginMetadata)
         {
-            pluginMetadata = new();
-
+            pluginMetadata = null;
             using var pluginLoader = new PluginsLoader();
             if (!pluginLoader.TryLoadPlugin(assemblyDir, out ErrorInfo errorInfo))
             {
@@ -56,9 +54,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 }
             }
 
+            ulong installedSize = 0;
             try
             {
-                pluginMetadata.InstalledSize = (ulong)CalculateFolderSize(assemblyDir);
+                installedSize = (ulong)CalculateFolderSize(assemblyDir);
             }
             catch (Exception e)
             {
@@ -66,20 +65,29 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 return false;
             }
 
-            pluginMetadata.ProcessingSources = processingSourcesMetadata;
-            pluginMetadata.SdkVersion = sdkVersion;
-
             // TODO: #294 Figure out how to extract description of a datacooker.
-            pluginMetadata.DataCookers = pluginLoader.Extensions.SourceDataCookers.Concat(pluginLoader.Extensions.CompositeDataCookers)
-                .Select(x => new DataCookerMetadata(x.DataCookerId, null, x.SourceParserId)).ToList();
+            var dataCookers = pluginLoader.Extensions.SourceDataCookers
+                .Concat(pluginLoader.Extensions.CompositeDataCookers)
+                .Select(x => new DataCookerMetadata(x.DataCookerId, null, x.SourceParserId))
+                .ToList();
 
-            pluginMetadata.ExtensibleTables = pluginLoader.Extensions.TablesById.Values
+            var tables = pluginLoader.Extensions.TablesById.Values
                 .Select(x => new TableMetadata(
                     x.TableDescriptor.Guid,
                     x.TableDescriptor.Name,
                     x.TableDescriptor.Description,
                     x.TableDescriptor.Category,
-                    x.TableDescriptor.IsMetadataTable)).ToList();
+                    x.TableDescriptor.IsMetadataTable))
+                .ToList();
+
+            pluginMetadata = new()
+            {
+                InstalledSize = installedSize,
+                SdkVersion = sdkVersion,
+                ProcessingSources = processingSourcesMetadata,
+                DataCookers = dataCookers,
+                ExtensibleTables = tables,
+            };
 
             return true;
         }

@@ -1,7 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
@@ -10,16 +11,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
     /// </summary>
     internal class PluginMetadataInit
     {
-        /// <summary>
-        ///     Gets or sets the identifier of this plugin.
-        /// </summary>
-        public string? Id { get; set; }
-
-        /// <summary>
-        ///     Gets or sets the version of this plugin.
-        /// </summary>
-        public Version? Version { get; set; }
-
+        public PluginIdentity? Identity { get; set; }
+        
         /// <summary>
         ///     Gets or sets the size of this plugin when installed.
         /// </summary>
@@ -38,7 +31,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         /// <summary>
         ///     Gets or sets the owners of this plugin.
         /// </summary>
-        public IEnumerable<PluginOwner>? Owners { get; set; }
+        public IEnumerable<PluginOwnerInfo>? Owners { get; set; }
+
+        /// <summary>
+        ///    Gets or sets the project URL of this plugin.
+        /// </summary>
+        public Uri? ProjectUrl { get; set; }
 
         /// <summary>
         ///     Gets or sets the version of the performance SDK which this plugin depends upon.
@@ -69,13 +67,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         public PluginMetadata ToPluginMetadata()
         {
             return new PluginMetadata(
-                this.Id,
-                this.Version,
+                this.Identity,
                 this.InstalledSize,
                 this.DisplayName,
                 this.Description,
-                this.Owners,
                 this.SdkVersion,
+                this.ProjectUrl,
+                this.Owners);
+        }
+
+        public PluginContentsMetadata ToPluginContentsMetadata()
+        {
+            return new PluginContentsMetadata(
                 this.ProcessingSources,
                 this.DataCookers,
                 this.ExtensibleTables);

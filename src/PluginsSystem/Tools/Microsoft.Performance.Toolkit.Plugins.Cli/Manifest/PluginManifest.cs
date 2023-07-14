@@ -1,20 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    public sealed class PluginManifest
+    internal sealed class PluginManifest
     {
         public PluginManifest(
-            string id,
-            string version,
+            PluginIdentityManifest identity,
             string displayName,
             string description,
-            IEnumerable<PluginOwner> owners,
+            IEnumerable<PluginOwnerInfoManifest> owners,
             string projectUrl)
         {
-            this.Id = id;
-            this.Version = version;
+            this.Identity = identity;
             this.DisplayName = displayName;
             this.Description = description;
             this.Owners = owners;
@@ -22,16 +19,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         }
 
         /// <summary>
-        ///     Gets or sets the identifier of this plugin.
+        ///     Gets or sets the identity of this plugin.
         /// </summary>
-        [Required(ErrorMessage = "The plugin ID is required.")]
-        public string Id { get; }
-
-        /// <summary>
-        ///     Gets or sets the version of this plugin.
-        /// </summary>
-        [Required(ErrorMessage = "The plugin version is required.")]
-        public string Version { get; }
+        [Required(ErrorMessage = "The plugin identity is required.")]
+        public PluginIdentityManifest Identity { get; }
 
         /// <summary>
         ///     Gets or sets the human-readable name of this plugin.
@@ -48,11 +39,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         /// <summary>
         ///     Gets or sets the owners of this plugin.
         /// </summary>
-        public IEnumerable<PluginOwner> Owners { get; }
+        public IEnumerable<PluginOwnerInfoManifest> Owners { get; }
 
         /// <summary>
         ///     Gets or sets the URL of the project that owns this plugin.
         /// </summary>
         public string ProjectUrl { get; }
-}
+    }
 }

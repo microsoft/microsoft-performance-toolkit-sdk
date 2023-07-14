@@ -1,25 +1,33 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema",
+  "$schema": "http://json-schema.org/draft-07/schema",
   "title": "JSON Schema a plugin manifest",
-
   "type": "object",
   "required": [
-    "id",
+    "identity",
     "displayName",
-    "version",
     "description",
     "projectUrl",
-    "manifestVersion"
+    "owners",
+    "version"
   ],
   "properties": {
-    "id": {
-      "type": "string",
-      "description": "The unique identifier for a plugin."
-    },
-    "version": {
-      "type": "string",
-      "pattern": "^(\\d+\\.\\d+\\.\\d+)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$",
-      "description": "The version number of the plugin."
+    "identity": {
+      "type": "object",
+      "required": [
+        "id",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for a plugin."
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(\\d+\\.\\d+\\.\\d+)(?:-([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+([0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?$",
+          "description": "The version number of the plugin."
+        }
+      }
     },
     "description": {
       "type": "string",
@@ -37,6 +45,12 @@
     "owners": {
       "type": "array",
       "description": "The owners of the plugin.",
+      "required": [
+        "name",
+        "address",
+        "emailAddresses",
+        "phoneNumbers"
+      ],
       "items": {
         "type": "object",
         "properties": {
@@ -68,7 +82,8 @@
     },
     "manifestVersion": {
       "type": "number",
-      "description": "The version of the manifest schema."
+      "description": "The version of the manifest schema.",
+      "const": 1.0
     }
   }
 }

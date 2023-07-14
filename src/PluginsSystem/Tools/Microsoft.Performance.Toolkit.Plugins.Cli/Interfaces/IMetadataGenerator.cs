@@ -5,6 +5,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     internal interface IMetadataGenerator
     {
-        public bool TryCreateMetadata(string assemblyDir, out PluginMetadataInit pluginMetadata);
+        public bool TryCreateMetadata(string assemblyDir, out ExtractedMetadata pluginMetadata);
     }
 }

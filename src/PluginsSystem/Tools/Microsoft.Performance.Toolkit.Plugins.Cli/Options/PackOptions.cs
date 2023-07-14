@@ -4,7 +4,9 @@
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Core.Packaging.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
+using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using SystemVersion = System.Version;
 
@@ -91,13 +93,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                 return 1;
             }
 
-            if (!metadataGenerator.TryCreateMetadata(this.SourceDirectory, out PluginMetadataInit metadataInit))
+            if (!metadataGenerator.TryCreateMetadata(this.SourceDirectory, out ExtractedMetadata extracted))
             {
                 logger.Error("Failed to extract metadata from assembly.");
                 return 1;
             }
 
-            PluginManifest? pluginManifest = null;
+            PluginMetadataInit metadataInit = new();
             if (this.ManifestFilePath != null)
             {
                 if (!File.Exists(this.ManifestFilePath))
@@ -105,7 +107,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                     logger.Error($"Plugin manifest file does not exist: {this.ManifestFilePath}");
                     return 1;
                 }
-
+                
+                PluginManifest? pluginManifest = null;
                 try
                 {
                     // If a manifest file was specified, use it to generate the metadata file
@@ -119,6 +122,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                     {
                         pluginManifest = JsonSerializer.Deserialize<PluginManifest>(manifestStream, options: options);
                     }
+
+
+                    if (!SystemVersion.TryParse(pluginManifest.Identity.Version, out SystemVersion? version))
+                    {
+                        Console.Error.WriteLine($"The version '{this.Version}' is not a valid System.Version string.");
+                        return 1;
+                    }
+
+                    metadataInit.Identity = new PluginIdentity(pluginManifest.Identity.Id, version);
+                    metadataInit.DisplayName = pluginManifest.DisplayName;
+                    metadataInit.Description = pluginManifest.Description;
+                    metadataInit.Owners = pluginManifest.Owners.Select(o => new PluginOwnerInfo(o.Name, o.Address, o.EmailAddresses, o.PhoneNumbers));
+                    metadataInit.ProjectUrl = new Uri(pluginManifest.ProjectUrl);
                 }
                 catch (JsonException ex)
                 {
@@ -150,30 +166,35 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                     return 1;
                 }
 
-                pluginManifest = new PluginManifest(this.Id, this.Version, this.PluginDisplayName, this.PluginDescription, null, null);
+                var id = new PluginIdentity(this.Id, version);
+                metadataInit.Identity = id;
+                metadataInit.DisplayName = this.PluginDisplayName;
+                metadataInit.Description = this.PluginDescription;
             }
 
-            if (!manifestValidator.Validate(pluginManifest))
-            {
-                logger.Error("Invalid plugin manifest. See errors above.");
-                return 1;
-            }
+            metadataInit.SdkVersion = extracted.SdkVersion;
+            metadataInit.InstalledSize = extracted.InstalledSize;
 
-            metadataInit.Id = pluginManifest.Id;
-            metadataInit.Version = SystemVersion.Parse(pluginManifest.Version);
-            metadataInit.Description = pluginManifest.Description;
-            metadataInit.DisplayName = pluginManifest.DisplayName;
-            metadataInit.Owners = pluginManifest.Owners;
+            //if (!manifestValidator.Validate(pluginManifest))
+            //{
+            //    logger.Error("Invalid plugin manifest. See errors above.");
+            //    return 1;
+            //}
+
 
             var metadata = metadataInit.ToPluginMetadata();
+            var metadataContents = metadataInit.ToPluginContentsMetadata();
+
             string relativePackageFileName = $"{metadata.Identity}{Constants.PluginPackageExtension}";
             string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
-
             string tmpPath = Path.GetTempFileName();
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
-            using (var builder = new PluginPackageBuilder(tmpPath, serializer))
+            ISerializer<PluginContentsMetadata> contentsSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>();
+
+            using (var builder = new PluginPackageBuilder(tmpPath, serializer, contentsSerializer))
             {
                 builder.AddMetadata(metadata);
+                builder.AddContentsMetadata(metadataContents);
                 builder.AddContent(this.SourceDirectory, CancellationToken.None);
             }
 
