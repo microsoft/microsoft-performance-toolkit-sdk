@@ -2,11 +2,11 @@
   "profiles": {
     "pack": {
       "commandName": "Project",
-      "commandLineArgs": "pack -s \"D:\\TestXadView\\a\" -t \"D:\\TestXadView\\target\" -m \"D:\\TestXadView\\pluginspec.json\"\r\n"
+      "commandLineArgs": "pack -s \"D:\\TestXadView\\a\" -t \"D:\\TestXadView\\target\" -m \"D:\\TestXadView\\newManifest.json\"\r\n"
     },
     "metadata": {
       "commandName": "Project",
-      "commandLineArgs": "metadata-gen -s \"D:\\TestXadView\\a\" -t \"D:\\TestXadView\\target\" --id \"XadView\" --owners \"Helen\" \"email\""
+      "commandLineArgs": "metadata-gen -s \"D:\\TestXadView\\a\" -t \"D:\\TestXadView\\target\" --id \"XadView\" --version \"1.0.0\" --displayName \"abc\" --description \"abc\""
     }
   }
 }

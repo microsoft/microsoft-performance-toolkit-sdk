@@ -5,7 +5,7 @@ using System.IO.Compression;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
+using Microsoft.Performance.Toolkit.Plugins.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {

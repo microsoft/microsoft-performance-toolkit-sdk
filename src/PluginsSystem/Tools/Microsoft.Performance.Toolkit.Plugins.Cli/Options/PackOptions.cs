@@ -8,11 +8,12 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Package;
 using SystemVersion = System.Version;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 {
-    [Verb("pack", HelpText = $"Creates a new {Constants.PluginPackageExtension} package using specified metadata and source directory.")]
+    [Verb("pack", HelpText = $"Creates a new {PackageConstants.PluginPackageExtension} package using specified metadata and source directory.")]
     internal class PackOptions
     {
         public PackOptions(
@@ -44,7 +45,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             't',
             "target",
             Required = false,
-            HelpText = $"Directory where the {Constants.PluginPackageExtension} file will be created. If not specified, the current directory will be used.")]
+            HelpText = $"Directory where the {PackageConstants.PluginPackageExtension} file will be created. If not specified, the current directory will be used.")]
         public string TargetDirectory { get; }
 
         [Option(
@@ -189,7 +190,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             var metadata = metadataInit.ToPluginMetadata();
             var metadataContents = metadataInit.ToPluginContentsMetadata();
 
-            string relativePackageFileName = $"{metadata.Identity}{Constants.PluginPackageExtension}";
+            string relativePackageFileName = $"{metadata.Identity}{PackageConstants.PluginPackageExtension}";
             string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
             string tmpPath = Path.GetTempFileName();
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();

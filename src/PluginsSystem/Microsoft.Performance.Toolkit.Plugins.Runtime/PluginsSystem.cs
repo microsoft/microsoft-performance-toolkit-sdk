@@ -16,7 +16,7 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Extensibility;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Loading;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
+using Microsoft.Performance.Toolkit.Plugins.Package;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Validation;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime

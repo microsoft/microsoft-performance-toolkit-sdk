@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+    <ProjectReference Include="..\..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Toolkit.Plugins.Core\Microsoft.Performance.Toolkit.Plugins.Core.csproj" />
+  </ItemGroup>
+
+</Project>
