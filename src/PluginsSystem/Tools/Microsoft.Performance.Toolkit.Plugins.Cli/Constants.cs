@@ -2,8 +2,8 @@
 {
     public static class Constants
     {
-        public const string PluginPackageExtension = ".ptix";
         public const string DirectoryDataSourceName = "directory";
         public const string ExtensionlessDataSourceName = "extensionless";
+        public const string ManifestSchemaFileName = "PluginManifestSchema.json";
     }
 }

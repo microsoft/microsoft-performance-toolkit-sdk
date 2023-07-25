@@ -1,4 +1,7 @@
-﻿namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
     internal class PluginOwnerInfoManifest
     {

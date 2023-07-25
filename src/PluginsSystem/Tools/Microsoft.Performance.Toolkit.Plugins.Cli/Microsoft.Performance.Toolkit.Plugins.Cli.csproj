@@ -23,4 +23,10 @@
     <ProjectReference Include="..\..\Microsoft.Performance.Toolkit.Plugins.Package\Microsoft.Performance.Toolkit.Plugins.Package.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="PluginManifestSchema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

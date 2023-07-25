@@ -10,16 +10,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     public sealed class Program
     {
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, MetadataGenOptions>(args);
             Func<Type, ILogger> loggerFactory = ConsoleLogger.Create;
             var metadataGenerator = new MetadataGenerator(loggerFactory);
-            var manifestValidator = new PluginManifestValidator(loggerFactory);
             var sourceFilesValidator = new PluginSourceFilesValidator(loggerFactory);
+            string schemaFilePath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                Constants.ManifestSchemaFileName);
 
-            var schemaFilePath = @"D:\CleanRepos\microsoft-performance-toolkit-sdk\src\PluginsSystem\Schemas\PluginManifestSchema.json";
             var manifestSchema = File.ReadAllText(schemaFilePath);
+
+            var manifestValidator = new PluginManifestJsonValidator(manifestSchema, loggerFactory);
 
             return result.MapResult(
                 (PackOptions opts) => opts.Run(

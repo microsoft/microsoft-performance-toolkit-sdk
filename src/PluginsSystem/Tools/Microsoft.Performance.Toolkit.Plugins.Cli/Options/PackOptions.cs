@@ -83,7 +83,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
         public int Run(
             Func<Type, ILogger> loggerFactory,
             IPluginSourceFilesValidator sourceDirValidator,
-            IPluginManifestValidator manifestValidator,
+            IPluginManifestFileValidator manifestValidator,
             IMetadataGenerator metadataGenerator)
         {
             ILogger logger = loggerFactory(typeof(MetadataGenOptions));
@@ -103,9 +103,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             PluginMetadataInit metadataInit = new();
             if (this.ManifestFilePath != null)
             {
-                if (!File.Exists(this.ManifestFilePath))
+                string manifestFullPath = Path.GetFullPath(this.ManifestFilePath);
+
+                if (!File.Exists(manifestFullPath))
                 {
-                    logger.Error($"Plugin manifest file does not exist: {this.ManifestFilePath}");
+                    logger.Error($"Plugin manifest file does not exist: {manifestFullPath}");
                     return 1;
                 }
                 
@@ -119,7 +121,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     };
 
-                    using (FileStream manifestStream = File.OpenRead(this.ManifestFilePath))
+                    using (FileStream manifestStream = File.OpenRead(manifestFullPath))
                     {
                         pluginManifest = JsonSerializer.Deserialize<PluginManifest>(manifestStream, options: options);
                     }
@@ -131,6 +133,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                         return 1;
                     }
 
+
+                    if (!manifestValidator.Validate(manifestFullPath))
+                    {
+                        logger.Error("Invalid plugin manifest. See errors above.");
+                        // For now, continue to generate metadata file even if manifest is invalid
+                    }
+
                     metadataInit.Identity = new PluginIdentity(pluginManifest.Identity.Id, version);
                     metadataInit.DisplayName = pluginManifest.DisplayName;
                     metadataInit.Description = pluginManifest.Description;
@@ -140,13 +149,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                 }
                 catch (JsonException ex)
                 {
-                    logger.Error($"Invalid plugin manifest file: {this.ManifestFilePath}");
+                    logger.Error($"Invalid plugin manifest file: {manifestFullPath}");
                     logger.Error(ex.Message);
                     return 1;
                 }
                 catch (Exception ex)
                 {
-                    logger.Error($"Failed to read plugin manifest file: {this.ManifestFilePath}");
+                    logger.Error($"Failed to read plugin manifest file: {manifestFullPath}");
                     logger.Error(ex.Message);
                     return 1;
                 }
@@ -179,14 +188,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             metadataInit.ProcessingSources = extracted.ProcessingSources;
             metadataInit.DataCookers = extracted.DataCookers;
             metadataInit.ExtensibleTables = extracted.ExtensibleTables;
-
-
-            //if (!manifestValidator.Validate(pluginManifest))
-            //{
-            //    logger.Error("Invalid plugin manifest. See errors above.");
-            //    return 1;
-            //}
-
 
             var metadata = metadataInit.ToPluginMetadata();
             var metadataContents = metadataInit.ToPluginContentsMetadata();

@@ -25,7 +25,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             {
                 foreach (string error in errors)
                 {
-                    this.logger.Error($"Plugin manifest validation error: {error}");
+                    this.logger.Warn($"Plugin manifest validation error: {error}");
                 }
             }
 

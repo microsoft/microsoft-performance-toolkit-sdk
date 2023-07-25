@@ -39,7 +39,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             var processingSourcesMetadata = new List<ProcessingSourceMetadata>();
             foreach (ProcessingSourceReference source in pluginLoader.LoadedProcessingSources)
             {
-                // Version (use the latest version if different across processing sources)
+                // For now, use latest version if different across processing sources
+                // TODO: Get SDK version directly from assembly
                 Version version = GetSDKVersion(source, versionChecker);
                 sdkVersion = sdkVersion == null ? version : version > sdkVersion ? version : sdkVersion;
 

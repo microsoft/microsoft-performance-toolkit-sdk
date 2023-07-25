@@ -23,7 +23,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             bool isValid = Validator.TryValidateObject(pluginManifest, validationContext, validationResults, true);
             if (!isValid)
             {
-                foreach (var validationResult in validationResults)
+                foreach (ValidationResult validationResult in validationResults)
                 {
                     this.logger.Error(validationResult.ErrorMessage);
                 }

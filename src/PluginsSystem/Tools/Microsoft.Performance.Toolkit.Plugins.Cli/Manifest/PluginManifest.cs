@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
@@ -17,23 +18,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             this.Owners = owners;
             this.ProjectUrl = projectUrl;
         }
-
-        /// <summary>
-        ///     Gets or sets the identity of this plugin.
-        /// </summary>
-        [Required(ErrorMessage = "The plugin identity is required.")]
+        
         public PluginIdentityManifest Identity { get; }
 
         /// <summary>
         ///     Gets or sets the human-readable name of this plugin.
         /// </summary>
-        [Required(ErrorMessage = "The plugin display name is required.")]
         public string DisplayName { get; }
 
         /// <summary>
         ///     Gets or sets the user friendly description of this plugin.
         /// </summary>
-        [Required(ErrorMessage = "The plugin description is required.")]
+        /// </summary>
         public string Description { get; }
 
         /// <summary>
