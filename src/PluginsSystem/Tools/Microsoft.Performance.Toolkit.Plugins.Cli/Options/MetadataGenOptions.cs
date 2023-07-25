@@ -134,7 +134,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                     metadataInit.DisplayName = pluginManifest.DisplayName;
                     metadataInit.Description = pluginManifest.Description;
                     metadataInit.Owners = pluginManifest.Owners.Select(o => new PluginOwnerInfo(o.Name, o.Address, o.EmailAddresses, o.PhoneNumbers));
-                    metadataInit.ProjectUrl = new Uri(pluginManifest.ProjectUrl);
+                    Uri.TryCreate(pluginManifest.ProjectUrl, UriKind.Absolute, out Uri? projectUrl);
+                    metadataInit.ProjectUrl = projectUrl;
                 }
                 catch (JsonException ex)
                 {

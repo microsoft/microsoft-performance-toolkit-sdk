@@ -25,6 +25,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         public bool TryCreateMetadata(string assemblyDir, out ExtractedMetadata pluginMetadata)
         {
             pluginMetadata = null;
+            assemblyDir = Path.GetFullPath(assemblyDir);
+
             using var pluginLoader = new PluginsLoader();
             if (!pluginLoader.TryLoadPlugin(assemblyDir, out ErrorInfo errorInfo))
             {
