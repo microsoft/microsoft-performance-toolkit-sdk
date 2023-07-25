@@ -1,7 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
     </PropertyGroup>
+    <ItemGroup>
+      <Compile Remove="scripts\**" />
+      <EmbeddedResource Remove="scripts\**" />
+      <None Remove="scripts\**" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Performance.SDK" Version="1.1.13" />

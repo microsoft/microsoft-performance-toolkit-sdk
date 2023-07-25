@@ -10,7 +10,7 @@
       <PackageTags>dotnet-new;templates;microsoft;performance</PackageTags>
 
       <TargetFramework>netstandard2.1</TargetFramework>
-
+      <PackageType>Template</PackageType>
       <IncludeContentInPack>true</IncludeContentInPack>
       <IncludeBuildOutput>false</IncludeBuildOutput>
       <ContentTargetFolders>content</ContentTargetFolders>

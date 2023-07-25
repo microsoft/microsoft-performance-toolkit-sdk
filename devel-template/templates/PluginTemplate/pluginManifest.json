@@ -1,9 +1,11 @@
 {
-  "$schema": "  https://raw.githubusercontent.com/microsoft/microsoft-performance-toolkit-sdk/user/helzhang/pluginToolCLINew/src/PluginsSystem/Schemas/PluginManifestSchema.json",
-  "id": "__PLUGIN_ID__",
-  "displayName": "__PLUGIN_DISPLAY_NAME__",
+  "$schema": "https://raw.githubusercontent.com/microsoft/microsoft-performance-toolkit-sdk/user/helzhang/pluginToolCLINew/src/PluginsSystem/Schemas/PluginManifestSchema.json",
   "description": "__PLUGIN_DESCRIPTION__",
-  "version": "__PLUGIN_VERSION__",
+  "displayName": "__PLUGIN_DISPLAY_NAME__",
+  "identity": {
+    "id": "__PLUGIN_ID__",
+    "version": "__PLUGIN_VERSION__"
+  },
   "owners": [
     {
       "name": "__PLUGIN_OWNER_NAME__",
@@ -13,5 +15,5 @@
     }
   ],
   "projectUrl": "__PLUGIN_PROJECT_URL__",
-  "manifestVersion": 1
+  "manifestVersion": 1.0
 }

@@ -8,5 +8,34 @@
   "tags": {
       "language": "C#",
       "type": "project"
-  }
+  },
+  "postActions": [
+    {
+      "actionId": "3A7C4B45-1F5D-4A30-959A-51B88E82B5D2",
+      "args": {
+        "executable": "scripts\\InstallPluginTool.cmd",
+        "args": "plugintool 0.1.39-preview.g4446eb55d D:\\CleanRepos\\microsoft-performance-toolkit-sdk\\src\\PluginsSystem\\Tools\\Microsoft.Performance.Toolkit.Plugins.Cli\\nupkg",
+        "redirectStandardOutput": false,
+        "redirectStandardError": false
+      },
+      "manualInstructions": [
+        {
+          "text": "Run 'setup.cmd'"
+        }
+      ],
+      "continueOnError": false,
+      "description ": "setups the project by calling setup.cmd"
+    },
+    {
+      "id": "instructions",
+      "description": "Manual actions required",
+      "manualInstructions": [
+        {
+          "text": "Open pluginManifest.json in the editor and complete the plugin metadata configuration."
+        }
+      ],
+      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
+      "continueOnError": true
+    }
+  ]
 }
