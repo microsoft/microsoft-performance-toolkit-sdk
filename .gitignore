@@ -348,4 +348,3 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-/src/PluginsSystem/Microsoft.Performance.Toolkit.Plugins.Publisher.Cli/Properties/launchSettings.json
