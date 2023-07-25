@@ -291,6 +291,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
         }
 
+        /// <inheritdoc/>
+        public async Task ResetInstalledPlugins(CancellationToken cancellationToken)
+        {
+            using (await this.pluginRegistry.AquireLockAsync(cancellationToken, null))
+            {
+                await this.pluginRegistry.Reset(cancellationToken);
+            }
+        }
+
         private async Task<InstalledPlugin> CreateInstalledPluginAsync(
             InstalledPluginInfo installedPluginInfo,
             CancellationToken cancellationToken)

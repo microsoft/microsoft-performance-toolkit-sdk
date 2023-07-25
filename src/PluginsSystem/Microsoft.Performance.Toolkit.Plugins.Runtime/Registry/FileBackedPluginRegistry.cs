@@ -235,6 +235,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             return await this.fileDistributedLock.AcquireAsync(timeout, cancellationToken);
         }
 
+        /// <inheritdoc/>
+        public Task Reset(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => File.Delete(this.registryFilePath), cancellationToken);
+        }
+
         private async Task<List<InstalledPluginInfo>> ReadInstalledPlugins(
             CancellationToken cancellationToken)
         {
@@ -254,18 +260,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             }
             catch (Exception e)
             {
-                string errorMsg = null;
-                if (e is JsonException)
+                if (e is JsonException || e is ArgumentNullException)
                 {
-                    errorMsg = $"Deserialization of plugin registry failed due to invalid JSON text.";
-                }
-                else if (e is IOException)
-                {
-                    errorMsg = $"Failed to read the plugin registry file at {this.registryFilePath}.";
+                    string errorMsg = $"Deserialization of plugin registry failed due to invalid JSON text.";
+                    this.logger.Error(e, errorMsg);
+                    throw new RepositoryCorruptedException(errorMsg, e);
                 }
 
-                if (errorMsg != null)
+                if (e is IOException)
                 {
+                    string errorMsg = $"Failed to read the plugin registry file at {this.registryFilePath}.";
                     this.logger.Error(e, errorMsg);
                     throw new RepositoryDataAccessException(errorMsg, e);
                 }

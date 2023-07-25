@@ -56,6 +56,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
+        public async Task GetAllAsync_MissingData_ThrowsRepositoryCorruptedException()
+        {
+            File.Create(this.registryFilePath).Close();
+
+            var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
+            fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+                .Throws<ArgumentNullException>();
+
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+
+            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.GetAllAsync(CancellationToken.None));
+        }
+
+        [TestMethod]
+        [UnitTest]
         public async Task GetAllAsync_FileNotExist_ReturnsEmpty()
         {
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
@@ -86,7 +101,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public async Task GetAllAsync_JsonException_ThrowsDataAccessException()
+        public async Task GetAllAsync_JsonException_ThrowsRepositoryCorruptedException()
         {
             File.Create(this.registryFilePath).Close();
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
@@ -102,7 +117,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeSerializer.Object,
                 fakeLoggerFactory);
 
-            RepositoryDataAccessException e = await Assert.ThrowsExceptionAsync<RepositoryDataAccessException>(() => sut.GetAllAsync(CancellationToken.None));
+            RepositoryCorruptedException e = await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.GetAllAsync(CancellationToken.None));
             Assert.AreSame(exception, e.InnerException);
             fakeLogger.Verify(l => l.Error(exception, It.IsAny<string>()));
         }

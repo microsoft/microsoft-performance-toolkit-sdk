@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
@@ -13,5 +15,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         : IKeyedRepository<InstalledPluginInfo, string>,
           ISynchronizedObject
     {
+        /// <summary>
+        ///     Resets the plugin registry to an empty state.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     An awaitable task that completes when the registry has been reset.
+        /// </returns>
+        Task Reset(CancellationToken cancellationToken);
     }
 }
