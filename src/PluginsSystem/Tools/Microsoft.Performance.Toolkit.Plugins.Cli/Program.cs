@@ -18,7 +18,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             var sourceFilesValidator = new PluginSourceFilesValidator(loggerFactory);
             string schemaFilePath = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
-                Constants.ManifestSchemaFileName);
+                Constants.ManifestSchemaFilePath);
 
             var manifestSchema = File.ReadAllText(schemaFilePath);
 

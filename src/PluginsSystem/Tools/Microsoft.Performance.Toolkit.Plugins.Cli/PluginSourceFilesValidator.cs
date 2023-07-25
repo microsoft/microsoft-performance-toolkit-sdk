@@ -32,6 +32,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 return false;
             }
 
+            // TODO: Add more validation here
+            // e.g. Ensure only one SDK assembly is present?
             return true;
         }
     }

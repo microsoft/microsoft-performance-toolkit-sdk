@@ -4,6 +4,6 @@
     {
         public const string DirectoryDataSourceName = "directory";
         public const string ExtensionlessDataSourceName = "extensionless";
-        public const string ManifestSchemaFileName = "PluginManifestSchema.json";
+        public const string ManifestSchemaFilePath = "Schemas/PluginManifestSchema.json";
     }
 }
