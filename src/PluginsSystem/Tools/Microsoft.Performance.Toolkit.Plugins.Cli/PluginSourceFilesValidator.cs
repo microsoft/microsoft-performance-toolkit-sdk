@@ -16,7 +16,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             this.logger = loggerFactory(typeof(PluginSourceFilesValidator));
         }
 
-        public bool Validate(string pluginSourceDir)
+        public bool Validate(string pluginSourceDir, bool manifestIncluded)
         {
             Guard.NotNull(pluginSourceDir, nameof(pluginSourceDir));
 
@@ -30,6 +30,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             {
                 this.logger.Error($"Plugin source directory does not contain any DLLs: {pluginSourceDir}");
                 return false;
+            }
+
+            if (manifestIncluded)
+            {
+                if (!File.Exists(Path.Combine(pluginSourceDir, Constants.BundledManifestName)))
+                {
+                    this.logger.Error($"Plugin source directory does not contain an bundled manifest: {Constants.BundledManifestName}");
+                    return false;
+                }
             }
 
             // TODO: Add more validation here

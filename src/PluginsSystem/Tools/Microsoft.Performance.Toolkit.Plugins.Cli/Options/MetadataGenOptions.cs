@@ -19,6 +19,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
         public MetadataGenOptions(
             string sourceDirectory,
             string targetDirectory,
+            bool manifestBundled,
             string manifestFilePath,
             string id,
             string version,
@@ -28,6 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             this.SourceDirectory = sourceDirectory;
             this.TargetDirectory = targetDirectory;
             this.ManifestFilePath = manifestFilePath;
+            this.ManifestBundled = manifestBundled;
             this.Id = id;
             this.Version = version;
             this.PluginDisplayName = pluginDisplayName;
@@ -47,6 +49,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             Required = false,
             HelpText = "Directory where the metadata file will be created. If not specified, the current directory will be used.")]
         public string TargetDirectory { get; }
+
+        [Option(
+            'b',
+            "manifest-bundled",
+            SetName = "manifest-bundled",
+            HelpText = "Indicates that the plugin manifest file should be included in the package source directory.")]
+        public bool ManifestBundled { get; }
 
         [Option(
             'm',
@@ -87,23 +96,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             IMetadataGenerator metadataGenerator)
         {
             ILogger logger = loggerFactory(typeof(MetadataGenOptions));
-
-            if (!sourceDirValidator.Validate(this.SourceDirectory))
+            
+            string sourceDirectory = Path.GetFullPath(this.SourceDirectory);
+            if (!sourceDirValidator.Validate(sourceDirectory, this.ManifestBundled))
             {
-                logger.Error($"Invalid plugin source files in: {this.SourceDirectory}");
+                logger.Error($"Invalid plugin source files in: {sourceDirectory}");
                 return 1;
             }
 
-            if (!metadataGenerator.TryCreateMetadata(this.SourceDirectory, out ExtractedMetadata extracted))
+            if (!metadataGenerator.TryCreateMetadata(sourceDirectory, out ExtractedMetadata extracted))
             {
                 logger.Error("Failed to extract metadata from assembly.");
                 return 1;
             }
 
             PluginMetadataInit metadataInit = new();
-            if (this.ManifestFilePath != null)
+            if (this.ManifestBundled || this.ManifestFilePath != null)
             {
-                string manifestFullPath = Path.GetFullPath(this.ManifestFilePath);
+                string manifestFullPath = this.ManifestBundled ? Path.Combine(sourceDirectory, Constants.BundledManifestName)
+                    : Path.GetFullPath(this.ManifestFilePath);
 
                 if (!File.Exists(manifestFullPath))
                 {
@@ -186,12 +197,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             metadataInit.ProcessingSources = extracted.ProcessingSources;
             metadataInit.DataCookers = extracted.DataCookers;
             metadataInit.ExtensibleTables = extracted.ExtensibleTables;
-
-            //if (!manifestValidator.Validate(pluginManifest))
-            //{
-            //    logger.Error("Invalid plugin manifest. See errors above.");
-            //    return 1;
-            //}
 
             var metadata = metadataInit.ToPluginMetadata();
             var metadataContents = metadataInit.ToPluginContentsMetadata();

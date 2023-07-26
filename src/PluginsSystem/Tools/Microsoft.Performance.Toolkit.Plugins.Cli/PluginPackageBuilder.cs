@@ -46,6 +46,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
         public void AddContent(
             string sourcePath,
+            Predicate<string> shouldInclude,
             CancellationToken cancellationToken)
         {
             Guard.NotNull(sourcePath, nameof(sourcePath));
@@ -56,9 +57,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             foreach (FileInfo fileInfo in dirInfo.EnumerateFiles("*", SearchOption.AllDirectories))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-
                 string fileSourcePath = fileInfo.FullName;
+                if (!shouldInclude(fileSourcePath))
+                {
+                    continue;
+                }
+
                 string relPath = fileInfo.FullName.Substring(dirInfo.FullName.Length+1);
+
                 string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName.Replace("/","\\"), relPath);
                 this.zip.CreateEntryFromFile(fileSourcePath, fileTargetPath, CompressionLevel.Fastest);
             }
