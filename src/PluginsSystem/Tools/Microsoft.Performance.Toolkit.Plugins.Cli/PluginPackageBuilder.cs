@@ -46,7 +46,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
         public void AddContent(
             string sourcePath,
-            Predicate<string> shouldInclude,
+            Predicate<string> shouldExclude,
             CancellationToken cancellationToken)
         {
             Guard.NotNull(sourcePath, nameof(sourcePath));
@@ -58,7 +58,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 string fileSourcePath = fileInfo.FullName;
-                if (!shouldInclude(fileSourcePath))
+                if (shouldExclude(fileSourcePath))
                 {
                     continue;
                 }

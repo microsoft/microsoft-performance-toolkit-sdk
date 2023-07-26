@@ -147,7 +147,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 
                     if (!manifestValidator.Validate(manifestFullPath))
                     {
-                        logger.Error("Invalid plugin manifest. See errors above.");
+                        logger.Warn("Invalid plugin manifest. See errors above.");
                         // For now, continue to generate metadata file even if manifest is invalid
                     }
 
@@ -215,7 +215,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                 builder.AddContentsMetadata(metadataContents);
                 builder.AddContent(
                     sourceDirectory,
-                    s => this.ManifestFilePath == null || !s.Equals(Path.GetFullPath(this.ManifestFilePath), StringComparison.OrdinalIgnoreCase),
+                    s => (this.ManifestBundled && s.Equals(Path.Combine(sourceDirectory, Constants.BundledManifestName))) 
+                            || (this.ManifestFilePath != null && s.Equals(Path.GetFullPath(this.ManifestFilePath), StringComparison.OrdinalIgnoreCase)),
                     CancellationToken.None);
             }
 
