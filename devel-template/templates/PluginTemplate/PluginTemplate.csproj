@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
+		<PluginToolVersion>0.1.44-preview.g1b042022db</PluginToolVersion>
+		<PluginToolFeed>D:\CleanRepos\microsoft-performance-toolkit-sdk\src\PluginsSystem\Tools\Microsoft.Performance.Toolkit.Plugins.Cli\nupkg</PluginToolFeed>
     </PropertyGroup>
     <ItemGroup>
       <Compile Remove="scripts\**" />
@@ -18,5 +20,7 @@
       </None>
     </ItemGroup>
 
-    <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+	<Target Name="PackageToPlugin" BeforeTargets="Pack">
+		<Exec Command="scripts\PackageToPlugin.cmd $(OutputPath) $(PluginToolVersion) $(PluginToolFeed)" />
+	</Target>
 </Project>
