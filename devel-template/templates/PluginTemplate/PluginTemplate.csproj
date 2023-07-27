@@ -4,20 +4,20 @@
 		<PluginToolVersion>0.1.44-preview.g1b042022db</PluginToolVersion>
 		<PluginToolFeed>D:\CleanRepos\microsoft-performance-toolkit-sdk\src\PluginsSystem\Tools\Microsoft.Performance.Toolkit.Plugins.Cli\nupkg</PluginToolFeed>
     </PropertyGroup>
+	
     <ItemGroup>
       <Compile Remove="scripts\**" />
       <EmbeddedResource Remove="scripts\**" />
       <None Remove="scripts\**" />
     </ItemGroup>
-
+    <ItemGroup>
+	  <ContentWithTargetPath Include="pluginManifest.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <TargetPath>pluginManifest.json</TargetPath>
+      </ContentWithTargetPath>
+    </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.Performance.SDK" Version="1.1.13" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="pluginManifest.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
     </ItemGroup>
 
 	<Target Name="PackageToPlugin" BeforeTargets="Pack">

@@ -25,6 +25,14 @@ dotnet tool install --add-source %toolPackagePath% %toolName% --version %toolVer
 
 :run
 echo Running %toolName% %outputDirectory%...
-dotnet %toolCommand% pack -s %outputDirectory% -b
+
+dotnet %toolCommand% pack -s %outputDirectory% -t %outputDirectory% -b 2>nul
+
+if %ERRORLEVEL% equ 0 (
+    echo mytool executed successfully!
+) else (
+    echo mytool encountered an error.
+    exit /b 1
+)
 
 exit /b 0
