@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 {
@@ -24,6 +26,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <returns>
         ///     An awaitable task that completes when the registry has been reset.
         /// </returns>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was cancelled.
+        /// </exception>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when the installed plugins registry cannot be reset.
+        /// </exception>
         Task Reset(CancellationToken cancellationToken);
     }
 }

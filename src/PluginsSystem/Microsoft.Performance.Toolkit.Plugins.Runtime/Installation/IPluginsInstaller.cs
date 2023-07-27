@@ -115,6 +115,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
         /// </exception>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when the installed plugins registry cannot be reset.
+        /// </exception>
         Task ResetInstalledPlugins(CancellationToken cancellationToken);
     }
 }

@@ -238,7 +238,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <inheritdoc/>
         public Task Reset(CancellationToken cancellationToken)
         {
-            return Task.Run(() => File.Delete(this.registryFilePath), cancellationToken);
+            return Task.Run(() =>
+            {
+                try
+                {
+                    File.Delete(this.registryFilePath);
+                }
+                catch (IOException e)
+                {
+                    throw new RepositoryDataAccessException("Failed to delete plugin registry.", e);
+                }
+            }, cancellationToken);
         }
 
         private async Task<List<InstalledPluginInfo>> ReadInstalledPlugins(
