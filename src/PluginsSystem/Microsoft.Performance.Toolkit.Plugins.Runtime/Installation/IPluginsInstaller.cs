@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
@@ -24,6 +25,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// </returns>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
+        /// </exception>
+        /// <exception cref="RepositoryCorruptedException">
+        ///     Throws when the installed plugins registry is corrupted, requiring <see cref="ResetInstalledPlugins"/>
+        ///     to be invoked.
+        /// </exception>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when the installed plugins registry cannot be read or written to.
         /// </exception>
         Task<InstalledPluginsResults> GetAllInstalledPluginsAsync(
             CancellationToken cancellationToken);
@@ -47,11 +55,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         ///     The <see cref="InstalledPluginInfo"/> of the installed plugin if the installation was successful. Otherwise, null.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     Throws when <paramref name="pluginPackage"/> or <paramref name="installationRoot"/> or
-        ///     <paramref name="sourceUri"/> is null.
+        ///     Throws when <paramref name="pluginStream"/> or <paramref name="sourceUri"/> is null.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
+        /// </exception>
+        /// <exception cref="RepositoryCorruptedException">
+        ///     Throws when the installed plugins registry is corrupted, requiring <see cref="ResetInstalledPlugins"/>
+        ///     to be invoked.
+        /// </exception>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when the installed plugins registry cannot be read or written to.
         /// </exception>
         Task<InstalledPlugin> InstallPluginAsync(
             Stream pluginStream,
@@ -77,8 +91,33 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
         /// <exception cref="OperationCanceledException">
         ///     Throws when the operation was cancelled.
         /// </exception>
+        /// <exception cref="RepositoryCorruptedException">
+        ///     Throws when the installed plugins registry is corrupted, requiring <see cref="ResetInstalledPlugins"/>
+        ///     to be invoked.
+        /// </exception>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when the installed plugins registry cannot be read or written to.
+        /// </exception>
         Task<bool> UninstallPluginAsync(
             InstalledPlugin installedPlugin,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        ///     Resets the state of installed plugins, which uninstall every formerly installed plugin.
+        ///     This is necessary if the plugin installation registry becomes corrupted.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     Signals that the caller wishes to cancel the operation.
+        /// </param>
+        /// <returns>
+        ///     An await-able <see cref="Task"/>.
+        /// </returns>
+        /// <exception cref="OperationCanceledException">
+        ///     Throws when the operation was cancelled.
+        /// </exception>
+        /// <exception cref="RepositoryDataAccessException">
+        ///     Throws when the installed plugins registry cannot be reset.
+        /// </exception>
+        Task ResetInstalledPlugins(CancellationToken cancellationToken);
     }
 }
