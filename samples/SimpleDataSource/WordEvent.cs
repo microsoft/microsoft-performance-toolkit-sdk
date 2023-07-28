@@ -1,10 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
-using Microsoft.Performance.SDK;
+﻿using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace SimplePlugin
+namespace SampleAddIn
 {
     public class WordEvent
         : IKeyedDataType<string>

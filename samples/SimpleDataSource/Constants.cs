@@ -1,9 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
+﻿using Microsoft.Performance.SDK.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-using Microsoft.Performance.SDK.Extensibility;
-
-namespace SimplePlugin
+namespace SampleAddIn
 {
     public static class Constants
     {

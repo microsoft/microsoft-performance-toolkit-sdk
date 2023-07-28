@@ -1,16 +1,14 @@
-﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
-using Microsoft.Performance.SDK;
+﻿using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
-namespace SimplePlugin
+namespace SampleAddIn
 {
     public class WordDataCooker
         : SourceDataCooker<WordEvent, WordSourceParser, string>

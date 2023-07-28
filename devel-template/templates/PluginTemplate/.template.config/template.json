@@ -6,46 +6,7 @@
   "name": "Microsoft Performance ToolKit Plugin",
   "shortName": "ptkplugin",
   "tags": {
-    "language": "C#",
-    "type": "project"
-  },
-  "postActions": [
-    {
-      "id": "instructions",
-      "description": "Manual actions required",
-      "manualInstructions": [
-        {
-          "text": "Open pluginManifest.json in the editor and complete the plugin metadata configuration."
-        }
-      ],
-      "actionId": "AC1156F7-BB77-4DB8-B28F-24EEBCCA1E5C",
-      "continueOnError": true
-    }
-  ],
-  "symbols": {
-    "id01": {
-      "type": "generated",
-      "generator": "guid",
-      "replaces": "myid01",
-      "parameters": {
-        "defaultFormat": "B"
-      }
-    },
-    "id02 ": {
-      "type": "generated",
-      "generator": "guid",
-      "replaces": "myid02",
-      "parameters": {
-        "defaultFormat ": "B"
-      }
-    },
-    "id03": {
-      "type": "generated",
-      "generator": "guid",
-      "replaces": "myid03",
-      "parameters": {
-        "defaultFormat": "B"
-      }
-    }
+      "language": "C#",
+      "type": "project"
   }
 }
