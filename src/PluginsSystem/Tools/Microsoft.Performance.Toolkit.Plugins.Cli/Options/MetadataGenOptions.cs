@@ -202,8 +202,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             var metadataContents = metadataInit.ToPluginContentsMetadata();
 
             string fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
-            string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, fileName);
-            string? targetDirectory = Path.GetDirectoryName(targetFileName);
+            string targetDirectory = Path.GetFullPath(this.TargetDirectory ?? Environment.CurrentDirectory);
+            string targetFileName = Path.Combine(targetDirectory, fileName);
             Directory.CreateDirectory(targetDirectory);
 
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
@@ -211,7 +211,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             {
                 serializer.Serialize(fileStream, metadata);
             }
-
 
             ISerializer<PluginContentsMetadata> contentsSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>();
             string contentsFileName = $"{metadata.Identity}-{PackageConstants.PluginContentsMetadataFileName}";

@@ -203,8 +203,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             var metadata = metadataInit.ToPluginMetadata();
             var metadataContents = metadataInit.ToPluginContentsMetadata();
 
-            string relativePackageFileName = $"{metadata.Identity}{PackageConstants.PluginPackageExtension}";
-            string targetFileName = Path.Combine(this.TargetDirectory ?? Environment.CurrentDirectory, relativePackageFileName);
             string tmpPath = Path.GetTempFileName();
             ISerializer<PluginMetadata> serializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
             ISerializer<PluginContentsMetadata> contentsSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>();
@@ -220,7 +218,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                     CancellationToken.None);
             }
 
-            string? targetDirectory = Path.GetDirectoryName(targetFileName);
+            string packageFileName = $"{metadata.Identity}{PackageConstants.PluginPackageExtension}";
+            string targetDirectory = Path.GetFullPath(this.TargetDirectory ?? Environment.CurrentDirectory);
+            string targetFileName = Path.Combine(targetDirectory, packageFileName);
             Directory.CreateDirectory(targetDirectory);
 
             File.Delete(targetFileName);

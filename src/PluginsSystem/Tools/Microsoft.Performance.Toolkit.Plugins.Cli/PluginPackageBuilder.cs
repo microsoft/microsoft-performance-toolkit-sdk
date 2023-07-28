@@ -63,9 +63,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                     continue;
                 }
 
-                string relPath = fileInfo.FullName.Substring(dirInfo.FullName.Length+1);
-
-                string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName.Replace("/","\\"), relPath);
+                string relPath = Path.GetRelativePath(sourcePath, fileSourcePath);
+                string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName, relPath);
                 this.zip.CreateEntryFromFile(fileSourcePath, fileTargetPath, CompressionLevel.Fastest);
             }
         }

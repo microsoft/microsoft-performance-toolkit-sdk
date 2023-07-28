@@ -26,7 +26,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 return false;
             }
 
-            if (!Directory.EnumerateFiles(pluginSourceDir, "*.dll").Any())
+            if (!Directory.EnumerateFiles(pluginSourceDir, "*.dll", SearchOption.AllDirectories).Any())
             {
                 this.logger.Error($"Plugin source directory does not contain any DLLs: {pluginSourceDir}");
                 return false;
