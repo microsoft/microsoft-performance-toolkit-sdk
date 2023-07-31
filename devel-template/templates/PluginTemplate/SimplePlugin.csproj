@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
-		<PluginToolVersion>0.1.44-preview.g1b042022db</PluginToolVersion>
-		<PluginToolFeed>D:\CleanRepos\microsoft-performance-toolkit-sdk\src\PluginsSystem\Tools\Microsoft.Performance.Toolkit.Plugins.Cli\nupkg</PluginToolFeed>
+		<PluginToolVersion>0.1.48-preview.g2c726e2004</PluginToolVersion>
+		<PluginToolFeed>https://pkgs.dev.azure.com/perftoolkit/_packaging/PerfToolKit.Developer/nuget/v3/index.json</PluginToolFeed>
     </PropertyGroup>
 	
     <ItemGroup>
