@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/microsoft/microsoft-performance-toolkit-sdk/user/helzhang/pluginToolCLINew/src/PluginsSystem/Schemas/PluginManifestSchema.json",
+  "$schema": "https://raw.githubusercontent.com/microsoft/microsoft-performance-toolkit-sdk/feature/pluginToolCli/src/PluginsSystem/Tools/Microsoft.Performance.Toolkit.Plugins.Cli/Schemas/PluginManifestSchema.json",
   "identity": {
     "id": "__PLUGIN_ID__",
     "version": "__PLUGIN_VERSION__"
