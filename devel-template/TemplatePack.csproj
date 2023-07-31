@@ -3,6 +3,7 @@
   <PropertyGroup>
       <PackageType>Template</PackageType>
       <PackageId>Microsoft.Performance.ToolKit.Templates</PackageId>
+	  <PackageVersion>0.1-preview</PackageVersion>
       <Title>Microsoft Performance ToolKit Templates</Title>
       <Authors>Microsoft Corporation</Authors>
       <Description>Templates for Microsoft Performance ToolKit Plugins.</Description>
