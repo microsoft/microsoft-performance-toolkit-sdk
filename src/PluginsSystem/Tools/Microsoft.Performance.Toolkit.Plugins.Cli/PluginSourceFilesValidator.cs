@@ -41,6 +41,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 }
             }
 
+            // SDK should not be present in the plugin source directory
+            // All dlls should depend on a single SDK version
+
             // TODO: Add more validation here
             // e.g. Ensure only one SDK assembly is present?
             return true;
