@@ -5,11 +5,9 @@ using System.IO.Compression;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Package;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
+namespace Microsoft.Performance.Toolkit.Plugins.Package.Tests
 {
     [TestClass]
     public class ZipPluginPackageEntryTests

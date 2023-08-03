@@ -3,7 +3,7 @@
 
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
+namespace Microsoft.Performance.Toolkit.Plugins.Package.Tests
 {
     internal static class FakeContentsMetadata
     {
