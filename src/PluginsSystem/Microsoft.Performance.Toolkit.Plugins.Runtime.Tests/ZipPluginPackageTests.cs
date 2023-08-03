@@ -4,7 +4,7 @@
 using System.IO.Compression;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
+using Microsoft.Performance.Toolkit.Plugins.Package;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 

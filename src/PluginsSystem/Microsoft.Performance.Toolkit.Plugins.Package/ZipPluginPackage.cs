@@ -10,7 +10,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
+namespace Microsoft.Performance.Toolkit.Plugins.Package
 {
     /// <summary>
     ///     Represents a read-only plugin package.
@@ -37,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <param name="loggerFactory">
         ///     A factory that creates loggers for the given type.
         /// </param>
-        internal ZipPluginPackage(
+        public ZipPluginPackage(
             PluginMetadata metadata,
             PluginContentsMetadata contentsMetadata,
             ZipArchive zip,

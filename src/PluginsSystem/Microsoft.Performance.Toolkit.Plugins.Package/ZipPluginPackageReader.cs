@@ -14,7 +14,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
+namespace Microsoft.Performance.Toolkit.Plugins.Package
 {
     /// <summary>
     ///     Reads a plugin package from a zip archive.
@@ -63,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             ZipArchive zip;
             try
             {
-                zip = new ZipArchive(stream, ZipArchiveMode.Read, true);
+                zip = new ZipArchive(stream, ZipArchiveMode.Read, false);
             }
             catch (ArgumentException e)
             {

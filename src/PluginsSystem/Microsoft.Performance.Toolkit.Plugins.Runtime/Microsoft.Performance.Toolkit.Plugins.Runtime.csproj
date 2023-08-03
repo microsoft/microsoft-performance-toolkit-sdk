@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.Performance.SDK.Runtime\Microsoft.Performance.SDK.Runtime.csproj" />
     <ProjectReference Include="..\Microsoft.Performance.Toolkit.Plugins.Core\Microsoft.Performance.Toolkit.Plugins.Core.csproj" />
+    <ProjectReference Include="..\Microsoft.Performance.Toolkit.Plugins.Package\Microsoft.Performance.Toolkit.Plugins.Package.csproj" />
   </ItemGroup>
 
 </Project>

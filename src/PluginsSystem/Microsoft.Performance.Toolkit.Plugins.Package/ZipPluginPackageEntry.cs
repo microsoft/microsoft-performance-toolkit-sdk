@@ -6,7 +6,7 @@ using System.IO;
 using System.IO.Compression;
 using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
+namespace Microsoft.Performance.Toolkit.Plugins.Package
 {
     /// <summary>
     ///     Represents a file or directory contained in a <see cref="PluginPackage"/>.
