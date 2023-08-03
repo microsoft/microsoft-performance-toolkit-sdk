@@ -63,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             ZipArchive zip;
             try
             {
-                zip = new ZipArchive(stream, ZipArchiveMode.Read, false);
+                zip = new ZipArchive(stream, ZipArchiveMode.Read, true);
             }
             catch (ArgumentException e)
             {
