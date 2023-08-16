@@ -8,8 +8,20 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
+    /// <summary>
+    ///     Represents the entry point for the CLI.
+    /// </summary>
     public sealed class Program
     {
+        /// <summary>
+        ///     Main entry point.
+        /// </summary>
+        /// <param name="args">
+        ///     The command line arguments.
+        /// </param>
+        /// <returns>
+        ///     A task whose result is the exit code. 0 on success; otherwise, non-zero.
+        /// </returns>
         public static async Task<int> Main(string[] args)
         {
             ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, MetadataGenOptions>(args);
@@ -20,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 AppDomain.CurrentDomain.BaseDirectory,
                 Constants.ManifestSchemaFilePath);
 
-            var manifestSchema = File.ReadAllText(schemaFilePath);
+            string manifestSchema = File.ReadAllText(schemaFilePath);
 
             var manifestValidator = new PluginManifestJsonValidator(manifestSchema, loggerFactory);
 
