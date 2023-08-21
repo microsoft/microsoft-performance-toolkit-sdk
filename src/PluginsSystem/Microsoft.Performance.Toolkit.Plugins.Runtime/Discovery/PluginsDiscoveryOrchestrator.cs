@@ -393,7 +393,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             }
             finally
             {
-                this.requiresDiscoverersRefresh = false;
                 this.semaphore.Release();
             }
         }
