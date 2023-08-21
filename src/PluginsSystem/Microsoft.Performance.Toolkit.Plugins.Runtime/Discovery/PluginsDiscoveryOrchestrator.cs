@@ -96,7 +96,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         public async Task<IReadOnlyCollection<AvailablePlugin>> GetAvailablePluginsLatestAsync(
             CancellationToken cancellationToken)
         {
-            await RefereshDiscoverersIfNeededAsync(cancellationToken);
+            await RefreshDiscoverersIfNeededAsync(cancellationToken);
 
             PluginSource[] pluginSources = this.PluginSources.ToArray();
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
@@ -175,7 +175,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
                 throw new InvalidOperationException("Plugin source needs to be added to the manager before being performed discovery on.");
             }
 
-            await RefereshDiscoverersIfNeededAsync(cancellationToken);
+            await RefreshDiscoverersIfNeededAsync(cancellationToken);
 
             IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[pluginSource].ToArray();
             if (!discoverers.Any())
@@ -251,7 +251,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
         {
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            await RefereshDiscoverersIfNeededAsync(cancellationToken);
+            await RefreshDiscoverersIfNeededAsync(cancellationToken);
 
             Task<IReadOnlyCollection<AvailablePlugin>>[] tasks = this.PluginSources
                 .Select(s => GetAllVersionsOfPluginFromSourceAsync(s, pluginIdentity, cancellationToken))
@@ -289,7 +289,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             Guard.NotNull(source, nameof(source));
             Guard.NotNull(pluginIdentity, nameof(pluginIdentity));
 
-            await RefereshDiscoverersIfNeededAsync(cancellationToken);
+            await RefreshDiscoverersIfNeededAsync(cancellationToken);
 
             IPluginDiscoverer[] discoverers = this.sourceToDiscoverers[source].ToArray();
             if (!discoverers.Any())
@@ -378,20 +378,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
             }
         }
 
-        private async Task RefereshDiscoverersIfNeededAsync(CancellationToken cancellationToken)
+        private async Task RefreshDiscoverersIfNeededAsync(CancellationToken cancellationToken)
         {
             await this.semaphore.WaitAsync(cancellationToken);
-            if (this.requiresDiscoverersRefresh)
+            try
             {
-                try
+                if (!this.requiresDiscoverersRefresh)
                 {
-                    await RefreshDiscoverersAsync(cancellationToken);
+                    return;
                 }
-                finally
-                {
-                    this.requiresDiscoverersRefresh = false;
-                    this.semaphore.Release();
-                }
+
+                await RefreshDiscoverersAsync(cancellationToken);
+                this.requiresDiscoverersRefresh = false;
+            }
+            finally
+            {
+                this.requiresDiscoverersRefresh = false;
+                this.semaphore.Release();
             }
         }
 
