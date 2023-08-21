@@ -1,4 +1,7 @@
-﻿using Microsoft.Performance.SDK.Processing;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
@@ -10,10 +13,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         private readonly JSchema schema;
         private readonly ILogger logger;
 
-        public PluginManifestJsonValidator(string schemaString, Func<Type, ILogger> loggerFactory)
+        public PluginManifestJsonValidator(string schemaString, ILogger logger)
         {
             this.schema = JSchema.Parse(schemaString);
-            this.logger = loggerFactory(typeof(PluginManifestJsonValidator));
+            this.logger = logger;
         }
 
         public bool Validate(string pluginManifestPath)
@@ -25,7 +28,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             {
                 foreach (string error in errors)
                 {
-                    this.logger.Warn($"Plugin manifest validation error: {error}");
+                    this.logger.LogWarning($"Plugin manifest validation error: {error}");
                 }
             }
 

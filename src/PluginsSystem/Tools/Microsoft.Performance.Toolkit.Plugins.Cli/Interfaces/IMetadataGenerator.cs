@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
+
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     internal interface IMetadataGenerator
     {
-        public bool TryCreateMetadata(string assemblyDir, out ExtractedMetadata pluginMetadata);
+        public AllMetadata? TryGen(ValidatedPluginDirectory pluginDirectory, PluginManifest manifest);
     }
 }

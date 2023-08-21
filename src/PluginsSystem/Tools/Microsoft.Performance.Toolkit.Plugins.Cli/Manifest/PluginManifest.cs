@@ -3,14 +3,14 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    internal sealed class PluginManifest
+    public sealed class PluginManifest
     {
         public PluginManifest(
             PluginIdentityManifest identity,
             string displayName,
             string description,
             IEnumerable<PluginOwnerInfoManifest> owners,
-            string projectUrl)
+            Uri projectUrl)
         {
             this.Identity = identity;
             this.DisplayName = displayName;
@@ -40,6 +40,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         /// <summary>
         ///     Gets or sets the URL of the project that owns this plugin.
         /// </summary>
-        public string ProjectUrl { get; }
+        public Uri ProjectUrl { get; }
     }
 }

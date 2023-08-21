@@ -9,64 +9,37 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProcessingSourceInfo;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using Microsoft.Extensions.Logging;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
-    internal class MetadataGenerator
+    public class MetadataGenerator
         : IMetadataGenerator
     {
         private readonly ILogger logger;
 
-        public MetadataGenerator(Func<Type, ILogger> loggerFactory)
+        public MetadataGenerator(ILogger<MetadataGenerator> logger)
         {
-            this.logger = loggerFactory(typeof(MetadataGenerator));
+            this.logger = logger;
         }
 
-        public bool TryCreateMetadata(string assemblyDir, out ExtractedMetadata pluginMetadata)
-        {
-            pluginMetadata = null;
-            assemblyDir = Path.GetFullPath(assemblyDir);
 
+        public AllMetadata? TryGen(ValidatedPluginDirectory pluginDirectory, PluginManifest manifest)
+        {
+            string assemblyDir = pluginDirectory.FullPath;
+            
             using var pluginLoader = new PluginsLoader();
             if (!pluginLoader.TryLoadPlugin(assemblyDir, out ErrorInfo errorInfo))
             {
-                this.logger.Error($"Failed to load plugin: {errorInfo}");
-                return false;
+                this.logger.LogError($"Failed to load plugin: {errorInfo}");
+                return null;
             }
 
-            Version sdkVersion = null;
-            var versionChecker = VersionChecker.Create();
-            var processingSourcesMetadata = new List<ProcessingSourceMetadata>();
-            foreach (ProcessingSourceReference source in pluginLoader.LoadedProcessingSources)
-            {
-                // For now, use latest version if different across processing sources
-                // TODO: Get SDK version directly from assembly
-                Version version = GetSDKVersion(source, versionChecker);
-                sdkVersion = sdkVersion == null ? version : version > sdkVersion ? version : sdkVersion;
+            var processingSourcesMetadata = pluginLoader.LoadedProcessingSources.Select(x => CreateProcessingSourceMetadata(x)).ToList();
 
-                try
-                {
-                    ProcessingSourceMetadata metadata = CreateProcessingSourceMetadata(source);
-
-                    processingSourcesMetadata.Add(metadata);
-                }
-                catch (Exception e)
-                {
-                    this.logger.Error($"Failed to create metadata for processing source {source.Type.Name}: {e}");
-                    return false;
-                }
-            }
-
-            ulong installedSize = 0;
-            try
-            {
-                installedSize = (ulong)CalculateFolderSize(assemblyDir);
-            }
-            catch (Exception e)
-            {
-                this.logger.Error($"Failed to calculate the installed size of this plugin: {e}");
-                return false;
-            }
 
             // TODO: #294 Figure out how to extract description of a datacooker.
             var dataCookers = pluginLoader.Extensions.SourceDataCookers
@@ -83,40 +56,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                     x.TableDescriptor.IsMetadataTable))
                 .ToList();
 
-            pluginMetadata = new()
-            {
-                InstalledSize = installedSize,
-                SdkVersion = sdkVersion,
-                ProcessingSources = processingSourcesMetadata,
-                DataCookers = dataCookers,
-                ExtensibleTables = tables,
-            };
 
-            return true;
-        }
+            PluginIdentity identity = new(manifest.Identity.Id, manifest.Identity.Version);
+            ulong installedSize = (ulong)pluginDirectory.PluginSize;
+            IEnumerable<PluginOwnerInfo> owners = manifest.Owners.Select(o => new PluginOwnerInfo(o.Name, o.Address, o.EmailAddresses.ToArray(), o.PhoneNumbers.ToArray()));
+            Version sdkVersion = pluginDirectory.SdkVersion;
 
-        private static long CalculateFolderSize(string folderPath)
-        {
-            long totalSize = 0;
+            PluginMetadata metadata = new(identity, installedSize, manifest.DisplayName, manifest.Description, sdkVersion, manifest.ProjectUrl, owners);
+            PluginContentsMetadata contentsMetadata = new(processingSourcesMetadata, dataCookers, tables);
 
-            if (!Directory.Exists(folderPath))
-            {
-                return totalSize;
-            }
-
-            foreach (string file in Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories))
-            {
-                totalSize += new FileInfo(file).Length;
-            }
-
-            return totalSize;
-        }
-
-        private static Version GetSDKVersion(ProcessingSourceReference psr, VersionChecker versionChecker)
-        {
-            NuGet.Versioning.SemanticVersion nugetVersion = versionChecker.FindReferencedSdkVersion(psr.Type.Assembly);
-            var version = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Patch);
-            return version;
+            return new AllMetadata(metadata, contentsMetadata);
         }
 
         private static ProcessingSourceMetadata CreateProcessingSourceMetadata(ProcessingSourceReference psr)

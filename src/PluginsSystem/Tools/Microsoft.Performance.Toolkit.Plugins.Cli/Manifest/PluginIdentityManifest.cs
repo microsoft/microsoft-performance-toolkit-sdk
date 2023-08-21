@@ -1,12 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    internal class PluginIdentityManifest
+    public class PluginIdentityManifest
     {
         public PluginIdentityManifest(
             string id,
-            string version)
+            Version version)
         {
             this.Id = id;
             this.Version = version;
@@ -15,13 +16,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         /// <summary>
         ///     Gets or sets the identifier of this plugin.
         /// </summary>
-        [Required(ErrorMessage = "The plugin ID is required.")]
         public string Id { get; }
 
         /// <summary>
         ///     Gets or sets the version of this plugin.
         /// </summary>
-        [Required(ErrorMessage = "The plugin version is required.")]
-        public string Version { get; }
+        public Version Version { get; }
     }
 }

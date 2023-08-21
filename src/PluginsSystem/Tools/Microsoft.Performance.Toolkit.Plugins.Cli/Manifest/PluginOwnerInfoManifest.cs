@@ -3,7 +3,7 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    internal class PluginOwnerInfoManifest
+    public class PluginOwnerInfoManifest
     {
         public PluginOwnerInfoManifest(
             string name,

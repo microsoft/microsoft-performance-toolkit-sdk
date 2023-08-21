@@ -5,6 +5,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     public interface IPluginSourceFilesValidator
     {
-        bool Validate(string pluginSourceDir, bool manifestEmbedded);
+        bool Validate(
+            string pluginSourceDir,
+            bool manifestEmbedded,
+            out ValidatedPluginDirectory? validatedPluginDirectory);
     }
 }
