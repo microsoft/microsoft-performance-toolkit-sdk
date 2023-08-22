@@ -10,7 +10,7 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
-using Microsoft.Performance.Toolkit.Plugins.Package;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {

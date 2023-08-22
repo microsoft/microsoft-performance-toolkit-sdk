@@ -3,7 +3,7 @@
 
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Package;
+using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 {

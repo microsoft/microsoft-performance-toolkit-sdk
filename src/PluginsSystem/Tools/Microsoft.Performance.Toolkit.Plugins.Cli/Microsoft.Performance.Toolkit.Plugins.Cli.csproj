@@ -23,7 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Microsoft.Performance.SDK.Runtime.NetCoreApp\Microsoft.Performance.SDK.Runtime.NetCoreApp.csproj" />
     <ProjectReference Include="..\..\Microsoft.Performance.Toolkit.Plugins.Core\Microsoft.Performance.Toolkit.Plugins.Core.csproj" />
-    <ProjectReference Include="..\..\Microsoft.Performance.Toolkit.Plugins.Package\Microsoft.Performance.Toolkit.Plugins.Package.csproj" />
+    <ProjectReference Include="..\..\Microsoft.Performance.Toolkit.Plugins.Runtime\Microsoft.Performance.Toolkit.Plugins.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>
