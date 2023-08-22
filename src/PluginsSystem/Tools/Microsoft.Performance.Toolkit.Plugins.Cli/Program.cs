@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Interfaces;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
@@ -53,6 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 .AddLogging(x => x.AddConsole())
                 .AddSingleton<IMetadataGenerator, MetadataGenerator>()
                 .AddSingleton<IPluginSourceFilesValidator, PluginSourceFilesValidator>()
+                .AddSingleton<IPackageBuilder, ZipPluginPackageBuilder>()
                 .AddSingleton<ISerializer<PluginManifest>>(manifestSerializer)
                 .AddSingleton<ISerializer<PluginMetadata>>(metadataSerializer)
                 .AddSingleton<ISerializer<PluginContentsMetadata>>(contentsMetadataSerializer)
@@ -83,8 +82,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             IPluginSourceFilesValidator validator = serviceProvider.GetRequiredService<IPluginSourceFilesValidator>();
             IManifestReader manifestReader = serviceProvider.GetRequiredService<IManifestReader>();
             IMetadataGenerator metadataGenerator = serviceProvider.GetRequiredService<IMetadataGenerator>();
-            ISerializer<PluginMetadata> metadataSerializer = serviceProvider.GetRequiredService<ISerializer<PluginMetadata>>();
-            ISerializer<PluginContentsMetadata> contentsMetadataSerializer = serviceProvider.GetRequiredService<ISerializer<PluginContentsMetadata>>();
+            IPackageBuilder packageBuilder = serviceProvider.GetRequiredService<IPackageBuilder>();
+            ILogger logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+
 
             bool shouldInclude = packOptions.ManifestFilePath == null;
 
@@ -95,36 +95,47 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
             string? manifestFilePath = shouldInclude ? validatedPluginDirectory.ManifestFilePath : packOptions.ManifestFilePath;
             PluginManifest? manifest = manifestReader.TryReadFromFile(manifestFilePath);
-
             if (manifest == null)
             {
                 return 1;
             }
 
             AllMetadata? allMetadata = metadataGenerator.TryGen(validatedPluginDirectory, manifest);
-            PluginMetadata metadata = allMetadata.Metadata;
-            PluginContentsMetadata contentsMetadata = allMetadata.ContentsMetadata;
-
-
-            string tmpPath = Path.GetTempFileName();
-            using (var builder = new PluginPackageBuilder(tmpPath, metadataSerializer, contentsMetadataSerializer))
+            if (allMetadata == null)
             {
-                builder.AddMetadata(metadata);
-                builder.AddContentsMetadata(contentsMetadata);
-                builder.AddContent(
-                    packOptions.SourceDirectory,
-                    s => (packOptions.ManifestBundled && s.Equals(Path.Combine(packOptions.SourceDirectory, Constants.BundledManifestName)))
-                            || (packOptions.ManifestFilePath != null && s.Equals(Path.GetFullPath(packOptions.ManifestFilePath), StringComparison.OrdinalIgnoreCase)),
-                    CancellationToken.None);
+                return 1;
             }
 
-            string packageFileName = $"{metadata.Identity}{PackageConstants.PluginPackageExtension}";
-            string targetDirectory = Path.GetFullPath(packOptions.TargetDirectory ?? Environment.CurrentDirectory);
-            string targetFileName = Path.Combine(targetDirectory, packageFileName);
-            Directory.CreateDirectory(targetDirectory);
+            string? destFilePath = packOptions.OutputFilePath;
+            if (destFilePath == null || !packOptions.Overwrite)
+            {
+                string destFileName = destFilePath == null ? Path.Combine(Environment.CurrentDirectory, allMetadata.Metadata.Identity.ToString()) : Path.GetFileNameWithoutExtension(destFilePath);
+                destFilePath = GetValidDestFileName(destFileName, PackageConstants.PluginPackageExtension);
+            }
 
-            File.Delete(targetFileName);
-            File.Move(tmpPath, targetFileName);
+            string tmpFile = Path.GetTempFileName();
+            try
+            {
+                packageBuilder.Build(validatedPluginDirectory, allMetadata, tmpFile);
+                File.Move(tmpFile, destFilePath, packOptions.Overwrite);
+            }
+            catch (IOException ex)
+            {
+                logger.LogError($"Failed to package plugin due to an IO error: {ex.Message}");
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Failed to package plugin due to an unexpected error: {ex.Message}");
+                return 1;
+            }
+            finally
+            {
+                if (File.Exists(tmpFile))
+                {
+                    File.Delete(tmpFile);
+                }
+            }
 
             return 0;
         }
@@ -136,6 +147,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             IMetadataGenerator metadataGenerator = serviceProvider.GetRequiredService<IMetadataGenerator>();
             ISerializer<PluginMetadata> metadataSerializer = serviceProvider.GetRequiredService<ISerializer<PluginMetadata>>();
             ISerializer<PluginContentsMetadata> contentsMetadataSerializer = serviceProvider.GetRequiredService<ISerializer<PluginContentsMetadata>>();
+            ILogger logger = serviceProvider.GetRequiredService<ILogger<Program>>();
 
             bool shouldInclude = metadataGenOptions.ManifestFilePath == null;
 
@@ -160,25 +172,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
 
             PluginMetadata metadata = allMetadata.Metadata;
-            PluginContentsMetadata contentsMetadata = allMetadata.ContentsMetadata;    
+            PluginContentsMetadata contentsMetadata = allMetadata.ContentsMetadata;
 
-            string fileName = $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}";
-            string contentsFileName = $"{metadata.Identity}-{PackageConstants.PluginContentsMetadataFileName}";
+
+            bool outputSpecified = metadataGenOptions.OutputDirectory != null;
+            string outputDirectory = outputSpecified ? metadataGenOptions.OutputDirectory : Environment.CurrentDirectory;
 
             try
             {
-                string targetDirectory = Path.GetFullPath(metadataGenOptions.TargetDirectory ?? Environment.CurrentDirectory);
-                Directory.CreateDirectory(targetDirectory);
-
-
-                string targetFileName = Path.Combine(targetDirectory, fileName);
-                using (FileStream fileStream = File.Open(targetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                string destMetadataFileName = Path.Combine(outputDirectory, $"{metadata.Identity}-{Constants.MetadataFileName}");
+                string validDestMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
+                    $"{destMetadataFileName}{Constants.MetadataFileExtension}" : GetValidDestFileName(destMetadataFileName, Constants.MetadataFileExtension);
+                
+                using (FileStream fileStream = File.Open(validDestMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     metadataSerializer.Serialize(fileStream, metadata);
                 }
 
-                string contentsTargetFileName = Path.Combine(metadataGenOptions.TargetDirectory ?? Environment.CurrentDirectory, contentsFileName);
-                using (FileStream fileStream = File.Open(contentsTargetFileName, FileMode.Create, FileAccess.Write, FileShare.None))
+                string destContentsMetadataFileName = Path.Combine(outputDirectory, $"{metadata.Identity}-{Constants.ContentsMetadataFileName}");
+                string validDestContentsMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
+                    $"{destContentsMetadataFileName}{Constants.MetadataFileExtension}" : GetValidDestFileName(destContentsMetadataFileName, Constants.MetadataFileExtension);
+                
+                using (FileStream fileStream = File.Open(validDestContentsMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     contentsMetadataSerializer.Serialize(fileStream, contentsMetadata);
                 }
@@ -189,6 +204,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             }
 
             return 0;
+        }
+
+        private static string GetValidDestFileName(string filename, string extension)
+        {
+            string destFileName = $"{filename}{extension}";
+            
+            int fileCount = 1;
+            while (File.Exists(destFileName))
+            {
+                destFileName = $"{filename}_({fileCount++}){extension}";
+            }
+
+            return destFileName;
         }
     }
 }

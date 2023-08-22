@@ -6,5 +6,8 @@
         public const string ExtensionlessDataSourceName = "extensionless";
         public const string ManifestSchemaFilePath = "Schemas/PluginManifestSchema.json";
         public const string BundledManifestName = "pluginManifest.json";
+        public const string MetadataFileName = "pluginMetadata";
+        public const string ContentsMetadataFileName = "pluginContentsMetadata";
+        public const string MetadataFileExtension = ".json";
     }
 }

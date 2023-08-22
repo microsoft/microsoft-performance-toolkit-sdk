@@ -12,22 +12,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
     {
         public PackOptions(
             string sourceDirectory,
-            string targetDirectory,
-            bool manifestBundled,
-            string manifestFilePath,
-            string id,
-            string version,
-            string pluginDisplayName,
-            string pluginDescription)
+            string outputFilePath,
+            bool overwrite,
+            string manifestFilePath)
         {
             this.SourceDirectory = sourceDirectory;
-            this.TargetDirectory = targetDirectory;
+            this.OutputFilePath = outputFilePath;
+            this.Overwrite = overwrite;
             this.ManifestFilePath = manifestFilePath;
-            this.ManifestBundled = manifestBundled;
-            this.Id = id;
-            this.Version = version;
-            this.PluginDisplayName = pluginDisplayName;
-            this.PluginDescription = pluginDescription;
         }
 
         [Option(
@@ -38,49 +30,44 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
         public string SourceDirectory { get; }
 
         [Option(
-            't',
-            "target",
+            'o',
+            "output",
             Required = false,
-            HelpText = $"Directory where the {PackageConstants.PluginPackageExtension} file will be created. If not specified, the current directory will be used.")]
-        public string TargetDirectory { get; }
+            HelpText = "The path to the output package file. If not specified, a file will be created in the current directory.")]
+        public string? OutputFilePath { get; }
 
         [Option(
-            'b',
-            "manifest-bundled",
-            SetName = "manifest-bundled",
-            HelpText = "Indicates that the plugin manifest file should be included in the package source directory.")]
-        public bool ManifestBundled { get; }
+            'w',
+            "overwrite",
+            Required = false,
+            HelpText = "Indicates that the destination file should be overwritten if it already exists.")]
+        public bool Overwrite { get; } = false;
 
         [Option(
             'm',
             "manifest",
-            SetName = "manifest",
-            HelpText = "Path to the plugin manifest file. If not specified, command line arguments will be used.")]
+            Required = false,
+            HelpText = "Path to the plugin manifest file. If not specified, the program will attempt to find the manifest in the source directory.")]
         public string? ManifestFilePath { get; }
 
-        [Option(
-            "id",
-            SetName = "no-manifest",
-            HelpText = "Id of the plugin.")]
-        public string? Id { get; }
+        public void Validate()
+        {
+            if (string.IsNullOrWhiteSpace(this.SourceDirectory))
+            {
+                // throw new ProcessingException("Source directory must be specified.");
+            }
 
-        [Option(
-            'v',
-            "version",
-            SetName = "no-manifest",
-            HelpText = "Version of the packaged plugin. Must be a valid System.Version string.")]
-        public string? Version { get; }
+            if (string.IsNullOrWhiteSpace(this.OutputFilePath))
+            {
+                // throw new ProcessingException("Destination file must be specified.");
+            }
 
-        [Option(
-            "displayName",
-            SetName = "no-manifest",
-            HelpText = "Display name of the plugin")]
-        public string? PluginDisplayName { get; }
+            if (Path.GetExtension(this.OutputFilePath) != PackageConstants.PluginPackageExtension)
+            {
+                // throw new ProcessingException($"Destination file must have extension '{PackageConstants.PluginPackageExtension}'.");
+            }
 
-        [Option(
-            "description",
-            SetName = "no-manifest",
-            HelpText = "Description of the plugin")]
-        public string? PluginDescription { get; }
+            // Check if dest directory exists
+        }
     }
 }
