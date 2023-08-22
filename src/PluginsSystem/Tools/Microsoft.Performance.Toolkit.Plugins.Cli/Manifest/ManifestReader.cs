@@ -3,22 +3,20 @@
 
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Interfaces;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
     public class ManifestReader
         : IManifestReader
     {
         private readonly ISerializer<PluginManifest> serializer;
-        private readonly IPluginManifestFileValidator manifestValidator;
+        private readonly IManifestFileValidator manifestValidator;
         private readonly ILogger logger;
 
         public ManifestReader(
             ISerializer<PluginManifest> serializer,
-            IPluginManifestFileValidator manifestValidator,
+            IManifestFileValidator manifestValidator,
             ILogger<ManifestReader> logger)
         {
             this.serializer = serializer;
@@ -33,9 +31,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
         public PluginManifest? TryReadFromFile(string manifestFilePath)
         {
-            if (!this.manifestValidator.Validate(manifestFilePath))
+            if (!this.manifestValidator.IsValid(manifestFilePath))
             {
-                this.logger.LogError($"Invaid manifest file {manifestFilePath}");
+                this.logger.LogError($"Invalid manifest file {manifestFilePath}");
                 return null;
             }
 
@@ -57,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 this.logger.LogDebug(ex, $"Json exception thrown when deserializing {manifestFilePath}");
                 this.logger.LogError($"Failed to deserialize {manifestFilePath}");
             }
-            
+
 
             return pluginManifest;
         }

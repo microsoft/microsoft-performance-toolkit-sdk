@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Reflection.Emit;
 using System.Text.Json;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Interfaces;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
@@ -32,33 +32,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         {
             ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, MetadataGenOptions>(args);
 
-            string schemaFilePath = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                Constants.ManifestSchemaFilePath);
-
-            string manifestSchema = File.ReadAllText(schemaFilePath);
-
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             };
-            var manifestSerializer = SerializationUtils.GetJsonSerializer<PluginManifest>(options);
-            var metadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>();
-            var contentsMetadataSerializer = SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>();
 
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddLogging(x => x.AddConsole())
                 .AddSingleton<IMetadataGenerator, MetadataGenerator>()
                 .AddSingleton<IPluginSourceFilesValidator, PluginSourceFilesValidator>()
                 .AddSingleton<IPackageBuilder, ZipPluginPackageBuilder>()
-                .AddSingleton<ISerializer<PluginManifest>>(manifestSerializer)
-                .AddSingleton<ISerializer<PluginMetadata>>(metadataSerializer)
-                .AddSingleton<ISerializer<PluginContentsMetadata>>(contentsMetadataSerializer)
+                .AddSingleton<ISerializer<PluginManifest>>(SerializationUtils.GetJsonSerializer<PluginManifest>(new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                }))
+                .AddSingleton<ISerializer<PluginMetadata>>(SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
+                .AddSingleton<ISerializer<PluginContentsMetadata>>(SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>())
                 .AddSingleton<IManifestReader, ManifestReader>()
-                .AddSingleton<IPluginManifestFileValidator>(serviceProvider => new PluginManifestJsonValidator(
-                    File.ReadAllText(Constants.ManifestSchemaFilePath),
-                    serviceProvider.GetRequiredService<ILogger<PluginManifestJsonValidator>>()))
+                .AddSingleton<IManifestFileValidator, ManifestJsonSchemaValidator>()
+                .AddSingleton<IJsonSchemaLoader, LocalManifestSchemaLoader>()
                 .BuildServiceProvider();
 
             return result.MapResult(
@@ -183,7 +177,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 string destMetadataFileName = Path.Combine(outputDirectory, $"{metadata.Identity}-{Constants.MetadataFileName}");
                 string validDestMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
                     $"{destMetadataFileName}{Constants.MetadataFileExtension}" : GetValidDestFileName(destMetadataFileName, Constants.MetadataFileExtension);
-                
+
                 using (FileStream fileStream = File.Open(validDestMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     metadataSerializer.Serialize(fileStream, metadata);
@@ -192,7 +186,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 string destContentsMetadataFileName = Path.Combine(outputDirectory, $"{metadata.Identity}-{Constants.ContentsMetadataFileName}");
                 string validDestContentsMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
                     $"{destContentsMetadataFileName}{Constants.MetadataFileExtension}" : GetValidDestFileName(destContentsMetadataFileName, Constants.MetadataFileExtension);
-                
+
                 using (FileStream fileStream = File.Open(validDestContentsMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     contentsMetadataSerializer.Serialize(fileStream, contentsMetadata);
@@ -209,7 +203,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         private static string GetValidDestFileName(string filename, string extension)
         {
             string destFileName = $"{filename}{extension}";
-            
+
             int fileCount = 1;
             while (File.Exists(destFileName))
             {

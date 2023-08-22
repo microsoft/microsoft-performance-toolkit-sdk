@@ -1,6 +1,4 @@
-﻿using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
-
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Interfaces
+﻿namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
     public interface IManifestReader
     {
