@@ -32,12 +32,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         {
             ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, MetadataGenOptions>(args);
 
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            };
-
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddLogging(x => x.AddConsole())
                 .AddSingleton<IMetadataGenerator, MetadataGenerator>()
