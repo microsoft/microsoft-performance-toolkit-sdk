@@ -1,4 +1,8 @@
-﻿using CommandLine;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using CommandLine;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 {
@@ -35,16 +39,40 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             HelpText = "Path to the plugin manifest file. If not specified, the program will attempt to find the manifest in the source directory.")]
         public string? ManifestFilePath { get; }
 
-        protected void Validate()
+        internal string? SourceDirectoryFullPath { get; private set; }
+
+        internal string? ManifestFullPath { get; private set; }
+
+        internal bool? HasManifestFilePath { get; private set; }
+        
+        public virtual void Validate()
         {
             if (string.IsNullOrWhiteSpace(this.SourceDirectory))
             {
-                // throw new ProcessingException("Source directory must be specified.");
+                throw new ArgumentValidationException("Source directory must be specified. Use --source <path> or -s <path>.");
             }
+
+            if (!Directory.Exists(this.SourceDirectory))
+            {
+                throw new ArgumentValidationException($"Source directory '{this.SourceDirectory}' does not exist.");
+            }
+            
+            this.SourceDirectoryFullPath = Path.GetFullPath(this.SourceDirectory);
 
             if (string.IsNullOrWhiteSpace(this.ManifestFilePath))
             {
-                // throw new ProcessingException("Manifest file must be specified.");
+                this.HasManifestFilePath = false;
+            }
+            else
+            {
+                this.HasManifestFilePath = true;
+
+                if (!File.Exists(this.ManifestFilePath))
+                {
+                    throw new ArgumentValidationException($"Manifest file '{this.ManifestFilePath}' does not exist.");
+                }
+
+                this.ManifestFullPath = Path.GetFullPath(this.ManifestFilePath);
             }
         }
     }
