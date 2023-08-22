@@ -37,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         /// <param name="loggerFactory">
         ///     A factory that creates loggers for the given type.
         /// </param>
-        public ZipPluginPackage(
+        internal ZipPluginPackage(
             PluginMetadata metadata,
             PluginContentsMetadata contentsMetadata,
             ZipArchive zip,
