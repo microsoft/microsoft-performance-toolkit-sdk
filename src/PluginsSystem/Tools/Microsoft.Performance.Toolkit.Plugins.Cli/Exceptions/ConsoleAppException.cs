@@ -1,18 +1,21 @@
-﻿namespace Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions
 {
-    public class ConsoleAppException
+    public abstract class ConsoleAppException
         : Exception
     {
-        internal ConsoleAppException()
+        protected ConsoleAppException()
         {
         }
 
-        internal ConsoleAppException(string message)
+        protected ConsoleAppException(string message)
             : base(message)
         {
         }
 
-        internal ConsoleAppException(string message, Exception innerException)
+        protected ConsoleAppException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

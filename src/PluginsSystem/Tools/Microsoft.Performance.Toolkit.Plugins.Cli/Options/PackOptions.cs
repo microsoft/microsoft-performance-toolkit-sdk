@@ -56,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
                     throw new ArgumentValidationException("Unable to get full path to output file.", ex);
                 }
 
-                string outputDir = Path.GetDirectoryName(this.OutputFileFullPath);
+                string? outputDir = Path.GetDirectoryName(this.OutputFileFullPath);
                 if (!Directory.Exists(outputDir))
                 {
                     throw new ArgumentValidationException($"The directory '{outputDir}' does not exist. Please provide a valid directory path or create the directory and try again.");

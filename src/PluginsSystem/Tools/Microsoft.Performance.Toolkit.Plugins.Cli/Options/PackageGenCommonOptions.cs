@@ -39,14 +39,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             HelpText = "Path to the plugin manifest file. If not specified, the program will attempt to find the manifest in the source directory.")]
         public string? ManifestFilePath { get; }
 
-        internal string? SourceDirectoryFullPath { get; private set; }
+        internal string SourceDirectoryFullPath { get; private set; }
 
-        internal string? ManifestFullPath { get; private set; }
-
-        internal bool? HasManifestFilePath { get; private set; }
+        internal string? ManifestFileFullPath { get; private set; }
         
         public virtual void Validate()
         {
+            // Validate source directory
             if (string.IsNullOrWhiteSpace(this.SourceDirectory))
             {
                 throw new ArgumentValidationException("Source directory must be specified. Use --source <path> or -s <path>.");
@@ -59,20 +58,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
             
             this.SourceDirectoryFullPath = Path.GetFullPath(this.SourceDirectory);
 
-            if (string.IsNullOrWhiteSpace(this.ManifestFilePath))
+            // Validate manifest file path
+            if (this.ManifestFilePath != null)
             {
-                this.HasManifestFilePath = false;
-            }
-            else
-            {
-                this.HasManifestFilePath = true;
-
                 if (!File.Exists(this.ManifestFilePath))
                 {
                     throw new ArgumentValidationException($"Manifest file '{this.ManifestFilePath}' does not exist.");
                 }
 
-                this.ManifestFullPath = Path.GetFullPath(this.ManifestFilePath);
+                this.ManifestFileFullPath = Path.GetFullPath(this.ManifestFilePath);
             }
         }
     }

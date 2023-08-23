@@ -3,41 +3,28 @@
 
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    public class ManifestReader
-        : IManifestReader
+    public sealed class ManifestReader
+        : IManifestFileReader
     {
         private readonly ISerializer<PluginManifest> serializer;
-        private readonly IManifestFileValidator manifestValidator;
         private readonly ILogger logger;
 
         public ManifestReader(
             ISerializer<PluginManifest> serializer,
-            IManifestFileValidator manifestValidator,
             ILogger<ManifestReader> logger)
         {
             this.serializer = serializer;
-            this.manifestValidator = manifestValidator;
             this.logger = logger;
         }
 
-        public PluginManifest? TryReadInteractively()
+        public PluginManifest Read(string manifestFilePath)
         {
-            throw new NotImplementedException();
-        }
-
-        public PluginManifest? TryReadFromFile(string manifestFilePath)
-        {
-            if (!this.manifestValidator.IsValid(manifestFilePath))
-            {
-                this.logger.LogError($"Invalid manifest file {manifestFilePath}");
-                return null;
-            }
-
-            PluginManifest? pluginManifest = null;
+            PluginManifest pluginManifest;
             try
             {
                 using (FileStream manifestStream = File.OpenRead(manifestFilePath))
@@ -47,13 +34,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             }
             catch (IOException ex)
             {
-                this.logger.LogDebug(ex, $"IO exception thrown when reading {manifestFilePath}");
-                this.logger.LogError($"Failed to read {manifestFilePath}");
+                this.logger.LogDebug(ex, $"IO exception thrown when reading {manifestFilePath}.");
+                throw new ConsoleRuntimeException($"Failed to read {manifestFilePath} due to an IO exception.", ex);
             }
             catch (JsonException ex)
             {
                 this.logger.LogDebug(ex, $"Json exception thrown when deserializing {manifestFilePath}");
-                this.logger.LogError($"Failed to deserialize {manifestFilePath}");
+                throw new InvalidManifestException($"Invalid manifest file content: {ex.Message}. Failed to deserialize.", ex);
             }
 
 

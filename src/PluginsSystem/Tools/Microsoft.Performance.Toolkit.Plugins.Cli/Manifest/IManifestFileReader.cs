@@ -3,8 +3,8 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    public interface IManifestFileValidator
+    public interface IManifestFileReader
     {
-        bool IsValid(string pluginManifestPath, out List<string> errorMessages);
+        PluginManifest Read(string manifestFilePath);
     }
 }

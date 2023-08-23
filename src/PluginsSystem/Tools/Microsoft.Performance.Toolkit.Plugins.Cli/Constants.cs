@@ -9,5 +9,6 @@
         public const string MetadataFileName = "pluginMetadata";
         public const string ContentsMetadataFileName = "pluginContentsMetadata";
         public const string MetadataFileExtension = ".json";
+        public const string SdkAssemblyName = "Microsoft.Performance.SDK";
     }
 }

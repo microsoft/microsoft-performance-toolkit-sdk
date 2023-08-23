@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
@@ -12,60 +13,44 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
     {
         private readonly IJsonSchemaLoader schemaLoader;
         private readonly ILogger logger;
-        private JSchema? schema = null;
+        private readonly Lazy<JSchema> schema;
 
         public ManifestJsonSchemaValidator(IJsonSchemaLoader schemaLoader, ILogger<ManifestJsonSchemaValidator> logger)
         {
             this.schemaLoader = schemaLoader;
+            this.schema = new Lazy<JSchema>(this.schemaLoader.LoadSchema);
             this.logger = logger;
         }
 
-        public bool IsValid(string manifestPath)
+        public bool IsValid(string manifestPath, out List<string> errorMessages)
         {
-            if (!File.Exists(manifestPath))
-            {
-                this.logger.LogError($"Plugin manifest file {manifestPath} does not exist.");
-                return false;
-            }
-
+            errorMessages = new List<string>();
+            string? fileText;
             JToken? parsedManifest;
             try
             {
-                string? fileText = File.ReadAllText(manifestPath);
-                parsedManifest = JToken.Parse(fileText);
+                fileText = File.ReadAllText(manifestPath);
             }
             catch (IOException ex)
             {
-                this.logger.LogError($"Failed to read manifest file {manifestPath} due to an IO exception: {ex}.");
-                throw;
+                this.logger.LogDebug(ex, $"IO exception thrown when reading {manifestPath}.");
+                throw new ConsoleRuntimeException($"Failed to read {manifestPath} due to an IO exception.", ex);
+            }
+
+            try
+            {
+                parsedManifest = JToken.Parse(fileText);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, $"Failed to parse {manifestPath} as a json token.");
-                throw;
+                this.logger.LogError(ex, $"Exception thrown when processing {manifestPath} as JSON.");
+                throw new ConsoleRuntimeException($"Failed to parse {manifestPath} as JSON when validating manifest.", ex);
             }
 
-            if (this.schema == null)
-            {
-                try
-                {
-                    this.schema = this.schemaLoader.LoadSchema();
-                }
-                catch (Exception ex)
-                {
-                    this.logger.LogError(ex, $"Failed to load json schema.");
-                    throw;
-                }
-
-            }
-
-            bool isValid = parsedManifest.IsValid(this.schema, out IList<string> errors);
+            bool isValid = parsedManifest.IsValid(this.schema.Value, out IList<string> errors);
             if (!isValid)
             {
-                foreach (string error in errors)
-                {
-                    this.logger.LogWarning($"Plugin manifest validation error: {error}");
-                }
+                errorMessages.AddRange(errors);
             }
 
             return isValid;

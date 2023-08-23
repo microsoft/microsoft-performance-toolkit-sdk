@@ -3,19 +3,19 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions
 {
-    internal class ConsoleRuntimeException
+    public class InvalidPluginContentException
         : ConsoleAppException
     {
-        internal ConsoleRuntimeException()
+        internal InvalidPluginContentException()
         {
         }
 
-        internal ConsoleRuntimeException(string message)
+        internal InvalidPluginContentException(string message)
             : base(message)
         {
         }
 
-        internal ConsoleRuntimeException(string message, Exception innerException)
+        internal InvalidPluginContentException(string message, Exception innerException)
             : base(message, innerException)
         {
         }

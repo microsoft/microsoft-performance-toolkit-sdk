@@ -10,30 +10,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         : IJsonSchemaLoader
     {
         private readonly ILogger<LocalManifestSchemaLoader> logger;
+        private readonly Lazy<string> schemaFilePath;
 
         public LocalManifestSchemaLoader(ILogger<LocalManifestSchemaLoader> logger)
         {
             this.logger = logger;
+            this.schemaFilePath = new Lazy<string>(() => Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                Constants.ManifestSchemaFilePath));
         }
 
         public JSchema LoadSchema()
         {
-            try
-            {
-                string schemaFilePath = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    Constants.ManifestSchemaFilePath);
-
-                string fileText = File.ReadAllText(schemaFilePath);
-                var schema = JSchema.Parse(fileText);
-
-                return schema;
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, $"Failed to load manifest schema from {Constants.ManifestSchemaFilePath}");
-                throw;
-            }
+            string? fileText = File.ReadAllText(this.schemaFilePath.Value);
+            var schema = JSchema.Parse(fileText);
+            
+            return schema;
         }
     }
 }
