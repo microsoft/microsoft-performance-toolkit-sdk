@@ -63,7 +63,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Packaging
                 this.logger.LogDebug(ex, $"Failed to create plugin package at '{destFilePath}'.");
                 throw new ConsoleRuntimeException($"Package creation failed: {ex.Message}", ex);
             }
-
         }
     }
 }
