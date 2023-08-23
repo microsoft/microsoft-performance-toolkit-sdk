@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "metadata-gen": {
+      "commandName": "Project",
+      "commandLineArgs": "metadata-gen -s D:\\Demo\\withMetadataTable\\bin\\Debug\\netstandard2.1 -o d:\\demo"
+    },
+    "pack": {
+      "commandName": "Project",
+      "commandLineArgs": "pack -s D:\\Demo\\withMetadataTable\\bin\\Debug\\netstandard2.1 -o D:\\Demo\\something.ptix -w"
+    }
+  }
+}
