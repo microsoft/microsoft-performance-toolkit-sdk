@@ -187,11 +187,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Validation
                 }
                 else if (ds is DirectoryDataSourceAttribute)
                 {
-                    dataSourcesMetadata.Add(new DataSourceMetadata(Constants.DirectoryDataSourceName, ds.Description));
+                    dataSourcesMetadata.Add(new DataSourceMetadata(DataSourceNameConstants.DirectoryDataSourceName, ds.Description));
                 }
                 else if (ds is ExtensionlessFileDataSourceAttribute)
                 {
-                    dataSourcesMetadata.Add(new DataSourceMetadata(Constants.ExtensionlessDataSourceName, ds.Description));
+                    dataSourcesMetadata.Add(new DataSourceMetadata(DataSourceNameConstants.ExtensionlessDataSourceName, ds.Description));
                 }
                 else
                 {

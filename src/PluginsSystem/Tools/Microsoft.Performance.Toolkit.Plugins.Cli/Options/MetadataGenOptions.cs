@@ -31,10 +31,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
 
         internal string? OutputDirectoryFullPath { get; private set; }
 
-
         public override void Validate()
         {
             base.Validate();
+
+            if (this.OutputDirectory == null && this.Overwrite)
+            {
+                throw new ArgumentValidationException("Cannot overwrite output directory when output directory is not specified.");
+            }
 
             if (this.OutputDirectory != null)
             {

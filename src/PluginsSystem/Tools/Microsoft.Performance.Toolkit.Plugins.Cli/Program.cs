@@ -107,11 +107,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             string? destFilePath = packOptions.OutputFileFullPath;
             if (destFilePath == null || !packOptions.Overwrite)
             {
-                string destFileName = destFilePath == null ?
-                    Path.Combine(Environment.CurrentDirectory, metadata.Identity.ToString()) :
-                    Path.GetFileNameWithoutExtension(destFilePath);
+                string destFileName = destFilePath ??
+                    Path.Combine(Environment.CurrentDirectory, $"{metadata.Identity}{PackageConstants.PluginPackageExtension}");
 
-                destFilePath = GetValidDestFileName(destFileName, PackageConstants.PluginPackageExtension);
+                destFilePath = GetValidDestFileName(destFileName);
             }
 
             string tmpFile = Path.GetTempFileName();
@@ -145,13 +144,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             bool outputSpecified = metadataGenOptions.OutputDirectory != null;
             string? outputDirectory = outputSpecified ? metadataGenOptions.OutputDirectoryFullPath : Environment.CurrentDirectory;
             
-            string destMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{Constants.MetadataFileName}");
+            string destMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}");
             string validDestMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
-                $"{destMetadataFileName}{Constants.MetadataFileExtension}" : GetValidDestFileName(destMetadataFileName, Constants.MetadataFileExtension);
+                destMetadataFileName : GetValidDestFileName(destMetadataFileName);
 
-            string destContentsMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{Constants.ContentsMetadataFileName}");
+            string destContentsMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginContentsMetadataFileName}");
             string validDestContentsMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
-                $"{destContentsMetadataFileName}{Constants.MetadataFileExtension}" : GetValidDestFileName(destContentsMetadataFileName, Constants.MetadataFileExtension);
+                destContentsMetadataFileName : GetValidDestFileName(destContentsMetadataFileName);
 
             try
             {
@@ -210,14 +209,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
         }
 
-        private static string GetValidDestFileName(string filename, string extension)
+        private static string GetValidDestFileName(string file)
         {
-            string destFileName = $"{filename}{extension}";
+            string name = Path.GetFileNameWithoutExtension(file);
+            string extension = Path.GetExtension(file);
+
+            string destFileName = $"{name}{extension}";
 
             int fileCount = 1;
             while (File.Exists(destFileName))
             {
-                destFileName = $"{filename}_({fileCount++}){extension}";
+                destFileName = $"{name}_({fileCount++}){extension}";
             }
 
             return destFileName;
