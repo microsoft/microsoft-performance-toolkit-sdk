@@ -34,9 +34,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             this.logger = logger;
         }
 
-        public ProcessedPluginContents Process(PackageGenCommonOptions options)
+        public ProcessedPluginContents Process(TransformedBase options)
         {
-            bool shouldInclude = options.ManifestFilePath == null;
+            bool shouldInclude = options.ManifestFileFullPath == null;
             ScannedResult processedDir = ProcessDir(options.SourceDirectoryFullPath, shouldInclude);
 
             string? manifestFilePath = shouldInclude ? processedDir.ManifestFilePath : options.ManifestFileFullPath;

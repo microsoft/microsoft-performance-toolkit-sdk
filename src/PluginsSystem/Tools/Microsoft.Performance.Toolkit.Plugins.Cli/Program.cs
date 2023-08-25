@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Options.Validation;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
@@ -35,6 +36,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddLogging(x => x.AddConsole())
                 .AddSingleton<IPluginContentsProcessor, SourceProcessor>()
+                .AddSingleton<IOptionsValidator<PackOptions, TransformedPackOptions>, PackOptionsValidator>()
+                .AddSingleton<IOptionsValidator<MetadataGenOptions, TransformedMetadataGenOptions>, MetadataGenOptionsValidator>()
                 .AddSingleton<IPack, Pack>()
                 .AddSingleton<IMetadataGen, MetadataGen>()
                 .AddSingleton<IPackageBuilder, ZipPluginPackageBuilder>()

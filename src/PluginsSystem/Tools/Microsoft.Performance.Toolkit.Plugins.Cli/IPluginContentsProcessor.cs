@@ -7,6 +7,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     internal interface IPluginContentsProcessor
     {
-        public ProcessedPluginContents Process(PackageGenCommonOptions options);
+        public ProcessedPluginContents Process(TransformedBase options);
     }
 }
