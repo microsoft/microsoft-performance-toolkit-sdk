@@ -34,7 +34,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Packaging
 
             try
             {
-                foreach (string fileInfo in processedDir.AllContentFilePaths)
+                foreach (string fileInfo in processedDir.ContentFiles)
                 {
                     string fileSourcePath = Path.Combine(processedDir.SourceDirectory, fileInfo);
                     string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName, fileInfo);
