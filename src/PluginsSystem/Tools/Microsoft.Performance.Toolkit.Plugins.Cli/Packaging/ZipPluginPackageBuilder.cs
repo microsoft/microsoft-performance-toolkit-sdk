@@ -4,7 +4,6 @@
 using System.IO.Compression;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Validation;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
@@ -28,20 +27,17 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Packaging
             this.logger = logger;
         }
 
-        public void Build(ProcessedPluginDirectory processedDir, PluginMetadata metadata, string destFilePath)
+        public void Build(ProcessedPluginContents processedDir, string destFilePath)
         {
-            string sourcePath = processedDir.FullPath;
             using var stream = new FileStream(destFilePath, FileMode.Create, FileAccess.Write, FileShare.None);
             using var zip = new ZipArchive(stream, ZipArchiveMode.Create, false);
-            var dirInfo = new DirectoryInfo(sourcePath);
 
             try
             {
-                foreach (FileInfo fileInfo in dirInfo.EnumerateFiles("*", SearchOption.AllDirectories))
+                foreach (string fileInfo in processedDir.AllContentFilePaths)
                 {
-                    string fileSourcePath = fileInfo.FullName;
-                    string relPath = Path.GetRelativePath(sourcePath, fileSourcePath);
-                    string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName, relPath);
+                    string fileSourcePath = Path.Combine(processedDir.SourceDirectory, fileInfo);
+                    string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName, fileInfo);
 
                     zip.CreateEntryFromFile(fileSourcePath, fileTargetPath, CompressionLevel.Optimal);
                 }
@@ -49,7 +45,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Packaging
                 ZipArchiveEntry metadataEntry = zip.CreateEntry(PackageConstants.PluginMetadataFileName);
                 using (Stream entryStream = metadataEntry.Open())
                 {
-                    this.metadataSerializer.Serialize(entryStream, metadata);
+                    this.metadataSerializer.Serialize(entryStream, processedDir.Metadata);
                 }
 
                 ZipArchiveEntry contentsMetadataEntry = zip.CreateEntry(PackageConstants.PluginContentsMetadataFileName);

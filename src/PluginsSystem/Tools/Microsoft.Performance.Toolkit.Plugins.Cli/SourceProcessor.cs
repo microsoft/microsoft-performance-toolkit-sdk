@@ -9,29 +9,67 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
+using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProcessingSourceInfo;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Validation
+namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
-    public class PluginSourceFilesProcessor
-        : ISourceFilesProcessor
+    internal class SourceProcessor
+        : IPluginContentsProcessor
     {
-        private readonly ILogger<PluginSourceFilesProcessor> logger;
-
-        public PluginSourceFilesProcessor(ILogger<PluginSourceFilesProcessor> logger)
+        private readonly IManifestFileValidator manifestValidator;
+        private readonly IManifestFileReader manifestReader;
+        private readonly ILogger<SourceProcessor> logger;
+        
+        public SourceProcessor(
+            IManifestFileValidator manifestValidator,
+            IManifestFileReader manifestReader,
+            ILogger<SourceProcessor> logger)
         {
+            this.manifestValidator = manifestValidator;
+            this.manifestReader = manifestReader;
             this.logger = logger;
         }
 
-        public ProcessedPluginDirectory Process(
-            string sourceDir,
-            bool manifestShouldPresent)
+        public ProcessedPluginContents Process(PackageGenCommonOptions options)
+        {
+            bool shouldInclude = options.ManifestFilePath == null;
+            ScannedResult processedDir = ProcessDir(options.SourceDirectoryFullPath, shouldInclude);
+
+            string? manifestFilePath = shouldInclude ? processedDir.ManifestFilePath : options.ManifestFileFullPath;
+            if (!this.manifestValidator.IsValid(manifestFilePath!, out List<string> validationMessages))
+            {
+                string errors = string.Join(Environment.NewLine, validationMessages);
+                this.logger.LogWarning($"Manifest file failed some json schema format validation checks: \n{errors}");
+                this.logger.LogWarning("Continuing with packing process but it is recommended to fix the validation errors and repack before publishing the plugin.");
+            }
+
+            PluginManifest manifest = this.manifestReader.Read(manifestFilePath!);
+            PluginMetadata metadata = GenerateMetadata(processedDir, manifest);
+            PluginContentsMetadata contentsMetadata = GenerateContentsMetadata(processedDir);
+
+            return new ProcessedPluginContents(options.SourceDirectoryFullPath,processedDir.AllContentFilePaths, metadata, contentsMetadata);
+        }
+
+        private record ScannedResult(
+            string FullPath,
+            IReadOnlyList<string> AllContentFilePaths,
+            string? ManifestFilePath,
+            Version SdkVersion,
+            long PluginSize);
+
+        private ScannedResult ProcessDir(
+           string sourceDir,
+           bool manifestShouldPresent)
         {
             string? manifestFilePath = null;
             Version? sdkVersion = null;
             long totalSize = 0;
             int dllCount = 0;
+            var filesToPack = new List<string>();
 
             foreach (string file in Directory.EnumerateFiles(sourceDir, "*", SearchOption.AllDirectories))
             {
@@ -61,7 +99,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Validation
                     {
                         throw new ConsoleRuntimeException($"Unexpected Error occurs when loading {fileName}: {ex.Message}", ex);
                     }
-
 
                     AssemblyName? sdkRef = assembly.GetReferencedAssemblies()
                         .FirstOrDefault(assemblyName => assemblyName.Name?.Equals(Constants.SdkAssemblyName, StringComparison.OrdinalIgnoreCase) == true);
@@ -94,11 +131,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Validation
                     }
 
                     manifestFilePath = file;
+                    continue;
                 }
 
+                filesToPack.Add(Path.GetRelativePath(sourceDir, file));
                 totalSize += new FileInfo(file).Length;
             }
-            
+
             if (dllCount == 0)
             {
                 throw new InvalidPluginContentException($"Directory does not contain any DLLs: {sourceDir}.");
@@ -114,31 +153,47 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Validation
             {
                 throw new InvalidPluginContentException($"Invalid plugin: {Constants.SdkAssemblyName} is not referenced anywhere in the plugin.");
             }
-
-            PluginContentsMetadata contentsMetadata;
-            using (PluginsLoader pluginsLoader = new())
-            {
-                if (!pluginsLoader.TryLoadPlugin(sourceDir, out ErrorInfo errorInfo))
-                {
-                    this.logger.LogDebug($"Failed to load plugin from {sourceDir}: {errorInfo}");
-
-                    // TODO: Check error codes and throw more specific exceptions
-                    throw new InvalidPluginContentException($"Failed to load plugin from {sourceDir}: {errorInfo.Message}");
-                }
-
-                contentsMetadata = GenerateContentsMetadata(pluginsLoader);
-            }
-
-            return new ProcessedPluginDirectory(
+            
+            return new ScannedResult(
                 sourceDir,
+                filesToPack,
                 manifestFilePath,
                 sdkVersion,
-                totalSize,
-                contentsMetadata);
+                totalSize);
         }
 
-        private PluginContentsMetadata GenerateContentsMetadata(PluginsLoader pluginsLoader)
+        private PluginMetadata GenerateMetadata(ScannedResult scannedDir, PluginManifest manifest)
         {
+            PluginIdentity identity = new(manifest.Identity.Id, manifest.Identity.Version);
+            ulong installedSize = (ulong)scannedDir.PluginSize;
+            IEnumerable<PluginOwnerInfo> owners = manifest.Owners.Select(
+                o => new PluginOwnerInfo(o.Name, o.Address, o.EmailAddresses.ToArray(), o.PhoneNumbers.ToArray()));
+            Version sdkVersion = scannedDir.SdkVersion;
+
+            PluginMetadata metadata = new(
+                identity,
+                installedSize,
+                manifest.DisplayName,
+                manifest.Description,
+                sdkVersion,
+                manifest.ProjectUrl, owners);
+
+            return metadata;
+        }
+
+        private PluginContentsMetadata GenerateContentsMetadata(ScannedResult scannedDir)
+        {
+            string sourceDir = scannedDir.FullPath;
+            using PluginsLoader pluginsLoader = new();
+            
+            if (!pluginsLoader.TryLoadPlugin(sourceDir, out ErrorInfo errorInfo))
+            {
+                this.logger.LogDebug($"Failed to load plugin from {sourceDir}: {errorInfo}");
+
+                // TODO: Check error codes and throw more specific exceptions
+                throw new InvalidPluginContentException($"Failed to load plugin from {sourceDir}: {errorInfo.Message}");
+            }
+            
             var processingSourcesMetadata = pluginsLoader.LoadedProcessingSources.Select(x => CreateProcessingSourceMetadata(x)).ToList();
 
             // TODO: #294 Figure out how to extract description of a datacooker.
@@ -146,7 +201,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Validation
                 .Concat(pluginsLoader.Extensions.CompositeDataCookers)
                 .Select(x => new DataCookerMetadata(x.DataCookerId, null, x.SourceParserId))
                 .ToList();
-            
+
             var tables = pluginsLoader.Extensions.TablesById.Values
                 .Select(x => new TableMetadata(
                     x.TableDescriptor.Guid,

@@ -7,13 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Packaging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Validation;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
-using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
@@ -37,8 +34,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddLogging(x => x.AddConsole())
-                .AddSingleton<IMetadataGenerator, MetadataGenerator>()
-                .AddSingleton<ISourceFilesProcessor, PluginSourceFilesProcessor>()
+                .AddSingleton<IPluginContentsProcessor, SourceProcessor>()
+                .AddSingleton<IPack, Pack>()
+                .AddSingleton<IMetadataGen, MetadataGen>()
                 .AddSingleton<IPackageBuilder, ZipPluginPackageBuilder>()
                 .AddSingleton<ISerializer<PluginManifest>>(SerializationUtils.GetJsonSerializer<PluginManifest>(new JsonSerializerOptions
                 {
@@ -97,129 +95,31 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
 
         private static int RunPack(PackOptions packOptions, ServiceProvider serviceProvider)
         {
-            packOptions.Validate();
-            
-            PackageGenCommon(packOptions, serviceProvider, out ProcessedPluginDirectory processedDir, out PluginMetadata metadata);
+            IPack pack = serviceProvider.GetRequiredService<IPack>();
 
-            IPackageBuilder packageBuilder = serviceProvider.GetRequiredService<IPackageBuilder>();
-            ILogger logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-
-            string? destFilePath = packOptions.OutputFileFullPath;
-            if (destFilePath == null || !packOptions.Overwrite)
-            {
-                string destFileName = destFilePath ??
-                    Path.Combine(Environment.CurrentDirectory, $"{metadata.Identity}{PackageConstants.PluginPackageExtension}");
-
-                destFilePath = GetValidDestFileName(destFileName);
-            }
-
-            string tmpFile = Path.GetTempFileName();
-            try
-            {
-                packageBuilder.Build(processedDir, metadata, tmpFile);
-                File.Move(tmpFile, destFilePath, packOptions.Overwrite);
-
-                logger.LogInformation($"Successfully created plugin package at {destFilePath}");
-            }
-            finally
-            {
-                if (File.Exists(tmpFile))
-                {
-                    File.Delete(tmpFile);
-                }
-            }
-
-            return 0;
+            return pack.Run(packOptions);
         }
 
         private static int RunMetadataGen(MetadataGenOptions metadataGenOptions, ServiceProvider serviceProvider)
         {
-            metadataGenOptions.Validate();
-            PackageGenCommon(metadataGenOptions, serviceProvider, out ProcessedPluginDirectory processedDir, out PluginMetadata metadata);
+            IMetadataGen metadataGen = serviceProvider.GetRequiredService<IMetadataGen>();
 
-            ISerializer<PluginMetadata> metadataSerializer = serviceProvider.GetRequiredService<ISerializer<PluginMetadata>>();
-            ISerializer<PluginContentsMetadata> contentsMetadataSerializer = serviceProvider.GetRequiredService<ISerializer<PluginContentsMetadata>>();
-            ILogger logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-
-            bool outputSpecified = metadataGenOptions.OutputDirectory != null;
-            string? outputDirectory = outputSpecified ? metadataGenOptions.OutputDirectoryFullPath : Environment.CurrentDirectory;
-            
-            string destMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}");
-            string validDestMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
-                destMetadataFileName : GetValidDestFileName(destMetadataFileName);
-
-            string destContentsMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginContentsMetadataFileName}");
-            string validDestContentsMetadataFileName = (outputSpecified && metadataGenOptions.Overwrite) ?
-                destContentsMetadataFileName : GetValidDestFileName(destContentsMetadataFileName);
-
-            try
-            {
-                using (FileStream fileStream = File.Open(validDestMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    metadataSerializer.Serialize(fileStream, metadata);
-                }
-            }
-            catch (IOException ex)
-            {
-                logger.LogDebug(ex, $"IO exception when writing to {validDestMetadataFileName}.");
-                throw new ConsoleRuntimeException($"Failed to create plugin metadata at {validDestMetadataFileName}.", ex);
-            }
-
-            logger.LogInformation($"Successfully created plugin metadata at {validDestMetadataFileName}.");
-            
-            try
-            {
-                using (FileStream fileStream = File.Open(validDestContentsMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    contentsMetadataSerializer.Serialize(fileStream, processedDir.ContentsMetadata);
-                }
-            }
-            catch (IOException ex)
-            {
-                logger.LogDebug(ex, $"IO exception when writing to {validDestContentsMetadataFileName}.");
-                throw new ConsoleRuntimeException($"Failed to create plugin contents metadata at {validDestContentsMetadataFileName}.", ex);
-            }
-
-            logger.LogInformation($"Successfully created plugin contents metadata at {validDestContentsMetadataFileName}.");
-            
-            return 0;
+            return metadataGen.Run(metadataGenOptions);
         }
 
-        private static void PackageGenCommon(PackageGenCommonOptions options, ServiceProvider serviceProvider, out ProcessedPluginDirectory processedDir, out PluginMetadata metadata)
+        // To utils
+        public static string GetValidDestFileName(string file)
         {
-            ISourceFilesProcessor processor = serviceProvider.GetRequiredService<ISourceFilesProcessor>();
-            IManifestFileValidator manifestValidator = serviceProvider.GetRequiredService<IManifestFileValidator>();
-            IManifestFileReader manifestReader = serviceProvider.GetRequiredService<IManifestFileReader>();
-            IMetadataGenerator metadataGenerator = serviceProvider.GetRequiredService<IMetadataGenerator>();
-            ILogger logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-
-            bool shouldInclude = options.ManifestFilePath == null;
-            processedDir = processor.Process(options.SourceDirectoryFullPath, shouldInclude);
-
-            string? manifestFilePath = shouldInclude ? processedDir.ManifestFilePath : options.ManifestFileFullPath;
-            if (!manifestValidator.IsValid(manifestFilePath!, out List<string> validationMessages))
-            {
-                string errors = string.Join(Environment.NewLine, validationMessages);
-                logger.LogWarning($"Manifest file failed some json schema format validation checks: \n{errors}");
-                logger.LogWarning("Continuing with packing process but it is recommended to fix the validation errors and repack before publishing the plugin.");
-            }
-
-            PluginManifest manifest = manifestReader.Read(manifestFilePath!);
-            metadata = metadataGenerator.Generate(processedDir, manifest);
-
-        }
-
-        private static string GetValidDestFileName(string file)
-        {
+            string? directory = Path.GetDirectoryName(file);
             string name = Path.GetFileNameWithoutExtension(file);
             string extension = Path.GetExtension(file);
 
-            string destFileName = $"{name}{extension}";
+            string destFileName = file;
 
             int fileCount = 1;
             while (File.Exists(destFileName))
             {
-                destFileName = $"{name}_({fileCount++}){extension}";
+                destFileName = Path.Combine(directory!, $"{name}_({fileCount++}){extension}");
             }
 
             return destFileName;
