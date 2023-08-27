@@ -2,14 +2,12 @@
 // Licensed under the MIT License.
 
 using CommandLine;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs
 {
-    internal abstract class PackageGenCommonOptions
-        : IOptions
+    internal abstract class PackGenCommonOptions
     {
-        protected PackageGenCommonOptions(
+        protected PackGenCommonOptions(
             string sourceDirectory,
             bool overwrite,
             string? manifestFilePath)

@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
-    internal record TransformedPackOptions(
+    internal record PackArgs(
         string SourceDirectoryFullPath,
         string? ManifestFileFullPath,
         string? OutputFileFullPath,
         bool OverWrite)
-        : TransformedBase(SourceDirectoryFullPath, ManifestFileFullPath, OverWrite)
+        : PackGenCommonArgs(SourceDirectoryFullPath, ManifestFileFullPath, OverWrite)
     {
-        public TransformedPackOptions(TransformedBase baseOptions, string? outputFileFullPath)
+        public PackArgs(PackGenCommonArgs baseOptions, string? outputFileFullPath)
             : this(baseOptions.SourceDirectoryFullPath, baseOptions.ManifestFileFullPath, outputFileFullPath, baseOptions.Overwrite)
         {
         }

@@ -3,7 +3,7 @@
 
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing
 {
     public record ProcessedPluginContents(
         string SourceDirectory,

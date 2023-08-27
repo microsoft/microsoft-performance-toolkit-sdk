@@ -3,14 +3,13 @@
 
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs
 {
     [Verb("metadata-gen", HelpText = $"Generates a {PackageConstants.PluginMetadataFileName} file from the specified source directory.")]
     internal class MetadataGenOptions
-        : PackageGenCommonOptions
+        : PackGenCommonOptions
     {
         public MetadataGenOptions(
             string sourceDirectory,

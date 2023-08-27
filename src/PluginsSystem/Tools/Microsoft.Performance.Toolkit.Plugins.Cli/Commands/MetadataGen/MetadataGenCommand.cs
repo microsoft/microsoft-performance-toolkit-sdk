@@ -2,59 +2,50 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Options.Validation;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
-    internal class MetadataGen
-        : IMetadataGen
+    internal class MetadataGenCommand
+        : ICommand<MetadataGenArgs>
     {
-        IOptionsValidator<MetadataGenOptions, TransformedMetadataGenOptions> optionsValidator;
         private readonly IPluginContentsProcessor sourceProcessor;
         private readonly ISerializer<PluginMetadata> metadataSerializer;
         private readonly ISerializer<PluginContentsMetadata> contentsMetadataSerializer;
-        private readonly ILogger<MetadataGen> logger;
+        private readonly ILogger<MetadataGenCommand> logger;
 
-        public MetadataGen(
-            IOptionsValidator<MetadataGenOptions, TransformedMetadataGenOptions> optionsValidator,
+        public MetadataGenCommand(
             IPluginContentsProcessor sourceProcessor,
             ISerializer<PluginMetadata> metadataSerializer,
             ISerializer<PluginContentsMetadata> contentsMetadataSerializer,
-            ILogger<MetadataGen> logger)
+            ILogger<MetadataGenCommand> logger)
         {
-            this.optionsValidator = optionsValidator;
             this.sourceProcessor = sourceProcessor;
             this.metadataSerializer = metadataSerializer;
             this.contentsMetadataSerializer = contentsMetadataSerializer;
             this.logger = logger;
         }
 
-        public int Run(MetadataGenOptions metadataGenOptions)
+        public int Run(MetadataGenArgs transformedOptions)
         {
-            if (!this.optionsValidator.IsValid(metadataGenOptions, out TransformedMetadataGenOptions transformedOptions))
-            {
-                return -1;
-            }
-
             ProcessedPluginContents processedDir = this.sourceProcessor.Process(transformedOptions);
             PluginMetadata metadata = processedDir.Metadata;
             PluginContentsMetadata contentsMetadata = processedDir.ContentsMetadata;
 
-            bool outputSpecified = metadataGenOptions.OutputDirectory != null;
+            bool outputSpecified = transformedOptions.OutputDirectoryFullPath != null;
             string? outputDirectory = outputSpecified ? transformedOptions.OutputDirectoryFullPath : Environment.CurrentDirectory;
 
             string destMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}");
-            string validDestMetadataFileName = (outputSpecified && transformedOptions.Overwrite) ?
-                destMetadataFileName : Program.GetValidDestFileName(destMetadataFileName);
+            string validDestMetadataFileName = outputSpecified && transformedOptions.Overwrite ?
+                destMetadataFileName : Utils.GetValidDestFileName(destMetadataFileName);
 
             string destContentsMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginContentsMetadataFileName}");
-            string validDestContentsMetadataFileName = (outputSpecified && transformedOptions.Overwrite) ?
-                destContentsMetadataFileName : Program.GetValidDestFileName(destContentsMetadataFileName);
+            string validDestContentsMetadataFileName = outputSpecified && transformedOptions.Overwrite ?
+                destContentsMetadataFileName : Utils.GetValidDestFileName(destContentsMetadataFileName);
 
             try
             {

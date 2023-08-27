@@ -3,6 +3,7 @@
 
 using System.IO.Compression;
 using Microsoft.Extensions.Logging;
+using Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;

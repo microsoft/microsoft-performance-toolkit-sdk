@@ -10,12 +10,12 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Commands;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProcessingSourceInfo;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing
 {
     internal class SourceProcessor
         : IPluginContentsProcessor
@@ -23,7 +23,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         private readonly IManifestFileValidator manifestValidator;
         private readonly IManifestFileReader manifestReader;
         private readonly ILogger<SourceProcessor> logger;
-        
+
         public SourceProcessor(
             IManifestFileValidator manifestValidator,
             IManifestFileReader manifestReader,
@@ -34,7 +34,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             this.logger = logger;
         }
 
-        public ProcessedPluginContents Process(TransformedBase options)
+        public ProcessedPluginContents Process(PackGenCommonArgs options)
         {
             bool shouldInclude = options.ManifestFileFullPath == null;
             ScannedResult processedDir = ProcessDir(options.SourceDirectoryFullPath, shouldInclude);
@@ -51,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             PluginMetadata metadata = GenerateMetadata(processedDir, manifest);
             PluginContentsMetadata contentsMetadata = GenerateContentsMetadata(processedDir);
 
-            return new ProcessedPluginContents(options.SourceDirectoryFullPath,processedDir.AllContentFilePaths, metadata, contentsMetadata);
+            return new ProcessedPluginContents(options.SourceDirectoryFullPath, processedDir.AllContentFilePaths, metadata, contentsMetadata);
         }
 
         private record ScannedResult(
@@ -153,7 +153,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
             {
                 throw new InvalidPluginContentException($"Invalid plugin: {Constants.SdkAssemblyName} is not referenced anywhere in the plugin.");
             }
-            
+
             return new ScannedResult(
                 sourceDir,
                 filesToPack,
@@ -185,7 +185,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         {
             string sourceDir = scannedDir.FullPath;
             using PluginsLoader pluginsLoader = new();
-            
+
             if (!pluginsLoader.TryLoadPlugin(sourceDir, out ErrorInfo errorInfo))
             {
                 this.logger.LogDebug($"Failed to load plugin from {sourceDir}: {errorInfo}");
@@ -193,7 +193,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 // TODO: Check error codes and throw more specific exceptions
                 throw new InvalidPluginContentException($"Failed to load plugin from {sourceDir}: {errorInfo.Message}");
             }
-            
+
             var processingSourcesMetadata = pluginsLoader.LoadedProcessingSources.Select(x => CreateProcessingSourceMetadata(x)).ToList();
 
             // TODO: #294 Figure out how to extract description of a datacooker.

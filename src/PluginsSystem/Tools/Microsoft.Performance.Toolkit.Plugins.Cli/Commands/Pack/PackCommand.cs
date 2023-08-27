@@ -2,40 +2,31 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Options;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Options.Validation;
+using Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
-    internal sealed class Pack
-        : IPack
+    internal sealed class PackCommand
+        : ICommand<PackArgs>
     {
-        private readonly IOptionsValidator<PackOptions, TransformedPackOptions> optionsValidator;
         private readonly IPluginContentsProcessor sourceProcessor;
         private readonly IPackageBuilder packageBuilder;
-        private readonly ILogger<Pack> logger;
+        private readonly ILogger<PackCommand> logger;
 
-        public Pack(
-            IOptionsValidator<PackOptions, TransformedPackOptions> optionsValidator,
+        public PackCommand(
             IPluginContentsProcessor sourceProcessor,
             IPackageBuilder packageBuilder,
-            ILogger<Pack> logger)
+            ILogger<PackCommand> logger)
         {
-            this.optionsValidator = optionsValidator;
             this.sourceProcessor = sourceProcessor;
             this.packageBuilder = packageBuilder;
             this.logger = logger;
         }
 
-        public int Run(PackOptions packOptions)
+        public int Run(PackArgs transformedOptions)
         {
-            if (!this.optionsValidator.IsValid(packOptions, out TransformedPackOptions transformedOptions))
-            {
-                return -1;
-            }
-
             ProcessedPluginContents processedSource = this.sourceProcessor.Process(transformedOptions);
 
             string? destFilePath = transformedOptions.OutputFileFullPath;
@@ -44,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 string destFileName = destFilePath ??
                     Path.Combine(Environment.CurrentDirectory, $"{processedSource.Metadata.Identity}{PackageConstants.PluginPackageExtension}");
 
-                destFilePath = Program.GetValidDestFileName(destFileName);
+                destFilePath = Utils.GetValidDestFileName(destFileName);
             }
 
             string tmpFile = Path.GetTempFileName();

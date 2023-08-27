@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
-    internal record TransformedMetadataGenOptions(
+    internal record MetadataGenArgs(
         string SourceDirectoryFullPath,
         string? ManifestFileFullPath,
         string? OutputDirectoryFullPath,
         bool Overwrite)
-        : TransformedBase(
+        : PackGenCommonArgs(
             SourceDirectoryFullPath,
             ManifestFileFullPath,
             Overwrite)
     {
-        public TransformedMetadataGenOptions(TransformedBase baseOptions, string? outputDirectoryFullPath)
+        public MetadataGenArgs(PackGenCommonArgs baseOptions, string? outputDirectoryFullPath)
             : this(baseOptions.SourceDirectoryFullPath, baseOptions.ManifestFileFullPath, outputDirectoryFullPath, baseOptions.Overwrite)
         {
         }

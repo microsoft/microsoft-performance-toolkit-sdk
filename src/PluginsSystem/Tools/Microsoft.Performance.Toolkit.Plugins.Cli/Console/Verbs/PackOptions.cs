@@ -3,14 +3,13 @@
 
 using CommandLine;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs
 {
     [Verb("pack", HelpText = $"Creates a new {PackageConstants.PluginPackageExtension} package using specified metadata and source directory.")]
     internal class PackOptions
-        : PackageGenCommonOptions
+        : PackGenCommonOptions
     {
         public PackOptions(
             string sourceDirectory,

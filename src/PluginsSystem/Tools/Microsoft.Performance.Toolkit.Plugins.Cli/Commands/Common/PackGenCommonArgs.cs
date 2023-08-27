@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.Toolkit.Plugins.Cli.Options
+namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
-    internal record TransformedBase(
+    internal record PackGenCommonArgs(
         string SourceDirectoryFullPath,
         string? ManifestFileFullPath,
         bool Overwrite);
