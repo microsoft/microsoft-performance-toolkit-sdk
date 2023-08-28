@@ -3,8 +3,7 @@
 
 using System.IO.Compression;
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
@@ -28,37 +27,29 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Packaging
             this.logger = logger;
         }
 
-        public void Build(ProcessedPluginContents processedDir, string destFilePath)
+        public void Build(ProcessedPluginResult processedDir, string destFilePath)
         {
             using var stream = new FileStream(destFilePath, FileMode.Create, FileAccess.Write, FileShare.None);
             using var zip = new ZipArchive(stream, ZipArchiveMode.Create, false);
 
-            try
+            foreach (string fileInfo in processedDir.ContentFiles)
             {
-                foreach (string fileInfo in processedDir.ContentFiles)
-                {
-                    string fileSourcePath = Path.Combine(processedDir.SourceDirectory, fileInfo);
-                    string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName, fileInfo);
+                string fileSourcePath = Path.Combine(processedDir.SourceDirectory, fileInfo);
+                string fileTargetPath = Path.Combine(PackageConstants.PluginContentFolderName, fileInfo);
 
-                    zip.CreateEntryFromFile(fileSourcePath, fileTargetPath, CompressionLevel.Optimal);
-                }
-
-                ZipArchiveEntry metadataEntry = zip.CreateEntry(PackageConstants.PluginMetadataFileName);
-                using (Stream entryStream = metadataEntry.Open())
-                {
-                    this.metadataSerializer.Serialize(entryStream, processedDir.Metadata);
-                }
-
-                ZipArchiveEntry contentsMetadataEntry = zip.CreateEntry(PackageConstants.PluginContentsMetadataFileName);
-                using (Stream entryStream = contentsMetadataEntry.Open())
-                {
-                    this.contentsMetadataSerializer.Serialize(entryStream, processedDir.ContentsMetadata);
-                }
+                zip.CreateEntryFromFile(fileSourcePath, fileTargetPath, CompressionLevel.Optimal);
             }
-            catch (Exception ex)
+
+            ZipArchiveEntry metadataEntry = zip.CreateEntry(PackageConstants.PluginMetadataFileName);
+            using (Stream entryStream = metadataEntry.Open())
             {
-                this.logger.LogDebug(ex, $"Failed to create plugin package at '{destFilePath}'.");
-                throw new ConsoleRuntimeException($"Package creation failed: {ex.Message}", ex);
+                this.metadataSerializer.Serialize(entryStream, processedDir.Metadata);
+            }
+
+            ZipArchiveEntry contentsMetadataEntry = zip.CreateEntry(PackageConstants.PluginContentsMetadataFileName);
+            using (Stream entryStream = contentsMetadataEntry.Open())
+            {
+                this.contentsMetadataSerializer.Serialize(entryStream, processedDir.ContentsMetadata);
             }
         }
     }

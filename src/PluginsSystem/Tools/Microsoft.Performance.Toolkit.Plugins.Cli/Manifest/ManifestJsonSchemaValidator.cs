@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 
@@ -27,26 +26,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             errorMessages = new List<string>();
             string? fileText;
             JToken? parsedManifest;
-            try
-            {
-                fileText = File.ReadAllText(manifestPath);
-            }
-            catch (IOException ex)
-            {
-                this.logger.LogDebug(ex, $"IO exception thrown when reading {manifestPath}.");
-                throw new ConsoleRuntimeException($"Failed to read {manifestPath} due to an IO exception.", ex);
-            }
 
-            try
-            {
-                parsedManifest = JToken.Parse(fileText);
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, $"Exception thrown when processing {manifestPath} as JSON.");
-                throw new ConsoleRuntimeException($"Failed to parse {manifestPath} as JSON when validating manifest.", ex);
-            }
-
+            fileText = File.ReadAllText(manifestPath);
+            
+            parsedManifest = JToken.Parse(fileText);
             bool isValid = parsedManifest.IsValid(this.schema.Value, out IList<string> errors);
             if (!isValid)
             {

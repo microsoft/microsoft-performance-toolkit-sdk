@@ -3,7 +3,6 @@
 
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
@@ -22,9 +21,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             this.logger = logger;
         }
 
-        public PluginManifest Read(string manifestFilePath)
+        public bool TryRead(string manifestFilePath, out PluginManifest? pluginManifest)
         {
-            PluginManifest pluginManifest;
+            pluginManifest = null;
             try
             {
                 using (FileStream manifestStream = File.OpenRead(manifestFilePath))
@@ -34,17 +33,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             }
             catch (IOException ex)
             {
-                this.logger.LogDebug(ex, $"IO exception thrown when reading {manifestFilePath}.");
-                throw new ConsoleRuntimeException($"Failed to read {manifestFilePath} due to an IO exception.", ex);
+                this.logger.LogError($"Failed to read {manifestFilePath} due to an IO exception {ex.Message}");
             }
             catch (JsonException ex)
             {
-                this.logger.LogDebug(ex, $"Json exception thrown when deserializing {manifestFilePath}");
-                throw new InvalidManifestException($"Invalid manifest file content: {ex.Message}. Failed to deserialize.", ex);
+                this.logger.LogError($"Failed to deserialize {manifestFilePath} due to an JSON exception {ex.Message}.");
             }
 
 
-            return pluginManifest;
+            return true;
         }
     }
 }

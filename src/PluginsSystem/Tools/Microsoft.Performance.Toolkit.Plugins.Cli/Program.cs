@@ -6,11 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Commands;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Console;
-using Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using System;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
@@ -28,14 +29,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         /// <returns>
         ///     A task whose result is the exit code. 0 on success; otherwise, non-zero.
         /// </returns>
-        public static async Task<int> Main(string[] args)
+        public static int Main(string[] args)
+        {
+            return CreatPluginsCli().Run(args);
+        }
+
+        private static PluginsCli CreatPluginsCli()
         {
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddLogging(x => x.AddConsole())
-                .AddSingleton<IConsole, CommandLineParserConsole>()
+                .AddSingleton<PluginsCli>()
                 .AddSingleton<ICommand<PackArgs>, PackCommand>()
                 .AddSingleton<ICommand<MetadataGenArgs>, MetadataGenCommand>()
-                .AddSingleton<IPluginContentsProcessor, SourceProcessor>()
+                .AddSingleton<IPluginArtifactsProcessor, PluginArtifactsProcessor>()
                 .AddSingleton<IPackageBuilder, ZipPluginPackageBuilder>()
                 .AddSingleton<ISerializer<PluginManifest>>(SerializationUtils.GetJsonSerializer<PluginManifest>(new JsonSerializerOptions
                 {
@@ -49,9 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 .AddSingleton<IJsonSchemaLoader, LocalManifestSchemaLoader>()
                 .BuildServiceProvider();
 
-            IConsole console = serviceProvider.GetRequiredService<IConsole>();
-
-            return console.Run(args);
+             return serviceProvider.GetRequiredService<PluginsCli>();
         }
     }
 }

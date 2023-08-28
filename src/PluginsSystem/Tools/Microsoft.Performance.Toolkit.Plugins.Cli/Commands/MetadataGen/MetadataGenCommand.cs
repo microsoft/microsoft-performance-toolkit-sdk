@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Performance.Toolkit.Plugins.Cli.ContentsProcessing;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
@@ -13,13 +12,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
     internal class MetadataGenCommand
         : ICommand<MetadataGenArgs>
     {
-        private readonly IPluginContentsProcessor sourceProcessor;
+        private readonly IPluginArtifactsProcessor sourceProcessor;
         private readonly ISerializer<PluginMetadata> metadataSerializer;
         private readonly ISerializer<PluginContentsMetadata> contentsMetadataSerializer;
         private readonly ILogger<MetadataGenCommand> logger;
 
         public MetadataGenCommand(
-            IPluginContentsProcessor sourceProcessor,
+            IPluginArtifactsProcessor sourceProcessor,
             ISerializer<PluginMetadata> metadataSerializer,
             ISerializer<PluginContentsMetadata> contentsMetadataSerializer,
             ILogger<MetadataGenCommand> logger)
@@ -32,8 +31,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 
         public int Run(MetadataGenArgs transformedOptions)
         {
-            ProcessedPluginContents processedDir = this.sourceProcessor.Process(transformedOptions);
-            PluginMetadata metadata = processedDir.Metadata;
+            var args = new PluginArtifacts(transformedOptions.SourceDirectoryFullPath, transformedOptions.ManifestFileFullPath);
+            if (!this.sourceProcessor.TryProcess(args, out ProcessedPluginResult? processedDir))
+            {
+                this.logger.LogError("Failed to process plugin artifacts.");
+                return 1;
+            }
+
+            PluginMetadata metadata = processedDir!.Metadata;
             PluginContentsMetadata contentsMetadata = processedDir.ContentsMetadata;
 
             bool outputSpecified = transformedOptions.OutputDirectoryFullPath != null;
@@ -47,32 +52,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
             string validDestContentsMetadataFileName = outputSpecified && transformedOptions.Overwrite ?
                 destContentsMetadataFileName : Utils.GetValidDestFileName(destContentsMetadataFileName);
 
-            try
+            using (FileStream fileStream = File.Open(validDestMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                using (FileStream fileStream = File.Open(validDestMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    this.metadataSerializer.Serialize(fileStream, metadata);
-                }
+                this.metadataSerializer.Serialize(fileStream, metadata);
             }
-            catch (IOException ex)
-            {
-                this.logger.LogDebug(ex, $"IO exception when writing to {validDestMetadataFileName}.");
-                throw new ConsoleRuntimeException($"Failed to create plugin metadata at {validDestMetadataFileName}.", ex);
-            }
-
+ 
             this.logger.LogInformation($"Successfully created plugin metadata at {validDestMetadataFileName}.");
 
-            try
+            using (FileStream fileStream = File.Open(validDestContentsMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
             {
-                using (FileStream fileStream = File.Open(validDestContentsMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))
-                {
-                    this.contentsMetadataSerializer.Serialize(fileStream, contentsMetadata);
-                }
-            }
-            catch (IOException ex)
-            {
-                this.logger.LogDebug(ex, $"IO exception when writing to {validDestContentsMetadataFileName}.");
-                throw new ConsoleRuntimeException($"Failed to create plugin contents metadata at {validDestContentsMetadataFileName}.", ex);
+                this.contentsMetadataSerializer.Serialize(fileStream, contentsMetadata);
             }
 
             this.logger.LogInformation($"Successfully created plugin contents metadata at {validDestContentsMetadataFileName}.");

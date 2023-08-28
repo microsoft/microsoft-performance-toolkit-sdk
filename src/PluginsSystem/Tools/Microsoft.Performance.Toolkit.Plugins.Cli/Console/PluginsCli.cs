@@ -5,22 +5,20 @@ using CommandLine;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Commands;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs;
-using Microsoft.Performance.Toolkit.Plugins.Cli.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
 {
-    internal class CommandLineParserConsole
-        : IConsole
+    internal class PluginsCli
     {
         private readonly ICommand<PackArgs> packCommand;
         private readonly ICommand<MetadataGenArgs> metadataGenCommand;
-        private readonly ILogger<CommandLineParserConsole> logger;
+        private readonly ILogger<PluginsCli> logger;
 
-        public CommandLineParserConsole(
+        public PluginsCli(
             ICommand<PackArgs> packCommand,
             ICommand<MetadataGenArgs> metadataGenCommand,
-            ILogger<CommandLineParserConsole> logger)
+            ILogger<PluginsCli> logger)
         {
             this.packCommand = packCommand;
             this.metadataGenCommand = metadataGenCommand;
@@ -38,22 +36,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
                     (MetadataGenOptions opts) => RunMetadataGen(opts),
                     errs => HandleParseError(errs));
             }
-            catch (ArgumentValidationException ex)
-            {
-                this.logger.LogError("Invalid arguments. {0}", ex.Message);
-            }
-            catch (InvalidPluginContentException ex)
-            {
-                this.logger.LogError("Invalid plugin content. {0}", ex.Message);
-            }
-            catch (InvalidManifestException ex)
-            {
-                this.logger.LogError("Invalid manifest file. {0}", ex.Message);
-            }
-            catch (ConsoleRuntimeException ex)
-            {
-                this.logger.LogError("A runtime error occurred: {0}", ex.Message);
-            }
             catch (Exception ex)
             {
                 this.logger.LogError("Unhandled exception occurred: {0}", ex.Message);
@@ -63,7 +45,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
         }
         private int RunPack(PackOptions packOptions)
         {
-            if (!TryGetValidatedPackArgs(packOptions, out PackArgs packArgs))
+            if (!TryGetValidatedPackArgs(packOptions, out PackArgs? packArgs))
             {
                 return 1;
             }
@@ -73,7 +55,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
 
         private int RunMetadataGen(MetadataGenOptions metadataGenOptions)
         {
-            if (!TryGetValidatdMetadataGenArgs(metadataGenOptions, out MetadataGenArgs metadataGenArgs))
+            if (!TryGetValidatdMetadataGenArgs(metadataGenOptions, out MetadataGenArgs? metadataGenArgs))
             {
                 return 1;
             }
@@ -93,14 +75,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
         private bool TryGetValidatedPackArgs(PackOptions options, out PackArgs? result)
         {
             result = null;
-            if (!IsValidCommon(options, out PackGenCommonArgs resultBase))
+            if (!TryGetValidatedCommonArgs(options, out PackGenCommonArgs resultBase))
             {
                 return false;
             }
 
             if (options.OutputFilePath == null && options.Overwrite)
             {
-                throw new ArgumentValidationException("Cannot overwrite output file when output file is not specified.");
+                this.logger.LogError("Cannot overwrite output file when output file is not specified.");
+                return false;
             }
 
             string? outputFileFullPath = null;
@@ -108,7 +91,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
             {
                 if (!Path.GetExtension(options.OutputFilePath).Equals(PackageConstants.PluginPackageExtension, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new ArgumentValidationException($"Output file must have extension '{PackageConstants.PluginPackageExtension}'.");
+                    this.logger.LogError($"Output file must have extension '{PackageConstants.PluginPackageExtension}'.");
+                    return false;
                 }
 
                 try
@@ -117,13 +101,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
                 }
                 catch (Exception ex)
                 {
-                    throw new ArgumentValidationException("Unable to get full path to output file.", ex);
+                    this.logger.LogError("Unable to get full path to output file.", ex);
+                    return false;
                 }
 
                 string? outputDir = Path.GetDirectoryName(outputFileFullPath);
                 if (!Directory.Exists(outputDir))
                 {
-                    throw new ArgumentValidationException($"The directory '{outputDir}' does not exist. Please provide a valid directory path or create the directory and try again.");
+                    this.logger.LogError($"The directory '{outputDir}' does not exist. Please provide a valid directory path or create the directory and try again.");
                 }
             }
 
@@ -134,14 +119,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
         private bool TryGetValidatdMetadataGenArgs(MetadataGenOptions options, out MetadataGenArgs? result)
         {
             result = null;
-            if (!IsValidCommon(options, out PackGenCommonArgs resultBase))
+            if (!TryGetValidatedCommonArgs(options, out PackGenCommonArgs resultBase))
             {
                 return false;
             }
 
             if (options.OutputDirectory == null && options.Overwrite)
             {
-                throw new ArgumentValidationException("Cannot overwrite output directory when output directory is not specified.");
+                this.logger.LogError("Cannot overwrite output directory when output directory is not specified.");
+                return false;
             }
 
             string? outputDirectoryFullPath = null;
@@ -149,7 +135,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
             {
                 if (!Directory.Exists(options.OutputDirectory))
                 {
-                    throw new ArgumentValidationException($"Output directory '{options.OutputDirectory}' does not exist. Please create it or omit the --output option to use the current directory.");
+                    this.logger.LogError($"Output directory '{options.OutputDirectory}' does not exist." +
+                        $"Please create it or omit the --output option to use the current directory.");
+                    return false;
                 }
 
                 outputDirectoryFullPath = Path.GetFullPath(options.OutputDirectory);
@@ -160,35 +148,37 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
         }
 
 
-        private bool IsValidCommon(PackGenCommonOptions options, out PackGenCommonArgs transformed)
+        private bool TryGetValidatedCommonArgs(PackGenCommonOptions options, out PackGenCommonArgs transformed)
         {
-            // Validate source directory
+            transformed = null!;
             if (string.IsNullOrWhiteSpace(options.SourceDirectory))
             {
-                throw new ArgumentValidationException("Source directory must be specified. Use --source <path> or -s <path>.");
+                this.logger.LogError("Source directory must be specified. Use --source <path> or -s <path>.");
+                return false;
             }
 
             if (!Directory.Exists(options.SourceDirectory))
             {
-                throw new ArgumentValidationException($"Source directory '{options.SourceDirectory}' does not exist.");
+                this.logger.LogError($"Source directory '{options.SourceDirectory}' does not exist.");
+                return false;
             }
 
-            var sourceDirectoryFullPath = Path.GetFullPath(options.SourceDirectory);
+            string sourceDirectoryFullPath = Path.GetFullPath(options.SourceDirectory);
 
-            string manifestFileFullPath = null;
             // Validate manifest file path
+            string? manifestFileFullPath = null;
             if (options.ManifestFilePath != null)
             {
                 if (!File.Exists(options.ManifestFilePath))
                 {
-                    throw new ArgumentValidationException($"Manifest file '{options.ManifestFilePath}' does not exist.");
+                    this.logger.LogError($"Manifest file '{options.ManifestFilePath}' does not exist.");
+                    return false;
                 }
 
                 manifestFileFullPath = Path.GetFullPath(options.ManifestFilePath);
             }
 
             transformed = new PackGenCommonArgs(sourceDirectoryFullPath, manifestFileFullPath, options.Overwrite);
-
             return true;
         }
     }

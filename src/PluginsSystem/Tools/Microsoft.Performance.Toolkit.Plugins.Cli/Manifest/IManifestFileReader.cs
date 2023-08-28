@@ -5,6 +5,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
     public interface IManifestFileReader
     {
-        PluginManifest Read(string manifestFilePath);
+        bool TryRead(string manifestFilePath, out PluginManifest? pluginManifest);
     }
 }
