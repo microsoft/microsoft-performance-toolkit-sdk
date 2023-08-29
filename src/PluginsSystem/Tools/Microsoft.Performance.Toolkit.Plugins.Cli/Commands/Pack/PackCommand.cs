@@ -6,45 +6,27 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
     internal sealed class PackCommand
-        : ICommand<PackArgs>
+        : PackGenCommonCommand<PackArgs>
     {
-        private readonly IManifestLocatorFactory manifestLocatorFactory;
-        private readonly IPluginArtifactsProcessor sourceProcessor;
         private readonly IPackageBuilder packageBuilder;
-        private readonly ILogger<PackCommand> logger;
 
         public PackCommand(
             IManifestLocatorFactory manifestLocatorFactory,
-            IPluginArtifactsProcessor sourceProcessor,
+            IPluginArtifactsProcessor artifactsProcessor,
             IPackageBuilder packageBuilder,
             ILogger<PackCommand> logger)
+            : base(manifestLocatorFactory, artifactsProcessor, logger)
         {
-            this.manifestLocatorFactory = manifestLocatorFactory;
-            this.sourceProcessor = sourceProcessor;
             this.packageBuilder = packageBuilder;
-            this.logger = logger;
         }
 
-        public int Run(PackArgs args)
+        protected override int RunCore(PackArgs args, ProcessedPluginResult processedSource)
         {
-            IManifestLocator manifestLocator = this.manifestLocatorFactory.Create(args);
-            if (!manifestLocator.TryLocate(out string? manifestFilePath))
-            {
-                this.logger.LogError("Failed to locate manifest file.");
-                return 1;
-            }
-            
-            var artifacts = new PluginArtifacts(args.SourceDirectoryFullPath, manifestFilePath);
-            if (!this.sourceProcessor.TryProcess(artifacts, out ProcessedPluginResult? processedSource))
-            {
-                this.logger.LogError("Failed to process plugin artifacts.");
-                return 1;
-            }
-
             string? destFilePath = args.OutputFileFullPath;
             if (destFilePath == null || !args.Overwrite)
             {

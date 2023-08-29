@@ -22,7 +22,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
         {
             if (!TryValidateCommonOptions(cliOptions, out PackGenCommonArgs validatedCommonArgs))
             {
-                this.logger.LogError("Failed to validate common options.");
                 validatedAppArgs = null;
                 return false;
             }
