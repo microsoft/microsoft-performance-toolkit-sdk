@@ -10,9 +10,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
     ///     The full path to the directory containing the plugin binaries.
     /// </param>
     /// <param name="ManifestFileFullPath">
-    ///     The full path to the manifest file, if it's not in the source directory. Otherwise, <c>null</c>.
-    /// </param>
+    ///     The full path to the manifest file.
     internal record PluginArtifacts(
         string SourceDirectoryFullPath,
-        string? ManifestFileFullPath);
+        string ManifestFileFullPath);
 }

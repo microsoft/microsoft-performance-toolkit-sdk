@@ -34,16 +34,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 
         public bool TryProcess(PluginArtifacts artifacts, out ProcessedPluginResult? processedPlugin)
         {
-            processedPlugin = null;
-            bool shouldInclude = artifacts.ManifestFileFullPath == null;
-            
-            if (!TryProcessSourceDir(artifacts.SourceDirectoryFullPath, shouldInclude, out ProcessedPluginSourceDirectory? processedDir))
+            processedPlugin = null;            
+            if (!TryProcessSourceDir(artifacts.SourceDirectoryFullPath, out ProcessedPluginSourceDirectory? processedDir))
             {
                 this.logger.LogError($"Failed to process source directory {artifacts.SourceDirectoryFullPath}.");
                 return false;
             }
 
-            string? manifestFilePath = shouldInclude ? processedDir!.ManifestFilePath : artifacts.ManifestFileFullPath;
+            string manifestFilePath = artifacts.ManifestFileFullPath;
 
             try
             {
@@ -80,7 +78,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 
         private bool TryProcessSourceDir(
            string sourceDir,
-           bool manifestShouldPresent,
            out ProcessedPluginSourceDirectory? processedDir)
         {
             processedDir = null;
@@ -140,17 +137,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 }
                 else if (fileName.Equals(Constants.BundledManifestName, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!manifestShouldPresent)
-                    {
-                        this.logger.LogWarning($"Directory contains {Constants.BundledManifestName} when it should not: {sourceDir}. This file will be ignored.");
-                    }
-                    else if (manifestFilePath != null)
-                    {
-                        this.logger.LogError($"Directory contains multiple manifests: {manifestFilePath}, {file}. Only one manifest is allowed.");
-                        return false;
-                    }
-
-                    manifestFilePath = file;
                     continue;
                 }
 
@@ -161,13 +147,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             if (dllCount == 0)
             {
                 this.logger.LogError($"Directory does not contain any DLLs: {sourceDir}.");
-                return false;
-            }
-
-            // Check if the directory contains the manifest file if it should
-            if (manifestShouldPresent && manifestFilePath == null)
-            {
-                this.logger.LogError($"Directory does not contain {Constants.BundledManifestName} as expected: {sourceDir}.");
                 return false;
             }
 

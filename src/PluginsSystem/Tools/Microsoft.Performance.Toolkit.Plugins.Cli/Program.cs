@@ -52,6 +52,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 .AddSingleton<IManifestFileReader, ManifestReader>()
                 .AddSingleton<IManifestFileValidator, ManifestJsonSchemaValidator>()
                 .AddSingleton<IJsonSchemaLoader, LocalManifestSchemaLoader>()
+                .AddSingleton<IManifestLocatorFactory, ManifestLocatorFactory>()
                 .BuildServiceProvider();
 
              return serviceProvider.GetRequiredService<PluginsCli>();

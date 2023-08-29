@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
@@ -12,17 +13,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
     internal class MetadataGenCommand
         : ICommand<MetadataGenArgs>
     {
+        private readonly IManifestLocatorFactory manifestLocatorFactory;
         private readonly IPluginArtifactsProcessor sourceProcessor;
         private readonly ISerializer<PluginMetadata> metadataSerializer;
         private readonly ISerializer<PluginContentsMetadata> contentsMetadataSerializer;
         private readonly ILogger<MetadataGenCommand> logger;
 
         public MetadataGenCommand(
+            IManifestLocatorFactory manifestLocatorFactory,
             IPluginArtifactsProcessor sourceProcessor,
             ISerializer<PluginMetadata> metadataSerializer,
             ISerializer<PluginContentsMetadata> contentsMetadataSerializer,
             ILogger<MetadataGenCommand> logger)
         {
+            this.manifestLocatorFactory = manifestLocatorFactory;
             this.sourceProcessor = sourceProcessor;
             this.metadataSerializer = metadataSerializer;
             this.contentsMetadataSerializer = contentsMetadataSerializer;
@@ -31,8 +35,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 
         public int Run(MetadataGenArgs transformedOptions)
         {
-            var args = new PluginArtifacts(transformedOptions.SourceDirectoryFullPath, transformedOptions.ManifestFileFullPath);
-            if (!this.sourceProcessor.TryProcess(args, out ProcessedPluginResult? processedDir))
+            IManifestLocator manifestLocator = this.manifestLocatorFactory.Create(transformedOptions);
+            if (!manifestLocator.TryLocate(out string? manifestFilePath))
+            {
+                this.logger.LogError("Failed to locate manifest file.");
+                return 1;
+            }
+
+            var artifacts = new PluginArtifacts(transformedOptions.SourceDirectoryFullPath, manifestFilePath);
+            if (!this.sourceProcessor.TryProcess(artifacts, out ProcessedPluginResult? processedDir))
             {
                 this.logger.LogError("Failed to process plugin artifacts.");
                 return 1;
