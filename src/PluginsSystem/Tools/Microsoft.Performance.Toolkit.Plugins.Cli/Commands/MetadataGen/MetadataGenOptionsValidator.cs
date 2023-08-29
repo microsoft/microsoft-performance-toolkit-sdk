@@ -14,16 +14,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.MetadataGen
             : base(logger)
         {
         }
-
-        public override bool TryValidate(MetadataGenOptions cliOptions, out MetadataGenArgs? validatedAppArgs)
+ 
+        protected override bool TryValidateCore(MetadataGenOptions cliOptions, PackGenCommonArgs validatedCommonAppArgs, out MetadataGenArgs? validatedAppArgs)
         {
             validatedAppArgs = null;
-            if (!TryValidateCommonOptions(cliOptions, out PackGenCommonArgs validatedCommonArgs))
-            {
-                this.logger.LogError("Failed to validate common options.");
-                return false;
-            }
-
             if (cliOptions.OutputDirectory == null && cliOptions.Overwrite)
             {
                 this.logger.LogError("Cannot overwrite output directory when output directory is not specified.");
@@ -43,7 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.MetadataGen
                 outputDirectoryFullPath = Path.GetFullPath(cliOptions.OutputDirectory);
             }
 
-            validatedAppArgs = new MetadataGenArgs(validatedCommonArgs, outputDirectoryFullPath);
+            validatedAppArgs = new MetadataGenArgs(validatedCommonAppArgs, outputDirectoryFullPath);
             return true;
         }
     }

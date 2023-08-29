@@ -18,7 +18,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
             this.logger = logger;
         }
 
-        public abstract bool TryValidate(TOptions cliOptions, out TArgs? validatedAppArgs);
+        public bool TryValidate(TOptions cliOptions, out TArgs? validatedAppArgs)
+        {
+            if (!TryValidateCommonOptions(cliOptions, out PackGenCommonArgs validatedCommonArgs))
+            {
+                this.logger.LogError("Failed to validate common options.");
+                validatedAppArgs = null;
+                return false;
+            }
+
+            return TryValidateCore(cliOptions, validatedCommonArgs, out validatedAppArgs);
+        }
+
+        protected abstract bool TryValidateCore(TOptions options, PackGenCommonArgs validatedCommonAppArgs, out TArgs? validatedAppArgs);
 
         protected bool TryValidateCommonOptions(
             PackGenCommonOptions rawOptions,

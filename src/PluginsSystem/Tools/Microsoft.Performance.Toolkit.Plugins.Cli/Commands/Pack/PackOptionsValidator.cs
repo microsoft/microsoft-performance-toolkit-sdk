@@ -16,15 +16,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Pack
         {
         }
 
-        public override bool TryValidate(PackOptions cliOptions, out PackArgs? validatedAppArgs)
+        protected override bool TryValidateCore(PackOptions cliOptions, PackGenCommonArgs validatedCommonAppArgs, out PackArgs? validatedAppArgs)
         {
             validatedAppArgs = null;
-            if (!TryValidateCommonOptions(cliOptions, out PackGenCommonArgs validatedCommonArgs))
-            {
-                this.logger.LogError("Failed to validate common options.");
-                return false;
-            }
-
             if (cliOptions.OutputFilePath == null && cliOptions.Overwrite)
             {
                 this.logger.LogError("Cannot overwrite output file when output file is not specified.");
@@ -57,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Pack
                 }
             }
 
-            validatedAppArgs = new PackArgs(validatedCommonArgs, outputFileFullPath);
+            validatedAppArgs = new PackArgs(validatedCommonAppArgs, outputFileFullPath);
             return true;
         }
     }

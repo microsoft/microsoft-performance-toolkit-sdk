@@ -22,27 +22,23 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         public bool TryLocate(out string? manifestFilePath)
         {
             manifestFilePath = null;
-            foreach (string file in Directory.EnumerateFiles(this.sourceDir, "*", SearchOption.AllDirectories))
-            {
-                string fileName = Path.GetFileName(file);
-                if (fileName.Equals(Constants.BundledManifestName, StringComparison.OrdinalIgnoreCase))
-                {
-                    if (manifestFilePath != null)
-                    {
-                        this.logger.LogError($"Directory contains multiple manifests: {manifestFilePath}, {file}. Only one manifest is allowed.");
-                        return false;
-                    }
-                    manifestFilePath = file;
-                }
-            }
+            var matchedFiles = Directory.EnumerateFiles(this.sourceDir, Constants.BundledManifestName, SearchOption.AllDirectories).ToList();
 
-            if (manifestFilePath == null)
+            if (matchedFiles.Count == 0)
             {
                 this.logger.LogError($"Directory does not contain {Constants.BundledManifestName} as expected: {this.sourceDir}.");
                 return false;
             }
-
-            return true;
+            else if (matchedFiles.Count > 1)
+            {
+                this.logger.LogError($"Directory contains multiple manifests: {string.Join(", ", matchedFiles)}. Only one manifest is allowed.");
+                return false;
+            }
+            else
+            {
+                manifestFilePath = matchedFiles.First();
+                return true;
+            }
         }
     }
 }
