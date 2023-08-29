@@ -11,12 +11,33 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
+    /// <summary>
+    ///     Command to generate plugin metadata and contents metadata.
+    /// </summary>
     internal class MetadataGenCommand
         : PackGenCommonCommand<MetadataGenArgs>
     {
         private readonly ISerializer<PluginMetadata> metadataSerializer;
         private readonly ISerializer<PluginContentsMetadata> contentsMetadataSerializer;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="MetadataGenCommand"/>
+        /// </summary>
+        /// <param name="manifestLocatorFactory">
+        ///     The manifest locator factory to use to create manifest locators.
+        /// </param>
+        /// <param name="artifactsProcessor">
+        ///     The artifacts processor to use to process plugin artifacts.
+        /// </param>
+        /// <param name="metadataSerializer">
+        ///     The serializer to use to serialize the plugin metadata.
+        /// </param>
+        /// <param name="contentsMetadataSerializer">
+        ///     The serializer to use to serialize the plugin contents metadata.
+        /// </param>
+        /// <param name="logger">
+        ///     The logger to use.
+        /// </param>
         public MetadataGenCommand(
             IManifestLocatorFactory manifestLocatorFactory,
             IPluginArtifactsProcessor artifactsProcessor,

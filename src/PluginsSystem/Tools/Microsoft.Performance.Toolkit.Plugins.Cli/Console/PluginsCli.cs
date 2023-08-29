@@ -8,6 +8,9 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
 {
+    /// <summary>
+    ///     A command line interface for the plugins toolkit commands using the Command Line Parser Library.
+    /// </summary>
     internal class PluginsCli
     {
         private readonly ICommand<PackArgs> packCommand;
@@ -16,6 +19,24 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
         private readonly IOptionsValidator<MetadataGenOptions, MetadataGenArgs> metadataGenOptionsValidator;
         private readonly ILogger<PluginsCli> logger;
 
+        /// <summary>
+        ///     Creates a new instance of <see cref="PluginsCli"/>.
+        /// </summary>
+        /// <param name="packCommand">
+        ///     The command to run when the pack verb.
+        /// </param>
+        /// <param name="metadataGenCommand">
+        ///     The command to run when the metadata-gen verb.
+        /// </param>
+        /// <param name="packOptionsValidator">
+        ///     The validator for the pack options.
+        /// </param>
+        /// <param name="metadataGenOptionsValidator">
+        ///     The validator for the metadata-gen options.
+        /// </param>
+        /// <param name="logger">
+        ///     The logger to use.
+        /// </param>
         public PluginsCli(
             ICommand<PackArgs> packCommand,
             ICommand<MetadataGenArgs> metadataGenCommand,
@@ -30,6 +51,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
             this.logger = logger;
         }
 
+        /// <summary>
+        ///     Parses and runs the command line arguments.
+        /// </summary>
+        /// <param name="args">
+        ///     The command line arguments.
+        /// </param>
+        /// <returns>
+        ///     0 if the command was successful; otherwise, 1.
+        /// </returns>
         public int Run(string[] args)
         {
             ParserResult<object> result = Parser.Default.ParseArguments<PackOptions, MetadataGenOptions>(args);
@@ -47,7 +77,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
                 return 0;
             }
         }
-        
+
         private int RunPack(PackOptions packOptions)
         {
             if (!this.packOptionsValidator.TryValidate(packOptions, out PackArgs? packArgs))
@@ -66,10 +96,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
                 this.logger.LogError("Failed to validate metadata gen options.");
                 return 1;
             }
-            
+
             return this.metadataGenCommand.Run(metadataGenArgs);
         }
-
 
         private int HandleParseError(IEnumerable<Error> errs)
         {

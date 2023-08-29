@@ -3,6 +3,10 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
+   
+    /// <summary>
+    ///     Locates the manifest file specified on the command line.
+    /// </summary>
     internal class CommandLineManifestFileLocator
         : IManifestLocator
     {

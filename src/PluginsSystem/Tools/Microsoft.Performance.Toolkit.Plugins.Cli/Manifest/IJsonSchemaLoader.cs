@@ -5,8 +5,17 @@ using Newtonsoft.Json.Schema;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    public interface IJsonSchemaLoader
+    /// <summary>
+    ///     Loads the schema for the plugin manifest.
+    /// </summary>
+    internal interface IJsonSchemaLoader
     {
+        /// <summary>
+        ///     Loads the schema for the plugin manifest.
+        /// </summary>
+        /// <returns>
+        ///     The json schema.
+        /// </returns>
         JSchema LoadSchema();
     }
 }

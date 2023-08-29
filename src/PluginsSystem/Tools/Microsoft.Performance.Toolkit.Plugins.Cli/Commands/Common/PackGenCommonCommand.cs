@@ -1,10 +1,19 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
 {
+    /// <summary>
+    ///     Base class for commands that require the plugin to be processed.
+    /// </summary>
+    /// <typeparam name="TArgs">
+    ///     The type of arguments for the command.
+    /// </typeparam>
     internal abstract class PackGenCommonCommand<TArgs>
         : ICommand<TArgs>
         where TArgs : PackGenCommonArgs
@@ -23,6 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
             this.logger = logger;
         }
 
+        /// <inheritdoc />
         public int Run(TArgs args)
         {
             if (!TryGetProcessedPluginResult(args, out ProcessedPluginResult? processedSource))

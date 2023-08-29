@@ -7,9 +7,18 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.MetadataGen
 {
+    /// <summary>
+    ///     Validates <see cref="MetadataGenOptions"/> and converts them to <see cref="MetadataGenArgs"/>.
+    /// </summary>
     internal class MetadataGenOptionsValidator
         : PackGenCommonOptionsValidator<MetadataGenOptions, MetadataGenArgs>
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="MetadataGenOptionsValidator"/>
+        /// </summary>
+        /// <param name="logger">
+        ///     Logger to use for validation.
+        /// </param>
         public MetadataGenOptionsValidator(ILogger<MetadataGenOptionsValidator> logger)
             : base(logger)
         {

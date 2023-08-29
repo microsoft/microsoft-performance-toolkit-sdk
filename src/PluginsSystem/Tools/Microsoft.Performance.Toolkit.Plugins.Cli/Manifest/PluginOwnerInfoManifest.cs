@@ -3,8 +3,26 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    public class PluginOwnerInfoManifest
+    /// <summary>
+    ///     Contains information about the plugin owner in the manifest.
+    /// </summary>
+    public sealed class PluginOwnerInfoManifest
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PluginOwnerInfoManifest"/>
+        /// </summary>
+        /// <param name="name">
+        ///     The name of the plugin owner.
+        /// </param>
+        /// <param name="address">
+        ///     The address of the owner, if any.
+        /// </param>
+        /// <param name="emailAddresses">
+        ///     The email addresses of the owner, if any.
+        /// </param>
+        /// <param name="phoneNumbers">
+        ///     The phone numbers of the owner, if any.
+        /// </param>
         public PluginOwnerInfoManifest(
             string name,
             string address,
@@ -18,22 +36,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         }
 
         /// <summary>
-        ///     Gets or sets the name of the plugin owner.
+        ///     Gets the name of the plugin owner.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        ///     Gets or sets the address of the owner, if any.
+        ///     Gets the address of the owner, if any.
         /// </summary>
         public string Address { get; }
 
         /// <summary>
-        ///     Gets or sets the email addresses of the owner, if any.
+        ///     Gets the email addresses of the owner, if any.
         /// </summary>
         public IEnumerable<string> EmailAddresses { get; }
 
         /// <summary>
-        ///     Gets or sets the phone numbers of the owner, if any.
+        ///     Gets the phone numbers of the owner, if any.
         /// </summary>
         public IEnumerable<string> PhoneNumbers { get; }
 

@@ -10,13 +10,28 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Package;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Packaging
 {
-    public sealed class ZipPluginPackageBuilder
+    /// <summary>
+    ///     Creates a plugin package from a processed plugin directory using the zip format.
+    /// </summary>
+    internal sealed class ZipPluginPackageBuilder
         : IPackageBuilder
     {
         private readonly ISerializer<PluginMetadata> metadataSerializer;
         private readonly ISerializer<PluginContentsMetadata> contentsMetadataSerializer;
         private readonly ILogger<ZipPluginPackageBuilder> logger;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ZipPluginPackageBuilder"/>.
+        /// </summary>
+        /// <param name="serializer">
+        ///     The serializer to use to serialize the plugin metadata.
+        /// </param>
+        /// <param name="contentsMetadataSerializer">
+        ///     The serializer to use to serialize the plugin contents metadata.
+        /// </param>
+        /// <param name="logger">
+        ///     The logger to use.
+        /// </param>
         public ZipPluginPackageBuilder(
             ISerializer<PluginMetadata> serializer,
             ISerializer<PluginContentsMetadata> contentsMetadataSerializer,
@@ -27,6 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Packaging
             this.logger = logger;
         }
 
+        /// <inheritdoc/>
         public void Build(ProcessedPluginResult processedDir, string destFilePath)
         {
             using var stream = new FileStream(destFilePath, FileMode.Create, FileAccess.Write, FileShare.None);

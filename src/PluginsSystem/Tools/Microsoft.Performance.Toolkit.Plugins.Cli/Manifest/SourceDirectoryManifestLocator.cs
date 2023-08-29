@@ -6,12 +6,24 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
+    /// <summary>
+    ///     Locates the manifest file in the source directory.
+    /// </summary>
     internal class SourceDirectoryManifestLocator
         : IManifestLocator
     {
         private readonly string sourceDir;
         private readonly ILogger<SourceDirectoryManifestLocator> logger;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="SourceDirectoryManifestLocator"/>
+        /// </summary>
+        /// <param name="sourceDirectory">
+        ///     The source directory to search for the manifest file.
+        /// </param>
+        /// <param name="logger">
+        ///     The logger to use.
+        /// </param>
         public SourceDirectoryManifestLocator(
             string sourceDirectory,
             ILogger<SourceDirectoryManifestLocator> logger)
@@ -20,6 +32,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             this.logger = logger;
         }
 
+        /// <inheritdoc />
         public bool TryLocate([NotNullWhen(true)] out string? manifestFilePath)
         {
             manifestFilePath = null;

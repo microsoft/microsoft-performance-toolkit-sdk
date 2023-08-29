@@ -6,17 +6,27 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Commands;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
+    /// <summary>
+    ///     A factory for creating <see cref="IManifestLocator"/> instances.
+    /// </summary>
     internal class ManifestLocatorFactory
-    : IManifestLocatorFactory
+        : IManifestLocatorFactory
     {
         private readonly ILoggerFactory loggerFactory;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ManifestLocatorFactory"/>
+        /// </summary>
+        /// <param name="loggerFactory">
+        ///     The logger factory to use.
+        /// </param>
         public ManifestLocatorFactory(
             ILoggerFactory loggerFactory)
         {
             this.loggerFactory = loggerFactory;
         }
 
+        /// <inheritdoc />
         public IManifestLocator Create(PackGenCommonArgs args)
         {
             if (args.ManifestFileFullPath != null)

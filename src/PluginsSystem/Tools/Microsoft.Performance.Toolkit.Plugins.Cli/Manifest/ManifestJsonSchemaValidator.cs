@@ -7,13 +7,25 @@ using Newtonsoft.Json.Schema;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    public sealed class ManifestJsonSchemaValidator
+    /// <summary>
+    ///     Validates a manifest file against the schema.
+    /// </summary>
+    internal sealed class ManifestJsonSchemaValidator
         : IManifestFileValidator
     {
         private readonly IJsonSchemaLoader schemaLoader;
         private readonly ILogger logger;
         private readonly Lazy<JSchema> schema;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ManifestJsonSchemaValidator"/>
+        /// </summary>
+        /// <param name="schemaLoader">
+        ///     The schema loader to use.
+        /// </param>
+        /// <param name="logger">
+        ///     The logger to use.
+        /// </param>
         public ManifestJsonSchemaValidator(IJsonSchemaLoader schemaLoader, ILogger<ManifestJsonSchemaValidator> logger)
         {
             this.schemaLoader = schemaLoader;
@@ -21,6 +33,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             this.logger = logger;
         }
 
+        /// <inheritdoc />
         public bool IsValid(string manifestPath, out List<string> errorMessages)
         {
             errorMessages = new List<string>();

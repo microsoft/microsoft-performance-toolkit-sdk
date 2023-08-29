@@ -16,6 +16,9 @@ using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 {
+    /// <summary>
+    ///     Processes a plugin's artifacts.
+    /// </summary>
     internal class PluginArtifactsProcessor
         : IPluginArtifactsProcessor
     {
@@ -33,6 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             this.logger = logger;
         }
 
+        /// <inheritdoc />
         public bool TryProcess(PluginArtifacts artifacts, [NotNullWhen(true)] out ProcessedPluginResult? processedPlugin)
         {
             processedPlugin = null;            

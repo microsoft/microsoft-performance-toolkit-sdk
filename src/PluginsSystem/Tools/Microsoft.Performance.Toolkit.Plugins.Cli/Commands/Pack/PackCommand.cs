@@ -10,11 +10,29 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 {
+    /// <summary>
+    ///     This command is used to pack a plugin into a plugin package.
+    /// </summary>
     internal sealed class PackCommand
         : PackGenCommonCommand<PackArgs>
     {
         private readonly IPackageBuilder packageBuilder;
 
+        /// <summary>
+        ///     Creates a new instance of <see cref="PackCommand"/>.
+        /// </summary>
+        /// <param name="manifestLocatorFactory">
+        ///     Factory for creating <see cref="IManifestLocator"/> instances.
+        /// </param>
+        /// <param name="artifactsProcessor">
+        ///     The processor to use for plugin artifacts.
+        /// </param>
+        /// <param name="packageBuilder">
+        ///     The builder to use for creating plugin packages.
+        /// </param>
+        /// <param name="logger">
+        ///     The logger to use.
+        /// </param>
         public PackCommand(
             IManifestLocatorFactory manifestLocatorFactory,
             IPluginArtifactsProcessor artifactsProcessor,

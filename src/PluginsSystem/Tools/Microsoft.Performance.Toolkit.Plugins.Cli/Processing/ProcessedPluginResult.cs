@@ -20,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
     /// <param name="ContentsMetadata">
     ///     The generated plugin contents metadata.
     /// </param>
-    public record ProcessedPluginResult(
+    internal record ProcessedPluginResult(
         string SourceDirectory,
         IReadOnlyList<string> ContentFiles,
         PluginMetadata Metadata,

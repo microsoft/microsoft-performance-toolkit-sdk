@@ -3,6 +3,9 @@
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
+    /// <summary>
+    ///     Constants used by the CLI.
+    /// </summary>
     public static class Constants
     {
         public const string ManifestSchemaFilePath = "Manifest/PluginManifestSchema.json";

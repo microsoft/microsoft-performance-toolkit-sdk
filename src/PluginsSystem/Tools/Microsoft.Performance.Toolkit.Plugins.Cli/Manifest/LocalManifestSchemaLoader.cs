@@ -6,12 +6,21 @@ using Newtonsoft.Json.Schema;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
-    public sealed class LocalManifestSchemaLoader
+    /// <summary>
+    ///     Loads the manifest schema from a local file.
+    /// </summary>
+    internal sealed class LocalManifestSchemaLoader
         : IJsonSchemaLoader
     {
         private readonly ILogger<LocalManifestSchemaLoader> logger;
         private readonly Lazy<string> schemaFilePath;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="LocalManifestSchemaLoader"/>
+        /// </summary>
+        /// <param name="logger">
+        ///     Logger to use.
+        /// </param>
         public LocalManifestSchemaLoader(ILogger<LocalManifestSchemaLoader> logger)
         {
             this.logger = logger;
@@ -20,6 +29,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
                 Constants.ManifestSchemaFilePath));
         }
 
+        /// <inheritdoc />
         public JSchema LoadSchema()
         {
             string? fileText = File.ReadAllText(this.schemaFilePath.Value);
