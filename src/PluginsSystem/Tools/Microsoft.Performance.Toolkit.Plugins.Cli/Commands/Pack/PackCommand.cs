@@ -51,7 +51,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
                 string destFileName = destFilePath ??
                     Path.Combine(Environment.CurrentDirectory, $"{processedSource!.Metadata.Identity}{PackageConstants.PluginPackageExtension}");
 
-                destFilePath = Utils.GetValidDestFileName(destFileName);
+                destFilePath = Utils.GetAlterDestFilePath(destFileName);
             }
 
             string tmpFile = Path.GetTempFileName();
