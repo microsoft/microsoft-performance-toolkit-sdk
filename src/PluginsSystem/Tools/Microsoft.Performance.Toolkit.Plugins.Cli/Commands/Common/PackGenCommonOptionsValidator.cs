@@ -8,8 +8,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
 {
     internal abstract class PackGenCommonOptionsValidator<TOptions, TArgs>
        : IOptionsValidator<TOptions, TArgs>
-       where TOptions : PackGenCommonOptions
-       where TArgs : PackGenCommonArgs
+        where TOptions : PackGenCommonOptions
+        where TArgs : PackGenCommonArgs
     {
         protected readonly ILogger<PackGenCommonOptionsValidator<TOptions, TArgs>> logger;
 
@@ -31,7 +31,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
 
         protected abstract bool TryValidateCore(TOptions options, PackGenCommonArgs validatedCommonAppArgs, out TArgs? validatedAppArgs);
 
-        protected bool TryValidateCommonOptions(
+        private bool TryValidateCommonOptions(
             PackGenCommonOptions rawOptions,
             out PackGenCommonArgs validatedAppArgs)
         {

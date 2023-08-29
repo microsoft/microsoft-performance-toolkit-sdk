@@ -34,7 +34,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
 
         protected abstract int RunCore(TArgs args, ProcessedPluginResult processedSource);
 
-        protected bool TryGetProcessedPluginResult(PackGenCommonArgs args, out ProcessedPluginResult? processedPluginResult)
+        private bool TryGetProcessedPluginResult(PackGenCommonArgs args, out ProcessedPluginResult? processedPluginResult)
         {
             processedPluginResult = null;
             IManifestLocator manifestLocator = this.manifestLocatorFactory.Create(args);
