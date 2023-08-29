@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
 
@@ -34,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
 
         protected abstract int RunCore(TArgs args, ProcessedPluginResult processedSource);
 
-        private bool TryGetProcessedPluginResult(PackGenCommonArgs args, out ProcessedPluginResult? processedPluginResult)
+        private bool TryGetProcessedPluginResult(PackGenCommonArgs args, [NotNullWhen(true)] out ProcessedPluginResult? processedPluginResult)
         {
             processedPluginResult = null;
             IManifestLocator manifestLocator = this.manifestLocatorFactory.Create(args);
@@ -44,7 +45,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
                 return false;
             }
 
-            var artifacts = new PluginArtifacts(args.SourceDirectoryFullPath, manifestFilePath!);
+            var artifacts = new PluginArtifacts(args.SourceDirectoryFullPath, manifestFilePath);
             if (!this.artifactsProcessor.TryProcess(artifacts, out processedPluginResult))
             {
                 this.logger.LogError("Failed to process plugin artifacts.");

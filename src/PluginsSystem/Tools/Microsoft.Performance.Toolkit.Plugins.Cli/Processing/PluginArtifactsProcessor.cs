@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.SDK;
@@ -32,7 +33,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             this.logger = logger;
         }
 
-        public bool TryProcess(PluginArtifacts artifacts, out ProcessedPluginResult? processedPlugin)
+        public bool TryProcess(PluginArtifacts artifacts, [NotNullWhen(true)] out ProcessedPluginResult? processedPlugin)
         {
             processedPlugin = null;            
             if (!TryProcessSourceDir(artifacts.SourceDirectoryFullPath, out ProcessedPluginSourceDirectory? processedDir))
@@ -45,7 +46,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 
             try
             {
-                if (!this.manifestValidator.IsValid(manifestFilePath!, out List<string> validationMessages))
+                if (!this.manifestValidator.IsValid(manifestFilePath, out List<string> validationMessages))
                 {
                     string errors = string.Join(Environment.NewLine, validationMessages);
                     this.logger.LogWarning($"Manifest file failed some json schema format validation checks: \n{errors}");
@@ -58,27 +59,27 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 return false;
             }
 
-            if (!this.manifestReader.TryRead(manifestFilePath!, out PluginManifest? manifest))
+            if (!this.manifestReader.TryRead(manifestFilePath, out PluginManifest? manifest))
             {
                 this.logger.LogError($"Failed to read manifest file {manifestFilePath}.");
                 return false;
             }
             
-            PluginMetadata metadata = GenerateMetadata(processedDir!, manifest!);
+            PluginMetadata metadata = GenerateMetadata(processedDir, manifest);
             
-            if (!TryGenerateContentsMetadata(processedDir!, out PluginContentsMetadata? contentsMetadata))
+            if (!TryGenerateContentsMetadata(processedDir, out PluginContentsMetadata? contentsMetadata))
             {
                 this.logger.LogError($"Failed to generate contents metadata for plugin.");
                 return false;
             }
 
-            processedPlugin = new ProcessedPluginResult(artifacts.SourceDirectoryFullPath, processedDir!.AllContentFilePaths, metadata, contentsMetadata!);
+            processedPlugin = new ProcessedPluginResult(artifacts.SourceDirectoryFullPath, processedDir.AllContentFilePaths, metadata, contentsMetadata!);
             return true;
         }
 
         private bool TryProcessSourceDir(
            string sourceDir,
-           out ProcessedPluginSourceDirectory? processedDir)
+           [NotNullWhen(true)] out ProcessedPluginSourceDirectory? processedDir)
         {
             processedDir = null;
             string? manifestFilePath = null;

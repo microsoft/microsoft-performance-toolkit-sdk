@@ -56,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
                 return 1;
             }
 
-            return this.packCommand.Run(packArgs!);
+            return this.packCommand.Run(packArgs);
         }
 
         private int RunMetadataGen(MetadataGenOptions metadataGenOptions)
@@ -67,7 +67,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console
                 return 1;
             }
             
-            return this.metadataGenCommand.Run(metadataGenArgs!);
+            return this.metadataGenCommand.Run(metadataGenArgs);
         }
 
 

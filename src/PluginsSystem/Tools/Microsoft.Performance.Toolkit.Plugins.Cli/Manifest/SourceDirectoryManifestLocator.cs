@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
@@ -19,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             this.logger = logger;
         }
 
-        public bool TryLocate(out string? manifestFilePath)
+        public bool TryLocate([NotNullWhen(true)] out string? manifestFilePath)
         {
             manifestFilePath = null;
             var matchedFiles = Directory.EnumerateFiles(this.sourceDir, Constants.BundledManifestName, SearchOption.AllDirectories).ToList();

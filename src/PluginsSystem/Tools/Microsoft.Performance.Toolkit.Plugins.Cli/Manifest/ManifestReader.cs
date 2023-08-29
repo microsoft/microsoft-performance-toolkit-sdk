@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
@@ -21,7 +22,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             this.logger = logger;
         }
 
-        public bool TryRead(string manifestFilePath, out PluginManifest? pluginManifest)
+        public bool TryRead(string manifestFilePath, [NotNullWhen(true)] out PluginManifest? pluginManifest)
         {
             pluginManifest = null;
             try

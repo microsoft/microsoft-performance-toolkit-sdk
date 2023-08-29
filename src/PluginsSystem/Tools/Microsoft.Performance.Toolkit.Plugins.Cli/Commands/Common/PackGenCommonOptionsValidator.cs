@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs;
 
@@ -18,7 +19,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Common
             this.logger = logger;
         }
 
-        public bool TryValidate(TOptions cliOptions, out TArgs? validatedAppArgs)
+        public bool TryValidate(TOptions cliOptions, [NotNullWhen(true)] out TArgs? validatedAppArgs)
         {
             if (!TryValidateCommonOptions(cliOptions, out PackGenCommonArgs validatedCommonArgs))
             {

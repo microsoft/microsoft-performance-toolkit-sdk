@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Microsoft.Performance.Toolkit.Plugins.Cli
 {
     /// <summary>
@@ -26,6 +28,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         /// <returns>
         ///     <c>true</c> if the options are valid; <c>false</c> otherwise.
         /// </returns>
-        bool TryValidate(TOptions cliOptions, out TArgs? validatedAppArgs);
+        bool TryValidate(TOptions cliOptions, [NotNullWhen(true)] out TArgs? validatedAppArgs);
     }
 }

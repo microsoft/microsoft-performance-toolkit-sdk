@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 {
     /// <summary>
@@ -20,6 +22,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
         /// <returns>
         ///     <c>true</c> if processing was successful; <c>false</c> otherwise.
         /// </returns>
-        public bool TryProcess(PluginArtifacts artifacts, out ProcessedPluginResult? processedPlugin);
+        public bool TryProcess(PluginArtifacts artifacts, [NotNullWhen(true)] out ProcessedPluginResult? processedPlugin);
     }
 }
