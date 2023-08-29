@@ -5,7 +5,10 @@ using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Commands;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Commands.MetadataGen;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Pack;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Console;
+using Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Processing;
@@ -40,6 +43,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 .AddSingleton<PluginsCli>()
                 .AddSingleton<ICommand<PackArgs>, PackCommand>()
                 .AddSingleton<ICommand<MetadataGenArgs>, MetadataGenCommand>()
+                .AddSingleton<IOptionsValidator<PackOptions, PackArgs>, PackOptionsValidator>()
+                .AddSingleton<IOptionsValidator<MetadataGenOptions, MetadataGenArgs>, MetadataGenOptionsValidator>()
                 .AddSingleton<IPluginArtifactsProcessor, PluginArtifactsProcessor>()
                 .AddSingleton<IPackageBuilder, ZipPluginPackageBuilder>()
                 .AddSingleton<ISerializer<PluginManifest>>(SerializationUtils.GetJsonSerializer<PluginManifest>(new JsonSerializerOptions
