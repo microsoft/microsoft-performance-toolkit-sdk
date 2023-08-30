@@ -138,7 +138,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                             return false;
                         }
                     }
-
                 }
                 else if (fileName.Equals(Constants.BundledManifestName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -173,6 +172,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 
         private PluginMetadata GenerateMetadata(ProcessedPluginSourceDirectory processedDir, PluginManifest manifest)
         {
+            this.logger.LogTrace($"Generating metadata for plugin {manifest.Identity.Id}-{manifest.Identity.Version}");
+
             PluginIdentity identity = new(manifest.Identity.Id, manifest.Identity.Version);
             ulong installedSize = (ulong)processedDir.PluginSize;
             IEnumerable<PluginOwnerInfo> owners = manifest.Owners.Select(

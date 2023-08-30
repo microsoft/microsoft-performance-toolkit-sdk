@@ -34,6 +34,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             this.logger = logger;
         }
 
+        /// <inheritdoc />
         public bool TryRead(string manifestFilePath, [NotNullWhen(true)] out PluginManifest? pluginManifest)
         {
             pluginManifest = null;

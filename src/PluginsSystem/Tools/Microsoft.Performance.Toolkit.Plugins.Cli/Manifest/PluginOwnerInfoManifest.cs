@@ -54,6 +54,5 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         ///     Gets the phone numbers of the owner, if any.
         /// </summary>
         public IEnumerable<string> PhoneNumbers { get; }
-
     }
 }

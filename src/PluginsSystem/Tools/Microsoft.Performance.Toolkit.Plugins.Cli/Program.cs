@@ -60,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 .AddSingleton<IManifestLocatorFactory, ManifestLocatorFactory>()
                 .BuildServiceProvider();
 
-             return serviceProvider.GetRequiredService<PluginsCli>();
+            return serviceProvider.GetRequiredService<PluginsCli>();
         }
     }
 }
