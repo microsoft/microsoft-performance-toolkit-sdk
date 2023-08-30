@@ -55,7 +55,7 @@ namespace Microsoft.Performance.SDK
         ///     The type to check.
         /// </param>
         /// <returns>
-        ///     <c>trye</c> if <paramref name="type"/> represents a nullable
+        ///     <c>true</c> if <paramref name="type"/> represents a nullable
         ///     type; <c>false</c> otherwise.
         /// </returns>
         public static bool IsNullableType(this Type type)

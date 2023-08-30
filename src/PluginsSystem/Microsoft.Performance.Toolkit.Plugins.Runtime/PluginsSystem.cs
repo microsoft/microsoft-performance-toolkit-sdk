@@ -9,6 +9,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
+using Microsoft.Performance.Toolkit.Plugins.Core.Packaging;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Core.Transport;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Common;
@@ -50,6 +51,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         /// <param name="installedPluginLoader">
         ///     The installed plugin loader.
         /// </param>
+        /// <param name="pluginPackageReader">
+        ///     The plugin package reader.
+        /// </param>
         public PluginsSystem(
             IPluginsInstaller installer,
             IPluginsDiscoveryOrchestrator discoverer,
@@ -57,7 +61,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             IPluginsSystemResourceLoader<IPluginDiscovererProvider> pluginDiscovererProviderLoader,
             IPluginsSystemResourceLoader<IPluginFetcher> pluginFetcherLoader,
             IObsoletePluginsRemover obsoletePluginsRemover,
-            IInstalledPluginLoader installedPluginLoader)
+            IInstalledPluginLoader installedPluginLoader,
+            IPluginPackageReader pluginPackageReader)
         {
             Guard.NotNull(installer, nameof(installer));
             Guard.NotNull(discoverer, nameof(discoverer));
@@ -66,6 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             Guard.NotNull(pluginFetcherLoader, nameof(pluginFetcherLoader));
             Guard.NotNull(obsoletePluginsRemover, nameof(obsoletePluginsRemover));
             Guard.NotNull(installedPluginLoader, nameof(installedPluginLoader));
+            Guard.NotNull(pluginPackageReader, nameof(pluginPackageReader));
 
             this.Installer = installer;
             this.Discoverer = discoverer;
@@ -74,6 +80,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.FetcherResourceLoader = pluginFetcherLoader;
             this.ObsoletePluginsRemover = obsoletePluginsRemover;
             this.InstalledPluginLoader = installedPluginLoader;
+            this.PluginPackageReader = pluginPackageReader;
         }
 
         /// <summary>
@@ -105,7 +112,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             string pluginsSystemRoot = Path.GetFullPath(root);
 
-            List<IPluginValidator> validatorsToUse = new List<IPluginValidator>();
+            var validatorsToUse = new List<IPluginValidator>();
 
             if (options.ValidateSdkVersion)
             {
@@ -183,7 +190,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 discovererProviderRepo,
                 fetcherRepo,
                 obsoletePluginsRemover,
-                pluginLoader);
+                pluginLoader,
+                packageReader);
         }
 
         /// <summary>
@@ -220,5 +228,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         ///     Gets the loader of installed plugins.
         /// </summary>
         public IInstalledPluginLoader InstalledPluginLoader { get; }
+
+        /// <summary>
+        ///     Gets the plugin package reader.
+        /// </summary>
+        public IPluginPackageReader PluginPackageReader { get; }
     }
 }
