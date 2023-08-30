@@ -47,7 +47,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs
             'm',
             "manifest",
             Required = false,
-            HelpText = "Path to the plugin manifest file. If not specified, the program will attempt to find the manifest in the source directory.")]
+            HelpText = $"Path to the plugin manifest file. If not specified, the tool searches the source directory for file named {Constants.BundledManifestName}")]
         public string? ManifestFilePath { get; }
     }
 }

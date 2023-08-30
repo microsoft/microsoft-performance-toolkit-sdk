@@ -10,7 +10,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Console.Verbs
     /// <summary>
     ///     Options for the metadata-gen verb.
     /// </summary>
-    [Verb("metadata-gen", HelpText = $"Generates a {PackageConstants.PluginMetadataFileName} file from the specified source directory.")]
+    [Verb("metadata-gen", HelpText = $"Generates a {PackageConstants.PluginMetadataFileName} and a {PackageConstants.PluginContentsMetadataFileName} file from the specified plugin source directory.")]
     internal class MetadataGenOptions
         : PackGenCommonOptions
     {
