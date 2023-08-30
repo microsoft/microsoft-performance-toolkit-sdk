@@ -109,10 +109,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                     {
                         assembly = Assembly.LoadFrom(file);
                     }
-                    catch (BadImageFormatException ex)
+                    catch (BadImageFormatException)
                     {
-                        this.logger.LogError($"Unable to load file {fileName}: {ex.Message}");
-                        return false;
+                        // TODO: Add support for excluding certain files from being loaded.
+                        // Skipping this for now.
+                        continue;
                     }
                     catch (FileLoadException ex)
                     {
