@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Processing
     public static partial class Projection
     {
         /// <summary>
-        ///     Creates intances of <see cref="IProjection{TSource, TResult}"/> that are sensitive to the current visible domain.
+        ///     Creates instances of <see cref="IProjection{TSource, TResult}"/> that are sensitive to the current visible domain.
         /// </summary>
         public static class ClipTimeToVisibleDomain
         {
