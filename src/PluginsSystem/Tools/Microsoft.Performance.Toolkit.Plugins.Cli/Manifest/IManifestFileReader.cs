@@ -17,10 +17,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         ///     The path to the manifest file.
         /// </param>
         /// <param name="pluginManifest">
-        ///     The read manifest, if it could be read.
+        ///     The parsed manifest file, if the manifest could be parsed; <c>null</c> otherwise.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the manifest could be read; <c>false</c> otherwise.
+        ///     <c>true</c> if the manifest could be parsed; <c>false</c> otherwise.
         /// </returns>
         bool TryRead(string manifestFilePath, [NotNullWhen(true)] out PluginManifest? pluginManifest);
     }

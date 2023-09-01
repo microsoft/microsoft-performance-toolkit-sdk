@@ -29,14 +29,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         /// <inheritdoc />
         public IManifestLocator Create(PackGenCommonArgs args)
         {
-            if (args.ManifestFileFullPath != null)
+            if (args.ManifestFileFullPath == null)
             {
-                return new CommandLineManifestFileLocator(args.ManifestFileFullPath);
-            }
-            else
-            {
+
                 return new SourceDirectoryManifestLocator(args.SourceDirectoryFullPath, this.loggerFactory.CreateLogger<SourceDirectoryManifestLocator>());
             }
+
+            return new CommandLineManifestFileLocator(args.ManifestFileFullPath);
         }
     }
 }

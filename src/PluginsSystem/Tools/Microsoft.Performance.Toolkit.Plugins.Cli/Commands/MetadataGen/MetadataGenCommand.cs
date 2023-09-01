@@ -57,13 +57,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands
 
             bool outputSpecified = args.OutputDirectoryFullPath != null;
             string? outputDirectory = outputSpecified ? args.OutputDirectoryFullPath : Environment.CurrentDirectory;
+            bool shouldOverwrite = outputSpecified && args.Overwrite;
 
             string destMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginMetadataFileName}");
-            string validDestMetadataFileName = outputSpecified && args.Overwrite ?
+            string validDestMetadataFileName = shouldOverwrite ?
                 destMetadataFileName : Utils.GetAlterDestFilePath(destMetadataFileName);
 
             string destContentsMetadataFileName = Path.Combine(outputDirectory!, $"{metadata.Identity}-{PackageConstants.PluginContentsMetadataFileName}");
-            string validDestContentsMetadataFileName = outputSpecified && args.Overwrite ?
+            string validDestContentsMetadataFileName = shouldOverwrite ?
                 destContentsMetadataFileName : Utils.GetAlterDestFilePath(destContentsMetadataFileName);
 
             using (FileStream fileStream = File.Open(validDestMetadataFileName, FileMode.Create, FileAccess.Write, FileShare.None))

@@ -40,7 +40,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Commands.Pack
                 }
                 catch (Exception ex)
                 {
-                    this.logger.LogError("Unable to get full path to output file.", ex);
+                    this.logger.LogError($"Unable to get full path to output file: {ex.Message}");
                     return false;
                 }
 
