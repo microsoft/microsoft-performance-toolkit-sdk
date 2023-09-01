@@ -3,15 +3,16 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
+using NuGet.Versioning;
 using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProcessingSourceInfo;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
@@ -25,6 +26,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
         private readonly IManifestFileValidator manifestValidator;
         private readonly IManifestFileReader manifestReader;
         private readonly ILogger<PluginArtifactsProcessor> logger;
+        private static readonly string? sdkAssemblyName = SdkAssembly.Assembly.GetName().Name;
 
         public PluginArtifactsProcessor(
             IManifestFileValidator manifestValidator,
@@ -68,10 +70,36 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 this.logger.LogError($"Failed to read manifest file {manifestFilePath}.");
                 return false;
             }
+
+            var versionChecker = new TrackingVersionChecker();
+            using PluginsLoader pluginsLoader = new(
+                new IsolationAssemblyLoader(),
+                x => new SandboxPreloadValidator(x, versionChecker),
+                Logger.Create<PluginsLoader>());
+
+            if (!pluginsLoader.TryLoadPlugin(processedDir.FullPath, out ErrorInfo errorInfo))
+            {
+                // TODO: Check error codes and throw more specific exceptions
+                this.logger.LogError($"Failed to load plugin from {processedDir.FullPath}: {errorInfo.Message}");
+                return false;
+            }
+
+            if (versionChecker.VerifiedVersions.Count == 0)
+            {
+                this.logger.LogError($"Invalid plugin: {sdkAssemblyName} is not referenced anywhere in the plugin.");
+                return false;
+            }
+
+            if (versionChecker.VerifiedVersions.Count > 1)
+            {
+                this.logger.LogError($"Mutiple versions of {sdkAssemblyName} are referenced in the plugin: " +
+                    $"{string.Join(", ", versionChecker.VerifiedVersions)}. Only one version is allowed.");
+                return false;
+            }
+
+            PluginMetadata metadata = GenerateMetadata(processedDir, manifest, versionChecker.VerifiedVersions.Single());
             
-            PluginMetadata metadata = GenerateMetadata(processedDir, manifest);
-            
-            if (!TryGenerateContentsMetadata(processedDir, out PluginContentsMetadata? contentsMetadata))
+            if (!TryGenerateContentsMetadata(pluginsLoader, out PluginContentsMetadata? contentsMetadata))
             {
                 this.logger.LogError($"Failed to generate contents metadata for plugin.");
                 return false;
@@ -87,7 +115,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
         {
             processedDir = null;
             string? manifestFilePath = null;
-            Version? sdkVersion = null;
             long totalSize = 0;
             int dllCount = 0;
             var filesToPack = new List<string>();
@@ -98,46 +125,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 if (Path.GetExtension(file).Equals(".dll", StringComparison.OrdinalIgnoreCase))
                 {
                     dllCount++;
-                    if (Path.GetFileNameWithoutExtension(file).Equals(Constants.SdkAssemblyName, StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetFileNameWithoutExtension(file).Equals(sdkAssemblyName, StringComparison.OrdinalIgnoreCase))
                     {
-                        this.logger.LogError($"{Constants.SdkAssemblyName} should not present in the directory.");
+                        this.logger.LogError($"{sdkAssemblyName} should not present in the directory.");
                         return false;
-                    }
-
-                    Assembly assembly;
-                    try
-                    {
-                        assembly = Assembly.LoadFrom(file);
-                    }
-                    catch (BadImageFormatException)
-                    {
-                        // TODO: Add support for excluding certain files from being loaded.
-                        // Skipping this for now.
-                        continue;
-                    }
-                    catch (FileLoadException ex)
-                    {
-                        this.logger.LogError($"Unable to load file {fileName}: {ex.Message}");
-                        return false;
-                    }
-
-                    AssemblyName? sdkRef = assembly.GetReferencedAssemblies()
-                        .FirstOrDefault(assemblyName => assemblyName.Name?.Equals(Constants.SdkAssemblyName, StringComparison.OrdinalIgnoreCase) == true);
-
-                    // Check if the assembly references the target dependency
-                    if (sdkRef != null)
-                    {
-                        Version? curVersion = sdkRef.Version;
-                        if (sdkVersion == null)
-                        {
-                            sdkVersion = curVersion;
-                        }
-                        else if (sdkVersion != curVersion)
-                        {
-                            this.logger.LogError(
-                                $"Mutiple versions of {Constants.SdkAssemblyName} are referenced in the plugin: {sdkVersion} and {curVersion}. Only one version is allowed.");
-                            return false;
-                        }
                     }
                 }
                 else if (fileName.Equals(Constants.BundledManifestName, StringComparison.OrdinalIgnoreCase))
@@ -155,23 +146,16 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 return false;
             }
 
-            if (sdkVersion == null)
-            {
-                this.logger.LogError($"Invalid plugin: {Constants.SdkAssemblyName} is not referenced anywhere in the plugin.");
-                return false;
-            }
-
             processedDir = new ProcessedPluginSourceDirectory(
                 sourceDir,
                 filesToPack,
                 manifestFilePath,
-                sdkVersion,
                 totalSize);
             
             return true;
         }
 
-        private PluginMetadata GenerateMetadata(ProcessedPluginSourceDirectory processedDir, PluginManifest manifest)
+        private PluginMetadata GenerateMetadata(ProcessedPluginSourceDirectory processedDir, PluginManifest manifest, SemanticVersion sdkVersion)
         {
             this.logger.LogTrace($"Generating metadata for plugin {manifest.Identity.Id}-{manifest.Identity.Version}");
 
@@ -179,32 +163,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             ulong installedSize = (ulong)processedDir.PluginSize;
             IEnumerable<PluginOwnerInfo> owners = manifest.Owners.Select(
                 o => new PluginOwnerInfo(o.Name, o.Address, o.EmailAddresses.ToArray(), o.PhoneNumbers.ToArray()));
-            Version sdkVersion = processedDir.SdkVersion;
+            Version convertedSDKVersion = new(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch);
 
             PluginMetadata metadata = new(
                 identity,
                 installedSize,
                 manifest.DisplayName,
                 manifest.Description,
-                sdkVersion,
+                convertedSDKVersion,
                 manifest.ProjectUrl, owners);
 
             return metadata;
         }
 
-        private bool TryGenerateContentsMetadata(ProcessedPluginSourceDirectory processedDir, out PluginContentsMetadata? contentsMetadata)
+        private bool TryGenerateContentsMetadata(PluginsLoader pluginsLoader, out PluginContentsMetadata? contentsMetadata)
         {
-            contentsMetadata = null;
-            string sourceDir = processedDir.FullPath;
-            using PluginsLoader pluginsLoader = new();
-
-            if (!pluginsLoader.TryLoadPlugin(sourceDir, out ErrorInfo errorInfo))
-            {
-                // TODO: Check error codes and throw more specific exceptions
-                this.logger.LogError($"Failed to load plugin from {sourceDir}: {errorInfo.Message}");
-                return false;
-            }
-
             var processingSourcesMetadata = pluginsLoader.LoadedProcessingSources.Select(x => CreateProcessingSourceMetadata(x)).ToList();
 
             // TODO: #294 Figure out how to extract description of a datacooker.
@@ -281,7 +254,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             string FullPath,
             IReadOnlyList<string> AllContentFilePaths,
             string? ManifestFilePath,
-            Version SdkVersion,
             long PluginSize);
     }
 }

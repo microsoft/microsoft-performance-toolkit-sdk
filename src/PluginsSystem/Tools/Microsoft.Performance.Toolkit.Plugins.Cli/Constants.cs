@@ -10,6 +10,5 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
     {
         public const string ManifestSchemaFilePath = "Manifest/PluginManifestSchema.json";
         public const string BundledManifestName = "pluginManifest.json";
-        public const string SdkAssemblyName = "Microsoft.Performance.SDK";
     }
 }
