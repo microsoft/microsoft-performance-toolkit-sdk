@@ -1,41 +1,41 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using NuGet.Versioning;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
-    ///     A <see cref="VersionChecker"/> that keeps track of the versions it has verified to be supported.
+    ///     A <see cref="VersionChecker"/> that keeps track of the versions it has checked and whether they are supported.
     /// </summary>
     public class TrackingVersionChecker
         : VersionChecker
     {
-        private readonly HashSet<SemanticVersion> verifiedVersions;
+        private readonly ConcurrentDictionary<SemanticVersion, bool> checkedVersion;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TrackingVersionChecker"/>
         /// </summary>
         public TrackingVersionChecker()
         {
-            this.verifiedVersions = new HashSet<SemanticVersion>();
+            this.checkedVersion = new ConcurrentDictionary<SemanticVersion, bool>();
         }
 
         /// <summary>
-        ///     Gets the list of versions that have been verified to be supported.
+        ///     Gets the list of versions that have been checked by this instance.
         /// </summary>
-        public IReadOnlyList<SemanticVersion> VerifiedVersions
+        public IReadOnlyDictionary<SemanticVersion, bool> CheckedVersions
         {
             get
             {
-                return this.verifiedVersions.ToList();
+                return this.checkedVersion;
             }
         }
 
         /// <summary>
-        ///     Overrides the base implementation to keep track of the versions that have been verified.
+        ///     Overrides the base implementation to keep track of the versions that have been checked.
         /// </summary>
         /// <param name="candidateVersion">
         ///     The version to check.
@@ -46,10 +46,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public override bool IsVersionSupported(SemanticVersion candidateVersion)
         {
             bool supported = base.IsVersionSupported(candidateVersion);
-            if (supported)
-            {
-                this.verifiedVersions.Add(candidateVersion);
-            }
+            this.checkedVersion.TryAdd(candidateVersion, supported);
 
             return supported;
         }

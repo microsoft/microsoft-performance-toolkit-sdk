@@ -77,27 +77,52 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 x => new SandboxPreloadValidator(x, versionChecker),
                 Logger.Create<PluginsLoader>());
 
-            if (!pluginsLoader.TryLoadPlugin(processedDir.FullPath, out ErrorInfo errorInfo))
+            bool loadSuccess = pluginsLoader.TryLoadPlugin(processedDir.FullPath, out ErrorInfo errorInfo);    
+            if (!loadSuccess)
             {
                 // TODO: Check error codes and throw more specific exceptions
                 this.logger.LogError($"Failed to load plugin from {processedDir.FullPath}: {errorInfo.Message}");
-                return false;
             }
 
-            if (versionChecker.VerifiedVersions.Count == 0)
+            if (versionChecker.CheckedVersions.Count == 0)
             {
                 this.logger.LogError($"Invalid plugin: {sdkAssemblyName} is not referenced anywhere in the plugin.");
                 return false;
             }
 
-            if (versionChecker.VerifiedVersions.Count > 1)
+            if (versionChecker.CheckedVersions.Count > 1)
             {
                 this.logger.LogError($"Mutiple versions of {sdkAssemblyName} are referenced in the plugin: " +
-                    $"{string.Join(", ", versionChecker.VerifiedVersions)}. Only one version is allowed.");
+                    $"{string.Join(", ", versionChecker.CheckedVersions.Keys)}. Only one version is allowed.");
                 return false;
             }
 
-            PluginMetadata metadata = GenerateMetadata(processedDir, manifest, versionChecker.VerifiedVersions.Single());
+            (SemanticVersion? pluginSDKversion, bool isVersionSupported) = versionChecker.CheckedVersions.Single();
+            if (!isVersionSupported)
+            {
+                SemanticVersion cliSDKVersion = SdkAssembly.Assembly.GetSemanticVersion();
+                if (pluginSDKversion.Major != cliSDKVersion.Major)
+                {
+                    this.logger.LogError($"Plugin is built against SDK version {pluginSDKversion} but the sdk used in the CLI is {cliSDKVersion}. " +
+                        "The major version of the SDK used in the CLI must match the major version of the SDK used to build the plugin. " +
+                        "Please use the CLI that targets the same major version of the SDK as the plugin.");
+                }
+
+                if (pluginSDKversion.Minor > cliSDKVersion.Minor)
+                {
+                    this.logger.LogError($"Plugin is built against SDK version {pluginSDKversion} but the sdk used in the CLI is {cliSDKVersion}. " +
+                        "The minor version of the SDK used in the CLI must be greater than or equal to the minor version of the SDK used to build the plugin. " +
+                        $"If your plugin does NOT use any features from SDK version {pluginSDKversion}, consider downgrading the plugin to use version {cliSDKVersion}. " +
+                        $"If your plugin does use features from SDK version {pluginSDKversion}, please update your CLI to a version that targets SDK version {pluginSDKversion} or later.");
+                }
+            }
+
+            if (!loadSuccess || !isVersionSupported)
+            {
+                return false;
+            }    
+
+            PluginMetadata metadata = GenerateMetadata(processedDir, manifest, pluginSDKversion);
             
             if (!TryGenerateContentsMetadata(pluginsLoader, out PluginContentsMetadata? contentsMetadata))
             {
