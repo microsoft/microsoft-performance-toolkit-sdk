@@ -112,7 +112,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 {
                     this.logger.LogError($"Plugin is built against SDK version {pluginSDKversion} but the sdk used in the CLI is {cliSDKVersion}. " +
                         "The minor version of the SDK used in the CLI must be greater than or equal to the minor version of the SDK used to build the plugin. " +
-                        $"If your plugin does NOT use any features from SDK version {pluginSDKversion}, consider downgrading the plugin to use version {cliSDKVersion}. " +
+                        $"If your plugin does NOT use any features from SDK version {pluginSDKversion}, consider downgrading the plugin to use version {cliSDKVersion} or lower. " +
+                        "Using the lowest minor version required will maximize compatibility of your plugin. " +
                         $"If your plugin does use features from SDK version {pluginSDKversion}, please update your CLI to a version that targets SDK version {pluginSDKversion} or later.");
                 }
             }
