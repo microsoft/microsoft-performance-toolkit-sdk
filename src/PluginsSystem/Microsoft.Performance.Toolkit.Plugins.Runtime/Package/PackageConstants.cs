@@ -11,5 +11,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         public const string PluginMetadataFileName = "metadata.json";
         public const string PluginContentsMetadataFileName = "contentsmetadata.json";
         public const string PluginContentFolderName = "plugin/";
+        public const string PluginPackageExtension = ".ptix";
     }
 }
