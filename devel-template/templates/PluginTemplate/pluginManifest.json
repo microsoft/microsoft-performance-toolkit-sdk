@@ -1,6 +1,5 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/microsoft-performance-toolkit-sdk/main/src/PluginsSystem/Tools/Microsoft.Performance.Toolkit.Plugins.Cli/Manifest/PluginManifestSchema.json",
-  // Please fill out the following fields with your plugin information
   "identity": {
     "id": "__PLUGIN_ID__",
     "version": "__PLUGIN_VERSION__"
