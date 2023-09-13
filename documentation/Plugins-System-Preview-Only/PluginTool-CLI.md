@@ -60,3 +60,4 @@ The URL of the project repository. e.g. `https://github.com/mycompany/myplugin`.
 
 #### `manifestVersion`
 The version of the manifest file defined in the schema this manifest file conforms to. e.g. `1.0`.
+
