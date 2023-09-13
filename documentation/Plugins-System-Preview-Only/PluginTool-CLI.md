@@ -34,7 +34,7 @@ The manifest file contains the following properties:
 
 #### `identity`
 
-`id` - A unique identifier for the plugin. e.g. `com.mycompany.myplugin`.
+`id` - An identifier for the plugin. Plugin IDs must be unique within the context of a plugin feed. It's recommended to use dots to create a namespace-like structure that reflects the organization and projects the plugin belongs to. e.g. `MyCompany.MyPlugin` or `MyCompany.MyProject.MyPlugin`.
 
 `version` - The version of the plugin in the format of sematic versioning. e.g. `1.0.0` or `1.0.0-beta.1`.
 
