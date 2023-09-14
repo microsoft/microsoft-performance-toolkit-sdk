@@ -38,7 +38,6 @@ For help with getting started and developing SDK plugins, refer to our [document
 * `Microsoft.Performance.SDK.Toolkit.Engine.Tests`: Tests for `Microsoft.Performance.SDK.Toolkit.Engine`
 * `Microsoft.Performance.SDK.Testing`: General utilities for authoring tests
 * `Microsoft.Performance.SDK.Testing.SDK`: SDK-specific utilities for authoring tests 
-* `PluginConfigurationEditor`: *description coming soon*
 
 ## Known SDK Driver Plugin Compatibility
 
