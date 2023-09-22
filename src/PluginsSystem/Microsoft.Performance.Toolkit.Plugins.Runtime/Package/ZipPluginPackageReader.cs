@@ -57,27 +57,35 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
         {
             Guard.NotNull(stream, nameof(stream));
 
+            if (!stream.CanRead)
+            {
+                this.logger.Error($"The stream is not readable.");
+                return null;
+            }
+
+            if (!stream.CanSeek)
+            {
+                this.logger.Error($"The stream is not seekable.");
+                return null;
+            }
+
             bool success = false;
+            long originalPosition = stream.Position;
 
             // Try to open the stream as a zip archive
-            ZipArchive zip;
+            ZipArchive zip = null;
             try
             {
-                zip = new ZipArchive(stream, ZipArchiveMode.Read, true);
-            }
-            catch (ArgumentException e)
-            {
-                this.logger.Error(e, $"Unable to read from the stream.");
-                return null;
-            }
-            catch (InvalidDataException e)
-            {
-                this.logger.Error(e, $"The stream could not be interpreted as a zip archive.");
-                return null;
-            }
+                try
+                {
+                    zip = new ZipArchive(stream, ZipArchiveMode.Read, true);
+                }
+                catch (InvalidDataException e)
+                {
+                    this.logger.Error(e, $"The stream could not be interpreted as a zip archive.");
+                    return null;
+                }
 
-            try
-            {
                 // Check that the plugin content folder exists
                 bool hasContentFolder = zip.Entries.Any(
                     e => e.FullName.Replace('\\', '/').StartsWith(PackageConstants.PluginContentFolderName, StringComparison.OrdinalIgnoreCase));
@@ -139,7 +147,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             }
             finally
             {
-                if (!success)
+                stream.Position = originalPosition;
+
+                if (!success && zip != null)
                 {
                     zip.Dispose();
                 }
