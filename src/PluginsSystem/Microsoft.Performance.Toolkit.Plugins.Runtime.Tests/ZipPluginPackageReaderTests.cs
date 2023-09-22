@@ -49,7 +49,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var package = await sut.TryReadPackageAsync(stream, CancellationToken.None);
 
             Assert.IsNull(package);
-            fakeLogger.Verify(logger => logger.Error(It.IsAny<ArgumentException>(), It.IsAny<string>()));
+            fakeLogger.Verify(logger => logger.Error(It.IsAny<string>()));
         }
 
         [TestMethod]
