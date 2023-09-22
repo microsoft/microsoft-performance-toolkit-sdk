@@ -58,6 +58,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             Guard.NotNull(stream, nameof(stream));
 
             bool success = false;
+            long originalPosition = stream.Position;
 
             // Try to open the stream as a zip archive
             ZipArchive zip;
@@ -74,6 +75,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             {
                 this.logger.Error(e, $"The stream could not be interpreted as a zip archive.");
                 return null;
+            }
+            finally
+            {
+                stream.Position = originalPosition;
             }
 
             try
@@ -139,6 +144,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
             }
             finally
             {
+                stream.Position = originalPosition;
+
                 if (!success)
                 {
                     zip.Dispose();
