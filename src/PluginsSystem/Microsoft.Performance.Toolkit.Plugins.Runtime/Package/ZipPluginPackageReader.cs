@@ -80,11 +80,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Package
                 {
                     zip = new ZipArchive(stream, ZipArchiveMode.Read, true);
                 }
-                catch (ArgumentException e)
-                {
-                    this.logger.Error(e, $"Unable to read from the stream.");
-                    return null;
-                }
                 catch (InvalidDataException e)
                 {
                     this.logger.Error(e, $"The stream could not be interpreted as a zip archive.");
