@@ -134,6 +134,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         /// <param name="candidateType">
         ///     Candidate <see cref="Type"/> for the <see cref="ITableExtensionReference"/>
         /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
         /// <param name="reference">
         ///     Out <see cref="ITableExtensionReference"/>
         /// </param>
@@ -146,15 +149,18 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
         /// </exception>
         internal static bool TryCreateReference(
             Type candidateType,
+            ILogger logger,
             out ITableExtensionReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
+            Debug.Assert(candidateType != null, $"{nameof(candidateType)} cannot be null.");
+            Debug.Assert(logger != null, $"{nameof(logger)} cannot be null.");
 
             reference = null;
 
             if (TableDescriptorFactory.TryCreate(
                     candidateType,
                     tableConfigSerializer,
+                    logger,
                     out var tableDescriptor,
                     out var tableBuildAction,
                     out var tableIsDataAvailableFunc))

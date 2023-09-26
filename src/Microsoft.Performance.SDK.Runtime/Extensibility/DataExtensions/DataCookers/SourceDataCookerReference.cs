@@ -10,7 +10,6 @@ using System.Security.Permissions;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
@@ -141,7 +140,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             return TryCreateReference(
                 candidateType,
-                Runtime.Logger.Create<SourceDataCookerReference>(),
+                Runtime.Logger.Null,
                 out reference);
         }
 
@@ -176,7 +175,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             ILogger logger,
             out ISourceDataCookerReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
+            Debug.Assert(candidateType != null, $"{nameof(candidateType)} cannot be null.");
+            Debug.Assert(logger != null, $"{nameof(logger)} cannot be null.");
 
             reference = null;
 
@@ -202,7 +202,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             // There must be an empty, public constructor
             if (!candidateType.TryGetEmptyPublicConstructor(out var constructor))
             {
-                Console.Error.WriteLine(
+                logger.Error(
                     $"Warning: type {candidateType} seems to be a data cooker, but is missing an empty public " +
                     "constructor.");
                 return false;
