@@ -340,9 +340,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                assemblyLoader ??= logger is null
-                    ? new AssemblyLoader()
-                    : new AssemblyLoader(logger);
+                assemblyLoader ??= new AssemblyLoader(logger ?? Logger.Null);
 
                 var validatorFactory = new Func<IEnumerable<string>, IPreloadValidator>(_ => new NullValidator());
 
