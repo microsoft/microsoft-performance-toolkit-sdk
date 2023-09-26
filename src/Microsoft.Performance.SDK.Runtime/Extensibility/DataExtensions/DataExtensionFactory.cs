@@ -88,9 +88,33 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
+            return TryCreateCompositeDataCookerReference(candidateType, Logger.Null, out reference);
+        }
 
-            return CompositeDataCookerReference.TryCreateReference(candidateType, out reference);
+        /// <summary>
+        ///     Generate a composite data cooker reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Data extension type.
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <param name="reference">
+        ///     Data extension reference.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if succeeded, <c>false</c> otherwise.
+        /// </returns>
+        public bool TryCreateCompositeDataCookerReference(
+            Type candidateType,
+            ILogger logger,
+            out ICompositeDataCookerReference reference)
+        {
+            Guard.NotNull(candidateType, nameof(candidateType));
+            Guard.NotNull(logger, nameof(logger));
+
+            return CompositeDataCookerReference.TryCreateReference(candidateType, logger, out reference);
         }
 
         // TODO: __SDK_DP__

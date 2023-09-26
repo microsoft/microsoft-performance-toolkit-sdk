@@ -63,6 +63,25 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// </summary>
         /// <param name="candidateType">
         /// data extension type</param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <param name="reference">
+        ///     Data extension reference.
+        /// </param>
+        /// <returns>
+        ///     true if succeeded.
+        /// </returns>
+        bool TryCreateCompositeDataCookerReference(
+            Type candidateType,
+            ILogger logger,
+            out ICompositeDataCookerReference reference);
+
+        /// <summary>
+        ///     Generate a composite data cooker reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        /// data extension type</param>
         /// <param name="reference">
         ///     Data extension reference.
         /// </param>
