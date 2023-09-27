@@ -148,10 +148,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             Type candidateType,
             out ITableExtensionReference reference)
         {
-            return TryCreateReference(
-                candidateType,
-                Logger.Create<TableExtensionReference>(),
-                out reference);
+            return TryCreateReference(candidateType, null, out reference);
         }
 
         /// <summary>
@@ -190,9 +187,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             out ITableExtensionReference reference)
         {
             Debug.Assert(candidateType != null, $"{nameof(candidateType)} cannot be null.");
-            Debug.Assert(logger != null, $"{nameof(logger)} cannot be null.");
 
             reference = null;
+
+            if (logger == null)
+            {
+                logger = Logger.Create<TableExtensionReference>();
+            }
 
             if (TableDescriptorFactory.TryCreate(
                     candidateType,

@@ -138,10 +138,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             Type candidateType,
             out ISourceDataCookerReference reference)
         {
-            return TryCreateReference(
-                candidateType,
-                Runtime.Logger.Create<SourceDataCookerReference>(),
-                out reference);
+            return TryCreateReference(candidateType, null, out reference);
         }
 
         /// <summary>
@@ -176,9 +173,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             out ISourceDataCookerReference reference)
         {
             Debug.Assert(candidateType != null, $"{nameof(candidateType)} cannot be null.");
-            Debug.Assert(logger != null, $"{nameof(logger)} cannot be null.");
 
             reference = null;
+
+            if (logger == null)
+            {
+                logger = Runtime.Logger.Create<SourceDataCookerReference>();
+            }
 
             // perform this basic check first, as it's cheaper than a more specific test below
             if (!candidateType.Implements(typeof(IDataCooker)))

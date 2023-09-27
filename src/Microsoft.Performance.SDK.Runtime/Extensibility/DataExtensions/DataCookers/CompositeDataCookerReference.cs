@@ -70,10 +70,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
-            return TryCreateReference(
-                candidateType,
-                Runtime.Logger.Create<CompositeDataCookerReference>(),
-                out reference);
+            return TryCreateReference(candidateType, null, out reference);
         }
 
         /// <summary>
@@ -107,9 +104,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             out ICompositeDataCookerReference reference)
         {
             Debug.Assert(candidateType != null, $"{nameof(candidateType)} cannot be null.");
-            Debug.Assert(logger != null, $"{nameof(logger)} cannot be null.");
 
             reference = null;
+
+            if (logger == null)
+            {
+                logger = Runtime.Logger.Create<CompositeDataCookerReference>();
+            }
 
             if (candidateType.IsInstantiatableOfType(typeof(ICompositeDataCookerDescriptor)))
             {

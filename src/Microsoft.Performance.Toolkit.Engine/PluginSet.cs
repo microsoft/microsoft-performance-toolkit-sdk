@@ -340,7 +340,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             try
             {
-                assemblyLoader ??= new AssemblyLoader(logger ?? Logger.Null);
+                assemblyLoader ??= logger is null
+                    ? new AssemblyLoader()
+                    : new AssemblyLoader(logger);
 
                 var validatorFactory = new Func<IEnumerable<string>, IPreloadValidator>(_ => new NullValidator());
 
@@ -353,7 +355,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 var factory = new DataExtensionFactory();
                 repo = factory.CreateDataExtensionRepository();
 
-                var reflector = new DataExtensionReflector(assemblyDiscovery, repo, logger ?? Logger.Null);
+                var reflector = new DataExtensionReflector(assemblyDiscovery, repo, logger);
 
                 assemblyDiscovery.ProcessAssemblies(extensionDirectoriesFullPaths, out var discoveryError);
 

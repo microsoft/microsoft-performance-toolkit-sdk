@@ -43,9 +43,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ISourceDataCookerReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
-
-            return SourceDataCookerReference.TryCreateReference(candidateType, out reference);
+            return TryCreateSourceDataCookerReference(candidateType, null, out reference);
         }
 
         /// <summary>
@@ -69,7 +67,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             out ISourceDataCookerReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
-            Guard.NotNull(logger, nameof(logger));
 
             return SourceDataCookerReference.TryCreateReference(candidateType, logger, out reference);
         }
@@ -90,9 +87,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
-
-            return CompositeDataCookerReference.TryCreateReference(candidateType, out reference);
+            return TryCreateCompositeDataCookerReference(candidateType, null, out reference);
         }
 
         /// <summary>
@@ -116,7 +111,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             out ICompositeDataCookerReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
-            Guard.NotNull(logger, nameof(logger));
 
             return CompositeDataCookerReference.TryCreateReference(candidateType, logger, out reference);
         }
@@ -160,9 +154,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ITableExtensionReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
-
-            return TableExtensionReference.TryCreateReference(candidateType, out reference);
+            return TryCreateTableReference(candidateType, null, out reference);
         }
 
         /// <summary>
@@ -186,7 +178,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             out ITableExtensionReference reference)
         {
             Guard.NotNull(candidateType, nameof(candidateType));
-            Guard.NotNull(logger, nameof(logger));
 
             return TableExtensionReference.TryCreateReference(candidateType, logger, out reference);
         }

@@ -37,11 +37,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             IDataExtensionRepositoryBuilder repoBuilder,
             ILogger logger)
         {
-            if (logger == null)
-            {
-                logger = Logger.Create<DataExtensionReflector>();
-            }
-
             this.repoBuilder = repoBuilder;
             this.logger = logger;
 
