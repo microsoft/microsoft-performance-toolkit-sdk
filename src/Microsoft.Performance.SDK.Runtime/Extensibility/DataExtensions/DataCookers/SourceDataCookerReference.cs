@@ -140,7 +140,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         {
             return TryCreateReference(
                 candidateType,
-                Runtime.Logger.Null,
+                Runtime.Logger.Create<SourceDataCookerReference>(),
                 out reference);
         }
 

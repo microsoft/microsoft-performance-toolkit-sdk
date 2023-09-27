@@ -32,7 +32,9 @@ namespace Microsoft.Performance.SDK.Runtime
             Type candidateType,
             out ISourceDataCookerReference reference)
         {
-            return TryCreateReference(candidateType, Logger.Null, out reference);
+            Guard.NotNull(candidateType, nameof(candidateType));
+
+            return SourceDataCookerReference.TryCreateReference(candidateType, out reference);
         }
 
         /// <summary>

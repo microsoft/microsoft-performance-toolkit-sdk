@@ -43,7 +43,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ISourceDataCookerReference reference)
         {
-            return TryCreateSourceDataCookerReference(candidateType, Logger.Null, out reference);
+            Guard.NotNull(candidateType, nameof(candidateType));
+
+            return SourceDataCookerReference.TryCreateReference(candidateType, out reference);
         }
 
         /// <summary>
@@ -88,7 +90,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
-            return TryCreateCompositeDataCookerReference(candidateType, Logger.Null, out reference);
+            Guard.NotNull(candidateType, nameof(candidateType));
+
+            return CompositeDataCookerReference.TryCreateReference(candidateType, out reference);
         }
 
         /// <summary>
@@ -156,7 +160,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ITableExtensionReference reference)
         {
-            return TryCreateTableReference(candidateType, Logger.Null, out reference);
+            Guard.NotNull(candidateType, nameof(candidateType));
+
+            return TableExtensionReference.TryCreateReference(candidateType, out reference);
         }
 
         /// <summary>
