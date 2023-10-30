@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<AssemblyName>Microsoft.Performance.Toolkit.Plugins.Runtime</AssemblyName>
+	<RootNamespace>Microsoft.Performance.Toolkit.Plugins.Runtime</RootNamespace>
+	<Authors>Microsoft</Authors>
+	<Company>Microsoft Corporation</Company>
+	<Product>Performance ToolKit</Product>
+	<Description>Contains the core types and components for the Performance ToolKit plugins system.</Description>
+	<copyright>© Microsoft Corporation. All rights reserved.</copyright>
+	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	<RepositoryUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</PackageProjectUrl>
+	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
