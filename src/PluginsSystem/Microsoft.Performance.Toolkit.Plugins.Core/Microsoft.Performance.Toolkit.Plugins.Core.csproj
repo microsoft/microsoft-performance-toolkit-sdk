@@ -2,8 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<AssemblyName>Microsoft.Performance.Toolkit.Plugins.Core</AssemblyName>
+	<RootNamespace>Microsoft.Performance.Toolkit.Plugins.Core</RootNamespace>
+	<Authors>Microsoft</Authors>
+	<Company>Microsoft Corporation</Company>
+	<Product>Performance ToolKit</Product>
+	<Description>Contains the core types for building extensions for the Performance Toolkit plugins system. This package is not intended to be used directly.</Description>
+	<copyright>© Microsoft Corporation. All rights reserved.</copyright>
+	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	<RepositoryUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</PackageProjectUrl>
+	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
-
 
   <ItemGroup>
     <ProjectReference Include="..\..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
