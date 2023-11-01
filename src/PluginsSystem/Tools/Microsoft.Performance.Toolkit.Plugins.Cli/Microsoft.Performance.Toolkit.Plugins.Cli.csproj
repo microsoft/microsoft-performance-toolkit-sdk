@@ -7,7 +7,15 @@
     <Nullable>enable</Nullable>
 	<PackAsTool>true</PackAsTool>
 	<ToolCommandName>plugintool</ToolCommandName>
-	  <Description>A CLI tool for managing Performance Toolkit plugins.</Description>
+	<Authors>Microsoft</Authors>
+	<Company>Microsoft</Company>
+	<Product>Performance ToolKit</Product>
+	<Description>A CLI tool for managing Performance Toolkit plugins.</Description>
+	<copyright>© Microsoft Corporation. All rights reserved.</copyright>
+	<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	<RepositoryUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/microsoft/microsoft-performance-toolkit-sdk</PackageProjectUrl>
+	<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
   <ItemGroup>
