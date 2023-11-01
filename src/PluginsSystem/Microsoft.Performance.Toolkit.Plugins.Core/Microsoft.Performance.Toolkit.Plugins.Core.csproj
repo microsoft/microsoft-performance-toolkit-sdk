@@ -23,4 +23,14 @@
     <PackageReference Include="System.Text.Json" Version="7.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+	<Compile Remove="Properties\**" />
+	<EmbeddedResource Remove="Properties\**" />
+	<None Remove="Properties\**" />
+	<None Include="..\..\..\LICENSE.txt">
+	  <Pack>True</Pack>
+	  <PackagePath></PackagePath>
+	</None>
+  </ItemGroup>
+
 </Project>
