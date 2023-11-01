@@ -101,7 +101,7 @@ namespace Microsoft.Performance.SDK.Runtime
         {
             Guard.NotNull(candidate, nameof(candidate));
 
-            var referencedSdk = candidate
+            AssemblyName referencedSdk = candidate
                 .GetReferencedAssemblies()
                 .SingleOrDefault(x => x.Name.Equals(SdkAssembly.Assembly.GetName().Name));
 
