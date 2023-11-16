@@ -41,7 +41,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
         /// <inheritdoc />
         public bool TryProcess(PluginArtifacts artifacts, [NotNullWhen(true)] out ProcessedPluginResult? processedPlugin)
         {
-            processedPlugin = null;            
+            processedPlugin = null;
             if (!TryProcessSourceDir(artifacts.SourceDirectoryFullPath, out ProcessedPluginSourceDirectory? processedDir))
             {
                 this.logger.LogError($"Failed to process source directory {artifacts.SourceDirectoryFullPath}.");
@@ -77,7 +77,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 x => new SandboxPreloadValidator(x, versionChecker),
                 Logger.Create<PluginsLoader>());
 
-            bool loadSuccess = pluginsLoader.TryLoadPlugin(processedDir.FullPath, out ErrorInfo errorInfo);    
+            bool loadSuccess = pluginsLoader.TryLoadPlugin(processedDir.FullPath, out ErrorInfo errorInfo);
             if (!loadSuccess)
             {
                 // TODO: Check error codes and throw more specific exceptions
@@ -121,10 +121,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             if (!loadSuccess || !isVersionSupported)
             {
                 return false;
-            }    
+            }
 
             PluginMetadata metadata = GenerateMetadata(processedDir, manifest, pluginSDKversion);
-            
+
             if (!TryGenerateContentsMetadata(pluginsLoader, out PluginContentsMetadata? contentsMetadata))
             {
                 this.logger.LogError($"Failed to generate contents metadata for plugin.");
@@ -177,7 +177,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 filesToPack,
                 manifestFilePath,
                 totalSize);
-            
+
             return true;
         }
 
@@ -204,7 +204,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 
         private bool TryGenerateContentsMetadata(PluginsLoader pluginsLoader, out PluginContentsMetadata? contentsMetadata)
         {
-            var processingSourcesMetadata = pluginsLoader.LoadedProcessingSources.Select(x => CreateProcessingSourceMetadata(x)).ToList();
+            HashSet<ProcessingSourceMetadata> processingSourcesMetadata = new();
+
+            foreach (ProcessingSourceReference psr in pluginsLoader.LoadedProcessingSources)
+            {
+                if (!TryCreateProcessingSourceMetadata(psr, out var metadata))
+                {
+                    contentsMetadata = null;
+                    return false;
+                }
+
+                processingSourcesMetadata.Add(metadata);
+            }
 
             // TODO: #294 Figure out how to extract description of a datacooker.
             var dataCookers = pluginsLoader.Extensions.SourceDataCookers
@@ -220,12 +231,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                     x.TableDescriptor.Category,
                     x.TableDescriptor.IsMetadataTable))
                 .ToList();
-            
+
             contentsMetadata = new(processingSourcesMetadata, dataCookers, tables);
             return true;
         }
 
-        private static ProcessingSourceMetadata CreateProcessingSourceMetadata(ProcessingSourceReference psr)
+        private bool TryCreateProcessingSourceMetadata(ProcessingSourceReference psr, [NotNullWhen(true)] out ProcessingSourceMetadata? metadata)
         {
             // Tables
             IEnumerable<TableMetadata> dataTables = psr.Instance.DataTables.Select(x => new TableMetadata(
@@ -264,16 +275,58 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 }
             }
 
-            ProcessingSourceMetadata metadata = new(
+            if (!TryGetAboutInfo(psr, out ProcessingSourceInfo? aboutInfo))
+            {
+                metadata = null;
+                return false;
+            }
+
+            metadata = new(
                 version: Version.Parse(psr.Version),
                 name: psr.Name,
                 description: psr.Description,
                 guid: psr.Instance.TryGetGuid(),
-                aboutInfo: new ProcessingSourceInfo(psr.Instance.GetAboutInfo()),
+                aboutInfo: aboutInfo,
                 availableTables: dataTables.Concat(metadataTables),
                 supportedDataSources: dataSourcesMetadata);
 
-            return metadata;
+            return true;
+        }
+
+        private bool TryGetAboutInfo(ProcessingSourceReference psr, [NotNullWhen(true)] out ProcessingSourceInfo? processingSourceInfo)
+        {
+            processingSourceInfo = null;
+
+            var aboutInfo = psr.Instance.GetAboutInfo();
+
+            if (aboutInfo == null)
+            {
+                this.logger.LogError($"Unable to generate processing source info: {psr.Name} does not contain about info.");
+                return false;
+            }
+
+            var owners = aboutInfo.Owners
+                .Select(o => new Core.Metadata.ContactInfo(o.Name, o.Address, o.EmailAddresses, o.PhoneNumbers))
+                .ToArray();
+
+            if (!Uri.TryCreate(aboutInfo.ProjectInfo.Uri, UriKind.Absolute, out Uri? projectUri))
+            {
+                this.logger.LogError($"Unable to generate processing source info: {aboutInfo.ProjectInfo.Uri} is not an absolute URI.");
+                return false;
+            }
+
+            Core.Metadata.ProjectInfo projectInfo = new(projectUri);
+
+            if (!Uri.TryCreate(aboutInfo.LicenseInfo.Uri, UriKind.Absolute, out Uri? licenseUri))
+            {
+                this.logger.LogError($"Unable to generate processing source info: {aboutInfo.LicenseInfo.Uri} is not an absolute URI.");
+                return false;
+            }
+
+            Core.Metadata.LicenseInfo licenseInfo = new(aboutInfo.LicenseInfo.Name, licenseUri, aboutInfo.LicenseInfo.Text);
+
+            processingSourceInfo = new ProcessingSourceInfo(owners, projectInfo, licenseInfo, aboutInfo.CopyrightNotice, aboutInfo.AdditionalInformation);
+            return true;
         }
 
         private record ProcessedPluginSourceDirectory(
