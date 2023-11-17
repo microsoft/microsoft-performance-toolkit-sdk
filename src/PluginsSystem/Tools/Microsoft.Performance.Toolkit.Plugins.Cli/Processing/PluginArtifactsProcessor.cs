@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
@@ -303,6 +304,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             {
                 this.logger.LogError($"Unable to generate processing source info: {psr.Name} does not contain about info.");
                 return false;
+            }
+
+            // Check if the GetAboutInfo method is overridden
+            MethodInfo? methodInfo = psr.Instance.GetType().GetMethod(nameof(ProcessingSource.GetAboutInfo));
+            if (methodInfo == null || methodInfo.DeclaringType == typeof(ProcessingSource))
+            {
+                this.logger.LogError($"Unable to generate processing source info: {psr.Name} does not override the virtual method {nameof(ProcessingSource)}.{nameof(ProcessingSource.GetAboutInfo)}.");
             }
 
             var owners = aboutInfo.Owners
