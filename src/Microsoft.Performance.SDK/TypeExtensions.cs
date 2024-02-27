@@ -408,7 +408,10 @@ namespace Microsoft.Performance.SDK
                     (self == typeof(float)) ||
                     (self == typeof(double)) ||
                     (self == typeof(byte)) ||
-                    (self == typeof(sbyte));
+                    (self == typeof(sbyte)) ||
+                    (self == typeof(LargeSignedBytes)) ||
+                    (self == typeof(SignedBytes)) ||
+                    (self == typeof(Bytes));
         }
     }
 }
