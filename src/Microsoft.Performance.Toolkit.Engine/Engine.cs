@@ -248,7 +248,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 dataSourceSet.AddDataSource(dataSource);
 
                 var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
-                return Create(info);
+                return CreateCore(info, dataSourceSet);
             }
             catch
             {

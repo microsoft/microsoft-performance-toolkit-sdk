@@ -15,7 +15,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
        "Source123 for Runtime Tests")]
     [FileDataSource(Extension)]
     public sealed class Source123DataSource
-        : ProcessingSource
+        : ProcessingSource,
+          IDisposable
     {
         private IEnumerable<Option> supportedOptions = new List<Option>()
         {
@@ -28,10 +29,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         public static Guid Guid = Guid.Parse(GuidAsString);
         public const string Extension = ".s123d";
 
+        private bool disposedValue;
+
         public Source123DataSource()
             : base(new Discovery())
         {
         }
+
+        public bool IsDisposed => this.disposedValue;
 
         protected override ICustomDataProcessor CreateProcessorCore(
             IEnumerable<IDataSource> dataSources,
@@ -58,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         public override IEnumerable<Option> CommandLineOptions => supportedOptions;
 
         public ProcessorOptions UserSpecifiedOptions { get; private set; }
-        
+
         private sealed class Discovery
             : IProcessingSourceTableProvider
         {
@@ -69,6 +74,30 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                     Source123Table.TableDescriptor,
                 };
             }
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        ~Source123DataSource()
+        {
+            throw new InvalidOperationException($"{nameof(Source123DataSource)} was not disposed of correctly.");
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
