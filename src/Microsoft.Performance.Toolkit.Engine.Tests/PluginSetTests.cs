@@ -20,7 +20,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void Ctor_ExtensionDirectory_IsCurrent()
         {
-            var sut = PluginSet.Load();
+            using var sut = PluginSet.Load();
 
             Assert.AreEqual(1, sut.ExtensionDirectories.Count());
             Assert.AreEqual(Environment.CurrentDirectory, sut.ExtensionDirectories.First());
@@ -30,7 +30,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void ExtensionDirectory_ExistingDirectory_Sets()
         {
-            var sut = PluginSet.Load(this.Scratch.FullName);
+            using var sut = PluginSet.Load(this.Scratch.FullName);
 
             Assert.AreEqual(1, sut.ExtensionDirectories.Count());
             Assert.AreEqual(this.Scratch.FullName, sut.ExtensionDirectories.First());
@@ -67,7 +67,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             {
                 Directory.CreateDirectory(relative);
 
-                var sut = PluginSet.Load(relative);
+                using var sut = PluginSet.Load(relative);
 
                 Assert.AreEqual(1, sut.ExtensionDirectories.Count());
                 Assert.AreEqual(relativeFull, sut.ExtensionDirectories.First());
@@ -86,7 +86,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var dir2 = this.Scratch.CreateSubdirectory("Dir2");
 
 
-            var sut = PluginSet.Load(new[] { dir1.FullName, dir2.FullName });
+            using var sut = PluginSet.Load(new[] { dir1.FullName, dir2.FullName });
 
             Assert.AreEqual(2, sut.ExtensionDirectories.Count());
             Assert.IsTrue(sut.ExtensionDirectories.Contains(dir1.FullName));

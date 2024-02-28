@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing.SDK;
@@ -31,9 +32,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 
         private bool disposedValue;
 
+        // saves the constructor stack. useful for debugging cases where Dispose wasn't called.
+        private readonly StackTrace constructionStack = null;
+
         public Source123DataSource()
             : base(new Discovery())
         {
+            this.constructionStack = new StackTrace(true);
         }
 
         public bool IsDisposed => this.disposedValue;
