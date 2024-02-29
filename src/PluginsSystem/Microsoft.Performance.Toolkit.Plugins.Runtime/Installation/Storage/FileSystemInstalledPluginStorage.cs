@@ -71,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             const int bufferSize = 4096;
             const int defaultAsyncBufferSize = 81920;
 
-            string installDir = this.storageDirectory.GetRootDirectory(package.Metadata.Identity);
+            string rootInstallDir = this.storageDirectory.GetRootDirectory(package.Metadata.Identity);
 
             long totalCopied = 0;
             long totalBytesToCopy = package.Entries.Select(e => e.InstalledSize).Sum();
@@ -92,6 +92,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                         case PluginPackageEntryType.ContentFile:
                             string contentDir = this.storageDirectory.GetContentDirectory(package.Metadata.Identity);
                             destPath = Path.GetFullPath(Path.Combine(contentDir, entry.ContentRelativePath));
+
+                            if (!destPath.StartsWith(contentDir))
+                            {
+                                // This can happen if the content relative path contains ".." or other invalid characters.
+                                throw new PluginPackageExtractionException($"Invalid file path: {destPath}");
+                            }
+
                             isDirectory = entry.RawPath.EndsWith("/");
                             break;
                         case PluginPackageEntryType.MetadataJsonFile:
@@ -103,6 +110,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                         case PluginPackageEntryType.Unknown:
                         default:
                             continue;
+                    }
+
+                    if (!destPath.StartsWith(rootInstallDir))
+                    {
+                        // This can happen if the package entry path contains ".." or other invalid characters.
+                        throw new PluginPackageExtractionException($"Invalid file path: {destPath}");
                     }
 
                     string destDir = isDirectory ? destPath : Path.GetDirectoryName(destPath);
@@ -145,12 +158,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             }
             catch (Exception e) when (!(e is OperationCanceledException))
             {
-                string errorMsg = $"Unable to extract plugin content to {installDir}";
+                string errorMsg = $"Unable to extract plugin content to {rootInstallDir}";
                 this.logger.Error(e, errorMsg);
                 throw new PluginPackageExtractionException(errorMsg, e);
             }
 
-            string checksum = await this.checksumCalculator.GetDirectoryChecksumAsync(installDir);
+            string checksum = await this.checksumCalculator.GetDirectoryChecksumAsync(rootInstallDir);
 
             return checksum;
         }
