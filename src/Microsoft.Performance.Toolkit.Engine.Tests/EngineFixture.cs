@@ -19,7 +19,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void Initialize()
         {
             var scratchPath = Path.Combine(
-                this.TestContext.TestResultsDirectory, 
+                this.TestContext.TestResultsDirectory,
                 $"Scratch-{this.GetType().Name}-{this.TestContext.TestName}");
             this.Scratch = new DirectoryInfo(scratchPath);
             try
@@ -77,6 +77,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         public virtual void OnCleanup()
         {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+            GC.WaitForPendingFinalizers();
         }
 
         protected static void CopyAssemblyContainingType(Type type, DirectoryInfo destDir)

@@ -113,6 +113,75 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
         [TestMethod]
         [IntegrationTest]
+        public void Create_DataSource_DisposesDataSet()
+        {
+            // Engine.Create(IDataSourceSet) owns the data source set and should dispose of it
+
+            Source123DataSource processingSource = null;
+
+            using (Engine sut = Engine.Create(new FileDataSource("test" + Source123DataSource.Extension)))
+            {
+                processingSource = sut.Plugins.ProcessingSourceReferences
+                    .Where(x => x.Name == nameof(Source123DataSource))
+                    .First()
+                    .Instance as Source123DataSource;
+
+                Assert.IsNotNull(processingSource, $"{nameof(processingSource)} is null.");
+            }
+
+            Assert.IsTrue(processingSource.IsDisposed, $"{processingSource} is not disposed.");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_DataSourceAndType_DisposesDataSet()
+        {
+            // Engine.Create(IDataSourceSet, Type) owns the data source set and should dispose of it
+
+            Source123DataSource processingSource = null;
+
+            using (Engine sut = Engine.Create(new FileDataSource("test" + Source123DataSource.Extension), typeof(Source123DataSource)))
+            {
+                processingSource = sut.Plugins.ProcessingSourceReferences
+                    .Where(x => x.Name == nameof(Source123DataSource))
+                    .First()
+                    .Instance as Source123DataSource;
+
+                Assert.IsNotNull(processingSource, $"{nameof(processingSource)} is null.");
+            }
+
+            Assert.IsTrue(processingSource.IsDisposed, $"{processingSource} is not disposed.");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_DataSourcesAndType_DisposesDataSet()
+        {
+            // Engine.Create(IEnumerable<IDataSourceSet>, Type) owns the data source set and should dispose of it
+
+            Source123DataSource processingSource = null;
+
+            IDataSource[] sources = new[]
+            {
+                new FileDataSource("test1" + Source123DataSource.Extension),
+                new FileDataSource("test2" + Source123DataSource.Extension),
+            };
+
+            using (Engine sut = Engine.Create(sources, typeof(Source123DataSource)))
+            {
+                processingSource = sut.Plugins.ProcessingSourceReferences
+                    .Where(x => x.Name == nameof(Source123DataSource))
+                    .First()
+                    .Instance as Source123DataSource;
+
+                Assert.IsNotNull(processingSource, $"{nameof(processingSource)} is null.");
+            }
+
+            Assert.IsTrue(processingSource.IsDisposed, $"{processingSource} is not disposed.");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
         public void Create_WithValidOptions()
         {
             var expectedProcessorOptions = new ProcessorOptions(

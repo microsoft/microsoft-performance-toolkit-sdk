@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests
 {
@@ -18,7 +18,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void DefaultRuntime_Set()
         {
-            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
+            using var dataSourceSet = DataSourceSet.Create();
+            var sut = new EngineCreateInfo(dataSourceSet.AsReadOnly());
 
             string expectedName = typeof(EngineCreateInfo).Assembly.GetName().Name;
             Assert.AreEqual(expectedName, sut.RuntimeName);
@@ -28,7 +29,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void DefaultProcessorOptionsResolver_Set()
         {
-            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
+            using var dataSourceSet = DataSourceSet.Create();
+            var sut = new EngineCreateInfo(dataSourceSet.AsReadOnly());
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
@@ -57,7 +59,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
 
-            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly()).WithProcessorOptions(processorOptions);
+            using var dataSourceSet = DataSourceSet.Create();
+            var sut = new EngineCreateInfo(dataSourceSet.AsReadOnly()).WithProcessorOptions(processorOptions);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
 
@@ -92,7 +95,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var dsg = new DataSourceGroup(new[] { new FileDataSource("sample") }, new DefaultProcessingMode());
 
-            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly()).WithProcessorOptions(processorOptionsMap);
+            using var dataSourceSet = DataSourceSet.Create();
+            var sut = new EngineCreateInfo(dataSourceSet.AsReadOnly()).WithProcessorOptions(processorOptionsMap);
 
             Assert.IsNotNull(sut.OptionsResolver, "Options Resolver is null when a default is expected");
 
@@ -103,7 +107,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
                 new Tuple<Guid, IDataSourceGroup>(Guid.NewGuid(), Any.DataSourceGroup()),
             };
-            
+
             var guidDataSourcePairs = new[]
             {
                 new Tuple<Guid, IDataSourceGroup>(processingGuid, dsg),
@@ -120,7 +124,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [UnitTest]
         public void NullOptionsResolver_Failure()
         {
-            var sut = new EngineCreateInfo(DataSourceSet.Create().AsReadOnly());
+            using var dataSourceSet = DataSourceSet.Create();
+            var sut = new EngineCreateInfo(dataSourceSet.AsReadOnly());
             IProcessingOptionsResolver resolver = null;
             Assert.ThrowsException<ArgumentNullException>(() => sut.WithProcessorOptions(resolver));
         }
