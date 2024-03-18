@@ -3,8 +3,7 @@
 
 using System;
 using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -62,10 +61,9 @@ namespace Microsoft.Performance.SDK.Tests
 
             using (var stream = new MemoryStream())
             {
-                var formatter = new BinaryFormatter();
                 try
                 {
-                    formatter.Serialize(stream, info);
+                    JsonSerializer.Serialize(stream, info);
                 }
                 catch (Exception e)
                 {
@@ -76,7 +74,7 @@ namespace Microsoft.Performance.SDK.Tests
                 ErrorInfo deserialized = null;
                 try
                 {
-                    deserialized = (ErrorInfo)formatter.Deserialize(stream);
+                    deserialized = JsonSerializer.Deserialize<TestError>(stream);
                 }
                 catch (Exception e)
                 {
@@ -87,29 +85,15 @@ namespace Microsoft.Performance.SDK.Tests
             }
         }
 
-        [Serializable]
         private sealed class TestError
             : ErrorInfo
         {
-            public TestError(string code) 
+            public TestError(string code)
                 : base(code, code)
             {
             }
 
-            private TestError(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-                this.Data = info.GetString(nameof(Data));
-            }
-
             public string Data { get; set; }
-
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                base.GetObjectData(info, context);
-
-                info.AddValue(nameof(Data), this.Data);
-            }
         }
     }
 }

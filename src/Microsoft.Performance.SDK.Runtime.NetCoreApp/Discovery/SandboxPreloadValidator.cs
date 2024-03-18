@@ -9,8 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 using Microsoft.Performance.SDK.Runtime.Discovery;
 using NuGet.Versioning;
 
@@ -31,8 +29,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
         {
             //
             // https://docs.microsoft.com/en-us/dotnet/standard/assembly/inspect-contents-using-metadataloadcontext
-            // 
-            
+            //
+
             var runtime = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
             var allDlls = assemblyPaths.Concat(runtime);
 
@@ -180,10 +178,8 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
             return true;
         }
 
-        [Serializable]
         private class SdkMismatchError
-            : ErrorInfo,
-              ISerializable
+            : ErrorInfo
         {
             public SdkMismatchError(
                 SemanticVersion referencedSdkVersion,
@@ -194,33 +190,9 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
                 this.HostedSdkVersion = hostedSdkVersion;
             }
 
-            protected SdkMismatchError(
-                SerializationInfo info,
-                StreamingContext context)
-                : base(info, context)
-            {
-                this.ReferencedSdkVersion = SemanticVersion.Parse(info.GetString(nameof(this.ReferencedSdkVersion)));
-                this.HostedSdkVersion = SemanticVersion.Parse(info.GetString(nameof(this.HostedSdkVersion)));
-            }
-
             public SemanticVersion ReferencedSdkVersion { get; }
 
             public SemanticVersion HostedSdkVersion { get; }
-
-            [SecurityPermission(
-                SecurityAction.LinkDemand,
-                Flags = SecurityPermissionFlag.SerializationFormatter)]
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                base.GetObjectData(info, context);
-                info.AddValue(nameof(this.ReferencedSdkVersion), this.ReferencedSdkVersion.ToString());
-                info.AddValue(nameof(this.HostedSdkVersion), this.HostedSdkVersion.ToString());
-            }
-
-            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                this.GetObjectData(info, context);
-            }
         }
     }
 }

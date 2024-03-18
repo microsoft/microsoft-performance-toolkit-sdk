@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
@@ -12,7 +11,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     /// <summary>
     ///     Represents errors that occur when interacting with the WPT runtime.
     /// </summary>
-    [Serializable]
     public class EngineException
         : Exception
     {
@@ -24,25 +22,12 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         /// <inheritdoc />
         public EngineException(string message, Exception inner) : base(message, inner) { }
-
-        /// <inheritdoc />
-        protected EngineException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-        }
     }
 
     /// <summary>
     ///     Represents the error that occurs when an attempt is made to access a cooker
     ///     that is not known.
     /// </summary>
-    [Serializable]
     public class CookerNotFoundException
         : EngineException
     {
@@ -89,13 +74,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         public DataCookerPath DataCookerPath { get; }
 
         /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(DataCookerPath), this.DataCookerPath.ToString());
-        }
-
-        /// <inheritdoc />
         public override string ToString()
         {
             return new StringBuilder(base.ToString()).AppendLine()
@@ -108,7 +86,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents the error that occurs when an attempt is made to access a
     ///     data output that is not known.
     /// </summary>
-    [Serializable]
     public class DataOutputNotFoundException
         : EngineException
     {
@@ -159,14 +136,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         private string OutputId => this.DataOutputPath.OutputId;
 
         /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(CookerPath), this.CookerPath);
-            info.AddValue(nameof(OutputId), this.OutputId);
-        }
-
-        /// <inheritdoc />
         public override string ToString()
         {
             return new StringBuilder(base.ToString()).AppendLine()
@@ -179,7 +148,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents the error that occurs when an attempt is made to access a
     ///     <see cref="TableDescriptor"/> that is not known.
     /// </summary>
-    [Serializable]
     public class TableNotFoundException
         : EngineException
     {
@@ -220,15 +188,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.Descriptor = tableDescriptor;
         }
 
-        /// <inheritdoc />
-        protected TableNotFoundException(SerializationInfo info, StreamingContext context)
-        {
-            this.Descriptor = new TableDescriptor(
-                                        (Guid)info.GetValue(nameof(TableGuid), typeof(Guid)),
-                                        info.GetString(nameof(Name)),
-                                        info.GetString(nameof(Description)));
-        }
-
         /// <summary>
         ///     Gets the requested <see cref="TableDescriptor"/> that is the cause of this error.
         /// </summary>
@@ -239,15 +198,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         private string Name => this.Descriptor.Name;
 
         private string Description => this.Descriptor.Description;
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(TableGuid), this.TableGuid);
-            info.AddValue(nameof(Name), this.Name);
-            info.AddValue(nameof(Description), this.Description);
-        }
 
         /// <inheritdoc />
         public override string ToString()
@@ -262,7 +212,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents the error that occurs when an attempt is made to build a
     ///     <see cref="ITableResult"/> that with a specified <see cref="TableDescriptor"/>.
     /// </summary>
-    [Serializable]
     public class TableException
         : EngineException
     {
@@ -309,15 +258,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.Descriptor = tableDescriptor;
         }
 
-        /// <inheritdoc />
-        protected TableException(SerializationInfo info, StreamingContext context)
-        {
-            this.Descriptor = new TableDescriptor(
-                                        (Guid)info.GetValue(nameof(TableGuid), typeof(Guid)),
-                                        info.GetString(nameof(Name)),
-                                        info.GetString(nameof(Description)));
-        }
-
         /// <summary>
         ///     Gets the requested <see cref="TableDescriptor"/> that is the cause of this error.
         /// </summary>
@@ -328,15 +268,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         private string Name => this.Descriptor.Name;
 
         private string Description => this.Descriptor.Description;
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(TableGuid), this.TableGuid);
-            info.AddValue(nameof(Name), this.Name);
-            info.AddValue(nameof(Description), this.Description);
-        }
 
         /// <inheritdoc />
         public override string ToString()
@@ -353,7 +284,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     This can also happen if the user requests a processor to
     ///     process a Data Source that the processor cannot process.
     /// </summary>
-    [Serializable]
     public class UnsupportedDataSourceException
         : EngineException
     {
@@ -416,13 +346,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.RequestedProcessingSource = requestedProcessingSource?.FullName ?? string.Empty;
         }
 
-        /// <inheritdoc />
-        protected UnsupportedDataSourceException(SerializationInfo info, StreamingContext context)
-        {
-            this.DataSource = info.GetString(nameof(DataSource));
-            this.RequestedProcessingSource = info.GetString(nameof(RequestedProcessingSource));
-        }
-
         /// <summary>
         ///     Gets the URI of the requested Data Source.
         /// </summary>
@@ -434,14 +357,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     for the <see cref="IDataSource"/>. See <see cref="Type.FullName"/>.
         /// </summary>
         public string RequestedProcessingSource { get; }
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(DataSource), this.DataSource);
-            info.AddValue(nameof(RequestedProcessingSource), this.RequestedProcessingSource);
-        }
 
         /// <inheritdoc />
         public override string ToString()
@@ -462,7 +377,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents the error that occurs when an attempt is made
     ///     to use an <see cref="IProcessingSource"/> that is unknown by the runtime.
     /// </summary>
-    [Serializable]
     public class UnsupportedProcessingSourceException
         : EngineException
     {
@@ -504,25 +418,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.RequestedProcessingSource = requestedProcessingSource.FullName;
         }
 
-        /// <inheritdoc />
-        protected UnsupportedProcessingSourceException(SerializationInfo info, StreamingContext context)
-        {
-            this.RequestedProcessingSource = info.GetString(nameof(RequestedProcessingSource));
-        }
-
         /// <summary>
         ///     Gets the fully qualified type name of the <see cref="IProcessingSource"/> requested for
         ///     the file. This property may be null if no <see cref="IProcessingSource"/> was requested
         ///     for the file. See <see cref="Type.FullName"/>.
         /// </summary>
         public string RequestedProcessingSource { get; }
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(RequestedProcessingSource), this.RequestedProcessingSource);
-        }
 
         /// <inheritdoc />
         public override string ToString()
@@ -537,7 +438,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents the error that occurs when an attempt is made
     ///     to use a path that is not valid as a directory for extensions.
     /// </summary>
-    [Serializable]
     public class InvalidExtensionDirectoryException
         : EngineException
     {
@@ -572,23 +472,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.Path = filePath;
         }
 
-        /// <inheritdoc />
-        protected InvalidExtensionDirectoryException(SerializationInfo info, StreamingContext context)
-        {
-            this.Path = info.GetString(nameof(Path));
-        }
-
         /// <summary>
         ///     Gets the invalid path.
         /// </summary>
         public string Path { get; }
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(Path), this.Path);
-        }
 
         /// <inheritdoc />
         public override string ToString()
@@ -603,7 +490,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     Represents errors that occur when attempting to mutate
     ///     the runtime after it has already been processed.
     /// </summary>
-    [Serializable]
     public class InstanceAlreadyProcessedException
         : Exception
     {
@@ -615,18 +501,6 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         /// <inheritdoc />
         public InstanceAlreadyProcessedException(string message, Exception inner) : base(message, inner) { }
-
-        /// <inheritdoc />
-        protected InstanceAlreadyProcessedException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-        }
     }
 
     /// <summary>
@@ -638,7 +512,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     ///     that cooks events from an ETL file (Event Tracing for Windows trace file),
     ///     but no ETL files are present in the set of files to process.
     /// </summary>
-    [Serializable]
     public class NoDataSourceException
         : EngineException
     {
@@ -682,45 +555,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.CookerPath = cookerPath;
         }
 
-        /// <inheritdoc />
-        protected NoDataSourceException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            var type = (DataCookerType)info.GetInt32(nameof(this.CookerPath.DataCookerType));
-            var dataCookerId = info.GetString(nameof(this.CookerPath.DataCookerId));
-            switch (type)
-            {
-                case DataCookerType.CompositeDataCooker:
-                    this.CookerPath = DataCookerPath.ForComposite(dataCookerId);
-                    break;
-
-                case DataCookerType.SourceDataCooker:
-                    {
-                        var sourceParserId = info.GetString(nameof(this.CookerPath.SourceParserId));
-                        this.CookerPath = DataCookerPath.ForSource(sourceParserId, dataCookerId);
-                    }
-
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
         /// <summary>
         ///     Gets the path to the cooker that will not have any input.
         /// </summary>
         public DataCookerPath CookerPath { get; }
-
-        /// <inheritdoc />
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-
-            info.AddValue(nameof(this.CookerPath.SourceParserId), this.CookerPath.SourceParserId);
-            info.AddValue(nameof(this.CookerPath.DataCookerId), this.CookerPath.DataCookerId);
-            info.AddValue(nameof(this.CookerPath.DataCookerType), (int)this.CookerPath.DataCookerType);
-        }
     }
 
     /// <summary>
@@ -748,12 +586,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         public TableNotEnabledException(TableDescriptor descriptor)
             : base("The given table is not enabled.", descriptor)
-        {
-        }
-
-        /// <inheritdoc />
-        protected TableNotEnabledException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

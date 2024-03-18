@@ -18,10 +18,10 @@ namespace Microsoft.Performance.SDK
     ///     <see cref="ExtensionException"/> to report errors
     ///     from their Plugins.
     /// </summary>
-    [Serializable]
+    [Serializable] // Remove this for 2.0
     public class ErrorInfo
         : IFormattable,
-          ISerializable
+          ISerializable // Remove this for 2.0
     {
         /// <summary>
         ///     The <see cref="ErrorInfo"/> instance representing no errors.
@@ -64,6 +64,7 @@ namespace Microsoft.Performance.SDK
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="info"/> is <c>null</c>.
         /// </exception>
+        [Obsolete("SYSLIB0051")] // Remove this method for 2.0
         protected ErrorInfo(SerializationInfo info, StreamingContext context)
         {
             Guard.NotNull(info, nameof(info));
@@ -119,7 +120,7 @@ namespace Microsoft.Performance.SDK
         ///     implementation.
         /// </param>
         /// <param name="formatProvider">
-        ///     The provider to use to format the value. 
+        ///     The provider to use to format the value.
         ///     - or -
         ///     A <c>null</c> reference (Nothing in Visual Basic) to obtain the
         ///     numeric format information from the current locale setting of
@@ -146,6 +147,7 @@ namespace Microsoft.Performance.SDK
         [SecurityPermission(
             SecurityAction.LinkDemand,
             Flags = SecurityPermissionFlag.SerializationFormatter)]
+        [Obsolete("SYSLIB0051")] // Remove this method for 2.0
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             Guard.NotNull(info, nameof(info));
@@ -157,6 +159,7 @@ namespace Microsoft.Performance.SDK
         }
 
         /// <inheritdoc />
+        [Obsolete("SYSLIB0051")] // Remove this method for 2.0
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             this.GetObjectData(info, context);
