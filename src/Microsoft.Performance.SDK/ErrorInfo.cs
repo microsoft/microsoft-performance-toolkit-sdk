@@ -64,7 +64,7 @@ namespace Microsoft.Performance.SDK
         /// <exception cref="System.ArgumentNullException">
         ///     <paramref name="info"/> is <c>null</c>.
         /// </exception>
-        [Obsolete("SYSLIB0051")] // Remove this method for 2.0
+        [Obsolete("SYSLIB0051 - This will be removed by 2.0. You should not use this serialization system for de/serializing this object.")] // Remove this method for 2.0
         protected ErrorInfo(SerializationInfo info, StreamingContext context)
         {
             Guard.NotNull(info, nameof(info));
@@ -147,7 +147,7 @@ namespace Microsoft.Performance.SDK
         [SecurityPermission(
             SecurityAction.LinkDemand,
             Flags = SecurityPermissionFlag.SerializationFormatter)]
-        [Obsolete("SYSLIB0051")] // Remove this method for 2.0
+        [Obsolete("SYSLIB0051 - This will be removed by 2.0. You should not use this serialization system for de/serializing this object.")] // Remove this method for 2.0
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             Guard.NotNull(info, nameof(info));
@@ -159,7 +159,7 @@ namespace Microsoft.Performance.SDK
         }
 
         /// <inheritdoc />
-        [Obsolete("SYSLIB0051")] // Remove this method for 2.0
+        [Obsolete("SYSLIB0051 - This will be removed by 2.0. You should not use this serialization system for de/serializing this object.")] // Remove this method for 2.0
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             this.GetObjectData(info, context);
