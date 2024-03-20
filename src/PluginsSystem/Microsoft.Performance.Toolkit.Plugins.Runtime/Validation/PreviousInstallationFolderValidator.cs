@@ -5,16 +5,13 @@ using System;
 using System.IO;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
-using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
 {
     /// <summary>
-    ///     Validates a plugin's <see cref="PluginMetadata.SdkVersion"/> is compatible with
-    ///     the currently running's SDK version.
+    ///     Validates a plugin's installation directory is not already in use by a previous installation.
     /// </summary>
     public class PreviousInstallationFolderValidator
         : IPluginValidator
