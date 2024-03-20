@@ -19,23 +19,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         [JsonConstructor]
         public LicenseInfo(
             string name,
-            string uri,
+            Uri uri,
             string text)
         {
             this.Name = name;
             this.Uri = uri;
             this.Text = text;
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="LicenseInfo"/> class from a <see cref="SDK.Processing.LicenseInfo"/> instance.
-        /// </summary>
-        /// <param name="licenseInfo">
-        ///     The license info to copy.
-        /// </param>
-        public LicenseInfo(SDK.Processing.LicenseInfo licenseInfo)
-            : this(licenseInfo?.Name, licenseInfo?.Uri, licenseInfo?.Text)
-        {
         }
 
         /// <summary>
@@ -46,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <summary>
         ///     Gets the URI where the license text may be found.
         /// </summary>
-        public string Uri { get; }
+        public Uri Uri { get; }
 
         /// <summary>
         ///     Gets the full text of the license, if desired.
@@ -74,7 +63,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             }
 
             return string.Equals(this.Name, other.Name, StringComparison.Ordinal)
-                && string.Equals(this.Uri, other.Uri, StringComparison.Ordinal)
+                && string.Equals(this.Uri.OriginalString, other.Uri.OriginalString, StringComparison.Ordinal)
                 && string.Equals(this.Text, other.Text, StringComparison.Ordinal);
         }
 
