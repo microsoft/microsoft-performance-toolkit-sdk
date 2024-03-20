@@ -107,10 +107,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     return true;
                 }
 
-                // First try to rename the directory to a temporary name.
+                // First try to move the directory to the temp folder.
                 // If this succeeds, it means no other process was using any file
                 // in the directory, and we can safely delete it.
-                var toDelete = dir + ".delete";
+                var toDelete = Path.Combine(Path.GetTempPath(), new DirectoryInfo(dir).Name + ".delete");
+
                 try
                 {
                     Directory.Move(dir, toDelete);
