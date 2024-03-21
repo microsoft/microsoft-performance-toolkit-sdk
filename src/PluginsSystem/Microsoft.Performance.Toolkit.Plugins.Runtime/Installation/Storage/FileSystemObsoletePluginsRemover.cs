@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 {
@@ -107,7 +108,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     return true;
                 }
 
-                if (IsAnyFileInUse(dir))
+                if (!TryDeleteContentsAtomic(dir))
                 {
                     this.logger.Error($"Failed to delete {dir} because it is in use.");
                     return false;
@@ -149,25 +150,35 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             }, cancellationToken);
         }
 
-        private bool IsAnyFileInUse(string directory)
+        private bool TryDeleteContentsAtomic(string directory)
         {
-            // Enumerate all files in the directory and check if any of them are in use.
-            return Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
-                .Any(f =>
+            List<string> files = Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).ToList();
+
+            List<FileStream> streams = files
+                .Select(f =>
                 {
                     try
                     {
-                        using (FileStream stream = File.Open(f, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-                        {
-                            stream.Close();
-                            return false;
-                        }
+                        return File.Open(f, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
                     }
                     catch (IOException)
                     {
-                        return true;
+                        return null;
                     }
-                });
+                })
+                .ToList();
+
+            if (streams.Any(s => s is null))
+            {
+                // At least one file is in use. Close all the streams and return false.
+                streams.ForEach(s => s?.Close());
+                return false;
+            }
+
+            // All files are available to be deleted. Delete all the files and close the streams.
+            files.ForEach(f => File.Delete(f));
+            streams.ForEach(s => s.Close());
+            return true;
         }
     }
 }
