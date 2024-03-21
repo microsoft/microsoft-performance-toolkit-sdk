@@ -131,10 +131,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     ex is IOException ||
                     ex is UnauthorizedAccessException)
                 {
-                    this.logger.Error(ex, $"Failed to delete {dir}.");
-
-                    // Restore the original directory name
-                    Directory.Move(toDelete, dir);
+                    this.logger.Error(ex, $"Failed to delete {toDelete}.");
                     return false;
                 }
             }, cancellationToken);
