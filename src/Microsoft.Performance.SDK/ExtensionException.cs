@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Text;
 
 namespace Microsoft.Performance.SDK
@@ -13,7 +11,6 @@ namespace Microsoft.Performance.SDK
     ///     extension (ProcessingSource, CustomDataProcessor, etc) to
     ///     uniformly report fatal error conditions.
     /// </summary>
-    [Serializable]
     public class ExtensionException
         : Exception
     {
@@ -75,29 +72,9 @@ namespace Microsoft.Performance.SDK
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExtensionException"/>
-        ///     class.
-        /// </summary>
-        protected ExtensionException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-            this.Error = (ErrorInfo)info.GetValue(nameof(Error), typeof(ErrorInfo));
-        }
-
-        /// <summary>
         ///     Gets the <see cref="ErrorInfo"/> associated with this exception.
         /// </summary>
         public ErrorInfo Error { get; }
-
-        /// <inheritdoc />
-        [SecurityPermission(
-            SecurityAction.LinkDemand,
-            Flags = SecurityPermissionFlag.SerializationFormatter)]
-        public override void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            base.GetObjectData(info, context);
-            info.AddValue(nameof(Error), this.Error, typeof(ErrorInfo));
-        }
 
         /// <inheritdoc />
         public override string ToString()

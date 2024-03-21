@@ -8,8 +8,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
 
@@ -469,26 +467,14 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             }
         }
 
-        [Serializable]
         private class FusionError
-            : ErrorInfo,
-              ISerializable
+            : ErrorInfo
         {
             public FusionError(
                 FileNotFoundException e)
                 : base(ErrorCodes.AssemblyLoadFailed, ErrorCodes.AssemblyLoadFailed.Description)
             {
                 this.Exception = e;
-            }
-
-            protected FusionError(
-                SerializationInfo info,
-                StreamingContext context)
-                : base(info, context)
-            {
-                this.Exception = (FileNotFoundException)info.GetValue(
-                    nameof(this.Exception),
-                    typeof(FileNotFoundException));
             }
 
             public FileNotFoundException Exception { get; }
@@ -506,26 +492,10 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
 
                 return null;
             }
-
-            [SecurityPermission(
-                SecurityAction.LinkDemand,
-                Flags = SecurityPermissionFlag.SerializationFormatter)]
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                base.GetObjectData(info, context);
-                info.AddValue(nameof(this.Exception), this.Exception);
-            }
-
-            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                this.GetObjectData(info, context);
-            }
         }
 
-        [Serializable]
         private class DiscoveryError
-            : ErrorInfo,
-              ISerializable
+            : ErrorInfo
         {
             public DiscoveryError(
                 IEnumerable<string> directoryPaths,
@@ -542,18 +512,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 this.ExclusionsAreCaseSensitive = exclusionsAreCaseSensitive;
             }
 
-            protected DiscoveryError(
-               SerializationInfo info,
-               StreamingContext context)
-               : base(info, context)
-            {
-                this.DirectoryPaths = (List<string>)info.GetValue(nameof(this.DirectoryPaths), typeof(List<string>));
-                this.IncludeSubDirectories = info.GetBoolean(nameof(this.IncludeSubDirectories));
-                this.SearchPatterns = (List<string>)info.GetValue(nameof(this.SearchPatterns), typeof(List<string>));
-                this.ExclusionFileNames = (List<string>)info.GetValue(nameof(this.ExclusionFileNames), typeof(List<string>));
-                this.ExclusionsAreCaseSensitive = info.GetBoolean(nameof(this.ExclusionsAreCaseSensitive));
-            }
-
             public List<string> DirectoryPaths { get; }
 
             public bool IncludeSubDirectories { get; }
@@ -563,25 +521,6 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
             public List<string> ExclusionFileNames { get; }
 
             public bool ExclusionsAreCaseSensitive { get; }
-
-            [SecurityPermission(
-                SecurityAction.LinkDemand,
-                Flags = SecurityPermissionFlag.SerializationFormatter)]
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                base.GetObjectData(info, context);
-
-                info.AddValue(nameof(this.DirectoryPaths), this.DirectoryPaths);
-                info.AddValue(nameof(this.IncludeSubDirectories), this.IncludeSubDirectories);
-                info.AddValue(nameof(this.SearchPatterns), this.SearchPatterns);
-                info.AddValue(nameof(this.ExclusionFileNames), this.ExclusionFileNames);
-                info.AddValue(nameof(this.ExclusionsAreCaseSensitive), this.ExclusionsAreCaseSensitive);
-            }
-
-            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                this.GetObjectData(info, context);
-            }
         }
     }
 }

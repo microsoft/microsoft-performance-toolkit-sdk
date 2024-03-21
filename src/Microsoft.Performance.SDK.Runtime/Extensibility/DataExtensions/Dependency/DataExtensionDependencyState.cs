@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
@@ -179,11 +177,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
         ///     Precedence is:
         ///     <see cref="DataExtensionAvailability.Undetermined"/>
         ///         Passing in  causes a reset.
-        ///     <see cref="DataExtensionAvailability.Error"/> 
-        ///     <see cref="DataExtensionAvailability.IndirectError"/> 
-        ///     <see cref="DataExtensionAvailability.MissingRequirement"/> 
-        ///     <see cref="DataExtensionAvailability.MissingIndirectRequirement"/> 
-        ///     <see cref="DataExtensionAvailability.Available"/> 
+        ///     <see cref="DataExtensionAvailability.Error"/>
+        ///     <see cref="DataExtensionAvailability.IndirectError"/>
+        ///     <see cref="DataExtensionAvailability.MissingRequirement"/>
+        ///     <see cref="DataExtensionAvailability.MissingIndirectRequirement"/>
+        ///     <see cref="DataExtensionAvailability.Available"/>
         /// </summary>
         /// <param name="availability">
         ///     An availability state based on some validation rule.
@@ -477,17 +475,11 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Depende
             }
         }
 
-        [Serializable]
         private sealed class CycleError
             : ErrorInfo
         {
             internal CycleError()
                 : base(ErrorCodes.EXTENSION_DependencyCycle, ErrorCodes.EXTENSION_DependencyCycle.Description)
-            {
-            }
-
-            private CycleError(SerializationInfo info, StreamingContext context)
-                : base(info, context)
             {
             }
 
