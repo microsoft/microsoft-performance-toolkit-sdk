@@ -107,10 +107,22 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     return true;
                 }
 
-                // First try to move the directory to the temp folder.
-                // If this succeeds, it means no other process was using any file
-                // in the directory, and we can safely delete it.
-                var toDelete = Path.Combine(Path.GetTempPath(), new DirectoryInfo(dir).Name + ".delete");
+                if (IsAnyFileInUse(dir))
+                {
+                    this.logger.Error($"Failed to delete {dir} because it is in use.");
+                    return false;
+                }
+
+
+                /*
+                 * The directory is not in use, and the plugins system won't return that it is available
+                 * to be loaded because we currently hold the lock on the plugin registry. We will first
+                 * move the directory to a temporary location, and then delete it. The delete may fail if
+                 * another process opens a file in the directory between the move and the delete, but that's OK
+                 * because we only care that no nobody tries to load the plugin via the plugins system.
+                 */
+
+                var toDelete = Path.Combine(Path.GetTempPath(), new DirectoryInfo(dir).Name + Path.GetRandomFileName());
 
                 try
                 {
@@ -137,5 +149,25 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             }, cancellationToken);
         }
 
+        private bool IsAnyFileInUse(string directory)
+        {
+            // Enumerate all files in the directory and check if any of them are in use.
+            return Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
+                .Any(f =>
+                {
+                    try
+                    {
+                        using (FileStream stream = File.Open(f, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                        {
+                            stream.Close();
+                            return false;
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        return true;
+                    }
+                });
+        }
     }
 }
