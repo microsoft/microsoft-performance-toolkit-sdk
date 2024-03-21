@@ -60,20 +60,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                 IEnumerable<string> dirsToRemove = this.pluginsStorageDirectory.GetAllRootDirectories()
                     .Where(d => !dirsInUse.Contains(d, StringComparer.OrdinalIgnoreCase));
 
-                IEnumerable<(string dirToRemove, Task task)> dirTaskTuples = dirsToRemove
-                    .Select(dirToRemove => (dirToRemove: dirToRemove, task: DeleteDirectory(dirToRemove, cancellationToken)));
+                List<(string dirToRemove, Task<bool> task)> dirTaskTuples = dirsToRemove
+                    .Select(dirToRemove => (dirToRemove: dirToRemove, task: TryDeleteDirectory(dirToRemove, cancellationToken)))
+                    .ToList();
 
-                IEnumerable<Task> tasks = dirsToRemove.Select(d => DeleteDirectory(d, cancellationToken));
                 try
                 {
-                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                    await Task.WhenAll(dirTaskTuples.Select(t => t.task)).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
                     this.logger.Info($"The request to clean up plugins from the storage is cancelled.");
 
                     dirTaskTuples
-                        .Where(p => p.task.Status == TaskStatus.RanToCompletion)
+                        .Where(p => p.task.Status == TaskStatus.RanToCompletion && p.task.Result)
                         .ToList()
                         .ForEach(t => this.logger.Info($"{t.dirToRemove} has been successfully deleted"));
 
@@ -85,7 +85,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 
                 foreach (var tuple in dirTaskTuples)
                 {
-                    if (tuple.task.IsFaulted)
+                    if (tuple.task.IsFaulted || tuple.task.IsCanceled || !tuple.task.Result)
                     {
                         this.logger.Error(tuple.task.Exception, $"Failed to clean up directory {tuple.dirToRemove}");
                     }
@@ -97,13 +97,42 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             }
         }
 
-        private Task DeleteDirectory(string dir, CancellationToken cancellationToken)
+        private Task<bool> TryDeleteDirectory(string dir, CancellationToken cancellationToken)
         {
             return Task.Run(() =>
             {
-                if (Directory.Exists(dir))
+                if (!Directory.Exists(dir))
                 {
-                    Directory.Delete(dir, true);
+                    // The directory does not exist, so it is already deleted.
+                    return true;
+                }
+
+                // First try to move the directory to the temp folder.
+                // If this succeeds, it means no other process was using any file
+                // in the directory, and we can safely delete it.
+                var toDelete = Path.Combine(Path.GetTempPath(), new DirectoryInfo(dir).Name + ".delete");
+
+                try
+                {
+                    Directory.Move(dir, toDelete);
+                }
+                catch (IOException e)
+                {
+                    this.logger.Error(e, $"Failed to delete {dir} because it is in use.");
+                    return false;
+                }
+
+                try
+                {
+                    Directory.Delete(toDelete, true);
+                    return true;
+                }
+                catch (Exception ex) when (
+                    ex is IOException ||
+                    ex is UnauthorizedAccessException)
+                {
+                    this.logger.Error(ex, $"Failed to delete {toDelete}.");
+                    return false;
                 }
             }, cancellationToken);
         }
