@@ -145,7 +145,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     ex is UnauthorizedAccessException)
                 {
                     this.logger.Error(ex, $"Failed to delete {toDelete}.");
-                    return false;
+
+                    /*
+                     * We return true here because the directory has been moved to a temporary location
+                     * with all of its original contents removed. From the perspective of the plugins system,
+                     * the directory is gone and will not interfere with installing a new instance of the plugin.
+                     */
+                    return true;
                 }
             }, cancellationToken);
         }
