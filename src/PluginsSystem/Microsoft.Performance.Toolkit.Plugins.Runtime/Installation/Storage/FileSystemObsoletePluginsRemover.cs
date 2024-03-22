@@ -171,13 +171,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
             if (streams.Any(s => s is null))
             {
                 // At least one file is in use. Close all the streams and return false.
-                streams.ForEach(s => s?.Close());
+                streams.ForEach(s =>
+                {
+                    s?.Close();
+                    s?.Dispose();
+                });
                 return false;
             }
 
             // All files are available to be deleted. Delete all the files and close the streams.
             files.ForEach(f => File.Delete(f));
-            streams.ForEach(s => s.Close());
+            streams.ForEach(s =>
+            {
+                s.Close();
+                s.Dispose();
+            });
             return true;
         }
     }
