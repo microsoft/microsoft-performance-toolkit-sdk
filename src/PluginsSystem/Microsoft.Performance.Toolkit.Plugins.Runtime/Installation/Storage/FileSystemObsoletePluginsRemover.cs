@@ -161,8 +161,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     {
                         return File.Open(f, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        this.logger.Error(e, $"Failed to open {f} for deletion.");
                         return null;
                     }
                 })
