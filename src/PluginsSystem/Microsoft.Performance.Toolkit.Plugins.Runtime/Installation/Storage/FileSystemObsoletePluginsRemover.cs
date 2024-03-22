@@ -114,7 +114,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     return false;
                 }
 
-
                 /*
                  * The directory is not in use, and the plugins system won't return that it is available
                  * to be loaded because we currently hold the lock on the plugin registry. We will first
@@ -151,6 +150,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                      * with all of its original contents removed. From the perspective of the plugins system,
                      * the directory is gone and will not interfere with installing a new instance of the plugin.
                      */
+
                     return true;
                 }
             }, cancellationToken);
@@ -183,6 +183,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     s?.Close();
                     s?.Dispose();
                 });
+
                 return false;
             }
 
@@ -193,6 +194,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                 s.Close();
                 s.Dispose();
             });
+
             return true;
         }
     }
