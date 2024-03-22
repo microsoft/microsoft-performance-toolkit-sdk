@@ -116,43 +116,52 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
 
                 /*
                  * The directory is not in use, and the plugins system won't return that it is available
-                 * to be loaded because we currently hold the lock on the plugin registry. We will first
-                 * move the directory to a temporary location, and then delete it. The delete may fail if
-                 * another process opens a file in the directory between the move and the delete, but that's OK
-                 * because we only care that no nobody tries to load the plugin via the plugins system.
+                 * to be loaded because we currently hold the lock on the plugin registry. We already deleted
+                 * all of the files that were originally in the directory, so we just need to clean up the directory
+                 * itself. Note that between deleting all the contents above and now, there could potentially be new
+                 * files that were added (and which are now in use). Whatever those files are and whoever is using them
+                 * is irrelevant to the plugins system, though, because the lock guarantees nobody is trying
+                 * to load the plugin directory for plugin use.
+                 *
+                 * First, we will attempt to delete the directory immediately. If that fails, we will just (attempt to)
+                 * rename the directory to a new, randomly generated, name.
                  */
 
-                var toDelete = Path.Combine(Path.GetTempPath(), new DirectoryInfo(dir).Name + Path.GetRandomFileName());
-
                 try
                 {
-                    Directory.Move(dir, toDelete);
-                }
-                catch (IOException e)
-                {
-                    this.logger.Error(e, $"Failed to delete {dir} because it is in use.");
-                    return false;
-                }
-
-                try
-                {
-                    Directory.Delete(toDelete, true);
+                    Directory.Delete(dir, true);
                     return true;
                 }
                 catch (Exception ex) when (
                     ex is IOException ||
                     ex is UnauthorizedAccessException)
                 {
-                    this.logger.Error(ex, $"Failed to delete {toDelete}.");
-
-                    /*
-                     * We return true here because the directory has been moved to a temporary location
-                     * with all of its original contents removed. From the perspective of the plugins system,
-                     * the directory is gone and will not interfere with installing a new instance of the plugin.
-                     */
-
-                    return true;
+                    this.logger.Info(ex, $"Failed to delete {dir}. Attempting to rename the folder.");
                 }
+
+                var di = new DirectoryInfo(dir);
+                var moveTo = Path.Combine((di.Parent?.FullName ?? di.Root.FullName), Path.GetRandomFileName());
+
+                try
+                {
+                    Directory.Move(dir, moveTo);
+                }
+                catch (IOException e)
+                {
+                    this.logger.Error(e, $"Failed to rename {dir} to {moveTo}.");
+                    return false;
+                }
+
+                this.logger.Info($"Renamed {dir} to {moveTo}.");
+
+                /*
+                 * We failed to delete the original directory, so it's unlikely that we will be able to delete
+                 * it after renaming it. The plugin won't be loaded or conflict with new installations since it's
+                 * been renamed, though, so we'll just return true here and hope that the next time this cleanup code is
+                 * ran the renamed directory is deleted.
+                 */
+
+                return true;
             }, cancellationToken);
         }
 
