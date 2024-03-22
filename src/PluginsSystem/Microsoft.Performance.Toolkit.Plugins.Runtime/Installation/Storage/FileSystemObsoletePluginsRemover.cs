@@ -161,7 +161,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Installation
                     {
                         return File.Open(f, FileMode.Open, FileAccess.ReadWrite, FileShare.Delete);
                     }
-                    catch (IOException)
+                    catch (Exception)
                     {
                         return null;
                     }
