@@ -479,13 +479,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                 pluginName = parentFolder.Parent.Name;
                 pluginVersion = Version.TryParse(parentFolder.Name, out var version) ? version : null;
             }
-            else if (parentFolder?.Parent?.Name == ProcessingSourceConstants.ProcessingSourceRootFolderName)
-            {
-                // Legacy: this plugin was bundled with WPA. It has its binaries inside of one folder
-                // named after the plugin itself.
-                pluginName = parentFolder.Name;
-                pluginVersion = null;
-            }
             else
             {
                 // Unknown file system schema. Do not attempt to make assumptions about the plugin's name.
