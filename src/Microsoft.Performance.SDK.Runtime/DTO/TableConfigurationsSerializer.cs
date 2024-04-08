@@ -126,17 +126,25 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         }
 
         /// <summary>
-        ///     Serializes a table configuration to a stream.
+        ///     Serializes a <see cref="Processing.TableConfiguration"/> to a stream.
         /// </summary>
         /// <param name="stream">
         ///     Target stream.
         /// </param>
         /// <param name="tableConfiguration">
-        ///     Table configuration to serialize.
+        ///     The <see cref="Processing.TableConfiguration"/> to serialize.
         /// </param>
         /// <param name="tableId">
         ///     Table identifier.
         /// </param>
+        /// <remarks>
+        ///     This will serialize a full <see cref="Processing.TableConfigurations"/> that has the given
+        ///     <paramref name="tableId" /> as its <see cref="Processing.TableConfigurations.TableId"/>
+        ///     and the given <paramref name="tableConfiguration"/> as its single element
+        ///     <see cref="Processing.TableConfigurations.Configurations"/>.
+        ///     The serialized <see cref="Processing.TableConfigurations"/> will have a null
+        ///     <see cref="Processing.TableConfigurations.DefaultConfigurationName"/>.
+        /// </remarks>
         public static void SerializeTableConfiguration(
             Stream stream,
             Processing.TableConfiguration tableConfiguration,
@@ -146,13 +154,40 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         }
 
         /// <summary>
-        ///     Serializes a table configuration to a stream.
+        ///     Serializes one or more <see cref="Processing.TableConfiguration"/> instances to a stream.
+        /// </summary>
+        /// <param name="stream">
+        ///     Target stream.
+        /// </param>
+        /// <param name="tableConfigurations">
+        ///     The <see cref="Processing.TableConfiguration"/> instances to serialize.
+        /// </param>
+        /// <param name="tableId">
+        ///     Table identifier.
+        /// </param>
+        /// <remarks>
+        ///     This will serialize a full <see cref="Processing.TableConfigurations"/> that has the given
+        ///     <paramref name="tableId" /> as its <see cref="Processing.TableConfigurations.TableId"/>
+        ///     and the given <paramref name="tableConfigurations"/> as its <see cref="Processing.TableConfigurations.Configurations"/>.
+        ///     The serialized <see cref="Processing.TableConfigurations"/> will have a null
+        ///     <see cref="Processing.TableConfigurations.DefaultConfigurationName"/>.
+        /// </remarks>
+        public static void SerializeTableConfigurations(
+            Stream stream,
+            Processing.TableConfiguration[] tableConfigurations,
+            Guid tableId)
+        {
+            SerializeTableConfigurations(stream, tableConfigurations, tableId, null);
+        }
+
+        /// <summary>
+        ///     Serializes a <see cref="Processing.TableConfiguration"/> to a stream.
         /// </summary>
         /// <param name="stream">
         ///     Target stream.
         /// </param>
         /// <param name="tableConfiguration">
-        ///     Table configuration to serialize.
+        ///     The <see cref="Processing.TableConfiguration"/> to serialize.
         /// </param>
         /// <param name="tableId">
         ///     Table identifier.
@@ -160,13 +195,72 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         /// <param name="logger">
         ///     Used to log relevant messages.
         /// </param>
+        /// <remarks>
+        ///     This will serialize a full <see cref="Processing.TableConfigurations"/> that has the given
+        ///     <paramref name="tableId" /> as its <see cref="Processing.TableConfigurations.TableId"/>
+        ///     and the given <paramref name="tableConfiguration"/> as its single element
+        ///     <see cref="Processing.TableConfigurations.Configurations"/>.
+        ///     The serialized <see cref="Processing.TableConfigurations"/> will have a null
+        ///     <see cref="Processing.TableConfigurations.DefaultConfigurationName"/>.
+        /// </remarks>
         public static void SerializeTableConfiguration(
             Stream stream,
             Processing.TableConfiguration tableConfiguration,
             Guid tableId,
             ILogger logger)
         {
-            var tableConfigurations = new Processing.TableConfigurations(tableId) { Configurations = new[] { tableConfiguration } };
+            SerializeTableConfigurations(stream, new[] { tableConfiguration }, tableId, logger);
+        }
+
+        /// <summary>
+        ///     Serializes one or more <see cref="Processing.TableConfiguration"/> instances to a stream.
+        /// </summary>
+        /// <param name="stream">
+        ///     Target stream.
+        /// </param>
+        /// <param name="tableConfigurations">
+        ///     The <see cref="Processing.TableConfiguration"/> instances to serialize.
+        /// </param>
+        /// <param name="tableId">
+        ///     Table identifier.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log relevant messages.
+        /// </param>
+        /// <remarks>
+        ///     This will serialize a full <see cref="Processing.TableConfigurations"/> that has the given
+        ///     <paramref name="tableId" /> as its <see cref="Processing.TableConfigurations.TableId"/>
+        ///     and the given <paramref name="tableConfiguration"/> as its <see cref="Processing.TableConfigurations.Configurations"/>.
+        ///     The serialized <see cref="Processing.TableConfigurations"/> will have a null
+        ///     <see cref="Processing.TableConfigurations.DefaultConfigurationName"/>.
+        /// </remarks>
+        public static void SerializeTableConfigurations(
+            Stream stream,
+            Processing.TableConfiguration[] tableConfigurations,
+            Guid tableId,
+            ILogger logger)
+        {
+            var toSerialize = new Processing.TableConfigurations(tableId) { Configurations = tableConfigurations };
+            SerializeTableConfigurations(stream, toSerialize, logger);
+        }
+
+        /// <summary>
+        ///     Serializes <see cref="Processing.TableConfigurations"/> to a stream.
+        /// </summary>
+        /// <param name="stream">
+        ///     Target stream.
+        /// </param>
+        /// <param name="tableConfigurations">
+        ///     The <see cref="Processing.TableConfigurations"/> to serialize.
+        /// </param>
+        /// <param name="logger">
+        ///     Used to log relevant messages.
+        /// </param>
+        public static void SerializeTableConfigurations(
+            Stream stream,
+            Processing.TableConfigurations tableConfigurations,
+            ILogger logger)
+        {
             var prebuiltConfigurations = tableConfigurations.ConvertToDto();
 
             SerializeTableConfigurations(stream, prebuiltConfigurations, logger);
