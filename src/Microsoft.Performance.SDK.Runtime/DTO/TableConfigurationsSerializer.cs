@@ -257,9 +257,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             Stream stream,
             Processing.TableConfigurations tableConfigurations)
         {
-            var prebuiltConfigurations = tableConfigurations.ConvertToDto();
-
-            SerializeTableConfigurations(stream, prebuiltConfigurations, null);
+            SerializeTableConfigurations(stream, tableConfigurations, null);
         }
 
         /// <summary>
