@@ -253,6 +253,24 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         /// <param name="tableConfigurations">
         ///     The <see cref="Processing.TableConfigurations"/> to serialize.
         /// </param>
+        public static void SerializeTableConfigurations(
+            Stream stream,
+            Processing.TableConfigurations tableConfigurations)
+        {
+            var prebuiltConfigurations = tableConfigurations.ConvertToDto();
+
+            SerializeTableConfigurations(stream, prebuiltConfigurations, null);
+        }
+
+        /// <summary>
+        ///     Serializes <see cref="Processing.TableConfigurations"/> to a stream.
+        /// </summary>
+        /// <param name="stream">
+        ///     Target stream.
+        /// </param>
+        /// <param name="tableConfigurations">
+        ///     The <see cref="Processing.TableConfigurations"/> to serialize.
+        /// </param>
         /// <param name="logger">
         ///     Used to log relevant messages.
         /// </param>
