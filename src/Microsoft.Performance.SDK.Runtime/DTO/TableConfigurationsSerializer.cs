@@ -174,7 +174,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         /// </remarks>
         public static void SerializeTableConfigurations(
             Stream stream,
-            Processing.TableConfiguration[] tableConfigurations,
+            IEnumerable<Processing.TableConfiguration> tableConfigurations,
             Guid tableId)
         {
             SerializeTableConfigurations(stream, tableConfigurations, tableId, null);
@@ -236,7 +236,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         /// </remarks>
         public static void SerializeTableConfigurations(
             Stream stream,
-            Processing.TableConfiguration[] tableConfigurations,
+            IEnumerable<Processing.TableConfiguration> tableConfigurations,
             Guid tableId,
             ILogger logger)
         {
