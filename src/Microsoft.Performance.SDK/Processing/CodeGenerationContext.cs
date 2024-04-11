@@ -110,7 +110,7 @@ namespace Microsoft.Performance.SDK.Processing
             var resultType = methodToCall.ReturnType;
 
             var type = moduleBuilder.DefineType(
-                methodToCall.DeclaringType.FullName + "$." + methodToCall.Name,
+                $"{methodToCall.DeclaringType.FullName}$.{methodToCall.Name}$.{methodToCall.MethodHandle.Value.ToInt64():x16}",
                 TypeAttributes.Public,
                 typeof(ValueType),
                 new Type[] 
