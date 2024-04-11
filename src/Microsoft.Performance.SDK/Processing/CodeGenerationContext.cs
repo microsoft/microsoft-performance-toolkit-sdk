@@ -110,7 +110,21 @@ namespace Microsoft.Performance.SDK.Processing
             var resultType = methodToCall.ReturnType;
 
             var type = moduleBuilder.DefineType(
-                methodToCall.DeclaringType.FullName + "$." + methodToCall.Name,
+                //
+                // Notes:
+                //
+                // 1. `MethodInfo.MethodHandle.Value` is used in the name of the generated type as a unique identifier
+                //    to avoid type name collisions.
+                //
+                //    `MethofInfo.DelaringType.FullName` and `MethofInfo.DelaringType.Name` are used there only for
+                //    easy attribution purposes and could, in principle, be removed.  The exact `methodToCall` is
+                //    available in the code of the `get_Item` method of the generated dynamic type.
+                //
+                // 2. The `MethodInfo.MethodHandle.Value` cannot be reused while this generated type is still loaded
+                //    because `methodToCall` is referenced directly in the IL code of the `get_Item` method of the
+                //    generated dynamic type.
+                //
+                $"{methodToCall.DeclaringType.FullName}$.{methodToCall.Name}$.{methodToCall.MethodHandle.Value.ToInt64():x16}",
                 TypeAttributes.Public,
                 typeof(ValueType),
                 new Type[] 
