@@ -15,6 +15,9 @@ namespace Microsoft.Performance.SDK
         ///     Performs the <see cref="IComparable{T}.CompareTo(T)" /> operation,
         ///     handling the case  where any parameter could be null, even the
         ///     source. It is safe to call this method on a null reference.
+        ///     <para/>
+        ///     This method does NOT guarantee that the input parameter to
+        ///     <see cref="IComparable{T}.CompareTo"/> is non-null. See remarks below.
         /// </summary>
         /// <returns>
         ///     An integer value denoting the ordering of <paramref name="self"/> in
@@ -29,6 +32,14 @@ namespace Microsoft.Performance.SDK
         ///     A negative value indicates that <paramref name="self"/> is
         ///     strictly less than <paramref name="compareValue"/>.
         /// </returns>
+        /// <remarks>
+        ///     This method does NOT guarantee that the input parameter to
+        ///     <see cref="IComparable{T}.CompareTo"/> is non-null. This is because the method definition
+        ///     of <see cref="IComparable{T}.CompareTo"/> accepts a nullable input (i.e. it takes in a <c>T?</c>).
+        ///     Implementations of <see cref="IComparable{T}.CompareTo"/> that this method may call still must
+        ///     handle null values, because <see cref="IComparable{T}.CompareTo"/> may be invoked outside of
+        ///     this extension method.
+        /// </remarks>
         public static int CompareToSafe<T>(this T self, T compareValue)
             where T : IComparable<T>
         {
