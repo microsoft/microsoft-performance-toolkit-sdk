@@ -1,5 +1,5 @@
 # Abstract
-This document outlines what versions of WPA are compatbile with plugins compiled against specific versions of the SDK.
+This document outlines what versions of WPA are compatible with plugins compiled against specific versions of the SDK.
 
 | Plugin SDK Version | Supported WPA versions |
 | ------------------ | ---------------------- |
