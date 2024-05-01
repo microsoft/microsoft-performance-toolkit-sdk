@@ -1,9 +1,9 @@
 # Choosing an SDK Version
 
-The SDK is versioned using semantic versioning and will only load plugins that were compiled against a build of the SDK that is semantically compatible with the running version. Concretely, this means
+The SDK is versioned using semantic versioning and will only load plugins that were compiled against a build of the SDK that is semantically compatible with the running version. Concretely, this means if
 
-- If your plugin is compiled against SDK version `a.b.c`
-- Your plugin is being loaded by SDK version `x.y.z`
+1. Your plugin uses SDK version `a.b.c`
+2. The SDK driver (e.g. WPA) uses SDK version `x.y.z`
 
 then
 
