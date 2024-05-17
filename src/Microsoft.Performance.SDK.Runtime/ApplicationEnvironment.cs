@@ -12,7 +12,7 @@ using Microsoft.Performance.SDK.Extensibility;
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <inheritdoc cref="IApplicationEnvironment"/>
-    public abstract class ApplicationEnvironment
+    public class ApplicationEnvironment
         : IApplicationEnvironment
     {
         private readonly IMessageBox messageBox;
