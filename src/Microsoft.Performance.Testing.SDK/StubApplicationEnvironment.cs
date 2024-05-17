@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
@@ -34,6 +35,13 @@ namespace Microsoft.Performance.Testing.SDK
         public ButtonResult MessageBox(MessageType messageType, IFormatProvider formatProvider, Buttons buttons, string caption, string format, params object[] args)
         {
             return ButtonResult.None;
+        }
+
+        public bool TryGetAuthProvider<TAuth, TResult>(out IAuthProvider<TAuth, TResult> provider)
+            where TAuth : IAuthMethod<TResult>
+        {
+            provider = null;
+            return false;
         }
     }
 }

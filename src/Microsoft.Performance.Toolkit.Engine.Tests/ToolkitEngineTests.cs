@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
@@ -1127,6 +1129,55 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsInstanceOfType(error.Processor, typeof(InteractiveProcessor));
             Assert.AreEqual(file, error.DataSources.Single());
             Assert.IsInstanceOfType(error.ProcessFault, typeof(InvalidOperationException));
+        }
+
+        #endregion
+
+        #region Auth
+
+        [TestMethod]
+        [UnitTest]
+        public void ProcessingSources_AreGiven_SpecifiedAuthProviders()
+        {
+            var givenProvider = new StubAuthProvider();
+
+            var info = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
+            info.WithAuthProvider(givenProvider);
+            using var sut = Engine.Create(info);
+
+            var spy = sut.Plugins.ProcessingSourceReferences.First(psr => psr.Guid == Source123DataSource.Guid).Instance as Source123DataSource;
+            var success = spy.ApplicationEnvironmentSpy.TryGetAuthProvider<StubAuthMethod, int>(out var foundProvider);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual(givenProvider, foundProvider);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryGetAuthProvider_Fails_WhenNoProviderIsRegistered()
+        {
+            var info = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
+            using var sut = Engine.Create(info);
+
+            var spy = sut.Plugins.ProcessingSourceReferences.First(psr => psr.Guid == Source123DataSource.Guid).Instance as Source123DataSource;
+            var success = spy.ApplicationEnvironmentSpy.TryGetAuthProvider<StubAuthMethod, int>(out var foundProvider);
+
+            Assert.IsFalse(success);
+            Assert.IsNull(foundProvider);
+        }
+
+        private class StubAuthMethod
+            : IAuthMethod<int>
+        {
+        }
+
+        private class StubAuthProvider
+            : IAuthProvider<StubAuthMethod, int>
+        {
+            public Task<int> TryGetAuth(StubAuthMethod authRequest)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion

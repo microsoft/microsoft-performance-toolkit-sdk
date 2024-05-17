@@ -770,7 +770,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                     ? createInfo.ApplicationName
                     : string.Empty;
 
-                instance.applicationEnvironment = new ApplicationEnvironment(
+                instance.applicationEnvironment = new EngineApplicationEnvironment(
                     applicationName: applicationName,
                     runtimeName: runtimeName,
                     new RuntimeTableSynchronizer(),
@@ -778,7 +778,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                     instance.Factory.CreateSourceSessionFactory(),
                     createInfo.IsInteractive
                         ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
-                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger))
+                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger),
+                    createInfo.AuthProviders)
                 {
                     IsInteractive = createInfo.IsInteractive,
                 };

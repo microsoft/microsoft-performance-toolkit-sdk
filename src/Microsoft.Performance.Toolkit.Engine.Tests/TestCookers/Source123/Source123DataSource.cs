@@ -43,6 +43,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
 
         public bool IsDisposed => this.disposedValue;
 
+        internal IApplicationEnvironment ApplicationEnvironmentSpy => this.ApplicationEnvironment;
+
         protected override ICustomDataProcessor CreateProcessorCore(
             IEnumerable<IDataSource> dataSources,
             IProcessorEnvironment processorEnvironment,
