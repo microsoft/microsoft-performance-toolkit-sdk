@@ -102,20 +102,23 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Registers an <see cref="IAuthProvider{T}"/> of type <typeparamref name="T"/> to be available to plugins
-        ///     via <see cref="IApplicationEnvironment.TryGetAuthProvider{T}"/>.
+        ///     Registers an <see cref="IAuthProvider{TAuth, TResult}"/> of type <typeparamref name="TAuth"/> to be available to plugins
+        ///     via <see cref="IApplicationEnvironment.TryGetAuthProvider{TAuth, TResult}"/>.
         /// </summary>
         /// <param name="provider">
-        ///     The <see cref="IAuthProvider{T}"/> to register.
+        ///     The <see cref="IAuthProvider{TAuth, TResult}"/> to register.
         /// </param>
-        /// <typeparam name="T">
-        ///     The type of <see cref="IAuthMethod"/> for which the <see cref="IAuthProvider{T}"/> is being registered.
+        /// <typeparam name="TAuth">
+        ///     The type of <see cref="IAuthMethod{TResult}"/> for which the <see cref="IAuthProvider{TAuth, TResult}"/> is being registered.
+        /// </typeparam>
+        /// <typeparam name="TResult">
+        ///     The type of the result of successful authentication requests for <typeparamref name="TAuth"/>.
         /// </typeparam>
         /// <returns>
         ///     The instance of <see cref="EngineCreateInfo"/>.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     An <see cref="IAuthProvider{T}"/> for the specified type <typeparamref name="T"/> already exists.
+        ///     An <see cref="IAuthProvider{TAuth, TResult}"/> for the specified type <typeparamref name="TAuth"/> already exists.
         /// </exception>
         public EngineCreateInfo WithAuthProvider<TAuth, TResult>(IAuthProvider<TAuth, TResult> provider)
             where TAuth : IAuthMethod<TResult>
