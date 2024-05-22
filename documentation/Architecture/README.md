@@ -54,7 +54,7 @@ Creating an SDK driver is currently outside the scope of this documentation.
 The SDK operates as a common interface between the driver and plugins. It facilitates 
 1) Loading plugins at the request of the SDK driver
 2) Distributing data sources to the appropriate plugins
-3) Processing (also known as cooking) data within a plugin through a [processing pipeline](./The-Data-Processing-Pipeline)
+3) Processing (also known as cooking) data within a plugin through a [processing pipeline](./The-Data-Processing-Pipeline.md)
 4) Querying and piping data between either two concurrently loaded plugins or a loaded plugin and an assembly with programmatic 
    access to the running instance of the SDK (even if the data originates from a plugin which the destination does 
    not have the source code for)
@@ -88,12 +88,12 @@ The diagram below demonstrates how these objects work together to acheive this h
    primarily an interface definition, but it also implements creating a `CustomDataProcessor`
 2) The `CustomDataProcessor` contains implementation logic for processing the data sources provided by the SDK. The data sources 
    are given to the `ProcessingSource`, which typically passes them to the `CustomDataProcessor` it creates
-3) `DataCooker` classes participate in the plugin's [processing pipeline](./The-Data-Processing-Pipeline) and
+3) `DataCooker` classes participate in the plugin's [processing pipeline](./The-Data-Processing-Pipeline.md) and
     1) Export `DataOutput`s that can be queried, via the SDK, by anyone who knows an output's *data path*
     2) Advertise to the SDK *data paths* that can be used by either outside sources (such as concurrently loaded plugins), or other parts 
        of that cooker's plugin, to query that cooker's `DataOutput`s
 4) `Table` classes populate the tables ultimately returned by the plugin. The data inside these tables comes from the `CustomDataProcessor`,
-   either directly or indirectly through a [processing pipeline](./The-Data-Processing-Pipeline)
+   either directly or indirectly through a [processing pipeline](./The-Data-Processing-Pipeline.md)
 
 For implementation details on how to create a simple plugin containing one `ProcessingSource`, its associated `CustomDataProcessor` and a
 `Table`, please view [Using the SDK/Creating A Simple SDK Plugin](../Using-the-SDK/Creating-a-simple-sdk-plugin.md).
