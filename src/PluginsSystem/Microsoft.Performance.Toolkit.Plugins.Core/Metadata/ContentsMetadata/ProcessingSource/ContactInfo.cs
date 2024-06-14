@@ -31,21 +31,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ContactInfo"/> class from a <see cref="SDK.Processing.ContactInfo"/> instance.
-        /// </summary>
-        /// <param name="contactInfo">
-        ///     The <see cref="SDK.Processing.ContactInfo"/> instance to copy.
-        /// </param>
-        public ContactInfo(SDK.Processing.ContactInfo contactInfo)
-            : this(
-                  contactInfo?.Name,
-                  contactInfo?.Address,
-                  contactInfo?.EmailAddresses?.ToArray(),
-                  contactInfo?.PhoneNumbers?.ToArray())
-        {
-        }
-
-        /// <summary>
         ///     Gets the name of the contact, if any.
         /// </summary>
         public string Name { get; }

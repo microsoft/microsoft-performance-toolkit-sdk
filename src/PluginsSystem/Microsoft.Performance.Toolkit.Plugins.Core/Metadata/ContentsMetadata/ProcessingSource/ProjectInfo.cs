@@ -19,24 +19,15 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         ///     The URI to the page for this project.
         /// </param>
         [JsonConstructor]
-        public ProjectInfo(string uri)
+        public ProjectInfo(Uri uri)
         {
             this.Uri = uri;
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ProjectInfo"/> class from a <see cref="SDK.Processing.ProjectInfo"/> instance.
-        /// </summary>
-        /// <param name="projectInfo"></param>
-        public ProjectInfo(SDK.Processing.ProjectInfo projectInfo)
-            : this(projectInfo?.Uri)
-        {
-        }
-
-        /// <summary>
         ///     Gets the URI to the page for this project.
         /// </summary>
-        public string Uri { get; }
+        public Uri Uri { get; }
 
         /// <inheritdoc />
         public override bool Equals(object obj)
@@ -57,7 +48,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
                 return true;
             }
 
-            return string.Equals(this.Uri, other.Uri, StringComparison.Ordinal);
+            return string.Equals(this.Uri.OriginalString, other.Uri.OriginalString, StringComparison.Ordinal);
         }
 
         /// <inheritdoc />
