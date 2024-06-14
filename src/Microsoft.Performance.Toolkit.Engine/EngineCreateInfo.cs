@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine
@@ -15,6 +17,8 @@ namespace Microsoft.Performance.Toolkit.Engine
     public sealed class EngineCreateInfo
     {
         private static string DefaultRuntimeName;
+
+        private readonly Dictionary<Type, object> authProviders = new Dictionary<Type, object>();
 
         /// <summary>
         ///     Initializes the statc members of the <see cref="EngineCreateInfo"/>
@@ -98,6 +102,39 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
+        ///     Registers an <see cref="IAuthProvider{TAuth, TResult}"/> of type <typeparamref name="TAuth"/> to be available to plugins
+        ///     via <see cref="IApplicationEnvironment.TryGetAuthProvider{TAuth, TResult}"/>.
+        /// </summary>
+        /// <param name="provider">
+        ///     The <see cref="IAuthProvider{TAuth, TResult}"/> to register.
+        /// </param>
+        /// <typeparam name="TAuth">
+        ///     The type of <see cref="IAuthMethod{TResult}"/> for which the <see cref="IAuthProvider{TAuth, TResult}"/> is being registered.
+        /// </typeparam>
+        /// <typeparam name="TResult">
+        ///     The type of the result of successful authentication requests for <typeparamref name="TAuth"/>.
+        /// </typeparam>
+        /// <returns>
+        ///     The instance of <see cref="EngineCreateInfo"/>.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///     An <see cref="IAuthProvider{TAuth, TResult}"/> for the specified type <typeparamref name="TAuth"/> already exists.
+        /// </exception>
+        public EngineCreateInfo WithAuthProvider<TAuth, TResult>(IAuthProvider<TAuth, TResult> provider)
+            where TAuth : IAuthMethod<TResult>
+        {
+            Guard.NotNull(provider, nameof(provider));
+
+            var toRegister = typeof(TAuth);
+            if (!this.authProviders.TryAdd(toRegister, provider))
+            {
+                throw new InvalidOperationException($"An auth provider for the specified type {toRegister} already exists.");
+            }
+
+            return this;
+        }
+
+        /// <summary>
         ///     Gets or sets the name of the runtime on which the application is built.
         /// </summary>
         /// <remarks>
@@ -136,5 +173,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     will fail. By default, this property is <c>false</c>.
         /// </summary>
         public bool IsInteractive { get; set; }
+
+        internal ReadOnlyDictionary<Type, object> AuthProviders => new ReadOnlyDictionary<Type, object>(this.authProviders);
     }
 }
