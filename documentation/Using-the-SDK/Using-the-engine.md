@@ -10,6 +10,9 @@ major components to be aware of when using the `Engine`:
 2. The [`DataSourceSet`](#DataSourceSet)
 3. The [`Engine`](#Engine) itself
 
+Before starting, make sure to include the `Microsoft.Performance.Toolkit.Engine`
+library to use the engine.
+
 ## Plugin Set
 
 The `PluginSet` is a collection of all of your plugins and extensions that can
@@ -106,7 +109,7 @@ Once you are ready, call process and then examine the results.
 using (var plugins = PluginSet.Load())
 using (var dataSources = DataSourceSet.Create(plugins))
 {
-    dataSources.Add(new FileDataSource("myfile.txt");
+    dataSources.Add(new FileDataSource("myfile.txt"));
 
     var createInfo = new EngineCreateInfo(dataSources.AsReadOnly());
     using (var engine = Engine.Create(createInfo))
@@ -114,6 +117,26 @@ using (var dataSources = DataSourceSet.Create(plugins))
         engine.EnableCooker(DataCookerPath);
 
         var results = engine.Process();
+    }
+}
+````
+
+If you would like to enable a composite cooker, call the `GetCookedData(DataCookerPath)`
+method after process is called so that the results are obtained properly.
+
+````cs
+using (var plugins = PluginSet.Load())
+using (var dataSources = DataSourceSet.Create(plugins))
+{
+    dataSources.Add(new FileDataSource("myfile.txt"));
+
+    var createInfo = new EngineCreateInfo(dataSources.AsReadOnly());
+    using (var engine = Engine.Create(createInfo))
+    {
+        engine.EnableCooker(CompCookerPath);
+
+        var results = engine.Process();
+        results.GetCookedData(CompCookerPath);
     }
 }
 ````
