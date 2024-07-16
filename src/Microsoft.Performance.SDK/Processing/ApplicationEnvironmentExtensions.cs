@@ -149,6 +149,9 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Attempts to get an <see cref="IAuthProvider{TAuth, TResult}"/> that can provide authentication
         ///     for <see cref="IAuthMethod{TResult}"/> of type <typeparamref name="TAuth"/>.
         /// </summary>
+        /// <param name="self">
+        ///     The <see cref="IApplicationEnvironment"/> instance.
+        /// </param>
         /// <param name="provider">
         ///     The found provider, or <c>null</c> if no registered provider can provide authentication for
         ///     <typeparamref name="TAuth"/>.
@@ -164,11 +167,11 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="provider"/> will be <c>null</c>.
         /// </returns>
         public static bool TryGetAuthProvider<TAuth, TResult>(
-            this IApplicationEnvironment applicationEnvironment,
+            this IApplicationEnvironment self,
             out IAuthProvider<TAuth, TResult> provider)
             where TAuth : IAuthMethod<TResult>
         {
-            if (applicationEnvironment is IApplicationEnvironmentV2 v2)
+            if (self is IApplicationEnvironmentV2 v2)
             {
                 return v2.TryGetAuthProvider(out provider);
             }
