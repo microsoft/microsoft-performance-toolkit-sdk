@@ -10,7 +10,7 @@ using System;
 namespace Microsoft.Performance.Testing.SDK
 {
     public class StubApplicationEnvironment
-        : IApplicationEnvironment
+        : IApplicationEnvironmentV2
     {
         public string ApplicationName { get; set; }
 
