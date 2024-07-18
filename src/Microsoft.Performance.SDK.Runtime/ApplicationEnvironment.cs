@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
@@ -120,6 +121,14 @@ namespace Microsoft.Performance.SDK.Runtime
                 caption,
                 format,
                 args);
+        }
+
+        /// <inheritdoc />
+        public virtual bool TryGetAuthProvider<TAuth, TResult>(out IAuthProvider<TAuth, TResult> provider)
+            where TAuth : IAuthMethod<TResult>
+        {
+            provider = null;
+            return false;
         }
 
         private static MessageBoxIcon MapToImage(MessageType messageType)
