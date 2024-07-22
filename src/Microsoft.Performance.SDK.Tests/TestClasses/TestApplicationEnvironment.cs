@@ -10,7 +10,7 @@ using Microsoft.Performance.SDK.Processing;
 namespace Microsoft.Performance.SDK.Tests.TestClasses
 {
     public class TestApplicationEnvironment
-        : IApplicationEnvironment
+        : IApplicationEnvironmentV2
     {
         public string ApplicationName { get; set; }
 

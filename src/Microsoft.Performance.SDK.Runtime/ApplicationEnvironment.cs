@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <inheritdoc cref="IApplicationEnvironment"/>
     public class ApplicationEnvironment
-        : IApplicationEnvironment
+        : IApplicationEnvironmentV2
     {
         private readonly IMessageBox messageBox;
 
