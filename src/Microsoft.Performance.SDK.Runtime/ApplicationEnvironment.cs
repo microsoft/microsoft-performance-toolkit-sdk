@@ -3,11 +3,11 @@
 
 using System;
 using Microsoft.Performance.SDK.Auth;
+using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
-using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -47,8 +47,8 @@ namespace Microsoft.Performance.SDK.Runtime
             IMessageBox messageBox)
         {
             // application and runtime names may be null
+            // tableDataSynchronizer may be null
 
-            Guard.NotNull(tableDataSynchronizer, nameof(tableDataSynchronizer));
             Guard.NotNull(sourceDataCookerFactory, nameof(sourceDataCookerFactory));
             Guard.NotNull(sourceSessionFactory, nameof(sourceSessionFactory));
             Guard.NotNull(messageBox, nameof(messageBox));
