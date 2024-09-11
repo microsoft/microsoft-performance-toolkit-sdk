@@ -10,7 +10,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// <summary>
     ///     Provides a way to synchronize data changes in columns with the user interface displaying the columns.
     /// </summary>
-    public interface ITableDataSynchronization2
+    public interface ITableDataSynchronizationV2
     {
         /// <summary>
         ///     The data of these columns is changing and that should be reflected by the user interface.

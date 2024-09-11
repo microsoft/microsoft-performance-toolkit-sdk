@@ -56,7 +56,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Provides the interface to be used to notify that data in
         ///     a table has changed.
+        ///     <para/>
+        ///     This may be <c>null</c>.
         /// </summary>
-        ITableDataSynchronization2 TableDataSynchronizer { get; }
+        ITableDataSynchronizationV2 TableDataSynchronizer { get; }
     }
 }

@@ -1091,7 +1091,11 @@ namespace Microsoft.Performance.Toolkit.Engine
                         processingSource,
                         dsg, // todo #214
                         processingSource.Instance.MetadataTables,
-                        new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
+                        new RuntimeProcessorEnvironment(
+                            this.Extensions,
+                            this.compositeCookers,
+                            this.CreateLogger,
+                            new RuntimeTableSynchronizerV2()),
                         processorOptions);
 
                     var executor = new ProcessingSourceExecutor();
@@ -1222,7 +1226,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         private sealed class RuntimeProcessorEnvironment
-            : IProcessorEnvironment
+            : IProcessorEnvironmentV2
         {
             private readonly ProcessingSystemCompositeCookers compositeCookers;
             private readonly IDataExtensionRepository repository;
@@ -1235,7 +1239,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             public RuntimeProcessorEnvironment(
                 IDataExtensionRepository repository,
                 ProcessingSystemCompositeCookers compositeCookers,
-                Func<Type, ILogger> loggerFactory)
+                Func<Type, ILogger> loggerFactory,
+                ITableDataSynchronizationV2 tableDataSynchronizer)
             {
                 Debug.Assert(repository != null);
                 Debug.Assert(compositeCookers != null);
@@ -1244,7 +1249,10 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.compositeCookers = compositeCookers;
                 this.repository = repository;
                 this.loggerFactory = loggerFactory;
+                this.TableDataSynchronizer = tableDataSynchronizer;
             }
+
+            public ITableDataSynchronizationV2 TableDataSynchronizer { get; }
 
             public ILogger CreateLogger(Type processorType)
             {
@@ -1295,6 +1303,32 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onReadyForChange,
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
+            {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
+            }
+        }
+
+        private sealed class RuntimeTableSynchronizerV2
+            : ITableDataSynchronizationV2
+        {
+            public void SubmitColumnChangeRequest(
+                IEnumerable<Guid> columns,
+                Action onReadyForChange,
+                Action onChangeComplete,
+                bool requestInitialFilterReevaluation,
+                CancellationToken cancellationToken)
+            {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
+            }
+
+            public void SubmitColumnChangeRequest(
+                Func<IProjectionDescription, bool> predicate,
+                Action onReadyForChange,
+                Action onChangeComplete,
+                bool requestInitialFilterReevaluation,
+                CancellationToken cancellationToken)
             {
                 onReadyForChange?.Invoke();
                 onChangeComplete?.Invoke();
