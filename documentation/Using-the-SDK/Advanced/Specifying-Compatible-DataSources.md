@@ -37,7 +37,7 @@ Beginning in SDK version `2.0.*`, the legacy `IEnumerable<IDataSource>` processi
 # Usage
 First, ensure you are targeting SDK version `1.1.13` or later. Then, there are two code changes that must be performed:
 1. Implement an API that constructs `IDataSourceGroup` instances that can be processed
-2. Implement a new method to process a `IDataSourceGroup`
+2. Implement a new method to process an `IDataSourceGroup`
 
 ## Specifying supported `IDataSourceGroup` instances
 On the `ProcessingSource` implementation you wish to adopt this feature on, implement the new [IDataSourceGrouper interface](https://github.com/microsoft/microsoft-performance-toolkit-sdk/blob/main/src/Microsoft.Performance.SDK/Processing/DataSourceGrouping/IDataSourceGrouper.cs).
@@ -51,7 +51,7 @@ IReadOnlyCollection<IDataSourceGroup> CreateValidGroups(
 ```
 
 I.e., your processing source must map the `IDataSource` instances it advertised support for to `IDataSourceGroup` instances, optionally
-using the specific `ProcessorOptions` to help determine which groups to return. 
+using the specified `ProcessorOptions` to help determine which groups to return. 
 
 An `IDataSourceGroup` specifies two properties:
 
