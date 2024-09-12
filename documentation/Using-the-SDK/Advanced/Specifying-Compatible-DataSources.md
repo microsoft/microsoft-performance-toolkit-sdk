@@ -2,7 +2,7 @@
 This document outlines how to use the `IDataSourceGrouper` interface to specify which combinations of `IDataSource` instances are capable
 of being processed together as a single unit.
 
-> :info: This feature is currently optional, but will be required starting in SDK version `2.0.*`.
+> :information_source: This feature is currently optional, but will be required starting in SDK version `2.0.*`.
 > If you do not implement this feature in earlier versions, you may see warning messages logged
 > as "<processing_source_name> does not support processing user-specified processing groups - falling back to default processing."
 > This is expected behavior.
