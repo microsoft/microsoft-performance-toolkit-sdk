@@ -1091,10 +1091,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         processingSource,
                         dsg, // todo #214
                         processingSource.Instance.MetadataTables,
-                        new RuntimeProcessorEnvironment(
-                            this.Extensions,
-                            this.compositeCookers,
-                            this.CreateLogger),
+                        new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
                         processorOptions);
 
                     var executor = new ProcessingSourceExecutor();
