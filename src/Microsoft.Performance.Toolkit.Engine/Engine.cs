@@ -1094,8 +1094,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         new RuntimeProcessorEnvironment(
                             this.Extensions,
                             this.compositeCookers,
-                            this.CreateLogger,
-                            new RuntimeTableSynchronizer()),
+                            this.CreateLogger),
                         processorOptions);
 
                     var executor = new ProcessingSourceExecutor();
@@ -1226,7 +1225,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         private sealed class RuntimeProcessorEnvironment
-            : IProcessorEnvironmentV2
+            : IProcessorEnvironment
         {
             private readonly ProcessingSystemCompositeCookers compositeCookers;
             private readonly IDataExtensionRepository repository;
@@ -1239,8 +1238,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             public RuntimeProcessorEnvironment(
                 IDataExtensionRepository repository,
                 ProcessingSystemCompositeCookers compositeCookers,
-                Func<Type, ILogger> loggerFactory,
-                ITableDataSynchronization tableDataSynchronizer)
+                Func<Type, ILogger> loggerFactory)
             {
                 Debug.Assert(repository != null);
                 Debug.Assert(compositeCookers != null);
@@ -1249,10 +1247,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.compositeCookers = compositeCookers;
                 this.repository = repository;
                 this.loggerFactory = loggerFactory;
-                this.TableDataSynchronizer = tableDataSynchronizer;
             }
-
-            public ITableDataSynchronization TableDataSynchronizer { get; }
 
             public ILogger CreateLogger(Type processorType)
             {

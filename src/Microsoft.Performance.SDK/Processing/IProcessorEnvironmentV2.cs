@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
@@ -12,10 +14,11 @@ namespace Microsoft.Performance.SDK.Processing
         : IProcessorEnvironment
     {
         /// <summary>
-        ///     Provides the interface to be used to notify that data in a table has changed.
+        ///     Gets a factory to creates an instance of <see cref="ITableDataSynchronization"> specific to the 
+        ///     processor.
         ///     <para/>
         ///     This may be <c>null</c>.
         /// </summary>
-        ITableDataSynchronization TableDataSynchronizer { get; }
+        Func<ICustomDataProcessor, ITableDataSynchronization> TableDataSynchronizerFactory { get; }
     }
 }
