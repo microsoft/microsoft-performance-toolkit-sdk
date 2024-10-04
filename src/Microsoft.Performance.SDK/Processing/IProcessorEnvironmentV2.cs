@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
@@ -19,6 +17,6 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <para/>
         ///     This may be <c>null</c>.
         /// </summary>
-        Func<ICustomDataProcessor, ITableDataSynchronization> TableDataSynchronizerFactory { get; }
+        IProcessorTableDataSynchronizationFactory TableDataSynchronizerFactory { get; }
     }
 }
