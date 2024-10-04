@@ -12,11 +12,10 @@ namespace Microsoft.Performance.SDK.Processing
         : IProcessorEnvironment
     {
         /// <summary>
-        ///     Provides the interface to be used to notify that data in
-        ///     a table has changed.
+        ///     Provides the interface to be used to notify that data in a table has changed.
         ///     <para/>
         ///     This may be <c>null</c>.
         /// </summary>
-        ITableDataSynchronizationV2 TableDataSynchronizer { get; }
+        ITableDataSynchronization TableDataSynchronizer { get; }
     }
 }

@@ -1095,7 +1095,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                             this.Extensions,
                             this.compositeCookers,
                             this.CreateLogger,
-                            new RuntimeTableSynchronizerV2()),
+                            new RuntimeTableSynchronizer()),
                         processorOptions);
 
                     var executor = new ProcessingSourceExecutor();
@@ -1240,7 +1240,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 IDataExtensionRepository repository,
                 ProcessingSystemCompositeCookers compositeCookers,
                 Func<Type, ILogger> loggerFactory,
-                ITableDataSynchronizationV2 tableDataSynchronizer)
+                ITableDataSynchronization tableDataSynchronizer)
             {
                 Debug.Assert(repository != null);
                 Debug.Assert(compositeCookers != null);
@@ -1252,7 +1252,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.TableDataSynchronizer = tableDataSynchronizer;
             }
 
-            public ITableDataSynchronizationV2 TableDataSynchronizer { get; }
+            public ITableDataSynchronization TableDataSynchronizer { get; }
 
             public ILogger CreateLogger(Type processorType)
             {
@@ -1303,32 +1303,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 Action onReadyForChange,
                 Action onChangeComplete,
                 bool requestInitialFilterReevaluation = false)
-            {
-                onReadyForChange?.Invoke();
-                onChangeComplete?.Invoke();
-            }
-        }
-
-        private sealed class RuntimeTableSynchronizerV2
-            : ITableDataSynchronizationV2
-        {
-            public void SubmitColumnChangeRequest(
-                IEnumerable<Guid> columns,
-                Action onReadyForChange,
-                Action onChangeComplete,
-                bool requestInitialFilterReevaluation,
-                CancellationToken cancellationToken)
-            {
-                onReadyForChange?.Invoke();
-                onChangeComplete?.Invoke();
-            }
-
-            public void SubmitColumnChangeRequest(
-                Func<IProjectionDescription, bool> predicate,
-                Action onReadyForChange,
-                Action onChangeComplete,
-                bool requestInitialFilterReevaluation,
-                CancellationToken cancellationToken)
             {
                 onReadyForChange?.Invoke();
                 onChangeComplete?.Invoke();
