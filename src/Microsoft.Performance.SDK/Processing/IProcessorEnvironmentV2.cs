@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Processing
         : IProcessorEnvironment
     {
         /// <summary>
-        ///     Gets a factory to creates an instance of <see cref="ITableDataSynchronization"> specific to the 
+        ///     Gets a factory to creates an instance of <see cref="ITableDataSynchronization"/> specific to the 
         ///     processor.
         ///     <para/>
         ///     This may be <c>null</c>.
