@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -44,10 +45,32 @@ namespace Microsoft.Performance.SDK.Processing
             ColumnConfiguration column,
             IProjection<int, T> projection)
         {
+            return self.AddColumn(column, projection, null);
+        }
+
+        public static ITableBuilderWithRowCount AddColumn<T>(
+            this ITableBuilderWithRowCount self,
+            ColumnConfiguration column,
+            IProjection<int, T> projection,
+            Action<IColumnBuilder> options)
+        {
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(projection, nameof(projection));
 
-            return self.AddColumn(new DataColumn<T>(column, projection));
+            return self.AddColumn(new DataColumn<T>(column, projection), options);
+        }
+
+        public static ITableBuilderWithRowCount AddColumnWithModes<T>(
+            this ITableBuilderWithRowCount self,
+            ColumnVariantIdentifier defaultMode,
+            ColumnConfiguration column,
+            IProjection<int, T> projection,
+            Action<IColumnModeBuilder> options)
+        {
+            Guard.NotNull(self, nameof(self));
+            Guard.NotNull(projection, nameof(projection));
+
+            return self.AddColumnWithModes(defaultMode, new DataColumn<T>(column, projection), options);
         }
 
         /// <summary>
