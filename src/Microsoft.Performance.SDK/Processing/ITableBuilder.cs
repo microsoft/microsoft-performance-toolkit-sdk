@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -104,6 +105,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         int RowCount { get; }
 
+        // TODO: Update this to IDataColumn2
         /// <summary>
         ///     Gets the collection of columns that have been added to
         ///     the builder instance.
@@ -123,6 +125,13 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="column"/> is <c>null</c>.
         /// </exception>
         ITableBuilderWithRowCount AddColumn(IDataColumn column);
+
+        ITableBuilderWithRowCount AddColumn(IDataColumn column, Action<IColumnBuilder> options);
+
+        ITableBuilderWithRowCount AddColumnWithModes<T>(
+            ColumnVariantIdentifier defaultMode,
+            IDataColumn<T> column,
+            Action<IColumnModeBuilder> options);
 
         /// <summary>
         ///     Replaces the given column with another column.
