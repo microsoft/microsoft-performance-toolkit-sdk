@@ -4,67 +4,18 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
-using Microsoft.Performance.SDK.Processing.DataColumns;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
 {
-    internal class DataColumnVariant
-        : IDataColumnVariant
-    {
-        public DataColumnVariant(
-            ColumnVariantIdentifier identifier,
-            IDataColumnVariants subVariants)
-        {
-            Identifier = identifier;
-            SubVariants = subVariants;
-        }
-
-        public ColumnVariantIdentifier Identifier { get; }
-        public IDataColumnVariants SubVariants { get; }
-    }
-    internal class DataColumnVariants
-        : IDataColumnVariants
-    {
-        public DataColumnVariants(
-            ColumnVariantsType type,
-            IDataColumnVariant[] possibleVariants)
-        {
-            Type = type;
-            PossibleVariants = possibleVariants;
-        }
-
-        public ColumnVariantsType Type { get; }
-        public IDataColumnVariant[] PossibleVariants { get; }
-    }
-
     internal class IdentityDataColumnVariantsProcessor
         : IDataColumnVariantsProcessor
     {
-        public IDataColumnVariants Output { get; private set; }
+        public IColumnVariant Output { get; private set; }
 
-        public void ProcessColumnVariants(IDataColumnVariants variants)
+        public void ProcessColumnVariants(IColumnVariant variants)
         {
             this.Output = variants;
-        }
-    }
-
-    internal class DataColumnVariantsCombiner
-        : IDataColumnVariantsProcessor
-    {
-        private readonly IDataColumnVariant self;
-
-        public DataColumnVariantsCombiner(IDataColumnVariant self)
-        {
-            this.self = self;
-        }
-
-        public IDataColumnVariant Output { get; private set; }
-
-        public void ProcessColumnVariants(IDataColumnVariants variants)
-        {
-            this.Output =
-                new DataColumnVariant(
-                    this.self.Identifier, variants);
         }
     }
 
@@ -73,21 +24,19 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
     {
         private readonly IDataColumnVariantsProcessor processor;
         private readonly IDataColumn baseColumn;
-        private readonly IReadOnlyList<ColumnVariantWithColumn> modes;
-        private readonly IReadOnlyList<Action<IColumnVariantsRootBuilder>> subBuilders;
+
+        private readonly IReadOnlyList<(ColumnVariantWithColumn, BuilderCallbackRunner<IColumnVariantsRootBuilder>)> modes;
         private readonly int? defaultModeIndex;
 
         public ColumnVariantsModesBuilder(
             IDataColumnVariantsProcessor processor,
             IDataColumn baseColumn,
-            IReadOnlyList<ColumnVariantWithColumn> modes,
-            IReadOnlyList<Action<IColumnVariantsRootBuilder>> subBuilders,
+            IReadOnlyList<(ColumnVariantWithColumn, BuilderCallbackRunner<IColumnVariantsRootBuilder>)> modes,
             int? defaultModeIndex)
         {
             this.processor = processor;
             this.modes = modes;
             this.defaultModeIndex = defaultModeIndex;
-            this.subBuilders = subBuilders;
             this.baseColumn = baseColumn;
         }
 
@@ -107,32 +56,26 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
                 }
             }
 
-            ColumnVariantWithColumn defaultMode = this.modes[this.defaultModeIndex ?? 0];
+            List<IColumnVariant> modeVariants = new List<IColumnVariant>();
 
-
-
-            List<IDataColumnVariant> variantsList = new List<IDataColumnVariant>();
             for (int i = 0; i < this.modes.Count; i++)
             {
-                ColumnVariantWithColumn mode = this.modes[i];
-                Action<IColumnVariantsRootBuilder> subBuilder = this.subBuilders[i];
+                var (columnVariantWithColumn, modeCallbackRunner) = this.modes[i];
 
-                var modeVariant = new DataColumnVariant(mode.Identifier, null);
-
-                if (subBuilder != null)
+                IColumnVariant subVariant = null;
+                if (modeCallbackRunner != null)
                 {
-                    // Invoke the sub-builder and append its output as the sub-variants
-                    var processor = new DataColumnVariantsCombiner(modeVariant);
-
+                    subVariant = modeCallbackRunner.RunCallback();
                 }
 
-                variantsList.Add(modeVariant);
+                var modeVariant = new ModeColumnVariant(columnVariantWithColumn.Identifier, subVariant);
+                modeVariants.Add(modeVariant);
             }
 
             this.processor.ProcessColumnVariants(
-                new DataColumnVariants(
-                    ColumnVariantsType.Modes,
-                    variantsList.ToArray()));
+                new ModesColumnVariant(
+                    modeVariants.ToArray(),
+                    this.defaultModeIndex ?? 0));
         }
 
         public IColumnVariantsModesBuilder WithMode<T>(
@@ -145,9 +88,9 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
         public IColumnVariantsModesBuilder WithMode<T>(
             ColumnVariantIdentifier modeIdentifier,
             IProjection<int, T> column,
-            Action<IColumnVariantsRootBuilder> builder)
+            Action<IColumnVariantsRootBuilder> builderCallback)
         {
-            if (this.modes.Any(m => m.Identifier.Id == modeIdentifier.Id))
+            if (this.modes.Any(m => m.Item1.Identifier.Id == modeIdentifier.Id))
             {
                 throw new InvalidOperationException($"A mode with identifier {modeIdentifier} has already been added.");
             }
@@ -156,11 +99,23 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
             var newColumn =
                 new ColumnVariantWithColumn(modeIdentifier, new DataColumn<T>(baseColumn.Configuration, column));
 
+            BuilderCallbackRunner<IColumnVariantsRootBuilder> callbackRunner = null;
+            if (builderCallback != null)
+            {
+                callbackRunner = new BuilderCallbackRunner<IColumnVariantsRootBuilder>(
+                    this.baseColumn,
+                    (newProcessor) => new ColumnVariantsTogglesBuilder(
+                        newProcessor,
+                        baseColumn,
+                        new List<ColumnVariantWithColumn>(),
+                        null),
+                    builderCallback);
+            }
+
             return new ColumnVariantsModesBuilder(
                 this.processor,
                 this.baseColumn,
-                this.modes.Concat(newColumn).ToList(),
-                this.subBuilders.Concat(builder).ToList(),
+                this.modes.Concat((newColumn, callbackRunner)).ToList(),
                 this.defaultModeIndex);
         }
 
@@ -176,7 +131,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
             int? index = null;
             for (int i = 0; i < this.modes.Count; i++)
             {
-                if (this.modes[i].Identifier.Id == modeIdentifierGuid)
+                if (this.modes[i].Item1.Identifier.Id == modeIdentifierGuid)
                 {
                     index = i;
                     break;
@@ -192,7 +147,6 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
                 this.processor,
                 this.baseColumn,
                 this.modes,
-                this.subBuilders,
                 index);
         }
     }
@@ -203,45 +157,41 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
         private readonly IDataColumnVariantsProcessor processor;
         private readonly IDataColumn baseColumn;
         private readonly IReadOnlyList<ColumnVariantWithColumn> toggleLevels;
-        private readonly ModesBuilderWrapper modesBuilderWrapper;
+        private readonly BuilderCallbackRunner<IColumnVariantsModesBuilder> builderCallbackRunner;
 
         public ColumnVariantsTogglesBuilder(
             IDataColumnVariantsProcessor processor,
             IDataColumn baseColumn,
             IReadOnlyList<ColumnVariantWithColumn> toggleLevels,
-            ModesBuilderWrapper modesBuilderWrapper)
+            BuilderCallbackRunner<IColumnVariantsModesBuilder> builderCallbackRunner)
         {
             this.processor = processor;
             this.baseColumn = baseColumn;
             this.toggleLevels = toggleLevels;
-            this.modesBuilderWrapper = modesBuilderWrapper;
+            this.builderCallbackRunner = builderCallbackRunner;
         }
 
         public void Build()
         {
-            IDataColumnVariants variants = null;
-            if (this.modesBuilderWrapper != null)
+            IColumnVariant variant = null;
+            if (this.builderCallbackRunner != null)
             {
-                variants = this.modesBuilderWrapper.Build();
+                variant = this.builderCallbackRunner.RunCallback();
             }
 
             for (var i = this.toggleLevels.Count - 1; i >= 0; i--)
             {
                 var toggle = this.toggleLevels[i];
 
-                var currentLevelVariant = new DataColumnVariant(toggle.Identifier, variants);
-
-                variants = new DataColumnVariants(
-                    ColumnVariantsType.Toggles,
-                    new[] { currentLevelVariant });
+                variant = new ToggleableColumnVariant(toggle.Identifier, variant);
             }
 
-            if (variants == null)
+            if (variant == null)
             {
                 return;
             }
 
-            this.processor.ProcessColumnVariants(variants);
+            this.processor.ProcessColumnVariants(variant);
         }
 
         public IColumnVariantsRootBuilder WithToggle<T>(
@@ -254,52 +204,58 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
                 this.processor,
                 this.baseColumn,
                 this.toggleLevels.Concat(newColumn).ToList(),
-                this.modesBuilderWrapper);
+                this.builderCallbackRunner);
         }
 
-        public IColumnVariantsBuilder WithModes(Action<IColumnVariantsModesBuilder> builder)
+        public IColumnVariantsBuilder WithModes(Action<IColumnVariantsModesBuilder> builderCallback)
         {
-            Debug.Assert(this.modesBuilderWrapper == null);
+            Debug.Assert(this.builderCallbackRunner == null);
 
-            if (this.modesBuilderWrapper != null)
+            if (this.builderCallbackRunner != null)
             {
                 throw new InvalidOperationException("Modes have already been set.");
             }
 
-            var newWrapper = new ModesBuilderWrapper(this.baseColumn, builder);
+            var callbackRunner = new BuilderCallbackRunner<IColumnVariantsModesBuilder>(
+                this.baseColumn,
+                (newProcessor) => new ColumnVariantsModesBuilder(
+                    newProcessor,
+                    baseColumn,
+                    new List<(ColumnVariantWithColumn, BuilderCallbackRunner<IColumnVariantsRootBuilder>)>(),
+                    null),
+                builderCallback);
 
             return new ColumnVariantsTogglesBuilder(
                 this.processor,
                 this.baseColumn,
                 this.toggleLevels,
-                newWrapper);
+                callbackRunner);
+        }
+    }
+
+    // Runs the callback for the modes builder and returns the built variant (if any)
+    internal class BuilderCallbackRunner<TBuilder>
+        where TBuilder : IColumnVariantsBuilder
+    {
+        private readonly TBuilder builder;
+        private readonly Action<TBuilder> builderCallback;
+        private readonly IdentityDataColumnVariantsProcessor processor;
+
+        public BuilderCallbackRunner(
+            IDataColumn baseColumn,
+            Func<IDataColumnVariantsProcessor, TBuilder> builderFactory,
+            Action<TBuilder> builderCallback)
+        {
+            this.builderCallback = builderCallback;
+
+            this.processor = new IdentityDataColumnVariantsProcessor();
+            this.builder = builderFactory(this.processor);
         }
 
-        internal class ModesBuilderWrapper
+        public IColumnVariant RunCallback()
         {
-            private readonly ColumnVariantsModesBuilder builder;
-            private readonly Action<IColumnVariantsModesBuilder> builderCallback;
-            private readonly IdentityDataColumnVariantsProcessor processor;
-
-            public ModesBuilderWrapper(IDataColumn baseColumn, Action<IColumnVariantsModesBuilder> builderCallback)
-            {
-                this.builderCallback = builderCallback;
-
-                this.processor = new IdentityDataColumnVariantsProcessor();
-
-                this.builder = new ColumnVariantsModesBuilder(
-                    this.processor,
-                    baseColumn,
-                    new List<ColumnVariantWithColumn>(),
-                    new List<Action<IColumnVariantsRootBuilder>>(),
-                    null);
-            }
-
-            public IDataColumnVariants Build()
-            {
-                this.builderCallback.Invoke(this.builder);
-                return this.processor.Output;
-            }
+            this.builderCallback.Invoke(this.builder);
+            return this.processor.Output;
         }
     }
 }

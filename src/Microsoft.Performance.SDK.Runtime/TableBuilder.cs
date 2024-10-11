@@ -7,8 +7,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
-using Microsoft.Performance.SDK.Processing.DataColumns;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -48,15 +48,12 @@ namespace Microsoft.Performance.SDK.Runtime
             this.commands = new List<TableCommand>();
             this.commandsRO = new ReadOnlyCollection<TableCommand>(this.commands);
 
-            this.DynamicColumns = new Dictionary<IDataColumn, IDynamicDataColumn>();
-
             this.RowCount = 0;
         }
 
         /// <inheritdoc />
         public IReadOnlyCollection<IDataColumn> Columns => this.columnsRO;
 
-        public Dictionary<IDataColumn, IDynamicDataColumn> DynamicColumns { get; }
 
         /// <inheritdoc />
         public IEnumerable<TableConfiguration> BuiltInTableConfigurations => this.builtInTableConfigurations.AsReadOnly();
@@ -176,10 +173,18 @@ namespace Microsoft.Performance.SDK.Runtime
             return this;
         }
 
-        private Dictionary<IDataColumn, IDataColumnVariants> columnVariants = new Dictionary<IDataColumn, IDataColumnVariants>();
+        private Dictionary<IDataColumn, IColumnVariant> columnVariants = new Dictionary<IDataColumn, IColumnVariant>();
 
-        public IReadOnlyDictionary<ColumnConfiguration, IDataColumnVariants> ColumnVariants =>
-            this.columnVariants.ToDictionary(kvp => kvp.Key.Configuration, kvp => kvp.Value);
+        public bool TryGetVariantsRoot(IDataColumn column, out IColumnVariant variants)
+        {
+            return this.columnVariants.TryGetValue(column, out variants);
+        }
+
+        // TODO: expose the actual datacolumn variants
+        // To do this, the variants with projections first need to expose an IDataColumn
+        // Then, the below processor needs to use a visitor that extracts the datacolumns
+        // associated with every variant identifier. These variants will be stored in a separate
+        // dictionary, and exposed via a new method on this class.
 
         private class VariantsProcessor
             : IDataColumnVariantsProcessor
@@ -193,7 +198,7 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.tableBuilder = tableBuilder;
             }
 
-            public void ProcessColumnVariants(IDataColumnVariants variants)
+            public void ProcessColumnVariants(IColumnVariant variants)
             {
                 tableBuilder.columnVariants[this.baseColumn] = variants;
             }

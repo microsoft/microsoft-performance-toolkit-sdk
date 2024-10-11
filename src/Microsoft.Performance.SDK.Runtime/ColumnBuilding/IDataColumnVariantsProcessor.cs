@@ -1,9 +1,9 @@
-using Microsoft.Performance.SDK.Processing.DataColumns;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding
 {
     public interface IDataColumnVariantsProcessor
     {
-        void ProcessColumnVariants(IDataColumnVariants variants);
+        void ProcessColumnVariants(IColumnVariant variants);
     }
 }
