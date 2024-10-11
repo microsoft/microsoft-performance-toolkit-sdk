@@ -126,12 +126,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// </exception>
         ITableBuilderWithRowCount AddColumn(IDataColumn column);
 
-        ITableBuilderWithRowCount AddColumn(IDataColumn column, Action<IColumnBuilder> options);
-
-        ITableBuilderWithRowCount AddColumnWithModes<T>(
-            ColumnVariantIdentifier defaultMode,
-            IDataColumn<T> column,
-            Action<IColumnModeBuilder> options);
+        ITableBuilderWithRowCount AddColumnWithVariants(
+            IDataColumn column,
+            Action<IColumnVariantsRootBuilder> variantsBuilder);
 
         /// <summary>
         ///     Replaces the given column with another column.

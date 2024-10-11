@@ -5,15 +5,14 @@ using System;
 
 namespace Microsoft.Performance.SDK.Processing.ColumnBuilding
 {
-    public interface IColumnBuilder
+    public interface IColumnVariantsRootBuilder
+        : IColumnVariantsBuilder
     {
-        IColumnBuilder WithToggle<T>(
+        IColumnVariantsRootBuilder WithToggle<T>(
             ColumnVariantIdentifier toggleIdentifier,
             IProjection<int, T> column);
 
-        IColumnBuilder WithToggle<T>(
-            ColumnVariantIdentifier toggleIdentifier,
-            IProjection<int, T> column,
-            Action<IColumnToggleBuilder> options);
+        IColumnVariantsBuilder WithModes(
+            Action<IColumnVariantsModesBuilder> builder);
     }
 }

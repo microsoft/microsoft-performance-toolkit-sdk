@@ -10,6 +10,7 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
@@ -580,8 +581,14 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public ITableBuilderWithRowCount AddColumn(IDataColumn column)
             {
-                this.columns.Add(column);
-                return this;
+                return this.AddColumnWithVariants(column, null);
+            }
+
+            public ITableBuilderWithRowCount AddColumnWithVariants(
+                IDataColumn column,
+                Action<IColumnVariantsRootBuilder> variantsBuilder)
+            {
+                throw new NotImplementedException();
             }
 
             public ITableBuilderWithRowCount ReplaceColumn(IDataColumn oldColumn, IDataColumn newColumn)

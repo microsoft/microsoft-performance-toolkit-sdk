@@ -45,32 +45,19 @@ namespace Microsoft.Performance.SDK.Processing
             ColumnConfiguration column,
             IProjection<int, T> projection)
         {
-            return self.AddColumn(column, projection, null);
+            return self.AddColumnWithVariants(column, projection, null);
         }
 
-        public static ITableBuilderWithRowCount AddColumn<T>(
+        public static ITableBuilderWithRowCount AddColumnWithVariants<T>(
             this ITableBuilderWithRowCount self,
             ColumnConfiguration column,
             IProjection<int, T> projection,
-            Action<IColumnBuilder> options)
+            Action<IColumnVariantsRootBuilder> variantsBuilder)
         {
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(projection, nameof(projection));
 
-            return self.AddColumn(new DataColumn<T>(column, projection), options);
-        }
-
-        public static ITableBuilderWithRowCount AddColumnWithModes<T>(
-            this ITableBuilderWithRowCount self,
-            ColumnVariantIdentifier defaultMode,
-            ColumnConfiguration column,
-            IProjection<int, T> projection,
-            Action<IColumnModeBuilder> options)
-        {
-            Guard.NotNull(self, nameof(self));
-            Guard.NotNull(projection, nameof(projection));
-
-            return self.AddColumnWithModes(defaultMode, new DataColumn<T>(column, projection), options);
+            return self.AddColumnWithVariants(new DataColumn<T>(column, projection), variantsBuilder);
         }
 
         /// <summary>

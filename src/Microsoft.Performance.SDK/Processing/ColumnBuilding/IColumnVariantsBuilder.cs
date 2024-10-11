@@ -3,9 +3,8 @@
 
 namespace Microsoft.Performance.SDK.Processing.ColumnBuilding
 {
-    public interface IColumnToggleBuilder
-        : IColumnBuilder
+    public interface IColumnVariantsBuilder
     {
-        IColumnModeBuilder AsMode(string modeName);
+        void Build();
     }
 }

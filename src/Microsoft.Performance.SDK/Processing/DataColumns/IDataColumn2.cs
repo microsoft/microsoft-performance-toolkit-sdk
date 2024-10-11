@@ -3,9 +3,10 @@
 
 namespace Microsoft.Performance.SDK.Processing.DataColumns
 {
-    public interface IDataColumn2
-        : IDataColumn
+    public interface IDynamicDataColumn
     {
+        IDataColumn CurrentColumn { get; }
+
         IDataColumnVariants Variants { get; }
     }
 }

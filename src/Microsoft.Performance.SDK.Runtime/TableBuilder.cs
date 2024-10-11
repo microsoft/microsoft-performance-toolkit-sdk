@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
+using Microsoft.Performance.SDK.Processing.DataColumns;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -45,11 +48,15 @@ namespace Microsoft.Performance.SDK.Runtime
             this.commands = new List<TableCommand>();
             this.commandsRO = new ReadOnlyCollection<TableCommand>(this.commands);
 
+            this.DynamicColumns = new Dictionary<IDataColumn, IDynamicDataColumn>();
+
             this.RowCount = 0;
         }
 
         /// <inheritdoc />
         public IReadOnlyCollection<IDataColumn> Columns => this.columnsRO;
+
+        public Dictionary<IDataColumn, IDynamicDataColumn> DynamicColumns { get; }
 
         /// <inheritdoc />
         public IEnumerable<TableConfiguration> BuiltInTableConfigurations => this.builtInTableConfigurations.AsReadOnly();
@@ -140,14 +147,56 @@ namespace Microsoft.Performance.SDK.Runtime
             return this;
         }
 
-        /// <inheritdoc />
         public ITableBuilderWithRowCount AddColumn(IDataColumn column)
+        {
+            return this.AddColumnWithVariants(column, null);
+        }
+
+        /// <inheritdoc />
+        public ITableBuilderWithRowCount AddColumnWithVariants(
+            IDataColumn column,
+            Action<IColumnVariantsRootBuilder> options)
         {
             Guard.NotNull(column, nameof(column));
 
             this.columns.Add(column);
 
+            if (options != null)
+            {
+                var processor = new VariantsProcessor(column, this);
+                var builder = new ColumnVariantsTogglesBuilder(
+                    processor,
+                    column,
+                    new List<ColumnVariantWithColumn>(),
+                    null);
+
+                options(builder);
+            }
+
             return this;
+        }
+
+        private Dictionary<IDataColumn, IDataColumnVariants> columnVariants = new Dictionary<IDataColumn, IDataColumnVariants>();
+
+        public IReadOnlyDictionary<ColumnConfiguration, IDataColumnVariants> ColumnVariants =>
+            this.columnVariants.ToDictionary(kvp => kvp.Key.Configuration, kvp => kvp.Value);
+
+        private class VariantsProcessor
+            : IDataColumnVariantsProcessor
+        {
+            private readonly IDataColumn baseColumn;
+            private readonly TableBuilder tableBuilder;
+
+            public VariantsProcessor(IDataColumn baseColumn, TableBuilder tableBuilder)
+            {
+                this.baseColumn = baseColumn;
+                this.tableBuilder = tableBuilder;
+            }
+
+            public void ProcessColumnVariants(IDataColumnVariants variants)
+            {
+                tableBuilder.columnVariants[this.baseColumn] = variants;
+            }
         }
 
         /// <inheritdoc />
