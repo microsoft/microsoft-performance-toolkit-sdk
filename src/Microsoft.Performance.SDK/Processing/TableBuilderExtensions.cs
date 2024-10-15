@@ -52,7 +52,7 @@ namespace Microsoft.Performance.SDK.Processing
             this ITableBuilderWithRowCount self,
             ColumnConfiguration column,
             IProjection<int, T> projection,
-            Action<IColumnVariantsRootBuilder> variantsBuilder)
+            Action<IRootColumnVariantsBuilder> variantsBuilder)
         {
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(projection, nameof(projection));

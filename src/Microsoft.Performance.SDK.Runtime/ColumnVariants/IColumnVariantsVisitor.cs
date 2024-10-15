@@ -1,3 +1,5 @@
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding;
+
 namespace Microsoft.Performance.SDK.Runtime.ColumnVariants
 {
     public interface IColumnVariantsVisitor
@@ -10,6 +12,6 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnVariants
 
         void Visit(ModeColumnVariant modeColumnVariant);
 
-        void Visit(IntermediateModeColumnVariant intermediateModeColumnVariant);
+        void Visit(NullColumnVariant nullColumnVariant);
     }
 }

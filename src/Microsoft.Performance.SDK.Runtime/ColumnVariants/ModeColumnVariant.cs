@@ -1,3 +1,4 @@
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnVariants
@@ -7,13 +8,17 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnVariants
     {
         public ModeColumnVariant(
             ColumnVariantIdentifier modeIdentifier,
+            IDataColumn modeColumn,
             IColumnVariant subVariant)
         {
             ModeIdentifier = modeIdentifier;
+            ModeColumn = modeColumn;
             SubVariant = subVariant;
         }
 
         public ColumnVariantIdentifier ModeIdentifier { get; }
+
+        public IDataColumn ModeColumn { get; }
 
         public IColumnVariant SubVariant { get; }
 

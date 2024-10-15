@@ -1,3 +1,4 @@
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnVariants
@@ -7,15 +8,19 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnVariants
     {
         public ToggleableColumnVariant(
             ColumnVariantIdentifier identifier,
+            IDataColumn toggledColumn,
             IColumnVariant subVariant)
         {
             Identifier = identifier;
             SubVariant = subVariant;
+            ToggledColumn = toggledColumn;
         }
 
         public ColumnVariantIdentifier Identifier { get; }
         
         public IColumnVariant SubVariant { get; }
+
+        public IDataColumn ToggledColumn { get; }
         
         public void Accept(IColumnVariantsVisitor visitor)
         {

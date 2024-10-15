@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding
         IColumnVariantsModesBuilder WithMode<T>(
             ColumnVariantIdentifier modeIdentifier,
             IProjection<int, T> column,
-            Action<IColumnVariantsRootBuilder> builder);
+            Action<IToggleableColumnVariantsBuilder> builder);
 
         // If not called, the first mode added will be the default mode
         IColumnVariantsBuilder WithDefaultMode(Guid modeIdentifierGuid);

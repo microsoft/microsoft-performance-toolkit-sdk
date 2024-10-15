@@ -586,7 +586,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public ITableBuilderWithRowCount AddColumnWithVariants(
                 IDataColumn column,
-                Action<IColumnVariantsRootBuilder> variantsBuilder)
+                Action<IRootColumnVariantsBuilder> variantsBuilder)
             {
                 throw new NotImplementedException();
             }

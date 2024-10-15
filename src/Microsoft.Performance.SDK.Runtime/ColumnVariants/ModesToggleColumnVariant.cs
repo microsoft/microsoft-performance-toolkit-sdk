@@ -7,9 +7,15 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnVariants
     public sealed class ModesToggleColumnVariant
         : IColumnVariant
     {
+        public ModesToggleColumnVariant(string toggleText, IColumnVariant modes)
+        {
+            ToggleText = toggleText;
+            Modes = modes;
+        }
+
         public string ToggleText { get; }
 
-        public ModesColumnVariant Modes { get; }
+        public IColumnVariant Modes { get; }
 
         public void Accept(IColumnVariantsVisitor visitor)
         {

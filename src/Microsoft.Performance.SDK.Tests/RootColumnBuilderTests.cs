@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
@@ -13,32 +12,31 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Tests;
 
-
 [TestClass]
 [UnitTest]
 public class RootColumnBuilderTests
 {
-    static ColumnConfiguration baseConfig = new(new ColumnMetadata(Guid.NewGuid(), "BaseColumn"));
-    static IProjection<int, Timestamp> baseProj = Projection.Constant(Timestamp.Zero);
+    private static readonly ColumnConfiguration baseConfig = new(new ColumnMetadata(Guid.NewGuid(), "BaseColumn"));
+    private static readonly IProjection<int, Timestamp> baseProj = Projection.Constant(Timestamp.Zero);
 
-    static ColumnVariantIdentifier projectAsDateTime = new(Guid.NewGuid(), "Project as DateTime");
+    private static readonly ColumnVariantIdentifier projectAsDateTime = new(Guid.NewGuid(), "Project as DateTime");
 
-    static ColumnVariantIdentifier utc = new(Guid.NewGuid(), "UTC");
-    static IProjection<int, DateTime> utcProj = Projection.Constant(DateTime.UtcNow);
+    private static readonly ColumnVariantIdentifier utc = new(baseConfig.Metadata.Guid, "UTC");
+    private static readonly IProjection<int, DateTime> utcProj = Projection.Constant(DateTime.UtcNow);
 
-    static ColumnVariantIdentifier local = new(Guid.NewGuid(), "Local");
-    static IProjection<int, DateTime> localProj = Projection.Constant(DateTime.UtcNow.AddHours(2));
+    private static readonly ColumnVariantIdentifier local = new(Guid.NewGuid(), "Local");
+    private static readonly IProjection<int, DateTime> localProj = Projection.Constant(DateTime.UtcNow.AddHours(2));
 
-    static ColumnVariantIdentifier showFloat = new(Guid.NewGuid(), "Float");
-    static IProjection<int, float> floatProj = Projection.Constant(1f);
+    private static readonly ColumnVariantIdentifier showFloat = new(Guid.NewGuid(), "Float");
+    private static readonly IProjection<int, float> floatProj = Projection.Constant(1f);
 
-    static ColumnVariantIdentifier showBool = new(Guid.NewGuid(), "Bool");
-    static IProjection<int, bool> boolProj = Projection.Constant(true);
+    private static readonly ColumnVariantIdentifier showBool = new(Guid.NewGuid(), "Bool");
+    private static readonly IProjection<int, bool> boolProj = Projection.Constant(true);
 
     [TestMethod]
     public void SingleToggle()
     {
-        TableBuilder tableBuilder = new TableBuilder();
+        var tableBuilder = new TableBuilder();
         tableBuilder
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, baseProj, builder =>
@@ -48,14 +46,14 @@ public class RootColumnBuilderTests
                     .Build();
             });
 
-        var expected = new ToggleableColumnVariant(projectAsDateTime, null);
+        var expected = Toggle(projectAsDateTime);
         AssertCorrectColumnVariants(expected, tableBuilder);
     }
 
     [TestMethod]
     public void NestedToggle()
     {
-        TableBuilder tableBuilder = new TableBuilder();
+        var tableBuilder = new TableBuilder();
         tableBuilder
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, baseProj, builder =>
@@ -66,11 +64,9 @@ public class RootColumnBuilderTests
                     .Build();
             });
 
-        var expected = new ToggleableColumnVariant(
+        var expected = Toggle(
             projectAsDateTime,
-            new ToggleableColumnVariant(
-                utc,
-                null));
+            Toggle(utc));
 
 
         AssertCorrectColumnVariants(expected, tableBuilder);
@@ -79,29 +75,21 @@ public class RootColumnBuilderTests
     [TestMethod]
     public void SingleLevelOfModes()
     {
-        TableBuilder tableBuilder = new TableBuilder();
+        var tableBuilder = new TableBuilder();
         tableBuilder
             .SetRowCount(1)
-            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
                 builder
-                    .WithModes(modesBuilder =>
-                    {
-                        modesBuilder
-                            .WithMode(projectAsDateTime, utcProj)
-                            .WithMode(utc, utcProj)
-                            .Build();
-                    })
+                    .WithModes(utc.Name)
+                    .WithMode(local, localProj)
                     .Build();
             });
 
-        var expected = new ModesColumnVariant(
-            new[]
-            {
-                new ModeColumnVariant(projectAsDateTime, null),
-                new ModeColumnVariant(utc, null),
-            },
-            0);
+        var expected = Modes(
+            0,
+            Mode(utc),
+            Mode(local));
 
         AssertCorrectColumnVariants(expected, tableBuilder);
     }
@@ -109,30 +97,22 @@ public class RootColumnBuilderTests
     [TestMethod]
     public void ModesWithDefaultIndex()
     {
-        TableBuilder tableBuilder = new TableBuilder();
+        var tableBuilder = new TableBuilder();
         tableBuilder
             .SetRowCount(1)
-            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
                 builder
-                    .WithModes(modesBuilder =>
-                    {
-                        modesBuilder
-                            .WithMode(projectAsDateTime, utcProj)
-                            .WithMode(utc, utcProj)
-                            .WithDefaultMode(utc.Id)
-                            .Build();
-                    })
+                    .WithModes(utc.Name)
+                    .WithMode(local, localProj)
+                    .WithDefaultMode(local.Id)
                     .Build();
             });
 
-        var expected = new ModesColumnVariant(
-            new[]
-            {
-                new ModeColumnVariant(projectAsDateTime, null),
-                new ModeColumnVariant(utc, null),
-            },
-            1);
+        var expected = Modes(
+            1,
+            Mode(utc),
+            Mode(local));
 
         AssertCorrectColumnVariants(expected, tableBuilder);
     }
@@ -140,87 +120,72 @@ public class RootColumnBuilderTests
     [TestMethod]
     public void ModeWithNestedToggles()
     {
-        TableBuilder tableBuilder = new TableBuilder();
+        var tableBuilder = new TableBuilder();
         tableBuilder
             .SetRowCount(1)
-            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
                 builder
-                    .WithModes(modesBuilder =>
-                    {
-                        modesBuilder
-                            .WithMode(projectAsDateTime, utcProj, modeBuilder =>
-                            {
-                                modeBuilder
-                                    .WithToggle(showFloat, floatProj)
-                                    .WithToggle(showBool, boolProj)
-                                    .Build();
-                            })
-                            .WithMode(utc, utcProj)
-                            .Build();
-                    })
+                    .WithModes(
+                        utc.Name,
+                        modeBuilder =>
+                        {
+                            modeBuilder
+                                .WithToggle(showFloat, floatProj)
+                                .WithToggle(showBool, boolProj)
+                                .Build();
+                        })
+                    .WithMode(local, localProj)
                     .Build();
             });
 
-        var expected = new ModesColumnVariant(
-            new[]
-            {
-                new ModeColumnVariant(
-                    projectAsDateTime,
-                    new ToggleableColumnVariant(
-                        showFloat,
-                        new ToggleableColumnVariant(showBool, null))),
-                new ModeColumnVariant(utc, null),
-            },
-            0);
-
+        var expected = Modes(
+            0,
+            Mode(
+                utc,
+                Toggle(
+                    showFloat,
+                    Toggle(showBool))),
+            Mode(local));
         AssertCorrectColumnVariants(expected, tableBuilder);
     }
 
     [TestMethod]
     public void ModeWithNestedModes()
     {
-        TableBuilder tableBuilder = new TableBuilder();
+        var tableBuilder = new TableBuilder();
         tableBuilder
             .SetRowCount(1)
-            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
                 builder
-                    .WithModes(modesBuilder =>
+                    .WithModes(utc.Name)
+                    .WithMode(local, floatProj, modeBuilder =>
                     {
-                        modesBuilder
-                            .WithMode(projectAsDateTime, utcProj, modeBuilder =>
-                            {
-                                modeBuilder.WithModes(nestedModes =>
+                        modeBuilder.WithToggledModes(
+                                "Foo",
+                                nestedModes =>
                                 {
                                     nestedModes
                                         .WithMode(showFloat, floatProj)
                                         .WithMode(showBool, boolProj)
                                         .Build();
                                 })
-                                .Build();
-                            })
-                            .WithMode(utc, utcProj)
                             .Build();
                     })
                     .Build();
             });
 
-        var expected = new ModesColumnVariant(
-            new[]
-            {
-                new ModeColumnVariant(
-                    projectAsDateTime,
-                    new ModesColumnVariant(
-                        new[]
-                        {
-                            new ModeColumnVariant(showFloat, null),
-                            new ModeColumnVariant(showBool, null),
-                        },
-                        0)),
-                new ModeColumnVariant(utc, null),
-            },
-            0);
+        var expected = Modes(
+            0,
+            Mode(utc),
+            Mode(local,
+                ModesToggle(
+                    "Foo",
+                    Modes(
+                        0,
+                        Mode(showFloat),
+                        Mode(showBool)))));
 
         AssertCorrectColumnVariants(expected, tableBuilder);
     }
@@ -228,8 +193,28 @@ public class RootColumnBuilderTests
     private void AssertCorrectColumnVariants(
         IColumnVariant expectedRoot, TableBuilder builtTable)
     {
-        bool success = builtTable.TryGetVariantsRoot(builtTable.Columns.First(), out IColumnVariant actualRoot);
+        var success = builtTable.TryGetVariantsRoot(builtTable.Columns.First(), out var actualRoot);
         Assert.IsTrue(success, "No variants were registered for the column, but they were expected to be.");
         Assert.AreEqual(expectedRoot, actualRoot);
+    }
+
+    private ModesColumnVariant Modes(int defaultIndex, params ModeColumnVariant[] modes)
+    {
+        return new ModesColumnVariant(modes, defaultIndex);
+    }
+
+    private ModeColumnVariant Mode(ColumnVariantIdentifier identifier, IColumnVariant subVariant = null)
+    {
+        return new ModeColumnVariant(identifier, null, subVariant ?? NullColumnVariant.Instance);
+    }
+
+    private ModesToggleColumnVariant ModesToggle(string toggleText, ModesColumnVariant modes)
+    {
+        return new ModesToggleColumnVariant(toggleText, modes);
+    }
+
+    private ToggleableColumnVariant Toggle(ColumnVariantIdentifier identifier, IColumnVariant subVariant = null)
+    {
+        return new ToggleableColumnVariant(identifier, null, subVariant ?? NullColumnVariant.Instance);
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants;
 
 namespace Microsoft.Performance.SDK.Runtime
@@ -152,7 +153,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public ITableBuilderWithRowCount AddColumnWithVariants(
             IDataColumn column,
-            Action<IColumnVariantsRootBuilder> options)
+            Action<IRootColumnVariantsBuilder> options)
         {
             Guard.NotNull(column, nameof(column));
 
@@ -161,11 +162,9 @@ namespace Microsoft.Performance.SDK.Runtime
             if (options != null)
             {
                 var processor = new VariantsProcessor(column, this);
-                var builder = new ColumnVariantsTogglesBuilder(
+                var builder = new EmptyColumnVariantsBuilder(
                     processor,
-                    column,
-                    new List<ColumnVariantWithColumn>(),
-                    null);
+                    column);
 
                 options(builder);
             }
