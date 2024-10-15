@@ -105,7 +105,7 @@ public class RootColumnBuilderTests
                 builder
                     .WithModes(utc.Name)
                     .WithMode(local, localProj)
-                    .WithDefaultMode(local.Id)
+                    .WithDefaultMode(local.Guid)
                     .Build();
             });
 

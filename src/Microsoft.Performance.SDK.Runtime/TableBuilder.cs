@@ -9,6 +9,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants;
 
 namespace Microsoft.Performance.SDK.Runtime
@@ -153,7 +154,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public ITableBuilderWithRowCount AddColumnWithVariants(
             IDataColumn column,
-            Action<IRootColumnVariantsBuilder> options)
+            Action<IRootColumnBuilder> options)
         {
             Guard.NotNull(column, nameof(column));
 
@@ -162,7 +163,7 @@ namespace Microsoft.Performance.SDK.Runtime
             if (options != null)
             {
                 var processor = new VariantsProcessor(column, this);
-                var builder = new EmptyColumnVariantsBuilder(
+                var builder = new EmptyColumnBuilder(
                     processor,
                     column);
 
@@ -186,7 +187,7 @@ namespace Microsoft.Performance.SDK.Runtime
         // dictionary, and exposed via a new method on this class.
 
         private class VariantsProcessor
-            : IDataColumnVariantsProcessor
+            : IColumnVariantsProcessor
         {
             private readonly IDataColumn baseColumn;
             private readonly TableBuilder tableBuilder;

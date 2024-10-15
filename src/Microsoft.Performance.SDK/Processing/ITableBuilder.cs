@@ -128,7 +128,7 @@ namespace Microsoft.Performance.SDK.Processing
 
         ITableBuilderWithRowCount AddColumnWithVariants(
             IDataColumn column,
-            Action<IRootColumnVariantsBuilder> variantsBuilder);
+            Action<IRootColumnBuilder> variantsBuilder);
 
         /// <summary>
         ///     Replaces the given column with another column.
