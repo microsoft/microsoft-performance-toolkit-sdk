@@ -159,6 +159,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 checsumCalculator,
                 loggerFactory);
 
+            List<IPluginValidator> installValidators = new List<IPluginValidator>(validatorsToUse);
+            installValidators.Add(new PreviousInstallationFolderValidator(loggerFactory(typeof(PreviousInstallationFolderValidator)), storageDirectory));
+
             var validator = new InstalledPluginDirectoryChecksumValidator(storageDirectory, checsumCalculator, loggerFactory(typeof(InstalledPluginDirectoryChecksumValidator)));
 
             var installer = new FileBackedPluginsInstaller(
@@ -166,7 +169,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
                 validator,
                 installedPluginStorage,
                 packageReader,
-                compositePluginValidator,
+                new CompositePluginValidator(installValidators),
                 options.InvalidPluginsGate,
                 loggerFactory);
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.Serialization;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -12,7 +11,6 @@ namespace Microsoft.Performance.SDK.Runtime
     ///     to denote when a processor has terminated abnormally
     ///     or unexpectedly.
     /// </summary>
-    [Serializable]
     public class ProcessorFailureException
         : Exception
     {
@@ -51,21 +49,6 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </param>
         public ProcessorFailureException(string message, Exception inner)
             : base(message, inner)
-        {
-        }
-
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="ProcessorFailureException"/>
-        ///     class from the given serialization data.
-        /// </summary>
-        /// <param name="info">
-        ///     The serialized data.
-        /// </param>
-        /// <param name="context">
-        ///     The context of the serialization.
-        /// </param>
-        protected ProcessorFailureException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

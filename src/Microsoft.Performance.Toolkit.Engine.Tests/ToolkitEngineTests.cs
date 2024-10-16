@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
@@ -109,6 +111,75 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var processingSourceReference = plugins.ProcessingSourceReferences.Single(psr => psr.Guid.Equals(Source123DataSource.Guid));
             var processingSourceInstance = processingSourceReference.Instance as Source123DataSource;
             Assert.IsNull(processingSourceInstance.UserSpecifiedOptions, "User specified supportedOptions were found, despite expecting null, as passed supportedOptions are invalid");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_DataSource_DisposesDataSet()
+        {
+            // Engine.Create(IDataSourceSet) owns the data source set and should dispose of it
+
+            Source123DataSource processingSource = null;
+
+            using (Engine sut = Engine.Create(new FileDataSource("test" + Source123DataSource.Extension)))
+            {
+                processingSource = sut.Plugins.ProcessingSourceReferences
+                    .Where(x => x.Name == nameof(Source123DataSource))
+                    .First()
+                    .Instance as Source123DataSource;
+
+                Assert.IsNotNull(processingSource, $"{nameof(processingSource)} is null.");
+            }
+
+            Assert.IsTrue(processingSource.IsDisposed, $"{processingSource} is not disposed.");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_DataSourceAndType_DisposesDataSet()
+        {
+            // Engine.Create(IDataSourceSet, Type) owns the data source set and should dispose of it
+
+            Source123DataSource processingSource = null;
+
+            using (Engine sut = Engine.Create(new FileDataSource("test" + Source123DataSource.Extension), typeof(Source123DataSource)))
+            {
+                processingSource = sut.Plugins.ProcessingSourceReferences
+                    .Where(x => x.Name == nameof(Source123DataSource))
+                    .First()
+                    .Instance as Source123DataSource;
+
+                Assert.IsNotNull(processingSource, $"{nameof(processingSource)} is null.");
+            }
+
+            Assert.IsTrue(processingSource.IsDisposed, $"{processingSource} is not disposed.");
+        }
+
+        [TestMethod]
+        [IntegrationTest]
+        public void Create_DataSourcesAndType_DisposesDataSet()
+        {
+            // Engine.Create(IEnumerable<IDataSourceSet>, Type) owns the data source set and should dispose of it
+
+            Source123DataSource processingSource = null;
+
+            IDataSource[] sources = new[]
+            {
+                new FileDataSource("test1" + Source123DataSource.Extension),
+                new FileDataSource("test2" + Source123DataSource.Extension),
+            };
+
+            using (Engine sut = Engine.Create(sources, typeof(Source123DataSource)))
+            {
+                processingSource = sut.Plugins.ProcessingSourceReferences
+                    .Where(x => x.Name == nameof(Source123DataSource))
+                    .First()
+                    .Instance as Source123DataSource;
+
+                Assert.IsNotNull(processingSource, $"{nameof(processingSource)} is null.");
+            }
+
+            Assert.IsTrue(processingSource.IsDisposed, $"{processingSource} is not disposed.");
         }
 
         [TestMethod]
@@ -1058,6 +1129,55 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsInstanceOfType(error.Processor, typeof(InteractiveProcessor));
             Assert.AreEqual(file, error.DataSources.Single());
             Assert.IsInstanceOfType(error.ProcessFault, typeof(InvalidOperationException));
+        }
+
+        #endregion
+
+        #region Auth
+
+        [TestMethod]
+        [UnitTest]
+        public void ProcessingSources_AreGiven_SpecifiedAuthProviders()
+        {
+            var givenProvider = new StubAuthProvider();
+
+            var info = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
+            info.WithAuthProvider(givenProvider);
+            using var sut = Engine.Create(info);
+
+            var spy = sut.Plugins.ProcessingSourceReferences.First(psr => psr.Guid == Source123DataSource.Guid).Instance as Source123DataSource;
+            var success = spy.ApplicationEnvironmentSpy.TryGetAuthProvider<StubAuthMethod, int>(out var foundProvider);
+
+            Assert.IsTrue(success);
+            Assert.AreEqual(givenProvider, foundProvider);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void TryGetAuthProvider_Fails_WhenNoProviderIsRegistered()
+        {
+            var info = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
+            using var sut = Engine.Create(info);
+
+            var spy = sut.Plugins.ProcessingSourceReferences.First(psr => psr.Guid == Source123DataSource.Guid).Instance as Source123DataSource;
+            var success = spy.ApplicationEnvironmentSpy.TryGetAuthProvider<StubAuthMethod, int>(out var foundProvider);
+
+            Assert.IsFalse(success);
+            Assert.IsNull(foundProvider);
+        }
+
+        private class StubAuthMethod
+            : IAuthMethod<int>
+        {
+        }
+
+        private class StubAuthProvider
+            : IAuthProvider<StubAuthMethod, int>
+        {
+            public Task<int> TryGetAuth(StubAuthMethod authRequest)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #endregion

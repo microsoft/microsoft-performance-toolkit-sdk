@@ -423,30 +423,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         }
 
         //
-        // Legacy schema tests
-        //
-        [TestMethod]
-        [UnitTest]
-        public void LegacyPluginTest()
-        {
-            (var loader, var consumer) = Setup(true);
-            var success = loader.TryLoadPlugin(GetLegacyPath("LegacyA"), out var error);
-            Assert.IsTrue(success);
-            Assert.AreEqual(ErrorInfo.None, error);
-
-            var expectedPlugins = new List<Tuple<string, Version>>
-            {
-                new Tuple<string, Version>("LegacyA", null),
-            };
-            AssertExpectedPlugins(expectedPlugins, consumer);
-
-            var expectedCDSs = new Type[] { typeof(LegacySchemaA) };
-            AssertNumberProcessingSourcesLoaded(expectedCDSs.Length, loader, consumer);
-            AssertLoadedCDSs(expectedCDSs, loader);
-            AssertObservedCDSs(expectedCDSs, consumer);
-        }
-
-        //
         // Fake directory/directories tests
         //
         [TestMethod]
@@ -740,11 +716,6 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         private static string GetValidPath(string pluginName, Version pluginVersion)
         {
             return Path.Combine(compilePath, Valid, "InstalledPlugins", "1.0.0", pluginName, pluginVersion.ToString(3));
-        }
-
-        private static string GetLegacyPath(string pluginName)
-        {
-            return Path.Combine(compilePath, Legacy, ProcessingSourceConstants.ProcessingSourceRootFolderName, pluginName);
         }
 
         /// <summary>
