@@ -30,8 +30,6 @@ namespace Microsoft.Performance.Toolkit.Engine
     {
         private readonly ICompositeCookerRepository compositeCookerData;
 
-        private readonly ILogger logger;
-
         // The following fields aren't 'readonly' because they're set to null when disposing.
         private ICookedDataRetrieval sourceCookerData;
         private IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap;
@@ -89,8 +87,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             IDataExtensionRetrievalFactory retrievalFactory,
             IDataExtensionRepository repository,
             IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap,
-            IEnumerable<ProcessingError> errors,
-            ILogger logger)
+            IEnumerable<ProcessingError> errors)
         {
             Guard.NotNull(sourceCookerData, nameof(sourceCookerData));
             Guard.NotNull(compositeCookerData, nameof(compositeCookerData));
@@ -105,7 +102,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.repository = repository;
             this.sourceCookerPaths = new HashSet<DataCookerPath>(this.repository.SourceDataCookers);
             this.tableToProcessorMap = tableToProcessorMap;
-            this.logger = logger;
 
             this.ProcessingErrors = errors.OfType<ProcessingError>().ToList().AsReadOnly();
         }

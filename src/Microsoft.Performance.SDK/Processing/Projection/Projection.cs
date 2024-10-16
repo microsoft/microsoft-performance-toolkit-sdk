@@ -2198,12 +2198,12 @@ with anonymous methods for small tables.");
 
             public Type SourceType
             {
-                get { return typeof(T); }
+                get { return typeof(int); }
             }
 
             public Type ResultType
             {
-                get { return typeof(TResult); }
+                get { return typeof(T); }
             }
         }
 

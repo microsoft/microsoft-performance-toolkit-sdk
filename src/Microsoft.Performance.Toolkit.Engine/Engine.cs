@@ -1005,8 +1005,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 dataRetrievalFactory,
                 this.Extensions,
                 this.tablesToProcessors,
-                errors,
-                this.logger);
+                errors);
 
             return this.runtimeExecutionResult;
         }
