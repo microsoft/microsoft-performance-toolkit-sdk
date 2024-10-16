@@ -74,7 +74,7 @@ The `DataSources` property is the collection of `IDataSource` instances that can
 **must** be an `IDataSource` instance passed to `CreateValidGroups`.
 
 The `ProcessingMode` property can be used by your plugin to signal to your `ProcessingSource` and/or `ICustomDataProcessor` how to process the data sources in the group.
-For your conveinence, there is a [DefaultProcessingMode class](https://github.com/microsoft/microsoft-performance-toolkit-sdk/blob/main/src/Microsoft.Performance.SDK/Processing/DefaultProcessingMode.cs)
+For your convenience, there is a [DefaultProcessingMode class](https://github.com/microsoft/microsoft-performance-toolkit-sdk/blob/main/src/Microsoft.Performance.SDK/Processing/DefaultProcessingMode.cs)
 defined that you may use. However, you may create custom `IProcessingMode` implementations defined by your plugin for this property.
 
 To create `IDataSourceGroup` instances during `CreateValidGroups`, you may use the [DataSourceGroup class](https://github.com/microsoft/microsoft-performance-toolkit-sdk/blob/main/src/Microsoft.Performance.SDK/Processing/DataSourceGrouping/DataSourceGroup.cs) defined in the SDK.
