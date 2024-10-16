@@ -18,9 +18,9 @@ public class ColumnVariantsRegistrar
     private readonly Dictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> columnVariants = new();
 
     /// <inheritdoc/>
-    public bool TryGetVariantsTreeRoot(IDataColumn column, out IColumnVariantsTreeNode variantsTreeNodes)
+    public bool TryGetVariantsTreeRoot(IDataColumn baseColumn, out IColumnVariantsTreeNode variantsTreeNodes)
     {
-        return this.columnVariantsTrees.TryGetValue(column, out variantsTreeNodes);
+        return this.columnVariantsTrees.TryGetValue(baseColumn, out variantsTreeNodes);
     }
 
     /// <inheritdoc/>
