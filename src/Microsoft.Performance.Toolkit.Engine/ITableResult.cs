@@ -29,6 +29,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </summary>
         IReadOnlyCollection<IDataColumn> Columns { get; }
 
+        /// <summary>
+        ///     Gets the mapping of columns that have been added to the table with variants to their added variants.
+        /// </summary>
         IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> ColumnVariants
         {
             get;

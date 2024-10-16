@@ -556,9 +556,14 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public TableConfiguration DefaultConfiguration { get; private set; }
 
-            public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>>
-                ColumnVariants =>
-                this.variantsRegistrar.GetAllVariants();
+            /// <inheritdoc />
+            public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> ColumnVariants
+            {
+                get
+                {
+                    return this.variantsRegistrar.GetAllVariants();
+                }
+            }
 
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
@@ -590,6 +595,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public int RowCount { get; private set; }
 
+            /// <inheritdoc />
             public IReadOnlyCollection<IDataColumn> Columns => this.columnsRO;
 
             public ITableBuilderWithRowCount AddColumn(IDataColumn column)
