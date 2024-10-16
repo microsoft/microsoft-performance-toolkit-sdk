@@ -773,7 +773,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 instance.applicationEnvironment = new EngineApplicationEnvironment(
                     applicationName: applicationName,
                     runtimeName: runtimeName,
-                    new RuntimeTableSynchronizer(),
+                    null,
                     instance.Extensions,
                     instance.Factory.CreateSourceSessionFactory(),
                     createInfo.IsInteractive
@@ -1274,30 +1274,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 TableDescriptor descriptor)
             {
                 return null;
-            }
-        }
-
-        private sealed class RuntimeTableSynchronizer
-            : ITableDataSynchronization
-        {
-            public void SubmitColumnChangeRequest(
-                IEnumerable<Guid> columns,
-                Action onReadyForChange,
-                Action onChangeComplete,
-                bool requestInitialFilterReevaluation = false)
-            {
-                onReadyForChange?.Invoke();
-                onChangeComplete?.Invoke();
-            }
-
-            public void SubmitColumnChangeRequest(
-                Func<IProjectionDescription, bool> predicate,
-                Action onReadyForChange,
-                Action onChangeComplete,
-                bool requestInitialFilterReevaluation = false)
-            {
-                onReadyForChange?.Invoke();
-                onChangeComplete?.Invoke();
             }
         }
 
