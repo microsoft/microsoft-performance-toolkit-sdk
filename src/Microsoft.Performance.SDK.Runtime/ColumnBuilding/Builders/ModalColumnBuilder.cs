@@ -9,7 +9,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
-using Microsoft.Performance.SDK.Runtime.ColumnVariants;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -96,6 +96,9 @@ internal class ModalColumnBuilder
         IProjection<int, T> projection,
         Action<IToggleableColumnBuilder> builder)
     {
+        Guard.NotNull(modeIdentifier, nameof(modeIdentifier));
+        Guard.NotNull(projection, nameof(projection));
+
         AddedMode newMode = new(
             modeIdentifier,
             new DataColumn<T>(this.baseColumn.Configuration, projection),
@@ -130,7 +133,7 @@ internal class ModalColumnBuilder
 
         if (!index.HasValue)
         {
-            throw new InvalidOperationException($"No mode with identifier {modeIdentifierGuid} has been added.");
+            throw new ArgumentException($"No mode with identifier {modeIdentifierGuid} has been added.");
         }
 
         return new ModalColumnBuilder(

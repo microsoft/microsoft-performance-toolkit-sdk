@@ -7,7 +7,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
-using Microsoft.Performance.SDK.Runtime.ColumnVariants;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -48,6 +48,9 @@ internal sealed class EmptyColumnBuilder
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection)
     {
+        Guard.NotNull(toggleIdentifier, nameof(toggleIdentifier));
+        Guard.NotNull(projection, nameof(projection));
+
         return new ToggledColumnBuilder(
             [
                 new ToggledColumnBuilder.AddedToggle(toggleIdentifier,
@@ -62,6 +65,8 @@ internal sealed class EmptyColumnBuilder
         string toggleText,
         Action<IModalColumnBuilder> builder)
     {
+        Guard.NotNull(toggleText, nameof(toggleText));
+
         return new ToggledColumnWithToggledModesBuilder(
             new List<ToggledColumnBuilder.AddedToggle>(),
             baseColumn,
@@ -82,6 +87,8 @@ internal sealed class EmptyColumnBuilder
         string baseProjectionModeName,
         Action<IToggleableColumnBuilder> builder)
     {
+        Guard.NotNull(baseProjectionModeName, nameof(baseProjectionModeName));
+
         return new ModalColumnBuilder(
             processor,
             [

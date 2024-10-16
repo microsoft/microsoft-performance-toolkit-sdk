@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes.Visitors;
 
-namespace Microsoft.Performance.SDK.Runtime.ColumnVariants;
+namespace Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 /// <summary>
 ///     Exposes a set of mutually exclusive <see cref="IColumnVariantsTreeNode" /> modes.

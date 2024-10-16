@@ -3,8 +3,9 @@
 
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes.Visitors;
 
-namespace Microsoft.Performance.SDK.Runtime.ColumnVariants;
+namespace Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 /// <summary>
 ///     Represents a column variant that is one of many mutually exclusive modes.

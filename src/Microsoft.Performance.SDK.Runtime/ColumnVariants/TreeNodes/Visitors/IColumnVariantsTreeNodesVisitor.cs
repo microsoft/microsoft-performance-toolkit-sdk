@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.SDK.Runtime.ColumnVariants;
+namespace Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes.Visitors;
 
 /// <summary>
 ///     Represents a visitor for concrete <see cref="IColumnVariantsTreeNode"/> objects.

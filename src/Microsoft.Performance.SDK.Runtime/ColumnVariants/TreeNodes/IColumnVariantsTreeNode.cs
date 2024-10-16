@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes.Visitors;
 
-namespace Microsoft.Performance.SDK.Runtime.ColumnVariants;
+namespace Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 /// <summary>
 ///     Represents a node in the tree which exposes all variants of a column.

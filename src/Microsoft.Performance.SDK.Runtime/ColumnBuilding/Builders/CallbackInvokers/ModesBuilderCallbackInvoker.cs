@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
-using Microsoft.Performance.SDK.Runtime.ColumnVariants;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 

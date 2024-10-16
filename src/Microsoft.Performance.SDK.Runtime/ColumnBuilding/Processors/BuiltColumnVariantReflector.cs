@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Runtime.ColumnVariants;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 

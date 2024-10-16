@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime;
-using Microsoft.Performance.SDK.Runtime.ColumnVariants;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -32,6 +32,60 @@ public class RootColumnBuilderTests
 
     private static readonly ColumnVariantIdentifier showBool = new(Guid.NewGuid(), "Bool");
     private static readonly IProjection<int, bool> boolProj = Projection.Constant(true);
+
+    [TestMethod]
+    public void UnbuiltBuilderIsNoop()
+    {
+        bool wasCallbackCalled = false;
+
+        var tableBuilder = new TableBuilder();
+        tableBuilder.SetRowCount(1)
+            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            {
+                wasCallbackCalled = true;
+                builder.WithToggledModes(
+                    "foo",
+                    modeBuilder =>
+                    {
+                        modeBuilder.WithMode(local, localProj)
+                            .Build(); // calling build here should have no effect
+                    });
+                // Intentionally not calling Build on this builder
+            });
+
+        // The callback must still be invoked so that we were at least given a chance to call Build
+        Assert.IsTrue(wasCallbackCalled, "Supplied callback was not invoked even though it should have been.");
+        Assert.IsFalse(tableBuilder.ColumnVariantsRegistrar.TryGetVariantsTreeRoot(tableBuilder.Columns.First(), out var _));
+    }
+
+    [TestMethod]
+    public void BuildingTwiceOverridesFirstBuild()
+    {
+        var tableBuilder = new TableBuilder();
+        tableBuilder.SetRowCount(1)
+            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            {
+                var builderWithOneToggle =
+                    builder
+                        .WithToggle(projectAsDateTime, localProj);
+
+                builderWithOneToggle
+                    .WithToggledModes("foo", modeBuilder =>
+                    {
+                        modeBuilder
+                            .WithMode(utc, utcProj)
+                            .WithMode(showFloat, floatProj)
+                            .Build();
+                    })
+                    .Build();
+
+                // This should override the previous build to only expose the single toggle
+                builderWithOneToggle.Build();
+            });
+
+        var expected = Toggle(projectAsDateTime);
+        AssertCorrectColumnVariants(expected, tableBuilder);
+    }
 
     [TestMethod]
     public void SingleToggle()
@@ -151,6 +205,35 @@ public class RootColumnBuilderTests
     }
 
     [TestMethod]
+    public void ToggleWithNestedModes()
+    {
+        var tableBuilder = new TableBuilder();
+        tableBuilder
+            .SetRowCount(1)
+            .AddColumnWithVariants(baseConfig, utcProj, builder =>
+            {
+                builder
+                    .WithToggle(projectAsDateTime, utcProj)
+                    .WithToggledModes("withModes", modeBuilder =>
+                    {
+                        modeBuilder
+                            .WithMode(local, localProj)
+                            .Build();
+                    })
+                    .Build();
+            });
+
+        var expected =
+            Toggle(projectAsDateTime,
+                ModesToggle("withModes",
+                    Modes(
+                        0,
+                        Mode(local))));
+
+        AssertCorrectColumnVariants(expected, tableBuilder);
+    }
+
+    [TestMethod]
     public void ModeWithNestedModes()
     {
         var tableBuilder = new TableBuilder();
@@ -190,10 +273,29 @@ public class RootColumnBuilderTests
         AssertCorrectColumnVariants(expected, tableBuilder);
     }
 
+    [TestMethod]
+    public void AddColumnWithVariants_NullColumnThrows()
+    {
+        var tableBuilder = new TableBuilder().SetRowCount(1);
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            tableBuilder.AddColumnWithVariants(null, (_) => {});
+        });
+    }
+
+    [TestMethod]
+    public void AddColumnWithVariants_NullBuilderDoesNotThrow()
+    {
+        var tableBuilder = new TableBuilder().SetRowCount(1);
+        tableBuilder.AddColumnWithVariants(baseConfig, utcProj, null);
+        Assert.IsTrue(true);
+    }
+
     private void AssertCorrectColumnVariants(
         IColumnVariantsTreeNode expectedRoot, TableBuilder builtTable)
     {
-        var success = builtTable.TryGetVariantsRoot(builtTable.Columns.First(), out var actualRoot);
+        var success = builtTable.ColumnVariantsRegistrar.TryGetVariantsTreeRoot(builtTable.Columns.First(), out var actualRoot);
         Assert.IsTrue(success, "No variants were registered for the column, but they were expected to be.");
         Assert.IsTrue(expectedRoot.IsEquivalentTree(actualRoot));
     }

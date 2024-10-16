@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace Microsoft.Performance.SDK.Runtime.ColumnVariants;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes.Visitors;
+
+namespace Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 
 /// <summary>
 ///     Exposes a toggle for enabling/disabling a <see cref="IColumnVariantsTreeNode" />.

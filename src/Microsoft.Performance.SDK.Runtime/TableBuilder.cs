@@ -7,10 +7,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
-using Microsoft.Performance.SDK.Runtime.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
-using Microsoft.Performance.SDK.Runtime.ColumnVariants;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -34,6 +33,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private readonly List<TableConfiguration> builtInTableConfigurations;
         private readonly List<TableCommand> commands;
         private readonly IReadOnlyList<TableCommand> commandsRO;
+        private readonly ColumnVariantsRegistrar variantsRegistrar;
 
         // Maps a row to a collection of row detail entry
         private Func<int, IEnumerable<TableRowDetailEntry>> tableDetailsGenerator;
@@ -49,6 +49,7 @@ namespace Microsoft.Performance.SDK.Runtime
             this.columnsRO = new ReadOnlyCollection<IDataColumn>(this.columns);
             this.commands = new List<TableCommand>();
             this.commandsRO = new ReadOnlyCollection<TableCommand>(this.commands);
+            this.variantsRegistrar = new ColumnVariantsRegistrar();
 
             this.RowCount = 0;
         }
@@ -68,6 +69,12 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <inheritdoc />
         public IReadOnlyList<TableCommand> Commands => this.commandsRO;
+
+        /// <summary>
+        ///     Gets the <see cref="IColumnVariantsRegistrar"/> that can be used to find
+        ///     and discover registered column variants.
+        /// </summary>
+        public IColumnVariantsRegistrar ColumnVariantsRegistrar => this.variantsRegistrar;
 
         // TODO:
         // We currently set this to a default builder - build a TableDetails instance from the 
@@ -162,7 +169,7 @@ namespace Microsoft.Performance.SDK.Runtime
 
             if (options != null)
             {
-                var processor = new VariantsProcessor(column, this);
+                var processor = new BuiltColumnVariantsRegistrant(column, this.variantsRegistrar);
                 var builder = new EmptyColumnBuilder(
                     processor,
                     column);
@@ -173,36 +180,6 @@ namespace Microsoft.Performance.SDK.Runtime
             return this;
         }
 
-        private Dictionary<IDataColumn, IColumnVariantsTreeNode> columnVariants = new Dictionary<IDataColumn, IColumnVariantsTreeNode>();
-
-        public bool TryGetVariantsRoot(IDataColumn column, out IColumnVariantsTreeNode variantsTreeNodes)
-        {
-            return this.columnVariants.TryGetValue(column, out variantsTreeNodes);
-        }
-
-        // TODO: expose the actual datacolumn variants
-        // To do this, the variants with projections first need to expose an IDataColumn
-        // Then, the below processor needs to use a visitor that extracts the datacolumns
-        // associated with every variant identifier. These variants will be stored in a separate
-        // dictionary, and exposed via a new method on this class.
-
-        private class VariantsProcessor
-            : IColumnVariantsProcessor
-        {
-            private readonly IDataColumn baseColumn;
-            private readonly TableBuilder tableBuilder;
-
-            public VariantsProcessor(IDataColumn baseColumn, TableBuilder tableBuilder)
-            {
-                this.baseColumn = baseColumn;
-                this.tableBuilder = tableBuilder;
-            }
-
-            public void ProcessColumnVariants(IColumnVariantsTreeNode variantsTreeNodes)
-            {
-                tableBuilder.columnVariants[this.baseColumn] = variantsTreeNodes;
-            }
-        }
 
         /// <inheritdoc />
         public ITableBuilderWithRowCount ReplaceColumn(

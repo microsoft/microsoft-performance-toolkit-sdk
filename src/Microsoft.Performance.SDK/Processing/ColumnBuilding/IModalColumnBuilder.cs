@@ -69,7 +69,7 @@ public interface IModalColumnBuilder
     ///     A new instance of <see cref="IColumnBuilder"/> that has been
     ///     configured with the default mode.
     /// </returns>
-    /// <exception cref="InvalidOperationException">
+    /// <exception cref="ArgumentException">
     ///     The mode with the given <paramref name="modeIdentifierGuid"/> has not been
     ///     added as an available mode.
     /// </exception>
