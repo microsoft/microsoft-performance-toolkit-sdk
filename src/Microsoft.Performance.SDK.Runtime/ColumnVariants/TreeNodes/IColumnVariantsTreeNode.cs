@@ -29,7 +29,11 @@ public interface IColumnVariantsTreeNode
     ///     where exposed variants are considered equal if their <see cref="ColumnVariantIdentifier"/>s
     ///     are equal. The concrete projections/data columns are not compared.
     /// </summary>
-    /// <param name="other"></param>
-    /// <returns></returns>
+    /// <param name="other">
+    ///     The tree to compare to this one.
+    /// </param>
+    /// <returns>
+    ///     <c>true</c> if the trees are equivalent; <c>false</c> otherwise.
+    /// </returns>
     bool IsEquivalentTree(IColumnVariantsTreeNode other);
 }
