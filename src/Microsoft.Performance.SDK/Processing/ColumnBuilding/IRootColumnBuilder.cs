@@ -24,6 +24,9 @@ public interface IRootColumnBuilder
     ///     A new <see cref="IModalColumnBuilder"/> to continue building
     ///     column modes.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="baseProjectionModeName"/> is <c>null</c>.
+    /// </exception>
     IModalColumnBuilder WithModes(
         string baseProjectionModeName);
 
@@ -44,6 +47,9 @@ public interface IRootColumnBuilder
     ///     A new <see cref="IModalColumnBuilder"/> to continue building
     ///     column modes.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="baseProjectionModeName"/> is <c>null</c>.
+    /// </exception>
     IModalColumnBuilder WithModes(
         string baseProjectionModeName,
         Action<IToggleableColumnBuilder> builder);

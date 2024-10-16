@@ -31,6 +31,9 @@ public interface IToggleableColumnBuilder
     ///     A new instance of <see cref="IToggleableColumnBuilder"/> that has been
     ///     configured with the added toggle.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="toggleIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
+    /// </exception>
     IToggleableColumnBuilder WithToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection);
@@ -58,6 +61,10 @@ public interface IToggleableColumnBuilder
     ///     A new instance of <see cref="IToggleableColumnBuilder"/> that has been
     ///     configured with the added toggle.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="toggleIdentifier"/>, <paramref name="projection"/>,
+    ///     or <paramref name="collectionProvider"/> is <c>null</c>.
+    /// </exception>
     IToggleableColumnBuilder WithHierarchicalToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection,
@@ -77,6 +84,9 @@ public interface IToggleableColumnBuilder
     ///     A new instance of <see cref="IColumnBuilder"/> that has been
     ///     configured with the added toggled modes.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="toggleText"/> is <c>null</c>.
+    /// </exception>
     IColumnBuilder WithToggledModes(
         string toggleText,
         Action<IModalColumnBuilder> builder);

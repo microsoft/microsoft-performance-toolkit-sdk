@@ -30,6 +30,9 @@ public interface IModalColumnBuilder
     ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="modeIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
+    /// </exception>
     IModalColumnBuilder WithMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection);
@@ -55,6 +58,10 @@ public interface IModalColumnBuilder
     ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="modeIdentifier"/>, <paramref name="projection"/>, or
+    ///     <paramref name="collectionProvider"/> is <c>null</c>.
+    /// </exception>
     IModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
@@ -79,6 +86,9 @@ public interface IModalColumnBuilder
     ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="modeIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
+    /// </exception>
     IModalColumnBuilder WithMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
@@ -108,6 +118,10 @@ public interface IModalColumnBuilder
     ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="modeIdentifier"/>, <paramref name="projection"/>,
+    ///     or <paramref name="collectionProvider"/> is <c>null</c>.
+    /// </exception>
     IModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
