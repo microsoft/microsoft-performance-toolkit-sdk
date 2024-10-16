@@ -49,15 +49,15 @@ internal sealed class ToggledColumnWithToggledModesBuilder
         this.modesToggleText = modesToggleText;
     }
 
-    protected override IColumnVariant GetRootVariant()
+    protected override IColumnVariantsTreeNode GetRootVariant()
     {
         if (this.modesBuilderCallbackActionInvoker.TryGet(out var builtModesVariant))
         {
-            return new ModesToggleColumnVariant(this.modesToggleText, builtModesVariant);
+            return new ModesToggleColumnVariantsTreeNode(this.modesToggleText, builtModesVariant);
         }
         else
         {
-            return NullColumnVariant.Instance;
+            return NullColumnVariantsTreeNode.Instance;
         }
     }
 }

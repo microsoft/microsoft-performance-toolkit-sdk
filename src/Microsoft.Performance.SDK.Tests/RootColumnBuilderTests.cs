@@ -191,30 +191,30 @@ public class RootColumnBuilderTests
     }
 
     private void AssertCorrectColumnVariants(
-        IColumnVariant expectedRoot, TableBuilder builtTable)
+        IColumnVariantsTreeNode expectedRoot, TableBuilder builtTable)
     {
         var success = builtTable.TryGetVariantsRoot(builtTable.Columns.First(), out var actualRoot);
         Assert.IsTrue(success, "No variants were registered for the column, but they were expected to be.");
-        Assert.AreEqual(expectedRoot, actualRoot);
+        Assert.IsTrue(expectedRoot.IsEquivalentTree(actualRoot));
     }
 
-    private ModesColumnVariant Modes(int defaultIndex, params ModeColumnVariant[] modes)
+    private ModesColumnVariantsTreeNode Modes(int defaultIndex, params ModeColumnVariantsTreeNode[] modes)
     {
-        return new ModesColumnVariant(modes, defaultIndex);
+        return new ModesColumnVariantsTreeNode(modes, defaultIndex);
     }
 
-    private ModeColumnVariant Mode(ColumnVariantIdentifier identifier, IColumnVariant subVariant = null)
+    private ModeColumnVariantsTreeNode Mode(ColumnVariantIdentifier identifier, IColumnVariantsTreeNode subVariantsTreeNode = null)
     {
-        return new ModeColumnVariant(identifier, null, subVariant ?? NullColumnVariant.Instance);
+        return new ModeColumnVariantsTreeNode(identifier, null, subVariantsTreeNode ?? NullColumnVariantsTreeNode.Instance);
     }
 
-    private ModesToggleColumnVariant ModesToggle(string toggleText, ModesColumnVariant modes)
+    private ModesToggleColumnVariantsTreeNode ModesToggle(string toggleText, ModesColumnVariantsTreeNode modes)
     {
-        return new ModesToggleColumnVariant(toggleText, modes);
+        return new ModesToggleColumnVariantsTreeNode(toggleText, modes);
     }
 
-    private ToggleableColumnVariant Toggle(ColumnVariantIdentifier identifier, IColumnVariant subVariant = null)
+    private ToggleableColumnVariantsTreeNode Toggle(ColumnVariantIdentifier identifier, IColumnVariantsTreeNode subVariantsTreeNode = null)
     {
-        return new ToggleableColumnVariant(identifier, null, subVariant ?? NullColumnVariant.Instance);
+        return new ToggleableColumnVariantsTreeNode(identifier, null, subVariantsTreeNode ?? NullColumnVariantsTreeNode.Instance);
     }
 }

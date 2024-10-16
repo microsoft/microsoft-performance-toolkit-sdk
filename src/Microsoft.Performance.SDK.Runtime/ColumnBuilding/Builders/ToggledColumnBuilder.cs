@@ -80,20 +80,20 @@ internal class ToggledColumnBuilder
             toggleText);
     }
 
-    private IColumnVariant BuildVariant()
+    private IColumnVariantsTreeNode BuildVariant()
     {
-        IColumnVariant variant = GetRootVariant();
+        IColumnVariantsTreeNode variantsTreeNode = GetRootVariant();
 
         foreach (var toggle in this.toggles.Reverse())
         {
-            variant = new ToggleableColumnVariant(toggle.ToggleIdentifier, toggle.column, variant);
+            variantsTreeNode = new ToggleableColumnVariantsTreeNode(toggle.ToggleIdentifier, toggle.column, variantsTreeNode);
         }
 
-        return variant;
+        return variantsTreeNode;
     }
 
-    protected virtual IColumnVariant GetRootVariant()
+    protected virtual IColumnVariantsTreeNode GetRootVariant()
     {
-        return NullColumnVariant.Instance;
+        return NullColumnVariantsTreeNode.Instance;
     }
 }

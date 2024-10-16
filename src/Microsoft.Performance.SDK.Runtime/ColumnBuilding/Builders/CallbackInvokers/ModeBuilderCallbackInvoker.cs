@@ -35,11 +35,11 @@ internal sealed class ModeBuilderCallbackInvoker
         this.baseColumn = baseColumn;
     }
 
-    public bool TryGet(out IColumnVariant builtVariant)
+    public bool TryGet(out IColumnVariantsTreeNode builtVariantsTreeNode)
     {
         if (callback == null)
         {
-            builtVariant = NullColumnVariant.Instance;
+            builtVariantsTreeNode = NullColumnVariantsTreeNode.Instance;
             return false;
         }
 
@@ -47,7 +47,7 @@ internal sealed class ModeBuilderCallbackInvoker
         var builder = new EmptyColumnBuilder(processor, baseColumn);
 
         callback(builder);
-        builtVariant = processor.Output;
+        builtVariantsTreeNode = processor.Output;
         return true;
     }
 }

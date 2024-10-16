@@ -61,24 +61,24 @@ internal class ModalColumnBuilder
     {
         if (this.addedModes.Count == 0)
         {
-            this.processor.ProcessColumnVariants(NullColumnVariant.Instance);
+            this.processor.ProcessColumnVariants(NullColumnVariantsTreeNode.Instance);
             return;
         }
 
-        List<ModeColumnVariant> modeVariants = new();
+        List<ModeColumnVariantsTreeNode> modeVariants = new();
         foreach (AddedMode mode in this.addedModes)
         {
             var callbackInvoker = new ModeBuilderCallbackInvoker(mode.builder, this.baseColumn);
 
-            IColumnVariant subVariant = NullColumnVariant.Instance;
+            IColumnVariantsTreeNode subVariantsTreeNode = NullColumnVariantsTreeNode.Instance;
             if (callbackInvoker.TryGet(out var builtVariant))
             {
-                subVariant = builtVariant;
+                subVariantsTreeNode = builtVariant;
             }
-            modeVariants.Add(new ModeColumnVariant(mode.Identifier, mode.column, subVariant));
+            modeVariants.Add(new ModeColumnVariantsTreeNode(mode.Identifier, mode.column, subVariantsTreeNode));
         }
 
-        var variant = new ModesColumnVariant(modeVariants, this.defaultModeIndex ?? 0);
+        var variant = new ModesColumnVariantsTreeNode(modeVariants, this.defaultModeIndex ?? 0);
         this.processor.ProcessColumnVariants(variant);
     }
 

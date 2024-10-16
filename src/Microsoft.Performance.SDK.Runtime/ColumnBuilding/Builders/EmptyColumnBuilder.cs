@@ -40,7 +40,7 @@ internal sealed class EmptyColumnBuilder
     /// <inheritdoc />
     public void Build()
     {
-        processor.ProcessColumnVariants(NullColumnVariant.Instance);
+        processor.ProcessColumnVariants(NullColumnVariantsTreeNode.Instance);
     }
 
     /// <inheritdoc />

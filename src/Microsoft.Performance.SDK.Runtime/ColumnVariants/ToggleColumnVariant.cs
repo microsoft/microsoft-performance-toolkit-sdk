@@ -9,16 +9,16 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnVariants;
 /// <summary>
 ///     Represents a column variant that can be toggled on or off.
 /// </summary>
-public sealed class ToggleableColumnVariant
-    : IColumnVariant
+public sealed class ToggleableColumnVariantsTreeNode
+    : IColumnVariantsTreeNode
 {
-    public ToggleableColumnVariant(
+    public ToggleableColumnVariantsTreeNode(
         ColumnVariantIdentifier identifier,
         IDataColumn toggledColumn,
-        IColumnVariant subVariant)
+        IColumnVariantsTreeNode subVariantsTreeNode)
     {
         Identifier = identifier;
-        SubVariant = subVariant;
+        SubVariantsTreeNode = subVariantsTreeNode;
         ToggledColumn = toggledColumn;
     }
 
@@ -30,42 +30,29 @@ public sealed class ToggleableColumnVariant
     /// <summary>
     ///     Gets the sub-variant that represents nested variants of this mode.
     /// </summary>
-    public IColumnVariant SubVariant { get; }
+    public IColumnVariantsTreeNode SubVariantsTreeNode { get; }
 
     /// <summary>
     ///     Gets the column that the toggled on state represents.
     /// </summary>
     public IDataColumn ToggledColumn { get; }
 
-    /// <inheritdoc/>
-    public void Accept(IColumnVariantsVisitor visitor)
+    /// <inheritdoc />
+    public void Accept(IColumnVariantsTreeNodesVisitor treeNodesVisitor)
     {
-        visitor.Visit(this);
+        treeNodesVisitor.Visit(this);
     }
 
-    private bool Equals(ToggleableColumnVariant other)
+    /// <inheritdoc />
+    public bool IsEquivalentTree(IColumnVariantsTreeNode other)
     {
-        return this.Identifier.Equals(other.Identifier)
-               && Equals(SubVariant, other.SubVariant);
+        return ReferenceEquals(this, other) ||
+               (other is ToggleableColumnVariantsTreeNode otherT && IsEquivalentTree(otherT));
     }
 
-    /// <inheritdoc/>
-    public bool Equals(IColumnVariant other)
+    private bool IsEquivalentTree(ToggleableColumnVariantsTreeNode other)
     {
-        return ReferenceEquals(this, other) || other is ToggleableColumnVariant otherT && Equals(otherT);
-    }
-
-    /// <inheritdoc/>
-    public override bool Equals(object obj)
-    {
-        return ReferenceEquals(this, obj) || obj is IColumnVariant other && Equals(other);
-    }
-
-    /// <inheritdoc/>
-    public override int GetHashCode()
-    {
-        return HashCodeUtils.CombineHashCodeValues(
-            this.Identifier?.GetHashCode() ?? 0,
-            this.SubVariant?.GetHashCode() ?? 0);
+        return Identifier.Equals(other.Identifier)
+               && this.SubVariantsTreeNode.IsEquivalentTree(other.SubVariantsTreeNode);
     }
 }

@@ -13,14 +13,14 @@ internal interface IColumnVariantsProcessor
 {
     /// <summary>
     ///     Processes the given column variants. This method will be called
-    ///     with the root <see cref="IColumnVariant"/> of a column variants tree
+    ///     with the root <see cref="IColumnVariantsTreeNode"/> of a column variants tree
     ///     once the column variants have been built.
     /// </summary>
-    /// <param name="variants">
-    ///     The root <see cref="IColumnVariant"/> of a column variants tree.
+    /// <param name="variantsTreeNodes">
+    ///     The root <see cref="IColumnVariantsTreeNode"/> of a column variants tree.
     /// </param>
     /// <remarks>
     ///     This method is invoked during <see cref="IColumnBuilder.Build"/>.
     /// </remarks>
-    void ProcessColumnVariants(IColumnVariant variants);
+    void ProcessColumnVariants(IColumnVariantsTreeNode variantsTreeNodes);
 }

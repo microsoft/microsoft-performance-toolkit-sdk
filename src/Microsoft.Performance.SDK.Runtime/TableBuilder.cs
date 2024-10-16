@@ -173,11 +173,11 @@ namespace Microsoft.Performance.SDK.Runtime
             return this;
         }
 
-        private Dictionary<IDataColumn, IColumnVariant> columnVariants = new Dictionary<IDataColumn, IColumnVariant>();
+        private Dictionary<IDataColumn, IColumnVariantsTreeNode> columnVariants = new Dictionary<IDataColumn, IColumnVariantsTreeNode>();
 
-        public bool TryGetVariantsRoot(IDataColumn column, out IColumnVariant variants)
+        public bool TryGetVariantsRoot(IDataColumn column, out IColumnVariantsTreeNode variantsTreeNodes)
         {
-            return this.columnVariants.TryGetValue(column, out variants);
+            return this.columnVariants.TryGetValue(column, out variantsTreeNodes);
         }
 
         // TODO: expose the actual datacolumn variants
@@ -198,9 +198,9 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.tableBuilder = tableBuilder;
             }
 
-            public void ProcessColumnVariants(IColumnVariant variants)
+            public void ProcessColumnVariants(IColumnVariantsTreeNode variantsTreeNodes)
             {
-                tableBuilder.columnVariants[this.baseColumn] = variants;
+                tableBuilder.columnVariants[this.baseColumn] = variantsTreeNodes;
             }
         }
 
