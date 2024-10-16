@@ -35,6 +35,32 @@ public interface IModalColumnBuilder
         IProjection<int, T> projection);
 
     /// <summary>
+    ///     Adds a hierarchical mode to the column.
+    /// </summary>
+    /// <param name="modeIdentifier">
+    ///     The <see cref="ColumnVariantIdentifier"/> for the mode. The
+    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of
+    ///     this mode.
+    /// </param>
+    /// <param name="projection">
+    ///     The projection that will be used to generate the column for this mode.
+    /// </param>
+    /// <param name="collectionProvider">
+    ///     The collection provider for the column.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The type of data that the projection will produce.
+    /// </typeparam>
+    /// <returns>
+    ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
+    ///     configured with the new mode.
+    /// </returns>
+    IModalColumnBuilder WithHierarchicalMode<T>(
+        ColumnVariantIdentifier modeIdentifier,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider);
+
+    /// <summary>
     ///     Adds a mode to the column.
     /// </summary>
     /// <param name="modeIdentifier">
@@ -56,6 +82,36 @@ public interface IModalColumnBuilder
     IModalColumnBuilder WithMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
+        Action<IToggleableColumnBuilder> builder);
+
+    /// <summary>
+    ///     Adds a hierarchical mode to the column.
+    /// </summary>
+    /// <param name="modeIdentifier">
+    ///     The <see cref="ColumnVariantIdentifier"/> for the mode. The
+    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of
+    ///     this mode.
+    /// </param>
+    /// <param name="projection">
+    ///     The projection that will be used to generate the column for this mode.
+    /// </param>
+    /// <param name="collectionProvider">
+    ///     The collection provider for the column.
+    /// </param>
+    /// <param name="builder">
+    ///     A callback that builds sub-variants of the added mode.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The type of data that the projection will produce.
+    /// </typeparam>
+    /// <returns>
+    ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
+    ///     configured with the new mode.
+    /// </returns>
+    IModalColumnBuilder WithHierarchicalMode<T>(
+        ColumnVariantIdentifier modeIdentifier,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
         Action<IToggleableColumnBuilder> builder);
 
     /// <summary>

@@ -19,46 +19,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.ColumnBuilding;
 [TestClass]
 [UnitTest]
 public class ToggledColumnWithToggledModesBuilderTests
+    : ToggledColumnBuilderTests
 {
-    [TestMethod]
-    public void WithToggle_NullIdentifierThrows()
-    {
-        var builder = CreateSut();
-
-        Assert.ThrowsException<ArgumentNullException>(() =>
-        {
-            builder.WithToggle(null, Projection.Constant(1f)).Build();
-        });
-    }
-
-    [TestMethod]
-    public void WithToggle_NullProjectionThrows()
-    {
-        var builder = CreateSut();
-
-        Assert.ThrowsException<ArgumentNullException>(() =>
-        {
-            builder.WithToggle<int>(new ColumnVariantIdentifier(Guid.NewGuid(), "Foo"), null).Build();
-        });
-    }
-
-    [TestMethod]
-    public void WithToggledModes_NullTextThrows()
-    {
-        var builder = CreateSut();
-
-        Assert.ThrowsException<ArgumentNullException>(() => { builder.WithToggledModes(null, _ => { }).Build(); });
-    }
-
-    [TestMethod]
-    public void WithToggledModes_NullBuilderDoesNotThrow()
-    {
-        var builder = CreateSut();
-        builder.WithToggledModes("foo", null).Build();
-        Assert.IsTrue(true);
-    }
-
-    private ToggledColumnBuilder CreateSut()
+    protected override IToggleableColumnBuilder CreateSut()
     {
         var baseColumn = new DataColumn<float>(
             new ColumnConfiguration(

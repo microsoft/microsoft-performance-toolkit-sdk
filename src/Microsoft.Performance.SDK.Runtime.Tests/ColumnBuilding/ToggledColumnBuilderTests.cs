@@ -41,6 +41,48 @@ public class ToggledColumnBuilderTests
     }
 
     [TestMethod]
+    public void WithHierarchicalToggle_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggle(
+                null,
+                Projection.Constant(1f),
+                new StubCollectionAccessProvider<float>()).Build();
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggle_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggle(
+                new ColumnVariantIdentifier(Guid.NewGuid(), "Foo"),
+                null,
+                new StubCollectionAccessProvider<float>()).Build();
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggle_NullCollectionInfoThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggle(
+                new ColumnVariantIdentifier(Guid.NewGuid(), "Foo"),
+                Projection.Constant(1f),
+                null).Build();
+        });
+    }
+
+    [TestMethod]
     public void WithToggledModes_NullTextThrows()
     {
         var builder = CreateSut();
@@ -56,7 +98,7 @@ public class ToggledColumnBuilderTests
         Assert.IsTrue(true);
     }
 
-    private ToggledColumnBuilder CreateSut()
+    protected virtual IToggleableColumnBuilder CreateSut()
     {
         var baseColumn = new DataColumn<float>(
             new ColumnConfiguration(

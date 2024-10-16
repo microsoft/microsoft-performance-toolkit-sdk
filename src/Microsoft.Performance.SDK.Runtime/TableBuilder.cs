@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     This class is used to build tables. Tables are built by adding
-    ///     columns, each consisteing of the same number of rows. Each row in
+    ///     columns, each consisting of the same number of rows. Each row in
     ///     the table is made up of projections, one per column, that take the
     ///     integral row number and project the data for the given column as
     ///     the appropriate type.
@@ -179,7 +179,6 @@ namespace Microsoft.Performance.SDK.Runtime
 
             return this;
         }
-
 
         /// <inheritdoc />
         public ITableBuilderWithRowCount ReplaceColumn(

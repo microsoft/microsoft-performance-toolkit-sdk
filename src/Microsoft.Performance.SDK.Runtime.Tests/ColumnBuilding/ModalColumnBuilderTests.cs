@@ -53,6 +53,64 @@ public class ModalColumnBuilderTests
     }
 
     [TestMethod]
+    public void WithHierarchicalMode_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalMode(
+                null,
+                Projection.Constant(1f),
+                new StubCollectionAccessProvider<float>())
+                .Build();
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalMode_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalMode<float>(
+                modeIdentifier,
+                null,
+                new StubCollectionAccessProvider<float>())
+                .Build();
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalMode_NullCollectionInfoThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalMode<float>(
+                modeIdentifier,
+                Projection.Constant(1f),
+                null)
+                .Build();
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalMode_NullBuilderDoesNotThrow()
+    {
+        var builder = CreateSut();
+        builder.WithHierarchicalMode(
+            modeIdentifier,
+            modeProjection,
+            new StubCollectionAccessProvider<int>(),
+            null)
+            .Build();
+        Assert.IsTrue(true);
+    }
+
+    [TestMethod]
     public void WithDefaultMode_UnregisteredGuidThrows()
     {
         var builder = CreateSut();

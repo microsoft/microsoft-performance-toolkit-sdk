@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 /// <summary>
 ///     Represents a column builder that has not been modified in any way.
 /// </summary>
-internal sealed class EmptyColumnBuilder
+public sealed class EmptyColumnBuilder
     : IRootColumnBuilder
 {
     private readonly IColumnVariantsProcessor processor;
@@ -55,6 +55,25 @@ internal sealed class EmptyColumnBuilder
             [
                 new ToggledColumnBuilder.AddedToggle(toggleIdentifier,
                     new DataColumn<T>(baseColumn.Configuration, projection)),
+            ],
+            baseColumn,
+            processor);
+    }
+
+    /// <inheritdoc />
+    public IToggleableColumnBuilder WithHierarchicalToggle<T>(
+        ColumnVariantIdentifier toggleIdentifier,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider)
+    {
+        Guard.NotNull(toggleIdentifier, nameof(toggleIdentifier));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(collectionProvider, nameof(collectionProvider));
+
+        return new ToggledColumnBuilder(
+            [
+                new ToggledColumnBuilder.AddedToggle(toggleIdentifier,
+                    new HierarchicalDataColumn<T>(baseColumn.Configuration, projection, collectionProvider)),
             ],
             baseColumn,
             processor);

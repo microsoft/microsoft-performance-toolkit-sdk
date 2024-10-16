@@ -71,6 +71,25 @@ internal class ToggledColumnBuilder
     }
 
     /// <inheritdoc />
+    public IToggleableColumnBuilder WithHierarchicalToggle<T>(
+        ColumnVariantIdentifier toggleIdentifier,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider)
+    {
+        Guard.NotNull(toggleIdentifier, nameof(toggleIdentifier));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(collectionProvider, nameof(collectionProvider));
+
+        return new ToggledColumnBuilder(
+            [
+                new AddedToggle(toggleIdentifier,
+                    new HierarchicalDataColumn<T>(baseColumn.Configuration, projection, collectionProvider)),
+            ],
+            baseColumn,
+            processor);
+    }
+
+    /// <inheritdoc />
     public IColumnBuilder WithToggledModes(
         string toggleText,
         Action<IModalColumnBuilder> builder)

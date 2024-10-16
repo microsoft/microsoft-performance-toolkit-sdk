@@ -104,11 +104,33 @@ internal class ModalColumnBuilder
             new DataColumn<T>(this.baseColumn.Configuration, projection),
             builder);
 
-        return new ModalColumnBuilder(
-            this.processor,
-            this.addedModes.Append(newMode).ToList(),
-            this.baseColumn,
-            this.defaultModeIndex);
+        return WithMode(newMode);
+    }
+
+    public IModalColumnBuilder WithHierarchicalMode<T>(
+        ColumnVariantIdentifier modeIdentifier,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider)
+    {
+        return WithHierarchicalMode(modeIdentifier, projection, collectionProvider, null);
+    }
+
+    public IModalColumnBuilder WithHierarchicalMode<T>(
+        ColumnVariantIdentifier modeIdentifier,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        Action<IToggleableColumnBuilder> builder)
+    {
+        Guard.NotNull(modeIdentifier, nameof(modeIdentifier));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(collectionProvider, nameof(collectionProvider));
+
+        AddedMode newMode = new(
+            modeIdentifier,
+            new HierarchicalDataColumn<T>(this.baseColumn.Configuration, projection, collectionProvider),
+            builder);
+
+        return WithMode(newMode);
     }
 
     /// <inheritdoc />
@@ -141,5 +163,14 @@ internal class ModalColumnBuilder
             this.addedModes,
             this.baseColumn,
             index);
+    }
+
+    private IModalColumnBuilder WithMode(AddedMode newMode)
+    {
+        return new ModalColumnBuilder(
+            this.processor,
+            this.addedModes.Append(newMode).ToList(),
+            this.baseColumn,
+            this.defaultModeIndex);
     }
 }

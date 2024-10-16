@@ -36,6 +36,34 @@ public interface IToggleableColumnBuilder
         IProjection<int, T> projection);
 
     /// <summary>
+    ///     Adds a new toggleable variant to the column. The added toggleable variant
+    ///     is nested at the "end" of the chain of toggleable variants already
+    ///     added via calls to this method.
+    /// </summary>
+    /// <param name="toggleIdentifier">
+    ///     The <see cref="ColumnVariantIdentifier"/> for the toggle. The
+    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of the toggled
+    ///     on variant.
+    /// </param>
+    /// <param name="projection">
+    ///     The projection that will be used to generate the column when this toggle is on.
+    /// </param>
+    /// <param name="collectionProvider">
+    ///     The collection provider for the column.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The type of data that the projection will produce.
+    /// </typeparam>
+    /// <returns>
+    ///     A new instance of <see cref="IToggleableColumnBuilder"/> that has been
+    ///     configured with the added toggle.
+    /// </returns>
+    IToggleableColumnBuilder WithHierarchicalToggle<T>(
+        ColumnVariantIdentifier toggleIdentifier,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider);
+
+    /// <summary>
     ///     Adds a set of modes to the column that are nested inside of a toggle with no
     ///     associated projection.
     /// </summary>

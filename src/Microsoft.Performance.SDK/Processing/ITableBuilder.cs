@@ -105,7 +105,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// </summary>
         int RowCount { get; }
 
-        // TODO: Update this to IDataColumn2
         /// <summary>
         ///     Gets the collection of columns that have been added to
         ///     the builder instance.
@@ -126,6 +125,21 @@ namespace Microsoft.Performance.SDK.Processing
         /// </exception>
         ITableBuilderWithRowCount AddColumn(IDataColumn column);
 
+        /// <summary>
+        ///     Adds a column that can be configured with multiple variants to this builder instance.
+        /// </summary>
+        /// <param name="column">
+        ///     The column to add.
+        /// </param>
+        /// <param name="variantsBuilder">
+        ///     The builder that can be used to add variants to the column.
+        /// </param>
+        /// <returns>
+        ///     This instance of the builder.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="column"/> is <c>null</c>.
+        /// </exception>
         ITableBuilderWithRowCount AddColumnWithVariants(
             IDataColumn column,
             Action<IRootColumnBuilder> variantsBuilder);

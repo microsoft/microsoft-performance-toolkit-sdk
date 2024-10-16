@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 /// <summary>
 ///     Represents an object that processes built column variants.
 /// </summary>
-internal interface IColumnVariantsProcessor
+public interface IColumnVariantsProcessor
 {
     /// <summary>
     ///     Processes the given column variants. This method will be called

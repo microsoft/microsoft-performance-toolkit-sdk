@@ -12,6 +12,9 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
@@ -524,6 +527,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             private readonly List<IDataColumn> columns;
             private readonly ReadOnlyCollection<IDataColumn> columnsRO;
 
+            private readonly ColumnVariantsRegistrar variantsRegistrar;
+
             private readonly Dictionary<string, TableCommandCallback> tableCommands;
             private readonly ReadOnlyDictionary<string, TableCommandCallback> tableCommandsRO;
 
@@ -537,6 +542,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 this.tableCommands = new Dictionary<string, TableCommandCallback>();
                 this.tableCommandsRO = new ReadOnlyDictionary<string, TableCommandCallback>(this.tableCommands);
+                this.variantsRegistrar = new ColumnVariantsRegistrar();
             }
 
             //
@@ -550,6 +556,12 @@ namespace Microsoft.Performance.Toolkit.Engine
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
             public Func<int, IEnumerable<TableRowDetailEntry>> TableRowDetailsGenerator { get; private set; }
+
+            /// <summary>
+            ///     Gets the <see cref="IColumnVariantsRegistrar"/> that can be used to find
+            ///     and discover registered column variants.
+            /// </summary>
+            public IColumnVariantsRegistrar ColumnVariantsRegistrar => this.variantsRegistrar;
 
             public ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback)
             {
@@ -584,11 +596,26 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return this.AddColumnWithVariants(column, null);
             }
 
+            /// <inheritdoc />
             public ITableBuilderWithRowCount AddColumnWithVariants(
                 IDataColumn column,
-                Action<IRootColumnBuilder> variantsBuilder)
+                Action<IRootColumnBuilder> options)
             {
-                throw new NotImplementedException();
+                Guard.NotNull(column, nameof(column));
+
+                this.columns.Add(column);
+
+                if (options != null)
+                {
+                    var processor = new BuiltColumnVariantsRegistrant(column, this.variantsRegistrar);
+                    var builder = new EmptyColumnBuilder(
+                        processor,
+                        column);
+
+                    options(builder);
+                }
+
+                return this;
             }
 
             public ITableBuilderWithRowCount ReplaceColumn(IDataColumn oldColumn, IDataColumn newColumn)

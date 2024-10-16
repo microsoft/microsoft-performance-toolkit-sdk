@@ -48,6 +48,37 @@ namespace Microsoft.Performance.SDK.Processing
             return self.AddColumnWithVariants(column, projection, null);
         }
 
+        /// <summary>
+        ///     Adds a new column to the builder with the given
+        ///     configuration and projection. The added column
+        ///     can be configured with multiple variants using the <see cref="IRootColumnBuilder"/> passed
+        ///     to <paramref name="variantsBuilder"/>.
+        /// </summary>
+        /// <typeparam name="T">
+        ///     The <see cref="Type"/> of data being projected.
+        /// </typeparam>
+        /// <param name="self">
+        ///     The builder instance.
+        /// </param>
+        /// <param name="column">
+        ///     The column configuration the added column is to have.
+        /// </param>
+        /// <param name="projection">
+        ///     The projection the added column is to have.
+        /// </param>
+        /// <param name="variantsBuilder">
+        ///     The builder that can be used to add variants to the column.
+        /// </param>
+        /// <returns>
+        ///     The builder instance.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="column"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="projection"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="self"/> is <c>null</c>.
+        /// </exception>
         public static ITableBuilderWithRowCount AddColumnWithVariants<T>(
             this ITableBuilderWithRowCount self,
             ColumnConfiguration column,
@@ -97,11 +128,58 @@ namespace Microsoft.Performance.SDK.Processing
             IProjection<int, T> projection,
             ICollectionInfoProvider<T> collectionProvider)
         {
+            return AddHierarchicalColumnWithVariants(self, column, projection, collectionProvider, null);
+        }
+
+        /// <summary>
+        ///     Adds a new hierarchical column to the builder with the given
+        ///     configuration, projection, and info providers. The added column
+        ///     can be configured with multiple variants using the <see cref="IRootColumnBuilder"/> passed
+        ///     to <paramref name="variantsBuilder"/>.
+        /// </summary>
+        /// <typeparam name="T">
+        ///     The <see cref="Type"/> of data being projected.
+        /// </typeparam>
+        /// <param name="self">
+        ///     The builder instance.
+        /// </param>
+        /// <param name="column">
+        ///     The column configuration the added column is to have.
+        /// </param>
+        /// <param name="projection">
+        ///     The projection the added column is to have.
+        /// </param>
+        /// <param name="collectionProvider">
+        ///     The collection provider for the column.
+        /// </param>
+        /// <param name="variantsBuilder">
+        ///     The builder that can be used to add variants to the column.
+        /// </param>
+        /// <returns>
+        ///     The builder instance.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="collectionProvider"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="column"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="projection"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="self"/> is <c>null</c>.
+        /// </exception>
+        public static ITableBuilderWithRowCount AddHierarchicalColumnWithVariants<T>(
+            this ITableBuilderWithRowCount self,
+            ColumnConfiguration column,
+            IProjection<int, T> projection,
+            ICollectionInfoProvider<T> collectionProvider,
+            Action<IRootColumnBuilder> variantsBuilder)
+        {
             Guard.NotNull(self, nameof(self));
+            Guard.NotNull(column, nameof(column));
             Guard.NotNull(projection, nameof(projection));
             Guard.NotNull(collectionProvider, nameof(collectionProvider));
 
-            return self.AddColumn(new HierarchicalDataColumn<T>(column, projection, collectionProvider));
+            return self.AddColumnWithVariants(new HierarchicalDataColumn<T>(column, projection, collectionProvider), variantsBuilder);
         }
 
         /// <summary>
