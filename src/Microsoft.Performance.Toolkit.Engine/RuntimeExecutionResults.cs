@@ -30,6 +30,8 @@ namespace Microsoft.Performance.Toolkit.Engine
     {
         private readonly ICompositeCookerRepository compositeCookerData;
 
+        private readonly ILogger logger;
+
         // The following fields aren't 'readonly' because they're set to null when disposing.
         private ICookedDataRetrieval sourceCookerData;
         private IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap;
@@ -63,6 +65,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="errors">
         ///     The collection of errors, if any, that were encountered during processing.
         /// </param>
+        /// <param name="logger">
+        ///     The logger to use for logging.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="sourceCookerData"/> is <c>null</c>.
         ///     - or -
@@ -84,7 +89,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             IDataExtensionRetrievalFactory retrievalFactory,
             IDataExtensionRepository repository,
             IDictionary<TableDescriptor, ICustomDataProcessor> tableToProcessorMap,
-            IEnumerable<ProcessingError> errors)
+            IEnumerable<ProcessingError> errors,
+            ILogger logger)
         {
             Guard.NotNull(sourceCookerData, nameof(sourceCookerData));
             Guard.NotNull(compositeCookerData, nameof(compositeCookerData));
@@ -99,6 +105,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.repository = repository;
             this.sourceCookerPaths = new HashSet<DataCookerPath>(this.repository.SourceDataCookers);
             this.tableToProcessorMap = tableToProcessorMap;
+            this.logger = logger;
 
             this.ProcessingErrors = errors.OfType<ProcessingError>().ToList().AsReadOnly();
         }
@@ -553,15 +560,13 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public TableConfiguration DefaultConfiguration { get; private set; }
 
+            public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>>
+                ColumnVariants =>
+                this.variantsRegistrar.GetAllVariants();
+
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
             public Func<int, IEnumerable<TableRowDetailEntry>> TableRowDetailsGenerator { get; private set; }
-
-            /// <summary>
-            ///     Gets the <see cref="IColumnVariantsRegistrar"/> that can be used to find
-            ///     and discover registered column variants.
-            /// </summary>
-            public IColumnVariantsRegistrar ColumnVariantsRegistrar => this.variantsRegistrar;
 
             public ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback)
             {

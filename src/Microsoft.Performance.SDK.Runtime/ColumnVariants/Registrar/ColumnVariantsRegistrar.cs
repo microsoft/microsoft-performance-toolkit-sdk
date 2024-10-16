@@ -63,4 +63,9 @@ public class ColumnVariantsRegistrar
     {
         this.columnVariants[baseColumn] = variants;
     }
+
+    public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> GetAllVariants()
+    {
+        return new Dictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>>(this.columnVariants);
+    }
 }
