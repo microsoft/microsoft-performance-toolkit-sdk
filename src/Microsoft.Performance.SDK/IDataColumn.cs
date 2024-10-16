@@ -3,7 +3,6 @@
 
 using System;
 
-// Do not update this namespace to prevent breaking changes in the SDK.
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
