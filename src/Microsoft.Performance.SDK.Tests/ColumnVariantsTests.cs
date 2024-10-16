@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Tests;
 
 [TestClass]
 [UnitTest]
-public class RootColumnBuilderTests
+public class ColumnVariantsTests
 {
     private static readonly ColumnConfiguration baseConfig = new(new ColumnMetadata(Guid.NewGuid(), "BaseColumn"));
     private static readonly IProjection<int, Timestamp> baseProj = Projection.Constant(Timestamp.Zero);
