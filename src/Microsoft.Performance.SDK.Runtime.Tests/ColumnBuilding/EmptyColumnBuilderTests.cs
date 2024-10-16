@@ -122,6 +122,4 @@ public class EmptyColumnBuilderTests
                 new ColumnConfiguration(
                     new ColumnMetadata(Guid.NewGuid(), "foo")), Projection.Constant<int, int>(1)));
     }
-
-
 }
