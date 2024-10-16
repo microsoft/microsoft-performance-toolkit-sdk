@@ -45,6 +45,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             "PLUGINS_VALIDATION_UnsupportedSdkVersion",
             "The plugin is not compatible with the current running version of the SDK.");
 
+        public static ErrorCodes PLUGINS_VALIDATION_PreviousInstallationFolderExists = new ErrorCodes(
+            60002,
+            "PLUGINS_VALIDATION_PreviousInstallationFolderExists",
+            "The plugin has already been previously installed and has not been removed.");
+
         //
         // We do duplicate checking on the numeric and string codes
         // as part of construction of this collection. If there are

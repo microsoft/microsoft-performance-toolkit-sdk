@@ -13,7 +13,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Performance.Toolkit.Engine.Tests
 {
     [TestClass]
-    public class DataSourceSetTests
+    public sealed class DataSourceSetTests
         : EngineFixture
     {
         private DataSourceSet Sut { get; set; }
@@ -165,7 +165,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void TryAddDataSourceOnly_NoCookersOrDataSourcesSupport_False()
         {
             var tempDir = this.Scratch.CreateSubdirectory(nameof(TryAddDataSourceOnly_NoCookersOrDataSourcesSupport_False));
-            
+
             CopyAssemblyContainingType(typeof(Source123DataSource), tempDir);
             using (var plugins = PluginSet.Load(tempDir.FullName))
             using (var sut = DataSourceSet.Create(plugins))

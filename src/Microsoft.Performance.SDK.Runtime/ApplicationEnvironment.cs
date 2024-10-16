@@ -2,17 +2,19 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using Microsoft.Performance.SDK.Auth;
+using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
-using Microsoft.Performance.SDK.Extensibility;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <inheritdoc cref="IApplicationEnvironment"/>
     public class ApplicationEnvironment
-        : IApplicationEnvironment
+        : IApplicationEnvironmentV2
     {
         private readonly IMessageBox messageBox;
 
@@ -46,8 +48,8 @@ namespace Microsoft.Performance.SDK.Runtime
             IMessageBox messageBox)
         {
             // application and runtime names may be null
+            // tableDataSynchronizer may be null
 
-            Guard.NotNull(tableDataSynchronizer, nameof(tableDataSynchronizer));
             Guard.NotNull(sourceDataCookerFactory, nameof(sourceDataCookerFactory));
             Guard.NotNull(sourceSessionFactory, nameof(sourceSessionFactory));
             Guard.NotNull(messageBox, nameof(messageBox));
@@ -61,7 +63,7 @@ namespace Microsoft.Performance.SDK.Runtime
             // todo:when tests are ready, consider checking that columnController is not null
 
             this.Serializer = new TableConfigurationsSerializer();
-            this.TableDataSynchronizer = tableDataSynchronizer;
+            this.TableDataSynchronizer = tableDataSynchronizer ?? new NullTableSynchronizer();
             this.SourceDataCookerFactoryRetrieval = sourceDataCookerFactory;
             this.SourceSessionFactory = sourceSessionFactory;
         }
@@ -122,6 +124,14 @@ namespace Microsoft.Performance.SDK.Runtime
                 args);
         }
 
+        /// <inheritdoc />
+        public virtual bool TryGetAuthProvider<TAuth, TResult>(out IAuthProvider<TAuth, TResult> provider)
+            where TAuth : IAuthMethod<TResult>
+        {
+            provider = null;
+            return false;
+        }
+
         private static MessageBoxIcon MapToImage(MessageType messageType)
         {
             switch (messageType)
@@ -137,6 +147,30 @@ namespace Microsoft.Performance.SDK.Runtime
 
                 default:
                     return MessageBoxIcon.Information;
+            }
+        }
+
+        private sealed class NullTableSynchronizer
+            : ITableDataSynchronization
+        {
+            public void SubmitColumnChangeRequest(
+                IEnumerable<Guid> columns,
+                Action onReadyForChange,
+                Action onChangeComplete,
+                bool requestInitialFilterReevaluation = false)
+            {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
+            }
+
+            public void SubmitColumnChangeRequest(
+                Func<IProjectionDescription, bool> predicate,
+                Action onReadyForChange,
+                Action onChangeComplete,
+                bool requestInitialFilterReevaluation = false)
+            {
+                onReadyForChange?.Invoke();
+                onChangeComplete?.Invoke();
             }
         }
     }

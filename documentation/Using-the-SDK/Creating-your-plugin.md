@@ -63,7 +63,7 @@ You should now have a solution with one project file.
 #### Picking your SDK version
 The version of the SDK you add to your project will determine which versions of SDK drivers your plugin will work with. For example, a plugin that depends on SDK version 0.109.2 will not work a version of an SDK driver that uses SDK version 1.0.0.
 
-To decide which version of the SDK to use, refer to the [known SDK driver compatibility lists](../Known-SDK-Driver-Compatibility/README.md).
+For more information, refer to [Choosing an SDK Version](./Choosing-SDK-Version.md).
 
 #### Installing WPA for Debugging
 

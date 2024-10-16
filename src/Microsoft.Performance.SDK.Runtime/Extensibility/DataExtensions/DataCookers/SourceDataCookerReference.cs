@@ -5,12 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Dependency;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers
@@ -116,7 +113,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     Tries to create an instance of <see cref="ISourceDataCookerReference"/> based on the
         ///     <paramref name="candidateType"/>.
         ///     <para/>
-        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
@@ -149,7 +146,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
         ///     Tries to create an instance of <see cref="ISourceDataCookerReference"/> based on the
         ///     <paramref name="candidateType"/>.
         ///     <para/>
-        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to
         ///     be eligible as a reference:
         ///     <list type="bullet">
         ///         <item>must be concrete.</item>
@@ -349,7 +346,6 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             base.Dispose(disposing);
         }
 
-        [Serializable]
         private sealed class CrossSourceError
             : ErrorInfo
         {
@@ -360,27 +356,9 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
                 this.ThisPath = thisPath;
             }
 
-            private CrossSourceError(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-                this.DataReferencePath = info.GetString(nameof(this.DataReferencePath));
-                this.ThisPath = info.GetString(nameof(this.ThisPath));
-            }
-
             public string DataReferencePath { get; }
 
             public string ThisPath { get; }
-
-            [SecurityPermission(
-                SecurityAction.LinkDemand,
-                Flags = SecurityPermissionFlag.SerializationFormatter)]
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                Guard.NotNull(info, nameof(info));
-
-                info.AddValue(nameof(this.DataReferencePath), this.DataReferencePath);
-                info.AddValue(nameof(this.ThisPath), this.ThisPath);
-            }
         }
     }
 }

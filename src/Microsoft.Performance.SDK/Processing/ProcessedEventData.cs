@@ -25,14 +25,6 @@ namespace Microsoft.Performance.SDK.Processing
         private List<List<T>> events;
 
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public ProcessedEventData()
-        {
-            this.CreateNewList();
-        }
-
-        /// <summary>
         /// The number of data elements added.
         /// </summary>
         public uint Count { get; private set; }
@@ -117,13 +109,13 @@ namespace Microsoft.Performance.SDK.Processing
 
         private bool ListIsFull()
         {
-            return this.currentEventsBuilderList.Count == BuilderListSize;
+            return this.currentEventsBuilderList == null || this.currentEventsBuilderList.Count == BuilderListSize;
         }
 
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
         {
-            for(uint i = 0; i < this.Count; ++i)
+            for (uint i = 0; i < this.Count; ++i)
             {
                 yield return this[i];
             }

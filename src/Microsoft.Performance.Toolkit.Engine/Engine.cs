@@ -248,7 +248,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 dataSourceSet.AddDataSource(dataSource);
 
                 var info = new EngineCreateInfo(dataSourceSet.AsReadOnly());
-                return Create(info);
+                return CreateCore(info, dataSourceSet);
             }
             catch
             {
@@ -770,15 +770,16 @@ namespace Microsoft.Performance.Toolkit.Engine
                     ? createInfo.ApplicationName
                     : string.Empty;
 
-                instance.applicationEnvironment = new ApplicationEnvironment(
+                instance.applicationEnvironment = new EngineApplicationEnvironment(
                     applicationName: applicationName,
                     runtimeName: runtimeName,
-                    new RuntimeTableSynchronizer(),
+                    null,
                     instance.Extensions,
                     instance.Factory.CreateSourceSessionFactory(),
                     createInfo.IsInteractive
                         ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
-                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger))
+                        : (IMessageBox)new NonInteractiveMessageBox(instance.logger),
+                    createInfo.AuthProviders)
                 {
                     IsInteractive = createInfo.IsInteractive,
                 };
@@ -1273,30 +1274,6 @@ namespace Microsoft.Performance.Toolkit.Engine
                 TableDescriptor descriptor)
             {
                 return null;
-            }
-        }
-
-        private sealed class RuntimeTableSynchronizer
-            : ITableDataSynchronization
-        {
-            public void SubmitColumnChangeRequest(
-                IEnumerable<Guid> columns,
-                Action onReadyForChange,
-                Action onChangeComplete,
-                bool requestInitialFilterReevaluation = false)
-            {
-                onReadyForChange?.Invoke();
-                onChangeComplete?.Invoke();
-            }
-
-            public void SubmitColumnChangeRequest(
-                Func<IProjectionDescription, bool> predicate,
-                Action onReadyForChange,
-                Action onChangeComplete,
-                bool requestInitialFilterReevaluation = false)
-            {
-                onReadyForChange?.Invoke();
-                onChangeComplete?.Invoke();
             }
         }
 
