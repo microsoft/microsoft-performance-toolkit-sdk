@@ -56,6 +56,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
                 return false;
             }
 
+            if (!pluginManifest.ProjectUrl.IsAbsoluteUri)
+            {
+                this.logger.LogError($"Manifest {manifestFilePath} is invalid: project URL {pluginManifest.ProjectUrl.OriginalString} is not an absolute URI.");
+                return false;
+            }
+
             return true;
         }
     }
