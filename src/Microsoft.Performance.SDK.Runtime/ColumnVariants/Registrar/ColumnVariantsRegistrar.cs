@@ -23,18 +23,6 @@ public class ColumnVariantsRegistrar
         return this.columnVariantsTrees.TryGetValue(baseColumn, out variantsTreeNodes);
     }
 
-    /// <inheritdoc/>
-    public bool TryGetVariant(IDataColumn baseColumn, ColumnVariantIdentifier variantIdentifier, out IDataColumn foundVariant)
-    {
-        if (this.columnVariants.TryGetValue(baseColumn, out var foundVariants))
-        {
-            return foundVariants.TryGetValue(variantIdentifier, out foundVariant);
-        }
-
-        foundVariant = default;
-        return false;
-    }
-
     /// <summary>
     ///     Sets the root of the variants tree for the given column, overwriting any existing value.
     /// </summary>

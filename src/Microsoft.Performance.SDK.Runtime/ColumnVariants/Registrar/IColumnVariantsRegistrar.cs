@@ -30,24 +30,4 @@ public interface IColumnVariantsRegistrar
     bool TryGetVariantsTreeRoot(
         IDataColumn baseColumn,
         out IColumnVariantsTreeNode variantsTreeNodes);
-
-    /// <summary>
-    ///     Attempts to get the variant of the given column with the given identifier, if one exists.
-    /// </summary>
-    /// <param name="baseColumn">
-    ///     The column for which to get the variant.
-    /// </param>
-    /// <param name="variantIdentifier">
-    ///     The identifier of the variant to get.
-    /// </param>
-    /// <param name="foundVariant">
-    ///     The variant of the given column with the given identifier, if found.
-    /// </param>
-    /// <returns>
-    ///     <c>true</c> if the variant was found; <c>false</c> otherwise.
-    /// </returns>
-    bool TryGetVariant(
-        IDataColumn baseColumn,
-        ColumnVariantIdentifier variantIdentifier,
-        out IDataColumn foundVariant);
 }
