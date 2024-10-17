@@ -10,6 +10,9 @@ major components to be aware of when using the `Engine`:
 2. The [`DataSourceSet`](#DataSourceSet)
 3. The [`Engine`](#Engine) itself
 
+Before starting, make sure to include the `Microsoft.Performance.Toolkit.Engine`
+library to use the engine.
+
 ## Plugin Set
 
 The `PluginSet` is a collection of all of your plugins and extensions that can
@@ -65,7 +68,7 @@ to be used many times, then use the `DataSourceSet.Create(PluginSet, bool)`
 overload. By default, the `DataSourceSet` will take ownership of the `PluginSet`
 so you *MUST* use the overload if you do not want this to occur.
 
-NOTE: at this time, reusing the `PluginSet` is not fully implemented, and so
+> ⚠️ NOTE: at this time, reusing the `PluginSet` is not fully implemented, and so
 `Create(PluginSet, false)` will throw a `NotSupportedException`. The ability
 to pass `false` will be added in a future update.
 
@@ -106,7 +109,7 @@ Once you are ready, call process and then examine the results.
 using (var plugins = PluginSet.Load())
 using (var dataSources = DataSourceSet.Create(plugins))
 {
-    dataSources.Add(new FileDataSource("myfile.txt");
+    dataSources.Add(new FileDataSource("myfile.txt"));
 
     var createInfo = new EngineCreateInfo(dataSources.AsReadOnly());
     using (var engine = Engine.Create(createInfo))
@@ -117,6 +120,8 @@ using (var dataSources = DataSourceSet.Create(plugins))
     }
 }
 ````
+
+> ⚠️ NOTE: [Composite cookers](../Glossary.md#compositedatacooker) are processed lazily. The above code will not cause any code inside of an enabled composite cooker to execute. To execute/debug composite cookers, you must also have code that queries for the specific cooker, such as building a table that uses the cooker or manually calling `results.GetCookedData(CompositeCookerPath)` after processing.
 
 # Reusing the DataSourceSet - Coming Soon
 
