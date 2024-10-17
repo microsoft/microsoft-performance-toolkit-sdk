@@ -274,6 +274,48 @@ public class ColumnVariantsTests
     }
 
     [TestMethod]
+    public void TogglesWithSameGuid_ThrowsInvalidOperationException()
+    {
+        var tableBuilder = new TableBuilder();
+        tableBuilder.SetRowCount(1);
+
+        Assert.ThrowsException<InvalidOperationException>(() =>
+        {
+            tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
+            {
+                builder
+                    .WithToggle(projectAsDateTime, utcProj)
+                    .WithToggle(projectAsDateTime, localProj)
+                    .Build();
+            });
+        });
+    }
+
+    [TestMethod]
+    public void ToggleAndModeWithSameGuid_ThrowsInvalidOperationException()
+    {
+        var tableBuilder = new TableBuilder();
+        tableBuilder.SetRowCount(1);
+
+        Assert.ThrowsException<InvalidOperationException>(() =>
+        {
+            tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
+            {
+                builder
+                    .WithToggle(projectAsDateTime, utcProj)
+                    .WithToggle(showBool, boolProj)
+                    .WithToggledModes("foo", modeBuilder =>
+                    {
+                        modeBuilder
+                            .WithMode(projectAsDateTime, localProj)
+                            .Build();
+                    })
+                    .Build();
+            });
+        });
+    }
+
+    [TestMethod]
     public void AddColumnWithVariants_NullColumnThrows()
     {
         var tableBuilder = new TableBuilder().SetRowCount(1);
