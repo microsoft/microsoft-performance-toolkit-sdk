@@ -57,7 +57,7 @@ internal class ModalColumnBuilder
     }
 
     /// <inheritdoc />
-    public void Build()
+    public void Commit()
     {
         if (this.addedModes.Count == 0)
         {

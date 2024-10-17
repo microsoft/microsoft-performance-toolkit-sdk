@@ -48,7 +48,7 @@ public class ColumnVariantsTests
                     modeBuilder =>
                     {
                         modeBuilder.WithMode(local, localProj)
-                            .Build(); // calling build here should have no effect
+                            .Commit(); // calling commit here should have no effect
                     });
                 // Intentionally not calling Build on this builder
             });
@@ -75,12 +75,12 @@ public class ColumnVariantsTests
                         modeBuilder
                             .WithMode(utc, utcProj)
                             .WithMode(showFloat, floatProj)
-                            .Build();
+                            .Commit();
                     })
-                    .Build();
+                    .Commit();
 
                 // This should override the previous build to only expose the single toggle
-                builderWithOneToggle.Build();
+                builderWithOneToggle.Commit();
             });
 
         var expected = Toggle(projectAsDateTime);
@@ -97,7 +97,7 @@ public class ColumnVariantsTests
             {
                 builder
                     .WithToggle(projectAsDateTime, utcProj)
-                    .Build();
+                    .Commit();
             });
 
         var expected = Toggle(projectAsDateTime);
@@ -115,7 +115,7 @@ public class ColumnVariantsTests
                 builder
                     .WithToggle(projectAsDateTime, utcProj)
                     .WithToggle(utc, utcProj)
-                    .Build();
+                    .Commit();
             });
 
         var expected = Toggle(
@@ -137,7 +137,7 @@ public class ColumnVariantsTests
                 builder
                     .WithModes(utc.Name)
                     .WithMode(local, localProj)
-                    .Build();
+                    .Commit();
             });
 
         var expected = Modes(
@@ -160,7 +160,7 @@ public class ColumnVariantsTests
                     .WithModes(utc.Name)
                     .WithMode(local, localProj)
                     .WithDefaultMode(local.Guid)
-                    .Build();
+                    .Commit();
             });
 
         var expected = Modes(
@@ -187,10 +187,10 @@ public class ColumnVariantsTests
                             modeBuilder
                                 .WithToggle(showFloat, floatProj)
                                 .WithToggle(showBool, boolProj)
-                                .Build();
+                                .Commit();
                         })
                     .WithMode(local, localProj)
-                    .Build();
+                    .Commit();
             });
 
         var expected = Modes(
@@ -218,9 +218,9 @@ public class ColumnVariantsTests
                     {
                         modeBuilder
                             .WithMode(local, localProj)
-                            .Build();
+                            .Commit();
                     })
-                    .Build();
+                    .Commit();
             });
 
         var expected =
@@ -252,11 +252,11 @@ public class ColumnVariantsTests
                                     nestedModes
                                         .WithMode(showFloat, floatProj)
                                         .WithMode(showBool, boolProj)
-                                        .Build();
+                                        .Commit();
                                 })
-                            .Build();
+                            .Commit();
                     })
-                    .Build();
+                    .Commit();
             });
 
         var expected = Modes(
@@ -286,7 +286,7 @@ public class ColumnVariantsTests
                 builder
                     .WithToggle(projectAsDateTime, utcProj)
                     .WithToggle(projectAsDateTime, localProj)
-                    .Build();
+                    .Commit();
             });
         });
     }
@@ -308,9 +308,9 @@ public class ColumnVariantsTests
                     {
                         modeBuilder
                             .WithMode(projectAsDateTime, localProj)
-                            .Build();
+                            .Commit();
                     })
-                    .Build();
+                    .Commit();
             });
         });
     }

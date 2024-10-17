@@ -29,7 +29,7 @@ public class ModalColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithMode(null, Projection.Constant(1f)).Build();
+            builder.WithMode(null, Projection.Constant(1f)).Commit();
         });
     }
 
@@ -40,7 +40,7 @@ public class ModalColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithMode<int>(modeIdentifier, null).Build();
+            builder.WithMode<int>(modeIdentifier, null).Commit();
         });
     }
 
@@ -48,7 +48,7 @@ public class ModalColumnBuilderTests
     public void WithMode_NullBuilderDoesNotThrow()
     {
         var builder = CreateSut();
-        builder.WithMode(modeIdentifier, modeProjection, null).Build();
+        builder.WithMode(modeIdentifier, modeProjection, null).Commit();
         Assert.IsTrue(true);
     }
 
@@ -63,7 +63,7 @@ public class ModalColumnBuilderTests
                 null,
                 Projection.Constant(1f),
                 new StubCollectionAccessProvider<float>())
-                .Build();
+                .Commit();
         });
     }
 
@@ -78,7 +78,7 @@ public class ModalColumnBuilderTests
                 modeIdentifier,
                 null,
                 new StubCollectionAccessProvider<float>())
-                .Build();
+                .Commit();
         });
     }
 
@@ -93,7 +93,7 @@ public class ModalColumnBuilderTests
                 modeIdentifier,
                 Projection.Constant(1f),
                 null)
-                .Build();
+                .Commit();
         });
     }
 
@@ -106,7 +106,7 @@ public class ModalColumnBuilderTests
             modeProjection,
             new StubCollectionAccessProvider<int>(),
             null)
-            .Build();
+            .Commit();
         Assert.IsTrue(true);
     }
 
@@ -117,7 +117,7 @@ public class ModalColumnBuilderTests
 
         Assert.ThrowsException<ArgumentException>(() =>
         {
-            builder.WithDefaultMode(Guid.NewGuid()).Build();
+            builder.WithDefaultMode(Guid.NewGuid()).Commit();
         });
     }
 

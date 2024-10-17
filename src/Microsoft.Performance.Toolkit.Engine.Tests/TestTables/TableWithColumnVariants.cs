@@ -36,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
                 {
                     builder
                         .WithToggle(VariantIdentifier, VariantProjection)
-                        .Build();
+                        .Commit();
                 })
                 .AddColumn(ColumnTwo, Projection.Constant(2));
         }

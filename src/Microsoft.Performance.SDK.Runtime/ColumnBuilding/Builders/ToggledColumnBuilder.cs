@@ -49,7 +49,7 @@ internal class ToggledColumnBuilder
     }
 
     /// <inheritdoc />
-    public void Build()
+    public void Commit()
     {
         this.processor.ProcessColumnVariants(BuildVariant());
     }

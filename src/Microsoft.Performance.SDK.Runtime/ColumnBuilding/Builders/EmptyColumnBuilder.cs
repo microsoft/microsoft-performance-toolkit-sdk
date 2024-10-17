@@ -38,7 +38,7 @@ public sealed class EmptyColumnBuilder
     }
 
     /// <inheritdoc />
-    public void Build()
+    public void Commit()
     {
         processor.ProcessColumnVariants(NullColumnVariantsTreeNode.Instance);
     }

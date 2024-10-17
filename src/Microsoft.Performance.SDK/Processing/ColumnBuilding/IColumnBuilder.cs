@@ -12,12 +12,11 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 public interface IColumnBuilder
 {
     /// <summary>
-    ///     Builds the column. Note that this method MUST be called to have
-    ///     any effect on the column being built. Calling this method multiple
-    ///     times will result in only the final call having any effect.
+    ///     Commits this builder's configuration to the column being built. Note that this method MUST be called to have
+    ///     any effect on the column being built. Calling this method multiple times will override previous calls.
     /// </summary>
     /// <exception cref="InvalidOperationException">
     ///     Thrown if multiple column variants are registered were registered the same GUID.
     /// </exception>
-    void Build();
+    void Commit();
 }

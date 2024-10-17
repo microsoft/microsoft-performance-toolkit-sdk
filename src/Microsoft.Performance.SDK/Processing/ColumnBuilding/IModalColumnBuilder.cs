@@ -144,7 +144,7 @@ public interface IModalColumnBuilder
     ///     added as an available mode.
     /// </exception>
     /// <remarks>
-    ///     If this method is not called prior to <see cref="IColumnBuilder.Build"/>,
+    ///     If this method is not called prior to <see cref="IColumnBuilder.Commit"/>,
     ///     the first mode added will be the default mode.
     /// </remarks>
     IColumnBuilder WithDefaultMode(Guid modeIdentifierGuid);
