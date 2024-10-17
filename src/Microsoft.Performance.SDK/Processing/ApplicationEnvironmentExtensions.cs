@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Performance.SDK.Auth;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -142,6 +143,41 @@ namespace Microsoft.Performance.SDK.Processing
             params object[] args)
         {
             self.DisplayMessage(MessageType.Error, formatProvider, format, args);
+        }
+
+        /// <summary>
+        ///     Attempts to get an <see cref="IAuthProvider{TAuth, TResult}"/> that can provide authentication
+        ///     for <see cref="IAuthMethod{TResult}"/> of type <typeparamref name="TAuth"/>.
+        /// </summary>
+        /// <param name="self">
+        ///     The <see cref="IApplicationEnvironment"/> instance.
+        /// </param>
+        /// <param name="provider">
+        ///     The found provider, or <c>null</c> if no registered provider can provide authentication for
+        ///     <typeparamref name="TAuth"/>.
+        /// </param>
+        /// <typeparam name="TAuth">
+        ///     The type of the <see cref="IAuthMethod{TResult}"/> for which to attempt to get a provider.
+        /// </typeparam>
+        /// <typeparam name="TResult">
+        ///     The type of the result of a successful authentication for <typeparamref name="TAuth"/>.
+        /// </typeparam>
+        /// <returns>
+        ///     <c>true</c> if a provider was found; <c>false</c> otherwise. If <c>false</c> is returned,
+        ///     <paramref name="provider"/> will be <c>null</c>.
+        /// </returns>
+        public static bool TryGetAuthProvider<TAuth, TResult>(
+            this IApplicationEnvironment self,
+            out IAuthProvider<TAuth, TResult> provider)
+            where TAuth : IAuthMethod<TResult>
+        {
+            if (self is IApplicationEnvironmentV2 v2)
+            {
+                return v2.TryGetAuthProvider(out provider);
+            }
+
+            provider = null;
+            return false;
         }
     }
 }
