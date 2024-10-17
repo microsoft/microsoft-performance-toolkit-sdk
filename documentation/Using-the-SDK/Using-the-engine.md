@@ -68,7 +68,7 @@ to be used many times, then use the `DataSourceSet.Create(PluginSet, bool)`
 overload. By default, the `DataSourceSet` will take ownership of the `PluginSet`
 so you *MUST* use the overload if you do not want this to occur.
 
-NOTE: at this time, reusing the `PluginSet` is not fully implemented, and so
+> ⚠️ NOTE: at this time, reusing the `PluginSet` is not fully implemented, and so
 `Create(PluginSet, false)` will throw a `NotSupportedException`. The ability
 to pass `false` will be added in a future update.
 
@@ -121,25 +121,7 @@ using (var dataSources = DataSourceSet.Create(plugins))
 }
 ````
 
-If you would like to enable a composite cooker, call the `GetCookedData(DataCookerPath)`
-method after process is called so that the results are obtained properly.
-
-````cs
-using (var plugins = PluginSet.Load())
-using (var dataSources = DataSourceSet.Create(plugins))
-{
-    dataSources.Add(new FileDataSource("myfile.txt"));
-
-    var createInfo = new EngineCreateInfo(dataSources.AsReadOnly());
-    using (var engine = Engine.Create(createInfo))
-    {
-        engine.EnableCooker(CompCookerPath);
-
-        var results = engine.Process();
-        results.GetCookedData(CompCookerPath);
-    }
-}
-````
+> ⚠️ NOTE: [Composite cookers](../Glossary.md#compositedatacooker) are processed lazily. The above code will not cause any code inside of an enabled composite cooker to execute. To execute/debug composite cookers, you must also have code that queries for the specific cooker, such as building a table that uses the cooker or manually calling `results.GetCookedData(CompositeCookerPath)` after processing.
 
 # Reusing the DataSourceSet - Coming Soon
 
