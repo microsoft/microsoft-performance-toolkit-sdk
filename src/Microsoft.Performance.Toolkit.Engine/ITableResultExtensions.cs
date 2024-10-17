@@ -38,7 +38,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
-        ///     Attempts to get the column variant for the given column and identifier.
+        ///     Attempts to get the column variant for the given column and variant identifier.
         /// </summary>
         /// <param name="self">
         ///     The <see cref="ITableResult"/> to search.
@@ -74,9 +74,17 @@ namespace Microsoft.Performance.Toolkit.Engine
                 return false;
             }
 
-            return variants
-                .ToDictionary(kvp => kvp.Key.Guid, kvp => kvp.Value)
-                .TryGetValue(variantGuid, out columnVariant);
+            foreach (var kvp in variants)
+            {
+                if (kvp.Key.Guid == variantGuid)
+                {
+                    columnVariant = kvp.Value;
+                    return true;
+                }
+            }
+
+            columnVariant = null;
+            return false;
         }
     }
 }
