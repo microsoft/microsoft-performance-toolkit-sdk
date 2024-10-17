@@ -22,7 +22,7 @@ jobs:
     - name: Setup NBGV
       uses: dotnet/nbgv@v0.4
       with:
-        toolVersion: 3.5.119
+        toolVersion: 3.6.143
     - name: Restore dependencies
       run: dotnet restore "${{ github.workspace }}/src/SDK.sln"
     - name: Build solution
