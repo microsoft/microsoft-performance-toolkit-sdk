@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
@@ -41,8 +42,8 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             {
                 this.InitializeDescriptorData(instance);
             }
-        }       
-        
+        }
+
         /// <summary>
         ///     Tries to create an instance of <see cref="ICompositeDataCookerReference"/> based on the
         ///     <paramref name="candidateType"/>.
@@ -69,10 +70,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
-            return TryCreateReference(
-                candidateType,
-                Runtime.Logger.Create<CompositeDataCookerReference>(),
-                out reference);
+            return TryCreateReference(candidateType, null, out reference);
         }
 
         /// <summary>
@@ -105,10 +103,14 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCoo
             ILogger logger,
             out ICompositeDataCookerReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
-            Guard.NotNull(logger, nameof(logger));
+            Debug.Assert(candidateType != null, $"{nameof(candidateType)} cannot be null.");
 
             reference = null;
+
+            if (logger == null)
+            {
+                logger = Runtime.Logger.Create<CompositeDataCookerReference>();
+            }
 
             if (candidateType.IsInstantiatableOfType(typeof(ICompositeDataCookerDescriptor)))
             {
