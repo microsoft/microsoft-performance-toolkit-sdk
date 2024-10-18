@@ -77,7 +77,7 @@ public abstract class ModalColumnBuilder
     ///     The projection that will be used to generate the column for this mode.
     /// </param>
     /// <param name="builder">
-    ///     A callback that builds sub-variants of the added mode and returns its final column configuration..
+    ///     A callback that builds sub-variants of the added mode and returns its final column configuration.
     /// </param>
     /// <typeparam name="T">
     ///     The type of data that the projection will produce.
@@ -142,8 +142,7 @@ public abstract class ModalColumnBuilder
     ///     added as an available mode.
     /// </exception>
     /// <remarks>
-    ///     If this method is not called prior to <see cref="ColumnBuilder.Commit"/>,
-    ///     the first mode added will be the default mode.
+    ///     If this method is not called, the first mode added will be the default mode.
     /// </remarks>
     public abstract ColumnBuilder WithDefaultMode(Guid modeIdentifierGuid);
 }

@@ -37,7 +37,7 @@ internal sealed class ModeBuilderCallbackInvoker
 
     public bool TryGet(out IColumnVariantsTreeNode builtVariantsTreeNode)
     {
-        if (callback == null)
+        if (this.callback == null)
         {
             builtVariantsTreeNode = NullColumnVariantsTreeNode.Instance;
             return false;
@@ -46,7 +46,7 @@ internal sealed class ModeBuilderCallbackInvoker
         var processor = new BuiltColumnVariantReflector();
         var builder = new EmptyColumnBuilder(processor, baseColumn);
 
-        callback(builder).Commit();
+        this.callback(builder).Commit();
         builtVariantsTreeNode = processor.Output;
         return true;
     }
