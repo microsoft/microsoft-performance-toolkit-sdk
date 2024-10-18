@@ -17,8 +17,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
             "Used by the Engine Tests to test table with columns that contain variants.",
             "Engine");
 
-        public static readonly ColumnVariantIdentifier VariantIdentifier =
-            new ColumnVariantIdentifier(Guid.NewGuid(), "Toggled Variant");
+        public static readonly ColumnVariantDescriptor VariantDescriptor =
+            new ColumnVariantDescriptor(Guid.NewGuid(), "Toggled Variant");
 
         public static readonly IProjection<int, bool> VariantProjection =
             Projection.Constant<int, bool>(true);
@@ -35,7 +35,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
                 .AddColumnWithVariants(ColumnOne, Projection.Constant(1), builder =>
                 {
                     builder
-                        .WithToggle(VariantIdentifier, VariantProjection)
+                        .WithToggle(VariantDescriptor, VariantProjection)
                         .Commit();
                 })
                 .AddColumn(ColumnTwo, Projection.Constant(2));

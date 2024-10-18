@@ -15,7 +15,7 @@ public class ColumnVariantsRegistrar
     : IColumnVariantsRegistrar
 {
     private readonly Dictionary<IDataColumn, IColumnVariantsTreeNode> columnVariantsTrees = new();
-    private readonly Dictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> columnVariants = new();
+    private readonly Dictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>> columnVariants = new();
 
     /// <inheritdoc/>
     public bool TryGetVariantsTreeRoot(IDataColumn baseColumn, out IColumnVariantsTreeNode variantsTreeNodes)
@@ -47,13 +47,13 @@ public class ColumnVariantsRegistrar
     ///     The variants for the base column.
     /// </param>
     internal void SetVariants(IDataColumn baseColumn,
-        IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn> variants)
+        IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn> variants)
     {
         this.columnVariants[baseColumn] = variants;
     }
 
-    public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> GetAllVariants()
+    public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>> GetAllVariants()
     {
-        return new Dictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>>(this.columnVariants);
+        return new Dictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>>(this.columnVariants);
     }
 }

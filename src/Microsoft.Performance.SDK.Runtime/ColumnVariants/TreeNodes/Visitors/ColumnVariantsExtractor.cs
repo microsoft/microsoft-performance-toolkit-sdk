@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes.Visitors;
 
 internal sealed class ColumnVariantsExtractor
 {
-    internal IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn> ExtractVariants(
+    internal IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn> ExtractVariants(
         IColumnVariantsTreeNode root)
     {
         var visitor = new Visitor();
@@ -20,7 +20,7 @@ internal sealed class ColumnVariantsExtractor
     private class Visitor
         : IColumnVariantsTreeNodesVisitor
     {
-        public Dictionary<ColumnVariantIdentifier, IDataColumn> foundVariants = new();
+        public Dictionary<ColumnVariantDescriptor, IDataColumn> foundVariants = new();
 
         public void Visit(NullColumnVariantsTreeNode nullColumnVariantsTreeNode)
         {
@@ -29,7 +29,7 @@ internal sealed class ColumnVariantsExtractor
 
         public void Visit(ToggleableColumnVariantsTreeNode toggleableColumnVariantsTreeNode)
         {
-            foundVariants.Add(toggleableColumnVariantsTreeNode.Identifier, toggleableColumnVariantsTreeNode.ToggledColumn);
+            foundVariants.Add(toggleableColumnVariantsTreeNode.Descriptor, toggleableColumnVariantsTreeNode.ToggledColumn);
             toggleableColumnVariantsTreeNode.SubVariantsTreeNode.Accept(this);
         }
 
@@ -48,7 +48,7 @@ internal sealed class ColumnVariantsExtractor
 
         public void Visit(ModeColumnVariantsTreeNode modeColumnVariantsTreeNode)
         {
-            foundVariants.Add(modeColumnVariantsTreeNode.ModeIdentifier, modeColumnVariantsTreeNode.ModeColumn);
+            foundVariants.Add(modeColumnVariantsTreeNode.ModeDescriptor, modeColumnVariantsTreeNode.ModeColumn);
             modeColumnVariantsTreeNode.SubVariantsTreeNode.Accept(this);
         }
     }

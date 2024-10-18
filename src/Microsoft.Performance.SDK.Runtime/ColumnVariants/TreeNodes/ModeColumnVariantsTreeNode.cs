@@ -14,11 +14,11 @@ public sealed class ModeColumnVariantsTreeNode
     : IColumnVariantsTreeNode
 {
     public ModeColumnVariantsTreeNode(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IDataColumn modeColumn,
         IColumnVariantsTreeNode subVariantsTreeNode)
     {
-        ModeIdentifier = modeIdentifier;
+        ModeDescriptor = modeDescriptor;
         ModeColumn = modeColumn;
         SubVariantsTreeNode = subVariantsTreeNode;
     }
@@ -26,7 +26,7 @@ public sealed class ModeColumnVariantsTreeNode
     /// <summary>
     ///     Gets the identifier for the mode.
     /// </summary>
-    public ColumnVariantIdentifier ModeIdentifier { get; }
+    public ColumnVariantDescriptor ModeDescriptor { get; }
 
     /// <summary>
     ///     Gets the column that this mode represents.
@@ -52,7 +52,7 @@ public sealed class ModeColumnVariantsTreeNode
 
     private bool IsEquivalentTree(ModeColumnVariantsTreeNode other)
     {
-        return ModeIdentifier.Equals(other.ModeIdentifier)
+        return ModeDescriptor.Equals(other.ModeDescriptor)
                && this.SubVariantsTreeNode.IsEquivalentTree(other.SubVariantsTreeNode);
     }
 }

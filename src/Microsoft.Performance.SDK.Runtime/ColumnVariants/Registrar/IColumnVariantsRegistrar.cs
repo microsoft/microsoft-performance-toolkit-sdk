@@ -22,7 +22,7 @@ public interface IColumnVariantsRegistrar
     /// <param name="variantsTreeNodes">
     ///     The root of the variants tree for the given column, if one exists. If found, this root can be
     ///     used with an <see cref="IColumnVariantsTreeNodesVisitor"/> to find every concrete
-    ///     <see cref="ColumnVariantIdentifier"/> of the given column.
+    ///     <see cref="ColumnVariantDescriptor"/> of the given column.
     /// </param>
     /// <returns>
     ///     <c>true</c> if the variants tree root was found; <c>false</c> otherwise.

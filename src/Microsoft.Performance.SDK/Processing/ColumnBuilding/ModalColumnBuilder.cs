@@ -19,9 +19,9 @@ public abstract class ModalColumnBuilder
     /// <summary>
     ///     Adds a mode to the column.
     /// </summary>
-    /// <param name="modeIdentifier">
-    ///     The <see cref="ColumnVariantIdentifier"/> for the mode. The
-    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of
+    /// <param name="modeDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode. The
+    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of
     ///     this mode.
     /// </param>
     /// <param name="projection">
@@ -35,18 +35,18 @@ public abstract class ModalColumnBuilder
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="modeIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
+    ///     <paramref name="modeDescriptor"/> or <paramref name="projection"/> is <c>null</c>.
     /// </exception>
     public abstract ModalColumnBuilder WithMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection);
 
     /// <summary>
     ///     Adds a hierarchical mode to the column.
     /// </summary>
-    /// <param name="modeIdentifier">
-    ///     The <see cref="ColumnVariantIdentifier"/> for the mode. The
-    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of
+    /// <param name="modeDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode. The
+    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of
     ///     this mode.
     /// </param>
     /// <param name="projection">
@@ -63,19 +63,19 @@ public abstract class ModalColumnBuilder
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="modeIdentifier"/>, <paramref name="projection"/>, or
+    ///     <paramref name="modeDescriptor"/>, <paramref name="projection"/>, or
     ///     <paramref name="collectionProvider"/> is <c>null</c>.
     /// </exception>
     public abstract ModalColumnBuilder WithHierarchicalMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider);
 
     /// <summary>
     ///     Adds a mode to the column.
     /// </summary>
-    /// <param name="modeIdentifier">
-    ///     The <see cref="ColumnVariantIdentifier"/> for the mode.
+    /// <param name="modeDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode.
     /// </param>
     /// <param name="projection">
     ///     The projection that will be used to generate the column for this mode.
@@ -91,19 +91,19 @@ public abstract class ModalColumnBuilder
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="modeIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
+    ///     <paramref name="modeDescriptor"/> or <paramref name="projection"/> is <c>null</c>.
     /// </exception>
     public abstract ModalColumnBuilder WithMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         Action<ToggleableColumnBuilder> builder);
 
     /// <summary>
     ///     Adds a hierarchical mode to the column.
     /// </summary>
-    /// <param name="modeIdentifier">
-    ///     The <see cref="ColumnVariantIdentifier"/> for the mode. The
-    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of
+    /// <param name="modeDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode. The
+    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of
     ///     this mode.
     /// </param>
     /// <param name="projection">
@@ -123,11 +123,11 @@ public abstract class ModalColumnBuilder
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="modeIdentifier"/>, <paramref name="projection"/>,
+    ///     <paramref name="modeDescriptor"/>, <paramref name="projection"/>,
     ///     or <paramref name="collectionProvider"/> is <c>null</c>.
     /// </exception>
     public abstract ModalColumnBuilder WithHierarchicalMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
         Action<ToggleableColumnBuilder> builder);
@@ -136,7 +136,7 @@ public abstract class ModalColumnBuilder
     ///     Sets the default mode for the column.
     /// </summary>
     /// <param name="modeIdentifierGuid">
-    ///     The <see cref="Guid"/> of the <see cref="ColumnVariantIdentifier"/> that
+    ///     The <see cref="Guid"/> of the <see cref="ColumnVariantDescriptor"/> that
     ///     identifies the mode to set as the default.
     /// </param>
     /// <returns>

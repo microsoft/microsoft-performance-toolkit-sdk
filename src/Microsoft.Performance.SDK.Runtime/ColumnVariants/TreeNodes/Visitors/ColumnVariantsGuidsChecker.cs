@@ -28,7 +28,7 @@ internal sealed class ColumnVariantsGuidsChecker
 
         public void Visit(ToggleableColumnVariantsTreeNode toggleableColumnVariantsTreeNode)
         {
-            Process(toggleableColumnVariantsTreeNode.Identifier.Guid);
+            Process(toggleableColumnVariantsTreeNode.Descriptor.Guid);
             toggleableColumnVariantsTreeNode.SubVariantsTreeNode.Accept(this);
         }
 
@@ -47,7 +47,7 @@ internal sealed class ColumnVariantsGuidsChecker
 
         public void Visit(ModeColumnVariantsTreeNode modeColumnVariantsTreeNode)
         {
-            Process(modeColumnVariantsTreeNode.ModeIdentifier.Guid);
+            Process(modeColumnVariantsTreeNode.ModeDescriptor.Guid);
             modeColumnVariantsTreeNode.SubVariantsTreeNode.Accept(this);
         }
 

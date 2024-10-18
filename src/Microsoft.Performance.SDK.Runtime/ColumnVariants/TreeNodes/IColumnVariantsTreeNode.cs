@@ -26,7 +26,7 @@ public interface IColumnVariantsTreeNode
     /// <summary>
     ///     Determines if the given tree rooted at <paramref name="other"/> is equivalent to this one.
     ///     Trees are equivalent if they have the same structure and expose equivalent column variants,
-    ///     where exposed variants are considered equal if their <see cref="ColumnVariantIdentifier"/>s
+    ///     where exposed variants are considered equal if their <see cref="ColumnVariantDescriptor"/>s
     ///     are equal. The concrete projections/data columns are not compared.
     /// </summary>
     /// <param name="other">

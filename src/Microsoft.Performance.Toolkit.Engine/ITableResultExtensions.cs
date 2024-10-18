@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         public static bool TryGetColumnVariants(
             this ITableResult self,
             IDataColumn baseColumn,
-            out IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn> foundColumns)
+            out IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn> foundColumns)
         {
             return self.ColumnVariants.TryGetValue(baseColumn, out foundColumns);
         }

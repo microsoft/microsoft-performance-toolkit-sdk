@@ -44,10 +44,10 @@ public class ColumnVariantsTests
 
         var success = builtTable.TryGetColumnVariant(
             TableWithColumnVariants.ColumnOne.Metadata.Guid,
-            TableWithColumnVariants.VariantIdentifier.Guid,
+            TableWithColumnVariants.VariantDescriptor.Guid,
             out var variant);
 
-        Assert.IsTrue(success, $"Failed to get variant {TableWithColumnVariants.VariantIdentifier.Guid} for column {TableWithColumnVariants.ColumnOne.Metadata.Guid}");
+        Assert.IsTrue(success, $"Failed to get variant {TableWithColumnVariants.VariantDescriptor.Guid} for column {TableWithColumnVariants.ColumnOne.Metadata.Guid}");
         Assert.IsTrue(((IDataColumn<bool>)variant).ProjectTyped(0));
     }
 }

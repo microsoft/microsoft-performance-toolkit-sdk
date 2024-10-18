@@ -19,18 +19,18 @@ public class ColumnVariantsTests
     private static readonly ColumnConfiguration baseConfig = new(new ColumnMetadata(Guid.NewGuid(), "BaseColumn"));
     private static readonly IProjection<int, Timestamp> baseProj = Projection.Constant(Timestamp.Zero);
 
-    private static readonly ColumnVariantIdentifier projectAsDateTime = new(Guid.NewGuid(), "Project as DateTime");
+    private static readonly ColumnVariantDescriptor projectAsDateTime = new(Guid.NewGuid(), "Project as DateTime");
 
-    private static readonly ColumnVariantIdentifier utc = new(baseConfig.Metadata.Guid, "UTC");
+    private static readonly ColumnVariantDescriptor utc = new(baseConfig.Metadata.Guid, "UTC");
     private static readonly IProjection<int, DateTime> utcProj = Projection.Constant(DateTime.UtcNow);
 
-    private static readonly ColumnVariantIdentifier local = new(Guid.NewGuid(), "Local");
+    private static readonly ColumnVariantDescriptor local = new(Guid.NewGuid(), "Local");
     private static readonly IProjection<int, DateTime> localProj = Projection.Constant(DateTime.UtcNow.AddHours(2));
 
-    private static readonly ColumnVariantIdentifier showFloat = new(Guid.NewGuid(), "Float");
+    private static readonly ColumnVariantDescriptor showFloat = new(Guid.NewGuid(), "Float");
     private static readonly IProjection<int, float> floatProj = Projection.Constant(1f);
 
-    private static readonly ColumnVariantIdentifier showBool = new(Guid.NewGuid(), "Bool");
+    private static readonly ColumnVariantDescriptor showBool = new(Guid.NewGuid(), "Bool");
     private static readonly IProjection<int, bool> boolProj = Projection.Constant(true);
 
     [TestMethod]
@@ -347,9 +347,9 @@ public class ColumnVariantsTests
         return new ModesColumnVariantsTreeNode(modes, defaultIndex);
     }
 
-    private ModeColumnVariantsTreeNode Mode(ColumnVariantIdentifier identifier, IColumnVariantsTreeNode subVariantsTreeNode = null)
+    private ModeColumnVariantsTreeNode Mode(ColumnVariantDescriptor descriptor, IColumnVariantsTreeNode subVariantsTreeNode = null)
     {
-        return new ModeColumnVariantsTreeNode(identifier, null, subVariantsTreeNode ?? NullColumnVariantsTreeNode.Instance);
+        return new ModeColumnVariantsTreeNode(descriptor, null, subVariantsTreeNode ?? NullColumnVariantsTreeNode.Instance);
     }
 
     private ModesToggleColumnVariantsTreeNode ModesToggle(string toggleText, ModesColumnVariantsTreeNode modes)
@@ -357,8 +357,8 @@ public class ColumnVariantsTests
         return new ModesToggleColumnVariantsTreeNode(toggleText, modes);
     }
 
-    private ToggleableColumnVariantsTreeNode Toggle(ColumnVariantIdentifier identifier, IColumnVariantsTreeNode subVariantsTreeNode = null)
+    private ToggleableColumnVariantsTreeNode Toggle(ColumnVariantDescriptor descriptor, IColumnVariantsTreeNode subVariantsTreeNode = null)
     {
-        return new ToggleableColumnVariantsTreeNode(identifier, null, subVariantsTreeNode ?? NullColumnVariantsTreeNode.Instance);
+        return new ToggleableColumnVariantsTreeNode(descriptor, null, subVariantsTreeNode ?? NullColumnVariantsTreeNode.Instance);
     }
 }

@@ -557,7 +557,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             public TableConfiguration DefaultConfiguration { get; private set; }
 
             /// <inheritdoc />
-            public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> ColumnVariants
+            public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>> ColumnVariants
             {
                 get
                 {

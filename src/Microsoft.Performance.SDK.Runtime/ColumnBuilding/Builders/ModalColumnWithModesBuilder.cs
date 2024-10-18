@@ -25,7 +25,7 @@ internal class ModalColumnWithModesBuilder
     private readonly int? defaultModeIndex;
 
     internal record AddedMode(
-        ColumnVariantIdentifier Identifier,
+        ColumnVariantDescriptor Descriptor,
         IDataColumn column,
         Action<ToggleableColumnBuilder> builder);
 
@@ -75,7 +75,7 @@ internal class ModalColumnWithModesBuilder
             {
                 subVariantsTreeNode = builtVariant;
             }
-            modeVariants.Add(new ModeColumnVariantsTreeNode(mode.Identifier, mode.column, subVariantsTreeNode));
+            modeVariants.Add(new ModeColumnVariantsTreeNode(mode.Descriptor, mode.column, subVariantsTreeNode));
         }
 
         var variant = new ModesColumnVariantsTreeNode(modeVariants, this.defaultModeIndex ?? 0);
@@ -84,23 +84,23 @@ internal class ModalColumnWithModesBuilder
 
     /// <inheritdoc />
     public override ModalColumnBuilder WithMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection)
     {
-        return WithMode(modeIdentifier, projection, null);
+        return WithMode(modeDescriptor, projection, null);
     }
 
     /// <inheritdoc />
     public override ModalColumnBuilder WithMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         Action<ToggleableColumnBuilder> builder)
     {
-        Guard.NotNull(modeIdentifier, nameof(modeIdentifier));
+        Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
         Guard.NotNull(projection, nameof(projection));
 
         AddedMode newMode = new(
-            modeIdentifier,
+            modeDescriptor,
             new DataColumn<T>(this.baseColumn.Configuration, projection),
             builder);
 
@@ -108,25 +108,25 @@ internal class ModalColumnWithModesBuilder
     }
 
     public override ModalColumnBuilder WithHierarchicalMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider)
     {
-        return WithHierarchicalMode(modeIdentifier, projection, collectionProvider, null);
+        return WithHierarchicalMode(modeDescriptor, projection, collectionProvider, null);
     }
 
     public override ModalColumnBuilder WithHierarchicalMode<T>(
-        ColumnVariantIdentifier modeIdentifier,
+        ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
         Action<ToggleableColumnBuilder> builder)
     {
-        Guard.NotNull(modeIdentifier, nameof(modeIdentifier));
+        Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
         Guard.NotNull(projection, nameof(projection));
         Guard.NotNull(collectionProvider, nameof(collectionProvider));
 
         AddedMode newMode = new(
-            modeIdentifier,
+            modeDescriptor,
             new HierarchicalDataColumn<T>(this.baseColumn.Configuration, projection, collectionProvider),
             builder);
 
@@ -146,7 +146,7 @@ internal class ModalColumnWithModesBuilder
         int? index = null;
         for (int i = 0; i < this.addedModes.Count; i++)
         {
-            if (this.addedModes[i].Identifier.Guid == modeIdentifierGuid)
+            if (this.addedModes[i].Descriptor.Guid == modeIdentifierGuid)
             {
                 index = i;
                 break;

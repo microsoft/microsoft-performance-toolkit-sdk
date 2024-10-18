@@ -32,7 +32,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <summary>
         ///     Gets the mapping from columns with variants to those variants.
         /// </summary>
-        IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantIdentifier, IDataColumn>> ColumnVariants
+        IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>> ColumnVariants
         {
             get;
         }

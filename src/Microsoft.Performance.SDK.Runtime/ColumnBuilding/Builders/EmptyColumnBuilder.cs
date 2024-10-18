@@ -45,15 +45,15 @@ public sealed class EmptyColumnBuilder
 
     /// <inheritdoc />
     public override ToggleableColumnBuilder WithToggle<T>(
-        ColumnVariantIdentifier toggleIdentifier,
+        ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection)
     {
-        Guard.NotNull(toggleIdentifier, nameof(toggleIdentifier));
+        Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
 
         return new ToggledColumnBuilder(
             [
-                new ToggledColumnBuilder.AddedToggle(toggleIdentifier,
+                new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
                     new DataColumn<T>(baseColumn.Configuration, projection)),
             ],
             baseColumn,
@@ -62,17 +62,17 @@ public sealed class EmptyColumnBuilder
 
     /// <inheritdoc />
     public override ToggleableColumnBuilder WithHierarchicalToggle<T>(
-        ColumnVariantIdentifier toggleIdentifier,
+        ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider)
     {
-        Guard.NotNull(toggleIdentifier, nameof(toggleIdentifier));
+        Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
         Guard.NotNull(collectionProvider, nameof(collectionProvider));
 
         return new ToggledColumnBuilder(
             [
-                new ToggledColumnBuilder.AddedToggle(toggleIdentifier,
+                new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
                     new HierarchicalDataColumn<T>(baseColumn.Configuration, projection, collectionProvider)),
             ],
             baseColumn,
@@ -112,7 +112,7 @@ public sealed class EmptyColumnBuilder
             processor,
             [
                 new ModalColumnWithModesBuilder.AddedMode(
-                    new ColumnVariantIdentifier(baseColumn.Configuration.Metadata.Guid, baseProjectionModeName),
+                    new ColumnVariantDescriptor(baseColumn.Configuration.Metadata.Guid, baseProjectionModeName),
                     baseColumn,
                     builder),
             ],

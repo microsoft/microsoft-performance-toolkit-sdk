@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.ColumnBuilding;
 [UnitTest]
 public class ModalColumnBuilderTests
 {
-    private static ColumnVariantIdentifier modeIdentifier = new(Guid.NewGuid(), "Foo");
+    private static ColumnVariantDescriptor modeDescriptor = new(Guid.NewGuid(), "Foo");
     private static IProjection<int, int> modeProjection = Projection.Constant<int, int>(1);
 
     [TestMethod]
@@ -40,7 +40,7 @@ public class ModalColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithMode<int>(modeIdentifier, null).Commit();
+            builder.WithMode<int>(modeDescriptor, null).Commit();
         });
     }
 
@@ -48,7 +48,7 @@ public class ModalColumnBuilderTests
     public void WithMode_NullBuilderDoesNotThrow()
     {
         var builder = CreateSut();
-        builder.WithMode(modeIdentifier, modeProjection, null).Commit();
+        builder.WithMode(modeDescriptor, modeProjection, null).Commit();
         Assert.IsTrue(true);
     }
 
@@ -75,7 +75,7 @@ public class ModalColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalMode<float>(
-                modeIdentifier,
+                modeDescriptor,
                 null,
                 new StubCollectionAccessProvider<float>())
                 .Commit();
@@ -90,7 +90,7 @@ public class ModalColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalMode<float>(
-                modeIdentifier,
+                modeDescriptor,
                 Projection.Constant(1f),
                 null)
                 .Commit();
@@ -102,7 +102,7 @@ public class ModalColumnBuilderTests
     {
         var builder = CreateSut();
         builder.WithHierarchicalMode(
-            modeIdentifier,
+            modeDescriptor,
             modeProjection,
             new StubCollectionAccessProvider<int>(),
             null)

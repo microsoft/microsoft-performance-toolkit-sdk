@@ -14,11 +14,11 @@ public sealed class ToggleableColumnVariantsTreeNode
     : IColumnVariantsTreeNode
 {
     public ToggleableColumnVariantsTreeNode(
-        ColumnVariantIdentifier identifier,
+        ColumnVariantDescriptor descriptor,
         IDataColumn toggledColumn,
         IColumnVariantsTreeNode subVariantsTreeNode)
     {
-        Identifier = identifier;
+        Descriptor = descriptor;
         SubVariantsTreeNode = subVariantsTreeNode;
         ToggledColumn = toggledColumn;
     }
@@ -26,7 +26,7 @@ public sealed class ToggleableColumnVariantsTreeNode
     /// <summary>
     ///     Gets the identifier for the column variant.
     /// </summary>
-    public ColumnVariantIdentifier Identifier { get; }
+    public ColumnVariantDescriptor Descriptor { get; }
 
     /// <summary>
     ///     Gets the sub-variant that represents nested variants of this mode.
@@ -53,7 +53,7 @@ public sealed class ToggleableColumnVariantsTreeNode
 
     private bool IsEquivalentTree(ToggleableColumnVariantsTreeNode other)
     {
-        return Identifier.Equals(other.Identifier)
+        return Descriptor.Equals(other.Descriptor)
                && this.SubVariantsTreeNode.IsEquivalentTree(other.SubVariantsTreeNode);
     }
 }

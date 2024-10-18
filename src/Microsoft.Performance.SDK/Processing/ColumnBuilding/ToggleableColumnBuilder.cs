@@ -20,9 +20,9 @@ public abstract class ToggleableColumnBuilder
     ///     is nested at the "end" of the chain of toggleable variants already
     ///     added via calls to this method.
     /// </summary>
-    /// <param name="toggleIdentifier">
-    ///     The <see cref="ColumnVariantIdentifier"/> for the toggle. The
-    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of the toggled
+    /// <param name="toggleDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle. The
+    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of the toggled
     ///     on variant.
     /// </param>
     /// <param name="projection">
@@ -36,10 +36,10 @@ public abstract class ToggleableColumnBuilder
     ///     configured with the added toggle.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="toggleIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
+    ///     <paramref name="toggleDescriptor"/> or <paramref name="projection"/> is <c>null</c>.
     /// </exception>
     public abstract ToggleableColumnBuilder WithToggle<T>(
-        ColumnVariantIdentifier toggleIdentifier,
+        ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection);
 
     /// <summary>
@@ -47,9 +47,9 @@ public abstract class ToggleableColumnBuilder
     ///     is nested at the "end" of the chain of toggleable variants already
     ///     added via calls to this method.
     /// </summary>
-    /// <param name="toggleIdentifier">
-    ///     The <see cref="ColumnVariantIdentifier"/> for the toggle. The
-    ///     <see cref="ColumnVariantIdentifier.Name"/> represents the name of the toggled
+    /// <param name="toggleDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle. The
+    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of the toggled
     ///     on variant.
     /// </param>
     /// <param name="projection">
@@ -66,11 +66,11 @@ public abstract class ToggleableColumnBuilder
     ///     configured with the added toggle.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="toggleIdentifier"/>, <paramref name="projection"/>,
+    ///     <paramref name="toggleDescriptor"/>, <paramref name="projection"/>,
     ///     or <paramref name="collectionProvider"/> is <c>null</c>.
     /// </exception>
     public abstract ToggleableColumnBuilder WithHierarchicalToggle<T>(
-        ColumnVariantIdentifier toggleIdentifier,
+        ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider);
 
