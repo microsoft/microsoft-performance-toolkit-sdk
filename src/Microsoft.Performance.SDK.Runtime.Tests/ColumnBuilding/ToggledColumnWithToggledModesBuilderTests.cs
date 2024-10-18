@@ -34,7 +34,7 @@ public class ToggledColumnWithToggledModesBuilderTests
             new []{ new ToggledColumnBuilder.AddedToggle(new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"), initialToggle) },
             baseColumn,
             new TestColumnVariantsProcessor(),
-            new ModesBuilderCallbackInvoker((_) => { }, baseColumn),
+            new ModesBuilderCallbackInvoker((modesBuilder) => modesBuilder, baseColumn),
             "Modes");
     }
 }

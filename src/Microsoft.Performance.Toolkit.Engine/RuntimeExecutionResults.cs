@@ -606,7 +606,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             /// <inheritdoc />
             public ITableBuilderWithRowCount AddColumnWithVariants(
                 IDataColumn column,
-                Action<RootColumnBuilder> options)
+                Func<RootColumnBuilder, ColumnBuilder> options)
             {
                 Guard.NotNull(column, nameof(column));
 
@@ -619,7 +619,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         processor,
                         column);
 
-                    options(builder);
+                    options(builder).Commit();
                 }
 
                 return this;

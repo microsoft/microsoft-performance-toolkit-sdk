@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvo
 internal sealed class ModesBuilderCallbackInvoker
     : IBuilderCallbackInvoker
 {
-    private readonly Action<ModalColumnBuilder> callback;
+    private readonly Func<ModalColumnBuilder, ColumnBuilder> callback;
     private readonly IDataColumn baseColumn;
 
     /// <summary>
@@ -29,7 +29,7 @@ internal sealed class ModesBuilderCallbackInvoker
     ///     The base <see cref="IDataColumn"/> that the modes are being built upon.
     /// </param>
     public ModesBuilderCallbackInvoker(
-        Action<ModalColumnBuilder> callback,
+        Func<ModalColumnBuilder, ColumnBuilder> callback,
         IDataColumn baseColumn)
     {
         this.callback = callback;
@@ -51,7 +51,7 @@ internal sealed class ModesBuilderCallbackInvoker
             this.baseColumn,
             null);
 
-        this.callback(builder);
+        this.callback(builder).Commit();
         builtVariantsTreeNode = processor.Output;
         return true;
     }

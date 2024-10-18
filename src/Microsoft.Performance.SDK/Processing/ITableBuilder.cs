@@ -142,7 +142,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// </exception>
         ITableBuilderWithRowCount AddColumnWithVariants(
             IDataColumn column,
-            Action<RootColumnBuilder> variantsBuilder);
+            Func<RootColumnBuilder, ColumnBuilder> variantsBuilder);
 
         /// <summary>
         ///     Replaces the given column with another column.

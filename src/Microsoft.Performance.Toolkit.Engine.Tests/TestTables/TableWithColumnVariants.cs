@@ -34,9 +34,8 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
             tableBuilder.SetRowCount(1)
                 .AddColumnWithVariants(ColumnOne, Projection.Constant(1), builder =>
                 {
-                    builder
-                        .WithToggle(VariantDescriptor, VariantProjection)
-                        .Commit();
+                    return builder
+                        .WithToggle(VariantDescriptor, VariantProjection);
                 })
                 .AddColumn(ColumnTwo, Projection.Constant(2));
         }

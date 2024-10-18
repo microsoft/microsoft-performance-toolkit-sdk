@@ -38,7 +38,7 @@ public sealed class EmptyColumnBuilder
     }
 
     /// <inheritdoc />
-    public override void Commit()
+    internal override void Commit()
     {
         processor.ProcessColumnVariants(NullColumnVariantsTreeNode.Instance);
     }
@@ -82,7 +82,7 @@ public sealed class EmptyColumnBuilder
     /// <inheritdoc />
     public override ColumnBuilder WithToggledModes(
         string toggleText,
-        Action<ModalColumnBuilder> builder)
+        Func<ModalColumnBuilder, ColumnBuilder> builder)
     {
         Guard.NotNull(toggleText, nameof(toggleText));
 
@@ -104,7 +104,7 @@ public sealed class EmptyColumnBuilder
     /// <inheritdoc />
     public override ModalColumnBuilder WithModes(
         string baseProjectionModeName,
-        Action<ToggleableColumnBuilder> builder)
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
         Guard.NotNull(baseProjectionModeName, nameof(baseProjectionModeName));
 

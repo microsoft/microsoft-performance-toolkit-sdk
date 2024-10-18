@@ -49,7 +49,7 @@ internal class ToggledColumnBuilder
     }
 
     /// <inheritdoc />
-    public override void Commit()
+    internal override void Commit()
     {
         this.processor.ProcessColumnVariants(BuildVariant());
     }
@@ -92,7 +92,7 @@ internal class ToggledColumnBuilder
     /// <inheritdoc />
     public override ColumnBuilder WithToggledModes(
         string toggleText,
-        Action<ModalColumnBuilder> builder)
+        Func<ModalColumnBuilder, ColumnBuilder> builder)
     {
         Guard.NotNull(toggleText, nameof(toggleText));
 

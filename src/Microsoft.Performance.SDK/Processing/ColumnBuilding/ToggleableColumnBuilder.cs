@@ -82,7 +82,7 @@ public abstract class ToggleableColumnBuilder
     ///     The text to display for the toggle that represents the modes.
     /// </param>
     /// <param name="builder">
-    ///     A callback that builds the modes.
+    ///     A callback that builds the modes and returns the final column configuration.
     /// </param>
     /// <returns>
     ///     A new instance of <see cref="ColumnBuilder"/> that has been
@@ -93,5 +93,5 @@ public abstract class ToggleableColumnBuilder
     /// </exception>
     public abstract ColumnBuilder WithToggledModes(
         string toggleText,
-        Action<ModalColumnBuilder> builder);
+        Func<ModalColumnBuilder, ColumnBuilder> builder);
 }

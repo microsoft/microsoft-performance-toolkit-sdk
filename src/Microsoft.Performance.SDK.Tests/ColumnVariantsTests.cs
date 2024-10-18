@@ -34,31 +34,6 @@ public class ColumnVariantsTests
     private static readonly IProjection<int, bool> boolProj = Projection.Constant(true);
 
     [TestMethod]
-    public void UnbuiltBuilderIsNoop()
-    {
-        bool wasCallbackCalled = false;
-
-        var tableBuilder = new TableBuilder();
-        tableBuilder.SetRowCount(1)
-            .AddColumnWithVariants(baseConfig, baseProj, builder =>
-            {
-                wasCallbackCalled = true;
-                builder.WithToggledModes(
-                    "foo",
-                    modeBuilder =>
-                    {
-                        modeBuilder.WithMode(local, localProj)
-                            .Commit(); // calling commit here should have no effect
-                    });
-                // Intentionally not calling Build on this builder
-            });
-
-        // The callback must still be invoked so that we were at least given a chance to call Build
-        Assert.IsTrue(wasCallbackCalled, "Supplied callback was not invoked even though it should have been.");
-        Assert.IsFalse(tableBuilder.ColumnVariantsRegistrar.TryGetVariantsTreeRoot(tableBuilder.Columns.First(), out var _));
-    }
-
-    [TestMethod]
     public void BuildingTwiceOverridesFirstBuild()
     {
         var tableBuilder = new TableBuilder();
@@ -72,15 +47,13 @@ public class ColumnVariantsTests
                 builderWithOneToggle
                     .WithToggledModes("foo", modeBuilder =>
                     {
-                        modeBuilder
+                        return modeBuilder
                             .WithMode(utc, utcProj)
-                            .WithMode(showFloat, floatProj)
-                            .Commit();
-                    })
-                    .Commit();
+                            .WithMode(showFloat, floatProj);
+                    });
 
-                // This should override the previous build to only expose the single toggle
-                builderWithOneToggle.Commit();
+                // This should ignore everything above and only expose the single toggle
+                return builderWithOneToggle;
             });
 
         var expected = Toggle(projectAsDateTime);
@@ -95,9 +68,8 @@ public class ColumnVariantsTests
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, baseProj, builder =>
             {
-                builder
-                    .WithToggle(projectAsDateTime, utcProj)
-                    .Commit();
+                return builder
+                    .WithToggle(projectAsDateTime, utcProj);
             });
 
         var expected = Toggle(projectAsDateTime);
@@ -112,10 +84,9 @@ public class ColumnVariantsTests
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, baseProj, builder =>
             {
-                builder
+                return builder
                     .WithToggle(projectAsDateTime, utcProj)
-                    .WithToggle(utc, utcProj)
-                    .Commit();
+                    .WithToggle(utc, utcProj);
             });
 
         var expected = Toggle(
@@ -134,10 +105,9 @@ public class ColumnVariantsTests
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
-                builder
+                return builder
                     .WithModes(utc.Name)
-                    .WithMode(local, localProj)
-                    .Commit();
+                    .WithMode(local, localProj);
             });
 
         var expected = Modes(
@@ -156,11 +126,10 @@ public class ColumnVariantsTests
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
-                builder
+                return builder
                     .WithModes(utc.Name)
                     .WithMode(local, localProj)
-                    .WithDefaultMode(local.Guid)
-                    .Commit();
+                    .WithDefaultMode(local.Guid);
             });
 
         var expected = Modes(
@@ -179,18 +148,16 @@ public class ColumnVariantsTests
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
-                builder
+                return builder
                     .WithModes(
                         utc.Name,
                         modeBuilder =>
                         {
-                            modeBuilder
+                            return modeBuilder
                                 .WithToggle(showFloat, floatProj)
-                                .WithToggle(showBool, boolProj)
-                                .Commit();
+                                .WithToggle(showBool, boolProj);
                         })
-                    .WithMode(local, localProj)
-                    .Commit();
+                    .WithMode(local, localProj);
             });
 
         var expected = Modes(
@@ -212,15 +179,13 @@ public class ColumnVariantsTests
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
-                builder
+                return builder
                     .WithToggle(projectAsDateTime, utcProj)
                     .WithToggledModes("withModes", modeBuilder =>
                     {
-                        modeBuilder
-                            .WithMode(local, localProj)
-                            .Commit();
-                    })
-                    .Commit();
+                        return modeBuilder
+                            .WithMode(local, localProj);
+                    });
             });
 
         var expected =
@@ -241,22 +206,19 @@ public class ColumnVariantsTests
             .SetRowCount(1)
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
-                builder
+                return builder
                     .WithModes(utc.Name)
                     .WithMode(local, floatProj, modeBuilder =>
                     {
-                        modeBuilder.WithToggledModes(
-                                "Foo",
-                                nestedModes =>
-                                {
-                                    nestedModes
-                                        .WithMode(showFloat, floatProj)
-                                        .WithMode(showBool, boolProj)
-                                        .Commit();
-                                })
-                            .Commit();
-                    })
-                    .Commit();
+                        return modeBuilder.WithToggledModes(
+                            "Foo",
+                            nestedModes =>
+                            {
+                                return nestedModes
+                                    .WithMode(showFloat, floatProj)
+                                    .WithMode(showBool, boolProj);
+                            });
+                    });
             });
 
         var expected = Modes(
@@ -283,10 +245,9 @@ public class ColumnVariantsTests
         {
             tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
-                builder
+                return builder
                     .WithToggle(projectAsDateTime, utcProj)
-                    .WithToggle(projectAsDateTime, localProj)
-                    .Commit();
+                    .WithToggle(projectAsDateTime, localProj);
             });
         });
     }
@@ -298,7 +259,7 @@ public class ColumnVariantsTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            tableBuilder.AddColumnWithVariants(null, (_) => {});
+            tableBuilder.AddColumnWithVariants(null, (builder) => builder);
         });
     }
 
@@ -310,16 +271,14 @@ public class ColumnVariantsTests
 
         tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
         {
-            builder
-                .WithToggle(projectAsDateTime, utcProj)
-                .Commit();
+            return builder
+                .WithToggle(projectAsDateTime, utcProj);
         });
 
         tableBuilder.AddColumnWithVariants(new ColumnConfiguration(new ColumnMetadata(Guid.NewGuid(), "other columns")), boolProj, builder =>
         {
-            builder
-                .WithToggle(projectAsDateTime, utcProj)
-                .Commit();
+            return builder
+                .WithToggle(projectAsDateTime, utcProj);
         });
 
         Assert.IsTrue(true);
@@ -335,16 +294,14 @@ public class ColumnVariantsTests
         {
             tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
-                builder
+                return builder
                     .WithToggle(projectAsDateTime, utcProj)
                     .WithToggle(showBool, boolProj)
                     .WithToggledModes("foo", modeBuilder =>
                     {
-                        modeBuilder
-                            .WithMode(projectAsDateTime, localProj)
-                            .Commit();
-                    })
-                    .Commit();
+                        return modeBuilder
+                            .WithMode(projectAsDateTime, localProj);
+                    });
             });
         });
     }

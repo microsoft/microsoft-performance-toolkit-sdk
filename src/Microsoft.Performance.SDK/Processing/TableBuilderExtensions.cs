@@ -83,7 +83,7 @@ namespace Microsoft.Performance.SDK.Processing
             this ITableBuilderWithRowCount self,
             ColumnConfiguration column,
             IProjection<int, T> projection,
-            Action<RootColumnBuilder> variantsBuilder)
+            Func<RootColumnBuilder, ColumnBuilder> variantsBuilder)
         {
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(projection, nameof(projection));
@@ -172,7 +172,7 @@ namespace Microsoft.Performance.SDK.Processing
             ColumnConfiguration column,
             IProjection<int, T> projection,
             ICollectionInfoProvider<T> collectionProvider,
-            Action<RootColumnBuilder> variantsBuilder)
+            Func<RootColumnBuilder, ColumnBuilder> variantsBuilder)
         {
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(column, nameof(column));

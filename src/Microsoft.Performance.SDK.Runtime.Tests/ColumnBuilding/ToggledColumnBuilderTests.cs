@@ -25,7 +25,7 @@ public class ToggledColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithToggle(null, Projection.Constant(1f)).Commit();
+            builder.WithToggle(null, Projection.Constant(1f));
         });
     }
 
@@ -36,7 +36,7 @@ public class ToggledColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"), null).Commit();
+            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"), null);
         });
     }
 
@@ -50,7 +50,7 @@ public class ToggledColumnBuilderTests
             builder.WithHierarchicalToggle(
                 null,
                 Projection.Constant(1f),
-                new StubCollectionAccessProvider<float>()).Commit();
+                new StubCollectionAccessProvider<float>());
         });
     }
 
@@ -64,7 +64,7 @@ public class ToggledColumnBuilderTests
             builder.WithHierarchicalToggle(
                 new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"),
                 null,
-                new StubCollectionAccessProvider<float>()).Commit();
+                new StubCollectionAccessProvider<float>());
         });
     }
 
@@ -78,7 +78,7 @@ public class ToggledColumnBuilderTests
             builder.WithHierarchicalToggle(
                 new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"),
                 Projection.Constant(1f),
-                null).Commit();
+                null);
         });
     }
 
@@ -87,14 +87,14 @@ public class ToggledColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() => { builder.WithToggledModes(null, _ => { }).Commit(); });
+        Assert.ThrowsException<ArgumentNullException>(() => { builder.WithToggledModes(null, modesBuilder => modesBuilder); });
     }
 
     [TestMethod]
     public void WithToggledModes_NullBuilderDoesNotThrow()
     {
         var builder = CreateSut();
-        builder.WithToggledModes("foo", null).Commit();
+        builder.WithToggledModes("foo", null);
         Assert.IsTrue(true);
     }
 

@@ -29,7 +29,7 @@ public class ModalColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithMode(null, Projection.Constant(1f)).Commit();
+            builder.WithMode(null, Projection.Constant(1f));
         });
     }
 
@@ -40,7 +40,7 @@ public class ModalColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithMode<int>(modeDescriptor, null).Commit();
+            builder.WithMode<int>(modeDescriptor, null);
         });
     }
 
@@ -48,7 +48,7 @@ public class ModalColumnBuilderTests
     public void WithMode_NullBuilderDoesNotThrow()
     {
         var builder = CreateSut();
-        builder.WithMode(modeDescriptor, modeProjection, null).Commit();
+        builder.WithMode(modeDescriptor, modeProjection, null);
         Assert.IsTrue(true);
     }
 
@@ -62,8 +62,7 @@ public class ModalColumnBuilderTests
             builder.WithHierarchicalMode(
                 null,
                 Projection.Constant(1f),
-                new StubCollectionAccessProvider<float>())
-                .Commit();
+                new StubCollectionAccessProvider<float>());
         });
     }
 
@@ -77,8 +76,7 @@ public class ModalColumnBuilderTests
             builder.WithHierarchicalMode<float>(
                 modeDescriptor,
                 null,
-                new StubCollectionAccessProvider<float>())
-                .Commit();
+                new StubCollectionAccessProvider<float>());
         });
     }
 
@@ -92,8 +90,7 @@ public class ModalColumnBuilderTests
             builder.WithHierarchicalMode<float>(
                 modeDescriptor,
                 Projection.Constant(1f),
-                null)
-                .Commit();
+                null);
         });
     }
 
@@ -105,8 +102,7 @@ public class ModalColumnBuilderTests
             modeDescriptor,
             modeProjection,
             new StubCollectionAccessProvider<int>(),
-            null)
-            .Commit();
+            null);
         Assert.IsTrue(true);
     }
 
@@ -117,7 +113,7 @@ public class ModalColumnBuilderTests
 
         Assert.ThrowsException<ArgumentException>(() =>
         {
-            builder.WithDefaultMode(Guid.NewGuid()).Commit();
+            builder.WithDefaultMode(Guid.NewGuid());
         });
     }
 

@@ -77,7 +77,7 @@ public abstract class ModalColumnBuilder
     ///     The projection that will be used to generate the column for this mode.
     /// </param>
     /// <param name="builder">
-    ///     A callback that builds sub-variants of the added mode.
+    ///     A callback that builds sub-variants of the added mode and returns its final column configuration..
     /// </param>
     /// <typeparam name="T">
     ///     The type of data that the projection will produce.
@@ -92,7 +92,7 @@ public abstract class ModalColumnBuilder
     public abstract ModalColumnBuilder WithMode<T>(
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
-        Action<ToggleableColumnBuilder> builder);
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 
     /// <summary>
     ///     Adds a hierarchical mode to the column.
@@ -107,7 +107,7 @@ public abstract class ModalColumnBuilder
     ///     The collection provider for the column.
     /// </param>
     /// <param name="builder">
-    ///     A callback that builds sub-variants of the added mode.
+    ///     A callback that builds sub-variants of the added mode and returns its final column configuration.
     /// </param>
     /// <typeparam name="T">
     ///     The type of data that the projection will produce.
@@ -124,7 +124,7 @@ public abstract class ModalColumnBuilder
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        Action<ToggleableColumnBuilder> builder);
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 
     /// <summary>
     ///     Sets the default mode for the column.

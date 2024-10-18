@@ -27,7 +27,7 @@ internal class ModalColumnWithModesBuilder
     internal record AddedMode(
         ColumnVariantDescriptor Descriptor,
         IDataColumn column,
-        Action<ToggleableColumnBuilder> builder);
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ModalColumnWithModesBuilder"/>
@@ -57,7 +57,7 @@ internal class ModalColumnWithModesBuilder
     }
 
     /// <inheritdoc />
-    public override void Commit()
+    internal override void Commit()
     {
         if (this.addedModes.Count == 0)
         {
@@ -94,7 +94,7 @@ internal class ModalColumnWithModesBuilder
     public override ModalColumnBuilder WithMode<T>(
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
-        Action<ToggleableColumnBuilder> builder)
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
         Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
         Guard.NotNull(projection, nameof(projection));
@@ -119,7 +119,7 @@ internal class ModalColumnWithModesBuilder
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        Action<ToggleableColumnBuilder> builder)
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
         Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
         Guard.NotNull(projection, nameof(projection));

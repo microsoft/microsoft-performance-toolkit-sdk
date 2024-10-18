@@ -45,7 +45,7 @@ public abstract class RootColumnBuilder
     /// </param>
     /// <param name="builder">
     ///     A callback that builds sub-variants of the added mode represented by the base
-    ///     column.
+    ///     column and returns the final column configuration.
     /// </param>
     /// <returns>
     ///     A new <see cref="ModalColumnBuilder"/> to continue building
@@ -56,5 +56,5 @@ public abstract class RootColumnBuilder
     /// </exception>
     public abstract ModalColumnBuilder WithModes(
         string baseProjectionModeName,
-        Action<ToggleableColumnBuilder> builder);
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 }
