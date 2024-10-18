@@ -20,9 +20,7 @@ public abstract class ModalColumnBuilder
     ///     Adds a mode to the column.
     /// </summary>
     /// <param name="modeDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the mode. The
-    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of
-    ///     this mode.
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode.
     /// </param>
     /// <param name="projection">
     ///     The projection that will be used to generate the column for this mode.
@@ -45,9 +43,7 @@ public abstract class ModalColumnBuilder
     ///     Adds a hierarchical mode to the column.
     /// </summary>
     /// <param name="modeDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the mode. The
-    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of
-    ///     this mode.
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode.
     /// </param>
     /// <param name="projection">
     ///     The projection that will be used to generate the column for this mode.
@@ -102,9 +98,7 @@ public abstract class ModalColumnBuilder
     ///     Adds a hierarchical mode to the column.
     /// </summary>
     /// <param name="modeDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the mode. The
-    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of
-    ///     this mode.
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode.
     /// </param>
     /// <param name="projection">
     ///     The projection that will be used to generate the column for this mode.
