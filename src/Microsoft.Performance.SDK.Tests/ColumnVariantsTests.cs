@@ -292,6 +292,40 @@ public class ColumnVariantsTests
     }
 
     [TestMethod]
+    public void AddColumnWithVariants_NullColumnThrows()
+    {
+        var tableBuilder = new TableBuilder().SetRowCount(1);
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+        {
+            tableBuilder.AddColumnWithVariants(null, (_) => {});
+        });
+    }
+
+    [TestMethod]
+    public void DuplicateGuidsAcrossColumns_DoesNotThrow()
+    {
+        var tableBuilder = new TableBuilder();
+        tableBuilder.SetRowCount(1);
+
+        tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
+        {
+            builder
+                .WithToggle(projectAsDateTime, utcProj)
+                .Commit();
+        });
+
+        tableBuilder.AddColumnWithVariants(new ColumnConfiguration(new ColumnMetadata(Guid.NewGuid(), "other columns")), boolProj, builder =>
+        {
+            builder
+                .WithToggle(projectAsDateTime, utcProj)
+                .Commit();
+        });
+
+        Assert.IsTrue(true);
+    }
+
+    [TestMethod]
     public void ToggleAndModeWithSameGuid_ThrowsInvalidOperationException()
     {
         var tableBuilder = new TableBuilder();
@@ -312,17 +346,6 @@ public class ColumnVariantsTests
                     })
                     .Commit();
             });
-        });
-    }
-
-    [TestMethod]
-    public void AddColumnWithVariants_NullColumnThrows()
-    {
-        var tableBuilder = new TableBuilder().SetRowCount(1);
-
-        Assert.ThrowsException<ArgumentNullException>(() =>
-        {
-            tableBuilder.AddColumnWithVariants(null, (_) => {});
         });
     }
 

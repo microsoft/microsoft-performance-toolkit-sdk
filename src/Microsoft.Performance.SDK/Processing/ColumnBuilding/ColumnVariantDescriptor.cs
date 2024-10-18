@@ -11,7 +11,8 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 ///     been added to a table.
 /// </summary>
 /// <param name="Guid">
-///     The globally unique identifier for the column variant.
+///     The unique identifier for the column variant. This value must be unique within a single column's
+///     set of variants, but may be reused across columns.
 /// </param>
 /// <param name="Name">
 ///     The human-readable name of the column variant.
