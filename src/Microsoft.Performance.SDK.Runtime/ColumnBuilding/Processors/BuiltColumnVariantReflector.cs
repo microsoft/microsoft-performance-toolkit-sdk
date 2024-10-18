@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 /// <summary>
 ///     Exposes the <see cref="IColumnVariantsTreeNode"/> that was passed to the processor.
 /// </summary>
-internal class BuiltColumnVariantReflector
+internal readonly struct BuiltColumnVariantReflector
     : IColumnVariantsProcessor
 {
     /// <summary>

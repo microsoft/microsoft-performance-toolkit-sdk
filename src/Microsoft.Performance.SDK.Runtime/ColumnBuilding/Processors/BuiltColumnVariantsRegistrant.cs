@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 /// <summary>
 ///     Responsible for registering built column variants with a table builder.
 /// </summary>
-public class BuiltColumnVariantsRegistrant
+public sealed class BuiltColumnVariantsRegistrant
     : IColumnVariantsProcessor
 {
     private readonly IDataColumn baseColumn;
