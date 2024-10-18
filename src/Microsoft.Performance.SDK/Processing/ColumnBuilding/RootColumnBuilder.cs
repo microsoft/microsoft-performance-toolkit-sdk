@@ -8,9 +8,13 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 /// <summary>
 ///     A builder for configuring the root column that has been added to a table.
 /// </summary>
-public interface IRootColumnBuilder
-    : IToggleableColumnBuilder
+public abstract class RootColumnBuilder
+    : ToggleableColumnBuilder
 {
+    internal RootColumnBuilder()
+    {
+    }
+
     /// <summary>
     ///     Specifies that the added column should be a modal column that
     ///     has several top-level modes. The base projection/column specified
@@ -21,13 +25,13 @@ public interface IRootColumnBuilder
     ///     represents.
     /// </param>
     /// <returns>
-    ///     A new <see cref="IModalColumnBuilder"/> to continue building
+    ///     A new <see cref="ModalColumnBuilder"/> to continue building
     ///     column modes.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="baseProjectionModeName"/> is <c>null</c>.
     /// </exception>
-    IModalColumnBuilder WithModes(
+    public abstract ModalColumnBuilder WithModes(
         string baseProjectionModeName);
 
     /// <summary>
@@ -44,13 +48,13 @@ public interface IRootColumnBuilder
     ///     column.
     /// </param>
     /// <returns>
-    ///     A new <see cref="IModalColumnBuilder"/> to continue building
+    ///     A new <see cref="ModalColumnBuilder"/> to continue building
     ///     column modes.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="baseProjectionModeName"/> is <c>null</c>.
     /// </exception>
-    IModalColumnBuilder WithModes(
+    public abstract ModalColumnBuilder WithModes(
         string baseProjectionModeName,
-        Action<IToggleableColumnBuilder> builder);
+        Action<ToggleableColumnBuilder> builder);
 }

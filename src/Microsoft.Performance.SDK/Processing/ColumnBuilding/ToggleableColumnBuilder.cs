@@ -8,9 +8,13 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 /// <summary>
 ///     A builder for columns that can have nested toggled variants.
 /// </summary>
-public interface IToggleableColumnBuilder
-    : IColumnBuilder
+public abstract class ToggleableColumnBuilder
+    : ColumnBuilder
 {
+    internal ToggleableColumnBuilder()
+    {
+    }
+
     /// <summary>
     ///     Adds a new toggleable variant to the column. The added toggleable variant
     ///     is nested at the "end" of the chain of toggleable variants already
@@ -28,13 +32,13 @@ public interface IToggleableColumnBuilder
     ///     The type of data that the projection will produce.
     /// </typeparam>
     /// <returns>
-    ///     A new instance of <see cref="IToggleableColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ToggleableColumnBuilder"/> that has been
     ///     configured with the added toggle.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="toggleIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
     /// </exception>
-    IToggleableColumnBuilder WithToggle<T>(
+    public abstract ToggleableColumnBuilder WithToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection);
 
@@ -58,14 +62,14 @@ public interface IToggleableColumnBuilder
     ///     The type of data that the projection will produce.
     /// </typeparam>
     /// <returns>
-    ///     A new instance of <see cref="IToggleableColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ToggleableColumnBuilder"/> that has been
     ///     configured with the added toggle.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="toggleIdentifier"/>, <paramref name="projection"/>,
     ///     or <paramref name="collectionProvider"/> is <c>null</c>.
     /// </exception>
-    IToggleableColumnBuilder WithHierarchicalToggle<T>(
+    public abstract ToggleableColumnBuilder WithHierarchicalToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider);
@@ -81,13 +85,13 @@ public interface IToggleableColumnBuilder
     ///     A callback that builds the modes.
     /// </param>
     /// <returns>
-    ///     A new instance of <see cref="IColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ColumnBuilder"/> that has been
     ///     configured with the added toggled modes.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="toggleText"/> is <c>null</c>.
     /// </exception>
-    IColumnBuilder WithToggledModes(
+    public abstract ColumnBuilder WithToggledModes(
         string toggleText,
-        Action<IModalColumnBuilder> builder);
+        Action<ModalColumnBuilder> builder);
 }

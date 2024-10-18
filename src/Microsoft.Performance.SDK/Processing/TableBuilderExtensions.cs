@@ -51,7 +51,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Adds a new column to the builder with the given
         ///     configuration and projection. The added column
-        ///     can be configured with multiple variants using the <see cref="IRootColumnBuilder"/> passed
+        ///     can be configured with multiple variants using the <see cref="RootColumnBuilder"/> passed
         ///     to <paramref name="variantsBuilder"/>.
         /// </summary>
         /// <typeparam name="T">
@@ -83,7 +83,7 @@ namespace Microsoft.Performance.SDK.Processing
             this ITableBuilderWithRowCount self,
             ColumnConfiguration column,
             IProjection<int, T> projection,
-            Action<IRootColumnBuilder> variantsBuilder)
+            Action<RootColumnBuilder> variantsBuilder)
         {
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(projection, nameof(projection));
@@ -134,7 +134,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Adds a new hierarchical column to the builder with the given
         ///     configuration, projection, and info providers. The added column
-        ///     can be configured with multiple variants using the <see cref="IRootColumnBuilder"/> passed
+        ///     can be configured with multiple variants using the <see cref="RootColumnBuilder"/> passed
         ///     to <paramref name="variantsBuilder"/>.
         /// </summary>
         /// <typeparam name="T">
@@ -172,7 +172,7 @@ namespace Microsoft.Performance.SDK.Processing
             ColumnConfiguration column,
             IProjection<int, T> projection,
             ICollectionInfoProvider<T> collectionProvider,
-            Action<IRootColumnBuilder> variantsBuilder)
+            Action<RootColumnBuilder> variantsBuilder)
         {
             Guard.NotNull(self, nameof(self));
             Guard.NotNull(column, nameof(column));

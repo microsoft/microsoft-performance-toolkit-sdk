@@ -98,7 +98,7 @@ public class ToggledColumnBuilderTests
         Assert.IsTrue(true);
     }
 
-    protected virtual IToggleableColumnBuilder CreateSut()
+    protected virtual ToggleableColumnBuilder CreateSut()
     {
         var baseColumn = new DataColumn<float>(
             new ColumnConfiguration(

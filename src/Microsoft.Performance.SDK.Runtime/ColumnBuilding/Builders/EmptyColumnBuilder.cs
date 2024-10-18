@@ -12,10 +12,10 @@ using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
 /// <summary>
-///     Represents a column builder that has not been modified in any way.
+///     A column variants builder that has not been modified in any way.
 /// </summary>
 public sealed class EmptyColumnBuilder
-    : IRootColumnBuilder
+    : RootColumnBuilder
 {
     private readonly IColumnVariantsProcessor processor;
     private readonly IDataColumn baseColumn;
@@ -38,13 +38,13 @@ public sealed class EmptyColumnBuilder
     }
 
     /// <inheritdoc />
-    public void Commit()
+    public override void Commit()
     {
         processor.ProcessColumnVariants(NullColumnVariantsTreeNode.Instance);
     }
 
     /// <inheritdoc />
-    public IToggleableColumnBuilder WithToggle<T>(
+    public override ToggleableColumnBuilder WithToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection)
     {
@@ -61,7 +61,7 @@ public sealed class EmptyColumnBuilder
     }
 
     /// <inheritdoc />
-    public IToggleableColumnBuilder WithHierarchicalToggle<T>(
+    public override ToggleableColumnBuilder WithHierarchicalToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider)
@@ -80,9 +80,9 @@ public sealed class EmptyColumnBuilder
     }
 
     /// <inheritdoc />
-    public IColumnBuilder WithToggledModes(
+    public override ColumnBuilder WithToggledModes(
         string toggleText,
-        Action<IModalColumnBuilder> builder)
+        Action<ModalColumnBuilder> builder)
     {
         Guard.NotNull(toggleText, nameof(toggleText));
 
@@ -95,23 +95,23 @@ public sealed class EmptyColumnBuilder
     }
 
     /// <inheritdoc />
-    public IModalColumnBuilder WithModes(
+    public override ModalColumnBuilder WithModes(
         string baseProjectionModeName)
     {
         return WithModes(baseProjectionModeName, null);
     }
 
     /// <inheritdoc />
-    public IModalColumnBuilder WithModes(
+    public override ModalColumnBuilder WithModes(
         string baseProjectionModeName,
-        Action<IToggleableColumnBuilder> builder)
+        Action<ToggleableColumnBuilder> builder)
     {
         Guard.NotNull(baseProjectionModeName, nameof(baseProjectionModeName));
 
-        return new ModalColumnBuilder(
+        return new ModalColumnWithModesBuilder(
             processor,
             [
-                new ModalColumnBuilder.AddedMode(
+                new ModalColumnWithModesBuilder.AddedMode(
                     new ColumnVariantIdentifier(baseColumn.Configuration.Metadata.Guid, baseProjectionModeName),
                     baseColumn,
                     builder),

@@ -123,9 +123,9 @@ public class ModalColumnBuilderTests
 
     private ModalColumnBuilder CreateSut()
     {
-        return new ModalColumnBuilder(
+        return new ModalColumnWithModesBuilder(
             new TestColumnVariantsProcessor(),
-            new List<ModalColumnBuilder.AddedMode>(),
+            new List<ModalColumnWithModesBuilder.AddedMode>(),
             new DataColumn<int>(
                 new ColumnConfiguration(
                     new ColumnMetadata(Guid.NewGuid(), "foo")), Projection.Constant<int, int>(1)),

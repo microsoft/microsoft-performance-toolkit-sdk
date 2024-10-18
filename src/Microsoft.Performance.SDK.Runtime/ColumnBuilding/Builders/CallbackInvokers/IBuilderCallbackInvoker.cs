@@ -10,7 +10,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvo
 /// <summary>
 ///     Represents an object that can invoke a callback to build a column variant.
 ///     Implementations of this interface will typically invoke an <see cref="Action{T}"/>
-///     for an <see cref="IColumnBuilder"/> and return the final root <see cref="IColumnVariantsTreeNode"/>
+///     for a <see cref="ColumnBuilder"/> and return the final root <see cref="IColumnVariantsTreeNode"/>
 ///     that was built.
 /// </summary>
 internal interface IBuilderCallbackInvoker

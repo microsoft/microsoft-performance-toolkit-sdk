@@ -20,7 +20,7 @@ public interface IColumnVariantsProcessor
     ///     The root <see cref="IColumnVariantsTreeNode"/> of a column variants tree.
     /// </param>
     /// <remarks>
-    ///     This method is invoked during <see cref="IColumnBuilder.Commit"/>.
+    ///     This method is invoked during <see cref="ColumnBuilder.Commit"/>.
     /// </remarks>
     void ProcessColumnVariants(IColumnVariantsTreeNode variantsTreeNodes);
 }

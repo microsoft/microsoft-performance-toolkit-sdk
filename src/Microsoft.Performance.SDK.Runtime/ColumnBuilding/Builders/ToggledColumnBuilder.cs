@@ -13,10 +13,10 @@ using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
 /// <summary>
-///     Represents a builder for a column that has at least one toggle.
+///     A column variants builder with at least one hierarchical toggle.
 /// </summary>
 internal class ToggledColumnBuilder
-    : IToggleableColumnBuilder
+    : ToggleableColumnBuilder
 {
     internal record AddedToggle(
         ColumnVariantIdentifier ToggleIdentifier,
@@ -49,13 +49,13 @@ internal class ToggledColumnBuilder
     }
 
     /// <inheritdoc />
-    public void Commit()
+    public override void Commit()
     {
         this.processor.ProcessColumnVariants(BuildVariant());
     }
 
     /// <inheritdoc />
-    public IToggleableColumnBuilder WithToggle<T>(
+    public override ToggleableColumnBuilder WithToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection)
     {
@@ -71,7 +71,7 @@ internal class ToggledColumnBuilder
     }
 
     /// <inheritdoc />
-    public IToggleableColumnBuilder WithHierarchicalToggle<T>(
+    public override ToggleableColumnBuilder WithHierarchicalToggle<T>(
         ColumnVariantIdentifier toggleIdentifier,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider)
@@ -90,9 +90,9 @@ internal class ToggledColumnBuilder
     }
 
     /// <inheritdoc />
-    public IColumnBuilder WithToggledModes(
+    public override ColumnBuilder WithToggledModes(
         string toggleText,
-        Action<IModalColumnBuilder> builder)
+        Action<ModalColumnBuilder> builder)
     {
         Guard.NotNull(toggleText, nameof(toggleText));
 

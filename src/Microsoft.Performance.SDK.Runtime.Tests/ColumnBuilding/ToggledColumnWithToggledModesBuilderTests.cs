@@ -6,7 +6,6 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
-using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.Tests.Fixtures;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -21,7 +20,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.ColumnBuilding;
 public class ToggledColumnWithToggledModesBuilderTests
     : ToggledColumnBuilderTests
 {
-    protected override IToggleableColumnBuilder CreateSut()
+    protected override ToggleableColumnBuilder CreateSut()
     {
         var baseColumn = new DataColumn<float>(
             new ColumnConfiguration(

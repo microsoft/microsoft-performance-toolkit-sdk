@@ -6,11 +6,15 @@ using System;
 namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 /// <summary>
-///     Base interface for classes that can build/extend upon columns that are
+///     Base class for classes that can build/extend upon columns that are
 ///     part of a table.
 /// </summary>
-public interface IColumnBuilder
+public abstract class ColumnBuilder
 {
+    internal ColumnBuilder()
+    {
+    }
+
     /// <summary>
     ///     Commits this builder's configuration to the column being built. Note that this method MUST be called to have
     ///     any effect on the column being built. Calling this method multiple times will override previous calls.
@@ -18,5 +22,5 @@ public interface IColumnBuilder
     /// <exception cref="InvalidOperationException">
     ///     Thrown if multiple column variants are registered were registered the same GUID.
     /// </exception>
-    void Commit();
+    public abstract void Commit();
 }

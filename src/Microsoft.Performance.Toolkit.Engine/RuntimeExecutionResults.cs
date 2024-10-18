@@ -606,7 +606,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             /// <inheritdoc />
             public ITableBuilderWithRowCount AddColumnWithVariants(
                 IDataColumn column,
-                Action<IRootColumnBuilder> options)
+                Action<RootColumnBuilder> options)
             {
                 Guard.NotNull(column, nameof(column));
 

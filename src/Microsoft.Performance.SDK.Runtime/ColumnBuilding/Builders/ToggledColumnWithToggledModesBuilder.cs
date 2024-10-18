@@ -10,7 +10,7 @@ using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
 /// <summary>
-///     Represents a builder for a column that has at least one toggle, where the final toggle
+///     A column variants builder with at least one hierarchical toggle, where the final toggle
 ///     is a toggle for a set of modes.
 /// </summary>
 internal sealed class ToggledColumnWithToggledModesBuilder

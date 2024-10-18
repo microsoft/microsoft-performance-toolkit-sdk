@@ -14,10 +14,10 @@ using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
 /// <summary>
-///     Represents a builder for a column that has at least one mode.
+///     A column variants builder for zero or more mutually exclusive modes.
 /// </summary>
-internal class ModalColumnBuilder
-    : IModalColumnBuilder
+internal class ModalColumnWithModesBuilder
+    : ModalColumnBuilder
 {
     private readonly IDataColumn baseColumn;
     private readonly IColumnVariantsProcessor processor;
@@ -27,10 +27,10 @@ internal class ModalColumnBuilder
     internal record AddedMode(
         ColumnVariantIdentifier Identifier,
         IDataColumn column,
-        Action<IToggleableColumnBuilder> builder);
+        Action<ToggleableColumnBuilder> builder);
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="ModalColumnBuilder"/>
+    ///     Initializes a new instance of the <see cref="ModalColumnWithModesBuilder"/>
     /// </summary>
     /// <param name="processor">
     ///     The <see cref="IColumnVariantsProcessor" /> to invoke once the column variants are built.
@@ -44,7 +44,7 @@ internal class ModalColumnBuilder
     /// <param name="defaultModeIndex">
     ///     The index within <paramref name="addedModes"/> of the default mode.
     /// </param>
-    public ModalColumnBuilder(
+    public ModalColumnWithModesBuilder(
         IColumnVariantsProcessor processor,
         List<AddedMode> addedModes,
         IDataColumn baseColumn,
@@ -57,7 +57,7 @@ internal class ModalColumnBuilder
     }
 
     /// <inheritdoc />
-    public void Commit()
+    public override void Commit()
     {
         if (this.addedModes.Count == 0)
         {
@@ -83,7 +83,7 @@ internal class ModalColumnBuilder
     }
 
     /// <inheritdoc />
-    public IModalColumnBuilder WithMode<T>(
+    public override ModalColumnBuilder WithMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection)
     {
@@ -91,10 +91,10 @@ internal class ModalColumnBuilder
     }
 
     /// <inheritdoc />
-    public IModalColumnBuilder WithMode<T>(
+    public override ModalColumnBuilder WithMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
-        Action<IToggleableColumnBuilder> builder)
+        Action<ToggleableColumnBuilder> builder)
     {
         Guard.NotNull(modeIdentifier, nameof(modeIdentifier));
         Guard.NotNull(projection, nameof(projection));
@@ -107,7 +107,7 @@ internal class ModalColumnBuilder
         return WithMode(newMode);
     }
 
-    public IModalColumnBuilder WithHierarchicalMode<T>(
+    public override ModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider)
@@ -115,11 +115,11 @@ internal class ModalColumnBuilder
         return WithHierarchicalMode(modeIdentifier, projection, collectionProvider, null);
     }
 
-    public IModalColumnBuilder WithHierarchicalMode<T>(
+    public override ModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        Action<IToggleableColumnBuilder> builder)
+        Action<ToggleableColumnBuilder> builder)
     {
         Guard.NotNull(modeIdentifier, nameof(modeIdentifier));
         Guard.NotNull(projection, nameof(projection));
@@ -134,7 +134,7 @@ internal class ModalColumnBuilder
     }
 
     /// <inheritdoc />
-    public IColumnBuilder WithDefaultMode(Guid modeIdentifierGuid)
+    public override ColumnBuilder WithDefaultMode(Guid modeIdentifierGuid)
     {
         Debug.Assert(!this.defaultModeIndex.HasValue);
 
@@ -158,16 +158,16 @@ internal class ModalColumnBuilder
             throw new ArgumentException($"No mode with identifier {modeIdentifierGuid} has been added.");
         }
 
-        return new ModalColumnBuilder(
+        return new ModalColumnWithModesBuilder(
             this.processor,
             this.addedModes,
             this.baseColumn,
             index);
     }
 
-    private IModalColumnBuilder WithMode(AddedMode newMode)
+    private ModalColumnBuilder WithMode(AddedMode newMode)
     {
-        return new ModalColumnBuilder(
+        return new ModalColumnWithModesBuilder(
             this.processor,
             this.addedModes.Append(newMode).ToList(),
             this.baseColumn,

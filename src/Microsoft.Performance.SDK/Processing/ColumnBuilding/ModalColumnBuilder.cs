@@ -9,9 +9,13 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 ///     A builder for configuring modes on a column that has been
 ///     configured as having mutually exclusive modes.
 /// </summary>
-public interface IModalColumnBuilder
-    : IColumnBuilder
+public abstract class ModalColumnBuilder
+    : ColumnBuilder
 {
+    internal ModalColumnBuilder()
+    {
+    }
+
     /// <summary>
     ///     Adds a mode to the column.
     /// </summary>
@@ -27,13 +31,13 @@ public interface IModalColumnBuilder
     ///     The type of data that the projection will produce.
     /// </typeparam>
     /// <returns>
-    ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="modeIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
     /// </exception>
-    IModalColumnBuilder WithMode<T>(
+    public abstract ModalColumnBuilder WithMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection);
 
@@ -55,14 +59,14 @@ public interface IModalColumnBuilder
     ///     The type of data that the projection will produce.
     /// </typeparam>
     /// <returns>
-    ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="modeIdentifier"/>, <paramref name="projection"/>, or
     ///     <paramref name="collectionProvider"/> is <c>null</c>.
     /// </exception>
-    IModalColumnBuilder WithHierarchicalMode<T>(
+    public abstract ModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider);
@@ -83,16 +87,16 @@ public interface IModalColumnBuilder
     ///     The type of data that the projection will produce.
     /// </typeparam>
     /// <returns>
-    ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="modeIdentifier"/> or <paramref name="projection"/> is <c>null</c>.
     /// </exception>
-    IModalColumnBuilder WithMode<T>(
+    public abstract ModalColumnBuilder WithMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
-        Action<IToggleableColumnBuilder> builder);
+        Action<ToggleableColumnBuilder> builder);
 
     /// <summary>
     ///     Adds a hierarchical mode to the column.
@@ -115,18 +119,18 @@ public interface IModalColumnBuilder
     ///     The type of data that the projection will produce.
     /// </typeparam>
     /// <returns>
-    ///     A new instance of <see cref="IModalColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ModalColumnBuilder"/> that has been
     ///     configured with the new mode.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="modeIdentifier"/>, <paramref name="projection"/>,
     ///     or <paramref name="collectionProvider"/> is <c>null</c>.
     /// </exception>
-    IModalColumnBuilder WithHierarchicalMode<T>(
+    public abstract ModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantIdentifier modeIdentifier,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        Action<IToggleableColumnBuilder> builder);
+        Action<ToggleableColumnBuilder> builder);
 
     /// <summary>
     ///     Sets the default mode for the column.
@@ -136,7 +140,7 @@ public interface IModalColumnBuilder
     ///     identifies the mode to set as the default.
     /// </param>
     /// <returns>
-    ///     A new instance of <see cref="IColumnBuilder"/> that has been
+    ///     A new instance of <see cref="ColumnBuilder"/> that has been
     ///     configured with the default mode.
     /// </returns>
     /// <exception cref="ArgumentException">
@@ -144,8 +148,8 @@ public interface IModalColumnBuilder
     ///     added as an available mode.
     /// </exception>
     /// <remarks>
-    ///     If this method is not called prior to <see cref="IColumnBuilder.Commit"/>,
+    ///     If this method is not called prior to <see cref="ColumnBuilder.Commit"/>,
     ///     the first mode added will be the default mode.
     /// </remarks>
-    IColumnBuilder WithDefaultMode(Guid modeIdentifierGuid);
+    public abstract ColumnBuilder WithDefaultMode(Guid modeIdentifierGuid);
 }
