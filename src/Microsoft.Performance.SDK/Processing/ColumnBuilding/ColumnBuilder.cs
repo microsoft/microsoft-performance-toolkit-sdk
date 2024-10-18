@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 /// </summary>
 public abstract class ColumnBuilder
 {
-    internal ColumnBuilder()
+    private protected ColumnBuilder()
     {
     }
 

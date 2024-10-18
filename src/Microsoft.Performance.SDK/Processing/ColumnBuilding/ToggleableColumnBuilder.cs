@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 public abstract class ToggleableColumnBuilder
     : ColumnBuilder
 {
-    internal ToggleableColumnBuilder()
+    private protected ToggleableColumnBuilder()
     {
     }
 

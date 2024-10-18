@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 public abstract class ModalColumnBuilder
     : ColumnBuilder
 {
-    internal ModalColumnBuilder()
+    private protected ModalColumnBuilder()
     {
     }
 
