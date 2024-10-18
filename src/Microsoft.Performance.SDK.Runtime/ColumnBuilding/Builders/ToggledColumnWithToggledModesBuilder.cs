@@ -17,7 +17,7 @@ internal sealed class ToggledColumnWithToggledModesBuilder
     : ToggledColumnBuilder
 {
     private readonly string modesToggleText;
-    private readonly IBuilderCallbackInvoker modesBuilderCallbackActionInvoker;
+    private readonly ModesBuilderCallbackInvoker modesBuilderCallbackActionInvoker;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ToggledColumnWithToggledModesBuilder"/>
@@ -41,7 +41,7 @@ internal sealed class ToggledColumnWithToggledModesBuilder
         IReadOnlyCollection<AddedToggle> toggles,
         IDataColumn baseColumn,
         IColumnVariantsProcessor processor,
-        IBuilderCallbackInvoker modesBuilderCallbackActionInvoker,
+        ModesBuilderCallbackInvoker modesBuilderCallbackActionInvoker,
         string modesToggleText)
         : base(toggles, baseColumn, processor)
     {

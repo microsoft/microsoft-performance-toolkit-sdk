@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvo
 /// <summary>
 ///     Responsible for invoking a callback that builds modes of a modal column variant.
 /// </summary>
-internal sealed class ModesBuilderCallbackInvoker
+internal readonly struct ModesBuilderCallbackInvoker
     : IBuilderCallbackInvoker
 {
     private readonly Func<ModalColumnBuilder, ColumnBuilder> callback;
