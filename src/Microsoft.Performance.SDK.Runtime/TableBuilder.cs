@@ -6,12 +6,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <summary>
     ///     This class is used to build tables. Tables are built by adding
-    ///     columns, each consisteing of the same number of rows. Each row in
+    ///     columns, each consisting of the same number of rows. Each row in
     ///     the table is made up of projections, one per column, that take the
     ///     integral row number and project the data for the given column as
     ///     the appropriate type.
@@ -29,6 +33,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private readonly List<TableConfiguration> builtInTableConfigurations;
         private readonly List<TableCommand> commands;
         private readonly IReadOnlyList<TableCommand> commandsRO;
+        private readonly ColumnVariantsRegistrar variantsRegistrar;
 
         // Maps a row to a collection of row detail entry
         private Func<int, IEnumerable<TableRowDetailEntry>> tableDetailsGenerator;
@@ -44,12 +49,14 @@ namespace Microsoft.Performance.SDK.Runtime
             this.columnsRO = new ReadOnlyCollection<IDataColumn>(this.columns);
             this.commands = new List<TableCommand>();
             this.commandsRO = new ReadOnlyCollection<TableCommand>(this.commands);
+            this.variantsRegistrar = new ColumnVariantsRegistrar();
 
             this.RowCount = 0;
         }
 
         /// <inheritdoc />
         public IReadOnlyCollection<IDataColumn> Columns => this.columnsRO;
+
 
         /// <inheritdoc />
         public IEnumerable<TableConfiguration> BuiltInTableConfigurations => this.builtInTableConfigurations.AsReadOnly();
@@ -62,6 +69,12 @@ namespace Microsoft.Performance.SDK.Runtime
 
         /// <inheritdoc />
         public IReadOnlyList<TableCommand> Commands => this.commandsRO;
+
+        /// <summary>
+        ///     Gets the <see cref="IColumnVariantsRegistrar"/> that can be used to find
+        ///     and discover registered column variants.
+        /// </summary>
+        public IColumnVariantsRegistrar ColumnVariantsRegistrar => this.variantsRegistrar;
 
         // TODO:
         // We currently set this to a default builder - build a TableDetails instance from the 
@@ -140,12 +153,29 @@ namespace Microsoft.Performance.SDK.Runtime
             return this;
         }
 
-        /// <inheritdoc />
         public ITableBuilderWithRowCount AddColumn(IDataColumn column)
+        {
+            return this.AddColumnWithVariants(column, null);
+        }
+
+        /// <inheritdoc />
+        public ITableBuilderWithRowCount AddColumnWithVariants(
+            IDataColumn column,
+            Func<RootColumnBuilder, ColumnBuilder> options)
         {
             Guard.NotNull(column, nameof(column));
 
             this.columns.Add(column);
+
+            if (options != null)
+            {
+                var processor = new BuiltColumnVariantsRegistrant(column, this.variantsRegistrar);
+                var builder = new EmptyColumnBuilder(
+                    processor,
+                    column);
+
+                options(builder).Commit();
+            }
 
             return this;
         }

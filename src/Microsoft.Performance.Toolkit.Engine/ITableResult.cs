@@ -4,6 +4,7 @@
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -27,6 +28,14 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     Gets the collection of columns that have been added to the table.
         /// </summary>
         IReadOnlyCollection<IDataColumn> Columns { get; }
+
+        /// <summary>
+        ///     Gets the mapping from columns with variants to those variants.
+        /// </summary>
+        IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>> ColumnVariants
+        {
+            get;
+        }
 
         /// <summary>
         ///     Gets the dictionary of table command name and <see cref="TableCommandCallback"/> that have been assigned to the table.

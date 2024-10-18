@@ -10,7 +10,11 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
@@ -58,6 +62,9 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </param>
         /// <param name="errors">
         ///     The collection of errors, if any, that were encountered during processing.
+        /// </param>
+        /// <param name="logger">
+        ///     The logger to use for logging.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="sourceCookerData"/> is <c>null</c>.
@@ -523,6 +530,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             private readonly List<IDataColumn> columns;
             private readonly ReadOnlyCollection<IDataColumn> columnsRO;
 
+            private readonly ColumnVariantsRegistrar variantsRegistrar;
+
             private readonly Dictionary<string, TableCommandCallback> tableCommands;
             private readonly ReadOnlyDictionary<string, TableCommandCallback> tableCommandsRO;
 
@@ -536,6 +545,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 this.tableCommands = new Dictionary<string, TableCommandCallback>();
                 this.tableCommandsRO = new ReadOnlyDictionary<string, TableCommandCallback>(this.tableCommands);
+                this.variantsRegistrar = new ColumnVariantsRegistrar();
             }
 
             //
@@ -545,6 +555,15 @@ namespace Microsoft.Performance.Toolkit.Engine
             public IEnumerable<TableConfiguration> BuiltInTableConfigurations => this.builtInTableConfigurationsRO;
 
             public TableConfiguration DefaultConfiguration { get; private set; }
+
+            /// <inheritdoc />
+            public IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>> ColumnVariants
+            {
+                get
+                {
+                    return this.variantsRegistrar.GetAllVariants();
+                }
+            }
 
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
@@ -576,11 +595,33 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public int RowCount { get; private set; }
 
+            /// <inheritdoc />
             public IReadOnlyCollection<IDataColumn> Columns => this.columnsRO;
 
             public ITableBuilderWithRowCount AddColumn(IDataColumn column)
             {
+                return this.AddColumnWithVariants(column, null);
+            }
+
+            /// <inheritdoc />
+            public ITableBuilderWithRowCount AddColumnWithVariants(
+                IDataColumn column,
+                Func<RootColumnBuilder, ColumnBuilder> options)
+            {
+                Guard.NotNull(column, nameof(column));
+
                 this.columns.Add(column);
+
+                if (options != null)
+                {
+                    var processor = new BuiltColumnVariantsRegistrant(column, this.variantsRegistrar);
+                    var builder = new EmptyColumnBuilder(
+                        processor,
+                        column);
+
+                    options(builder).Commit();
+                }
+
                 return this;
             }
 
