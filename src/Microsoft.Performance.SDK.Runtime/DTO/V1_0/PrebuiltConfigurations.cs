@@ -3,7 +3,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO
+namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
 {
     [DataContract]
     internal class PrebuiltConfigurations
@@ -13,10 +13,10 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
         public PrebuiltConfigurations()
         {
-            this.Version = DTOVersion;
+            Version = DTOVersion;
         }
 
         [DataMember(Order = 2)]
         public TableConfigurations[] Tables { get; set; }
-    }    
+    }
 }

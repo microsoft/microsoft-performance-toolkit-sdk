@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.DTO.V1_0;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
