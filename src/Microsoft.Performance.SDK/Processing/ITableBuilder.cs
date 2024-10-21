@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -123,6 +124,25 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="column"/> is <c>null</c>.
         /// </exception>
         ITableBuilderWithRowCount AddColumn(IDataColumn column);
+
+        /// <summary>
+        ///     Adds a column that can be configured with multiple variants to this builder instance.
+        /// </summary>
+        /// <param name="column">
+        ///     The column to add.
+        /// </param>
+        /// <param name="variantsBuilder">
+        ///     The builder that can be used to add variants to the column.
+        /// </param>
+        /// <returns>
+        ///     This instance of the builder.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="column"/> is <c>null</c>.
+        /// </exception>
+        ITableBuilderWithRowCount AddColumnWithVariants(
+            IDataColumn column,
+            Func<RootColumnBuilder, ColumnBuilder> variantsBuilder);
 
         /// <summary>
         ///     Replaces the given column with another column.
