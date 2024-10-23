@@ -91,7 +91,7 @@ namespace Microsoft.Performance.SDK.Processing
             }
             else
             {
-                return $"{this.Metadata.Guid} - {this.Metadata.Name} (variant {this.VariantGuid}";
+                return $"{this.Metadata.Guid} - {this.Metadata.Name} (variant {this.VariantGuid})";
             }
         }
     }
