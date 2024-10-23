@@ -3,7 +3,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO.V1_3
+namespace Microsoft.Performance.SDK.Runtime.DTO.Latest
 {
     [DataContract]
     internal class PrebuiltConfigurations

@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
 {
     [DataContract]
     internal class TableConfigurations
-        : ISupportUpgrade<V1_3.TableConfigurations>
+        : ISupportUpgrade<Latest.TableConfigurations>
     {
         [DataMember(Order = 1)]
         public Guid TableId { get; set; }
@@ -20,9 +20,9 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
         [DataMember(Order = 3)]
         public TableConfiguration[] Configurations { get; set; }
 
-        public V1_3.TableConfigurations Upgrade()
+        public Latest.TableConfigurations Upgrade()
         {
-            return new V1_3.TableConfigurations()
+            return new Latest.TableConfigurations()
             {
                 TableId = this.TableId,
                 DefaultConfigurationName = this.DefaultConfigurationName,

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Microsoft.Performance.SDK.Runtime.DTO.Enums;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO.V1_3
+namespace Microsoft.Performance.SDK.Runtime.DTO.Latest
 {
     [DataContract]
     internal class TableConfiguration

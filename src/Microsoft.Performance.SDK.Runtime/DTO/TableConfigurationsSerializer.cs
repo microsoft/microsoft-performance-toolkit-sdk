@@ -9,8 +9,8 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.DTO.V1_3;
-using TableConfigurations = Microsoft.Performance.SDK.Runtime.DTO.V1_3.TableConfigurations;
+using Microsoft.Performance.SDK.Runtime.DTO.Latest;
+using TableConfigurations = Microsoft.Performance.SDK.Runtime.DTO.Latest.TableConfigurations;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
@@ -75,7 +75,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 startingPosition = stream.Position;
             }
 
-            V1_3.PrebuiltConfigurations prebuiltConfigurations = null;
+            PrebuiltConfigurations prebuiltConfigurations = null;
 
             try
             {
@@ -107,7 +107,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
                 while (visited.Add(configurationsBase))
                 {
-                    if (configurationsBase is V1_3.PrebuiltConfigurations)
+                    if (configurationsBase is PrebuiltConfigurations)
                     {
                         break;
                     }
@@ -118,7 +118,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                     }
                 }
 
-                prebuiltConfigurations = configurationsBase as V1_3.PrebuiltConfigurations;
+                prebuiltConfigurations = configurationsBase as PrebuiltConfigurations;
 
                 if (prebuiltConfigurations == null)
                 {

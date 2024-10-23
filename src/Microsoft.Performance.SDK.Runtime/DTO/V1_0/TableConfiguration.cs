@@ -11,7 +11,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
 {
     [DataContract]
     internal class TableConfiguration
-        : ISupportUpgrade<V1_3.TableConfiguration>
+        : ISupportUpgrade<Latest.TableConfiguration>
     {
         /// <summary>
         ///     The table name.
@@ -103,9 +103,9 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
         [DataMember(Order = 15)]
         public IDictionary<string, ColumnRoleEntry> ColumnRoles { get; set; }
 
-        public V1_3.TableConfiguration Upgrade()
+        public Latest.TableConfiguration Upgrade()
         {
-            return new V1_3.TableConfiguration()
+            return new Latest.TableConfiguration()
             {
                 Name = this.Name,
                 ChartType = this.ChartType,

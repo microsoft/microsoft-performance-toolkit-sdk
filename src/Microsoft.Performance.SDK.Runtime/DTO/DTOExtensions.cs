@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Runtime.DTO.Enums;
-using Microsoft.Performance.SDK.Runtime.DTO.V1_3;
+using Microsoft.Performance.SDK.Runtime.DTO.Latest;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {

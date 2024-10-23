@@ -10,7 +10,7 @@ using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ColumnConfiguration = Microsoft.Performance.SDK.Runtime.DTO.V1_3.ColumnConfiguration;
+using ColumnConfiguration = Microsoft.Performance.SDK.Runtime.DTO.Latest.ColumnConfiguration;
 using TableConfiguration = Microsoft.Performance.SDK.Processing.TableConfiguration;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
