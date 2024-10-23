@@ -29,6 +29,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
                 return assembly.GetTypes()
                                .Where(type => type.IsSubclassOf(typeof(PrebuiltConfigurationsBase)))
+                               .Where(type => type.IsConcrete())
                                .Select(type => (((PrebuiltConfigurationsBase)Activator.CreateInstance(type)).Version, type)).ToArray();
             });
 
@@ -106,17 +107,14 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
                 while (visited.Add(configurationsBase))
                 {
-                    if (configurationsBase is ISupportUpgrade<V1_0.PrebuiltConfigurations> v1_0)
-                    {
-                        configurationsBase = v1_0.Upgrade();
-                    }
-                    else if (configurationsBase is ISupportUpgrade<V1_3.PrebuiltConfigurations> v1_3)
-                    {
-                        configurationsBase = v1_3.Upgrade();
-                    }
-                    else if (configurationsBase is V1_3.PrebuiltConfigurations latestConfigs)
+                    if (configurationsBase is V1_3.PrebuiltConfigurations)
                     {
                         break;
+                    }
+
+                    if (configurationsBase is ISupportUpgrade<PrebuiltConfigurationsBase> upgradeable)
+                    {
+                        configurationsBase = upgradeable.Upgrade();
                     }
                 }
 

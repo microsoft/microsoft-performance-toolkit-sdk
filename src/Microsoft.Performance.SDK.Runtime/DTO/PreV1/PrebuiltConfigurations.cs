@@ -8,8 +8,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
 {
     [DataContract]
     internal class PrebuiltConfigurations
-        : PrebuiltConfigurationsBase,
-          ISupportUpgrade<V1_0.PrebuiltConfigurations>
+        : PreviousPrebuiltConfigurationBase<V1_0.PrebuiltConfigurations>
     {
         internal static readonly double DTOVersion = 0.1;
 
@@ -21,7 +20,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         [DataMember(Order = 2)]
         public TableConfigurations[] Tables { get; set; }
 
-        public V1_0.PrebuiltConfigurations Upgrade()
+        protected override V1_0.PrebuiltConfigurations UpgradeToNext()
         {
             return new V1_0.PrebuiltConfigurations()
             {
