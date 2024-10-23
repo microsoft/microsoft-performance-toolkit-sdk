@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
+using Microsoft.Performance.SDK.Runtime.DTO.V1_0;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -286,7 +287,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                     StartTimeColumnGuid = Guid.NewGuid(),
                     StartTimeColumnName = testStr()
                 }, 3).ToArray(),
-                Columns = Enumerable.Repeat(new DTO.ColumnConfiguration()
+                Columns = Enumerable.Repeat(new DTO.V1_0.ColumnConfiguration()
                 {
                     Metadata = new DTO.ColumnMetadata()
                     {

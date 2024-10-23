@@ -3,18 +3,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.Performance.SDK.Runtime.DTO.Enums;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
+namespace Microsoft.Performance.SDK.Runtime.DTO.V1_3
 {
     [DataContract]
     internal class TableConfiguration
-         : ISupportUpgrade<V1_3.TableConfiguration>
     {
         /// <summary>
-        ///     The table name.
+        ///     The configuration name.
         /// </summary>
         [DataMember(Order = 1)]
         public string Name { get; set; }
@@ -95,34 +93,12 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
         ///     Columns that may appear in the table.
         /// </summary>
         [DataMember(Order = 14)]
-        public IEnumerable<ColumnConfiguration> Columns { get; set; }
+        public IEnumerable<TableConfigurationColumn> Columns { get; set; }
 
         /// <summary>
         ///     The roles and their associated column entries.
         /// </summary>
         [DataMember(Order = 15)]
-        public IDictionary<string, ColumnRoleEntry> ColumnRoles { get; set; }
-
-        public V1_3.TableConfiguration Upgrade(Processing.ILogger logger)
-        {
-            return new V1_3.TableConfiguration()
-            {
-                Name = this.Name,
-                ChartType = this.ChartType,
-                AggregationOverTime = this.AggregationOverTime,
-                InitialFilterQuery = this.InitialFilterQuery,
-                InitialExpansionQuery = this.InitialExpansionQuery,
-                InitialSelectionQuery = this.InitialSelectionQuery,
-                InitialFilterShouldKeep = this.InitialFilterShouldKeep,
-                GraphFilterTopValue = this.GraphFilterTopValue,
-                GraphFilterThresholdValue = this.GraphFilterThresholdValue,
-                GraphFilterColumnName = this.GraphFilterColumnName,
-                GraphFilterColumnGuid = this.GraphFilterColumnGuid,
-                Description = this.Description,
-                HighlightEntries = this.HighlightEntries.Select(he => he.Upgrade(logger)).ToArray(),
-                Columns = this.Columns.Select(c => c.Upgrade(logger)).ToArray(),
-                ColumnRoles = this.ColumnRoles.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Upgrade(logger)),
-            };
-        }
+        public IDictionary<string, ColumnIdentifier> ColumnRoles { get; set; }
     }
 }

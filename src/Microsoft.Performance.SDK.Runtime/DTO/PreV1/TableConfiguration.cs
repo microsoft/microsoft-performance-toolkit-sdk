@@ -4,13 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO.Enums;
+using Microsoft.Performance.SDK.Runtime.DTO.V1_0;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
 {
     [DataContract]
     internal class TableConfiguration
-        : ISupportUpgrade<DTO.TableConfiguration>
+        : ISupportUpgrade<V1_0.TableConfiguration>
     {
         /// <summary>
         ///     The table name.
@@ -28,13 +30,13 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         ///     The type of chart displayed for this table.
         /// </summary>
         [DataMember(Order = 3)]
-        public ChartType ChartType { get; set; }
+        public Enums.ChartType ChartType { get; set; }
 
         /// <summary>
         ///     Gets or sets the aggregation over time mode for this table.
         /// </summary>
         [DataMember(Order = 4)]
-        public AggregationOverTime AggregationOverTime { get; set; }
+        public Enums.AggregationOverTime AggregationOverTime { get; set; }
 
         /// <summary>
         ///     Gets or sets the query for initial filtering in this table.
@@ -94,13 +96,13 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         ///     Gets or sets the collection of query entries that are used to highlight in this table.
         /// </summary>
         [DataMember(Order = 14)]
-        public IEnumerable<HighlightEntry> HighlightEntries { get; set; }
+        public IEnumerable<V1_0.HighlightEntry> HighlightEntries { get; set; }
 
         /// <summary>
         ///     Columns that may appear in the table.
         /// </summary>
         [DataMember(Order = 15)]
-        public IEnumerable<Runtime.DTO.ColumnConfiguration> Columns { get; set; }
+        public IEnumerable<V1_0.ColumnConfiguration> Columns { get; set; }
 
         /// <summary>
         ///     The roles and their associated column entries.
@@ -108,7 +110,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         [DataMember(Order = 16)]
         public IDictionary<ColumnRole, ColumnRoleEntry> ColumnRoles { get; set; }
 
-        public DTO.TableConfiguration Upgrade()
+        public V1_0.TableConfiguration Upgrade(ILogger logger)
         {
             var newColumnRoles = new Dictionary<string, ColumnRoleEntry>(this.ColumnRoles.Count);
 
@@ -163,7 +165,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
                 }                
             }
 
-            return new DTO.TableConfiguration()
+            return new DTO.V1_0.TableConfiguration()
             {
                 Name = this.Name,
                 ChartType = this.ChartType,

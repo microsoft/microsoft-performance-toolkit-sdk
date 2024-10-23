@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Runtime.Serialization;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
 {
@@ -21,11 +22,11 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         [DataMember(Order = 2)]
         public TableConfigurations[] Tables { get; set; }
 
-        public V1_0.PrebuiltConfigurations Upgrade()
+        public V1_0.PrebuiltConfigurations Upgrade(ILogger logger)
         {
-            return new DTO.PrebuiltConfigurations()
+            return new DTO.V1_0.PrebuiltConfigurations()
             {
-                Tables = this.Tables.Select(configs => configs.Upgrade()).ToArray()
+                Tables = this.Tables.Select(configs => configs.Upgrade(logger)).ToArray()
             };
         }
     }

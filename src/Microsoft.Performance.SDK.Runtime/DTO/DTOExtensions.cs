@@ -5,22 +5,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Runtime.DTO.Enums;
-using Microsoft.Performance.SDK.Runtime.DTO.V1_0;
+using Microsoft.Performance.SDK.Runtime.DTO.V1_3;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
     internal static class DTOExtensions
     {
-        private static Func<Processing.TableConfiguration, IDictionary<string, ColumnRoleEntry>> defaultColumnRolesConverter = 
+        private static Func<Processing.TableConfiguration, IDictionary<string, ColumnIdentifier>> defaultColumnRolesConverter = 
             (configuration) =>
             {
-                var columnRoles = new Dictionary<string, ColumnRoleEntry>();
+                var columnRoles = new Dictionary<string, ColumnIdentifier>();
                 foreach (var kvp in configuration.ColumnRoles)
                 {
-                    columnRoles[kvp.Key] = new ColumnRoleEntry()
+                    columnRoles[kvp.Key] = new ColumnIdentifier()
                     {
                         ColumnGuid = kvp.Value,
-                        ColumnName = configuration.Columns.FirstOrDefault(column => column.Metadata.Guid == kvp.Value)?.Metadata.Name,
+                        VariantGuid = null, // TODO
                     };
                 }
 
@@ -35,7 +35,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
         internal static PrebuiltConfigurations ConvertToDto(
             this Processing.TableConfigurations tableConfigurations,
-            Func<Processing.TableConfiguration, IDictionary<string, ColumnRoleEntry>> convertColumnRoles)
+            Func<Processing.TableConfiguration, IDictionary<string, ColumnIdentifier>> convertColumnRoles)
         {
             var dtoTableConfigurations = new PrebuiltConfigurations()
             {
@@ -119,7 +119,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
         internal static TableConfiguration ConvertToDto(
             this Microsoft.Performance.SDK.Processing.TableConfiguration configuration,
-            Func<Processing.TableConfiguration, IDictionary<string, ColumnRoleEntry>> convertColumnRoles)
+            Func<Processing.TableConfiguration, IDictionary<string, ColumnIdentifier>> convertColumnRoles)
         {
             var dto = new TableConfiguration
             {
@@ -359,24 +359,6 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             }
         }
 
-        private static Processing.ColumnMetadata ConvertToSdk(this ColumnMetadata dto)
-        {
-            return new Processing.ColumnMetadata(dto.Guid, dto.Name, dto.Description) { ShortDescription = dto.ShortDescription };
-        }
-
-        private static ColumnMetadata ConvertToDto(this Processing.ColumnMetadata columnMetadata)
-        {
-            var dto = new ColumnMetadata
-            {
-                Guid = columnMetadata.Guid,
-                Name = columnMetadata.Name,
-                Description = columnMetadata.Description,
-                ShortDescription = columnMetadata.ShortDescription,
-            };
-
-            return dto;
-        }
-
         private static Microsoft.Performance.SDK.Processing.UIHints ConvertToSdk(this UIHints dto)
         {
             var uiHints = new Microsoft.Performance.SDK.Processing.UIHints
@@ -410,22 +392,22 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         }
 
         private static Microsoft.Performance.SDK.Processing.ColumnConfiguration ConvertToSdk(
-            this ColumnConfiguration dto)
+            this TableConfigurationColumn dto)
         {
             // These are checked by reference, so they need to point to these instances.
-            if (dto.Metadata.Guid == Microsoft.Performance.SDK.Processing.TableConfiguration.PivotColumn.Metadata.Guid)
+            if (dto.ColumnIdentifier.ColumnGuid == Microsoft.Performance.SDK.Processing.TableConfiguration.PivotColumn.Metadata.Guid)
             {
                 return Microsoft.Performance.SDK.Processing.TableConfiguration.PivotColumn;
             }
-            else if (dto.Metadata.Guid == Microsoft.Performance.SDK.Processing.TableConfiguration.LeftFreezeColumn.Metadata.Guid)
+            else if (dto.ColumnIdentifier.ColumnGuid == Microsoft.Performance.SDK.Processing.TableConfiguration.LeftFreezeColumn.Metadata.Guid)
             {
                 return Microsoft.Performance.SDK.Processing.TableConfiguration.LeftFreezeColumn;
             }
-            else if (dto.Metadata.Guid == Microsoft.Performance.SDK.Processing.TableConfiguration.RightFreezeColumn.Metadata.Guid)
+            else if (dto.ColumnIdentifier.ColumnGuid == Microsoft.Performance.SDK.Processing.TableConfiguration.RightFreezeColumn.Metadata.Guid)
             {
                 return Microsoft.Performance.SDK.Processing.TableConfiguration.RightFreezeColumn;
             }
-            else if (dto.Metadata.Guid == Microsoft.Performance.SDK.Processing.TableConfiguration.GraphColumn.Metadata.Guid)
+            else if (dto.ColumnIdentifier.ColumnGuid == Microsoft.Performance.SDK.Processing.TableConfiguration.GraphColumn.Metadata.Guid)
             {
                 return Microsoft.Performance.SDK.Processing.TableConfiguration.GraphColumn;
             }
@@ -436,11 +418,12 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
             return columnConfiguration;
         }
 
-        private static ColumnConfiguration ConvertToDto(
+        private static TableConfigurationColumn ConvertToDto(
             this Microsoft.Performance.SDK.Processing.ColumnConfiguration columnConfiguration)
         {
-            var dto = new ColumnConfiguration
+            var dto = new TableConfigurationColumn
             {
+                ColumnIdentifier = columnConfiguration.Co
                 DisplayHints = columnConfiguration.DisplayHints.ConvertToDto(),
                 Metadata = columnConfiguration.Metadata.ConvertToDto(),
             };

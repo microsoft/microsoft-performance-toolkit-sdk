@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime.DTO.V1_0;
+using Microsoft.Performance.SDK.Runtime.DTO.V1_3;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
@@ -97,7 +97,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
                 if (desrailizedObject is ISupportUpgrade<PrebuiltConfigurations> supportUpgrade)
                 {
-                    prebuiltConfigurations = supportUpgrade.Upgrade();
+                    prebuiltConfigurations = supportUpgrade.Upgrade(logger);
                 }
                 else if (desrailizedObject is PrebuiltConfigurations latestConfigs)
                 {
@@ -310,7 +310,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         }
 
         private static IEnumerable<Processing.TableConfigurations> ConvertDataTransferObjectsToTableConfigurations(
-            TableConfigurations[] transferObjects)
+            V1_3.TableConfigurations[] transferObjects)
         {
             var tableConfigurations = new List<Processing.TableConfigurations>(transferObjects.Length);
 
