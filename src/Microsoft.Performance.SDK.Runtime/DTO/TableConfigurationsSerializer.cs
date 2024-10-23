@@ -105,17 +105,11 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 // Ensure we don't get stuck in a loop by tracking visited configurations
                 HashSet<PrebuiltConfigurationsBase> visited = new HashSet<PrebuiltConfigurationsBase>();
 
-                while (visited.Add(configurationsBase))
+                while (configurationsBase is not PrebuiltConfigurations &&
+                       configurationsBase is ISupportUpgrade<PrebuiltConfigurationsBase> upgradeable &&
+                       visited.Add(configurationsBase))
                 {
-                    if (configurationsBase is PrebuiltConfigurations)
-                    {
-                        break;
-                    }
-
-                    if (configurationsBase is ISupportUpgrade<PrebuiltConfigurationsBase> upgradeable)
-                    {
-                        configurationsBase = upgradeable.Upgrade();
-                    }
+                    configurationsBase = upgradeable.Upgrade();
                 }
 
                 prebuiltConfigurations = configurationsBase as PrebuiltConfigurations;
