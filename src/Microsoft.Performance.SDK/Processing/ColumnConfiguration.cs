@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
@@ -19,7 +21,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="metadata"/> is <c>null</c>.
         /// </exception>
         public ColumnConfiguration(ColumnMetadata metadata)
-            : this(metadata, null)
+            : this(metadata, null, null)
         {   
         }
 
@@ -39,10 +41,34 @@ namespace Microsoft.Performance.SDK.Processing
         ///     <paramref name="metadata"/> is <c>null</c>.
         /// </exception>
         public ColumnConfiguration(ColumnMetadata metadata, UIHints hints)
+            : this(metadata, hints, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ColumnConfiguration"/>
+        ///     class.
+        /// </summary>
+        /// <param name="metadata">
+        ///     The metadata about the column.
+        /// </param>
+        /// <param name="hints">
+        ///     Optional hints about displaying this column in the UI. This parameter
+        ///     may be <c>null</c>. If this parameter is <c>null</c>, then
+        ///     <see cref="UIHints.Default"/> will be used for this instance.
+        /// </param>
+        /// <param name="variantGuid">
+        ///     Optional unique identifier of the column variant to use.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="metadata"/> is <c>null</c>.
+        /// </exception>
+        public ColumnConfiguration(ColumnMetadata metadata, UIHints hints, Guid? variantGuid)
         {
             Guard.NotNull(metadata, nameof(metadata));
 
             this.Metadata = metadata;
+            this.VariantGuid = variantGuid;
             this.DisplayHints = hints ?? UIHints.Default();
         }
 
@@ -61,6 +87,7 @@ namespace Microsoft.Performance.SDK.Processing
             Guard.NotNull(other, nameof(other));
 
             this.Metadata = other.Metadata.CloneT();
+            this.VariantGuid = other.VariantGuid;
             this.DisplayHints = other.DisplayHints.CloneT();
         }
 
@@ -68,6 +95,12 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets the metadata for this instance.
         /// </summary>
         public ColumnMetadata Metadata { get; }
+
+        /// <summary>
+        ///     Gets the unique identifier of the column variant to use.
+
+        /// </summary>
+        public Guid? VariantGuid { get; }
 
         /// <summary>
         ///     Gets any hints from the addin on how to render the column.
@@ -85,7 +118,14 @@ namespace Microsoft.Performance.SDK.Processing
         /// </returns>
         public override string ToString()
         {
-            return $"{this.Metadata.Guid} - {this.Metadata.Name}";
+            if (this.VariantGuid == null)
+            {
+                return $"{this.Metadata.Guid} - {this.Metadata.Name}";
+            }
+            else
+            {
+                return $"{this.Metadata.Guid} - {this.Metadata.Name} (variant {this.VariantGuid}";
+            }
         }
     }
 }

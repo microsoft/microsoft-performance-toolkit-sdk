@@ -10,6 +10,7 @@ using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ColumnConfiguration = Microsoft.Performance.SDK.Runtime.DTO.V1_3.ColumnConfiguration;
 using TableConfiguration = Microsoft.Performance.SDK.Processing.TableConfiguration;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
@@ -286,7 +287,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                     StartTimeColumnGuid = Guid.NewGuid(),
                     StartTimeColumnName = testStr()
                 }, 3).ToArray(),
-                Columns = Enumerable.Repeat(new DTO.ColumnConfiguration()
+                Columns = Enumerable.Repeat(new DTO.V1_0.ColumnConfiguration()
                 {
                     Metadata = new DTO.ColumnMetadata()
                     {

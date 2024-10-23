@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Microsoft.Performance.SDK.Runtime.DTO.Enums;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO
+namespace Microsoft.Performance.SDK.Runtime.DTO.V1_3
 {
     [DataContract]
     internal class TableConfiguration
@@ -93,7 +93,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         ///     Columns that may appear in the table.
         /// </summary>
         [DataMember(Order = 14)]
-        public IEnumerable<Runtime.DTO.ColumnConfiguration> Columns { get; set; }
+        public IEnumerable<ColumnConfiguration> Columns { get; set; }
 
         /// <summary>
         ///     The roles and their associated column entries.

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Runtime.DTO.Enums;
+using Microsoft.Performance.SDK.Runtime.DTO.V1_3;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
@@ -431,7 +432,8 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
             var columnConfiguration = new Microsoft.Performance.SDK.Processing.ColumnConfiguration(
                     dto.Metadata.ConvertToSdk(),
-                    dto.DisplayHints.ConvertToSdk());
+                    dto.DisplayHints.ConvertToSdk(),
+                    dto.VariantGuid);
             return columnConfiguration;
         }
 

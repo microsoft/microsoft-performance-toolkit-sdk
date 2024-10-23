@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
     [DataContract]
     internal class PrebuiltConfigurations
         : PrebuiltConfigurationsBase,
-          ISupportUpgrade<DTO.PrebuiltConfigurations>
+          ISupportUpgrade<V1_0.PrebuiltConfigurations>
     {
         internal static readonly double DTOVersion = 0.1;
 
@@ -21,9 +21,9 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         [DataMember(Order = 2)]
         public TableConfigurations[] Tables { get; set; }
 
-        public DTO.PrebuiltConfigurations Upgrade()
+        public V1_0.PrebuiltConfigurations Upgrade()
         {
-            return new DTO.PrebuiltConfigurations()
+            return new V1_0.PrebuiltConfigurations()
             {
                 Tables = this.Tables.Select(configs => configs.Upgrade()).ToArray()
             };

@@ -9,6 +9,8 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.DTO.V1_3;
+using TableConfigurations = Microsoft.Performance.SDK.Runtime.DTO.V1_3.TableConfigurations;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
@@ -72,7 +74,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                 startingPosition = stream.Position;
             }
 
-            PrebuiltConfigurations prebuiltConfigurations = null;
+            V1_3.PrebuiltConfigurations prebuiltConfigurations = null;
 
             try
             {
@@ -94,14 +96,31 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
                 var desrailizedObject = serializer.ReadObject(stream);
 
-                if (desrailizedObject is ISupportUpgrade<PrebuiltConfigurations> supportUpgrade)
+                if (desrailizedObject is not PrebuiltConfigurationsBase configurationsBase)
                 {
-                    prebuiltConfigurations = supportUpgrade.Upgrade();
+                    return Enumerable.Empty<Processing.TableConfigurations>();
                 }
-                else if (desrailizedObject is PrebuiltConfigurations latestConfigs)
+
+                // Ensure we don't get stuck in a loop by tracking visited configurations
+                HashSet<PrebuiltConfigurationsBase> visited = new HashSet<PrebuiltConfigurationsBase>();
+
+                while (visited.Add(configurationsBase))
                 {
-                    prebuiltConfigurations = latestConfigs;
+                    if (configurationsBase is ISupportUpgrade<V1_0.PrebuiltConfigurations> v1_0)
+                    {
+                        configurationsBase = v1_0.Upgrade();
+                    }
+                    else if (configurationsBase is ISupportUpgrade<V1_3.PrebuiltConfigurations> v1_3)
+                    {
+                        configurationsBase = v1_3.Upgrade();
+                    }
+                    else if (configurationsBase is V1_3.PrebuiltConfigurations latestConfigs)
+                    {
+                        break;
+                    }
                 }
+
+                prebuiltConfigurations = configurationsBase as V1_3.PrebuiltConfigurations;
 
                 if (prebuiltConfigurations == null)
                 {
