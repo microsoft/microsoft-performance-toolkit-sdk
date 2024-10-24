@@ -102,12 +102,8 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
                     return Enumerable.Empty<Processing.TableConfigurations>();
                 }
 
-                // Ensure we don't get stuck in a loop by tracking visited configurations
-                HashSet<PrebuiltConfigurationsBase> visited = new HashSet<PrebuiltConfigurationsBase>();
-
                 while (configurationsBase is not PrebuiltConfigurations &&
-                       configurationsBase is ISupportUpgrade<PrebuiltConfigurationsBase> upgradeable &&
-                       visited.Add(configurationsBase))
+                       configurationsBase is ISupportUpgrade<PrebuiltConfigurationsBase> upgradeable)
                 {
                     configurationsBase = upgradeable.Upgrade();
                 }
