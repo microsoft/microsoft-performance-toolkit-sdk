@@ -5,11 +5,11 @@ using System;
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
+namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
 {
     [DataContract]
     internal class TableConfigurations
-        : ISupportUpgrade<V1_0.TableConfigurations>
+        : ISupportUpgrade<Latest.TableConfigurations>
     {
         [DataMember(Order = 1)]
         public Guid TableId { get; set; }
@@ -20,9 +20,9 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         [DataMember(Order = 3)]
         public TableConfiguration[] Configurations { get; set; }
 
-        public V1_0.TableConfigurations Upgrade()
+        public Latest.TableConfigurations Upgrade()
         {
-            return new V1_0.TableConfigurations()
+            return new Latest.TableConfigurations()
             {
                 TableId = this.TableId,
                 DefaultConfigurationName = this.DefaultConfigurationName,
