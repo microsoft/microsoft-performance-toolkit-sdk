@@ -1,32 +1,34 @@
 # Glossary
 
-* [AboutInfo](#aboutinfo)
-* [Column](#column)
-* [ColumnConfiguration](#columnconfiguration)
-* [ColumnRole](#columnrole)
-* [CompositeDataCooker](#compositedatacooker)
-* [CustomDataProcessor](#customdataprocessor)
-* [DataCooker](#datacooker)
-* [DataSource](#datasource)
-* [DynamicTable](#dynamictable)
-* [Pivot Column](#pivot-column)
-* [Pivot Table](#pivot-table)
-* [Plugin](#plugin)
-* [Processing Pipeline](#processing-pipeline)
-* [ProcessingSource](#processingsource)
-* [Projection](#projection)
-* [SDK Driver](#sdk-driver)
-* [Simple Table](#simple-table)
-* [SourceDataCooker](#sourcedatacooker)
-* [SourceParser](#sourceparser)
-* [Special Columns](#special-columns)
-* [Table](#table)
-* [TableBuilder](#tablebuilder)
-* [Table Building Cycle](#table-building-cycle)
-* [TableCommand](#tablecommand)
-* [TableConfiguration](#tableconfiguration)
-* [VisibleDomainSensitiveProjection](#visibledomainsensitiveprojection)
-* [Windows Performance Analyzer](#windows-performance-analyzer)
+- [Glossary](#glossary)
+  - [AboutInfo](#aboutinfo)
+  - [Column](#column)
+  - [ColumnConfiguration](#columnconfiguration)
+  - [ColumnRole](#columnrole)
+  - [Column Variant](#column-variant)
+  - [CompositeDataCooker](#compositedatacooker)
+  - [CustomDataProcessor](#customdataprocessor)
+  - [DataCooker](#datacooker)
+  - [DataSource](#datasource)
+  - [DynamicTable](#dynamictable)
+  - [Pivot Column](#pivot-column)
+  - [Pivot Table](#pivot-table)
+  - [Plugin](#plugin)
+  - [Processing Pipeline](#processing-pipeline)
+  - [ProcessingSource](#processingsource)
+  - [Projection](#projection)
+  - [SDK Driver](#sdk-driver)
+  - [Simple Table](#simple-table)
+  - [SourceDataCooker](#sourcedatacooker)
+  - [SourceParser](#sourceparser)
+  - [Special Columns](#special-columns)
+  - [Table](#table)
+  - [TableBuilder](#tablebuilder)
+  - [Table Building Cycle](#table-building-cycle)
+  - [TableCommand](#tablecommand)
+  - [TableConfiguration](#tableconfiguration)
+  - [VisibleDomainSensitiveProjection](#visibledomainsensitiveprojection)
+  - [Windows Performance Analyzer](#windows-performance-analyzer)
 
 ---
 
@@ -52,6 +54,16 @@ Meta-information about a [Column](#column) that defines the Column's role in dat
 For example, a Column of `Timestamp` values relative to the start of a [DataSource](#datasource) may be marked as a "start time" Column.
 
 ColumnRoles are specified as part of a [Table Configuration](#tableconfiguration).
+
+## Column Variant
+
+An alternative [projection](#projection) for a [column](#column). While table authors are free to define column variants however they wish, variants are often used to provide alternate views of the same underlying data. For example, a "Process" column may define
+* one `IProjection<int, string>` variant that projects to the process name
+* one `IProjection<int, uint>` variant that projects to the process ID
+
+> ⚠️ Note: column variants **cannot** be assigned as a [column role](#columnrole) or highlight entries within a [column configuration](#columnconfiguration); only the "base" projection associated with the column may be used for these purposes.
+
+For more information on the different types of column variants, refer to the [Adding Column Variants](./Using-the-SDK/Advanced/Adding-Column-Variants.md) documentation.
 
 ## CompositeDataCooker
 
@@ -109,7 +121,7 @@ If the "State" column above is a [Pivot Column](#pivot-column), the 5 rows would
 |              | 10023    | 60,998     |
 |              | 10025    | 94,600     |
 
-NOTE: the SDK has no understanding of Pivot Tables. Tables created by a plugin are purely "flat" tables - i.e. tables similar the first one above. It is up to programs like [Windows Performance Analyzer](#windows-performance-analyzer) to use pivot information in a [Table Configuration](#tableconfiguration) to present a plugin's Table as a Pivot Table.
+> ⚠️ Note: the SDK has no understanding of Pivot Tables. Tables created by a plugin are purely "flat" tables - i.e. tables similar the first one above. It is up to programs like [Windows Performance Analyzer](#windows-performance-analyzer) to use pivot information in a [Table Configuration](#tableconfiguration) to present a plugin's Table as a Pivot Table.
 
 See also: [Wikipedia Pivot Tables](https://en.wikipedia.org/wiki/Pivot_table).
 
