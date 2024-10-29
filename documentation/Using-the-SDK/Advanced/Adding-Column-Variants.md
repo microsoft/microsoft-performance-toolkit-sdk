@@ -1,29 +1,31 @@
 # Abstract
 
-This document outlines how to configure a [column](../../Glossary.md#column) with different types of [column variants](../../Glossary.md#column-variant). Additionally, this document provides guidelines on when to use each type of column variant and when you should consider making column variants separate table columns.
+This document outlines how to configure a [column](../../Glossary.md#column) with [column variants](../../Glossary.md#column-variant). Additionally, this document provides guidelines on when to use each type of column variant and when you should consider making create separate columns instead of column variants.
 
 # Motivation
 
-There are often instances where a single piece of data can be expressed or displayed in multiple ways. Prior to SDK version `1.3`, table authors were forced to add one column for each way the data can be displayed.
+There are often instances where a single piece of data can be expressed in multiple ways. Prior to SDK version `1.3`, table authors were forced to add one column for each way the data can be displayed.
 
-For example, suppose a table author exposes a "Process" column whose data identifies which process is associated with a given row. This data can be expressed in multiple ways:
+For example, suppose a table has a "Process" column whose data identifies which process is associated with each row. This data can be expressed in multiple ways:
 * The process name
-* The process numeric identifier (PID)
+* The process identifier (PID)
 * The process name + PID
 
-Without column variants, the table author would have to add three independent columns to a table to expose these three representations of the same data. With column variants, however, the table author can add one "Process" column with three *mode variants* - one for each representation.
+Without column variants, the table author would have to add three independent columns to a table to expose these three representations of the same data. With column variants, however, the table author can add one "Process" column with three variants - one for each representation.
 
 # When to Use Column Variants
 
-Since column variants are defined as an alternative projection `IProjection<int, T>` with no constraint on the type `T`, there is no technical limitation on what data is exposed through a variant. As such, table authors should take care to ensure column variants make sense to be grouped together as one column. There are two restrictions on column variants that help guide whether to expose projections as variants or new columns:
+Column variants are defined as an alternative projection `IProjection<int, T>` with no constraint on the type `T`, which places no technical limitation on what data is exposed through a variant. As such, table authors should take care to ensure column variants make sense to be grouped together under one column. There are two restrictions on column variants that help guide whether to expose projections as variants or new columns:
 
-1. Column variants cannot supply a new [column configuration](../../Glossary.md#columnconfiguration) for the column that the variant is for. As such, column variants should only be used when the projected data makes sense given the base column's configuration. If a user would be confused how a column variant's data relates to its base column, you should consider exposing the variant as its own dedicated column. Note that in some cases it may make sense to edit a column configuration's name and description to accommodate new variants; for example, a column named "Process Name" could be renamed to "Process" and be supplied variants for process name, PID, and process name + PID.
+1. Column variants cannot supply a new [column configuration](../../Glossary.md#columnconfiguration) for the column that the variant is for. As such, column variants should only be used when the projected data makes sense given the base column's configuration. If a user would be confused how a column variant's data relates to its base column, you should consider exposing the variant as a separate dedicated column. 
+
+    Note that in some cases it may make sense to edit a column configuration's name and description to accommodate new variants; for example, a column named "Process Name" could be renamed to "Process" and be expose variants for process name, PID, and process name + PID.
 
 2. Column variants cannot be used as a [column role](../../Glossary.md#columnrole) or highlight entries within a [column configuration](../../Glossary.md#columnconfiguration). When column roles or highlight entries are defined, they are always associated with the column's base projection.
 
 # How to Add Column Variants
 
-Column variants are added to a column by adding the base column to an `ITableBuilder` with the `AddColumnWithVariants` methods introduced in SDK version `1.3`. These methods take a parameter `Func<RootColumnBuilder, ColumnBuilder>` which defines all the variants to associate with the added column. The supplied `Func` will be invoked with a `RootColumnBuilder` supplied by the SDK runtime and must return the final `ColumnBuilder` configured with variants.
+Column variants are added to a column by adding the base column to an `ITableBuilder` with the `AddColumnWithVariants` methods introduced in SDK version `1.3`. These methods take a callback `Func<RootColumnBuilder, ColumnBuilder>` whose return value defines all the variants to associate with the added column. The supplied `Func` will be invoked with a `RootColumnBuilder` supplied by the SDK runtime and must return the final `ColumnBuilder` configured with variants.
 
 Note that unlike the `ITableBuilder`, column builders are purely functional components: every column builder method returns a **new instance** of a column builder. For example, consider the code snippet below:
 
@@ -31,11 +33,14 @@ Note that unlike the `ITableBuilder`, column builders are purely functional comp
 tableBuilder
     .AddColumnWithVariants(baseConfig, projectionA, builder =>
     {
+        // These modes are ignored because the return value from
+        // WithMode(modeB, projectionB) is being discarded 
         builder
             .WithModes("Mode A")
             .WithMode(modeB, projectionB);
 
-        // Will ignore added modes above
+        // Will ignore added modes above because the returned value is building
+        // off of the input builder
         return builder
                 .WithToggle(toggleIdentifier, projectionToggle);
     });
