@@ -77,7 +77,7 @@ tableBuilder
 Toggles can be added recursively on top of each other: it is possible to have a toggle from projection `A` to `B`, then another toggle from `B` to `C`, and so on.
 
 ### Mode Column Variants
-Mode column variants are *a collection* of variants that are mutually exclusive to *each other*. Conceptually, they offer users a way to choose between one or more alternate views. 
+Mode column variants are *a collection* of variants that are mutually exclusive to *each other*. Conceptually, they offer users a way to choose between one or more alternate views. Unlike toggle variants that can be in on/off states, a collection of modes should have one mode selected at all times.
 
 There are two ways to define a set of modes:
 
@@ -103,7 +103,9 @@ There are two ways to define a set of modes:
         });
     ```
 
-2. Using `WithToggledModes`, define modes whose entire collection represents a set of modes that are mutually exclusive all of its parents. For example, a `Timestamp` column could offer a "as DateTime" toggle that itself allows users to select between UTC vs local time.
+    `WithModes` can *only* be invoked from a `RootColumnBuilder`. It is not possible to call, for example, `WithToggle` followed by `WithModes`. This restriction is in place because, if you could do this, the column variant associated with the modes' direct parent would be overshadowed by the set of modes. If you wish to expose, for UX purposes, a toggle that exposes a set of modes, use `WithToggledModes` described below.
+
+2. Using `WithToggledModes`, define modes whose entire collection represents a set of modes that are mutually exclusive to all of its parents. For example, a `Timestamp` column could offer a "as DateTime" toggle that itself allows users to select between UTC vs local time.
 
     ```cs
     ColumnConfiguration columnConfiguration = 
@@ -134,4 +136,45 @@ There are two ways to define a set of modes:
 
     `WithToggledModes` may be called after `WithToggle`, meaning you can end a chain of hierarchical toggles with a set of toggled modes. However, you are unable to continue adding toggles on top of toggled modes.
 
-Finally, it is worth noting that both `WithModes` and `WithMode` have an overloaded method that takes an `Func<ToggleableColumnBuilder, ColumnBuilder>`. This allows you to continue adding variants that are direct children of the mode that has been created.
+## Recursive Variants
+
+Both `WithModes` and `WithMode` described above have overloaded methods that takes a `Func<ToggleableColumnBuilder, ColumnBuilder>`. These methods allow you to add variants that are direct children of the mode that that is being added, effectively letting you define "recursive" column variants.
+
+For example, consider this code:
+
+```cs
+ColumnConfiguration columnConfiguration = 
+    new ColumnConfiguration(new ColumnMetadata(new Guid("..."), "Time"));
+
+IProjection<int, DateTime> asUtc = GetUtcProjection(); // Omitted for brevity
+IProjection<int, DateTime> asLocal = asUtc.Compose(utc => utc.ToLocalTime();
+
+tableBuilder
+    .AddColumnWithVariants(columnConfiguration, asUtc, builder =>
+    {
+        return builder
+                .WithModes("UTC")  // The name of the mode to associate with the base column projection
+                .WithMode(
+                    new ColumnVariantDescriptor(new Guid("..."), "Local"),
+                    asLocal),
+                    modeBuilder => 
+                    {
+                        ColumnVariantDescriptor withDST = new(new Guid("..."), "With DST");
+
+                        return modeBuilder
+                                .WithToggle(
+                                    withDST,
+                                    asLocal.Compose(local => FixDST(local)));
+                    });
+    });
+```
+
+This code will create a "Time" column that, at the root level, has two available modes:
+- "UTC" mode, which uses the base column's projection
+- "Local" mode, which converts each UTC datetime to local time
+
+In addition to these modes, this code adds a toggle "With DST" to the "Local" mode. Conceptually, this means that when a user is choosing to display the time as a local DateTime, they have the option to toggle DST on and off.
+
+If desired, it is also possible to define new sub-modes of a given mode using `WithToggledModes` in the callback.
+
+The ability to recursively defined column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to have no more than 2 levels of possible column variants; if you are considering adding more, you should consider adding new columns instead.
