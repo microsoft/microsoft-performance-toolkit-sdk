@@ -133,11 +133,11 @@ There are two ways to define a set of modes:
         });
     ```
 
-    `WithToggledModes` may be called after `WithToggle`, meaning you can end a chain of hierarchical toggles with a set of toggled modes. However, you are unable to continue adding toggles on top of toggled modes.
+    `WithToggledModes` may be called after `WithToggle`, meaning you can end a chain of hierarchical toggles with a set of toggled modes. However, you are unable to continue adding regular toggles on top of toggled modes.
 
 ## Recursive Variants
 
-Both `WithModes` and `WithMode` described above have overloaded methods that takes a `Func<ToggleableColumnBuilder, ColumnBuilder>`. These methods allow you to add variants that are direct children of the mode that that is being added, effectively letting you define "recursive" column variants.
+Both `WithModes` and `WithMode` described above have overloaded methods that take a `Func<ToggleableColumnBuilder, ColumnBuilder>`. These methods allow you to add variants that are direct children of the mode that that is being added, effectively letting you define "recursive" column variants.
 
 For example, consider this code:
 
