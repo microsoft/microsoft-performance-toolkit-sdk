@@ -116,7 +116,6 @@ There are two ways to define a set of modes:
     tableBuilder
         .AddColumnWithVariants(columnConfiguration, timestampProjection, builder =>
         {
-
             return builder
                     .WithToggledModes(
                         "as DateTime",
