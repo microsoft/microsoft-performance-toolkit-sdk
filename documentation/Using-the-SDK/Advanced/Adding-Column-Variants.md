@@ -137,7 +137,7 @@ There are two ways to define a set of modes:
 
 ## Recursive Variants
 
-Both `WithModes` and `WithMode` described above have overloaded methods that take a `Func<ToggleableColumnBuilder, ColumnBuilder>`. These methods allow you to add variants that are direct children of the mode that that is being added, effectively letting you define "recursive" column variants.
+Both `WithModes` and `WithMode` described above have overloaded methods that take a `Func<ToggleableColumnBuilder, ColumnBuilder>`. These methods allow you to add variants that are direct children of the mode that that is being added, letting you define "recursive" column variants.
 
 For example, consider this code:
 
@@ -155,7 +155,7 @@ tableBuilder
                 .WithModes("UTC")  // The name of the mode to associate with the base column projection
                 .WithMode(
                     new ColumnVariantDescriptor(new Guid("..."), "Local"),
-                    asLocal),
+                    asLocal,
                     modeBuilder => 
                     {
                         ColumnVariantDescriptor withDST = new(new Guid("..."), "With DST");
@@ -176,4 +176,4 @@ In addition to these modes, this code adds a toggle "With DST" to the "Local" mo
 
 If desired, it is also possible to define new sub-modes of a given mode using `WithToggledModes` in the callback.
 
-The ability to recursively defined column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to have no more than 2 levels of possible column variants; if you are considering adding more, you should consider adding new columns instead.
+The ability to recursively defined column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; if your column has a complex tree of variants, you should consider creating new columns instead.
