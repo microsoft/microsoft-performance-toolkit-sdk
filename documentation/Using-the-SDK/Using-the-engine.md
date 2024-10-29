@@ -134,3 +134,11 @@ Once you have finished using an `Engine` instance, you should dispose the corres
 # Using Column Variants
 
 Starting in SDK version `1.3`, table authors may define [column variants](../Glossary.md#column-variant)s for columns added to their tables.
+
+Column variants advertise two pieces of information:
+1. The `IDataColumn` that provides the data associated with the registered variant
+2. Meta-information about how the registered variant relates to other registered variants
+
+Because the engine is designed for programmatic access to data, this "meta-information" is not exposed via its API. Instead, the engine exposes only the `IDataColumn` instances that provide column variant data.
+
+This information is available via the `ITableResult.ColumnVariants` property, which exposes a `IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>>`. The keys of the outer dictionary are base columns from the `ITableResult.Columns` collection that had column variants registered. The inner dictionary maps all `ColumnVariantDescriptor` registered to a base column to the `IDataColumn` containing that variant's data.
