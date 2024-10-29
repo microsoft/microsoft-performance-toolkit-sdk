@@ -11,7 +11,7 @@ For example, suppose a table author exposes a "Process" column whose data identi
 * The process numeric identifier (PID)
 * The process name + PID
 
-Without column variants, the table author would have to add three independent columns to a table to expose each way to represent the data. With column variants, however, the table author can add one "Process" column with three *mode variants* - one for each representation.
+Without column variants, the table author would have to add three independent columns to a table to expose these three representations of the same data. With column variants, however, the table author can add one "Process" column with three *mode variants* - one for each representation.
 
 # When to Use Column Variants
 
