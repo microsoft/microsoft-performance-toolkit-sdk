@@ -130,3 +130,7 @@ across `Engine` instances. However, this functionality has not been fully implem
 Thus, at this time, it is not supported to create a new `Engine` reusing a `DataSourceSet`.
 Once you have finished using an `Engine` instance, you should dispose the corresponding
 `DataSourceSet` and `PluginSet`
+
+# Using Column Variants
+
+Starting in SDK version `1.3`, table authors may define [column variants](../Glossary.md#column-variant)s for columns added to their tables.

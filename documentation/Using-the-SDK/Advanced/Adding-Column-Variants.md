@@ -177,3 +177,19 @@ In addition to these modes, this code adds a toggle "With DST" to the "Local" mo
 If desired, it is also possible to define new sub-modes of a given mode using `WithToggledModes` in the callback.
 
 The ability to recursively defined column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; if your column has a complex tree of variants, you should consider creating new columns instead.
+
+# Defining Default Variants
+Starting in SDK version `1.3`, you can specify on a `ColumnConfiguration` the `Guid` of `ColumnVariantDescriptor` that should be used as the default presentation of the column. You may also add this property to any prebuilt table configuration JSON files, as long as your JSON file uses version `1.3` of the JSON schema.
+
+
+# Using Column Variants via the Engine
+
+To use column variants in the SDK Engine, please refer to the "Using Column Variants" section of the [Using the Engine](../Using-the-engine.md#using-column-variants) documentation.
+
+# Using Column Variants via the SDK Runtime
+
+The SDK runtime does not directly expose a collection of column variants that can be selected. Instead, each concrete `TableBuilder` instances exposes an `IColumnVariantsRegistrar` that can be used to find column variants that were added during table building.
+
+The `IColumnVariantsRegistrar` has a single method for getting the root `IColumnVariantsTreeNode` for a given base `IDataColumn` (i.e. the columns inside `TableBuilder.Columns`).
+
+These tree nodes follow a visitor pattern that allow SDK runtime users to discover both the `IDataColumn` instances that represent column variants as well as how the different variants relate to each other. Once you obtain the root tree node, you must create an `IColumnVariantsTreeNodesVisitor` implementation that the root node can `Accept`. 
