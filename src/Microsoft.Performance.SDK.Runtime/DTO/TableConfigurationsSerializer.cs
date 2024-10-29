@@ -9,6 +9,8 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.DTO.Latest;
+using TableConfigurations = Microsoft.Performance.SDK.Runtime.DTO.Latest.TableConfigurations;
 
 namespace Microsoft.Performance.SDK.Runtime.DTO
 {
@@ -27,6 +29,7 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
                 return assembly.GetTypes()
                                .Where(type => type.IsSubclassOf(typeof(PrebuiltConfigurationsBase)))
+                               .Where(type => type.IsConcrete())
                                .Select(type => (((PrebuiltConfigurationsBase)Activator.CreateInstance(type)).Version, type)).ToArray();
             });
 
@@ -94,14 +97,18 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
 
                 var desrailizedObject = serializer.ReadObject(stream);
 
-                if (desrailizedObject is ISupportUpgrade<PrebuiltConfigurations> supportUpgrade)
+                if (desrailizedObject is not PrebuiltConfigurationsBase configurationsBase)
                 {
-                    prebuiltConfigurations = supportUpgrade.Upgrade();
+                    return Enumerable.Empty<Processing.TableConfigurations>();
                 }
-                else if (desrailizedObject is PrebuiltConfigurations latestConfigs)
+
+                while (configurationsBase is not PrebuiltConfigurations &&
+                       configurationsBase is ISupportUpgrade<PrebuiltConfigurationsBase> upgradeable)
                 {
-                    prebuiltConfigurations = latestConfigs;
+                    configurationsBase = upgradeable.Upgrade();
                 }
+
+                prebuiltConfigurations = configurationsBase as PrebuiltConfigurations;
 
                 if (prebuiltConfigurations == null)
                 {

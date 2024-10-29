@@ -3,13 +3,13 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO
+namespace Microsoft.Performance.SDK.Runtime.DTO.Latest
 {
     [DataContract]
     internal class PrebuiltConfigurations
         : PrebuiltConfigurationsBase
     {
-        internal static readonly double DTOVersion = 1.0;
+        internal static readonly double DTOVersion = 1.3;
 
         public PrebuiltConfigurations()
         {

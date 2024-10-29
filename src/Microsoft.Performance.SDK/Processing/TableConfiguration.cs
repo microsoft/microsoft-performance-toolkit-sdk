@@ -184,11 +184,15 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets the mapping of column roles to column guids, if any.
         ///     If there are no column roles, then this dictionary will
         ///     be empty.
+        ///     Only the base projection of a column can be assigned a role; variants
+        ///     of a column cannot be assigned a role.
         /// </summary>
         public IReadOnlyDictionary<string, Guid> ColumnRoles { get; }
 
         /// <summary>
-        ///     Places the given column into the given column role.
+        ///     Places the given column into the given column role. Only the base projection of
+        ///     the column will be used; the <see cref="ColumnConfiguration.VariantGuid"/> set
+        ///     on the configuration will be ignored.
         /// </summary>
         /// <param name="columnRole">
         ///     The case sensitive role into which to place the column.
@@ -217,7 +221,8 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Places the given column into the given column role.
+        ///     Places the given column into the given column role. Only the base
+        ///     projection of the specified column will be assigned to the role.
         /// </summary>
         /// <param name="columnRole">
         ///     The case sensitive role into which to place the column.

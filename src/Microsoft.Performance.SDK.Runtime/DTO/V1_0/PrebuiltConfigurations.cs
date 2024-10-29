@@ -4,13 +4,13 @@
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
+namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
 {
     [DataContract]
     internal class PrebuiltConfigurations
-        : PreviousPrebuiltConfigurationBase<V1_0.PrebuiltConfigurations>
+        : PreviousPrebuiltConfigurationBase<Latest.PrebuiltConfigurations>
     {
-        internal static readonly double DTOVersion = 0.1;
+        internal static readonly double DTOVersion = 1.0;
 
         public PrebuiltConfigurations()
         {
@@ -20,9 +20,9 @@ namespace Microsoft.Performance.SDK.Runtime.DTO.PreV1
         [DataMember(Order = 2)]
         public TableConfigurations[] Tables { get; set; }
 
-        protected override V1_0.PrebuiltConfigurations UpgradeToNext()
+        protected override Latest.PrebuiltConfigurations UpgradeToNext()
         {
-            return new V1_0.PrebuiltConfigurations()
+            return new Latest.PrebuiltConfigurations()
             {
                 Tables = this.Tables.Select(configs => configs.Upgrade()).ToArray()
             };

@@ -3,10 +3,11 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Performance.SDK.Runtime.DTO
+namespace Microsoft.Performance.SDK.Runtime.DTO.V1_0
 {
     [DataContract]
     internal class ColumnConfiguration
+        : ISupportUpgrade<Latest.ColumnConfiguration>
     {
         /// <summary>
         ///     Metadata describing the column.
@@ -19,5 +20,15 @@ namespace Microsoft.Performance.SDK.Runtime.DTO
         /// </summary>
         [DataMember]
         public UIHints DisplayHints { get; set;  }
+
+        public Latest.ColumnConfiguration Upgrade()
+        {
+            return new Latest.ColumnConfiguration()
+            {
+                Metadata = this.Metadata,
+                VariantGuid = null,
+                DisplayHints = this.DisplayHints,
+            };
+        }
     }
 }
