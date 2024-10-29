@@ -6,7 +6,7 @@ This document outlines how to configure a [column](../../Glossary.md#column) wit
 
 There are often instances where a single piece of data can be expressed or displayed in multiple ways. Prior to SDK version `1.3`, table authors were forced to add one column for each way the data can be displayed.
 
-For example, suppose a table author exposes a "Process" column whose data that identifies which process is associated with a given row. This data can be expressed in multiple ways:
+For example, suppose a table author exposes a "Process" column whose data identifies which process is associated with a given row. This data can be expressed in multiple ways:
 * The process name
 * The process numeric identifier (PID)
 * The process name + PID
