@@ -58,7 +58,7 @@ For example, suppose a base column is added that exposes `DateTime` information 
 
 ```cs
 ColumnConfiguration columnConfiguration = 
-    new ColumnConfiguration(new ColumnMetadata(new Guid("..."), "Time (UTC)"));
+    new ColumnConfiguration(new ColumnMetadata(new Guid("..."), "Time"));
 
 IProjection<int, DateTime> asUtc = GetUtcProjection(); // Omitted for brevity
 
