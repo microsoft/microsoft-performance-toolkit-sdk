@@ -46,7 +46,14 @@ tableBuilder
     });
 ```
 
-In this example, the added column will only contain the base column with one toggle. **There will not be any modes associated with this column.** Even though `builder.WithModes` was called, the `ColumnBuilder` returned by the method was the supplied (empty) builder with one `WithToggle` added.
+This code will produce the following variants tree:
+
+```
+(base column)
+☑ toggle
+```
+
+ **There will not be any modes associated with this column.** Even though `builder.WithModes` was called, the `ColumnBuilder` returned by the method was the supplied (empty) builder with one `WithToggle` added.
 
 Any time a new projection is associated with a variant, a `ColumnVariantDescriptor` must be used to uniquely identify the added variant amongst all variants in the column. The `ColumnVariantDescriptor` is created either
 * Explicitly by the table author and passed into a `ColumnBuilder` method, such as the case when calling `WithToggle`
@@ -79,6 +86,13 @@ tableBuilder
     });
 ```
 
+This code will produce the following variants tree:
+
+```
+(base column)
+☑ As Local Time
+```
+
 Toggles can be added iteratively on top of each other: it is possible to have a toggle from projection `A` to `B`, then another toggle from `B` to `C`, and so on.
 
 ### Mode Column Variants
@@ -108,6 +122,13 @@ There are two ways to define a set of modes:
         });
     ```
 
+    This code will produce the following variants tree:
+
+    ```
+    (base column)  // This is equivalent to the "UTC" mode
+    ● UTC"    ○ Local    ○ Binary
+    ```
+
     `WithModes` can *only* be invoked from a `RootColumnBuilder`. It is not possible to call, for example, `WithToggle` followed by `WithModes`. This restriction is in place because, if you could do this, the column variant associated with the modes' direct parent would be overshadowed by the set of modes. If you wish to expose, for UX purposes, a toggle that exposes a set of modes, use `WithToggledModes` described below.
 
 2. Using `WithToggledModes`, define a set of modes that is, collectively, mutually exclusive to all of its parents. For example, a `Timestamp` column could offer an "as DateTime" toggle that itself allows users to select between UTC vs local time.
@@ -123,7 +144,7 @@ There are two ways to define a set of modes:
         {
             return builder
                     .WithToggledModes(
-                        "as DateTime",
+                        "As DateTime",
                         modesBuilder => 
                         {
                             ColumnVariantDescriptor utc = new(new Guid("..."), "UTC");
@@ -138,7 +159,15 @@ There are two ways to define a set of modes:
         });
     ```
 
-    Note how the `WithToggledModes` does not take a projection. The above code will result in a toggle with no associated variant being exposed to SDK drivers, which defines how the set of modes should be displayed.
+    This code will produce the following variants tree:
+
+    ```
+    (base column)
+    ☑ As DateTime
+    ● UTC     ○ Local
+    ```
+
+    Note how the `WithToggledModes` does not take a projection. The above code will result in a toggle with no associated variant being exposed to SDK drivers, which defines how the set of modes should be displayed. Depending on the SDK driver, the "UTC" and "Local" modes may not be presented to the user unless the "As DateTime" toggle is in use.
 
     `WithToggledModes` may be called after `WithToggle`, meaning you can end a chain of hierarchical toggles with a set of toggled modes. However, you are unable to continue adding regular toggles on top of toggled modes. If you wish to add a toggle after one or more modes in a collection, you must supply a callback `Func` when adding the mode(s), as explained below.
 
@@ -181,9 +210,18 @@ This code will create a "Time" column that, at the root level, has two available
 
 In addition to these modes, this code adds a toggle "With DST" to the "Local" mode. Conceptually, this means that when a user is choosing to display the time as a local DateTime, they have the option to toggle DST on and off.
 
+The variants tree therefore looks like
+```
+(base column)
+○ UTC     ● Local
+         ☑ With DST
+```
+
+where "With DST" is a child of "Local" but not "UTC." Depending on the SDK driver, "With DST" may not be presented to the user unless the "Local" mode is selected.
+
 If desired, it is also possible to define new sub-modes of a given mode using `WithToggledModes` in the callback.
 
-The ability to recursively define column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; if your column has a complex tree of variants, you should consider creating new columns instead.
+> ❗ The ability to recursively define column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; **if your column has a complex tree of variants, you should consider creating new columns instead**.
 
 # Defining Default Column Variants
 Starting in SDK version `1.3`, you can specify on a `ColumnConfiguration` the `Guid` of `ColumnVariantDescriptor` that should be used as the default presentation of the column. You may also add this property to any prebuilt table configuration JSON files, as long as your JSON file uses version `1.3` of the JSON schema.
