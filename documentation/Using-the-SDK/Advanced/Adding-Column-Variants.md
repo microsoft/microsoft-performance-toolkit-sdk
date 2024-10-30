@@ -130,7 +130,7 @@ There are two ways to define a set of modes:
 
     ```
     (base column)  // This is equivalent to the "UTC" mode
-    ● UTC"    ○ Local    ○ Binary
+    ● UTC    ○ Local    ○ Binary
     ```
 
     `WithModes` can *only* be invoked from a `RootColumnBuilder`. It is not possible to call, for example, `WithToggle` followed by `WithModes`. This restriction is in place because, if you could do this, the column variant associated with the modes' direct parent would be overshadowed by the set of modes. If you wish to expose, for UX purposes, a toggle that exposes a set of modes, use `WithToggledModes` described below.
