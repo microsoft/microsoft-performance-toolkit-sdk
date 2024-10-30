@@ -330,16 +330,6 @@ Registered column variants are exposed as `IDataColumn` instances where
 * The `IDataColumn.Configuration` is derived from the base column's configuration and the variant's `ColumnVariantDescriptor`
 * The data column's projection is the variant's projection
 
-Obtaining variant `IDataColumn` instances depends on how you are interacting with the SDK.
+For information on how to obtain `IDataColumn`s for column variants via the SDK Engine, please refer to the "Using Column Variants" section of the [Using the Engine](../Using-the-engine.md#using-column-variants) documentation.
 
-## Using Column Variants via the Engine
 
-To use column variants in the SDK Engine, please refer to the "Using Column Variants" section of the [Using the Engine](../Using-the-engine.md#using-column-variants) documentation.
-
-## Using Column Variants via the SDK Runtime
-
-The SDK runtime does not directly expose a collection of column variants that can be selected. Instead, each concrete `TableBuilder` instances exposes an `IColumnVariantsRegistrar` that can be used to find column variants that were added during table building.
-
-The `IColumnVariantsRegistrar` has a single method for getting the root `IColumnVariantsTreeNode` for a given base `IDataColumn` (i.e. the columns inside `TableBuilder.Columns`).
-
-These tree nodes follow a visitor pattern that allow SDK runtime users to discover both the `IDataColumn` instances that represent column variants as well as how the different variants relate to each other. Once you obtain the root tree node, you must create an `IColumnVariantsTreeNodesVisitor` implementation that the root node can `Accept`. 
