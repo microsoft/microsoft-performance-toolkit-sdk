@@ -39,14 +39,14 @@ tableBuilder
             .WithModes("Mode A")
             .WithMode(modeB, projectionB);
 
-        // Will ignore added modes above because the returned value is building
+        // Will not contain the modes added above because the returned value is building
         // off of the input builder
         return builder
                 .WithToggle(toggleIdentifier, projectionToggle);
     });
 ```
 
-The final column with only contain the base column with one toggle. **There will not be any modes associated with this column.** Even though `builder.WithModes` was called, the `ColumnBuilder` returned by the method was the supplied (empty) builder with one `WithToggle` added.
+In this example, the added column will only contain the base column with one toggle. **There will not be any modes associated with this column.** Even though `builder.WithModes` was called, the `ColumnBuilder` returned by the method was the supplied (empty) builder with one `WithToggle` added.
 
 Any time a new projection is associated with a variant, a `ColumnVariantDescriptor` must be used to uniquely identify the added variant amongst all variants in the column. The `ColumnVariantDescriptor` is created either
 * Explicitly by the table author and passed into a `ColumnBuilder` method, such as the case when calling `WithToggle`
@@ -183,15 +183,116 @@ If desired, it is also possible to define new sub-modes of a given mode using `W
 
 The ability to recursively defined column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; if your column has a complex tree of variants, you should consider creating new columns instead.
 
-# Defining Default Variants
+# Defining Default Column Variants
 Starting in SDK version `1.3`, you can specify on a `ColumnConfiguration` the `Guid` of `ColumnVariantDescriptor` that should be used as the default presentation of the column. You may also add this property to any prebuilt table configuration JSON files, as long as your JSON file uses version `1.3` of the JSON schema.
 
+# Globally Apply Variants Based on Data Type
 
-# Using Column Variants via the Engine
+In some cases table authors have many data columns of the same type available across many tables. For example, a plugin may have several tables that each have more than 1 `DateTime` column.
+
+In these cases, it may be useful to define a common set of variants for all columns of that specific type. Instead of duplicating calls to `AddColumnWithVariants`, a simple way to accomplish this is to create, at the plugin level, `ITableBuilderWithRowCount` extension methods that add these global variants.
+
+For example, you could define an extension method for `DateTime` columns that always adds a "local time" variant:
+
+```cs
+public static class TableBuilderExtensions
+{
+    public static void AddColumn(
+        this ITableBuilderWithRowCount tableBuilder,
+        ColumnConfiguration columnConfiguration,
+        IProjection<int, DateTime> dateTimeProjection)
+    {
+        tableBuilder.AddColumn(new DataColumn<DateTime>(columnConfiguration, projection));
+    }
+    
+    public static void AddColumn(
+        this ITableBuilderWithRowCount tableBuilder,
+        IDataColumn<DateTime> dateTimeProjection)
+    {
+        tableBuilder.AddColumnWithVariants(
+            column,
+            builder =>
+            {
+                return builder
+                    .WithToggle(
+                        new ColumnVariantDescriptor(new Guid("..."), "As Local Time"),
+                        column.Projector.Compose(t => t.ToLocalTime()));
+            });
+    }
+}
+```
+
+If there are cases where an added `DateTime` column needs additional variants outside of the ones applied in the extension method, you could define overloaded versions that take in an additional callback:
+
+```cs
+public static class TableBuilderExtensions
+{
+    public static void AddColumn(
+        this ITableBuilderWithRowCount tableBuilder,
+        ColumnConfiguration columnConfiguration,
+        IProjection<int, DateTime> dateTimeProjection)
+    {
+        tableBuilder.AddColumn(columnConfiguration, dateTimeProjection, null);
+    }
+
+    public static void AddColumn(
+        this ITableBuilderWithRowCount tableBuilder,
+        ColumnConfiguration columnConfiguration,
+        IProjection<int, DateTime> dateTimeProjection,
+        Func<ToggleableColumnBuilder, ColumnBuilder> columnBuilder)
+    {
+        tableBuilder.AddColumn(
+            new DataColumn<DateTime>(columnConfiguration, dateTimeProjection),
+            columnBuilder);
+    }
+
+    public static void AddColumn(
+        this ITableBuilderWithRowCount tableBuilder,
+        IDataColumn<DateTime> dateTimeColumn)
+    {
+        tableBuilder.AddColumn(dateTimeColumn, null);
+    }
+    
+    public static void AddColumn(
+        this ITableBuilderWithRowCount tableBuilder,
+        IDataColumn<DateTime> dateTimeColumn,
+        Func<ToggleableColumnBuilder, ColumnBuilder> columnBuilder)
+    {
+        tableBuilder.AddColumnWithVariants(
+            dateTimeColumn,
+            builder =>
+            {
+                var withToggle = builder
+                    .WithToggle(
+                        new ColumnVariantDescriptor(new Guid("..."), "As Local Time"),
+                        dateTimeColumn.Projector.Compose(t => t.ToLocalTime()));
+
+                if (columnBuilder != null)
+                {
+                    return columnBuilder(withToggle);
+                }
+                else
+                {
+                    return withToggle;
+                }
+            });
+    }
+}
+```
+
+# Using Column Variants
+
+Registered column variants are exposed as `IDataColumn` instances where
+* The `IDataColumn.Configuration` is derived from the base column's configuration and the variant's `ColumnVariantDescriptor`
+* The data column's projection is the variant's projection
+
+Obtaining variant `IDataColumn` instances depends on how you are interacting with the SDK.
+
+## Using Column Variants via the Engine
 
 To use column variants in the SDK Engine, please refer to the "Using Column Variants" section of the [Using the Engine](../Using-the-engine.md#using-column-variants) documentation.
 
-# Using Column Variants via the SDK Runtime
+## Using Column Variants via the SDK Runtime
 
 The SDK runtime does not directly expose a collection of column variants that can be selected. Instead, each concrete `TableBuilder` instances exposes an `IColumnVariantsRegistrar` that can be used to find column variants that were added during table building.
 
