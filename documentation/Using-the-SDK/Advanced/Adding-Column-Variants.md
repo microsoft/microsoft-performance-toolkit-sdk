@@ -59,7 +59,7 @@ There are two primary types of column variants: toggles and modes. While all var
 ### Toggle Column Variants
 A toggle column variant is a *single* variant that is mutually exclusive to all of its *parent* projections. Conceptually, it offers users a way to "toggle" to an alternate view of the toggle's parent projection.
 
-For example, suppose a base column is added that exposes `DateTime` information relative to UTC. An "as local time" toggle may be added that projects each value to a `DateTime` relative to the computer's timezone:
+For example, suppose a base column is added that exposes UTC `DateTime` information. An "as local time" toggle may be added that projects each value to a `DateTime` relative to the computer's timezone:
 
 ```cs
 ColumnConfiguration columnConfiguration = 
@@ -79,14 +79,14 @@ tableBuilder
     });
 ```
 
-Toggles can be added recursively on top of each other: it is possible to have a toggle from projection `A` to `B`, then another toggle from `B` to `C`, and so on.
+Toggles can be added iteratively on top of each other: it is possible to have a toggle from projection `A` to `B`, then another toggle from `B` to `C`, and so on.
 
 ### Mode Column Variants
 Mode column variants are *a collection* of variants that are mutually exclusive to *each other*. Conceptually, they offer users a way to choose between one or more alternate views. Unlike toggle variants that can be in on/off states, a collection of modes should have one mode selected at all times.
 
 There are two ways to define a set of modes:
 
-1. Using `WithModes`, define modes at the base column level. In this configuration, the base column's projection is the first of the available modes in the collection. The base column variant's `ColumnVariantDescriptor` identifier will automatically be set to the `ColumnConfiguration`'s identifier.
+1. Using `WithModes`, define modes at the base column level. In this configuration, the base column's projection is the first available mode in the collection. The base variant's `Guid` will automatically be set to the `ColumnConfiguration`'s identifier.
 
     ```cs
     ColumnConfiguration columnConfiguration = 
@@ -110,7 +110,7 @@ There are two ways to define a set of modes:
 
     `WithModes` can *only* be invoked from a `RootColumnBuilder`. It is not possible to call, for example, `WithToggle` followed by `WithModes`. This restriction is in place because, if you could do this, the column variant associated with the modes' direct parent would be overshadowed by the set of modes. If you wish to expose, for UX purposes, a toggle that exposes a set of modes, use `WithToggledModes` described below.
 
-2. Using `WithToggledModes`, define modes whose entire collection represents a set of modes that are mutually exclusive to all of its parents. For example, a `Timestamp` column could offer a "as DateTime" toggle that itself allows users to select between UTC vs local time.
+2. Using `WithToggledModes`, define a set of modes that is, collectively, mutually exclusive to all of its parents. For example, a `Timestamp` column could offer an "as DateTime" toggle that itself allows users to select between UTC vs local time.
 
     ```cs
     ColumnConfiguration columnConfiguration = 
@@ -138,7 +138,9 @@ There are two ways to define a set of modes:
         });
     ```
 
-    `WithToggledModes` may be called after `WithToggle`, meaning you can end a chain of hierarchical toggles with a set of toggled modes. However, you are unable to continue adding regular toggles on top of toggled modes.
+    Note how the `WithToggledModes` does not take a projection. The above code will result in a toggle with no associated variant being exposed to SDK drivers, which defines how the set of modes should be displayed.
+
+    `WithToggledModes` may be called after `WithToggle`, meaning you can end a chain of hierarchical toggles with a set of toggled modes. However, you are unable to continue adding regular toggles on top of toggled modes. If you wish to add a toggle after one or more modes in a collection, you must supply a callback `Func` when adding the mode(s), as explained below.
 
 ## Recursive Variants
 
@@ -181,18 +183,18 @@ In addition to these modes, this code adds a toggle "With DST" to the "Local" mo
 
 If desired, it is also possible to define new sub-modes of a given mode using `WithToggledModes` in the callback.
 
-The ability to recursively defined column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; if your column has a complex tree of variants, you should consider creating new columns instead.
+The ability to recursively define column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; if your column has a complex tree of variants, you should consider creating new columns instead.
 
 # Defining Default Column Variants
 Starting in SDK version `1.3`, you can specify on a `ColumnConfiguration` the `Guid` of `ColumnVariantDescriptor` that should be used as the default presentation of the column. You may also add this property to any prebuilt table configuration JSON files, as long as your JSON file uses version `1.3` of the JSON schema.
 
 # Globally Apply Variants Based on Data Type
 
-In some cases table authors have many data columns of the same type available across many tables. For example, a plugin may have several tables that each have more than 1 `DateTime` column.
+In some cases table authors have many data columns of the same type available across many tables. For example, a plugin may have several tables that each have one or more `DateTime` columns.
 
 In these cases, it may be useful to define a common set of variants for all columns of that specific type. Instead of duplicating calls to `AddColumnWithVariants`, a simple way to accomplish this is to create, at the plugin level, `ITableBuilderWithRowCount` extension methods that add these global variants.
 
-For example, you could define an extension method for `DateTime` columns that always adds a "local time" variant:
+For example, you could define extension methods for adding `DateTime` columns that always add a "local time" variant:
 
 ```cs
 public static class TableBuilderExtensions
@@ -232,10 +234,10 @@ public static class TableBuilderExtensions
         ColumnConfiguration columnConfiguration,
         IProjection<int, DateTime> dateTimeProjection)
     {
-        tableBuilder.AddColumn(columnConfiguration, dateTimeProjection, null);
+        tableBuilder.AddColumnWithVariants(columnConfiguration, dateTimeProjection, null);
     }
 
-    public static void AddColumn(
+    public static void AddColumnWithVariants(
         this ITableBuilderWithRowCount tableBuilder,
         ColumnConfiguration columnConfiguration,
         IProjection<int, DateTime> dateTimeProjection,
@@ -253,7 +255,7 @@ public static class TableBuilderExtensions
         tableBuilder.AddColumn(dateTimeColumn, null);
     }
     
-    public static void AddColumn(
+    public static void AddColumnWithVariants(
         this ITableBuilderWithRowCount tableBuilder,
         IDataColumn<DateTime> dateTimeColumn,
         Func<ToggleableColumnBuilder, ColumnBuilder> columnBuilder)
