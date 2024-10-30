@@ -15,7 +15,11 @@ Without column variants, the table author would have to add three independent co
 
 # When to Use Column Variants
 
-Column variants are defined as an alternative projection `IProjection<int, T>` with no constraint on the type `T`, which places no technical limitation on what data is exposed through a variant. As such, table authors should take care to ensure column variants make sense to be grouped together under one column. There are two restrictions on column variants that help guide whether to expose projections as variants or new columns:
+Columns variants should be used when you wish to expose the data within a column in multiple ways. Some examples of this are:
+* A "Process" column that has "Process Name" and "Process ID" variants, where each variant identifies the process associated with each row
+* A "Time" column that has "Timestamp" and "DateTime" variants, where each variant identifies the point in time each row's data was recorded
+
+Different column variants within the same column have no restrictions on the data type `T` that the variants expose. As such, table authors should take care to ensure column variants make sense to be grouped together under one column. There are two restrictions on column variants that help guide whether to expose projections as variants or new columns:
 
 1. Column variants cannot supply a new [column configuration](../../Glossary.md#columnconfiguration) for the column that the variant is for. As such, column variants should only be used when the projected data makes sense given the base column's configuration. If a user would be confused how a column variant's data relates to its base column, you should consider exposing the variant as a separate dedicated column. 
 
