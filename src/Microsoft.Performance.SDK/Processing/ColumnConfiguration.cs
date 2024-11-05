@@ -17,6 +17,43 @@ namespace Microsoft.Performance.SDK.Processing
         /// <param name="metadata">
         ///     The metadata about the column.
         /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="metadata"/> is <c>null</c>.
+        /// </exception>
+        public ColumnConfiguration(ColumnMetadata metadata)
+            : this(metadata, null, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ColumnConfiguration"/>
+        ///     class.
+        /// </summary>
+        /// <param name="metadata">
+        ///     The metadata about the column.
+        /// </param>
+        /// <param name="hints">
+        ///     Optional hints about displaying this column in the UI. This parameter
+        ///     may be <c>null</c>. If this parameter is <c>null</c>, then
+        ///     <see cref="UIHints.Default"/> will be used for this instance.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="metadata"/> is <c>null</c>.
+        /// </exception>
+        public ColumnConfiguration(
+            ColumnMetadata metadata,
+            UIHints hints)
+            : this(metadata, hints, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ColumnConfiguration"/>
+        ///     class.
+        /// </summary>
+        /// <param name="metadata">
+        ///     The metadata about the column.
+        /// </param>
         /// <param name="hints">
         ///     Optional hints about displaying this column in the UI. This parameter
         ///     may be <c>null</c>. If this parameter is <c>null</c>, then
@@ -30,8 +67,8 @@ namespace Microsoft.Performance.SDK.Processing
         /// </exception>
         public ColumnConfiguration(
             ColumnMetadata metadata,
-            UIHints hints = null,
-            Guid? variantGuid = null)
+            UIHints hints,
+            Guid? variantGuid)
         {
             Guard.NotNull(metadata, nameof(metadata));
 
