@@ -23,6 +23,8 @@ namespace Microsoft.Performance.SDK.Processing
         public ColumnConfiguration(ColumnMetadata metadata)
             : this(metadata, null, null)
         {
+            // These telescoping constructors are required to maintain backwards compatibility.
+            // Do not consolidate to a constructor with optional parameters since that breaks the API.
         }
 
         /// <summary>
@@ -45,6 +47,8 @@ namespace Microsoft.Performance.SDK.Processing
             UIHints hints)
             : this(metadata, hints, null)
         {
+            // These telescoping constructors are required to maintain backwards compatibility.
+            // Do not consolidate to a constructor with optional parameters since that breaks the API.
         }
 
         /// <summary>
