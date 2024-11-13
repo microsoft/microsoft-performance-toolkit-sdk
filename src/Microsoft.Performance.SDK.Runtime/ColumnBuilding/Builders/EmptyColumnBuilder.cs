@@ -112,7 +112,7 @@ public sealed class EmptyColumnBuilder
             processor,
             [
                 new ModalColumnWithModesBuilder.AddedMode(
-                    new ColumnVariantDescriptor(baseColumn.Configuration.Metadata.Guid, baseProjectionModeName),
+                    new ColumnVariantDescriptor(baseColumn.Configuration.Metadata.Guid, baseProjectionModeName, baseColumn.Configuration.Metadata.Description),
                     baseColumn,
                     builder),
             ],
