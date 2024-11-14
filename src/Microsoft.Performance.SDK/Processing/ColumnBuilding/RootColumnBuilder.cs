@@ -21,8 +21,7 @@ public abstract class RootColumnBuilder
     ///     by the column being constructed is one of, and the first, available top-level modes.
     /// </summary>
     /// <param name="baseProjectionProperties">
-    ///     The name of the mode that the base projection for this column
-    ///     represents.
+    ///     The metadata properties that the base projection's mode will have.
     /// </param>
     /// <returns>
     ///     A new <see cref="ModalColumnBuilder"/> to continue building
@@ -40,8 +39,7 @@ public abstract class RootColumnBuilder
     ///     by the column being constructed is one of, and the first, available top-level modes.
     /// </summary>
     /// <param name="baseProjectionProperties">
-    ///     The name of the mode that the base projection for this column
-    ///     represents.
+    ///     The metadata properties that the base projection's mode will have.
     /// </param>
     /// <param name="builder">
     ///     A callback that builds sub-variants of the added mode represented by the base
