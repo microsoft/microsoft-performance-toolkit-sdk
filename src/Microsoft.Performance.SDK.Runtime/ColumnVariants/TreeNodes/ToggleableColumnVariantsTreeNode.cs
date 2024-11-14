@@ -53,7 +53,7 @@ public sealed class ToggleableColumnVariantsTreeNode
 
     private bool IsEquivalentTree(ToggleableColumnVariantsTreeNode other)
     {
-        return Descriptor.Equals(other.Descriptor)
+        return this.Descriptor.Equals(other.Descriptor)
                && this.SubVariantsTreeNode.IsEquivalentTree(other.SubVariantsTreeNode);
     }
 }

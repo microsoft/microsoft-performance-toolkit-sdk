@@ -19,18 +19,18 @@ public class ColumnVariantsTests
     private static readonly ColumnConfiguration baseConfig = new(new ColumnMetadata(Guid.NewGuid(), "BaseColumn"));
     private static readonly IProjection<int, Timestamp> baseProj = Projection.Constant(Timestamp.Zero);
 
-    private static readonly ColumnVariantDescriptor projectAsDateTime = new(Guid.NewGuid(), "Project as DateTime");
+    private static readonly ColumnVariantDescriptor projectAsDateTime = new(Guid.NewGuid(), new ColumnVariantProperties { Name = "Project as DateTime", Description = "Projects as datetime"  });
 
-    private static readonly ColumnVariantDescriptor utc = new(baseConfig.Metadata.Guid, "UTC");
+    private static readonly ColumnVariantDescriptor utc = new(baseConfig.Metadata.Guid, new ColumnVariantProperties { Name = "UTC", Description = "Projects to UTC" });
     private static readonly IProjection<int, DateTime> utcProj = Projection.Constant(DateTime.UtcNow);
 
-    private static readonly ColumnVariantDescriptor local = new(Guid.NewGuid(), "Local");
+    private static readonly ColumnVariantDescriptor local = new(Guid.NewGuid(), new ColumnVariantProperties { Name = "Local", Description = "Projects to local time" });
     private static readonly IProjection<int, DateTime> localProj = Projection.Constant(DateTime.UtcNow.AddHours(2));
 
-    private static readonly ColumnVariantDescriptor showFloat = new(Guid.NewGuid(), "Float");
+    private static readonly ColumnVariantDescriptor showFloat = new(Guid.NewGuid(), new ColumnVariantProperties { Name = "Float", Description = "Projects a float"  });
     private static readonly IProjection<int, float> floatProj = Projection.Constant(1f);
 
-    private static readonly ColumnVariantDescriptor showBool = new(Guid.NewGuid(), "Bool");
+    private static readonly ColumnVariantDescriptor showBool = new(Guid.NewGuid(), new ColumnVariantProperties { Name = "Bool", Description = "Projects a bool"  });
     private static readonly IProjection<int, bool> boolProj = Projection.Constant(true);
 
     [TestMethod]
@@ -106,7 +106,7 @@ public class ColumnVariantsTests
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
                 return builder
-                    .WithModes(utc.Name)
+                    .WithModes(utc.Properties)
                     .WithMode(local, localProj);
             });
 
@@ -119,6 +119,30 @@ public class ColumnVariantsTests
     }
 
     [TestMethod]
+    public void BaseModeHasCorrectNameAndDescription()
+    {
+        ColumnVariantProperties baseModeProperties = new ColumnVariantProperties { Name = "Test Base Mode Name", Description = "Test Base Mode Name Description" };
+
+        var tableBuilder = new TableBuilder();
+        tableBuilder
+            .SetRowCount(1)
+            .AddColumnWithVariants(baseConfig, utcProj, builder =>
+            {
+                return builder
+                    .WithModes(baseModeProperties)
+                    .WithMode(local, localProj);
+            });
+
+        var actualRoot = GetTreeNode(tableBuilder);
+        Assert.IsInstanceOfType(actualRoot, typeof(ModesColumnVariantsTreeNode));
+
+        var baseMode = ((ModesColumnVariantsTreeNode)actualRoot).Modes.Cast<ModeColumnVariantsTreeNode>().Single(m => m.ModeDescriptor.Guid == baseConfig.Metadata.Guid);
+
+        Assert.AreEqual(baseMode.ModeDescriptor.Properties.Name, baseModeProperties.Name);
+        Assert.AreEqual(baseMode.ModeDescriptor.Properties.Description, baseModeProperties.Description);
+    }
+
+    [TestMethod]
     public void ModesWithDefaultIndex()
     {
         var tableBuilder = new TableBuilder();
@@ -127,7 +151,7 @@ public class ColumnVariantsTests
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
                 return builder
-                    .WithModes(utc.Name)
+                    .WithModes(utc.Properties)
                     .WithMode(local, localProj)
                     .WithDefaultMode(local.Guid);
             });
@@ -150,7 +174,7 @@ public class ColumnVariantsTests
             {
                 return builder
                     .WithModes(
-                        utc.Name,
+                        utc.Properties,
                         modeBuilder =>
                         {
                             return modeBuilder
@@ -207,7 +231,7 @@ public class ColumnVariantsTests
             .AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
                 return builder
-                    .WithModes(utc.Name)
+                    .WithModes(utc.Properties)
                     .WithMode(local, floatProj, modeBuilder =>
                     {
                         return modeBuilder.WithToggledModes(
@@ -317,9 +341,15 @@ public class ColumnVariantsTests
     private void AssertCorrectColumnVariants(
         IColumnVariantsTreeNode expectedRoot, TableBuilder builtTable)
     {
+        var actualRoot = GetTreeNode(builtTable);
+        Assert.IsTrue(expectedRoot.IsEquivalentTree(actualRoot));
+    }
+
+    private IColumnVariantsTreeNode GetTreeNode(TableBuilder builtTable)
+    {
         var success = builtTable.ColumnVariantsRegistrar.TryGetVariantsTreeRoot(builtTable.Columns.First(), out var actualRoot);
         Assert.IsTrue(success, "No variants were registered for the column, but they were expected to be.");
-        Assert.IsTrue(expectedRoot.IsEquivalentTree(actualRoot));
+        return actualRoot;
     }
 
     private ModesColumnVariantsTreeNode Modes(int defaultIndex, params ModeColumnVariantsTreeNode[] modes)

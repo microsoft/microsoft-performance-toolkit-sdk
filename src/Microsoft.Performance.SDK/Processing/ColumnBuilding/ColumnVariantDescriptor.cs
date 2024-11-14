@@ -14,13 +14,9 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 ///     The unique identifier for the column variant. This value must be unique within a single column's
 ///     set of variants, but may be reused across columns.
 /// </param>
-/// <param name="Name">
-///     The human-readable name of the column variant.
-/// </param>
-/// <param name="Description">
-///     An optional human-readable description of the column variant. This value may be <c>null</c>.
+/// <param name="Properties">
+///     The metadata properties to associate with the data column this variant represents.
 /// </param>
 public record ColumnVariantDescriptor(
     Guid Guid,
-    string Name,
-    string Description = null);
+    ColumnVariantProperties Properties);
