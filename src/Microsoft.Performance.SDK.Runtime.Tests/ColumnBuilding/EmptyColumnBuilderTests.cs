@@ -99,7 +99,7 @@ public class EmptyColumnBuilderTests
     }
 
     [TestMethod]
-    public void WithModes_NullTextThrows()
+    public void WithModes_NullPropertiesThrows()
     {
         var builder = CreateSut();
 
