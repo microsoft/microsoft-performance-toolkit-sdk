@@ -11,7 +11,7 @@ public record ColumnVariantProperties
     /// <summary>
     ///     Gets or initializes the human-readable name of the column variant.
     /// </summary>
-    public string Name { get; init; }
+    public required string Name { get; init; }
 
     /// <summary>
     ///     Gets or initializes an optional human-readable description of the column variant.

@@ -29,6 +29,11 @@
 
   <ItemGroup>
     <Compile Remove="Properties\**" />
+    
+    <Compile Include="..\Microsoft.Performance.SDK.Runtime\IsExternalInit.cs">
+      <Link>IsExternalInit.cs</Link>
+    </Compile>
+    
     <EmbeddedResource Remove="Properties\**" />
     <None Remove="Properties\**" />
     <None Include="..\..\LICENSE.txt">
