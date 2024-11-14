@@ -30,8 +30,8 @@
   <ItemGroup>
     <Compile Remove="Properties\**" />
     
-    <Compile Include="..\Microsoft.Performance.SDK.Runtime\IsExternalInit.cs">
-      <Link>IsExternalInit.cs</Link>
+    <Compile Include="..\Microsoft.Performance.SDK.Runtime\LanguageFeatures.cs">
+      <Link>LanguageFeatures.cs</Link>
     </Compile>
     
     <EmbeddedResource Remove="Properties\**" />
