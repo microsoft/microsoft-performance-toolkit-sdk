@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.ColumnBuilding;
 [UnitTest]
 public class ModalColumnBuilderTests
 {
-    private static ColumnVariantDescriptor modeDescriptor = new(Guid.NewGuid(), "Foo");
+    private static ColumnVariantDescriptor modeDescriptor = new(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" });
     private static IProjection<int, int> modeProjection = Projection.Constant<int, int>(1);
 
     [TestMethod]

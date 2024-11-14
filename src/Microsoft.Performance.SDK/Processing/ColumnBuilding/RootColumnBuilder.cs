@@ -20,7 +20,7 @@ public abstract class RootColumnBuilder
     ///     has several top-level modes. The base projection/column specified
     ///     by the column being constructed is one of, and the first, available top-level modes.
     /// </summary>
-    /// <param name="baseProjectionModeName">
+    /// <param name="baseProjectionProperties">
     ///     The name of the mode that the base projection for this column
     ///     represents.
     /// </param>
@@ -29,17 +29,17 @@ public abstract class RootColumnBuilder
     ///     column modes.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="baseProjectionModeName"/> is <c>null</c>.
+    ///     <paramref name="baseProjectionProperties"/> is <c>null</c>.
     /// </exception>
     public abstract ModalColumnBuilder WithModes(
-        string baseProjectionModeName);
+        ColumnVariantProperties baseProjectionProperties);
 
     /// <summary>
     ///     Specifies that the added column should be a modal column that
     ///     has several top-level modes. The base projection/column specified
     ///     by the column being constructed is one of, and the first, available top-level modes.
     /// </summary>
-    /// <param name="baseProjectionModeName">
+    /// <param name="baseProjectionProperties">
     ///     The name of the mode that the base projection for this column
     ///     represents.
     /// </param>
@@ -52,9 +52,9 @@ public abstract class RootColumnBuilder
     ///     column modes.
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    ///     <paramref name="baseProjectionModeName"/> is <c>null</c>.
+    ///     <paramref name="baseProjectionProperties"/> is <c>null</c>.
     /// </exception>
     public abstract ModalColumnBuilder WithModes(
-        string baseProjectionModeName,
+        ColumnVariantProperties baseProjectionProperties,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 }

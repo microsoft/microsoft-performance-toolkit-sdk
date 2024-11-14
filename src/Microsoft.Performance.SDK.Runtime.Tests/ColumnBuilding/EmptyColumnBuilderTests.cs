@@ -36,7 +36,7 @@ public class EmptyColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"), null);
+            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }), null);
         });
     }
 
@@ -62,7 +62,7 @@ public class EmptyColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
-                new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"),
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }),
                 null,
                 new StubCollectionAccessProvider<float>());
         });
@@ -76,7 +76,7 @@ public class EmptyColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
-                new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"),
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }),
                 Projection.Constant(1f),
                 null);
         });
@@ -94,7 +94,7 @@ public class EmptyColumnBuilderTests
     public void WithToggledModes_NullBuilderDoesNotThrow()
     {
         var builder = CreateSut();
-        builder.WithToggledModes("foo", null);
+        builder.WithToggledModes("Foo", null);
         Assert.IsTrue(true);
     }
 
@@ -110,7 +110,7 @@ public class EmptyColumnBuilderTests
     public void WithModes_NullBuilderDoesNotThrow()
     {
         var builder = CreateSut();
-        builder.WithModes("foo", null);
+        builder.WithModes(new ColumnVariantProperties { Name = "Foo" });
         Assert.IsTrue(true);
     }
 
@@ -120,6 +120,6 @@ public class EmptyColumnBuilderTests
             new TestColumnVariantsProcessor(),
             new DataColumn<int>(
                 new ColumnConfiguration(
-                    new ColumnMetadata(Guid.NewGuid(), "foo")), Projection.Constant<int, int>(1)));
+                    new ColumnMetadata(Guid.NewGuid(), "Foo")), Projection.Constant<int, int>(1)));
     }
 }

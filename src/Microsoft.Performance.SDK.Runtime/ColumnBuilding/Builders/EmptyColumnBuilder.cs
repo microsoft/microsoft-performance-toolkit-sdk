@@ -96,23 +96,23 @@ public sealed class EmptyColumnBuilder
 
     /// <inheritdoc />
     public override ModalColumnBuilder WithModes(
-        string baseProjectionModeName)
+        ColumnVariantProperties baseProjectionProperties)
     {
-        return WithModes(baseProjectionModeName, null);
+        return WithModes(baseProjectionProperties, null);
     }
 
     /// <inheritdoc />
     public override ModalColumnBuilder WithModes(
-        string baseProjectionModeName,
+        ColumnVariantProperties baseProjectionProperties,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
-        Guard.NotNull(baseProjectionModeName, nameof(baseProjectionModeName));
+        Guard.NotNull(baseProjectionProperties, nameof(baseProjectionProperties));
 
         return new ModalColumnWithModesBuilder(
             processor,
             [
                 new ModalColumnWithModesBuilder.AddedMode(
-                    new ColumnVariantDescriptor(baseColumn.Configuration.Metadata.Guid, baseProjectionModeName, baseColumn.Configuration.Metadata.Description),
+                    new ColumnVariantDescriptor(baseColumn.Configuration.Metadata.Guid, baseProjectionProperties),
                     baseColumn,
                     builder),
             ],

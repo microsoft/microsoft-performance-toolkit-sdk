@@ -36,7 +36,7 @@ public class ToggledColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"), null);
+            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }), null);
         });
     }
 
@@ -62,7 +62,7 @@ public class ToggledColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
-                new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"),
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }),
                 null,
                 new StubCollectionAccessProvider<float>());
         });
@@ -76,7 +76,7 @@ public class ToggledColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
-                new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"),
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }),
                 Projection.Constant(1f),
                 null);
         });
@@ -109,7 +109,7 @@ public class ToggledColumnBuilderTests
                 new ColumnMetadata(Guid.NewGuid(), "toggle")), Projection.Constant<int, int>(1));
 
         return new ToggledColumnBuilder(
-            new []{ new ToggledColumnBuilder.AddedToggle(new ColumnVariantDescriptor(Guid.NewGuid(), "Foo"), initialToggle) },
+            new []{ new ToggledColumnBuilder.AddedToggle(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }), initialToggle) },
             baseColumn,
             new TestColumnVariantsProcessor());
     }
