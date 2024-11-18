@@ -21,7 +21,7 @@ namespace Microsoft.Performance.Toolkit.Engine
 
         private readonly Dictionary<Type, object> authProviders = new Dictionary<Type, object>();
 
-        private ProcessEnvironmentFactory processEnvironmentFactory;
+        private ProcessorEnvironmentFactory processEnvironmentFactory;
 
         /// <summary>
         ///     Initializes the statc members of the <see cref="EngineCreateInfo"/>
@@ -150,7 +150,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="factory"/> is <c>null</c>.
         /// </exception>
-        public EngineCreateInfo WithProcessorEnvironmentFactory(ProcessEnvironmentFactory factory)
+        public EngineCreateInfo WithProcessorEnvironmentFactory(ProcessorEnvironmentFactory factory)
         {
             Guard.NotNull(factory, nameof(factory));
 
@@ -198,7 +198,7 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// </summary>
         public bool IsInteractive { get; set; }
 
-        internal ProcessEnvironmentFactory ProcessEnvironmentFactory
+        internal ProcessorEnvironmentFactory ProcessEnvironmentFactory
         {
             get
             {

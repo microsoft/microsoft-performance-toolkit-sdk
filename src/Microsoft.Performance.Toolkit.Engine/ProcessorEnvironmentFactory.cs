@@ -11,7 +11,7 @@ namespace Microsoft.Performance.Toolkit.Engine
     /// <summary>
     ///     This is used to generate processor environments.
     /// </summary>
-    public abstract class ProcessEnvironmentFactory
+    public abstract class ProcessorEnvironmentFactory
     {
         /// <summary>
         ///     Creates a <see cref="ProcessorEnvironment"/> for a processor.

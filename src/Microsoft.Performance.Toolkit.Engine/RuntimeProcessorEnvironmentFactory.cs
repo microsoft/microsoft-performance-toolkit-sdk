@@ -10,12 +10,12 @@ using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 namespace Microsoft.Performance.Toolkit.Engine
 {
     internal sealed class RuntimeProcessorEnvironmentFactory
-        : ProcessEnvironmentFactory
+        : ProcessorEnvironmentFactory
     {
         private readonly Func<Type, ILogger> loggerFactory;
-        private readonly ProcessEnvironmentFactory wrappedFactory;
+        private readonly ProcessorEnvironmentFactory wrappedFactory;
 
-        public RuntimeProcessorEnvironmentFactory(Func<Type, ILogger> loggerFactory, ProcessEnvironmentFactory wrappedFactory)
+        public RuntimeProcessorEnvironmentFactory(Func<Type, ILogger> loggerFactory, ProcessorEnvironmentFactory wrappedFactory)
         {
             Debug.Assert(loggerFactory != null);
             this.loggerFactory = loggerFactory;
