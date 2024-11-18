@@ -1065,9 +1065,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             foreach (var psDsgPair in processingOptionsMap)
             {
-                var processingSource = psDsgPair.Key.Item1;
-                var dsg = psDsgPair.Key.Item2;
-                var processorOptions = psDsgPair.Value;
+                ProcessingSourceReference processingSource = psDsgPair.Key.Item1;
+                IDataSourceGroup dsg = psDsgPair.Key.Item2;
+                ProcessorOptions processorOptions = psDsgPair.Value;
 
                 try
                 {
@@ -1087,11 +1087,11 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                     var executionContext = new SDK.Runtime.ExecutionContext(
                         new DataProcessorProgress(),
-                        x => ConsoleLogger.Create(x.GetType()),
+                        x => ConsoleLogger.Create(x.GetType()), // todo: this shouldn't be using a console logger by default
                         processingSource,
                         dsg, // todo #214
                         processingSource.Instance.MetadataTables,
-                        new RuntimeProcessorEnvironment(this.Extensions, this.compositeCookers, this.CreateLogger),
+                        this.CreateInfo.ProcessEnvironmentFactory.CreateProcessorEnvironment(processingSource.Guid, dsg),
                         processorOptions);
 
                     var executor = new ProcessingSourceExecutor();
@@ -1218,62 +1218,6 @@ namespace Microsoft.Performance.Toolkit.Engine
             internal EngineImpl(EngineCreateInfo createInfo, DataSourceSet internalDataSourceSet)
                 : base(createInfo, internalDataSourceSet)
             {
-            }
-        }
-
-        private sealed class RuntimeProcessorEnvironment
-            : IProcessorEnvironment
-        {
-            private readonly ProcessingSystemCompositeCookers compositeCookers;
-            private readonly IDataExtensionRepository repository;
-            private readonly Func<Type, ILogger> loggerFactory;
-            private readonly object loggerLock = new object();
-
-            private ILogger logger;
-            private Type processorType;
-
-            public RuntimeProcessorEnvironment(
-                IDataExtensionRepository repository,
-                ProcessingSystemCompositeCookers compositeCookers,
-                Func<Type, ILogger> loggerFactory)
-            {
-                Debug.Assert(repository != null);
-                Debug.Assert(compositeCookers != null);
-                Debug.Assert(loggerFactory != null);
-
-                this.compositeCookers = compositeCookers;
-                this.repository = repository;
-                this.loggerFactory = loggerFactory;
-            }
-
-            public ILogger CreateLogger(Type processorType)
-            {
-                Guard.NotNull(processorType, nameof(processorType));
-
-                lock (this.loggerLock)
-                {
-                    if (logger != null)
-                    {
-                        if (this.processorType != processorType)
-                        {
-                            throw new ArgumentException(
-                                $"{nameof(CreateLogger)} cannot be called with multiple types in a single instance.",
-                                nameof(processorType));
-                        }
-
-                        return this.logger;
-                    }
-
-                    this.processorType = processorType;
-                    this.logger = this.loggerFactory(processorType);
-                    return this.logger;
-                }
-            }
-
-            public IDynamicTableBuilder RequestDynamicTableBuilder(
-                TableDescriptor descriptor)
-            {
-                return null;
             }
         }
 
