@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -16,9 +17,11 @@ namespace Microsoft.Performance.Toolkit.Engine
     /// </summary>
     public sealed class EngineCreateInfo
     {
-        private static string DefaultRuntimeName;
+        private static readonly string DefaultRuntimeName;
 
         private readonly Dictionary<Type, object> authProviders = new Dictionary<Type, object>();
+
+        private ProcessorEnvironmentFactory processEnvironmentFactory;
 
         /// <summary>
         ///     Initializes the statc members of the <see cref="EngineCreateInfo"/>
@@ -135,6 +138,27 @@ namespace Microsoft.Performance.Toolkit.Engine
         }
 
         /// <summary>
+        ///     Registers a <see cref="ProcessEnvironmentFactory"/> to use for generating a custom processor 
+        ///     environment.
+        /// </summary>
+        /// <param name="factory">
+        ///     Factory for generating a <see cref="ProcessorEnvironment"/>.
+        /// </param>
+        /// <returns>
+        ///     The instance of <see cref="EngineCreateInfo"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="factory"/> is <c>null</c>.
+        /// </exception>
+        public EngineCreateInfo WithProcessorEnvironmentFactory(ProcessorEnvironmentFactory factory)
+        {
+            Guard.NotNull(factory, nameof(factory));
+
+            this.ProcessEnvironmentFactory = factory;
+            return this;
+        }
+
+        /// <summary>
         ///     Gets or sets the name of the runtime on which the application is built.
         /// </summary>
         /// <remarks>
@@ -173,6 +197,22 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     will fail. By default, this property is <c>false</c>.
         /// </summary>
         public bool IsInteractive { get; set; }
+
+        internal ProcessorEnvironmentFactory ProcessEnvironmentFactory
+        {
+            get
+            {
+                // Wrap any custom factory in the default factory. If there is no custom factory, or if it returns null,
+                // then a default runtime will be created.
+                return new RuntimeProcessorEnvironmentFactory(
+                    (type) => this.LoggerFactory?.Invoke(type) ?? Logger.Create(type),
+                    this.processEnvironmentFactory);
+            }
+            private set
+            {
+                this.processEnvironmentFactory = value;
+            }
+        }
 
         internal ReadOnlyDictionary<Type, object> AuthProviders => new ReadOnlyDictionary<Type, object>(this.authProviders);
     }
