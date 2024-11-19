@@ -5,7 +5,6 @@ using System;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
-
 namespace Microsoft.Performance.Toolkit.Engine
 {
     /// <summary>

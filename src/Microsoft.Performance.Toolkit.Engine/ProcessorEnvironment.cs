@@ -6,6 +6,7 @@ using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
+    /// <inheritdoc cref="IProcessorEnvironment"/>
     public abstract class ProcessorEnvironment
         : IProcessorEnvironment
     {
