@@ -6,11 +6,11 @@ namespace System.Runtime.CompilerServices
 {
     internal static class IsExternalInit {}
 
-    public class ExtensionAttribute : Attribute { }
+    internal class ExtensionAttribute : Attribute { }
 
-    public class RequiredMemberAttribute : Attribute { }
+    internal class RequiredMemberAttribute : Attribute { }
 
-    public class CompilerFeatureRequiredAttribute : Attribute
+    internal class CompilerFeatureRequiredAttribute : Attribute
     {
         public CompilerFeatureRequiredAttribute(string name) { }
     }
@@ -18,5 +18,5 @@ namespace System.Runtime.CompilerServices
 
 namespace System.Diagnostics.CodeAnalysis
 {
-    public class SetsRequiredMembersAttribute : Attribute {}
+    internal class SetsRequiredMembersAttribute : Attribute {}
 }
