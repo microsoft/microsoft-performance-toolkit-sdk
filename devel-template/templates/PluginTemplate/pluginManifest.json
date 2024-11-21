@@ -6,6 +6,7 @@
   },
   "displayName": "__PLUGIN_DISPLAY_NAME__",
   "description": "__PLUGIN_DESCRIPTION__",
+  "displayName": "__PLUGIN_DISPLAY_NAME__",
   "owners": [
     {
       "name": "__PLUGIN_OWNER_NAME__",
