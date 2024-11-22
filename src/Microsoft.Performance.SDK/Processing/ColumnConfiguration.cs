@@ -130,9 +130,6 @@ namespace Microsoft.Performance.SDK.Processing
         /// <remarks>
         ///     todo: __CDS__ sensible defaults in the application layer.
         /// </remarks>
-        /// <exception cref="System.ArgumentNullException">
-        ///     The supplied value is <c>null</c>.
-        /// </exception>
         public UIHints DisplayHints
         {
             get
