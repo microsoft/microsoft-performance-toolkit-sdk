@@ -19,7 +19,7 @@ public record ColumnVariantProperties
     public string Description { get; init; }
 
     /// <summary>
-    ///     Gets or initializes the optional <see cref="ColumnMetadata.Name"/> to associate with the column
+    ///     Gets or initializes the <see cref="ColumnMetadata.Name"/> to associate with the column
     ///     when this variant is active. If this value is not set, the base column's name will be used.
     /// </summary>
     public string ColumnName { get; init; }
