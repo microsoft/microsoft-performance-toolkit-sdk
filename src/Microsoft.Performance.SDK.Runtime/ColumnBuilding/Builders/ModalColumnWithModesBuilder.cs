@@ -101,7 +101,12 @@ internal class ModalColumnWithModesBuilder
 
         AddedMode newMode = new(
             modeDescriptor,
-            new DataColumn<T>(this.baseColumn.Configuration, projection),
+            new DataColumn<T>(
+                new ColumnConfiguration(
+                    new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = modeDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                    this.baseColumn.Configuration.DisplayHints,
+                    this.baseColumn.Configuration.VariantGuid),
+                projection),
             builder);
 
         return WithMode(newMode);
@@ -127,7 +132,13 @@ internal class ModalColumnWithModesBuilder
 
         AddedMode newMode = new(
             modeDescriptor,
-            new HierarchicalDataColumn<T>(this.baseColumn.Configuration, projection, collectionProvider),
+            new HierarchicalDataColumn<T>(
+                new ColumnConfiguration(
+                    new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = modeDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                    this.baseColumn.Configuration.DisplayHints,
+                    this.baseColumn.Configuration.VariantGuid),
+                projection,
+                collectionProvider),
             builder);
 
         return WithMode(newMode);

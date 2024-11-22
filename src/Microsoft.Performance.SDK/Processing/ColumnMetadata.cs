@@ -160,7 +160,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     on the data in the first row. Use <see cref="NameProjection"/>
         ///     for dynamic names.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; init; }
 
         /// <summary>
         ///     Gets a value indicating whether the name of this column is

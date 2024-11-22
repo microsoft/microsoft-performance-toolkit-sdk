@@ -64,7 +64,14 @@ internal class ToggledColumnBuilder
 
         return new ToggledColumnBuilder(
             this.toggles.Append(
-                new AddedToggle(toggleDescriptor, new DataColumn<T>(this.baseColumn.Configuration, projection))
+                new AddedToggle(
+                    toggleDescriptor,
+                    new DataColumn<T>(
+                        new ColumnConfiguration(
+                            new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                            this.baseColumn.Configuration.DisplayHints,
+                            this.baseColumn.Configuration.VariantGuid),
+                        projection))
             ).ToList(),
             this.baseColumn,
             this.processor);
@@ -82,8 +89,15 @@ internal class ToggledColumnBuilder
 
         return new ToggledColumnBuilder(
             [
-                new AddedToggle(toggleDescriptor,
-                    new HierarchicalDataColumn<T>(baseColumn.Configuration, projection, collectionProvider)),
+                new AddedToggle(
+                    toggleDescriptor,
+                    new HierarchicalDataColumn<T>(
+                        new ColumnConfiguration(
+                            new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                            this.baseColumn.Configuration.DisplayHints,
+                            this.baseColumn.Configuration.VariantGuid),
+                        projection,
+                        collectionProvider)),
             ],
             baseColumn,
             processor);

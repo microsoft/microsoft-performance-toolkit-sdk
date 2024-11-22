@@ -18,7 +18,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestTables
             "Engine");
 
         public static readonly ColumnVariantDescriptor VariantDescriptor =
-            new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Toggled Variant" });
+            new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Toggled Variant" });
 
         public static readonly IProjection<int, bool> VariantProjection =
             Projection.Constant<int, bool>(true);
