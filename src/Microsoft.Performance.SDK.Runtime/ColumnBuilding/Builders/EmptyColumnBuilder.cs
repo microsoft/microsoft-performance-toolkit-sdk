@@ -55,10 +55,10 @@ public sealed class EmptyColumnBuilder
             [
                 new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
                     new DataColumn<T>(
-                        new ColumnConfiguration(
-                            new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
-                            this.baseColumn.Configuration.DisplayHints,
-                            this.baseColumn.Configuration.VariantGuid),
+                        new ColumnConfiguration(this.baseColumn.Configuration)
+                        {
+                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                        },
                         projection)),
             ],
             baseColumn,
@@ -79,10 +79,10 @@ public sealed class EmptyColumnBuilder
             [
                 new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
                     new HierarchicalDataColumn<T>(
-                        new ColumnConfiguration(
-                            new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
-                            this.baseColumn.Configuration.DisplayHints,
-                            this.baseColumn.Configuration.VariantGuid),
+                        new ColumnConfiguration(this.baseColumn.Configuration)
+                        {
+                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                        },
                         projection,
                         collectionProvider)),
             ],

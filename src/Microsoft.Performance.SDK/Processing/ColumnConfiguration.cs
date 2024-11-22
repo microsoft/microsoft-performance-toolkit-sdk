@@ -102,13 +102,13 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Gets the metadata for this instance.
         /// </summary>
-        public ColumnMetadata Metadata { get; }
+        public ColumnMetadata Metadata { get; init; }
 
         /// <summary>
         ///     Gets the unique identifier of the column variant to use.
 
         /// </summary>
-        public Guid? VariantGuid { get; }
+        public Guid? VariantGuid { get; init;}
 
         /// <summary>
         ///     Gets any hints from the addin on how to render the column.
@@ -116,7 +116,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <remarks>
         ///     todo: __CDS__ sensible defaults in the application layer.
         /// </remarks>
-        public UIHints DisplayHints { get; }
+        public UIHints DisplayHints { get; init;}
 
         /// <summary>
         ///     Gets the <see cref="System.String"/> representation of this instance.
