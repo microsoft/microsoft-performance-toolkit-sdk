@@ -118,10 +118,10 @@ There are two ways to define a set of modes:
             return builder
                     .WithModes("UTC")  // The name of the mode to associate with the base column projection
                     .WithMode(
-                        new ColumnVariantDescriptor(new Guid("..."), "Local"),
+                        new ColumnVariantDescriptor(new Guid("..."), new ColumnVariantProperties() { Name = "Local" }),
                         asUtc.Compose(utc => utc.ToLocalTime()))
                     .WithMode(
-                        new ColumnVariantDescriptor(new Guid("..."), "Binary"),
+                        new ColumnVariantDescriptor(new Guid("..."), new ColumnVariantProperties() { Name = "Binary" }),
                         asUtc.Compose(utc => utc.ToBinary()));
         });
     ```
@@ -194,11 +194,11 @@ tableBuilder
         return builder
                 .WithModes("UTC")  // The name of the mode to associate with the base column projection
                 .WithMode(
-                    new ColumnVariantDescriptor(new Guid("..."), "Local"),
+                    new ColumnVariantDescriptor(new Guid("..."), new ColumnVariantProperties() { Name = "Local" }),
                     asLocal,
                     modeBuilder => 
                     {
-                        ColumnVariantDescriptor withDST = new(new Guid("..."), "With DST");
+                        ColumnVariantDescriptor withDST = new(new Guid("..."), new ColumnVariantProperties() { Name = "With DST" });
 
                         return modeBuilder
                                 .WithToggle(
@@ -241,15 +241,15 @@ For example, you could define extension methods for adding `DateTime` columns th
 ```cs
 public static class TableBuilderExtensions
 {
-    public static void AddColumn(
+    public static ITableBuilderWithRowCount AddColumn(
         this ITableBuilderWithRowCount tableBuilder,
         ColumnConfiguration columnConfiguration,
         IProjection<int, DateTime> dateTimeProjection)
     {
-        tableBuilder.AddColumn(new DataColumn<DateTime>(columnConfiguration, projection));
+        return tableBuilder.AddColumn(new DataColumn<DateTime>(columnConfiguration, dateTimeProjection));
     }
     
-    public static void AddColumn(
+    public static ITableBuilderWithRowCount AddColumn(
         this ITableBuilderWithRowCount tableBuilder,
         IDataColumn<DateTime> dateTimeProjection)
     {
@@ -259,9 +259,11 @@ public static class TableBuilderExtensions
             {
                 return builder
                     .WithToggle(
-                        new ColumnVariantDescriptor(new Guid("..."), "As Local Time"),
+                        new ColumnVariantDescriptor(new Guid("..."), new ColumnVariantProperties() { Name = "As Local Time" }),
                         column.Projector.Compose(t => t.ToLocalTime()));
             });
+
+        return tableBuilder;
     }
 }
 ```
@@ -271,33 +273,33 @@ If there are cases where an added `DateTime` column needs additional variants ou
 ```cs
 public static class TableBuilderExtensions
 {
-    public static void AddColumn(
+    public static ITableBuilderWithRowCount AddColumn(
         this ITableBuilderWithRowCount tableBuilder,
         ColumnConfiguration columnConfiguration,
         IProjection<int, DateTime> dateTimeProjection)
     {
-        tableBuilder.AddColumnWithVariants(columnConfiguration, dateTimeProjection, null);
+        return tableBuilder.AddColumnWithVariants(columnConfiguration, dateTimeProjection, null);
     }
 
-    public static void AddColumnWithVariants(
+    public static ITableBuilderWithRowCount AddColumnWithVariants(
         this ITableBuilderWithRowCount tableBuilder,
         ColumnConfiguration columnConfiguration,
         IProjection<int, DateTime> dateTimeProjection,
         Func<ToggleableColumnBuilder, ColumnBuilder> columnBuilder)
     {
-        tableBuilder.AddColumn(
+        return tableBuilder.AddColumn(
             new DataColumn<DateTime>(columnConfiguration, dateTimeProjection),
             columnBuilder);
     }
 
-    public static void AddColumn(
+    public static ITableBuilderWithRowCount AddColumn(
         this ITableBuilderWithRowCount tableBuilder,
         IDataColumn<DateTime> dateTimeColumn)
     {
-        tableBuilder.AddColumn(dateTimeColumn, null);
+        return tableBuilder.AddColumn(dateTimeColumn, null);
     }
     
-    public static void AddColumnWithVariants(
+    public static ITableBuilderWithRowCount AddColumnWithVariants(
         this ITableBuilderWithRowCount tableBuilder,
         IDataColumn<DateTime> dateTimeColumn,
         Func<ToggleableColumnBuilder, ColumnBuilder> columnBuilder)
@@ -308,7 +310,7 @@ public static class TableBuilderExtensions
             {
                 var withToggle = builder
                     .WithToggle(
-                        new ColumnVariantDescriptor(new Guid("..."), "As Local Time"),
+                        new ColumnVariantDescriptor(new Guid("..."), new ColumnVariantProperties() { Name = "As Local Time" }),
                         dateTimeColumn.Projector.Compose(t => t.ToLocalTime()));
 
                 if (columnBuilder != null)
@@ -320,6 +322,8 @@ public static class TableBuilderExtensions
                     return withToggle;
                 }
             });
+
+        return tableBuilder;
     }
 }
 ```
