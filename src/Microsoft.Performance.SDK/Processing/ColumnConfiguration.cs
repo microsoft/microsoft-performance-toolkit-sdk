@@ -10,6 +10,9 @@ namespace Microsoft.Performance.SDK.Processing
     /// </summary>
     public sealed class ColumnConfiguration
     {
+        private readonly ColumnMetadata metadata;
+        private readonly UIHints displayHints;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="ColumnConfiguration"/>
         ///     class.
@@ -74,11 +77,9 @@ namespace Microsoft.Performance.SDK.Processing
             UIHints hints,
             Guid? variantGuid)
         {
-            Guard.NotNull(metadata, nameof(metadata));
-
             this.Metadata = metadata;
             this.VariantGuid = variantGuid;
-            this.DisplayHints = hints ?? UIHints.Default();
+            this.DisplayHints = hints;
         }
 
         /// <summary>
@@ -100,23 +101,49 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Gets the metadata for this instance.
+        ///     Gets or initializes the metadata for this instance.
         /// </summary>
-        public ColumnMetadata Metadata { get; init; }
+        /// <exception cref="System.ArgumentNullException">
+        ///     The supplied value is <c>null</c>.
+        /// </exception>
+        public ColumnMetadata Metadata
+        {
+            get
+            {
+                return this.metadata;
+            }
+            init
+            {
+                Guard.NotNull(value, nameof(Metadata));
+                this.metadata = value;
+            }
+        }
 
         /// <summary>
-        ///     Gets the unique identifier of the column variant to use.
-
+        ///     Gets or initializes the unique identifier of the column variant to use.
         /// </summary>
-        public Guid? VariantGuid { get; init;}
+        public Guid? VariantGuid { get; init; }
 
         /// <summary>
-        ///     Gets any hints from the addin on how to render the column.
+        ///     Gets or initializes any hints from the addin on how to render the column.
         /// </summary>
         /// <remarks>
         ///     todo: __CDS__ sensible defaults in the application layer.
         /// </remarks>
-        public UIHints DisplayHints { get; init;}
+        /// <exception cref="System.ArgumentNullException">
+        ///     The supplied value is <c>null</c>.
+        /// </exception>
+        public UIHints DisplayHints
+        {
+            get
+            {
+                return this.displayHints;
+            }
+            init
+            {
+                this.displayHints = value ?? UIHints.Default();
+            }
+        }
 
         /// <summary>
         ///     Gets the <see cref="System.String"/> representation of this instance.

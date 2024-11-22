@@ -11,6 +11,8 @@ namespace Microsoft.Performance.SDK.Processing
     public class ColumnMetadata
         : ICloneable<ColumnMetadata>
     {
+        private readonly string name;
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="ColumnMetadata"/>
         ///     class.
@@ -106,7 +108,6 @@ namespace Microsoft.Performance.SDK.Processing
             string description)
         {
             Guard.NotDefault(guid, nameof(guid));
-            Guard.NotNullOrWhiteSpace(defaultName, nameof(defaultName));
             Guard.NotNull(nameProjection, nameof(nameProjection));
 
             if (string.IsNullOrWhiteSpace(description))
@@ -155,12 +156,29 @@ namespace Microsoft.Performance.SDK.Processing
         public Guid Guid { get; }
 
         /// <summary>
-        ///     Gets the name of this column. If this column has a dynamic
+        ///     Gets or initializes the name of this column. If this column has a dynamic
         ///     name, then this property always returns the name as based
         ///     on the data in the first row. Use <see cref="NameProjection"/>
         ///     for dynamic names.
         /// </summary>
-        public string Name { get; init; }
+        /// <exception cref="System.ArgumentException">
+        ///     The supplied value is whitespace.
+        /// </exception>
+        /// <exception cref="System.ArgumentNullException">
+        ///     The supplied value is <c>null</c>.
+        /// </exception>
+        public string Name
+        {
+            get
+            {
+                return this.name;
+            }
+            init
+            {
+                Guard.NotNullOrWhiteSpace(value, nameof(Name));
+                this.name = value;
+            }
+        }
 
         /// <summary>
         ///     Gets a value indicating whether the name of this column is
