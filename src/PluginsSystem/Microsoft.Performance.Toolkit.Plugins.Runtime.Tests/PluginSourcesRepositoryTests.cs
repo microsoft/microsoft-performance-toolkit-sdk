@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Collections.Specialized;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Toolkit.Plugins.Core.Discovery;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,7 +18,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Add_Single_New_Added()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
             var source = new PluginSource(FakeUris.Uri1);
 
             bool success = repo.Add(source);
@@ -55,7 +56,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Add_Single_CollectionChangedInvoked()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
             var source = new PluginSource(FakeUris.Uri1);
             bool raised = false;
 
@@ -91,7 +92,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Add_Single_NullItem_ThrowsArgumentNullException()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
 
             PluginSource? pluginSource = null;
             Assert.ThrowsException<ArgumentNullException>(() => repo.Add(pluginSource));
@@ -104,7 +105,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Add_Multiple_New_Added()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
             var sources = new PluginSource[]
             {
                 new PluginSource(FakeUris.Uri1),
@@ -137,7 +138,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Add_Multiple_CollectionChangedInvoked()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
             var sources = new PluginSource[]
             {
                 new PluginSource(FakeUris.Uri1),
@@ -176,7 +177,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Add_Mutiple_ThrowsArgumentNullException()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
 
             PluginSource[]? pluginSources = null;
             Assert.ThrowsException<ArgumentNullException>(() => repo.Add(pluginSources));
@@ -267,7 +268,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Remove_Single_ThrowsArgumentNullException()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
 
             PluginSource? pluginSource = null;
             Assert.ThrowsException<ArgumentNullException>(() => repo.Remove(pluginSource));
@@ -361,7 +362,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void Remove_Multiple_ThrowsArgumentNullException()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
 
             PluginSource[]? pluginSources = null;
             Assert.ThrowsException<ArgumentNullException>(() => repo.Remove(pluginSources));
@@ -376,7 +377,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void CollectionChanged_NewItem_Correct()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
             var source = new PluginSource(FakeUris.Uri1);
 
             repo.CollectionChanged += (s, e) =>
@@ -392,7 +393,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         [UnitTest]
         public void CollectionChanged_NewItems_Correct()
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
             var sources = new[]
             {
                 new PluginSource(FakeUris.Uri1),
@@ -450,7 +451,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
         private PluginSourceRepository CreateSut(IEnumerable<PluginSource>? existingPluginSources)
         {
-            var repo = new PluginSourceRepository();
+            var repo = new PluginSourceRepository(Logger.Create);
             if (existingPluginSources != null && existingPluginSources.Any())
             {
                 repo.Add(existingPluginSources);
