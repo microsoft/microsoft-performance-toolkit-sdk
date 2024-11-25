@@ -36,7 +36,7 @@ public class EmptyColumnBuilderTests
 
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
-            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }), null);
+            builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }), null);
         });
     }
 
@@ -62,7 +62,7 @@ public class EmptyColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
-                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }),
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
                 null,
                 new StubCollectionAccessProvider<float>());
         });
@@ -76,7 +76,7 @@ public class EmptyColumnBuilderTests
         Assert.ThrowsException<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
-                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }),
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
                 Projection.Constant(1f),
                 null);
         });
@@ -110,7 +110,7 @@ public class EmptyColumnBuilderTests
     public void WithModes_NullBuilderDoesNotThrow()
     {
         var builder = CreateSut();
-        builder.WithModes(new ColumnVariantProperties { Name = "Foo" });
+        builder.WithModes(new ColumnVariantProperties { Label = "Foo" });
         Assert.IsTrue(true);
     }
 

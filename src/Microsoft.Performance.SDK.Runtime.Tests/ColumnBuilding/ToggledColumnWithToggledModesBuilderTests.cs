@@ -31,7 +31,7 @@ public class ToggledColumnWithToggledModesBuilderTests
                 new ColumnMetadata(Guid.NewGuid(), "toggle")), Projection.Constant<int, int>(1));
 
         return new ToggledColumnWithToggledModesBuilder(
-            new []{ new ToggledColumnBuilder.AddedToggle(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Name = "Foo" }), initialToggle) },
+            new []{ new ToggledColumnBuilder.AddedToggle(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }), initialToggle) },
             baseColumn,
             new TestColumnVariantsProcessor(),
             new ModesBuilderCallbackInvoker((modesBuilder) => modesBuilder, baseColumn),

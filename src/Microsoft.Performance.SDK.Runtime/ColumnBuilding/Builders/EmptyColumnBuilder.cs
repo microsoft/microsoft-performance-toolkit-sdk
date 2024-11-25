@@ -54,7 +54,12 @@ public sealed class EmptyColumnBuilder
         return new ToggledColumnBuilder(
             [
                 new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
-                    new DataColumn<T>(baseColumn.Configuration, projection)),
+                    new DataColumn<T>(
+                        new ColumnConfiguration(this.baseColumn.Configuration)
+                        {
+                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                        },
+                        projection)),
             ],
             baseColumn,
             processor);
@@ -73,7 +78,13 @@ public sealed class EmptyColumnBuilder
         return new ToggledColumnBuilder(
             [
                 new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
-                    new HierarchicalDataColumn<T>(baseColumn.Configuration, projection, collectionProvider)),
+                    new HierarchicalDataColumn<T>(
+                        new ColumnConfiguration(this.baseColumn.Configuration)
+                        {
+                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                        },
+                        projection,
+                        collectionProvider)),
             ],
             baseColumn,
             processor);
