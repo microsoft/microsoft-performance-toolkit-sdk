@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Medallion.Threading.FileSystem;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 
@@ -33,23 +32,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
         private readonly ISerializer<List<InstalledPluginInfo>> registryFileSerializer;
 
         private readonly ILogger logger;
-        private readonly Func<Type, ILogger> loggerFactory;
-
-        /// <summary>
-        ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root and a serializer.
-        /// </summary>
-        /// <param name="registryRoot">
-        ///     The root directory of the registry.
-        /// </param>
-        /// <param name="serializer">
-        ///     Used to serialize and deserialize the registry file.
-        /// </param>
-        public FileBackedPluginRegistry(
-            string registryRoot,
-            ISerializer<List<InstalledPluginInfo>> serializer)
-            : this(registryRoot, serializer, Logger.Create)
-        {
-        }
 
         /// <summary>
         ///     Creates an instance of <see cref="FileBackedPluginRegistry"/> with a registry root and a logger.
@@ -82,7 +64,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             this.registryRoot = Path.GetFullPath(registryRoot);
             this.registryFilePath = Path.Combine(registryRoot, registryFileName);
             this.registryFileSerializer = serializer;
-            this.loggerFactory = loggerFactory;
             this.logger = loggerFactory(typeof(FileBackedPluginRegistry));
 
             string lockFilePath = Path.Combine(registryRoot, lockFileName);

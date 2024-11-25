@@ -460,7 +460,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Discovery
 
                 Debug.Assert(discoverer != null);
 
-                discoverer.SetLogger(Logger.Create(discoverer.GetType()));
+                discoverer.SetLogger(this.loggerFactory.Invoke(discoverer.GetType()));
                 results.Add(discoverer);
             }
 
