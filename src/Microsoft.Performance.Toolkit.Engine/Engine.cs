@@ -686,12 +686,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 {
                     foreach (ProcessingSourceExecutor executor in this.executors)
                     {
-                        if (executor.Processor is null)
-                        {
-                            continue;
-                        }
-
-                        executor.Context.ProcessingSource.Instance.DisposeProcessor(executor.Processor);
+                        executor.Dispose();
                     }
                 }
 
