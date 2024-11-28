@@ -200,14 +200,14 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 if (disposing)
                 {
-                    if ((this.Processor is not null) && (this.Processor is IDisposable disposable))
+                    if (this.Processor is not null)
                     {
                         this.Context?.ProcessingSource?.Instance?.DisposeProcessor(this.Processor);
 
                         // The default behavior for ProcessingSource.DisposeProcessor() is to do nothing
                         // and disposing a second time shouldn't have negative consequences.
                         //
-                        disposable.Dispose();
+                        this.Processor.TryDispose();
                     }
                 }
 
