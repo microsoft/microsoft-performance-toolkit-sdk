@@ -682,6 +682,14 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             if (disposing)
             {
+                if (this.executors != null)
+                {
+                    foreach (ProcessingSourceExecutor executor in this.executors)
+                    {
+                        executor.Dispose();
+                    }
+                }
+
                 //
                 // we diposes the original set only if we own the data sources.
                 // this only occurs when the user uses one of the convenience
@@ -699,6 +707,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             this.workingDataSourceSet = null;
             this.internalDataSourceSet = null;
             this.tablesToProcessors = null;
+            this.executors = null;
             this.isDisposed = true;
         }
 

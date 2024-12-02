@@ -14,10 +14,15 @@ namespace Microsoft.Performance.SDK.Runtime
     ///     Executes the <see cref="ICustomDataProcessor"/> of a <see cref="IProcessingSource"/>.
     /// </summary>
     public sealed class ProcessingSourceExecutor
+        : IDisposable
     {
+        private readonly ILogger logger;
+
+        private ICustomDataProcessor processor;
+        private ExecutionContext context;
         private List<TableDescriptor> enabledTables;
         private Dictionary<TableDescriptor, Exception> failedToEnableTables;
-        private readonly ILogger logger;
+        private bool disposedValue;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ProcessingSourceExecutor"/>
@@ -48,12 +53,34 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <summary>
         ///     The custom data processor created by this object.
         /// </summary>
-        public ICustomDataProcessor Processor { get; private set; }
+        public ICustomDataProcessor Processor
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return this.processor;
+            }
+            private set
+            {
+                this.processor = value;
+            }
+        }
 
         /// <summary>
         ///     Provides access to the <see cref="ExecutionContext"/> used to initialize this object.
         /// </summary>
-        public ExecutionContext Context { get; private set; }
+        public ExecutionContext Context
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return this.context;
+            }
+            private set
+            {
+                this.context = value;
+            }
+        }
 
         /// <summary>
         ///     Creates the custom data processor and enables the specified tables.
@@ -63,6 +90,8 @@ namespace Microsoft.Performance.SDK.Runtime
         /// </param>
         public void InitializeCustomDataProcessor(ExecutionContext context)
         {
+            ThrowIfDisposed();
+
             Guard.NotNull(context, nameof(context));
 
             this.Processor = context.ProcessingSource.CreateProcessor(
@@ -114,6 +143,8 @@ namespace Microsoft.Performance.SDK.Runtime
         public async Task<ExecutionResult> ExecuteAsync(
             CancellationToken cancellationToken)
         {
+            ThrowIfDisposed();
+
             if (this.Processor == null)
             {
                 throw new InvalidOperationException($"{nameof(this.InitializeCustomDataProcessor)} wasn't successfully called before calling this method.");
@@ -154,6 +185,46 @@ namespace Microsoft.Performance.SDK.Runtime
                 this.Processor,
                 this.failedToEnableTables,
                 metadataName);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!this.disposedValue)
+            {
+                if (disposing)
+                {
+                    if (this.Processor is not null)
+                    {
+                        this.Context?.ProcessingSource?.Instance?.DisposeProcessor(this.Processor);
+
+                        // The default behavior for ProcessingSource.DisposeProcessor() is to do nothing
+                        // and disposing a second time shouldn't have negative consequences.
+                        //
+                        this.Processor.TryDispose();
+                    }
+                }
+
+                this.enabledTables = null;
+                this.failedToEnableTables = null;
+                this.Processor = null;
+                this.Context = null;
+                this.disposedValue = true;
+            }
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (this.disposedValue)
+            {
+                throw new ObjectDisposedException(this.GetType().Name);
+            }
         }
     }
 }
