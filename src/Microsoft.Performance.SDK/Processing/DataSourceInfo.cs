@@ -136,5 +136,10 @@ namespace Microsoft.Performance.SDK.Processing
                 return this.FirstEventWallClockUtc.AddTicks(this.EndTimestampNanoseconds / 100);
             }
         }
+
+        /// <summary>
+        ///     Gets or initializes the time zones that are of significance to this data source.
+        /// </summary>
+        public IReadOnlyCollection<DataSourceTimeZone> TimeZones { get; init; } = Array.Empty<DataSourceTimeZone>();
     }
 }
