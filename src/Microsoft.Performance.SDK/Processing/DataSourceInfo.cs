@@ -138,8 +138,18 @@ namespace Microsoft.Performance.SDK.Processing
         }
 
         /// <summary>
-        ///     Gets or initializes the time zones that are of significance to this data source.
+        ///     Gets or initializes the time zones that are of significance to this data source, keyed by a label
+        ///     that describes the significance of the time zone.
         /// </summary>
-        public IReadOnlyCollection<DataSourceTimeZone> TimeZones { get; init; } = Array.Empty<DataSourceTimeZone>();
+        /// <example>
+        ///     If the data source was a trace file recorded on a machine in the Eastern Time Zone, an entry in this
+        ///     dictionary might be "Trace Local" => EST.
+        /// </example>
+        /// <example>
+        ///     If the data source was a trace recorded on a web server where the host was in the Eastern Time Zone and
+        ///     the client was in the Pacific Time Zone, entries in this dictionary might be "Host Local" => EST and
+        ///     "Client Local" => PST.
+        /// </example>
+        public IReadOnlyDictionary<string, TimeZoneInfo> TimeZones { get; init; } = new Dictionary<string, TimeZoneInfo>();
     }
 }
