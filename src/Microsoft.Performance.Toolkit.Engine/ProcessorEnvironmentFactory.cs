@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
-namespace Microsoft.Performance.SDK.Processing
+namespace Microsoft.Performance.Toolkit.Engine
 {
     /// <summary>
     ///     This is used to generate processor environments.
