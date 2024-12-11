@@ -2,14 +2,29 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.SDK.Processing;
 
-namespace Microsoft.Performance.Toolkit.Engine
+namespace Microsoft.Performance.SDK.Processing
 {
     /// <inheritdoc cref="IProcessorEnvironment"/>
     public abstract class ProcessorEnvironment
-        : IProcessorEnvironment
+        : IProcessorEnvironmentV2
     {
+        private IProcessorTableDataSynchronizationFactory processorTableDataSynchronizationFactory;
+
+        /// <inheritdoc/>
+        public IProcessorTableDataSynchronizationFactory TableDataSynchronizerFactory
+        {
+            get
+            {
+                return this.processorTableDataSynchronizationFactory;
+            }
+
+            protected set
+            {
+                this.processorTableDataSynchronizationFactory = value;
+            }
+        }
+
         /// <inheritdoc/>
         public abstract ILogger CreateLogger(Type processorType);
 
