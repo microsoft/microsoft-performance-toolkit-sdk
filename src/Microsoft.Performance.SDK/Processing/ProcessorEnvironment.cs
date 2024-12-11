@@ -9,6 +9,22 @@ namespace Microsoft.Performance.SDK.Processing
     public abstract class ProcessorEnvironment
         : IProcessorEnvironmentV2
     {
+        private IProcessorTableDataSynchronizationFactory processorTableDataSynchronizationFactory;
+
+        /// <inheritdoc/>
+        public IProcessorTableDataSynchronizationFactory TableDataSynchronizerFactory
+        {
+            get
+            {
+                return this.processorTableDataSynchronizationFactory;
+            }
+
+            protected set
+            {
+                this.processorTableDataSynchronizationFactory = value;
+            }
+        }
+
         /// <inheritdoc/>
         public abstract ILogger CreateLogger(Type processorType);
 
@@ -20,19 +36,6 @@ namespace Microsoft.Performance.SDK.Processing
         public virtual IDynamicTableBuilder RequestDynamicTableBuilder(TableDescriptor descriptor)
         {
             return null;
-        }
-
-        /// <inheritdoc/>
-        public virtual IProcessorTableDataSynchronizationFactory TableDataSynchronizerFactory
-        {
-            get
-            {
-                return null;
-            }
-
-            protected set
-            {
-            }
         }
     }
 }
