@@ -31,8 +31,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private readonly List<IDataColumn> columns;
         private readonly ReadOnlyCollection<IDataColumn> columnsRO;
         private readonly List<TableConfiguration> builtInTableConfigurations;
-        private readonly List<TableCommand> commands;
-        private readonly IReadOnlyList<TableCommand> commandsRO;
+        private readonly List<TableCommand2> commands2;
         private readonly ColumnVariantsRegistrar variantsRegistrar;
 
         // Maps a row to a collection of row detail entry
@@ -47,8 +46,10 @@ namespace Microsoft.Performance.SDK.Runtime
             this.columns = new List<IDataColumn>();
             this.builtInTableConfigurations = new List<TableConfiguration>();
             this.columnsRO = new ReadOnlyCollection<IDataColumn>(this.columns);
-            this.commands = new List<TableCommand>();
-            this.commandsRO = new ReadOnlyCollection<TableCommand>(this.commands);
+
+            this.commands2 = new List<TableCommand2>();
+            this.Commands = this.commands2;
+
             this.variantsRegistrar = new ColumnVariantsRegistrar();
 
             this.RowCount = 0;
@@ -67,8 +68,7 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public int RowCount { get; private set; }
 
-        /// <inheritdoc />
-        public IReadOnlyList<TableCommand> Commands => this.commandsRO;
+        public IReadOnlyList<TableCommand2> Commands { get; }
 
         /// <summary>
         ///     Gets the <see cref="IColumnVariantsRegistrar"/> that can be used to find
@@ -96,15 +96,28 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public ITableBuilder AddTableCommand(string name, TableCommandCallback callback)
         {
-            Guard.NotNullOrWhiteSpace(name, nameof(name));
+            Guard.NotNull(callback, nameof(callback));
 
-            var canonicalName = name.Trim();
-            if (this.commands.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.MenuName, canonicalName)))
+           return AddTableCommand2(
+               name,
+               (_) => true,
+               (context) => callback(context.SelectedRows));
+        }
+
+        /// <inheritdoc />
+        public ITableBuilder AddTableCommand2(string commandName, Predicate<TableCommandContext> canExecute, Action<TableCommandContext> onExecute)
+        {
+            Guard.NotNullOrWhiteSpace(commandName, nameof(commandName));
+            Guard.NotNull(canExecute, nameof(canExecute));
+            Guard.NotNull(onExecute, nameof(onExecute));
+
+            var canonicalName = commandName.Trim();
+            if (this.commands2.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, canonicalName)))
             {
                 throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {canonicalName}");
             }
 
-            this.commands.Add(new TableCommand(canonicalName, callback));
+            this.commands2.Add(new TableCommand2(canonicalName, canExecute, onExecute));
 
             return this;
         }

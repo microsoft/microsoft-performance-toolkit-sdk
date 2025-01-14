@@ -63,9 +63,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="errors">
         ///     The collection of errors, if any, that were encountered during processing.
         /// </param>
-        /// <param name="logger">
-        ///     The logger to use for logging.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="sourceCookerData"/> is <c>null</c>.
         ///     - or -
@@ -535,6 +532,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             private readonly Dictionary<string, TableCommandCallback> tableCommands;
             private readonly ReadOnlyDictionary<string, TableCommandCallback> tableCommandsRO;
 
+            private readonly List<TableCommand2> tableCommands2;
+
             internal TableBuilder()
             {
                 this.columns = new List<IDataColumn>();
@@ -545,6 +544,10 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 this.tableCommands = new Dictionary<string, TableCommandCallback>();
                 this.tableCommandsRO = new ReadOnlyDictionary<string, TableCommandCallback>(this.tableCommands);
+
+                this.tableCommands2 = new List<TableCommand2>();
+                this.TableCommands2 = new ReadOnlyCollection<TableCommand2>(this.tableCommands2);
+
                 this.variantsRegistrar = new ColumnVariantsRegistrar();
             }
 
@@ -565,13 +568,37 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
             }
 
+            [Obsolete("This property will be removed by 2.0. Use TableCommands2 instead.")]
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
+
+            public IReadOnlyCollection<TableCommand2> TableCommands2 { get; }
 
             public Func<int, IEnumerable<TableRowDetailEntry>> TableRowDetailsGenerator { get; private set; }
 
             public ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback)
             {
-                this.tableCommands.TryAdd(commandName, callback);
+                Guard.NotNull(callback, nameof(callback));
+
+                return AddTableCommand2(
+                    commandName,
+                    (_) => true,
+                    (context) => callback(context.SelectedRows));
+            }
+
+            public ITableBuilder AddTableCommand2(string commandName, Predicate<TableCommandContext> canExecute, Action<TableCommandContext> onExecute)
+            {
+                Guard.NotNull(commandName, nameof(commandName));
+                Guard.NotNull(canExecute, nameof(canExecute));
+                Guard.NotNull(onExecute, nameof(onExecute));
+
+                var canonicalName = commandName.Trim();
+                if (this.tableCommands2.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, canonicalName)))
+                {
+                    throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {canonicalName}");
+                }
+
+                this.tableCommands.TryAdd(commandName, (rows) => onExecute(new TableCommandContext(null, null, rows ?? ArraySegment<int>.Empty)));
+                this.tableCommands2.Add(new TableCommand2(commandName, canExecute, onExecute));
                 return this;
             }
 
