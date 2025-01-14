@@ -577,6 +577,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback)
             {
+                Guard.NotNull(callback, nameof(callback));
+
                 return AddTableCommand2(
                     commandName,
                     (_) => true,
@@ -585,6 +587,16 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public ITableBuilder AddTableCommand2(string commandName, Predicate<TableCommandContext> canExecute, Action<TableCommandContext> onExecute)
             {
+                Guard.NotNull(commandName, nameof(commandName));
+                Guard.NotNull(canExecute, nameof(canExecute));
+                Guard.NotNull(onExecute, nameof(onExecute));
+
+                var canonicalName = commandName.Trim();
+                if (this.tableCommands2.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, canonicalName)))
+                {
+                    throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {canonicalName}");
+                }
+
                 this.tableCommands.TryAdd(commandName, (rows) => onExecute(new TableCommandContext(null, null, rows ?? ArraySegment<int>.Empty)));
                 this.tableCommands2.Add(new TableCommand2(commandName, canExecute, onExecute));
                 return this;
