@@ -9,7 +9,7 @@ namespace Microsoft.Performance.SDK.Runtime;
 /// <summary>
 ///     Represents a command that can be executed against a table.
 /// </summary>
-/// <param name="MenuName">
+/// <param name="CommandName">
 ///     The name of the command to be shown to the user.
 /// </param>
 /// <param name="CanExecute">
@@ -19,6 +19,6 @@ namespace Microsoft.Performance.SDK.Runtime;
 ///     The function to execute when the command is invoked.
 /// </param>
 public sealed record TableCommand2(
-    string MenuName,
+    string CommandName,
     Predicate<TableCommandContext> CanExecute,
     Action<TableCommandContext> OnExecute);

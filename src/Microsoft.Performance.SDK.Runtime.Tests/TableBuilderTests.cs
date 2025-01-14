@@ -242,7 +242,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(1, this.Sut.Commands.Count);
             var command = this.Sut.Commands.Single();
             Assert.IsNotNull(command);
-            Assert.AreEqual(name, command.MenuName);
+            Assert.AreEqual(name, command.CommandName);
 
             var testList = new List<int> { 1, 2, 3, }.AsReadOnly();
             command.OnExecute(new TableCommandContext(null, null, testList));
@@ -268,7 +268,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(1, this.Sut.Commands.Count);
             var command = this.Sut.Commands.Single();
             Assert.IsNotNull(command);
-            Assert.AreEqual(expectedName, command.MenuName);
+            Assert.AreEqual(expectedName, command.CommandName);
 
             var testList = new List<int> { 1, 2, 3, }.AsReadOnly();
             command.OnExecute(new TableCommandContext(null, null, testList));
@@ -304,24 +304,24 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             Assert.AreEqual(3, this.Sut.Commands.Count);
 
-            var command1 = this.Sut.Commands.SingleOrDefault(x => x.MenuName == name1);
+            var command1 = this.Sut.Commands.SingleOrDefault(x => x.CommandName == name1);
             Assert.IsNotNull(command1);
-            Assert.AreEqual(name1, command1.MenuName);
+            Assert.AreEqual(name1, command1.CommandName);
             var test1 = new List<int> { 1, 2, 3, }.AsReadOnly();
             command1.OnExecute(new TableCommandContext(null, null, test1));
 
             Assert.AreEqual(captured1, test1);
 
-            var command2 = this.Sut.Commands.SingleOrDefault(x => x.MenuName == name2);
+            var command2 = this.Sut.Commands.SingleOrDefault(x => x.CommandName == name2);
             Assert.IsNotNull(command2);
-            Assert.AreEqual(name2, command2.MenuName);
+            Assert.AreEqual(name2, command2.CommandName);
             var test2 = new List<int> { 1, 2, 3, }.AsReadOnly();
             command2.OnExecute(new TableCommandContext(null, null, test2));
             Assert.AreEqual(captured2, test2);
 
-            var command3 = this.Sut.Commands.SingleOrDefault(x => x.MenuName == name3);
+            var command3 = this.Sut.Commands.SingleOrDefault(x => x.CommandName == name3);
             Assert.IsNotNull(command3);
-            Assert.AreEqual(name3, command3.MenuName);
+            Assert.AreEqual(name3, command3.CommandName);
             var test3 = new List<int> { 1, 2, 3, }.AsReadOnly();
             command3.OnExecute(new TableCommandContext(null, null, test3));
             Assert.AreEqual(captured3, test3);

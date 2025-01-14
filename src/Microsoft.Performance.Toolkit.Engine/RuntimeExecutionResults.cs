@@ -571,6 +571,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 }
             }
 
+            [Obsolete("This property will be removed by 2.0. Use TableCommands2 instead.")]
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
             public IReadOnlyCollection<TableCommand2> TableCommands2 { get; }

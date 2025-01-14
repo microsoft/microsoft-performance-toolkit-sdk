@@ -112,7 +112,7 @@ namespace Microsoft.Performance.SDK.Runtime
             Guard.NotNull(onExecute, nameof(onExecute));
 
             var canonicalName = commandName.Trim();
-            if (this.commands2.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.MenuName, canonicalName)))
+            if (this.commands2.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, canonicalName)))
             {
                 throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {canonicalName}");
             }
