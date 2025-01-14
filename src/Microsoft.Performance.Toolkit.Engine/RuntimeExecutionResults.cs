@@ -63,9 +63,6 @@ namespace Microsoft.Performance.Toolkit.Engine
         /// <param name="errors">
         ///     The collection of errors, if any, that were encountered during processing.
         /// </param>
-        /// <param name="logger">
-        ///     The logger to use for logging.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="sourceCookerData"/> is <c>null</c>.
         ///     - or -
