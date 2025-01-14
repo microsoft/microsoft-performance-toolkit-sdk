@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -16,9 +15,4 @@ namespace Microsoft.Performance.SDK.Processing
     ///     The rows that are selected by the user at the time the command is invoked.
     /// </param>
     public delegate void TableCommandCallback(IReadOnlyList<int> selectedRows);
-
-    public record TableCommandContext(
-        TableConfiguration Configuration, // May be null
-        Guid? Column, // May be null
-        IReadOnlyList<int> SelectedRows);
 }

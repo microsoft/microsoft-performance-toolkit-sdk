@@ -53,11 +53,42 @@ namespace Microsoft.Performance.SDK.Processing
         /// </exception>
         ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback);
 
+        /// <summary>
+        ///     Registers a command that users can execute against this table.
+        /// </summary>
+        /// <param name="commandName">
+        ///     The name of the command. This name ultimately shows up in the context
+        ///     menu in the UI when the user right clicks a table. The name of the command
+        ///     is *NOT* case sensitive, and must be unique for the table. Any whitespace
+        ///     around the name is trimmed, so " name " will be stored as "name".
+        /// </param>
+        /// <param name="canExecute">
+        ///     The callback to execute to determine if the user can choose this command.
+        /// </param>
+        /// <param name="onExecute">
+        ///     The callback to execute when the user chooses this command.
+        /// </param>
+        /// <returns>
+        ///     This instance of the builder.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="commandName"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="canExecute"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="onExecute"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        ///     <paramref name="commandName"/> is whitespace.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        ///     A command with <paramref name="commandName"/> has already been added
+        ///     to this instance, irrespective of casing.
+        /// </exception>
         ITableBuilder AddTableCommand2(
             string commandName,
             Predicate<TableCommandContext> canExecute,
-            Action<TableCommandContext> onExecute
-        );
+            Action<TableCommandContext> onExecute);
 
         /// <summary>
         ///     Adds a configuration for this table to the builder.
