@@ -173,6 +173,11 @@ namespace Microsoft.Performance.SDK.Tests
                 throw new NotImplementedException();
             }
 
+            public ITableBuilder AddTableCommand2(string commandName, Predicate<TableCommandContext> canExecute, Action<TableCommandContext> onExecute)
+            {
+                throw new NotImplementedException();
+            }
+
             public ITableBuilder AddTableConfiguration(TableConfiguration configuration)
             {
                 throw new NotImplementedException();

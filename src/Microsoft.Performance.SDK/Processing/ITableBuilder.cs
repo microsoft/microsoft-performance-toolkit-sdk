@@ -53,6 +53,12 @@ namespace Microsoft.Performance.SDK.Processing
         /// </exception>
         ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback);
 
+        ITableBuilder AddTableCommand2(
+            string commandName,
+            Predicate<TableCommandContext> canExecute,
+            Action<TableCommandContext> onExecute
+        );
+
         /// <summary>
         ///     Adds a configuration for this table to the builder.
         /// </summary>

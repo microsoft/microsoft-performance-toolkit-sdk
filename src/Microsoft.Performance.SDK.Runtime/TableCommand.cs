@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
+    public sealed record TableCommand2(string MenuName, Predicate<TableCommandContext> CanExecute, Action<TableCommandContext> OnExecute);
+
     /// <summary>
     ///     Represents a command that can be executed against a table.
     /// </summary>

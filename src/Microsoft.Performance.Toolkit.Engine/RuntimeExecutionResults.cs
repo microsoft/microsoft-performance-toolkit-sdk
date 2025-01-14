@@ -535,6 +535,8 @@ namespace Microsoft.Performance.Toolkit.Engine
             private readonly Dictionary<string, TableCommandCallback> tableCommands;
             private readonly ReadOnlyDictionary<string, TableCommandCallback> tableCommandsRO;
 
+            private readonly List<TableCommand2> tableCommands2;
+
             internal TableBuilder()
             {
                 this.columns = new List<IDataColumn>();
@@ -545,6 +547,10 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 this.tableCommands = new Dictionary<string, TableCommandCallback>();
                 this.tableCommandsRO = new ReadOnlyDictionary<string, TableCommandCallback>(this.tableCommands);
+
+                this.tableCommands2 = new List<TableCommand2>();
+                this.TableCommands2 = new ReadOnlyCollection<TableCommand2>(this.tableCommands2);
+
                 this.variantsRegistrar = new ColumnVariantsRegistrar();
             }
 
@@ -567,11 +573,22 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
+            public IReadOnlyCollection<TableCommand2> TableCommands2 { get; }
+
             public Func<int, IEnumerable<TableRowDetailEntry>> TableRowDetailsGenerator { get; private set; }
 
             public ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback)
             {
-                this.tableCommands.TryAdd(commandName, callback);
+                return AddTableCommand2(
+                    commandName,
+                    (_) => true,
+                    (context) => callback(context.SelectedRows));
+            }
+
+            public ITableBuilder AddTableCommand2(string commandName, Predicate<TableCommandContext> canExecute, Action<TableCommandContext> onExecute)
+            {
+                this.tableCommands.TryAdd(commandName, (rows) => onExecute(new TableCommandContext(null, null, rows ?? ArraySegment<int>.Empty)));
+                this.tableCommands2.Add(new TableCommand2(commandName, canExecute, onExecute));
                 return this;
             }
 
