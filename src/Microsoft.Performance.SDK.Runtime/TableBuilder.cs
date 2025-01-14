@@ -104,6 +104,7 @@ namespace Microsoft.Performance.SDK.Runtime
                (context) => callback(context.SelectedRows));
         }
 
+        /// <inheritdoc />
         public ITableBuilder AddTableCommand2(string commandName, Predicate<TableCommandContext> canExecute, Action<TableCommandContext> onExecute)
         {
             Guard.NotNullOrWhiteSpace(commandName, nameof(commandName));
