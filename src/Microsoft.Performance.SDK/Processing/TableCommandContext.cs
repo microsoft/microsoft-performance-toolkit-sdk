@@ -21,6 +21,6 @@ namespace Microsoft.Performance.SDK.Processing;
 ///     The rows that are selected by the user at the time the command is invoked.
 /// </param>
 public record TableCommandContext(
-    Guid? Column, // May be null
-    TableConfiguration Configuration, // May be null
+    Guid? Column,
+    TableConfiguration Configuration,
     IReadOnlyList<int> SelectedRows);
