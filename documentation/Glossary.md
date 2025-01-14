@@ -191,7 +191,9 @@ The standard process used to construct [Tables](#table). This process involves
 
 ## TableCommand
 
-An action that can be called on a [Table](#table). Concretely, a TableCommand is a `string => Func` key-value pair where the key is the TableCommand's name and the value is a function to be called when the TableCommand is invoked.
+An action that can be called on a [Table](#table). Concretely, a TableCommand associates a string "command name" with methods to, based on the context where the command is being used,
+1. Determine if the command can be performed
+2. Perform the command
 
 A common use-case of TableCommands is creating [DynamicTables](#dynamictable)
 
