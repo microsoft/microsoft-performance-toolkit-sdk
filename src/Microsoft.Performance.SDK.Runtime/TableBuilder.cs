@@ -48,7 +48,7 @@ namespace Microsoft.Performance.SDK.Runtime
             this.columnsRO = new ReadOnlyCollection<IDataColumn>(this.columns);
 
             this.commands2 = new List<TableCommand2>();
-            this.Commands = new ReadOnlyCollection<TableCommand2>(this.commands2);
+            this.Commands = this.commands2;
 
             this.variantsRegistrar = new ColumnVariantsRegistrar();
 

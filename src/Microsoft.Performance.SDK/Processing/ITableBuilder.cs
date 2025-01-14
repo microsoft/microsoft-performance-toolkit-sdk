@@ -57,10 +57,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Registers a command that users can execute against this table.
         /// </summary>
         /// <param name="commandName">
-        ///     The name of the command. This name ultimately shows up in the context
-        ///     menu in the UI when the user right clicks a table. The name of the command
-        ///     is *NOT* case sensitive, and must be unique for the table. Any whitespace
-        ///     around the name is trimmed, so " name " will be stored as "name".
+        ///     The human-readable name to associate with the command.
         /// </param>
         /// <param name="canExecute">
         ///     The callback to execute to determine if the user can choose this command.
