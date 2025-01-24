@@ -354,6 +354,15 @@ namespace Microsoft.Performance.SDK.Processing
         {
         }
 
+        /// <summary>
+        ///     Refreshes the tables expoed by this <see cref="ProcessingSource"/>. This method
+        ///     will re-run the <see cref="IProcessingSourceTableProvider"/> associated with
+        ///     this <see cref="ProcessingSource"/> and update <see cref="DataTables"/> and
+        ///     <see cref="MetadataTables"/> accordingly.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        ///     The application environment has not yet been set.
+        /// </exception>
         protected void RefreshTables()
         {
             if (this.ApplicationEnvironment == null)
