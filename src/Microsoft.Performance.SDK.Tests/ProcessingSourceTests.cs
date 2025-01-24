@@ -229,6 +229,56 @@ namespace Microsoft.Performance.SDK.Tests
             Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
+        [TestMethod]
+        [UnitTest]
+        public void RefreshTablesUpdatesTables()
+        {
+            var tableProvider = new StubTableProvider();
+
+            List<TableDescriptor> SetDiscoveredTables(params Type[] tables)
+            {
+                var tableDescriptors = TableDescriptorUtils.CreateTableDescriptors(serializer, tables);
+                tableProvider.DiscoverReturnValue = tableDescriptors;
+                return tableDescriptors;
+            }
+
+            var initialTableDescriptors = SetDiscoveredTables(
+                typeof(StubDataTableOne),
+                typeof(StubDataTableTwo),
+                typeof(StubMetadataTableOne),
+                typeof(StubMetadataTableTwo));
+
+            var sut = new CreateTableProviderBasedStubDataSource(tableProvider);
+            sut.SetApplicationEnvironment(this.applicationEnvironment);
+
+            AssertCorrectTableDescriptorsAreExposed(initialTableDescriptors, sut);
+
+            var refreshedTableDescriptors = SetDiscoveredTables(
+                typeof(StubDataTableOne),
+                typeof(StubMetadataTableOne));
+
+            sut.CallRefreshTables();
+
+            AssertCorrectTableDescriptorsAreExposed(refreshedTableDescriptors, sut);
+        }
+
+        private void AssertCorrectTableDescriptorsAreExposed(
+            IReadOnlyCollection<TableDescriptor> expected,
+            ProcessingSource processingSource)
+        {
+            CollectionAssert.AreEquivalent(
+                expected
+                    .Where(t => !t.IsMetadataTable)
+                    .ToList(),
+                processingSource.DataTables.ToList());
+
+            CollectionAssert.AreEquivalent(
+                expected
+                    .Where(t => t.IsMetadataTable)
+                    .ToList(),
+                processingSource.MetadataTables.ToList());
+        }
+
         private abstract class StubDataSource
             : ProcessingSource
         {
@@ -282,6 +332,11 @@ namespace Microsoft.Performance.SDK.Tests
             protected override bool IsDataSourceSupportedCore(IDataSource dataSource)
             {
                 return true;
+            }
+
+            public void CallRefreshTables()
+            {
+                RefreshTables();
             }
         }
 

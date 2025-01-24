@@ -24,7 +24,7 @@ namespace Microsoft.Performance.SDK.Processing
         private readonly HashSet<TableDescriptor> metadataTables;
         private readonly ReadOnlyHashSet<TableDescriptor> metadataTablesRO;
 
-        // todo: when the constructor that takes a table provider is removed in v2, this should 
+        // todo: when the constructor that takes a table provider is removed in v2, this should
         // be removed.
         private readonly IProcessingSourceTableProvider tableProvider;
 
@@ -51,7 +51,7 @@ namespace Microsoft.Performance.SDK.Processing
         ///     requests the Engine to enable or build a <see cref="TableDescriptor"/> that is in this list, the
         ///     <see cref="TableDescriptor"/> will be passed into
         ///     <see cref="ICustomDataProcessor.EnableTable(TableDescriptor)"/> or
-        ///     <see cref="ICustomDataProcessor.BuildTable(TableDescriptor, ITableBuilder)"/> for the 
+        ///     <see cref="ICustomDataProcessor.BuildTable(TableDescriptor, ITableBuilder)"/> for the
         ///     <see cref="ICustomDataProcessor"/> returned from
         ///     <see cref="ProcessingSource.CreateProcessor(IDataSource, IProcessorEnvironment, ProcessorOptions)"/>
         ///     or
@@ -273,7 +273,7 @@ namespace Microsoft.Performance.SDK.Processing
             IEnumerable<IDataSource> dataSources,
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions options);
-        
+
         /// <summary>
         ///     When implemented in a derived class, creates a new
         ///     instance implementing <see cref="ICustomDataProcessor"/>
@@ -308,9 +308,9 @@ namespace Microsoft.Performance.SDK.Processing
                 throw new InvalidOperationException(
                     $"Prior to V2, you must override the {nameof(CreateProcessorCore)} which accepts a {nameof(IDataSourceGroup)} when implementing {nameof(IDataSourceGrouper)}");
             }
-            
+
             this.Logger.Warn($"{this.GetType().Name} does not support processing user-specified processing groups - falling back to default processing.");
-	
+
             // Call v1 methods for now
             if (!(dataSourceGroup.ProcessingMode is DefaultProcessingMode))
             {
@@ -354,6 +354,16 @@ namespace Microsoft.Performance.SDK.Processing
         {
         }
 
+        protected void RefreshTables()
+        {
+            if (this.ApplicationEnvironment == null)
+            {
+                throw new InvalidOperationException("The application environment has not been set.");
+            }
+
+            this.InitializeAllTables(this.ApplicationEnvironment.Serializer);
+        }
+
         /// <summary>
         ///     A derived class may implement this to provide a custom <see cref="IProcessingSourceTableProvider"/>.
         /// </summary>
@@ -368,6 +378,9 @@ namespace Microsoft.Performance.SDK.Processing
         private void InitializeAllTables(ITableConfigurationsSerializer tableConfigSerializer)
         {
             Debug.Assert(tableConfigSerializer != null);
+
+            this.allTables.Clear();
+            this.metadataTables.Clear();
 
             IProcessingSourceTableProvider tableProvider = CreateTableProvider();
             if (tableProvider == null)
