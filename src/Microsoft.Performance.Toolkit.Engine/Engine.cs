@@ -779,6 +779,13 @@ namespace Microsoft.Performance.Toolkit.Engine
                     ? createInfo.ApplicationName
                     : string.Empty;
 
+                // TODO (options): we also need to support options from plugins without processing sources
+                var options =
+                    instance
+                        .ProcessingSourceReferences
+                        .SelectMany(psr => psr.Instance.PluginOptions)
+                        .Select(option => option.CloneT()).ToList();
+
                 instance.applicationEnvironment = new EngineApplicationEnvironment(
                     applicationName: applicationName,
                     runtimeName: runtimeName,
@@ -788,7 +795,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                     createInfo.IsInteractive
                         ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
                         : (IMessageBox)new NonInteractiveMessageBox(instance.logger),
-                    createInfo.AuthProviders)
+                    createInfo.AuthProviders,
+                    options)
                 {
                     IsInteractive = createInfo.IsInteractive,
                 };

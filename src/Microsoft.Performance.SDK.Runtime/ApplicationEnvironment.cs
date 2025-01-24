@@ -7,6 +7,7 @@ using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
 
@@ -17,6 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime
         : IApplicationEnvironmentV2
     {
         private readonly IMessageBox messageBox;
+        private readonly IReadOnlyCollection<PluginOption> options;
 
         /// <summary>
         ///     Creates an instance of the <see cref="ApplicationEnvironment"/> class.
@@ -39,13 +41,17 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="messageBox">
         ///     Provides a way to message the user.
         /// </param>
+        /// <param name="options">
+        ///     The plugin options to use for the application.
+        /// </param>
         public ApplicationEnvironment(
             string applicationName,
             string runtimeName,
             ITableDataSynchronization tableDataSynchronizer,
             ISourceDataCookerFactoryRetrieval sourceDataCookerFactory,
             ISourceSessionFactory sourceSessionFactory,
-            IMessageBox messageBox)
+            IMessageBox messageBox,
+            IReadOnlyCollection<PluginOption> options)
         {
             // application and runtime names may be null
             // tableDataSynchronizer may be null
@@ -66,6 +72,7 @@ namespace Microsoft.Performance.SDK.Runtime
             this.TableDataSynchronizer = tableDataSynchronizer ?? new NullTableSynchronizer();
             this.SourceDataCookerFactoryRetrieval = sourceDataCookerFactory;
             this.SourceSessionFactory = sourceSessionFactory;
+            this.options = options;
         }
 
         /// <inheritdoc />
@@ -122,6 +129,21 @@ namespace Microsoft.Performance.SDK.Runtime
                 caption,
                 format,
                 args);
+        }
+
+        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption
+        {
+            foreach (var pluginOption in this.options)
+            {
+                if (pluginOption.Guid == optionGuid && pluginOption is T asT)
+                {
+                    option = asT;
+                    return true;
+                }
+            }
+
+            option = null;
+            return false;
         }
 
         /// <inheritdoc />

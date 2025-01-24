@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
+using Microsoft.Performance.SDK.Options;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -117,5 +118,7 @@ namespace Microsoft.Performance.SDK.Processing
             string caption,
             string format,
             params object[] args);
+
+        bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption;
     }
 }

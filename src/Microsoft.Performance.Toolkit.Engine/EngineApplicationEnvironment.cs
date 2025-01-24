@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 
@@ -24,14 +26,16 @@ namespace Microsoft.Performance.Toolkit.Engine
             ISourceDataCookerFactoryRetrieval sourceDataCookerFactory,
             ISourceSessionFactory sourceSessionFactory,
             IMessageBox messageBox,
-            ReadOnlyDictionary<Type, object> authProviders)
+            ReadOnlyDictionary<Type, object> authProviders,
+            IReadOnlyCollection<PluginOption> options)
             : base(
                 applicationName,
                 runtimeName,
                 tableDataSynchronizer,
                 sourceDataCookerFactory,
                 sourceSessionFactory,
-                messageBox)
+                messageBox,
+                options)
         {
             this.authProviders = authProviders;
         }

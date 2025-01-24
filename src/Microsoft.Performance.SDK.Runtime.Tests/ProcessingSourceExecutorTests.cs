@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.Testing;
@@ -676,6 +677,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             public IEnumerable<TableDescriptor> MetadataTables { get; }
 
             public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
+
+            public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
 
             public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
             {
