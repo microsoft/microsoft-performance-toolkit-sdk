@@ -7,6 +7,8 @@ public abstract class PluginOption<T>
 {
     private readonly T defaultValue;
 
+    private bool isApplyingDefault;
+
     private T currentValue;
 
     internal PluginOption()
@@ -34,11 +36,21 @@ public abstract class PluginOption<T>
         }
         internal set
         {
-            if (!this.currentValue.Equals(value))
+            this.currentValue = value;
+            RaiseOptionChanged();
+
+            if (!isApplyingDefault)
             {
-                this.currentValue = value;
-                RaiseOptionChanged();
+                RaiseOnChangedFromDefault();
             }
         }
+    }
+
+    internal override void ApplyDefault()
+    {
+        this.isApplyingDefault = true;
+        this.CurrentValue = this.DefaultValue;
+        RaiseOnChangedToDefault();
+        this.isApplyingDefault = false;
     }
 }

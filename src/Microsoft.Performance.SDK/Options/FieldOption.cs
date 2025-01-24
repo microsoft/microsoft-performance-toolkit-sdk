@@ -11,7 +11,6 @@ public sealed class FieldOption
             Category = this.Category,
             Name = this.Name,
             Description = this.Description,
-            RequiresRestart = this.RequiresRestart,
             DefaultValue = this.DefaultValue,
             CurrentValue = this.CurrentValue,
         };
