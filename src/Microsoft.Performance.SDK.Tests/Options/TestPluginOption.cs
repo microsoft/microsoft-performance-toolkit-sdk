@@ -32,4 +32,16 @@ public static class TestPluginOption
             DefaultValue = defaultValue,
         };
     }
+
+    public static FieldArrayOption FieldArrayOption(string[] defaultValue)
+    {
+        return new FieldArrayOption()
+        {
+            Guid = Guid.NewGuid(),
+            Category = Utilities.RandomString(5),
+            Name = Utilities.RandomString(5),
+            Description = Utilities.RandomString(5),
+            DefaultValue = defaultValue,
+        };
+    }
 }

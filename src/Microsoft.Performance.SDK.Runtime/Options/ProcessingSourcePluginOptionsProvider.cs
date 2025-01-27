@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System.Collections.Generic;
 using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
@@ -19,6 +22,7 @@ public sealed class ProcessingSourcePluginOptionsProvider
         this.processingSources = processingSources;
     }
 
+    /// <inheritdoc />
     public IEnumerable<PluginOption> GetOptions()
     {
         foreach (var processingSource in this.processingSources)

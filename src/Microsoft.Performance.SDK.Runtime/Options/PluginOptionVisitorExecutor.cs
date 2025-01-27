@@ -13,11 +13,23 @@ public sealed class PluginOptionVisitorExecutor
 {
     private readonly IPluginOptionVisitor visitor;
 
+    /// <summary>
+    ///     Creates a new instance of <see cref="PluginOptionVisitorExecutor"/> for the given <see cref="IPluginOptionVisitor"/>.
+    /// </summary>
+    /// <param name="visitor">
+    ///     The <see cref="IPluginOptionVisitor"/> to use to visit each concrete option.
+    /// </param>
     public PluginOptionVisitorExecutor(IPluginOptionVisitor visitor)
     {
         this.visitor = visitor;
     }
 
+    /// <summary>
+    ///     Visits the given <see cref="PluginOption"/>s with the <see cref="IPluginOptionVisitor"/> provided to this instance.
+    /// </summary>
+    /// <param name="options">
+    ///     The <see cref="PluginOption"/>s to visit.
+    /// </param>
     public void Visit(IEnumerable<PluginOption> options)
     {
         foreach (var option in options)
@@ -26,6 +38,12 @@ public sealed class PluginOptionVisitorExecutor
         }
     }
 
+    /// <summary>
+    ///     Visits the given <see cref="PluginOption"/>s with the <see cref="IPluginOptionVisitor"/> provided to this instance.
+    /// </summary>
+    /// <param name="options">
+    ///     The <see cref="PluginOption"/>s to visit.
+    /// </param>
     public void Visit(params PluginOption[] options)
     {
         Visit((IEnumerable<PluginOption>)options);

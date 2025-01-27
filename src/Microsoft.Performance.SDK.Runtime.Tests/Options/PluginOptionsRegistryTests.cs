@@ -20,6 +20,60 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 public class PluginOptionsRegistryTests
 {
     /// <summary>
+    ///     Asserts that a <see cref="BooleanOption"/>'s value is updated when applying a matching <see cref="PluginOptionDto"/>.
+    /// </summary>
+    [TestMethod]
+    public void ApplyDto_Boolean_UpdatesValue()
+    {
+        var originalValue = false;
+        var sut = new PluginOptionsRegistry();
+        var option = TestPluginOption.BooleanOption(originalValue);
+
+        sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
+
+        var serializedValue = !originalValue;
+        sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.BooleanOptionDto(option.Guid, false, serializedValue)));
+
+        Assert.AreEqual(serializedValue, option.CurrentValue);
+    }
+
+    /// <summary>
+    ///     Asserts that a <see cref="FieldOption"/>'s value is updated when applying a matching <see cref="PluginOptionDto"/>.
+    /// </summary>
+    [TestMethod]
+    public void ApplyDto_Field_UpdatesValue()
+    {
+        var originalValue = "original value";
+        var sut = new PluginOptionsRegistry();
+        var option = TestPluginOption.FieldOption(originalValue);
+
+        sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
+
+        var serializedValue = "new value";
+        sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(option.Guid, false, serializedValue)));
+
+        Assert.AreEqual(serializedValue, option.CurrentValue);
+    }
+
+    /// <summary>
+    ///     Asserts that a <see cref="FieldArrayOption"/>'s value is updated when applying a matching <see cref="PluginOptionDto"/>.
+    /// </summary>
+    [TestMethod]
+    public void ApplyDto_FieldArray_UpdatesValue()
+    {
+        var originalValue = new[] { "original value 1", "original option 2" };
+        var sut = new PluginOptionsRegistry();
+        var option = TestPluginOption.FieldArrayOption(originalValue);
+
+        sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
+
+        var serializedValue = new[] { "new value 1", "new value 2", "new value 3" };
+        sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldArrayOptionDto(option.Guid, false, serializedValue)));
+
+        CollectionAssert.AreEqual(serializedValue, option.CurrentValue.ToList());
+    }
+
+    /// <summary>
     ///     Asserts that an option's <see cref="PluginOption{T}.DefaultValue"/> is set as the current value
     ///     when updating options from a DTO whose value indicates that the option is using the default value, but
     ///     the whose serialized default value differs from the current <see cref="PluginOption{T}.DefaultValue"/>.

@@ -32,6 +32,16 @@ internal static class TestPluginOptionDto
         };
     }
 
+    public static FieldArrayPluginOptionDto FieldArrayOptionDto(Guid guid, bool isDefault, string[] value)
+    {
+        return new FieldArrayPluginOptionDto()
+        {
+            Guid = guid,
+            IsDefault = isDefault,
+            Value = value,
+        };
+    }
+
     public static PluginOptionsDto PluginOptionsDto(params PluginOptionDto[] dtos)
     {
         return new PluginOptionsDto
