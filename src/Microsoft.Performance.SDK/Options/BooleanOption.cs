@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 namespace Microsoft.Performance.SDK.Options;
 
 public sealed class BooleanOption
@@ -13,6 +16,7 @@ public sealed class BooleanOption
             Description = this.Description,
             DefaultValue = this.DefaultValue,
             CurrentValue = this.CurrentValue,
+            IsUsingDefault = this.IsUsingDefault,
         };
     }
 }

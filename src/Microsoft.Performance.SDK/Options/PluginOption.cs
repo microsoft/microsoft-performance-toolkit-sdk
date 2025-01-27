@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System;
 
 namespace Microsoft.Performance.SDK.Options;
@@ -6,10 +9,6 @@ public abstract class PluginOption
     : ICloneable<PluginOption>
 {
     public event EventHandler OptionChanged;
-
-    internal event EventHandler OnChangedFromDefault;
-
-    internal event EventHandler OnChangedToDefault;
 
     internal PluginOption()
     {
@@ -23,21 +22,13 @@ public abstract class PluginOption
 
     public required string Description { get; init; }
 
+    internal bool IsUsingDefault { get; private protected set; }
+
     internal abstract void ApplyDefault();
 
     protected void RaiseOptionChanged()
     {
         this.OptionChanged?.Invoke(this, EventArgs.Empty);
-    }
-
-    protected void RaiseOnChangedFromDefault()
-    {
-        this.OnChangedFromDefault?.Invoke(this, EventArgs.Empty);
-    }
-
-    protected void RaiseOnChangedToDefault()
-    {
-        this.OnChangedToDefault?.Invoke(this, EventArgs.Empty);
     }
 
     public abstract PluginOption CloneT();

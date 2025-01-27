@@ -1,4 +1,5 @@
-using System;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 namespace Microsoft.Performance.SDK.Options;
 
@@ -13,6 +14,7 @@ public abstract class PluginOption<T>
 
     internal PluginOption()
     {
+        this.IsUsingDefault = true;
     }
 
     public required T DefaultValue
@@ -36,13 +38,10 @@ public abstract class PluginOption<T>
         }
         internal set
         {
+            this.IsUsingDefault = isApplyingDefault;
+
             this.currentValue = value;
             RaiseOptionChanged();
-
-            if (!isApplyingDefault)
-            {
-                RaiseOnChangedFromDefault();
-            }
         }
     }
 
@@ -50,7 +49,6 @@ public abstract class PluginOption<T>
     {
         this.isApplyingDefault = true;
         this.CurrentValue = this.DefaultValue;
-        RaiseOnChangedToDefault();
         this.isApplyingDefault = false;
     }
 }

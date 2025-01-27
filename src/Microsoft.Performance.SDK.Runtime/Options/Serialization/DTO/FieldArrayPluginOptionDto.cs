@@ -1,5 +1,10 @@
-using System;
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
-public record FieldArrayPluginOptionDto(Guid Guid, bool IsDefault, string[] Value) : PluginOptionDto(Guid, IsDefault);
+public sealed class FieldArrayPluginOptionDto
+    : PluginOptionDto
+{
+    public string[] Value { get; init; } = [];
+}
