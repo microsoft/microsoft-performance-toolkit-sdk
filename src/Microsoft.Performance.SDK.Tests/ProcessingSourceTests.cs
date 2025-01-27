@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Tests.TestClasses;
 using Microsoft.Performance.Testing;
@@ -283,6 +284,9 @@ namespace Microsoft.Performance.SDK.Tests
             {
                 return true;
             }
+
+            public List<PluginOption> PluginOptionsToReturn { get; set; }
+            public override IEnumerable<PluginOption> PluginOptions => this.PluginOptionsToReturn ?? Enumerable.Empty<PluginOption>();
         }
 
         [ProcessingSource("{CABDB99F-F182-457B-B0B4-AD3DD62272D8}", "One", "One")]

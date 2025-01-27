@@ -11,7 +11,7 @@ using Microsoft.Performance.SDK.Options;
 namespace Microsoft.Performance.Testing.SDK
 {
     public class StubApplicationEnvironment
-        : IApplicationEnvironmentV2
+        : IApplicationEnvironmentV3
     {
         public string ApplicationName { get; set; }
 

@@ -16,6 +16,7 @@ using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
+using Microsoft.Performance.SDK.Runtime.Options;
 
 // TODO::support concurrency in the Engine
 
@@ -780,11 +781,9 @@ namespace Microsoft.Performance.Toolkit.Engine
                     : string.Empty;
 
                 // TODO (options): we also need to support options from plugins without processing sources
-                var options =
-                    instance
-                        .ProcessingSourceReferences
-                        .SelectMany(psr => psr.Instance.PluginOptions)
-                        .Select(option => option.CloneT()).ToList();
+                // TODO (options): support saving these options
+                var pluginOptionsSystem = PluginOptionsSystem.CreateUnsaved();
+                pluginOptionsSystem.RegisterOptionsFrom(instance.ProcessingSourceReferences.Select(psr => psr.Instance));
 
                 instance.applicationEnvironment = new EngineApplicationEnvironment(
                     applicationName: applicationName,
@@ -796,7 +795,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         ? (IMessageBox)new InteractiveRuntimeMessageBox(instance.logger)
                         : (IMessageBox)new NonInteractiveMessageBox(instance.logger),
                     createInfo.AuthProviders,
-                    options)
+                    pluginOptionsSystem.Registry)
                 {
                     IsInteractive = createInfo.IsInteractive,
                 };

@@ -1,7 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.Saving;
@@ -12,10 +15,19 @@ public sealed class PluginOptionsSystem
 {
     private static readonly PluginOptionsRegistryToDtoConverter optionsRegistryToDtoConverter = new();
 
-    PluginOptionsSystem CreateForFile(string filePath)
+    public static PluginOptionsSystem CreateForFile(string filePath)
     {
         var loader = new FilePluginOptionsLoader(filePath);
         var saver = new FilePluginOptionsSaver(filePath);
+        var registry = new PluginOptionsRegistry();
+
+        return new PluginOptionsSystem(loader, saver, registry);
+    }
+
+    public static PluginOptionsSystem CreateUnsaved()
+    {
+        var loader = NullPluginOptionsLoader.Instance;
+        var saver = NullPluginOptionsSaver.Instance;
         var registry = new PluginOptionsRegistry();
 
         return new PluginOptionsSystem(loader, saver, registry);
@@ -31,11 +43,21 @@ public sealed class PluginOptionsSystem
         Registry = registry;
     }
 
-    IPluginOptionsLoader Loader { get; }
+    public IPluginOptionsLoader Loader { get; }
 
-    IPluginOptionsSaver Saver { get; }
+    public IPluginOptionsSaver Saver { get; }
 
-    PluginOptionsRegistry Registry { get; }
+    public PluginOptionsRegistry Registry { get; }
+
+    public void RegisterOptionsFrom(params IProcessingSource[] processingSources)
+    {
+        RegisterOptionsFrom((IEnumerable<IProcessingSource>)processingSources);
+    }
+
+    public void RegisterOptionsFrom(IEnumerable<IProcessingSource> processingSources)
+    {
+        this.Registry.RegisterFrom(new ProcessingSourcePluginOptionsProvider(processingSources.ToList()));
+    }
 
     public async Task TryLoadAsync()
     {

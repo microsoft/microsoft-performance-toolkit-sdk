@@ -30,7 +30,7 @@ public class PluginOptionsRegistryTests
         var option = TestPluginOptions.CreateFieldOption(expected);
         option.CurrentValue = "Random Value";
 
-        sut.Register(option);
+        sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
 
         sut.UpdateFromDto(TestPluginOptionDtos.CreateDto(TestPluginOptionDtos.CreateFieldOptionDto(option.Guid, true, "Old Default Value")));
         Assert.AreEqual(expected, option.CurrentValue);
@@ -42,7 +42,7 @@ public class PluginOptionsRegistryTests
     {
         var sut = new PluginOptionsRegistry();
         var option = TestPluginOptions.CreateBooleanOption(false);
-        sut.Register(option);
+        sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
 
         sut.UpdateFromDto(TestPluginOptionDtos.CreateDto(TestPluginOptionDtos.CreateFieldOptionDto(Guid.NewGuid(), true, "Random Value")));
 
@@ -60,7 +60,7 @@ public class PluginOptionsRegistryTests
 
         const string expected = "Serialized value";
 
-        sut.Register(option);
+        sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
         sut.UpdateFromDto(TestPluginOptionDtos.CreateDto(TestPluginOptionDtos.CreateFieldOptionDto(option.Guid, false, expected)));
 
         Assert.AreEqual(expected, option.CurrentValue);
@@ -77,7 +77,7 @@ public class PluginOptionsRegistryTests
 
         const string expected = "Serialized value";
 
-        sut.Register(option);
+        sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
         sut.UpdateFromDto(TestPluginOptionDtos.CreateDto(TestPluginOptionDtos.CreateFieldOptionDto(option.Guid, false, expected)));
 
         Assert.AreEqual(expected, option.CurrentValue);

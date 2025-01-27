@@ -11,6 +11,7 @@ using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.SDK.Runtime.Options;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -27,7 +28,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             ISourceSessionFactory sourceSessionFactory,
             IMessageBox messageBox,
             ReadOnlyDictionary<Type, object> authProviders,
-            IReadOnlyCollection<PluginOption> options)
+            PluginOptionsRegistry optionsRegistry)
             : base(
                 applicationName,
                 runtimeName,
@@ -35,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 sourceDataCookerFactory,
                 sourceSessionFactory,
                 messageBox,
-                options)
+                optionsRegistry)
         {
             this.authProviders = authProviders;
         }

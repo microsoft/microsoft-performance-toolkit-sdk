@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using Microsoft.Performance.SDK.Auth;
+using Microsoft.Performance.SDK.Options;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -177,6 +178,21 @@ namespace Microsoft.Performance.SDK.Processing
             }
 
             provider = null;
+            return false;
+        }
+
+        public static bool TryGetPluginOption<T>(
+            this IApplicationEnvironment self,
+            Guid optionGuid,
+            out T option)
+            where T : PluginOption
+        {
+            if (self is IApplicationEnvironmentV3 v3)
+            {
+                return v3.TryGetPluginOption(optionGuid, out option);
+            }
+
+            option = null;
             return false;
         }
     }

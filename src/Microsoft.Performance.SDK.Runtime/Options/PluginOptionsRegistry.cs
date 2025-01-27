@@ -9,10 +9,15 @@ using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Options;
 
-public class PluginOptionsRegistry
+public sealed class PluginOptionsRegistry
 {
     private readonly object mutex = new();
     private readonly Dictionary<Guid, PluginOption> optionByGuid = new();
+
+    internal interface Provider
+    {
+        IEnumerable<PluginOption> GetOptions();
+    }
 
     public IReadOnlyCollection<PluginOption> Options
     {
@@ -25,22 +30,14 @@ public class PluginOptionsRegistry
         }
     }
 
-    public void Register(params PluginOption[] options)
+    internal void RegisterFrom(Provider provider)
     {
         lock (mutex)
         {
-            foreach (var option in options)
+            foreach (var option in provider.GetOptions())
             {
                 optionByGuid[option.Guid] = option;
             }
-        }
-    }
-
-    public void Unregister(PluginOption option)
-    {
-        lock (mutex)
-        {
-            optionByGuid.Remove(option.Guid);
         }
     }
 
