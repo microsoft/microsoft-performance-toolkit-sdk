@@ -1,14 +1,15 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System;
-using System.Linq;
 using Microsoft.Performance.SDK.Options;
-using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 using Microsoft.Performance.Testing;
 
 namespace Microsoft.Performance.SDK.Tests.Options;
 
-public static class TestPluginOptions
+public static class TestPluginOption
 {
-    public static BooleanOption CreateBooleanOption(bool defaultValue)
+    public static BooleanOption BooleanOption(bool defaultValue)
     {
         return new BooleanOption()
         {
@@ -20,7 +21,7 @@ public static class TestPluginOptions
         };
     }
 
-    public static FieldOption CreateFieldOption(string defaultValue)
+    public static FieldOption FieldOption(string defaultValue)
     {
         return new FieldOption()
         {

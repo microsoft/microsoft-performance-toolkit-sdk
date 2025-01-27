@@ -6,22 +6,30 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 
+/// <summary>
+///     Tests for the <see cref="StreamPluginOptionsLoader"/>.
+/// </summary>
 [TestClass]
 [UnitTest]
 public class StreamPluginOptionsLoaderTests
 {
+    /// <summary>
+    ///     Asserts that the loaded <see cref="PluginOptionDto"/> contains data that was present in the
+    ///     <see cref="Stream"/>.
+    /// </summary>
     [TestMethod]
-    public async Task SavedDto_ContainsCorrectValues()
+    public async Task LoadedDto_ContainsCorrectValues()
     {
         var guid = Guid.NewGuid();
         const string value = "saved value";
-        var optionsDtoToSave = TestPluginOptionDtos.CreateDto(TestPluginOptionDtos.CreateFieldOptionDto(guid, false, value));
+        var optionsDtoToSave = TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(guid, false, value));
 
         using MemoryStream stream = new MemoryStream();
 
@@ -43,6 +51,10 @@ public class StreamPluginOptionsLoaderTests
         Assert.IsFalse(loaded.FieldOptions.First().IsDefault);
     }
 
+    /// <summary>
+    ///     Asserts that the <see cref="Stream"/> used to load the <see cref="PluginOptionsDto"/> is closed after loading
+    ///     if <see cref="StreamPluginOptionsLoader"/> is configured to do so.
+    /// </summary>
     [TestMethod]
     public async Task CloseStreamOnWrite_ClosesStream()
     {
@@ -57,6 +69,10 @@ public class StreamPluginOptionsLoaderTests
         Assert.IsFalse(stream.CanWrite);
     }
 
+    /// <summary>
+    ///     Asserts that the <see cref="Stream"/> used to load the <see cref="PluginOptionsDto"/> is not closed after loading
+    ///     if <see cref="StreamPluginOptionsLoader"/> is not configured to do so.
+    /// </summary>
     [TestMethod]
     public async Task DoNotCloseStreamOnWrite_DoesNotCloseStream()
     {

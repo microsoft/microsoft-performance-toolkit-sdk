@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Options;
@@ -13,15 +12,23 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 
+/// <summary>
+///     Contains tests for the <see cref="PluginOptionsSystem"/>.
+/// </summary>
 [TestClass]
 [IntegrationTest]
 public class PluginOptionsSystemTests
 {
+    /// <summary>
+    ///     Asserts that changes to a <see cref="PluginOption"/> instance returned by a <see cref="IProcessingSource"/>
+    ///     are not reflected by the <see cref="PluginOption"/> instance returned by the <see cref="PluginOptionsSystem"/>'s
+    ///     <see cref="PluginOptionsRegistry"/>.
+    /// </summary>
     [TestMethod]
     public void OptionReturnedBySystem_DoNotReflectChangeOnOriginalInstances()
     {
         const string defaultValue = "default value";
-        var optionReturnedByProcessingSource = TestPluginOptions.CreateFieldOption(defaultValue);
+        var optionReturnedByProcessingSource = TestPluginOption.FieldOption(defaultValue);
 
         var sut = CreateSut(new StubProcessingSource(optionReturnedByProcessingSource));
 
@@ -34,11 +41,16 @@ public class PluginOptionsSystemTests
         Assert.IsTrue(registeredOption.IsUsingDefault);
     }
 
+    /// <summary>
+    ///     Asserts that changes to a <see cref="PluginOption"/> instance returned by the <see cref="PluginOptionsSystem"/>'s
+    ///     <see cref="PluginOptionsRegistry"/> are not reflected by the <see cref="PluginOption"/> instance returned by the
+    ///     <see cref="IProcessingSource"/>.
+    /// </summary>
     [TestMethod]
     public void OptionReturnedBySystem_DoNotChangeOriginalInstance()
     {
         const string defaultValue = "default value";
-        var optionReturnedByProcessingSource = TestPluginOptions.CreateFieldOption(defaultValue);
+        var optionReturnedByProcessingSource = TestPluginOption.FieldOption(defaultValue);
 
         var sut = CreateSut(new StubProcessingSource(optionReturnedByProcessingSource));
         var registeredOption = sut.Registry.Options.First() as FieldOption;

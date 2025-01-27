@@ -7,9 +7,12 @@ using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 
-internal static class TestPluginOptionDtos
+/// <summary>
+///     Contains helper methods for creating <see cref="PluginOptionDto"/> instances during testing.
+/// </summary>
+internal static class TestPluginOptionDto
 {
-    public static BooleanPluginOptionDto CreateBooleanOptionDto(Guid guid, bool isDefault, bool value)
+    public static BooleanPluginOptionDto BooleanOptionDto(Guid guid, bool isDefault, bool value)
     {
         return new BooleanPluginOptionDto()
         {
@@ -19,7 +22,7 @@ internal static class TestPluginOptionDtos
         };
     }
 
-    public static FieldPluginOptionDto CreateFieldOptionDto(Guid guid, bool isDefault, string value)
+    public static FieldPluginOptionDto FieldOptionDto(Guid guid, bool isDefault, string value)
     {
         return new FieldPluginOptionDto()
         {
@@ -29,7 +32,7 @@ internal static class TestPluginOptionDtos
         };
     }
 
-    public static PluginOptionsDto CreateDto(params PluginOptionDto[] dtos)
+    public static PluginOptionsDto PluginOptionsDto(params PluginOptionDto[] dtos)
     {
         return new PluginOptionsDto
         {

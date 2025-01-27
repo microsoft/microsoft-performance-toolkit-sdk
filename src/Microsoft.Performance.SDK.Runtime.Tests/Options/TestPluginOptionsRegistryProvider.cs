@@ -7,6 +7,10 @@ using Microsoft.Performance.SDK.Runtime.Options;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 
+/// <summary>
+///     A test implementation of <see cref="PluginOptionsRegistry.Provider"/> that returns un-cloned
+///     options provided by tests.
+/// </summary>
 public sealed class TestPluginOptionsRegistryProvider
     : PluginOptionsRegistry.Provider
 {

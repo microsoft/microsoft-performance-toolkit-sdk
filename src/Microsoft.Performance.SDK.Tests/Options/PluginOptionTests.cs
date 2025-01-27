@@ -18,7 +18,7 @@ public class PluginOptionTests
     [TestMethod]
     public void SettingCurrentValue_ToNewValue_UpdatesIsUsingDefault()
     {
-        var option = TestPluginOptions.CreateBooleanOption(true);
+        var option = TestPluginOption.BooleanOption(true);
         option.CurrentValue = false;
 
         Assert.IsFalse(option.IsUsingDefault);
@@ -31,7 +31,7 @@ public class PluginOptionTests
     [TestMethod]
     public void SettingCurrentValue_ToDefaultValue_UpdatesIsUsingDefault()
     {
-        var option = TestPluginOptions.CreateBooleanOption(true);
+        var option = TestPluginOption.BooleanOption(true);
         option.CurrentValue = false;
 
         Assert.IsFalse(option.IsUsingDefault);
@@ -44,7 +44,7 @@ public class PluginOptionTests
     [TestMethod]
     public void CallingApplyDefault_UpdatesIsUsingDefault()
     {
-        var option = TestPluginOptions.CreateFieldOption("Default");
+        var option = TestPluginOption.FieldOption("Default");
         option.CurrentValue = "Non default";
         option.ApplyDefault();
 
