@@ -81,13 +81,6 @@ namespace Microsoft.Performance.SDK.Extensibility
             return new DataOutputPath(dataCookerPath, dataOutputId);
         }
 
-        public static DataOutputPath ForApplicationEnvironment(
-            Guid processingSourceId)
-        {
-            // TODO (options)
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataOutputPath"/>
         ///     struct with the given cooker path and output ID.

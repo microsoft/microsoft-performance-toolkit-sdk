@@ -23,8 +23,6 @@ namespace Microsoft.Performance.SDK.Extensibility
         /// </remarks>
         private static readonly string EmptySourceParserId = string.Empty;
 
-        private static readonly string ProcessingSourceFormatString = "ProcessingSource_{0}";
-
         /// <summary>
         ///     Separates the consituent parts of the data cooker path in the full string representation. This character is not
         ///     allowed in path components. If this path is changed, please update the exception comments in <see cref="ForSource(string, string)"/>
@@ -133,12 +131,6 @@ namespace Microsoft.Performance.SDK.Extensibility
             Guard.NotNullOrWhiteSpace(dataCookerId, nameof(dataCookerId));
 
             return new DataCookerPath(sourceParserId, dataCookerId);
-        }
-
-        public static DataCookerPath ForProcessingSource(Guid processingSourceId)
-        {
-            var cookerId = string.Format(ProcessingSourceFormatString, processingSourceId.ToString());
-            return new DataCookerPath(EmptySourceParserId, cookerId);
         }
 
         /// <summary>
