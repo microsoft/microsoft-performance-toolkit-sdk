@@ -18,8 +18,9 @@ public class PluginOptionTests
     [TestMethod]
     public void SettingCurrentValue_ToNewValue_UpdatesIsUsingDefault()
     {
-        var option = TestPluginOption.BooleanOption(true);
-        option.CurrentValue = false;
+        var value = true;
+        var option = TestPluginOption.BooleanOption(value);
+        option.CurrentValue = !value;
 
         Assert.IsFalse(option.IsUsingDefault);
     }
@@ -31,8 +32,9 @@ public class PluginOptionTests
     [TestMethod]
     public void SettingCurrentValue_ToDefaultValue_UpdatesIsUsingDefault()
     {
-        var option = TestPluginOption.BooleanOption(true);
-        option.CurrentValue = false;
+        var value = true;
+        var option = TestPluginOption.BooleanOption(value);
+        option.CurrentValue = value;
 
         Assert.IsFalse(option.IsUsingDefault);
     }
@@ -49,5 +51,20 @@ public class PluginOptionTests
         option.ApplyDefault();
 
         Assert.IsTrue(option.IsUsingDefault);
+    }
+
+    /// <summary>
+    ///     Asserts that the <see cref="PluginOption.IsUsingDefault"/> method returns <c>true</c>
+    ///     after calling <see cref="PluginOption.ApplyDefault"/> on an option.
+    /// </summary>
+    [TestMethod]
+    public void CallingApplyDefault_UpdatesCurrentValue()
+    {
+        string defaultValue = "Default";
+        var option = TestPluginOption.FieldOption(defaultValue);
+        option.CurrentValue = "Non default";
+        option.ApplyDefault();
+
+        Assert.AreEqual(defaultValue, option.CurrentValue);
     }
 }
