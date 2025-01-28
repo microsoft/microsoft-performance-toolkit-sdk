@@ -13,5 +13,20 @@ namespace Microsoft.Performance.SDK.Processing;
 public interface IApplicationEnvironmentV3
     : IApplicationEnvironmentV2
 {
+    /// <summary>
+    ///     Attempts to get the plugin option of type <typeparamref name="T"/> with the given GUID.
+    /// </summary>
+    /// <param name="optionGuid">
+    ///     The <see cref="Guid"/> of the option to get.
+    /// </param>
+    /// <param name="option">
+    ///     The found option if this method returns <c>true</c>; <c>null</c> otherwise.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The concrete type of the <see cref="PluginOption"/> to get. Must be a subclass of <see cref="PluginOption"/>.
+    /// </typeparam>
+    /// <returns>
+    ///     <c>true</c> if the option was found; <c>false</c> otherwise.
+    /// </returns>
     bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption;
 }
