@@ -54,7 +54,7 @@ public class PluginOptionTests
     }
 
     /// <summary>
-    ///     Asserts that the <see cref="PluginOption.IsUsingDefault"/> method returns <c>true</c>
+    ///     Asserts that the <see cref="PluginOption{T}.CurrentValue"/> method returns the associated <see cref="PluginOption{T}.DefaultValue"/>
     ///     after calling <see cref="PluginOption.ApplyDefault"/> on an option.
     /// </summary>
     [TestMethod]
