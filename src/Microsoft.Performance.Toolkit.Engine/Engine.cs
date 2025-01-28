@@ -780,8 +780,8 @@ namespace Microsoft.Performance.Toolkit.Engine
                     ? createInfo.ApplicationName
                     : string.Empty;
 
-                // TODO (options): we also need to support options from plugins without processing sources
-                // TODO (options): support saving these options
+                // TODO (#404): we also need to support options from plugins without processing sources
+                // TODO (#404): support saving these options
                 var pluginOptionsSystem = PluginOptionsSystem.CreateUnsaved();
                 pluginOptionsSystem.RegisterOptionsFrom(instance.ProcessingSourceReferences.Select(psr => psr.Instance));
 
