@@ -3,6 +3,12 @@
 
 namespace Microsoft.Performance.SDK.Options;
 
+/// <summary>
+///     Base class for plugin options.
+/// </summary>
+/// <typeparam name="T">
+///     The type of the option value.
+/// </typeparam>
 public abstract class PluginOption<T>
     : PluginOption
 {
@@ -12,11 +18,17 @@ public abstract class PluginOption<T>
 
     private T currentValue;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="PluginOption{T}"/> class.
+    /// </summary>
     internal PluginOption()
     {
         this.IsUsingDefault = true;
     }
 
+    /// <summary>
+    ///     Gets or initializes the default value of the option. This value is required to be initialized.
+    /// </summary>
     public required T DefaultValue
     {
         get
@@ -30,6 +42,9 @@ public abstract class PluginOption<T>
         }
     }
 
+    /// <summary>
+    ///     Gets the current value of the option.
+    /// </summary>
     public T CurrentValue
     {
         get
@@ -45,6 +60,7 @@ public abstract class PluginOption<T>
         }
     }
 
+    /// <inheritdoc />
     internal override void ApplyDefault()
     {
         this.isApplyingDefault = true;

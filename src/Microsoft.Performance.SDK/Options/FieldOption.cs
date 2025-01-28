@@ -3,6 +3,9 @@
 
 namespace Microsoft.Performance.SDK.Options;
 
+/// <summary>
+///     A <see cref="PluginOption{T}"/> for a single string field.
+/// </summary>
 public sealed class FieldOption
     : PluginOption<string>
 {

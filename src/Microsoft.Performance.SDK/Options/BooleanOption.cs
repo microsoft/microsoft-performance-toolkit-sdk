@@ -3,9 +3,13 @@
 
 namespace Microsoft.Performance.SDK.Options;
 
+/// <summary>
+///     A <see cref="PluginOption{T}"/> for a boolean value.
+/// </summary>
 public sealed class BooleanOption
     : PluginOption<bool>
 {
+    /// <inheritdoc />
     public override PluginOption CloneT()
     {
         return new BooleanOption
