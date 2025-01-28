@@ -184,6 +184,9 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Attempts to get the plugin option of type <typeparamref name="T"/> with the given GUID.
         /// </summary>
+        /// <param name="self">
+        ///     The <see cref="IApplicationEnvironment"/> instance.
+        /// </param>
         /// <param name="optionGuid">
         ///     The <see cref="Guid"/> of the option to get.
         /// </param>
