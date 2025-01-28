@@ -31,7 +31,7 @@ public class StreamPluginOptionsSaverTests
         var guid = Guid.NewGuid();
         const string value = "saved value";
 
-        var success = await sut.TrySave(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(guid, true, value)));
+        var success = await sut.TrySaveAsync(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(guid, true, value)));
 
         Assert.IsTrue(success);
 
@@ -54,7 +54,7 @@ public class StreamPluginOptionsSaverTests
         using MemoryStream stream = new MemoryStream();
         var sut = new TestPluginOptionsSaver(stream, true);
 
-        var success = await sut.TrySave(TestPluginOptionDto.PluginOptionsDto());
+        var success = await sut.TrySaveAsync(TestPluginOptionDto.PluginOptionsDto());
 
         Assert.IsTrue(success);
         Assert.ThrowsException<ObjectDisposedException>(() => stream.Position);
@@ -73,7 +73,7 @@ public class StreamPluginOptionsSaverTests
         using MemoryStream stream = new MemoryStream();
         var sut = new TestPluginOptionsSaver(stream, false);
 
-        var success = await sut.TrySave(TestPluginOptionDto.PluginOptionsDto());
+        var success = await sut.TrySaveAsync(TestPluginOptionDto.PluginOptionsDto());
 
         Assert.IsTrue(success);
         stream.Position = 0;

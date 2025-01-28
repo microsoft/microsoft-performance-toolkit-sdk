@@ -45,8 +45,8 @@ public sealed class PluginOptionsSystem
     /// </returns>
     public static PluginOptionsSystem CreateUnsaved()
     {
-        var loader = NullPluginOptionsLoader.Instance;
-        var saver = NullPluginOptionsSaver.Instance;
+        var loader = new NullPluginOptionsLoader();
+        var saver = new NullPluginOptionsSaver();
         var registry = new PluginOptionsRegistry();
 
         return new PluginOptionsSystem(loader, saver, registry);
@@ -142,6 +142,6 @@ public sealed class PluginOptionsSystem
     public Task<bool> TrySave()
     {
         var dto = optionsRegistryToDtoConverter.ConvertToDto(this.Registry);
-        return this.Saver.TrySave(dto);
+        return this.Saver.TrySaveAsync(dto);
     }
 }

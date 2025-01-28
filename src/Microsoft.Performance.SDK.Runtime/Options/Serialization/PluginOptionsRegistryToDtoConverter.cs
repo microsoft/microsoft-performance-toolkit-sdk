@@ -9,7 +9,7 @@ using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization;
 
 /// <summary>
-///     This class is used to convert a <see cref="PluginOptionsRegistry"/> to a <see cref="PluginOptionsDto"/>.
+///     A converter from a <see cref="PluginOptionsRegistry"/> to a <see cref="PluginOptionsDto"/>.
 /// </summary>
 public sealed class PluginOptionsRegistryToDtoConverter
 {

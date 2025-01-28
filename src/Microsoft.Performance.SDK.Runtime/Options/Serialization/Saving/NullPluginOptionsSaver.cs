@@ -6,17 +6,15 @@ using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Saving;
 
+/// <summary>
+///     A <see cref="IPluginOptionsSaver"/> that always returns <c>false</c>.
+/// </summary>
 public sealed class NullPluginOptionsSaver
     : IPluginOptionsSaver
 {
-    public static NullPluginOptionsSaver Instance { get; } = new NullPluginOptionsSaver();
-
-    private NullPluginOptionsSaver()
+    /// <inheritdoc />
+    public Task<bool> TrySaveAsync(PluginOptionsDto optionsDto)
     {
-    }
-
-    public Task<bool> TrySave(PluginOptionsDto optionsDto)
-    {
-        return Task.FromResult(true);
+        return Task.FromResult(false);
     }
 }

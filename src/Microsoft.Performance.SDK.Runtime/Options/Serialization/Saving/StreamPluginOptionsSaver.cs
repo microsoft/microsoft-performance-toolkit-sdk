@@ -16,12 +16,20 @@ public abstract class StreamPluginOptionsSaver
 {
     private readonly bool closeStreamOnWrite;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="StreamPluginOptionsSaver"/> class.
+    /// </summary>
+    /// <param name="closeStreamOnWrite">
+    ///     Whether to dispose of the stream returned by <see cref="GetStream"/> at the end of a call to
+    ///     <see cref="TrySaveAsync"/>.
+    /// </param>
     protected StreamPluginOptionsSaver(bool closeStreamOnWrite)
     {
         this.closeStreamOnWrite = closeStreamOnWrite;
     }
 
-    public async Task<bool> TrySave(PluginOptionsDto optionsDto)
+    /// <inheritdoc />
+    public async Task<bool> TrySaveAsync(PluginOptionsDto optionsDto)
     {
         var jsonSerializerOptions = new JsonSerializerOptions
         {
@@ -48,5 +56,11 @@ public abstract class StreamPluginOptionsSaver
         }
     }
 
+    /// <summary>
+    ///     Gets the <see cref="Stream"/> to save to.
+    /// </summary>
+    /// <returns>
+    ///     The <see cref="Stream"/> to save to.
+    /// </returns>
     protected abstract Stream GetStream();
 }

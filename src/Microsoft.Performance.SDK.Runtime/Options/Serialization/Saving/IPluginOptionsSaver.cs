@@ -11,5 +11,14 @@ namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Saving;
 /// </summary>
 public interface IPluginOptionsSaver
 {
-    Task<bool> TrySave(PluginOptionsDto optionsDto);
+    /// <summary>
+    ///     Attempts to save the given <see cref="PluginOptionsDto"/> instance.
+    /// </summary>
+    /// <param name="optionsDto">
+    ///     The <see cref="PluginOptionsDto"/> to save.
+    /// </param>
+    /// <returns>
+    ///     <c>true</c> if the <see cref="PluginOptionsDto"/> was saved; <c>false</c> otherwise.
+    /// </returns>
+    Task<bool> TrySaveAsync(PluginOptionsDto optionsDto);
 }

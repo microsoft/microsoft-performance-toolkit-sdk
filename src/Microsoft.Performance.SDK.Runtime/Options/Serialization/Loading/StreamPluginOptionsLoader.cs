@@ -9,18 +9,26 @@ using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 
 /// <summary>
-///     Base class for loading a <see cref="PluginOptionDto"/> instance from a stream.
+///     Base class for <see cref="IPluginOptionsLoader"/> classes which load from a stream.
 /// </summary>
 public abstract class StreamPluginOptionsLoader
     : IPluginOptionsLoader
 {
     private readonly bool closeStreamOnWrite;
 
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="StreamPluginOptionsLoader"/> class.
+    /// </summary>
+    /// <param name="closeStreamOnWrite">
+    ///     Whether to dispose of the stream returned by <see cref="GetStream"/> at the end of a call to
+    ///     <see cref="TryLoadAsync"/>.
+    /// </param>
     protected StreamPluginOptionsLoader(bool closeStreamOnWrite)
     {
         this.closeStreamOnWrite = closeStreamOnWrite;
     }
 
+    /// <inheritdoc />
     public async Task<PluginOptionsDto> TryLoadAsync()
     {
         var jsonSerializerOptions = new JsonSerializerOptions
@@ -47,5 +55,11 @@ public abstract class StreamPluginOptionsLoader
         }
     }
 
+    /// <summary>
+    ///     Gets the <see cref="Stream"/> from which to load the <see cref="PluginOptionsDto"/>.
+    /// </summary>
+    /// <returns>
+    ///     The <see cref="Stream"/> from which to load the <see cref="PluginOptionsDto"/>.
+    /// </returns>
     protected abstract Stream GetStream();
 }

@@ -11,5 +11,11 @@ namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 /// </summary>
 public interface IPluginOptionsLoader
 {
+    /// <summary>
+    ///     Attempts to load a <see cref="PluginOptionsDto"/> instance.
+    /// </summary>
+    /// <returns>
+    ///     The loaded <see cref="PluginOptionsDto"/> instance, or <c>null</c> if the load failed.
+    /// </returns>
     Task<PluginOptionsDto> TryLoadAsync();
 }
