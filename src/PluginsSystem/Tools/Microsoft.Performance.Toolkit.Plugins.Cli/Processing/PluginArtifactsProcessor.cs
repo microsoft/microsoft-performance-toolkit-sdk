@@ -15,6 +15,8 @@ using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using NuGet.Versioning;
 using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProcessingSourceInfo;
+using ProjectInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProjectInfo;
+using LicenseInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.LicenseInfo;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 {
@@ -321,12 +323,12 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 errors.Add(ownersError);
             }
 
-            if (!TryGetProjectInfoUri(psr, aboutInfo, out Uri? projectInfoUri, out string? projectInfoUriError))
+            if (!TryGetProjectInfo(psr, aboutInfo, out ProjectInfo? projectInfo, out string? projectInfoUriError))
             {
                 errors.Add(projectInfoUriError);
             }
 
-            if (!TryGetLicenseInfoUri(psr, aboutInfo, out Uri? licenseInfoUri, out string? licenseInfoUriError))
+            if (!TryGetLicenseInfo(psr, aboutInfo, out LicenseInfo? licenseInfo, out string? licenseInfoUriError))
             {
                 errors.Add(licenseInfoUriError);
             }
@@ -336,9 +338,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 this.logger.LogError($"Unable to generate processing source info. The following error{ (errors.Count == 1 ? " was" : "s were") } encountered:{string.Join("", errors.Select(e => $"\n\t - {e}"))}");
                 return false;
             }
-
-            Core.Metadata.ProjectInfo projectInfo = new(projectInfoUri);
-            Core.Metadata.LicenseInfo licenseInfo = new(aboutInfo.LicenseInfo.Name, licenseInfoUri, aboutInfo.LicenseInfo.Text);
 
             processingSourceInfo = new ProcessingSourceInfo(owners, projectInfo, licenseInfo, aboutInfo.CopyrightNotice, aboutInfo.AdditionalInformation);
             return true;
@@ -376,63 +375,73 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             return true;
         }
 
-        private bool TryGetProjectInfoUri(
+        private bool TryGetProjectInfo(
             ProcessingSourceReference processSource,
-            Microsoft.Performance.SDK.Processing.ProcessingSourceInfo info,
-            [NotNullWhen(true)] out Uri? uri,
+            Microsoft.Performance.SDK.Processing.ProcessingSourceInfo processingSourceInfo,
+            out ProjectInfo? projectInfo,
             [NotNullWhen(false)] out string? error)
         {
             error = null;
-            uri = null;
+            projectInfo = null;
 
-            if (info.ProjectInfo == null)
+            if (processingSourceInfo.ProjectInfo == null)
             {
-                error = $"The {nameof(ProcessingSourceInfo.ProjectInfo)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
-                return false;
+                // This is an optional field
+                projectInfo = null;
+                return true;
             }
 
-            if (info.ProjectInfo.Uri == null)
+            if (processingSourceInfo.ProjectInfo.Uri == null)
             {
                 error = $"The {nameof(ProcessingSourceInfo.ProjectInfo)}.{nameof(ProcessingSourceInfo.ProjectInfo.Uri)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
                 return false;
             }
 
-            if (!Uri.TryCreate(info.ProjectInfo.Uri, UriKind.Absolute, out uri))
+            if (!Uri.TryCreate(processingSourceInfo.ProjectInfo.Uri, UriKind.Absolute, out Uri? uri))
             {
-                error = $"{info.ProjectInfo.Uri} is not an absolute URI.";
+                error = $"{processingSourceInfo.ProjectInfo.Uri} is not an absolute URI.";
                 return false;
             }
 
+            projectInfo = new ProjectInfo(uri);
             return true;
         }
         
-        private bool TryGetLicenseInfoUri(
+        private bool TryGetLicenseInfo(
             ProcessingSourceReference processSource,
-            Microsoft.Performance.SDK.Processing.ProcessingSourceInfo info,
-            [NotNullWhen(true)] out Uri? uri,
+            Microsoft.Performance.SDK.Processing.ProcessingSourceInfo processingSourceInfo,
+            out LicenseInfo? licenseInfo,
             [NotNullWhen(false)] out string? error)
         {
             error = null;
-            uri = null;
+            licenseInfo = null;
 
-            if (info.LicenseInfo == null)
+            if (processingSourceInfo.LicenseInfo == null)
             {
-                error = $"The {nameof(ProcessingSourceInfo.LicenseInfo)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
-                return false;
+                // This is an optional field
+                licenseInfo = null;
+                return true;
             }
 
-            if (info.LicenseInfo.Uri == null)
+            if (processingSourceInfo.LicenseInfo.Uri == null)
             {
                 error = $"The {nameof(ProcessingSourceInfo.LicenseInfo)}.{nameof(ProcessingSourceInfo.LicenseInfo.Uri)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
                 return false;
             }
 
-            if (!Uri.TryCreate(info.LicenseInfo.Uri, UriKind.Absolute, out uri))
+            if (string.IsNullOrWhiteSpace(processingSourceInfo.LicenseInfo.Name))
             {
-                error = $"{info.LicenseInfo.Uri} is not an absolute URI.";
+                error = $"The {nameof(ProcessingSourceInfo.LicenseInfo)}.{nameof(ProcessingSourceInfo.LicenseInfo.Name)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null or whitespace.";
                 return false;
             }
 
+            if (!Uri.TryCreate(processingSourceInfo.LicenseInfo.Uri, UriKind.Absolute, out Uri? uri))
+            {
+                error = $"{processingSourceInfo.LicenseInfo.Uri} is not an absolute URI.";
+                return false;
+            }
+
+            licenseInfo = new LicenseInfo(processingSourceInfo.LicenseInfo.Name, uri, processingSourceInfo.LicenseInfo.Text);
             return true;
         }
 
