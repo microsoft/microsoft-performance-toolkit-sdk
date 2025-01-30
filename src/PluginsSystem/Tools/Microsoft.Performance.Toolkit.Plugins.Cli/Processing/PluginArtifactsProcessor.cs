@@ -323,14 +323,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
                 errors.Add(ownersError);
             }
 
-            if (!TryGetProjectInfo(psr, aboutInfo, out ProjectInfo? projectInfo, out string? projectInfoUriError))
+            if (!TryGetProjectInfo(psr, aboutInfo, out ProjectInfo? projectInfo, out string? projectInfoError))
             {
-                errors.Add(projectInfoUriError);
+                errors.Add(projectInfoError);
             }
 
-            if (!TryGetLicenseInfo(psr, aboutInfo, out LicenseInfo? licenseInfo, out string? licenseInfoUriError))
+            if (!TryGetLicenseInfo(psr, aboutInfo, out LicenseInfo? licenseInfo, out string? licenseInfoError))
             {
-                errors.Add(licenseInfoUriError);
+                errors.Add(licenseInfoError);
             }
 
             if (errors.Any())
