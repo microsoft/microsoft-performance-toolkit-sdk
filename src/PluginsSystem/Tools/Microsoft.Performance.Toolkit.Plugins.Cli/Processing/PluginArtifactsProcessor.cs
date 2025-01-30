@@ -14,9 +14,9 @@ using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using NuGet.Versioning;
+using LicenseInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.LicenseInfo;
 using ProcessingSourceInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProcessingSourceInfo;
 using ProjectInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.ProjectInfo;
-using LicenseInfo = Microsoft.Performance.Toolkit.Plugins.Core.Metadata.LicenseInfo;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 {
