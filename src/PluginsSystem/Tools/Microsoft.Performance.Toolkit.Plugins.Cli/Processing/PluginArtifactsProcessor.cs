@@ -311,29 +311,128 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             if (methodInfo == null || methodInfo.DeclaringType == typeof(ProcessingSource))
             {
                 this.logger.LogError($"Unable to generate processing source info: {psr.Name} does not override the virtual method {nameof(ProcessingSource)}.{nameof(ProcessingSource.GetAboutInfo)}.");
-            }
-
-            var owners = aboutInfo.Owners
-                .Select(o => new Core.Metadata.ContactInfo(o.Name, o.Address, o.EmailAddresses, o.PhoneNumbers))
-                .ToArray();
-
-            if (!Uri.TryCreate(aboutInfo.ProjectInfo.Uri, UriKind.Absolute, out Uri? projectUri))
-            {
-                this.logger.LogError($"Unable to generate processing source info: {aboutInfo.ProjectInfo.Uri} is not an absolute URI.");
                 return false;
             }
 
-            Core.Metadata.ProjectInfo projectInfo = new(projectUri);
+            List<string> errors = new();
 
-            if (!Uri.TryCreate(aboutInfo.LicenseInfo.Uri, UriKind.Absolute, out Uri? licenseUri))
+            if (!TryGetOwners(psr, aboutInfo, out Core.Metadata.ContactInfo[]? owners, out string? ownersError))
             {
-                this.logger.LogError($"Unable to generate processing source info: {aboutInfo.LicenseInfo.Uri} is not an absolute URI.");
+                errors.Add(ownersError);
+            }
+
+            if (!TryGetProjectInfoUri(psr, aboutInfo, out Uri? projectInfoUri, out string? projectInfoUriError))
+            {
+                errors.Add(projectInfoUriError);
+            }
+
+            if (!TryGetLicenseInfoUri(psr, aboutInfo, out Uri? licenseInfoUri, out string? licenseInfoUriError))
+            {
+                errors.Add(licenseInfoUriError);
+            }
+
+            if (errors.Any())
+            {
+                this.logger.LogError($"Unable to generate processing source info. The following error{ (errors.Count == 1 ? " was" : "s were") } encountered:{string.Join("", errors.Select(e => $"\n\t - {e}"))}");
                 return false;
             }
 
-            Core.Metadata.LicenseInfo licenseInfo = new(aboutInfo.LicenseInfo.Name, licenseUri, aboutInfo.LicenseInfo.Text);
+            Core.Metadata.ProjectInfo projectInfo = new(projectInfoUri);
+            Core.Metadata.LicenseInfo licenseInfo = new(aboutInfo.LicenseInfo.Name, licenseInfoUri, aboutInfo.LicenseInfo.Text);
 
             processingSourceInfo = new ProcessingSourceInfo(owners, projectInfo, licenseInfo, aboutInfo.CopyrightNotice, aboutInfo.AdditionalInformation);
+            return true;
+        }
+
+        private bool TryGetOwners(
+            ProcessingSourceReference processSource,
+            Microsoft.Performance.SDK.Processing.ProcessingSourceInfo info,
+            [NotNullWhen(true)] out Core.Metadata.ContactInfo[]? owners,
+            [NotNullWhen(false)] out string? error)
+        {
+            error = null;
+            owners = null;
+
+            if (info.Owners == null)
+            {
+                error = $"The {nameof(ProcessingSourceInfo.Owners)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
+                return false;
+            }
+
+            owners = info.Owners
+                .Select(o => new Core.Metadata.ContactInfo(o.Name, o.Address, o.EmailAddresses ?? [], o.PhoneNumbers ?? []))
+                .ToArray();
+
+            if (owners.Any(o => o.EmailAddresses.Any(string.IsNullOrWhiteSpace)))
+            {
+                error = $"One or more of the {nameof(ProcessingSourceInfo.Owners)}'s {nameof(Core.Metadata.ContactInfo.EmailAddresses)} on {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null or whitespace.";
+            }
+
+            if (owners.Any(o => o.PhoneNumbers.Any(string.IsNullOrWhiteSpace)))
+            {
+                error = $"One or more of the {nameof(ProcessingSourceInfo.Owners)}'s {nameof(Core.Metadata.ContactInfo.PhoneNumbers)} on {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null or whitespace.";
+            }
+
+            return true;
+        }
+
+        private bool TryGetProjectInfoUri(
+            ProcessingSourceReference processSource,
+            Microsoft.Performance.SDK.Processing.ProcessingSourceInfo info,
+            [NotNullWhen(true)] out Uri? uri,
+            [NotNullWhen(false)] out string? error)
+        {
+            error = null;
+            uri = null;
+
+            if (info.ProjectInfo == null)
+            {
+                error = $"The {nameof(ProcessingSourceInfo.ProjectInfo)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
+                return false;
+            }
+
+            if (info.ProjectInfo.Uri == null)
+            {
+                error = $"The {nameof(ProcessingSourceInfo.ProjectInfo)}.{nameof(ProcessingSourceInfo.ProjectInfo.Uri)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
+                return false;
+            }
+
+            if (!Uri.TryCreate(info.ProjectInfo.Uri, UriKind.Absolute, out uri))
+            {
+                error = $"{info.ProjectInfo.Uri} is not an absolute URI.";
+                return false;
+            }
+
+            return true;
+        }
+        
+        private bool TryGetLicenseInfoUri(
+            ProcessingSourceReference processSource,
+            Microsoft.Performance.SDK.Processing.ProcessingSourceInfo info,
+            [NotNullWhen(true)] out Uri? uri,
+            [NotNullWhen(false)] out string? error)
+        {
+            error = null;
+            uri = null;
+
+            if (info.LicenseInfo == null)
+            {
+                error = $"The {nameof(ProcessingSourceInfo.LicenseInfo)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
+                return false;
+            }
+
+            if (info.LicenseInfo.Uri == null)
+            {
+                error = $"The {nameof(ProcessingSourceInfo.LicenseInfo)}.{nameof(ProcessingSourceInfo.LicenseInfo.Uri)} property of {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null.";
+                return false;
+            }
+
+            if (!Uri.TryCreate(info.LicenseInfo.Uri, UriKind.Absolute, out uri))
+            {
+                error = $"{info.LicenseInfo.Uri} is not an absolute URI.";
+                return false;
+            }
+
             return true;
         }
 
