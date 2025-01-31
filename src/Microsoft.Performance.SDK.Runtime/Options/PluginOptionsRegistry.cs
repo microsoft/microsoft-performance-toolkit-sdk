@@ -40,9 +40,9 @@ public sealed class PluginOptionsRegistry
     {
         get
         {
-            lock (mutex)
+            lock (this.mutex)
             {
-                return optionByGuid.Values.ToList();
+                return this.optionByGuid.Values.ToList();
             }
         }
     }
@@ -55,11 +55,11 @@ public sealed class PluginOptionsRegistry
     /// </param>
     internal void RegisterFrom(Provider provider)
     {
-        lock (mutex)
+        lock (this.mutex)
         {
             foreach (var option in provider.GetOptions())
             {
-                optionByGuid[option.Guid] = option;
+                this.optionByGuid[option.Guid] = option;
             }
         }
     }
@@ -130,9 +130,10 @@ public sealed class PluginOptionsRegistry
         where TDTO : PluginOptionDto
     {
         foreach (var dto in dtoOptions)
-            lock (mutex)
+        {
+            lock (this.mutex)
             {
-                if (optionByGuid.TryGetValue(dto.Guid, out var option) && option is T asT)
+                if (this.optionByGuid.TryGetValue(dto.Guid, out var option) && option is T asT)
                 {
                     if (dto.IsDefault)
                         asT.ApplyDefault();
@@ -140,5 +141,6 @@ public sealed class PluginOptionsRegistry
                         applySaved(asT, dto);
                 }
             }
+        }
     }
 }
