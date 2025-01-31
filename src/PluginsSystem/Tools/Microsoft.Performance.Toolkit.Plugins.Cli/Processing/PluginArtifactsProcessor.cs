@@ -300,19 +300,19 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
         {
             processingSourceInfo = null;
 
-            var aboutInfo = psr.Instance.GetAboutInfo();
-
-            if (aboutInfo == null)
-            {
-                this.logger.LogError($"Unable to generate processing source info: {psr.Name} does not contain about info.");
-                return false;
-            }
-
             // Check if the GetAboutInfo method is overridden
             MethodInfo? methodInfo = psr.Instance.GetType().GetMethod(nameof(ProcessingSource.GetAboutInfo));
             if (methodInfo == null || methodInfo.DeclaringType == typeof(ProcessingSource))
             {
                 this.logger.LogError($"Unable to generate processing source info: {psr.Name} does not override the virtual method {nameof(ProcessingSource)}.{nameof(ProcessingSource.GetAboutInfo)}.");
+                return false;
+            }
+
+            var aboutInfo = psr.Instance.GetAboutInfo();
+
+            if (aboutInfo == null)
+            {
+                this.logger.LogError($"Unable to generate processing source info: {psr.Name}'s {nameof(IProcessingSource.GetAboutInfo)} returned null.");
                 return false;
             }
 
