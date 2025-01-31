@@ -40,4 +40,8 @@
     <ProjectReference Include="..\Microsoft.Performance.SDK\Microsoft.Performance.SDK.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
 </Project>

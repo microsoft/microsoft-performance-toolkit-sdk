@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -42,6 +43,11 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Gets the options that are supported by this <see cref="IProcessingSource"/>.
         /// </summary>
         IEnumerable<Option> CommandLineOptions { get; }
+
+        /// <summary>
+        ///     Gets the plugin options that are supported by this <see cref="IProcessingSource"/>.
+        /// </summary>
+        IEnumerable<PluginOption> PluginOptions { get; }
 
         /// <summary>
         ///     Gets information about this <see cref="IProcessingSource"/>.

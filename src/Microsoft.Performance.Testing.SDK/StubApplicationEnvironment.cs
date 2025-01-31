@@ -6,11 +6,12 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using System;
+using Microsoft.Performance.SDK.Options;
 
 namespace Microsoft.Performance.Testing.SDK
 {
     public class StubApplicationEnvironment
-        : IApplicationEnvironmentV2
+        : IApplicationEnvironmentV3
     {
         public string ApplicationName { get; set; }
 
@@ -35,6 +36,12 @@ namespace Microsoft.Performance.Testing.SDK
         public ButtonResult MessageBox(MessageType messageType, IFormatProvider formatProvider, Buttons buttons, string caption, string format, params object[] args)
         {
             return ButtonResult.None;
+        }
+
+        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption
+        {
+            option = null;
+            return false;
         }
 
         public bool TryGetAuthProvider<TAuth, TResult>(out IAuthProvider<TAuth, TResult> provider)

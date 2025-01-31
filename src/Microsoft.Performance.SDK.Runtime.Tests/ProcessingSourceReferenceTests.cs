@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 using Microsoft.Performance.Testing;
@@ -426,6 +427,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
 
+            public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+
             public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
             {
                 throw new NotImplementedException();
@@ -488,6 +491,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             public IEnumerable<TableDescriptor> MetadataTables => new TableDescriptor[0];
 
             public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
+
+            public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
 
             public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
             {
@@ -572,6 +577,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
 
+            public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+
             public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
             {
                 throw new NotImplementedException();
@@ -655,6 +662,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
             public IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
 
+            public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+
             public ICustomDataProcessor CreateProcessor(IDataSource dataSource, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
             {
                 throw new NotImplementedException();
@@ -720,6 +729,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             public IEnumerable<TableDescriptor> MetadataTables { get; set; }
 
             public IEnumerable<Option> CommandLineOptions { get; set; }
+
+            public IEnumerable<PluginOption> PluginOptions { get; set; }
 
             public ICustomDataProcessor CreateProcessor(IDataSource dataSource, IProcessorEnvironment processorEnvironment, ProcessorOptions options)
             {
