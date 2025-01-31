@@ -365,11 +365,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             if (owners.Any(o => o.EmailAddresses.Any(string.IsNullOrWhiteSpace)))
             {
                 error = $"One or more of the {nameof(ProcessingSourceInfo.Owners)}'s {nameof(Core.Metadata.ContactInfo.EmailAddresses)} on {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null or whitespace.";
+                return false;
             }
 
             if (owners.Any(o => o.PhoneNumbers.Any(string.IsNullOrWhiteSpace)))
             {
                 error = $"One or more of the {nameof(ProcessingSourceInfo.Owners)}'s {nameof(Core.Metadata.ContactInfo.PhoneNumbers)} on {processSource.Name}'s {nameof(ProcessingSourceInfo)} is null or whitespace.";
+                return false;
             }
 
             return true;
