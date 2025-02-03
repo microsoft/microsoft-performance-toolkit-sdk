@@ -24,7 +24,7 @@ public sealed class PluginOptionsRegistry
     ///     implement this interface directly. Instead, use public methods on <see cref="PluginOptionsSystem"/> to register
     ///     options from supported sources.
     /// </summary>
-    internal interface Provider
+    internal interface IProvider
     {
         /// <summary>
         ///     Gets the <see cref="PluginOption"/> instances to register.
@@ -50,12 +50,12 @@ public sealed class PluginOptionsRegistry
     }
 
     /// <summary>
-    ///     Registers the <see cref="PluginOption"/> instances provided by the given <see cref="Provider"/>.
+    ///     Registers the <see cref="PluginOption"/> instances provided by the given <see cref="IProvider"/>.
     /// </summary>
     /// <param name="provider">
-    ///     The <see cref="Provider"/> that provides the <see cref="PluginOption"/> instances to register.
+    ///     The <see cref="IProvider"/> that provides the <see cref="PluginOption"/> instances to register.
     /// </param>
-    internal void RegisterFrom(Provider provider)
+    internal void RegisterFrom(IProvider provider)
     {
         lock (this.mutex)
         {

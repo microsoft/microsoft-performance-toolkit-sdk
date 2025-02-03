@@ -13,7 +13,7 @@ namespace Microsoft.Performance.SDK.Runtime.Options;
 ///     by the <see cref="IProcessingSource"/> instances are not modified or used by the implementing plugin.
 /// </summary>
 internal sealed class ProcessingSourcePluginOptionsProvider
-    : PluginOptionsRegistry.Provider
+    : PluginOptionsRegistry.IProvider
 {
     private readonly IReadOnlyCollection<IProcessingSource> processingSources;
 

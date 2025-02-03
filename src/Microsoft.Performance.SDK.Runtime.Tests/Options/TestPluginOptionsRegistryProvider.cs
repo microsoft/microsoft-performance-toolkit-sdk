@@ -8,11 +8,11 @@ using Microsoft.Performance.SDK.Runtime.Options;
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 
 /// <summary>
-///     A test implementation of <see cref="PluginOptionsRegistry.Provider"/> that returns un-cloned
+///     A test implementation of <see cref="PluginOptionsRegistry.IProvider"/> that returns un-cloned
 ///     options provided by tests.
 /// </summary>
 public sealed class TestPluginOptionsRegistryProvider
-    : PluginOptionsRegistry.Provider
+    : PluginOptionsRegistry.IProvider
 {
     private readonly List<PluginOption> options;
 
