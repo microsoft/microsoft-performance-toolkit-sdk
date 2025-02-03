@@ -21,7 +21,7 @@ public abstract class PluginOption<T>
     /// <summary>
     ///     Initializes a new instance of the <see cref="PluginOption{T}"/> class.
     /// </summary>
-    internal PluginOption()
+    private protected PluginOption()
     {
         this.IsUsingDefault = true;
     }

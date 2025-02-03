@@ -19,7 +19,7 @@ public abstract class PluginOption
     /// <summary>
     ///     Initializes a new instance of the <see cref="PluginOption"/> class.
     /// </summary>
-    internal PluginOption()
+    private protected  PluginOption()
     {
     }
 
