@@ -73,4 +73,9 @@ public abstract class PluginOption
     {
         return CloneT();
     }
+
+    public override string ToString()
+    {
+        return $"{this.Name} ({this.Guid})";
+    }
 }

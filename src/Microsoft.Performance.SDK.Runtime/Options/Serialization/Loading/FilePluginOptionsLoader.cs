@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IO;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
@@ -20,8 +21,11 @@ public sealed class FilePluginOptionsLoader
     /// <param name="filePath">
     ///     The path to the file from which to load options.
     /// </param>
-    public FilePluginOptionsLoader(string filePath)
-        : base(true)
+    /// <param name="logger">
+    ///     The logger to use.
+    /// </param>
+    public FilePluginOptionsLoader(string filePath, ILogger logger)
+        : base(true, logger)
     {
         this.filePath = filePath;
     }

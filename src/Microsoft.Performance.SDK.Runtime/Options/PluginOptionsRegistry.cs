@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Options;
@@ -18,6 +19,18 @@ public sealed class PluginOptionsRegistry
 {
     private readonly object mutex = new();
     private readonly Dictionary<Guid, PluginOption> optionByGuid = new();
+    private readonly ILogger logger;
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="PluginOptionsRegistry"/> class.
+    /// </summary>
+    /// <param name="logger">
+    ///     The logger to use.
+    /// </param>
+    public PluginOptionsRegistry(ILogger logger)
+    {
+        this.logger = logger;
+    }
 
     /// <summary>
     ///     Represents a class that can provide <see cref="PluginOption"/> instances to register to this class. Do not
@@ -59,6 +72,8 @@ public sealed class PluginOptionsRegistry
     {
         lock (this.mutex)
         {
+            this.logger.Info($"Registering plugin options from {provider.GetType().FullName}.");
+
             foreach (var option in provider.GetOptions())
             {
                 this.optionByGuid[option.Guid] = option;
@@ -101,6 +116,8 @@ public sealed class PluginOptionsRegistry
     {
         lock (this.mutex)
         {
+            this.logger.Verbose($"Updating {this.Options.Count} plugin options from DTO.");
+
             ApplyBooleanDtos(dto.BooleanOptions);
             ApplyFieldDtos(dto.FieldOptions);
             ApplyFieldArrayDtos(dto.FieldArrayOptions);
@@ -111,21 +128,33 @@ public sealed class PluginOptionsRegistry
     {
         ApplyT<FieldArrayOption, FieldArrayPluginOptionDto>(
             dtoFieldArrayOptions,
-            (option, dto) => { option.CurrentValue = dto.Value; });
+            (option, dto) =>
+            {
+                option.CurrentValue = dto.Value;
+                this.logger.Verbose($"Plugin option {option} was updated to the saved value [{string.Join(", ", dto.Value)}].");
+            });
     }
 
     private void ApplyFieldDtos(IReadOnlyCollection<FieldPluginOptionDto> dtoFieldOptions)
     {
         ApplyT<FieldOption, FieldPluginOptionDto>(
             dtoFieldOptions,
-            (option, dto) => { option.CurrentValue = dto.Value; });
+            (option, dto) =>
+            {
+                option.CurrentValue = dto.Value;
+                this.logger.Verbose($"Plugin option {option} was updated to the saved value {dto.Value}.");
+            });
     }
 
     private void ApplyBooleanDtos(IReadOnlyCollection<BooleanPluginOptionDto> dtoBooleanOptions)
     {
         ApplyT<BooleanOption, BooleanPluginOptionDto>(
             dtoBooleanOptions,
-            (option, dto) => { option.CurrentValue = dto.Value; });
+            (option, dto) =>
+            {
+                option.CurrentValue = dto.Value;
+                this.logger.Verbose($"Plugin option {option} was updated to the saved value {dto.Value}.");
+            });
     }
 
     private void ApplyT<T, TDTO>(
@@ -141,9 +170,19 @@ public sealed class PluginOptionsRegistry
             if (this.optionByGuid.TryGetValue(dto.Guid, out var option) && option is T asT)
             {
                 if (dto.IsDefault)
+                {
                     asT.ApplyDefault();
+                    this.logger.Verbose($"Option {asT} was reset to default.");
+                }
                 else
+                {
+                    this.logger.Verbose($"Updating option {asT} from a saved value.");
                     applySaved(asT, dto);
+                }
+            }
+            else
+            {
+                this.logger.Verbose($"No option with GUID {dto.Guid} was found in the registry.");
             }
         }
     }

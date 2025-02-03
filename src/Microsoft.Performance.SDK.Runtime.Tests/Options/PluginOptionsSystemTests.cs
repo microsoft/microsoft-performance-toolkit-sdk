@@ -8,6 +8,7 @@ using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.SDK.Tests.Options;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
@@ -63,7 +64,7 @@ public class PluginOptionsSystemTests
 
     private PluginOptionsSystem CreateSut(params IProcessingSource[] processingSources)
     {
-        var sut = PluginOptionsSystem.CreateUnsaved();
+        var sut = PluginOptionsSystem.CreateUnsaved((_) => new NullLogger());
         sut.RegisterOptionsFrom(processingSources);
         return sut;
     }
@@ -74,8 +75,8 @@ public class PluginOptionsSystemTests
             public StubProcessingSource(params PluginOption[] options)
             {
                 this.pluginOptionsToReturn = new List<PluginOption>(options);
-
             }
+
             protected override ICustomDataProcessor CreateProcessorCore(
                 IEnumerable<IDataSource> dataSources,
                 IProcessorEnvironment processorEnvironment,

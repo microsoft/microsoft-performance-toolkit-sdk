@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.IO;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Saving;
@@ -20,8 +21,11 @@ public sealed class FilePluginOptionsSaver
     /// <param name="filePath">
     ///     The path to the file to which options will be saved.
     /// </param>
-    public FilePluginOptionsSaver(string filePath)
-        : base(true)
+    /// <param name="logger">
+    ///     The logger to use.
+    /// </param>
+    public FilePluginOptionsSaver(string filePath, ILogger logger)
+        : base(true, logger)
     {
         this.filePath = filePath;
     }

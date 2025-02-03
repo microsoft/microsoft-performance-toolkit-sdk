@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
@@ -15,6 +17,7 @@ public abstract class StreamPluginOptionsLoader
     : IPluginOptionsLoader
 {
     private readonly bool closeStreamOnWrite;
+    private readonly ILogger logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StreamPluginOptionsLoader"/> class.
@@ -23,9 +26,15 @@ public abstract class StreamPluginOptionsLoader
     ///     Whether to dispose of the stream returned by <see cref="GetStream"/> at the end of a call to
     ///     <see cref="TryLoadAsync"/>.
     /// </param>
-    protected StreamPluginOptionsLoader(bool closeStreamOnWrite)
+    /// <param name="logger">
+    ///     The logger to use.
+    /// </param>
+    protected StreamPluginOptionsLoader(
+        bool closeStreamOnWrite,
+        ILogger logger)
     {
         this.closeStreamOnWrite = closeStreamOnWrite;
+        this.logger = logger;
     }
 
     /// <inheritdoc />
@@ -42,8 +51,9 @@ public abstract class StreamPluginOptionsLoader
         {
             return await JsonSerializer.DeserializeAsync<PluginOptionsDto>(stream, jsonSerializerOptions);
         }
-        catch
+        catch (Exception e)
         {
+            this.logger?.Error(e, "Failed to load plugin options from stream.");
             return null;
         }
         finally

@@ -93,7 +93,7 @@ public class StreamPluginOptionsLoaderTests
         private readonly Stream stream;
 
         public TestStreamPluginOptionsLoader(MemoryStream stream, bool closeStreamOnWrite)
-            : base(closeStreamOnWrite)
+            : base(closeStreamOnWrite, Logger.Null)
         {
             this.stream = stream;
         }
