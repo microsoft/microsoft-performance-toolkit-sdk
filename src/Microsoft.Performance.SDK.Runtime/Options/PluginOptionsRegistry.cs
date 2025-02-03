@@ -129,9 +129,9 @@ public sealed class PluginOptionsRegistry
         where T : PluginOption
         where TDTO : PluginOptionDto
     {
-        foreach (var dto in dtoOptions)
+        lock (this.mutex)
         {
-            lock (this.mutex)
+            foreach (var dto in dtoOptions)
             {
                 if (this.optionByGuid.TryGetValue(dto.Guid, out var option) && option is T asT)
                 {
