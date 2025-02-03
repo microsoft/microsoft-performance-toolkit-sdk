@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
@@ -97,9 +99,12 @@ public sealed class PluginOptionsRegistry
     /// </param>
     internal void UpdateFromDto(PluginOptionsDto dto)
     {
-        ApplyBooleanDtos(dto.BooleanOptions);
-        ApplyFieldDtos(dto.FieldOptions);
-        ApplyFieldArrayDtos(dto.FieldArrayOptions);
+        lock (this.mutex)
+        {
+            ApplyBooleanDtos(dto.BooleanOptions);
+            ApplyFieldDtos(dto.FieldOptions);
+            ApplyFieldArrayDtos(dto.FieldArrayOptions);
+        }
     }
 
     private void ApplyFieldArrayDtos(IReadOnlyCollection<FieldArrayPluginOptionDto> dtoFieldArrayOptions)
@@ -129,17 +134,16 @@ public sealed class PluginOptionsRegistry
         where T : PluginOption
         where TDTO : PluginOptionDto
     {
-        lock (this.mutex)
+        Debug.Assert(Monitor.IsEntered(this.mutex));
+
+        foreach (var dto in dtoOptions)
         {
-            foreach (var dto in dtoOptions)
+            if (this.optionByGuid.TryGetValue(dto.Guid, out var option) && option is T asT)
             {
-                if (this.optionByGuid.TryGetValue(dto.Guid, out var option) && option is T asT)
-                {
-                    if (dto.IsDefault)
-                        asT.ApplyDefault();
-                    else
-                        applySaved(asT, dto);
-                }
+                if (dto.IsDefault)
+                    asT.ApplyDefault();
+                else
+                    applySaved(asT, dto);
             }
         }
     }
