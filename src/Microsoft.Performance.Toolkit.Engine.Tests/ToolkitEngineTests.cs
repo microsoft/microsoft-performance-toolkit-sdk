@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery;
@@ -1164,6 +1165,48 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             Assert.IsFalse(success);
             Assert.IsNull(foundProvider);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        [DataRow("test value")]
+        [DataRow(Source123DataSource.FieldOptionDefaultValue)] // Even the default value should be settable, which should also result in IsUsingDefault being false
+        public void WithPluginOptionValue_UpdatesPluginOption(string valueToSet)
+        {
+            var info = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
+            info.WithPluginOptionValue<FieldOption, string>(Source123DataSource.FieldOptionGuid, valueToSet);
+            using var sut = Engine.Create(info);
+
+            var spy = sut.Plugins.ProcessingSourceReferences.First(psr => psr.Guid == Source123DataSource.Guid).Instance as Source123DataSource;
+
+            var success =
+                spy.ApplicationEnvironmentSpy.TryGetPluginOption(
+                    Source123DataSource.FieldOptionGuid,
+                    out FieldOption option);
+
+            Assert.IsTrue(success, "Expected to successfully get the plugin option from the application environment");
+            Assert.AreEqual(valueToSet, option.CurrentValue, $"Expected the plugin option value to be '{valueToSet}' but found '{option.CurrentValue}'");
+            Assert.IsFalse(option.IsUsingDefault, "Expected the plugin option to not be using the default value because it was explicitly set via the EngineCreateInfo");
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void WithPluginOptionValue_DoesNotAlter_UnspecifiedPluginOptionValues()
+        {
+            var info = new EngineCreateInfo(this.DefaultSet.AsReadOnly());
+            info.WithPluginOptionValue<FieldOption, string>(Source123DataSource.FieldOptionGuid, "random value");
+            using var sut = Engine.Create(info);
+
+            var spy = sut.Plugins.ProcessingSourceReferences.First(psr => psr.Guid == Source123DataSource.Guid).Instance as Source123DataSource;
+
+            var success =
+                spy.ApplicationEnvironmentSpy.TryGetPluginOption(
+                    Source123DataSource.BooleanOptionGuid,
+                    out BooleanOption option);
+
+            Assert.IsTrue(success, "Expected to successfully get the plugin option from the application environment");
+            Assert.AreEqual(Source123DataSource.BooleanOptionDefaultValue, option.CurrentValue, $"Expected the plugin option value to be its default value but found '{option.CurrentValue}'");
+            Assert.IsTrue(option.IsUsingDefault, "Expected the plugin option to be using the default value because it was NOT explicitly set via the EngineCreateInfo");
         }
 
         private class StubAuthMethod

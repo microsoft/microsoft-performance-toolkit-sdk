@@ -61,6 +61,14 @@ public sealed class PluginOptionsSystem
         return new PluginOptionsSystem(loader, saver, registry);
     }
 
+    public static PluginOptionsSystem CreateInMemory(Func<Type, ILogger> loggerFactory)
+    {
+        var repository = new InMemoryPluginOptionsDtoRepository();
+        var registry = new PluginOptionsRegistry(loggerFactory(typeof(PluginOptionsRegistry)));
+
+        return new PluginOptionsSystem(repository, repository, registry);
+    }
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="PluginOptionsSystem"/> class.
     /// </summary>
@@ -148,7 +156,7 @@ public sealed class PluginOptionsSystem
     /// <returns>
     ///     <c>true</c> if the <see cref="Registry"/> was saved; <c>false</c> otherwise.
     /// </returns>
-    public Task<bool> TrySave()
+    public Task<bool> TrySaveCurrentRegistry()
     {
         var dto = optionsRegistryToDtoConverter.ConvertToDto(this.Registry);
         return this.Saver.TrySaveAsync(dto);

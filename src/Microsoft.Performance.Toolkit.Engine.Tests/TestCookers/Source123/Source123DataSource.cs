@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing.SDK;
 
@@ -29,6 +30,12 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         public const string GuidAsString = "{FA37C400-D2C4-48F7-B485-48F119BEE02E}";
         public static Guid Guid = Guid.Parse(GuidAsString);
         public const string Extension = ".s123d";
+
+        public static Guid FieldOptionGuid = Guid.NewGuid();
+        public const string FieldOptionDefaultValue = "FieldOptionDefaultValue";
+
+        public static Guid BooleanOptionGuid = Guid.NewGuid();
+        public const bool BooleanOptionDefaultValue = true;
 
         private bool disposedValue;
 
@@ -66,6 +73,26 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                    Extension,
                    Path.GetExtension(dataSource.Uri.LocalPath));
         }
+
+        public override IEnumerable<PluginOption> PluginOptions =>
+        [
+            new FieldOption()
+            {
+                Guid = FieldOptionGuid,
+                Name = "Test Option",
+                Description = "Test Option Description",
+                Category = "Test Option Category",
+                DefaultValue = FieldOptionDefaultValue,
+            },
+            new BooleanOption()
+            {
+                Guid = BooleanOptionGuid,
+                Name = "Test Boolean Option",
+                Description = "Test Boolean Option Description",
+                Category = "Test Boolean Option Category",
+                DefaultValue = BooleanOptionDefaultValue,
+            },
+        ];
 
         public override IEnumerable<Option> CommandLineOptions => supportedOptions;
 

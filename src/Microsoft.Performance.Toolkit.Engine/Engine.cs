@@ -781,9 +781,20 @@ namespace Microsoft.Performance.Toolkit.Engine
                     : string.Empty;
 
                 // TODO (#404): we also need to support options from plugins without processing sources
-                // TODO (#404): support saving these options
-                var pluginOptionsSystem = PluginOptionsSystem.CreateUnsaved(loggerFactory ?? Logger.Create);
+                var pluginOptionsSystem = PluginOptionsSystem.CreateInMemory(loggerFactory ?? Logger.Create);
                 pluginOptionsSystem.RegisterOptionsFrom(instance.ProcessingSourceReferences.Select(psr => psr.Instance));
+
+                pluginOptionsSystem.Saver.TrySaveAsync(createInfo.RegisteredPluginOptions.ToDtoFor(
+                        pluginOptionsSystem.Registry,
+                        loggerFactory(typeof(EngineCreateInfo))))
+                    .ConfigureAwait(false)
+                    .GetAwaiter()
+                    .GetResult();
+
+                pluginOptionsSystem.TryLoadAsync()
+                    .ConfigureAwait(false)
+                    .GetAwaiter()
+                    .GetResult();;
 
                 instance.applicationEnvironment = new EngineApplicationEnvironment(
                     applicationName: applicationName,

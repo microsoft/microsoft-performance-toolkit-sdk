@@ -4,10 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Auth;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.Toolkit.Engine.Options;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -158,6 +161,13 @@ namespace Microsoft.Performance.Toolkit.Engine
             return this;
         }
 
+        public EngineCreateInfo WithPluginOptionValue<T, TValue>(Guid optionGuid, TValue value)
+            where T : PluginOption<TValue>
+        {
+            this.RegisteredPluginOptions.Add(new PluginOptionValue<T, TValue>(optionGuid, value));
+            return this;
+        }
+
         /// <summary>
         ///     Gets or sets the name of the runtime on which the application is built.
         /// </summary>
@@ -197,6 +207,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     will fail. By default, this property is <c>false</c>.
         /// </summary>
         public bool IsInteractive { get; set; }
+
+        /// <summary>
+        ///     Gets the <see cref="PluginOptionValue"/> instances that have been registered.
+        /// </summary>
+        internal PluginOptionValuesRegistry RegisteredPluginOptions { get; } = new();
 
         internal ProcessorEnvironmentFactory ProcessEnvironmentFactory
         {
