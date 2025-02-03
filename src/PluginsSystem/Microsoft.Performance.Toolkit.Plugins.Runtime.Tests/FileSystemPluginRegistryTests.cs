@@ -1,17 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Text.Json;
+using AutoFixture;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.Testing;
+using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using System.Text.Json;
-using AutoFixture;
 using Fixture = AutoFixture.Fixture;
-using Microsoft.Performance.Toolkit.Plugins.Core;
-using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
@@ -64,7 +65,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
                 .Throws<ArgumentNullException>();
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.GetAllAsync(CancellationToken.None));
         }
@@ -76,7 +77,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             var sut = new FileBackedPluginRegistry(
                 this.registryRoot,
-                fakeSerializer.Object);
+                fakeSerializer.Object,
+                Logger.Create);
 
             IReadOnlyCollection<InstalledPluginInfo> result = await sut.GetAllAsync(CancellationToken.None);
 
@@ -93,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
                     .ReturnsAsync(new List<InstalledPluginInfo>());
 
-                var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+                var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
                 await Assert.ThrowsExceptionAsync<RepositoryDataAccessException>(() => sut.GetAllAsync(CancellationToken.None));
             }
@@ -138,7 +140,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>(expectedResult));
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             IReadOnlyCollection<InstalledPluginInfo> actualResult = await sut.GetAllAsync(CancellationToken.None);
 
@@ -161,7 +163,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>() { fakeInstalledPluginInfo });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None);
 
@@ -179,7 +181,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>());
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             InstalledPluginInfo actualResult = await sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None);
 
@@ -197,7 +199,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>() { fakeInstalledPluginInfo, fakeInstalledPluginInfo });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None));
         }
@@ -217,7 +219,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>() { fakeInstalledPluginInfo });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             bool actualResult = await sut.ExistsAsync(fakeInstalledPluginInfo, CancellationToken.None);
 
@@ -235,7 +237,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>());
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             bool actualResult = await sut.ExistsAsync(fakeInstalledPluginInfo, CancellationToken.None);
 
@@ -253,7 +255,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>() { fakeInstalledPluginInfo, fakeInstalledPluginInfo });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.ExistsAsync(fakeInstalledPluginInfo, CancellationToken.None));
         }
@@ -269,7 +271,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             InstalledPluginInfo fakeInstalledPluginInfo = new Fixture().Create<InstalledPluginInfo>();
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await sut.AddAsync(fakeInstalledPluginInfo, CancellationToken.None);
 
@@ -297,7 +299,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     plugin1,
                 });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await sut.AddAsync(plugin2, CancellationToken.None);
 
@@ -325,7 +327,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     plugin2
                 });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.AddAsync(plugin1, CancellationToken.None));
         }
@@ -341,7 +343,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
             InstalledPluginInfo fakeInstalledPluginInfo = new Fixture().Create<InstalledPluginInfo>();
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(
                 () => sut.DeleteAsync(fakeInstalledPluginInfo, CancellationToken.None));
@@ -365,7 +367,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     plugin2,
                 });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await sut.DeleteAsync(plugin1, CancellationToken.None);
 
@@ -392,7 +394,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     plugin1,
                 });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.DeleteAsync(plugin2, CancellationToken.None));
         }
@@ -415,7 +417,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     plugin1,
                 });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.DeleteAsync(plugin2, CancellationToken.None));
         }
@@ -433,7 +435,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             InstalledPluginInfo fakeInstalledPluginInfo = new Fixture().Create<InstalledPluginInfo>();
             var fakeUpdatedPluginInfo = CreatePluginWithDifferentIdVersion(fakeInstalledPluginInfo);
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(
                 () => sut.UpdateAsync(fakeInstalledPluginInfo, fakeUpdatedPluginInfo, CancellationToken.None));
@@ -448,7 +450,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             InstalledPluginInfo fakeInstalledPluginInfo = new Fixture().Create<InstalledPluginInfo>();
             var toUpdate = CreatePluginWithDifferentInstallDate(fakeInstalledPluginInfo);
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(
                 () => sut.UpdateAsync(fakeInstalledPluginInfo, toUpdate, CancellationToken.None));
@@ -467,7 +469,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()).Result)
                 .Returns(new List<InstalledPluginInfo>());
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.UpdateAsync(current, toUpdate, CancellationToken.None));
         }
@@ -488,7 +490,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     toUpdate,
                 });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.UpdateAsync(current, toUpdate, CancellationToken.None));
         }
@@ -509,7 +511,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     plugin1,
                 });
 
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             await sut.UpdateAsync(plugin1, plugin2, CancellationToken.None);
 
@@ -528,7 +530,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task AquireLock_Succeeds()
         {
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             using (IDisposable _ = await sut.AquireLockAsync(CancellationToken.None, null))
             {
@@ -543,7 +545,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
         public async Task AquireLock_Fails()
         {
             var fakeSerializer = new Mock<ISerializer<List<InstalledPluginInfo>>>();
-            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
+            var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object, Logger.Create);
 
             Task<IDisposable> attempt;
             using (IDisposable _ = await sut.AquireLockAsync(CancellationToken.None, null))
