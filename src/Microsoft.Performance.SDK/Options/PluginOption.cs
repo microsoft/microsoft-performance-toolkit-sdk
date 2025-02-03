@@ -47,7 +47,7 @@ public abstract class PluginOption
     /// <summary>
     ///     Gets a value indicating whether this option is using its default value. This value will be <c>true</c>
     ///     if the option's value is manually set outside of <see cref="ApplyDefault"/>, regardless of which
-    ///     value it was set to. This means that this value will be <c>true</c> even if the option's value is
+    ///     value it was set to. This means that this value will be <c>false</c> even if the option's value is
     ///     manually set to its default value.
     /// </summary>
     internal bool IsUsingDefault { get; private protected set; }
