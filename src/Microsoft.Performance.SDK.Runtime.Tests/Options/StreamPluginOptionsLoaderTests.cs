@@ -56,7 +56,7 @@ public class StreamPluginOptionsLoaderTests
     ///     if <see cref="StreamPluginOptionsLoader"/> is configured to do so.
     /// </summary>
     [TestMethod]
-    public async Task CloseStreamOnWrite_ClosesStream()
+    public async Task CloseStreamOnRead_ClosesStream()
     {
         using MemoryStream stream = new MemoryStream();
         var sut = new TestStreamPluginOptionsLoader(stream, true);
@@ -74,7 +74,7 @@ public class StreamPluginOptionsLoaderTests
     ///     if <see cref="StreamPluginOptionsLoader"/> is not configured to do so.
     /// </summary>
     [TestMethod]
-    public async Task DoNotCloseStreamOnWrite_DoesNotCloseStream()
+    public async Task DoNotCloseStreamOnRead_DoesNotCloseStream()
     {
         using MemoryStream stream = new MemoryStream();
         var sut = new TestStreamPluginOptionsLoader(stream, false);
@@ -92,8 +92,8 @@ public class StreamPluginOptionsLoaderTests
     {
         private readonly Stream stream;
 
-        public TestStreamPluginOptionsLoader(MemoryStream stream, bool closeStreamOnWrite)
-            : base(closeStreamOnWrite, Logger.Null)
+        public TestStreamPluginOptionsLoader(MemoryStream stream, bool closeStreamOnRead)
+            : base(closeStreamOnRead, Logger.Null)
         {
             this.stream = stream;
         }
