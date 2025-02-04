@@ -38,11 +38,7 @@ public abstract class StreamPluginOptionsSaver
     /// <inheritdoc />
     public async Task<bool> TrySaveAsync(PluginOptionsDto optionsDto)
     {
-        var jsonSerializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true,
-        };
+        var jsonSerializerOptions = PluginOptionsDtoJsonSerialization.GetJsonSerializerOptions();
 
         var stream = GetStream();
         try

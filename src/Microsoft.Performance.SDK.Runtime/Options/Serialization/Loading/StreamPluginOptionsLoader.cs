@@ -40,11 +40,7 @@ public abstract class StreamPluginOptionsLoader
     /// <inheritdoc />
     public async Task<PluginOptionsDto> TryLoadAsync()
     {
-        var jsonSerializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true,
-        };
+        var jsonSerializerOptions = PluginOptionsDtoJsonSerialization.GetJsonSerializerOptions();
 
         var stream = GetStream();
         try
