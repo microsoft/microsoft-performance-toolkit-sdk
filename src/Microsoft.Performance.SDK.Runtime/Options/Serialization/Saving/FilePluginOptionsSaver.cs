@@ -25,9 +25,23 @@ public sealed class FilePluginOptionsSaver
     /// <param name="logger">
     ///     The logger to use.
     /// </param>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="filePath"/> is or <paramref name="logger"/> <c>null</c>.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    ///     <paramref name="filePath"/> is empty or composed only of whitespace.
+    /// </exception>
     public FilePluginOptionsSaver(string filePath, ILogger logger)
         : base(true, logger)
     {
+        Guard.NotNull(filePath, nameof(filePath));
+        Guard.NotNull(logger, nameof(logger));
+        
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            throw new ArgumentException($"The file path cannot be empty or whitespace.", nameof(filePath));
+        }
+
         this.filePath = filePath;
     }
 
