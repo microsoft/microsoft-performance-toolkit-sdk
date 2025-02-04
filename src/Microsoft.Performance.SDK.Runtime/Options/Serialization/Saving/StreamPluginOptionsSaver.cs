@@ -52,7 +52,7 @@ public abstract class StreamPluginOptionsSaver
         }
         catch (Exception e)
         {
-            this.logger?.Error(e, "Failed to save plugin options to stream.");
+            this.logger?.Error(e, GetSerializeErrorMessage(e));
             return false;
         }
         finally
@@ -62,6 +62,11 @@ public abstract class StreamPluginOptionsSaver
                 stream.Dispose();
             }
         }
+    }
+
+    private protected virtual string GetSerializeErrorMessage(Exception exception)
+    {
+        return $"Failed to save plugin options to stream: {exception.Message}.";
     }
 
     /// <summary>

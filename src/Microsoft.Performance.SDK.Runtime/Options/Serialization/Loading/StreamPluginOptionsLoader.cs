@@ -53,7 +53,7 @@ public abstract class StreamPluginOptionsLoader
         }
         catch (Exception e)
         {
-            this.logger?.Error(e, "Failed to load plugin options from stream.");
+            this.logger?.Error(e, GetDeserializeErrorMessage(e));
             return null;
         }
         finally
@@ -63,6 +63,11 @@ public abstract class StreamPluginOptionsLoader
                 stream.Dispose();
             }
         }
+    }
+
+    private protected virtual string GetDeserializeErrorMessage(Exception exception)
+    {
+        return $"Failed to load plugin options from stream: {exception.Message}.";
     }
 
     /// <summary>

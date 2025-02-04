@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
@@ -28,6 +29,11 @@ public sealed class FilePluginOptionsSaver
         : base(true, logger)
     {
         this.filePath = filePath;
+    }
+
+    private protected override string GetSerializeErrorMessage(Exception exception)
+    {
+        return $"Failed to save plugin options to '{this.filePath}': {exception.Message}.";
     }
 
     /// <inheritdoc />
