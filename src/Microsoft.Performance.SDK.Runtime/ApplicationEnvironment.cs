@@ -7,16 +7,19 @@ using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
+using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
+using Microsoft.Performance.SDK.Runtime.Options;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
     /// <inheritdoc cref="IApplicationEnvironment"/>
     public class ApplicationEnvironment
-        : IApplicationEnvironmentV2
+        : IApplicationEnvironmentV3
     {
         private readonly IMessageBox messageBox;
+        private readonly PluginOptionsRegistry optionsRegistry;
 
         /// <summary>
         ///     Creates an instance of the <see cref="ApplicationEnvironment"/> class.
@@ -39,13 +42,17 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <param name="messageBox">
         ///     Provides a way to message the user.
         /// </param>
+        /// <param name="optionsRegistry">
+        ///     The registry of plugin options to use for the application.
+        /// </param>
         public ApplicationEnvironment(
             string applicationName,
             string runtimeName,
             ITableDataSynchronization tableDataSynchronizer,
             ISourceDataCookerFactoryRetrieval sourceDataCookerFactory,
             ISourceSessionFactory sourceSessionFactory,
-            IMessageBox messageBox)
+            IMessageBox messageBox,
+            PluginOptionsRegistry optionsRegistry)
         {
             // application and runtime names may be null
             // tableDataSynchronizer may be null
@@ -66,6 +73,7 @@ namespace Microsoft.Performance.SDK.Runtime
             this.TableDataSynchronizer = tableDataSynchronizer ?? new NullTableSynchronizer();
             this.SourceDataCookerFactoryRetrieval = sourceDataCookerFactory;
             this.SourceSessionFactory = sourceSessionFactory;
+            this.optionsRegistry = optionsRegistry;
         }
 
         /// <inheritdoc />
@@ -122,6 +130,21 @@ namespace Microsoft.Performance.SDK.Runtime
                 caption,
                 format,
                 args);
+        }
+
+        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption
+        {
+            foreach (var pluginOption in this.optionsRegistry.Options)
+            {
+                if (pluginOption.Guid == optionGuid && pluginOption is T asT)
+                {
+                    option = asT;
+                    return true;
+                }
+            }
+
+            option = null;
+            return false;
         }
 
         /// <inheritdoc />
