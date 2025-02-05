@@ -26,7 +26,7 @@ public class PluginOptionsRegistryTests
     public void ApplyDto_Boolean_UpdatesValue()
     {
         var originalValue = false;
-        var sut = new PluginOptionsRegistry();
+        var sut = CreateSut();
         var option = TestPluginOption.BooleanOption(originalValue);
 
         sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
@@ -44,7 +44,7 @@ public class PluginOptionsRegistryTests
     public void ApplyDto_Field_UpdatesValue()
     {
         var originalValue = "original value";
-        var sut = new PluginOptionsRegistry();
+        var sut = CreateSut();
         var option = TestPluginOption.FieldOption(originalValue);
 
         sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
@@ -62,7 +62,7 @@ public class PluginOptionsRegistryTests
     public void ApplyDto_FieldArray_UpdatesValue()
     {
         var originalValue = new[] { "original value 1", "original option 2" };
-        var sut = new PluginOptionsRegistry();
+        var sut = CreateSut();
         var option = TestPluginOption.FieldArrayOption(originalValue);
 
         sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
@@ -81,7 +81,7 @@ public class PluginOptionsRegistryTests
     [TestMethod]
     public void ApplyingDto_WithOldDefaultValue_RestoresNewDefaultValue()
     {
-        var sut = new PluginOptionsRegistry();
+        var sut = CreateSut();
 
         const string expected = "New Default Value";
 
@@ -102,7 +102,7 @@ public class PluginOptionsRegistryTests
     [TestMethod]
     public void ApplyingDto_WithNonExistentOption_HasNoEffect()
     {
-        var sut = new PluginOptionsRegistry();
+        var sut = CreateSut();
         var option = TestPluginOption.BooleanOption(false);
         sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
 
@@ -120,7 +120,7 @@ public class PluginOptionsRegistryTests
     [TestMethod]
     public void ApplyingDto_WithSerializedNonDefaultValue_WhileUsingDefault_SetsCurrentValue_ToSerializedValue()
     {
-        var sut = new PluginOptionsRegistry();
+        var sut = CreateSut();
         var option = TestPluginOption.FieldOption("Default");
         Assert.IsTrue(option.IsUsingDefault);
 
@@ -140,7 +140,7 @@ public class PluginOptionsRegistryTests
     [TestMethod]
     public void ApplyingDto_WithSerializedNonDefaultValue_WhileUsingNonDefaultValue_RestoresValue()
     {
-        var sut = new PluginOptionsRegistry();
+        var sut = CreateSut();
         var option = TestPluginOption.FieldOption("Default");
         option.CurrentValue = "Non default";
         Assert.IsFalse(option.IsUsingDefault);
@@ -152,5 +152,10 @@ public class PluginOptionsRegistryTests
 
         Assert.AreEqual(expected, option.CurrentValue);
         Assert.IsFalse(option.IsUsingDefault);
+    }
+
+    private PluginOptionsRegistry CreateSut()
+    {
+        return new PluginOptionsRegistry(Logger.Null);
     }
 }

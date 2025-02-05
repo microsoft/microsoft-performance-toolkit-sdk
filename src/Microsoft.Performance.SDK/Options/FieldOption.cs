@@ -9,6 +9,7 @@ namespace Microsoft.Performance.SDK.Options;
 public sealed class FieldOption
     : PluginOption<string>
 {
+    /// <inheritdoc />
     public override PluginOption CloneT()
     {
         return new FieldOption()

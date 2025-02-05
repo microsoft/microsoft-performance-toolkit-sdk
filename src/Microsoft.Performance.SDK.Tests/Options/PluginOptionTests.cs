@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -66,5 +67,28 @@ public class PluginOptionTests
         option.ApplyDefault();
 
         Assert.AreEqual(defaultValue, option.CurrentValue);
+    }
+
+    [TestMethod]
+    [DataRow(true, false)]
+    [DataRow(true, true)]
+    public void SettingCurrentValue_ToNewValue_RaisesOptionChanged(bool defaultValue, bool newValue)
+    {
+        var option = TestPluginOption.BooleanOption(defaultValue);
+        var raised = false;
+        option.OptionChanged += (s, e) => raised = true;
+
+        option.CurrentValue = newValue;
+
+        Assert.IsTrue(raised);
+    }
+
+    [TestMethod]
+    public void OptionsChangedHandler_ThrowingException_DoesNotThrow()
+    {
+        var option = TestPluginOption.BooleanOption(true);
+        option.OptionChanged += (s, e) => throw new Exception();
+
+        option.CurrentValue = false;
     }
 }

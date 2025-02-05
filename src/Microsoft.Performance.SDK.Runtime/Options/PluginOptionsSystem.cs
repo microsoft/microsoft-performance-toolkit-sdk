@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,14 +26,19 @@ public sealed class PluginOptionsSystem
     /// <param name="filePath">
     ///     The path to the file to which options will be saved and loaded.
     /// </param>
+    /// <param name="loggerFactory">
+    ///     A factory for creating loggers.
+    /// </param>
     /// <returns>
     ///     A new instance of <see cref="PluginOptionsSystem"/> that persists options to a file.
     /// </returns>
-    public static PluginOptionsSystem CreateForFile(string filePath)
+    public static PluginOptionsSystem CreateForFile(
+        string filePath,
+        Func<Type, ILogger> loggerFactory)
     {
-        var loader = new FilePluginOptionsLoader(filePath);
-        var saver = new FilePluginOptionsSaver(filePath);
-        var registry = new PluginOptionsRegistry();
+        var loader = new FilePluginOptionsLoader(filePath, loggerFactory(typeof(FilePluginOptionsLoader)));
+        var saver = new FilePluginOptionsSaver(filePath, loggerFactory(typeof(FilePluginOptionsSaver)));
+        var registry = new PluginOptionsRegistry(loggerFactory(typeof(PluginOptionsRegistry)));
 
         return new PluginOptionsSystem(loader, saver, registry);
     }
@@ -40,14 +46,17 @@ public sealed class PluginOptionsSystem
     /// <summary>
     ///     Creates a new instance of <see cref="PluginOptionsSystem"/> that does not persist options.
     /// </summary>
+    /// <param name="loggerFactory">
+    ///     A factory for creating loggers.
+    /// </param>
     /// <returns>
     ///     A new instance of <see cref="PluginOptionsSystem"/> that does not persist options.
     /// </returns>
-    public static PluginOptionsSystem CreateUnsaved()
+    public static PluginOptionsSystem CreateUnsaved(Func<Type, ILogger> loggerFactory)
     {
         var loader = new NullPluginOptionsLoader();
         var saver = new NullPluginOptionsSaver();
-        var registry = new PluginOptionsRegistry();
+        var registry = new PluginOptionsRegistry(loggerFactory(typeof(PluginOptionsRegistry)));
 
         return new PluginOptionsSystem(loader, saver, registry);
     }

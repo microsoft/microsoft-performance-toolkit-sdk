@@ -88,7 +88,7 @@ public class StreamPluginOptionsSaverTests
         private readonly Stream stream;
 
         public TestPluginOptionsSaver(MemoryStream stream, bool closeStreamOnWrite)
-            : base(closeStreamOnWrite)
+            : base(closeStreamOnWrite, Logger.Null)
         {
             this.stream = stream;
         }

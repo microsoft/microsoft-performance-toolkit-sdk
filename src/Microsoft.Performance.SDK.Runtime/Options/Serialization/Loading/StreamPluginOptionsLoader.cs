@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
@@ -14,45 +16,54 @@ namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 public abstract class StreamPluginOptionsLoader
     : IPluginOptionsLoader
 {
-    private readonly bool closeStreamOnWrite;
+    private readonly bool closeStreamOnRead;
+    private readonly ILogger logger;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="StreamPluginOptionsLoader"/> class.
     /// </summary>
-    /// <param name="closeStreamOnWrite">
+    /// <param name="closeStreamOnRead">
     ///     Whether to dispose of the stream returned by <see cref="GetStream"/> at the end of a call to
     ///     <see cref="TryLoadAsync"/>.
     /// </param>
-    protected StreamPluginOptionsLoader(bool closeStreamOnWrite)
+    /// <param name="logger">
+    ///     The logger to use.
+    /// </param>
+    protected StreamPluginOptionsLoader(
+        bool closeStreamOnRead,
+        ILogger logger)
     {
-        this.closeStreamOnWrite = closeStreamOnWrite;
+        this.closeStreamOnRead = closeStreamOnRead;
+        this.logger = logger;
     }
 
     /// <inheritdoc />
     public async Task<PluginOptionsDto> TryLoadAsync()
     {
-        var jsonSerializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNameCaseInsensitive = true,
-        };
+        var jsonSerializerOptions = PluginOptionsDtoJsonSerialization.GetJsonSerializerOptions();
 
         var stream = GetStream();
         try
         {
             return await JsonSerializer.DeserializeAsync<PluginOptionsDto>(stream, jsonSerializerOptions);
         }
-        catch
+        catch (Exception e)
         {
+            this.logger?.Error(e, GetDeserializeErrorMessage(e));
             return null;
         }
         finally
         {
-            if (this.closeStreamOnWrite)
+            if (this.closeStreamOnRead)
             {
                 stream.Dispose();
             }
         }
+    }
+
+    private protected virtual string GetDeserializeErrorMessage(Exception exception)
+    {
+        return $"Failed to load plugin options from stream: {exception.Message}.";
     }
 
     /// <summary>

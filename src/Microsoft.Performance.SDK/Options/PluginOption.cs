@@ -62,7 +62,20 @@ public abstract class PluginOption
     /// </summary>
     protected void RaiseOptionChanged()
     {
-        this.OptionChanged?.Invoke(this, EventArgs.Empty);
+        try
+        {
+            this.OptionChanged?.Invoke(this, EventArgs.Empty);
+        }
+        catch
+        {
+            // We catch all exceptions here because we don't want to crash the app just because
+            // a plugin is throwing exceptions. The SDK's state is not impacted by an exception here,
+            // since all that matters (the plugin's option value has been updated to the new value)
+            // isn't affected. A badly designed plugin may not in an unknown state here, but that's not
+            // the SDK's responsibility to address.
+
+            return;
+        }
     }
 
     /// <inheritdoc />
@@ -72,5 +85,10 @@ public abstract class PluginOption
     public object Clone()
     {
         return CloneT();
+    }
+
+    public override string ToString()
+    {
+        return $"{this.Name} ({this.Guid})";
     }
 }
