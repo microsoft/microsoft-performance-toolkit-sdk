@@ -34,13 +34,8 @@ public sealed class FilePluginOptionsSaver
     public FilePluginOptionsSaver(string filePath, ILogger logger)
         : base(true, logger)
     {
-        Guard.NotNull(filePath, nameof(filePath));
+        Guard.NotNullOrWhiteSpace(filePath, nameof(filePath));
         Guard.NotNull(logger, nameof(logger));
-
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            throw new ArgumentException($"The file path cannot be empty or whitespace.", nameof(filePath));
-        }
 
         this.filePath = filePath;
     }

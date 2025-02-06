@@ -49,7 +49,9 @@ public sealed class PluginOptionsRegistry
     }
 
     /// <summary>
-    ///     Gets the <see cref="PluginOption"/> instances that have been registered.
+    ///     Gets the <see cref="PluginOption"/> instances that are currently registered. The returned
+    ///     collection is a snapshot of the current state of the registry and will not update as new
+    ///     <see cref="PluginOption"/> instances are registered.
     /// </summary>
     public IReadOnlyCollection<PluginOption> Options
     {
