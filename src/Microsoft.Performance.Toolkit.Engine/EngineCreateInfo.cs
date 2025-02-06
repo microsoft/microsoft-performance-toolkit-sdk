@@ -161,9 +161,34 @@ namespace Microsoft.Performance.Toolkit.Engine
             return this;
         }
 
+        /// <summary>
+        ///     Specifies that the <see cref="PluginOption"/> whose <see cref="PluginOption.Guid" /> corresponds to
+        ///     the specified <paramref name="optionGuid"/> should have the specified <paramref name="value" />.
+        /// </summary>
+        /// <param name="optionGuid">
+        ///     The <see cref="PluginOption.Guid" /> of the <see cref="PluginOption"/> to set the value for.
+        /// </param>
+        /// <param name="value">
+        ///     The value to set for the <see cref="PluginOption"/>.
+        /// </param>
+        /// <typeparam name="T">
+        ///     The concrete type of the <see cref="PluginOption"/> whose value should be set (e.g. <see cref="BooleanOption"/>
+        ///     or <see cref="FieldOption"/>).
+        /// </typeparam>
+        /// <typeparam name="TValue">
+        ///     The type of the value of the <see cref="PluginOption"/>.
+        /// </typeparam>
+        /// <returns>
+        ///     The instance of <see cref="EngineCreateInfo"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="value"/> is <c>null</c>.
+        /// </exception>
         public EngineCreateInfo WithPluginOptionValue<T, TValue>(Guid optionGuid, TValue value)
             where T : PluginOption<TValue>
         {
+            Guard.NotNull(value, nameof(value));
+
             this.RegisteredPluginOptions.Add(new PluginOptionValue<T, TValue>(optionGuid, value));
             return this;
         }
@@ -209,7 +234,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         public bool IsInteractive { get; set; }
 
         /// <summary>
-        ///     Gets the <see cref="PluginOptionValue"/> instances that have been registered.
+        ///     Gets the <see cref="PluginOptionValuesRegistry"/> that tracks which <see cref="PluginOptionValue"/>
+        ///     instances have been registered.
         /// </summary>
         internal PluginOptionValuesRegistry RegisteredPluginOptions { get; } = new();
 
