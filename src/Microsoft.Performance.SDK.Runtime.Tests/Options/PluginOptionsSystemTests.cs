@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options;
+using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 using Microsoft.Performance.SDK.Tests.Options;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
@@ -60,6 +63,52 @@ public class PluginOptionsSystemTests
         registeredOption.CurrentValue = "new value";
 
         Assert.AreEqual(defaultValue, optionReturnedByProcessingSource.CurrentValue);
+    }
+
+    [TestMethod]
+    public async Task SavingNewOptions_DoesNotRemove_PreviouslySavedOption()
+    {
+        var previouslySavedOption = TestPluginOptionDto.BooleanOptionDto(Guid.NewGuid(), false, true);
+
+        var sut = PluginOptionsSystem.CreateInMemory((_) => new NullLogger());
+        await sut.Saver.TrySaveAsync(new PluginOptionsDto()
+        {
+            BooleanOptions = [previouslySavedOption],
+        });
+
+        var newOption = TestPluginOption.FieldOption("foo");
+        sut.RegisterOptionsFrom(new StubProcessingSource(newOption));
+        await sut.TrySaveCurrentRegistry();
+
+        var newDto = await sut.Loader.TryLoadAsync();
+
+        Assert.IsTrue(newDto.BooleanOptions.Contains(previouslySavedOption));
+        Assert.IsTrue(newDto.FieldOptions.Any(x => x.Guid == newOption.Guid));
+    }
+
+    [TestMethod]
+    public async Task SavingNewOptionValue_OverwritesPreviouslySavedOption()
+    {
+        bool previouslySavedValue = false;
+        var optionGuid = Guid.NewGuid();
+        var previouslySavedOption = TestPluginOptionDto.BooleanOptionDto(optionGuid, false, previouslySavedValue);
+
+        var sut = PluginOptionsSystem.CreateInMemory((_) => new NullLogger());
+        await sut.Saver.TrySaveAsync(new PluginOptionsDto()
+        {
+            BooleanOptions = [previouslySavedOption],
+        });
+
+        bool expectedValue = !previouslySavedValue;
+        var newOption = TestPluginOption.BooleanOption(false, optionGuid);
+        newOption.CurrentValue = expectedValue;
+
+        sut.RegisterOptionsFrom(new StubProcessingSource(newOption));
+        await sut.TrySaveCurrentRegistry();
+
+        var newDto = await sut.Loader.TryLoadAsync();
+
+        Assert.AreEqual(expectedValue, newDto.BooleanOptions.First(o => o.Guid == optionGuid).Value);
     }
 
     private PluginOptionsSystem CreateSut(params IProcessingSource[] processingSources)

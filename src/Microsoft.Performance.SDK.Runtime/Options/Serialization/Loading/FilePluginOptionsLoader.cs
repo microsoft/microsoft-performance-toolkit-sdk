@@ -48,6 +48,6 @@ public sealed class FilePluginOptionsLoader
     /// <inheritdoc />
     protected override Stream GetStream()
     {
-        return File.Open(this.filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return File.Open(this.filePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
     }
 }
