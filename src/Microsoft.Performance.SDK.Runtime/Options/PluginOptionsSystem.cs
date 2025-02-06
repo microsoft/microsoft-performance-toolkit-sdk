@@ -151,14 +151,21 @@ public sealed class PluginOptionsSystem
 
     /// <summary>
     ///     Attempts to save the <see cref="PluginOption"/> instances registered to the <see cref="Registry"/> using
-    ///     the <see cref="Saver"/>.
+    ///     the <see cref="Saver"/>. Previously saved options, as loaded by the <see cref="Loader"/> during this method call,
+    ///     will still be included in the saved options. If an option in the <see cref="Registry"/> was previously saved,
+    ///     its value will be updated after the save.
     /// </summary>
     /// <returns>
     ///     <c>true</c> if the <see cref="Registry"/> was saved; <c>false</c> otherwise.
     /// </returns>
-    public Task<bool> TrySaveCurrentRegistry()
+    /// <remarks>
+    ///     This method is not atomic with respect to merging previously saved options. Concurrent modifications to the
+    ///     backing storage of the <see cref="Loader"/> will result in the loss of those modifications.
+    /// </remarks>
+    public async Task<bool> TrySaveCurrentRegistry()
     {
-        var dto = optionsRegistryToDtoConverter.ConvertToDto(this.Registry);
-        return this.Saver.TrySaveAsync(dto);
+        var newDto = optionsRegistryToDtoConverter.ConvertToDto(this.Registry);
+        var oldDto = await this.Loader.TryLoadAsync();
+        return await this.Saver.TrySaveAsync(oldDto.UpdateTo(newDto));
     }
 }
