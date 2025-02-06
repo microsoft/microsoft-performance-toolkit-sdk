@@ -65,25 +65,6 @@ public sealed class PluginOptionsRegistry
     }
 
     /// <summary>
-    ///     Registers the <see cref="PluginOption"/> instances provided by the given <see cref="IProvider"/>.
-    /// </summary>
-    /// <param name="provider">
-    ///     The <see cref="IProvider"/> that provides the <see cref="PluginOption"/> instances to register.
-    /// </param>
-    internal void RegisterFrom(IProvider provider)
-    {
-        lock (this.mutex)
-        {
-            this.logger.Info($"Registering plugin options from {provider.GetType().FullName}.");
-
-            foreach (var option in provider.GetOptions())
-            {
-                this.optionByGuid[option.Guid] = option;
-            }
-        }
-    }
-
-    /// <summary>
     ///     Updates the state of the <see cref="PluginOption"/> instances in this registry from the given <see cref="PluginOptionsDto"/>. This
     ///     will have the following effects:
     ///     <list type="bullet">
@@ -114,7 +95,7 @@ public sealed class PluginOptionsRegistry
     /// <param name="dto">
     ///     The <see cref="PluginOptionsDto"/> from which to update the state of the <see cref="PluginOption"/> instances in this registry.
     /// </param>
-    internal void UpdateFromDto(PluginOptionsDto dto)
+    public void UpdateFromDto(PluginOptionsDto dto)
     {
         lock (this.mutex)
         {
@@ -123,6 +104,25 @@ public sealed class PluginOptionsRegistry
             ApplyBooleanDtos(dto.BooleanOptions);
             ApplyFieldDtos(dto.FieldOptions);
             ApplyFieldArrayDtos(dto.FieldArrayOptions);
+        }
+    }
+
+    /// <summary>
+    ///     Registers the <see cref="PluginOption"/> instances provided by the given <see cref="IProvider"/>.
+    /// </summary>
+    /// <param name="provider">
+    ///     The <see cref="IProvider"/> that provides the <see cref="PluginOption"/> instances to register.
+    /// </param>
+    internal void RegisterFrom(IProvider provider)
+    {
+        lock (this.mutex)
+        {
+            this.logger.Info($"Registering plugin options from {provider.GetType().FullName}.");
+
+            foreach (var option in provider.GetOptions())
+            {
+                this.optionByGuid[option.Guid] = option;
+            }
         }
     }
 
