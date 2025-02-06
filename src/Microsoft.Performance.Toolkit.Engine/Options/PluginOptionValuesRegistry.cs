@@ -21,17 +21,17 @@ internal class PluginOptionValuesRegistry
 
     public PluginOptionsDto ToDtoFor(PluginOptionsRegistry registry, ILogger logger)
     {
-        var allGuids = registry.Options.Select(x => x.Guid).ToHashSet();
+        var guidsInRegistry = registry.Options.Select(x => x.Guid).ToHashSet();
 
-        var missingGuids = this.values
+        var valuesNotInRegistry = this.values
             .Select(x => x.Guid)
-            .Where(x => !allGuids.Contains(x))
+            .Where(x => !guidsInRegistry.Contains(x))
             .ToList();
 
-        foreach (var missingGuid in missingGuids)
+        foreach (var guid in valuesNotInRegistry)
         {
             logger.Warn(
-                $"Plugin option value with GUID {missingGuid} was not found in the registry. It will be ignored.");
+                $"Plugin option value with GUID {guid} was not found in the registry. It will be ignored.");
         }
 
         // We use a visitor here instead of manually transforming each registered value so that when new
