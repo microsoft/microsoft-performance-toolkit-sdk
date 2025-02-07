@@ -40,7 +40,17 @@ public abstract class StreamPluginOptionsSaver
     {
         var jsonSerializerOptions = PluginOptionsDtoJsonSerialization.GetJsonSerializerOptions();
 
-        var stream = GetStream();
+        Stream stream;
+        try
+        {
+            stream = GetStream();
+        }
+        catch (Exception e)
+        {
+            this.logger?.Error(e, "Failed to get stream to save plugin options to.");
+            return false;
+        }
+
         try
         {
             await JsonSerializer.SerializeAsync(stream, optionsDto, jsonSerializerOptions);
@@ -67,6 +77,8 @@ public abstract class StreamPluginOptionsSaver
 
     /// <summary>
     ///     Gets the <see cref="Stream"/> to save to.
+    ///     If this method throws an exception, the call to <see cref="TrySaveAsync"/> will be considered
+    ///     as cleanly failed and return <c>false</c>.
     /// </summary>
     /// <returns>
     ///     The <see cref="Stream"/> to save to.

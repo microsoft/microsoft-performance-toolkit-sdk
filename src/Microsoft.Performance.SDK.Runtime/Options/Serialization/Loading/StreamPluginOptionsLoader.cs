@@ -46,7 +46,17 @@ public abstract class StreamPluginOptionsLoader<T>
     {
         var jsonSerializerOptions = PluginOptionsDtoJsonSerialization.GetJsonSerializerOptions();
 
-        var stream = GetStream();
+        T stream;
+        try
+        {
+            stream = GetStream();
+        }
+        catch (Exception e)
+        {
+            this.logger?.Error(e, "Failed to get stream to load plugin options from.");
+            return null;
+        }
+
         try
         {
             if (!HasContent(stream))
@@ -77,6 +87,8 @@ public abstract class StreamPluginOptionsLoader<T>
 
     /// <summary>
     ///     Gets the <see cref="Stream"/> from which to load the <see cref="PluginOptionsDto"/>.
+    ///     If this method throws an exception, the call to <see cref="TryLoadAsync"/> will be considered
+    ///     as cleanly failed and return <c>null</c>.
     /// </summary>
     /// <returns>
     ///     The <see cref="Stream"/> from which to load the <see cref="PluginOptionsDto"/>.
@@ -85,6 +97,8 @@ public abstract class StreamPluginOptionsLoader<T>
 
     /// <summary>
     ///     Determines whether <paramref name="stream"/> has content.
+    ///     If this method throws an exception, the call to <see cref="TryLoadAsync"/> will be considered
+    ///     as cleanly failed and return <c>null</c>.
     /// </summary>
     /// <param name="stream">
     ///     The <see cref="Stream"/> of type <typeparamref name="T"/> to check.
