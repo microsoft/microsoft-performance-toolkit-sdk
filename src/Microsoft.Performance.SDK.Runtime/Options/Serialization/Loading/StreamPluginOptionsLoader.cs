@@ -13,14 +13,18 @@ namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 /// <summary>
 ///     Base class for <see cref="IPluginOptionsLoader"/> classes which load from a stream.
 /// </summary>
-public abstract class StreamPluginOptionsLoader
+/// <typeparam name="T">
+///     The type of the stream from which to load.
+/// </typeparam>
+public abstract class StreamPluginOptionsLoader<T>
     : IPluginOptionsLoader
+    where T : Stream
 {
     private readonly bool closeStreamOnRead;
     private readonly ILogger logger;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="StreamPluginOptionsLoader"/> class.
+    ///     Initializes a new instance of the <see cref="StreamPluginOptionsLoader{T}"/> class.
     /// </summary>
     /// <param name="closeStreamOnRead">
     ///     Whether to dispose of the stream returned by <see cref="GetStream"/> at the end of a call to
@@ -45,6 +49,11 @@ public abstract class StreamPluginOptionsLoader
         var stream = GetStream();
         try
         {
+            if (!HasContent(stream))
+            {
+                return new PluginOptionsDto();
+            }
+
             return await JsonSerializer.DeserializeAsync<PluginOptionsDto>(stream, jsonSerializerOptions);
         }
         catch (Exception e)
@@ -72,5 +81,16 @@ public abstract class StreamPluginOptionsLoader
     /// <returns>
     ///     The <see cref="Stream"/> from which to load the <see cref="PluginOptionsDto"/>.
     /// </returns>
-    protected abstract Stream GetStream();
+    protected abstract T GetStream();
+
+    /// <summary>
+    ///     Determines whether <paramref name="stream"/> has content.
+    /// </summary>
+    /// <param name="stream">
+    ///     The <see cref="Stream"/> of type <typeparamref name="T"/> to check.
+    /// </param>
+    /// <returns>
+    ///     Whether <paramref name="stream"/> has content.
+    /// </returns>
+    protected abstract bool HasContent(T stream);
 }

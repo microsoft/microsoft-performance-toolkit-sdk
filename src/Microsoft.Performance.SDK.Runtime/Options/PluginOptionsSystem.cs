@@ -154,6 +154,8 @@ public sealed class PluginOptionsSystem
     ///     the <see cref="Saver"/>. Previously saved options, as loaded by the <see cref="Loader"/> during this method call,
     ///     will still be included in the saved options. If an option in the <see cref="Registry"/> was previously saved,
     ///     its value will be updated after the save.
+    ///     If <see cref="Loader"/> fails to load options, the save will fail and this method will have
+    ///     no effect.
     /// </summary>
     /// <returns>
     ///     <c>true</c> if the <see cref="Registry"/> was saved; <c>false</c> otherwise.
@@ -166,6 +168,12 @@ public sealed class PluginOptionsSystem
     {
         var newDto = optionsRegistryToDtoConverter.ConvertToDto(this.Registry);
         var oldDto = await this.Loader.TryLoadAsync();
+
+        if (oldDto == null)
+        {
+            return false;
+        }
+
         return await this.Saver.TrySaveAsync(oldDto.UpdateTo(newDto));
     }
 }

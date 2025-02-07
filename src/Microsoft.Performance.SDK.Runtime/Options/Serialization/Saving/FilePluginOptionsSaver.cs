@@ -14,8 +14,6 @@ namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Saving;
 public sealed class FilePluginOptionsSaver
     : StreamPluginOptionsSaver
 {
-    private readonly string filePath;
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="FilePluginOptionsSaver"/> class.
     /// </summary>
@@ -37,17 +35,22 @@ public sealed class FilePluginOptionsSaver
         Guard.NotNullOrWhiteSpace(filePath, nameof(filePath));
         Guard.NotNull(logger, nameof(logger));
 
-        this.filePath = filePath;
+        this.FilePath = filePath;
     }
+
+    /// <summary>
+    ///     Gets the path to the file to which options will be saved.
+    /// </summary>
+    public string FilePath { get; }
 
     private protected override string GetSerializeErrorMessage(Exception exception)
     {
-        return $"Failed to save plugin options to '{this.filePath}': {exception.Message}.";
+        return $"Failed to save plugin options to '{this.FilePath}': {exception.Message}.";
     }
 
     /// <inheritdoc />
     protected override Stream GetStream()
     {
-        return File.Open(this.filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+        return File.Open(this.FilePath, FileMode.Create, FileAccess.Write, FileShare.None);
     }
 }

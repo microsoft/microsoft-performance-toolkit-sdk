@@ -12,10 +12,8 @@ namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 ///     A <see cref="IPluginOptionsLoader"/> that can load a <see cref="PluginOptionsDto"/> instance from a file.
 /// </summary>
 public sealed class FilePluginOptionsLoader
-    : StreamPluginOptionsLoader
+    : StreamPluginOptionsLoader<FileStream>
 {
-    private readonly string filePath;
-
     /// <summary>
     ///     Initializes a new instance of the <see cref="FilePluginOptionsLoader"/> class.
     /// </summary>
@@ -37,17 +35,28 @@ public sealed class FilePluginOptionsLoader
         Guard.NotNullOrWhiteSpace(filePath, nameof(filePath));
         Guard.NotNull(logger, nameof(logger));
 
-        this.filePath = filePath;
+        this.FilePath = filePath;
     }
+
+    /// <summary>
+    ///     Gets the path to the file from which to load options.
+    /// </summary>
+    public string FilePath { get; }
 
     private protected override string GetDeserializeErrorMessage(Exception exception)
     {
-        return $"Failed to load plugin options from '{this.filePath}': {exception.Message}.";
+        return $"Failed to load plugin options from '{this.FilePath}': {exception.Message}.";
     }
 
     /// <inheritdoc />
-    protected override Stream GetStream()
+    protected override FileStream GetStream()
     {
-        return File.Open(this.filePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
+        return File.Open(this.FilePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
+    }
+
+    /// <inheritdoc />
+    protected override bool HasContent(FileStream stream)
+    {
+        return stream.Length > 0;
     }
 }

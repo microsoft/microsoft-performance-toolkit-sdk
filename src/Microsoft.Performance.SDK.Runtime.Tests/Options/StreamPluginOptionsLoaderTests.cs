@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 
 /// <summary>
-///     Tests for the <see cref="StreamPluginOptionsLoader"/>.
+///     Tests for the <see cref="StreamPluginOptionsLoader{T}"/>.
 /// </summary>
 [TestClass]
 [UnitTest]
@@ -53,7 +53,7 @@ public class StreamPluginOptionsLoaderTests
 
     /// <summary>
     ///     Asserts that the <see cref="Stream"/> used to load the <see cref="PluginOptionsDto"/> is closed after loading
-    ///     if <see cref="StreamPluginOptionsLoader"/> is configured to do so.
+    ///     if <see cref="StreamPluginOptionsLoader{T}"/> is configured to do so.
     /// </summary>
     [TestMethod]
     public async Task CloseStreamOnRead_ClosesStream()
@@ -71,7 +71,7 @@ public class StreamPluginOptionsLoaderTests
 
     /// <summary>
     ///     Asserts that the <see cref="Stream"/> used to load the <see cref="PluginOptionsDto"/> is not closed after loading
-    ///     if <see cref="StreamPluginOptionsLoader"/> is not configured to do so.
+    ///     if <see cref="StreamPluginOptionsLoader{T}"/> is not configured to do so.
     /// </summary>
     [TestMethod]
     public async Task DoNotCloseStreamOnRead_DoesNotCloseStream()
@@ -87,20 +87,37 @@ public class StreamPluginOptionsLoaderTests
         Assert.IsTrue(stream.CanWrite);
     }
 
-    private sealed class TestStreamPluginOptionsLoader
-        : StreamPluginOptionsLoader
+    [TestMethod]
+    public async Task EmptyStream_ReturnsEmptyDto()
     {
-        private readonly Stream stream;
+        using MemoryStream stream = new MemoryStream();
+        var sut = new TestStreamPluginOptionsLoader(stream, false);
 
-        public TestStreamPluginOptionsLoader(MemoryStream stream, bool closeStreamOnRead)
+        var loadedDto = await sut.TryLoadAsync();
+
+        Assert.IsNotNull(loadedDto);
+        Assert.IsTrue(loadedDto.IsEmpty());
+    }
+
+    private sealed class TestStreamPluginOptionsLoader
+        : StreamPluginOptionsLoader<MemoryStream>
+    {
+        private readonly MemoryStream memoryStream;
+
+        public TestStreamPluginOptionsLoader(MemoryStream memoryStream, bool closeStreamOnRead)
             : base(closeStreamOnRead, Logger.Null)
         {
-            this.stream = stream;
+            this.memoryStream = memoryStream;
         }
 
-        protected override Stream GetStream()
+        protected override MemoryStream GetStream()
         {
-            return this.stream;
+            return this.memoryStream;
+        }
+
+        protected override bool HasContent(MemoryStream stream)
+        {
+            return stream.Length > 0;
         }
     }
 }
