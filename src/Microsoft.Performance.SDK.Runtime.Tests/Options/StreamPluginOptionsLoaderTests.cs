@@ -87,6 +87,9 @@ public class StreamPluginOptionsLoaderTests
         Assert.IsTrue(stream.CanWrite);
     }
 
+    /// <summary>
+    ///     Asserts that an empty <see cref="Stream"/> returns an empty <see cref="PluginOptionsDto"/>.
+    /// </summary>
     [TestMethod]
     public async Task EmptyStream_ReturnsEmptyDto()
     {
@@ -97,6 +100,68 @@ public class StreamPluginOptionsLoaderTests
 
         Assert.IsNotNull(loadedDto);
         Assert.IsTrue(loadedDto.IsEmpty());
+    }
+
+    /// <summary>
+    ///     Asserts that <see cref="StreamPluginOptionsLoader{T}.TryLoadAsync"/> returns <c>null</c> if an exception is thrown
+    ///     when getting the <see cref="Stream"/> to load from.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStreamThrows_ReturnsNull()
+    {
+        var sut = new ThrowingStreamPluginOptionsLoader(true, false);
+
+        var loadedDto = await sut.TryLoadAsync();
+
+        Assert.IsNull(loadedDto);
+    }
+
+    /// <summary>
+    ///     Asserts that <see cref="StreamPluginOptionsLoader{T}.TryLoadAsync"/> returns <c>null</c> if an exception is thrown
+    ///     when checking if the <see cref="Stream"/> to load from has content.
+    /// </summary>
+    [TestMethod]
+    public async Task HasContentThrows_ReturnsNull()
+    {
+        using MemoryStream stream = new MemoryStream();
+        var sut = new ThrowingStreamPluginOptionsLoader(false, true);
+
+        var loadedDto = await sut.TryLoadAsync();
+
+        Assert.IsNull(loadedDto);
+    }
+
+    private sealed class ThrowingStreamPluginOptionsLoader
+        : StreamPluginOptionsLoader<MemoryStream>
+    {
+        private readonly bool throwInGetStream;
+        private readonly bool throwInHasContent;
+        public ThrowingStreamPluginOptionsLoader(bool throwInGetStream, bool throwInHasContent)
+            : base(true, Logger.Null)
+        {
+            this.throwInGetStream = throwInGetStream;
+            this.throwInHasContent = throwInHasContent;
+        }
+
+        protected override MemoryStream GetStream()
+        {
+            if (this.throwInGetStream)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return new MemoryStream();
+        }
+
+        protected override bool HasContent(MemoryStream stream)
+        {
+            if (this.throwInHasContent)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return true;
+        }
     }
 
     private sealed class TestStreamPluginOptionsLoader

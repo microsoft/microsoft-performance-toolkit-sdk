@@ -82,6 +82,42 @@ public class StreamPluginOptionsSaverTests
         Assert.IsTrue(stream.CanWrite);
     }
 
+    /// <summary>
+    ///     Asserts that <see cref="StreamPluginOptionsSaver.TrySaveAsync"/> returns <c>false</c> if an exception is thrown
+    ///     when getting the <see cref="Stream"/> to save to.
+    /// </summary>
+    [TestMethod]
+    public async Task GetStreamThrows_ReturnsFalse()
+    {
+        var sut = new ThrowingStreamPluginOptionsSaver(true);
+
+        var saved = await sut.TrySaveAsync(TestPluginOptionDto.PluginOptionsDto());
+
+        Assert.IsFalse(saved);
+    }
+
+    private sealed class ThrowingStreamPluginOptionsSaver
+        : StreamPluginOptionsSaver
+    {
+        private readonly bool throwOnGetStream;
+
+        public ThrowingStreamPluginOptionsSaver(bool throwOnGetStream)
+            : base(true, Logger.Null)
+        {
+            this.throwOnGetStream = throwOnGetStream;
+        }
+
+        protected override Stream GetStream()
+        {
+            if (this.throwOnGetStream)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return new MemoryStream();
+        }
+    }
+
     private sealed class TestPluginOptionsSaver
         : StreamPluginOptionsSaver
     {
