@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 
 /// <summary>
-///     Tests for the <see cref="StreamPluginOptionsLoader"/>.
+///     Tests for the <see cref="StreamPluginOptionsLoader{T}"/>.
 /// </summary>
 [TestClass]
 [UnitTest]
@@ -53,7 +53,7 @@ public class StreamPluginOptionsLoaderTests
 
     /// <summary>
     ///     Asserts that the <see cref="Stream"/> used to load the <see cref="PluginOptionsDto"/> is closed after loading
-    ///     if <see cref="StreamPluginOptionsLoader"/> is configured to do so.
+    ///     if <see cref="StreamPluginOptionsLoader{T}"/> is configured to do so.
     /// </summary>
     [TestMethod]
     public async Task CloseStreamOnRead_ClosesStream()
@@ -71,7 +71,7 @@ public class StreamPluginOptionsLoaderTests
 
     /// <summary>
     ///     Asserts that the <see cref="Stream"/> used to load the <see cref="PluginOptionsDto"/> is not closed after loading
-    ///     if <see cref="StreamPluginOptionsLoader"/> is not configured to do so.
+    ///     if <see cref="StreamPluginOptionsLoader{T}"/> is not configured to do so.
     /// </summary>
     [TestMethod]
     public async Task DoNotCloseStreamOnRead_DoesNotCloseStream()
@@ -102,17 +102,17 @@ public class StreamPluginOptionsLoaderTests
     private sealed class TestStreamPluginOptionsLoader
         : StreamPluginOptionsLoader<MemoryStream>
     {
-        private readonly MemoryStream stream;
+        private readonly MemoryStream memoryStream;
 
-        public TestStreamPluginOptionsLoader(MemoryStream stream, bool closeStreamOnRead)
+        public TestStreamPluginOptionsLoader(MemoryStream memoryStream, bool closeStreamOnRead)
             : base(closeStreamOnRead, Logger.Null)
         {
-            this.stream = stream;
+            this.memoryStream = memoryStream;
         }
 
         protected override MemoryStream GetStream()
         {
-            return this.stream;
+            return this.memoryStream;
         }
 
         protected override bool HasContent(MemoryStream stream)

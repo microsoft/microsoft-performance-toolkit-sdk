@@ -54,6 +54,7 @@ public sealed class FilePluginOptionsLoader
         return File.Open(this.FilePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.Read);
     }
 
+    /// <inheritdoc />
     protected override bool HasContent(FileStream stream)
     {
         return stream.Length > 0;
