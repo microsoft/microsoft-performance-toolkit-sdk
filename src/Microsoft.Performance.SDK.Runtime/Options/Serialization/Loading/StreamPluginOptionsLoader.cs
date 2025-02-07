@@ -53,7 +53,7 @@ public abstract class StreamPluginOptionsLoader<T>
         }
         catch (Exception e)
         {
-            this.logger?.Error(e, "Failed to get stream.");
+            this.logger?.Error(e, "Failed to get stream to load plugin options from.");
             return null;
         }
 

@@ -136,6 +136,7 @@ public class StreamPluginOptionsLoaderTests
     {
         private readonly bool throwInGetStream;
         private readonly bool throwInHasContent;
+
         public ThrowingStreamPluginOptionsLoader(bool throwInGetStream, bool throwInHasContent)
             : base(true, Logger.Null)
         {
