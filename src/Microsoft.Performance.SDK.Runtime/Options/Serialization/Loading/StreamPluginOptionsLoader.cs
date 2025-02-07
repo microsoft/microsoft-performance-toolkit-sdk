@@ -13,8 +13,9 @@ namespace Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 /// <summary>
 ///     Base class for <see cref="IPluginOptionsLoader"/> classes which load from a stream.
 /// </summary>
-public abstract class StreamPluginOptionsLoader
+public abstract class StreamPluginOptionsLoader<T>
     : IPluginOptionsLoader
+    where T : Stream
 {
     private readonly bool closeStreamOnRead;
     private readonly ILogger logger;
@@ -45,6 +46,11 @@ public abstract class StreamPluginOptionsLoader
         var stream = GetStream();
         try
         {
+            if (!HasContent(stream))
+            {
+                return new PluginOptionsDto();
+            }
+
             return await JsonSerializer.DeserializeAsync<PluginOptionsDto>(stream, jsonSerializerOptions);
         }
         catch (Exception e)
@@ -72,5 +78,7 @@ public abstract class StreamPluginOptionsLoader
     /// <returns>
     ///     The <see cref="Stream"/> from which to load the <see cref="PluginOptionsDto"/>.
     /// </returns>
-    protected abstract Stream GetStream();
+    protected abstract T GetStream();
+
+    protected abstract bool HasContent(T stream);
 }

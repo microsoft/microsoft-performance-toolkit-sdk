@@ -27,6 +27,13 @@ public sealed class PluginOptionsDto
     /// </summary>
     public IReadOnlyCollection<FieldArrayPluginOptionDto> FieldArrayOptions { get; init; } = new List<FieldArrayPluginOptionDto>();
 
+    public bool IsEmpty()
+    {
+        return !this.BooleanOptions.Any() &&
+               !this.FieldOptions.Any() &&
+               !this.FieldArrayOptions.Any();
+    }
+
     /// <summary>
     ///     Merges the values from the given <see cref="PluginOptionsDto"/> into this one, returning the new instance.
     ///     DTOs in <paramref name="newDto"/> that have the same <see cref="PluginOptionDto.Guid"/> as a DTO in this

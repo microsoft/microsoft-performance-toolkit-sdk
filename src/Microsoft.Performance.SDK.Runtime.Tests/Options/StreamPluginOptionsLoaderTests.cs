@@ -87,10 +87,22 @@ public class StreamPluginOptionsLoaderTests
         Assert.IsTrue(stream.CanWrite);
     }
 
-    private sealed class TestStreamPluginOptionsLoader
-        : StreamPluginOptionsLoader
+    [TestMethod]
+    public async Task EmptyStream_ReturnsEmptyDto()
     {
-        private readonly Stream stream;
+        using MemoryStream stream = new MemoryStream();
+        var sut = new TestStreamPluginOptionsLoader(stream, false);
+
+        var loadedDto = await sut.TryLoadAsync();
+
+        Assert.IsNotNull(loadedDto);
+        Assert.IsTrue(loadedDto.IsEmpty());
+    }
+
+    private sealed class TestStreamPluginOptionsLoader
+        : StreamPluginOptionsLoader<MemoryStream>
+    {
+        private readonly MemoryStream stream;
 
         public TestStreamPluginOptionsLoader(MemoryStream stream, bool closeStreamOnRead)
             : base(closeStreamOnRead, Logger.Null)
@@ -98,9 +110,14 @@ public class StreamPluginOptionsLoaderTests
             this.stream = stream;
         }
 
-        protected override Stream GetStream()
+        protected override MemoryStream GetStream()
         {
             return this.stream;
+        }
+
+        protected override bool HasContent(MemoryStream stream)
+        {
+            return stream.Length > 0;
         }
     }
 }

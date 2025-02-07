@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options;
+using Microsoft.Performance.SDK.Runtime.Options.Serialization;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
+using Microsoft.Performance.SDK.Runtime.Options.Serialization.Loading;
 using Microsoft.Performance.SDK.Tests.Options;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
@@ -109,6 +111,18 @@ public class PluginOptionsSystemTests
         var newDto = await sut.Loader.TryLoadAsync();
 
         Assert.AreEqual(expectedValue, newDto.BooleanOptions.First(o => o.Guid == optionGuid).Value);
+    }
+
+    [TestMethod]
+    public async Task TrySaveCurrentRegistry_LoaderFails_FailsToSave()
+    {
+        var sut = new PluginOptionsSystem(
+            new NullPluginOptionsLoader(),
+            new InMemoryPluginOptionsDtoRepository(),
+            new PluginOptionsRegistry(Logger.Null));
+
+        sut.RegisterOptionsFrom(new StubProcessingSource(TestPluginOption.FieldOption("foo")));
+        Assert.IsFalse(await sut.TrySaveCurrentRegistry());
     }
 
     private PluginOptionsSystem CreateSut(params IProcessingSource[] processingSources)
