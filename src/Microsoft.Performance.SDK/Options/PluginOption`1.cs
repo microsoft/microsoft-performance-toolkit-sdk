@@ -51,7 +51,7 @@ public abstract class PluginOption<T>
         {
             return this.currentValue;
         }
-        internal set
+        set
         {
             this.IsUsingDefault = isApplyingDefault;
 
@@ -61,7 +61,7 @@ public abstract class PluginOption<T>
     }
 
     /// <inheritdoc />
-    internal override void ApplyDefault()
+    public override void ApplyDefault()
     {
         this.isApplyingDefault = true;
         this.CurrentValue = this.DefaultValue;

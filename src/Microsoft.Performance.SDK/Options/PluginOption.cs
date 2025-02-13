@@ -50,12 +50,12 @@ public abstract class PluginOption
     ///     value it was set to. This means that this value will be <c>false</c> even if the option's value is
     ///     manually set to its default value.
     /// </summary>
-    internal bool IsUsingDefault { get; private protected set; }
+    public bool IsUsingDefault { get; private protected set; }
 
     /// <summary>
     ///     Applies the default value to this option.
     /// </summary>
-    internal abstract void ApplyDefault();
+    public abstract void ApplyDefault();
 
     /// <summary>
     ///     Raises the <see cref="OptionChanged"/> event.
