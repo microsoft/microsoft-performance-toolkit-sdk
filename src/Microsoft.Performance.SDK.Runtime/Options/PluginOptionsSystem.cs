@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Options;
@@ -32,10 +33,46 @@ public sealed class PluginOptionsSystem
     /// <returns>
     ///     A new instance of <see cref="PluginOptionsSystem"/> that persists options to a file.
     /// </returns>
+    /// <exception cref="T:System.ArgumentException">
+    ///     The <paramref name="filePath" /> parameter contains invalid characters, is empty, is null, or contains only white spaces.
+    ///
+    ///     -- or --
+    ///
+    ///     The <paramref name="filePath" /> parameter is prefixed with, or contains, only a colon character (:)
+    ///
+    /// -- or --
+    ///
+    ///     The <paramref name="filePath" /> parameter refers to the root directory of a volume.
+    ///
+    ///     -- or --
+    ///
+    ///     The <paramref name="filePath" /> parameter does not contain directory information.
+    /// </exception>
+    /// <exception cref="T:System.IO.PathTooLongException">
+    ///     The <paramref name="filePath" /> parameter is longer than the system-defined maximum length.
+    /// </exception>
+    /// <exception cref="T:System.IO.IOException">
+    ///     The <paramref name="filePath"/> maps to a network whose name is not known.
+    /// </exception>
+    /// <exception cref="T:System.UnauthorizedAccessException">
+    ///     The caller does not have the required permission to access <paramref name="filePath"/>.
+    /// </exception>
+    /// <exception cref="T:System.IO.DirectoryNotFoundException">
+    ///     The specified <paramref name="filePath" /> is invalid (for example, it is on an unmapped drive).
+    /// </exception>
     public static PluginOptionsSystem CreateForFile(
         string filePath,
         Func<Type, ILogger> loggerFactory)
     {
+        var directory = Path.GetDirectoryName(filePath);
+
+        if (string.IsNullOrEmpty(directory))
+        {
+            throw new ArgumentException("Cannot get directory from file path.", nameof(filePath));
+        }
+
+        Directory.CreateDirectory(directory);
+
         var loader = new FilePluginOptionsLoader(filePath, loggerFactory(typeof(FilePluginOptionsLoader)));
         var saver = new FilePluginOptionsSaver(filePath, loggerFactory(typeof(FilePluginOptionsSaver)));
         var registry = new PluginOptionsRegistry(loggerFactory(typeof(PluginOptionsRegistry)));

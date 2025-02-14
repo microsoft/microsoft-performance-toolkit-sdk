@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Options;
@@ -123,6 +124,42 @@ public class PluginOptionsSystemTests
 
         sut.RegisterOptionsFrom(new StubProcessingSource(TestPluginOption.FieldOption("foo")));
         Assert.IsFalse(await sut.TrySaveCurrentRegistry());
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("    ")]
+    [DataRow("\t")]
+    [DataRow(@"C:\Foo?<>.json")]
+    [DataRow(@"C:\")]
+    [DataRow(@"bar.json")]
+    [DataRow(@":C:\Foo\bar.json")]
+    [DataRow(@"C:\Foo\:bar.json")]
+    public void BadFilePath_ThrowsArgumentException(string filePath)
+    {
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            PluginOptionsSystem.CreateForFile(null, (_) => new NullLogger());
+        });
+    }
+
+    [TestMethod]
+    public void LongFilePath_ThrowsPathTooLongException()
+    {
+        Assert.ThrowsException<PathTooLongException>(() =>
+        {
+            PluginOptionsSystem.CreateForFile(Path.Combine(@"C:\", new string('a', 50000), "foo.json"), (_) => new NullLogger());
+        });
+    }
+
+    [TestMethod]
+    public void UnknownNetworkPath_ThrowsDirectoryNotFoundException()
+    {
+        Assert.ThrowsException<DirectoryNotFoundException>(() =>
+        {
+            PluginOptionsSystem.CreateForFile(@"\\randomServer\C$\foo.json", (_) => new NullLogger());
+        });
     }
 
     private PluginOptionsSystem CreateSut(params IProcessingSource[] processingSources)
