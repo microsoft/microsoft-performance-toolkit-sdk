@@ -1,16 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
       <PackageType>Template</PackageType>
-      <PackageVersion>0.1</PackageVersion>
       <PackageId>Microsoft.Performance.ToolKit.Templates</PackageId>
+	  <PackageVersion>0.1-preview</PackageVersion>
       <Title>Microsoft Performance ToolKit Templates</Title>
       <Authors>Microsoft Corporation</Authors>
       <Description>Templates for Microsoft Performance ToolKit Plugins.</Description>
       <PackageTags>dotnet-new;templates;microsoft;performance</PackageTags>
 
       <TargetFramework>netstandard2.1</TargetFramework>
-
+	  <PackageType>Template</PackageType>
       <IncludeContentInPack>true</IncludeContentInPack>
       <IncludeBuildOutput>false</IncludeBuildOutput>
       <ContentTargetFolders>content</ContentTargetFolders>
