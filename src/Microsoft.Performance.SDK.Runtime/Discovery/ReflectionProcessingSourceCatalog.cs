@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Discovery
 {
@@ -133,6 +133,14 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
         public void ProcessType(Type type, string sourceName)
         {
             this.ThrowIfDisposed();
+
+            if (this.loadedDataSources.ContainsKey(type))
+            {
+                // an assembly might exist in multiple folders and we get the same type multiple times.
+                // do not attempt to recreate the reference in this case
+                return;
+            }
+
             if (this.referenceFactory(type, out ProcessingSourceReference reference))
             {
                 Debug.Assert(reference != null);
@@ -140,7 +148,11 @@ namespace Microsoft.Performance.SDK.Runtime.Discovery
                 {
                     this.loadedDataSources.Add(type, reference);
                 }
-                catch { }
+                catch
+                {
+                    // if we were unable to add this reference, clean it up
+                    reference.TryDispose();
+                }
             }
         }
 

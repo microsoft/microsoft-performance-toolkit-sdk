@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Runtime.Discovery;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 using System;
 using System.Diagnostics;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Discovery;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
+using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
 namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
 {
@@ -18,6 +18,7 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         : IExtensionTypeObserver
     {
         private readonly IDataExtensionRepositoryBuilder repoBuilder;
+        private readonly ILogger logger;
 
         /// <summary>
         ///     Initializes a new instance of the DataExtensionReflector class.
@@ -28,11 +29,17 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// <param name="repoBuilder">
         ///     Provides an output to store discovered extensions.
         /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
         public DataExtensionReflector(
             IExtensionTypeProvider extensionProvider,
-            IDataExtensionRepositoryBuilder repoBuilder)
+            IDataExtensionRepositoryBuilder repoBuilder,
+            ILogger logger)
         {
             this.repoBuilder = repoBuilder;
+            this.logger = logger;
+
             extensionProvider.RegisterTypeConsumer(this);
         }
 
@@ -40,21 +47,21 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         public void ProcessType(Type type, string sourceName)
         {
             // Find source data cookers
-            if (SourceDataCookerReference.TryCreateReference(type, out var sourceDataCookerReference))
+            if (SourceDataCookerReference.TryCreateReference(type, this.logger, out var sourceDataCookerReference))
             {
                 Debug.Assert(sourceDataCookerReference != null);
                 this.repoBuilder.AddSourceDataCookerReference(sourceDataCookerReference);
             }
 
             // Find composite data cookers
-            if (CompositeDataCookerReference.TryCreateReference(type, out var compositeDataCookerReference))
+            if (CompositeDataCookerReference.TryCreateReference(type, this.logger, out var compositeDataCookerReference))
             {
                 Debug.Assert(compositeDataCookerReference != null);
                 this.repoBuilder.AddCompositeDataCookerReference(compositeDataCookerReference);
             }
 
             // Find tables
-            if (TableExtensionReference.TryCreateReference(type, out var dataExtensionReference))
+            if (TableExtensionReference.TryCreateReference(type, this.logger, out var dataExtensionReference))
             {
                 Debug.Assert(dataExtensionReference != null);
                 this.repoBuilder.AddTableExtensionReference(dataExtensionReference);

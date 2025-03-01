@@ -760,9 +760,12 @@ namespace Microsoft.Performance.Toolkit.Engine
         {
             Debug.Assert(createInfo != null);
 
-            var loggerFactory = createInfo.LoggerFactory ?? Logger.Create;
+            if (createInfo.LoggerFactory != null)
+            {
+                Logger.Factory = createInfo.LoggerFactory;
+            }
 
-            var logger = loggerFactory(typeof(Engine));
+            var logger = Logger.Create(typeof(Engine));
 
             Engine instance = null;
             try
