@@ -193,8 +193,9 @@ namespace Microsoft.Performance.SDK.Processing
             catch (Exception e)
             {
                 logger?.Warn(
+                    e,
                     $"Failed to processed table configurations for table {tableType} in file " +
-                    $"{tableAttribute.ExternalResourceFilePath}: {e.Message}.");
+                    $"{tableAttribute.ExternalResourceFilePath}.");
             }
 
             return null;
@@ -218,7 +219,7 @@ namespace Microsoft.Performance.SDK.Processing
                 Debug.Assert(tableAssembly != null, "Unable to retrieve assembly for a table type.");
 
                 var resourceName = tableAssembly.GetManifestResourceNames()
-                    .Single(name => name.EndsWith(tableAttribute.EmbeddedResourcePath));
+                    .SingleOrDefault(name => name.EndsWith(tableAttribute.EmbeddedResourcePath));
 
                 if (string.IsNullOrWhiteSpace(resourceName))
                 {
@@ -251,8 +252,7 @@ namespace Microsoft.Performance.SDK.Processing
             catch (Exception e)
             {
                 logger?.Warn(
-                    $"Unable to retrieve embedded resource for prebuilt configurations in table {tableType}\n" +
-                    $"{e.Message}.");
+                    e, $"Unable to retrieve embedded resource for prebuilt configurations in table {tableType}.");
             }
 
             return null;
