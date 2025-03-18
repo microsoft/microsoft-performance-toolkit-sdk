@@ -218,7 +218,7 @@ namespace Microsoft.Performance.SDK.Processing
                 Debug.Assert(tableAssembly != null, "Unable to retrieve assembly for a table type.");
 
                 var resourceName = tableAssembly.GetManifestResourceNames()
-                    .Single(name => name.EndsWith(tableAttribute.EmbeddedResourcePath));
+                    .SingleOrDefault(name => name.EndsWith(tableAttribute.EmbeddedResourcePath));
 
                 if (string.IsNullOrWhiteSpace(resourceName))
                 {
