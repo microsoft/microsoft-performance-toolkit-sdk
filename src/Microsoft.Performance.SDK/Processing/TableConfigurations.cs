@@ -193,8 +193,9 @@ namespace Microsoft.Performance.SDK.Processing
             catch (Exception e)
             {
                 logger?.Warn(
+                    e,
                     $"Failed to processed table configurations for table {tableType} in file " +
-                    $"{tableAttribute.ExternalResourceFilePath}: {e}");
+                    $"{tableAttribute.ExternalResourceFilePath}.");
             }
 
             return null;
@@ -251,7 +252,7 @@ namespace Microsoft.Performance.SDK.Processing
             catch (Exception e)
             {
                 logger?.Warn(
-                    $"Unable to retrieve embedded resource for prebuilt configurations in table {tableType}\n" + e);
+                    e, $"Unable to retrieve embedded resource for prebuilt configurations in table {tableType}.");
             }
 
             return null;
