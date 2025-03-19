@@ -88,5 +88,34 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         {
             return $"{this.Id}-{this.Version}";
         }
+
+        public bool HasValidId(out string errorMessage)
+        {
+            errorMessage = null;
+
+            if (string.IsNullOrWhiteSpace(this.Id))
+            {
+                errorMessage = "Plugin Id is null or whitespace.";
+                return false;
+            }
+
+            if (this.Id.Length > 256)
+            {
+                errorMessage = "Plugin Id is more than 256 characters.";
+                return false;
+            }
+
+            // Only allow alphanumeric characters, underscores, dots, and dashes.
+            foreach (var c in this.Id)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '_' && c != '-' && c != '.')
+                {
+                    errorMessage = "Plugin Id contains invalid characters. Only alphanumeric characters, underscores, dots, and dashes are allowed.";
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
