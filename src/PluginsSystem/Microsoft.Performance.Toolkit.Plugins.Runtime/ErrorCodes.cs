@@ -45,10 +45,21 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
             "PLUGINS_VALIDATION_UnsupportedSdkVersion",
             "The plugin is not compatible with the current running version of the SDK.");
 
+        /// <summary>
+        ///     The plugin has already been previously installed and has not been removed.
+        /// </summary>
         public static ErrorCodes PLUGINS_VALIDATION_PreviousInstallationFolderExists = new ErrorCodes(
             60002,
             "PLUGINS_VALIDATION_PreviousInstallationFolderExists",
             "The plugin has already been previously installed and has not been removed.");
+
+        /// <summary>
+        ///     The plugin ID contains invalid characters or is not properly defined.
+        /// </summary>
+        public static ErrorCodes PLUGINS_VALIDATION_InvalidPluginId = new ErrorCodes(
+            60003,
+            "PLUGINS_VALIDATION_InvalidPluginId",
+            "The plugin ID contains invalid characters or is not properly defined.");
 
         //
         // We do duplicate checking on the numeric and string codes

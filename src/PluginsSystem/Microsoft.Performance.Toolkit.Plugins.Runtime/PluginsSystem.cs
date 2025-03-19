@@ -114,6 +114,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime
 
             var validatorsToUse = new List<IPluginValidator>();
 
+            validatorsToUse.Add(new PluginIdentifierValidator(loggerFactory(typeof(PluginIdentifierValidator))));
+
             if (options.ValidateSdkVersion)
             {
                 validatorsToUse.Add(new SdkVersionValidator(loggerFactory(typeof(SdkVersionValidator))));

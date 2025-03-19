@@ -13,6 +13,11 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         : IEquatable<PluginIdentity>
     {
         /// <summary>
+        ///     The maximum length <see cref="Id"/> may be for it to be considered valid.
+        /// </summary>
+        public const int MaxIdLength = 256;
+
+        /// <summary>
         ///     Creates an instance of <see cref="PluginIdentity"/>.
         /// </summary>
         /// <param name="id">
@@ -87,6 +92,57 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public override string ToString()
         {
             return $"{this.Id}-{this.Version}";
+        }
+
+        /// <summary>
+        ///     Determines whether the <see cref="Id"/> conforms to the following specifications:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <see cref="Id"/> is not null or whitespace.
+        ///         </item>
+        ///         <item>
+        ///             <see cref="Id"/> is not more than <see cref="MaxIdLength"/> characters.
+        ///         </item>
+        ///         <item>
+        ///             <see cref="Id"/> contains only alphanumeric characters, underscores, dots, and dashes.
+        ///         </item>
+        ///     </list>
+        ///     This specification ensures that IDs can safely be used in file and directory names.
+        /// </summary>
+        /// <param name="errorMessage">
+        ///     An error message that describes the reason why <see cref="Id"/> is invalid, if applicable. This
+        ///     value is <c>null</c> if the ID is valid.
+        /// </param>
+        /// <returns>
+        ///     Whether <see cref="Id"/> is valid.
+        /// </returns>
+        public bool HasValidId(out string errorMessage)
+        {
+            errorMessage = null;
+
+            if (string.IsNullOrWhiteSpace(this.Id))
+            {
+                errorMessage = "Plugin Id is null or whitespace.";
+                return false;
+            }
+
+            if (this.Id.Length > MaxIdLength)
+            {
+                errorMessage = $"Plugin Id is more than {MaxIdLength} characters.";
+                return false;
+            }
+
+            // Only allow alphanumeric characters, underscores, dots, and dashes.
+            foreach (var c in this.Id)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '_' && c != '-' && c != '.')
+                {
+                    errorMessage = "Plugin Id contains invalid characters. Only alphanumeric characters, underscores, dots, and dashes are allowed.";
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
