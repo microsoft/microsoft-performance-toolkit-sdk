@@ -12,7 +12,10 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
     public sealed class PluginIdentity
         : IEquatable<PluginIdentity>
     {
-        internal const int maxIdLength = 256;
+        /// <summary>
+        ///     The maximum length <see cref="Id"/> may be for it to be considered valid.
+        /// </summary>
+        public const int MaxIdLength = 256;
 
         /// <summary>
         ///     Creates an instance of <see cref="PluginIdentity"/>.
@@ -91,6 +94,28 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             return $"{this.Id}-{this.Version}";
         }
 
+        /// <summary>
+        ///     Determines whether the <see cref="Id"/> conforms to the following specifications:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <see cref="Id"/> is not null or whitespace.
+        ///         </item>
+        ///         <item>
+        ///             <see cref="Id"/> is not more than <see cref="MaxIdLength"/> characters.
+        ///         </item>
+        ///         <item>
+        ///             <see cref="Id"/> contains only alphanumeric characters, underscores, dots, and dashes.
+        ///         </item>
+        ///     </list>
+        ///     This specification ensures that IDs can safely be used in file and directory names.
+        /// </summary>
+        /// <param name="errorMessage">
+        ///     An error message that describes the reason why <see cref="Id"/> is invalid, if applicable. This
+        ///     value is <c>null</c> if the ID is valid.
+        /// </param>
+        /// <returns>
+        ///     Whether <see cref="Id"/> is valid.
+        /// </returns>
         public bool HasValidId(out string errorMessage)
         {
             errorMessage = null;
@@ -101,9 +126,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return false;
             }
 
-            if (this.Id.Length > maxIdLength)
+            if (this.Id.Length > MaxIdLength)
             {
-                errorMessage = "Plugin Id is more than 256 characters.";
+                errorMessage = $"Plugin Id is more than {MaxIdLength} characters.";
                 return false;
             }
 

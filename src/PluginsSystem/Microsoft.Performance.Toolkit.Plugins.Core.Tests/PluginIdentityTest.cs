@@ -38,7 +38,7 @@ public class PluginIdentityTest
     [TestMethod]
     public void HasValidId_LongId_ReturnFalse()
     {
-        var sut = new PluginIdentity(new string('A', PluginIdentity.maxIdLength + 1), new Version(1, 2, 3));
+        var sut = new PluginIdentity(new string('A', PluginIdentity.MaxIdLength + 1), new Version(1, 2, 3));
         Assert.IsFalse(sut.HasValidId(out string _));
     }
 }
