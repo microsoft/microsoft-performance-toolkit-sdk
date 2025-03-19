@@ -12,6 +12,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
     public sealed class PluginIdentity
         : IEquatable<PluginIdentity>
     {
+        internal const int maxIdLength = 256;
+
         /// <summary>
         ///     Creates an instance of <see cref="PluginIdentity"/>.
         /// </summary>
@@ -99,7 +101,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
                 return false;
             }
 
-            if (this.Id.Length > 256)
+            if (this.Id.Length > maxIdLength)
             {
                 errorMessage = "Plugin Id is more than 256 characters.";
                 return false;
