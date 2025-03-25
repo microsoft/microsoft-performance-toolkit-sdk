@@ -128,6 +128,14 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
 
             PluginMetadata metadata = GenerateMetadata(processedDir, manifest, pluginSDKversion);
 
+            if (!metadata.Identity.HasValidId(out string error))
+            {
+                this.logger.LogError($"The plugin id {metadata.Identity.Id} is not valid.");
+                this.logger.LogError(error);
+
+                return false;
+            }
+
             if (!TryGenerateContentsMetadata(pluginsLoader, out PluginContentsMetadata? contentsMetadata))
             {
                 this.logger.LogError($"Failed to generate contents metadata for plugin.");
