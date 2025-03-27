@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Options.Definitions;
+
 namespace Microsoft.Performance.SDK.Options.Values;
 
 /// <summary>
@@ -24,6 +26,11 @@ public abstract class PluginOptionValue<T>
     /// <summary>
     ///     Gets the current value of the option.
     /// </summary>
+    /// <remarks>
+    ///     Note that this value may be equivalent to the <see cref="PluginOptionDefinition{T}.DefaultValue"/> defined
+    ///     for this plugin option regardless of whether the value has been modified/manually set. Do not use the value
+    ///     of this property to determine whether the option is using its default value.
+    /// </remarks>
     public T CurrentValue
     {
         get => this.currentValue;
