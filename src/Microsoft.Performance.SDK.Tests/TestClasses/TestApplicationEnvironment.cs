@@ -7,6 +7,7 @@ using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Tests.TestClasses
@@ -30,7 +31,7 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
 
         public ISourceSessionFactory SourceSessionFactory { get; set; }
 
-        public IReadOnlyCollection<PluginOption> PluginOptions { get; set; }
+        public IReadOnlyDictionary<Guid, PluginOptionValue> PluginOptions { get; set; }
 
         public void DisplayMessage(MessageType messageType, IFormatProvider formatProvider, string format, params object[] args)
         {
@@ -41,11 +42,11 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
             return ButtonResult.None;
         }
 
-        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption
+        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOptionValue
         {
-            foreach (var pluginOption in this.PluginOptions)
+            foreach (var kvp in this.PluginOptions)
             {
-                if (pluginOption.Guid == optionGuid && pluginOption is T asT)
+                if (kvp.Key == optionGuid && kvp.Value is T asT)
                 {
                     option = asT;
                     return true;

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Definitions;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization;
@@ -26,48 +27,6 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Options;
 [IntegrationTest]
 public class PluginOptionsSystemTests
 {
-    /// <summary>
-    ///     Asserts that changes to a <see cref="PluginOption"/> instance returned by a <see cref="IProcessingSource"/>
-    ///     are not reflected by the <see cref="PluginOption"/> instance returned by the <see cref="PluginOptionsSystem"/>'s
-    ///     <see cref="PluginOptionsRegistry"/>.
-    /// </summary>
-    [TestMethod]
-    public void OptionReturnedBySystem_DoNotReflectChangeOnOriginalInstances()
-    {
-        const string defaultValue = "default value";
-        var optionReturnedByProcessingSource = TestPluginOption.FieldOption(defaultValue);
-
-        var sut = CreateSut(new StubProcessingSource(optionReturnedByProcessingSource));
-
-        optionReturnedByProcessingSource.CurrentValue = "new value";
-
-        var registeredOption = sut.Registry.Options.First() as FieldOption;
-
-        Assert.IsNotNull(registeredOption);
-        Assert.AreEqual(defaultValue, registeredOption.CurrentValue);
-        Assert.IsTrue(registeredOption.IsUsingDefault);
-    }
-
-    /// <summary>
-    ///     Asserts that changes to a <see cref="PluginOption"/> instance returned by the <see cref="PluginOptionsSystem"/>'s
-    ///     <see cref="PluginOptionsRegistry"/> are not reflected by the <see cref="PluginOption"/> instance returned by the
-    ///     <see cref="IProcessingSource"/>.
-    /// </summary>
-    [TestMethod]
-    public void OptionReturnedBySystem_DoNotChangeOriginalInstance()
-    {
-        const string defaultValue = "default value";
-        var optionReturnedByProcessingSource = TestPluginOption.FieldOption(defaultValue);
-
-        var sut = CreateSut(new StubProcessingSource(optionReturnedByProcessingSource));
-        var registeredOption = sut.Registry.Options.First() as FieldOption;
-
-        Assert.IsNotNull(registeredOption);
-        registeredOption.CurrentValue = "new value";
-
-        Assert.AreEqual(defaultValue, optionReturnedByProcessingSource.CurrentValue);
-    }
-
     [TestMethod]
     public async Task SavingNewOptions_DoesNotRemove_PreviouslySavedOption()
     {
@@ -79,7 +38,7 @@ public class PluginOptionsSystemTests
             BooleanOptions = [previouslySavedOption],
         });
 
-        var newOption = TestPluginOption.FieldOption("foo");
+        var newOption = TestPluginOptionDefinition.FieldOptionDefinition("foo");
         sut.RegisterOptionsFrom(new StubProcessingSource(newOption));
         await sut.TrySaveCurrentRegistry();
 
@@ -103,10 +62,15 @@ public class PluginOptionsSystemTests
         });
 
         bool expectedValue = !previouslySavedValue;
-        var newOption = TestPluginOption.BooleanOption(false, optionGuid);
-        newOption.CurrentValue = expectedValue;
+        var newOption = TestPluginOptionDefinition.BooleanOptionDefinition(false, optionGuid);
 
         sut.RegisterOptionsFrom(new StubProcessingSource(newOption));
+
+        var option = sut.Registry.Options.First(o => o.Guid == optionGuid && o is BooleanOption) as BooleanOption;
+        Assert.IsNotNull(option);
+
+        option.SetValue(expectedValue);
+
         await sut.TrySaveCurrentRegistry();
 
         var newDto = await sut.Loader.TryLoadAsync();
@@ -122,7 +86,7 @@ public class PluginOptionsSystemTests
             new InMemoryPluginOptionsDtoRepository(),
             new PluginOptionsRegistry(Logger.Null));
 
-        sut.RegisterOptionsFrom(new StubProcessingSource(TestPluginOption.FieldOption("foo")));
+        sut.RegisterOptionsFrom(new StubProcessingSource(TestPluginOptionDefinition.FieldOptionDefinition("foo")));
         Assert.IsFalse(await sut.TrySaveCurrentRegistry());
     }
 
@@ -172,9 +136,9 @@ public class PluginOptionsSystemTests
     private sealed class StubProcessingSource
             : ProcessingSource
         {
-            public StubProcessingSource(params PluginOption[] options)
+            public StubProcessingSource(params PluginOptionDefinition[] options)
             {
-                this.pluginOptionsToReturn = new List<PluginOption>(options);
+                this.pluginOptionsToReturn = new List<PluginOptionDefinition>(options);
             }
 
             protected override ICustomDataProcessor CreateProcessorCore(
@@ -190,7 +154,7 @@ public class PluginOptionsSystemTests
                 return false;
             }
 
-            private readonly List<PluginOption> pluginOptionsToReturn;
-            public override IEnumerable<PluginOption> PluginOptions => this.pluginOptionsToReturn ?? Enumerable.Empty<PluginOption>();
+            private readonly List<PluginOptionDefinition> pluginOptionsToReturn;
+            public override IEnumerable<PluginOptionDefinition> PluginOptions => this.pluginOptionsToReturn ?? Enumerable.Empty<PluginOptionDefinition>();
         }
 }

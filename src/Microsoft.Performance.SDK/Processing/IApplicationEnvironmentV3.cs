@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 
 namespace Microsoft.Performance.SDK.Processing;
 
@@ -28,5 +29,5 @@ public interface IApplicationEnvironmentV3
     /// <returns>
     ///     <c>true</c> if the option was found; <c>false</c> otherwise.
     /// </returns>
-    bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption;
+    bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOptionValue;
 }

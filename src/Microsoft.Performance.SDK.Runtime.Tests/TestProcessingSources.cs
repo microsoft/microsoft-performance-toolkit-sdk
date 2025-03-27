@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Definitions;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
+using Microsoft.Performance.SDK.Runtime.Options;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
@@ -22,7 +24,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -86,7 +88,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -150,7 +152,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -220,7 +222,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -283,7 +285,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -345,7 +347,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -413,7 +415,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -484,7 +486,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public IEnumerable<TableDescriptor> MetadataTables => new TableDescriptor[0];
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {
@@ -552,7 +554,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         public IEnumerable<Option> CommandLineOptions => new Option[0];
 
-        public IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         public void SetApplicationEnvironment(IApplicationEnvironment applicationEnvironment)
         {

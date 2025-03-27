@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
+using Microsoft.Performance.SDK.Runtime.Options.Visitors;
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Serialization;
 
@@ -21,7 +22,7 @@ public sealed class PluginOptionsRegistryToDtoConverter
 
         var visitor = new Visitor(booleanOptions, fieldOptions, fieldArrayOptions);
 
-        var switcher = new PluginOptionVisitorExecutor(visitor);
+        var switcher = new IPluginOptionVisitor.Executor(visitor);
 
         switcher.Visit(registry.Options);
 
@@ -57,7 +58,7 @@ public sealed class PluginOptionsRegistryToDtoConverter
                 {
                     Guid = option.Guid,
                     IsDefault = option.IsUsingDefault,
-                    Value = option.CurrentValue,
+                    Value = option.Value.CurrentValue,
                 });
         }
 
@@ -68,7 +69,7 @@ public sealed class PluginOptionsRegistryToDtoConverter
                 {
                     Guid = option.Guid,
                     IsDefault = option.IsUsingDefault,
-                    Value = option.CurrentValue,
+                    Value = option.Value.CurrentValue,
                 });
         }
 
@@ -79,7 +80,7 @@ public sealed class PluginOptionsRegistryToDtoConverter
                 {
                     Guid = option.Guid,
                     IsDefault = option.IsUsingDefault,
-                    Value = option.CurrentValue.ToArray(),
+                    Value = option.Value.CurrentValue.ToArray(),
                 });
         }
     }

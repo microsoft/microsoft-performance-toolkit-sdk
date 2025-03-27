@@ -8,9 +8,11 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.SDK.Runtime.Options;
+using Microsoft.Performance.SDK.Runtime.Options.Visitors;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -132,19 +134,13 @@ namespace Microsoft.Performance.SDK.Runtime
                 args);
         }
 
-        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption
+        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOptionValue
         {
-            foreach (var pluginOption in this.optionsRegistry.Options)
-            {
-                if (pluginOption.Guid == optionGuid && pluginOption is T asT)
-                {
-                    option = asT;
-                    return true;
-                }
-            }
+            var visitor = new PluginOptionValueFinder<T>(optionGuid);
+            new IPluginOptionVisitor.Executor(visitor).Visit(this.optionsRegistry.Options);
 
-            option = null;
-            return false;
+            option = visitor.FoundValue;
+            return option != null;
         }
 
         /// <inheritdoc />
@@ -194,6 +190,48 @@ namespace Microsoft.Performance.SDK.Runtime
             {
                 onReadyForChange?.Invoke();
                 onChangeComplete?.Invoke();
+            }
+        }
+
+        private sealed class PluginOptionValueFinder<T>
+            : IPluginOptionVisitor
+            where T : PluginOptionValue
+        {
+            private readonly Guid guidToFind;
+
+            public PluginOptionValueFinder(Guid guidToFind)
+            {
+                this.guidToFind = guidToFind;
+            }
+
+            public T FoundValue { get; private set; }
+
+            public void Visit(BooleanOption option)
+            {
+                Visit(option.Definition.Guid, option.Value);
+            }
+
+            public void Visit(FieldOption option)
+            {
+                Visit(option.Definition.Guid, option.Value);
+            }
+
+            public void Visit(FieldArrayOption option)
+            {
+                Visit(option.Definition.Guid, option.Value);
+            }
+
+            private void Visit(Guid guid, PluginOptionValue value)
+            {
+                if (guid != this.guidToFind)
+                {
+                    return;
+                }
+
+                if (value is T optionValue)
+                {
+                    this.FoundValue = optionValue;
+                }
             }
         }
     }

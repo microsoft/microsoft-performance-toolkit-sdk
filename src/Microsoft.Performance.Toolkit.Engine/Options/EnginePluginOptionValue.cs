@@ -5,5 +5,5 @@ using System;
 
 namespace Microsoft.Performance.Toolkit.Engine.Options
 {
-    internal record PluginOptionValue(Guid Guid);
+    internal record EnginePluginOptionValue(Guid Guid);
 }

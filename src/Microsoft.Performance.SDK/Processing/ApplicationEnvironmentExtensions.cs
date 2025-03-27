@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -203,7 +204,7 @@ namespace Microsoft.Performance.SDK.Processing
             this IApplicationEnvironment self,
             Guid optionGuid,
             out T option)
-            where T : PluginOption
+            where T : PluginOptionValue
         {
             if (self is IApplicationEnvironmentV3 v3)
             {

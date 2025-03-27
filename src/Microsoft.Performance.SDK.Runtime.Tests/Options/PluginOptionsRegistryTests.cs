@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 using Microsoft.Performance.SDK.Tests.Options;
@@ -34,7 +35,7 @@ public class PluginOptionsRegistryTests
         var serializedValue = !originalValue;
         sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.BooleanOptionDto(option.Guid, false, serializedValue)));
 
-        Assert.AreEqual(serializedValue, option.CurrentValue);
+        Assert.AreEqual(serializedValue, option.Value.CurrentValue);
     }
 
     /// <summary>
@@ -52,7 +53,7 @@ public class PluginOptionsRegistryTests
         var serializedValue = "new value";
         sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(option.Guid, false, serializedValue)));
 
-        Assert.AreEqual(serializedValue, option.CurrentValue);
+        Assert.AreEqual(serializedValue, option.Value.CurrentValue);
     }
 
     /// <summary>
@@ -70,7 +71,7 @@ public class PluginOptionsRegistryTests
         var serializedValue = new[] { "new value 1", "new value 2", "new value 3" };
         sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldArrayOptionDto(option.Guid, false, serializedValue)));
 
-        CollectionAssert.AreEqual(serializedValue, option.CurrentValue.ToList());
+        CollectionAssert.AreEqual(serializedValue, option.Value.CurrentValue.ToList());
     }
 
     /// <summary>
@@ -86,12 +87,12 @@ public class PluginOptionsRegistryTests
         const string expected = "New Default Value";
 
         var option = TestPluginOption.FieldOption(expected);
-        option.CurrentValue = "Random Value";
+        option.SetValue("Random Value");
 
         sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
 
         sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(option.Guid, true, "Old Default Value")));
-        Assert.AreEqual(expected, option.CurrentValue);
+        Assert.AreEqual(expected, option.Value.CurrentValue);
         Assert.IsTrue(option.IsUsingDefault);
     }
 
@@ -114,7 +115,7 @@ public class PluginOptionsRegistryTests
     }
 
     /// <summary>
-    ///     Asserts that an option with a default value has its <see cref="PluginOption{T}.CurrentValue"/> updated
+    ///     Asserts that an option with a default value has its <see cref="PluginOptionValue{T}.CurrentValue"/> updated
     ///     to the serialized value of the option's corresponding <see cref="PluginOptionDto"/>.
     /// </summary>
     [TestMethod]
@@ -129,12 +130,12 @@ public class PluginOptionsRegistryTests
         sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
         sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(option.Guid, false, expected)));
 
-        Assert.AreEqual(expected, option.CurrentValue);
+        Assert.AreEqual(expected, option.Value.CurrentValue);
         Assert.IsFalse(option.IsUsingDefault);
     }
 
     /// <summary>
-    ///     Asserts that an option with a non-default value has its <see cref="PluginOption{T}.CurrentValue"/> updated
+    ///     Asserts that an option with a non-default value has its <see cref="PluginOptionValue{T}.CurrentValue"/> updated
     ///     to the serialized value of the option's corresponding <see cref="PluginOptionDto"/>.
     /// </summary>
     [TestMethod]
@@ -142,7 +143,7 @@ public class PluginOptionsRegistryTests
     {
         var sut = CreateSut();
         var option = TestPluginOption.FieldOption("Default");
-        option.CurrentValue = "Non default";
+        option.SetValue("Non default");
         Assert.IsFalse(option.IsUsingDefault);
 
         const string expected = "Serialized value";
@@ -150,7 +151,7 @@ public class PluginOptionsRegistryTests
         sut.RegisterFrom(new TestPluginOptionsRegistryProvider(option));
         sut.UpdateFromDto(TestPluginOptionDto.PluginOptionsDto(TestPluginOptionDto.FieldOptionDto(option.Guid, false, expected)));
 
-        Assert.AreEqual(expected, option.CurrentValue);
+        Assert.AreEqual(expected, option.Value.CurrentValue);
         Assert.IsFalse(option.IsUsingDefault);
     }
 

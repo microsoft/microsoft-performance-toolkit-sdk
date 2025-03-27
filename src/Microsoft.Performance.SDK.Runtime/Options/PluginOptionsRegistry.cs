@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 
@@ -73,11 +74,11 @@ public sealed class PluginOptionsRegistry
     ///             of the same type in the given <see cref="PluginOptionsDto"/> will either
     ///             <list type="bullet">
     ///                 <item>
-    ///                     Have its <see cref="PluginOption{T}.CurrentValue"/> set to the DTO's serialized value if the DTO's <see cref="PluginOptionDto.IsDefault"/>
+    ///                     Have its <see cref="PluginOptionValue{T}.CurrentValue"/> set to the DTO's serialized value if the DTO's <see cref="PluginOptionDto.IsDefault"/>
     ///                     is <c>false</c>.
     ///                 </item>
     ///                 <item>
-    ///                     Be reset to the <see cref="PluginOption{T}"/>'s default state if the DTO's <see cref="PluginOptionDto.IsDefault"/>
+    ///                     Be reset to the <see cref="PluginOptionValue{T}"/>'s default state if the DTO's <see cref="PluginOptionDto.IsDefault"/>
     ///                     is <c>true</c>, disregarding the serialized value.
     ///                 </item>
     ///             </list>
@@ -132,7 +133,7 @@ public sealed class PluginOptionsRegistry
             dtoFieldArrayOptions,
             (option, dto) =>
             {
-                option.CurrentValue = dto.Value;
+                option.SetValue(dto.Value);
                 this.logger.Verbose($"Plugin option {option} was updated to the saved value [{string.Join(", ", dto.Value)}].");
             });
     }
@@ -143,7 +144,7 @@ public sealed class PluginOptionsRegistry
             dtoFieldOptions,
             (option, dto) =>
             {
-                option.CurrentValue = dto.Value;
+                option.SetValue(dto.Value);
                 this.logger.Verbose($"Plugin option {option} was updated to the saved value {dto.Value}.");
             });
     }
@@ -154,7 +155,7 @@ public sealed class PluginOptionsRegistry
             dtoBooleanOptions,
             (option, dto) =>
             {
-                option.CurrentValue = dto.Value;
+                option.SetValue(dto.Value);
                 this.logger.Verbose($"Plugin option {option} was updated to the saved value {dto.Value}.");
             });
     }

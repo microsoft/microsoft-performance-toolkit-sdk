@@ -7,6 +7,7 @@ using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 
 namespace Microsoft.Performance.Testing.SDK
 {
@@ -38,7 +39,7 @@ namespace Microsoft.Performance.Testing.SDK
             return ButtonResult.None;
         }
 
-        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOption
+        public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOptionValue
         {
             option = null;
             return false;
