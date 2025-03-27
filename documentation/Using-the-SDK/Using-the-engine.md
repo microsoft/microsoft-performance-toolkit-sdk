@@ -142,3 +142,23 @@ Column variants advertise two pieces of information:
 Because the engine is designed for programmatic access to data, this "meta-information" is not exposed via its API. Instead, the engine exposes only the `IDataColumn` instances that provide column variant data.
 
 Column variants are available via the `ITableResult.ColumnVariants` property, which exposes a `IReadOnlyDictionary<IDataColumn, IReadOnlyDictionary<ColumnVariantDescriptor, IDataColumn>>`. The keys of the outer dictionary are base columns from the `ITableResult.Columns` collection which have registered column variants. The inner dictionary maps the column's registered `ColumnVariantDescriptor`s to their `IDataColumn`.
+
+# Defining Plugin Option Values
+
+Starting in SDK version `1.4`, plugin authors may define "plugin options" to configure how a plugin operates. These plugin options may be configured with values prior to processing via the engine.
+
+To configure plugin option values, invoke the `EngineCreateInfo.WithPluginOptionValue` method prior to processing. This method requires knowing
+1. The concrete `PluginOptionValue` type of the option being set.
+2. The `Guid` of the `PluginOptionDefinition` that corresponds to the option being set.
+
+```cs
+var info = new EngineCreateInfo(...);
+            .WithPluginOptionValue<FieldOptionValue, string>(MyPluginOptionIds.MyFieldOptionId, "Hello World");
+
+using var sut = Engine.Create(info);
+
+// Do processing
+...
+```
+
+Calling this method for a plugin option that does not exist has no effect.
