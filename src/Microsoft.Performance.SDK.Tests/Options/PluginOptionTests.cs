@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.Testing;

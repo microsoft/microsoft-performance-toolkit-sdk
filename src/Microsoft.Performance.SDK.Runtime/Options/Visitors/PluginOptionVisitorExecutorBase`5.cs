@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.Options.Visitors;
@@ -82,6 +83,8 @@ public abstract class PluginOptionVisitorExecutorBase
             case TFieldArray fieldArrayOption:
                 this.visitor.Visit(fieldArrayOption);
                 break;
+            default:
+                throw new InvalidOperationException($"Unknown option type: {option.GetType().FullName}.");
         }
     }
 }
