@@ -12,6 +12,7 @@ using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.DTO;
 using Microsoft.Performance.SDK.Runtime.Options;
+using Microsoft.Performance.SDK.Runtime.Options.Visitors;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -136,7 +137,7 @@ namespace Microsoft.Performance.SDK.Runtime
         public bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOptionValue
         {
             var visitor = new PluginOptionValueFinder<T>(optionGuid);
-            new PluginOptionVisitorExecutor(visitor).Visit(this.optionsRegistry.Options);
+            new IPluginOptionVisitor.Executor(visitor).Visit(this.optionsRegistry.Options);
 
             option = visitor.FoundValue;
             return option != null;

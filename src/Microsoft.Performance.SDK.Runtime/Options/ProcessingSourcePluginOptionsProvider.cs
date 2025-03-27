@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Options.Visitors;
 
 namespace Microsoft.Performance.SDK.Runtime.Options;
 
@@ -31,7 +32,7 @@ internal sealed class ProcessingSourcePluginOptionsProvider
     public IEnumerable<PluginOption> GetOptions()
     {
         var visitor = new PluginOptionCreator();
-        var executor = new PluginOptionDefinitionVisitorExecutor(visitor);
+        var executor = new IPluginOptionDefinitionVisitor.Executor(visitor);
 
         foreach (var processingSource in this.processingSources)
         {

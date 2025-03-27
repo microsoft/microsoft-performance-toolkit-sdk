@@ -8,6 +8,7 @@ using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
+using Microsoft.Performance.SDK.Runtime.Options.Visitors;
 
 namespace Microsoft.Performance.Toolkit.Engine.Options;
 
@@ -39,8 +40,7 @@ internal class PluginOptionValuesRegistry
         // types are added and IPluginOptionVisitor is updated we get a build break. Otherwise, we might
         // forget to update the manual transformation in this class.
         var visitor = new Visitor(this.values);
-        var switcher = new PluginOptionVisitorExecutor(visitor);
-        switcher.Visit(registry.Options);
+        new IPluginOptionVisitor.Executor(visitor).Visit(registry.Options);
 
         return new PluginOptionsDto()
         {

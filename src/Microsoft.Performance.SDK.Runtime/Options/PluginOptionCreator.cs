@@ -3,6 +3,7 @@
 
 using Microsoft.Performance.SDK.Options.Definitions;
 using Microsoft.Performance.SDK.Options.Values;
+using Microsoft.Performance.SDK.Runtime.Options.Visitors;
 
 namespace Microsoft.Performance.SDK.Runtime.Options;
 
