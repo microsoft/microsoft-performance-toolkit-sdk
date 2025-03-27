@@ -236,10 +236,10 @@ namespace Microsoft.Performance.Toolkit.Engine
         public bool IsInteractive { get; set; }
 
         /// <summary>
-        ///     Gets the <see cref="PluginOptionValuesRegistry"/> that tracks which <see cref="PluginOptionValue"/>
+        ///     Gets the <see cref="EnginePluginOptionValuesRegistry"/> that tracks which <see cref="PluginOptionValue"/>
         ///     instances have been registered.
         /// </summary>
-        internal PluginOptionValuesRegistry RegisteredPluginOptions { get; } = new();
+        internal EnginePluginOptionValuesRegistry RegisteredPluginOptions { get; } = new();
 
         internal ProcessorEnvironmentFactory ProcessEnvironmentFactory
         {

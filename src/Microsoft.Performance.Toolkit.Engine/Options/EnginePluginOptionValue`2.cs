@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.SDK.Options;
 
 namespace Microsoft.Performance.Toolkit.Engine.Options;
 

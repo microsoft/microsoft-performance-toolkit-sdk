@@ -23,6 +23,12 @@ public interface IPluginOptionDefinitionVisitor
             FieldOptionDefinition,
             FieldArrayOptionDefinition>
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Executor"/> class.
+        /// </summary>
+        /// <param name="visitor">
+        ///     The <see cref="IPluginOptionDefinitionVisitor"/> instance to use.
+        /// </param>
         public Executor(IPluginOptionDefinitionVisitor visitor) : base(visitor)
         {
         }

@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options;
@@ -12,7 +11,7 @@ using Microsoft.Performance.SDK.Runtime.Options.Visitors;
 
 namespace Microsoft.Performance.Toolkit.Engine.Options;
 
-internal class PluginOptionValuesRegistry
+internal class EnginePluginOptionValuesRegistry
 {
     private readonly List<EnginePluginOptionValue> values = new();
 

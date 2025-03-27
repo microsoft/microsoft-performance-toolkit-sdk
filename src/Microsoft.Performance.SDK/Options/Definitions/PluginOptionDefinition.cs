@@ -38,6 +38,7 @@ public abstract class PluginOptionDefinition
     /// </summary>
     public required string Description { get; init; }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"{this.Name} ({this.Guid})";
