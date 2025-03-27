@@ -54,7 +54,7 @@ The `PluginOptionDefinition` mentioned above do not expose the option values con
 bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOptionValue;
 ```
 
-A plugin must specify both
+A plugin must specify both:
 1. The concrete `PluginOptionValue` type that the plugin option is expected to have
 2. The value of the `Guid` property on the `PluginOptionDefinition` that corresponds to the value being requested.
 
