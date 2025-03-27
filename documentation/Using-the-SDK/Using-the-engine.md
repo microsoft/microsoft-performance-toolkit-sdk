@@ -148,8 +148,8 @@ Column variants are available via the `ITableResult.ColumnVariants` property, wh
 Starting in SDK version `1.4`, plugin authors may define "plugin options" to configure how a plugin operates. These plugin options may be configured with values prior to processing via the engine.
 
 To configure plugin option values, invoke the `EngineCreateInfo.WithPluginOptionValue` method prior to processing. This method requires knowing
-1. The concrete `PluginOptionValue` type of the option being set.
-2. The `Guid` of the `PluginOptionDefinition` that corresponds to the option being set.
+1. The concrete `PluginOptionValue` type of the option to set.
+2. The `Guid` of the `PluginOptionDefinition` that corresponds to the option to set.
 
 ```cs
 var info = new EngineCreateInfo(...);

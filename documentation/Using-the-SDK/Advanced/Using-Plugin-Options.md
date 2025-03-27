@@ -48,15 +48,15 @@ Valid `PluginOptionDefinition` types are:
 * `FieldArrayOptionDefinition`, which defines a `IReadOnlyList<string>` option.
 
 # How to Use Plugin Option Values
-The `PluginOptionDefinition` mentioned above do not expose the option values configured by the user. This information is exposed via `PluginOptionValue` classes, which are obtained by calling `IApplicationEnvironment.TryGetPluginOption`. This method has the following signature:
+The `PluginOptionDefinition` mentioned above do not expose the option values configured by the user. This information is exposed via `PluginOptionValue` instances, which are obtained by calling `IApplicationEnvironment.TryGetPluginOption`. This method has the following signature:
 
 ```cs
 bool TryGetPluginOption<T>(Guid optionGuid, out T option) where T : PluginOptionValue;
 ```
 
 A plugin must specify both
-1. The concrete `PluginOptionValue` type that a plugin option is expected to have
-2. The `Guid` of the plugin option that corresponds to the `Guid` property of the `PluginOptionDefinition` advertised by a `ProcessingSource`.
+1. The concrete `PluginOptionValue` type that the plugin option is expected to have
+2. The value of the `Guid` property on the `PluginOptionDefinition` that corresponds to the value being requested.
 
 If a plugin option value with the specified type and `Guid` is found, this method returns `true` and provides the found `PluginOptionValue` as an `out` parameter.
 
@@ -82,4 +82,4 @@ if (this.applicationEnvironment.TryGetPluginOption(
 # Setting Option Values
 Option values can only be set via the SDK runtime, which is only accessible to SDK drivers such as Windows Performance Analyzer. Each SDK driver may implement setting option values differently.
 
-To configure option values when using the SDK Engine, please refer to the "Defining Plugin Option Values" section of the [Using the Engine](../Using-the-engine.md#using-column-variants) documentation.
+To configure option values when using the SDK Engine, please refer to the "Defining Plugin Option Values" section of the [Using the Engine](../Using-the-engine.md#defining-plugin-option-values) documentation.
