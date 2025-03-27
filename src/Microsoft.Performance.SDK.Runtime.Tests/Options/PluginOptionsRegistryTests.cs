@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
 using Microsoft.Performance.SDK.Tests.Options;
@@ -114,7 +115,7 @@ public class PluginOptionsRegistryTests
     }
 
     /// <summary>
-    ///     Asserts that an option with a default value has its <see cref="PluginOption{T}.CurrentValue"/> updated
+    ///     Asserts that an option with a default value has its <see cref="PluginOptionValue{T}.CurrentValue"/> updated
     ///     to the serialized value of the option's corresponding <see cref="PluginOptionDto"/>.
     /// </summary>
     [TestMethod]
@@ -134,7 +135,7 @@ public class PluginOptionsRegistryTests
     }
 
     /// <summary>
-    ///     Asserts that an option with a non-default value has its <see cref="PluginOption{T}.CurrentValue"/> updated
+    ///     Asserts that an option with a non-default value has its <see cref="PluginOptionValue{T}.CurrentValue"/> updated
     ///     to the serialized value of the option's corresponding <see cref="PluginOptionDto"/>.
     /// </summary>
     [TestMethod]

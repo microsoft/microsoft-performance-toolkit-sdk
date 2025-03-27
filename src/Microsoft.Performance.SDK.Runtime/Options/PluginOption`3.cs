@@ -22,7 +22,7 @@ namespace Microsoft.Performance.SDK.Runtime.Options;
 ///     current value.
 /// </typeparam>
 public abstract class PluginOption<T, TDef, TValue>
-    : PluginOption<T>
+    : PluginOption
     where TDef : PluginOptionDefinition<T>
     where TValue : PluginOptionValue<T>
 {
@@ -58,8 +58,15 @@ public abstract class PluginOption<T, TDef, TValue>
         UpdateValue(this.Definition.DefaultValue, true);
     }
 
-    /// <inheritdoc />
-    public override void SetValue(T value)
+    /// <summary>
+    ///     Sets the value of this option to the given value. This will cause
+    ///     <see cref="PluginOption.IsUsingDefault"/> to be <c>false</c>, regardless
+    ///     of the value of <paramref name="value"/>.
+    /// </summary>
+    /// <param name="value">
+    ///     The value to set this option to.
+    /// </param>
+    public void SetValue(T value)
     {
         UpdateValue(value, false);
     }

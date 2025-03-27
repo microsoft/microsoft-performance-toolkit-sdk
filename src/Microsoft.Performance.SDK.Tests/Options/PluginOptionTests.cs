@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -56,7 +57,7 @@ public class PluginOptionTests
     }
 
     /// <summary>
-    ///     Asserts that the <see cref="PluginOption{T}.CurrentValue"/> method returns the associated <see cref="PluginOption{T}.DefaultValue"/>
+    ///     Asserts that the <see cref="PluginOptionValue{T}.CurrentValue"/> method returns the associated <see cref="PluginOption{T}.DefaultValue"/>
     ///     after calling <see cref="PluginOption.ApplyDefault"/> on an option.
     /// </summary>
     [TestMethod]

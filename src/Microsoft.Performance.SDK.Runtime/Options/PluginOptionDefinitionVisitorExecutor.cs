@@ -13,10 +13,10 @@ public sealed class PluginOptionDefinitionVisitorExecutor
     private readonly IPluginOptionDefinitionVisitor visitor;
 
     /// <summary>
-    ///     Creates a new instance of <see cref="PluginOptionVisitorExecutor"/> for the given <see cref="IPluginOptionVisitor"/>.
+    ///     Creates a new instance of <see cref="PluginOptionDefinitionVisitorExecutor"/> for the given <see cref="IPluginOptionVisitor"/>.
     /// </summary>
     /// <param name="visitor">
-    ///     The <see cref="IPluginOptionVisitor"/> to use to visit each concrete option.
+    ///     The <see cref="IPluginOptionDefinitionVisitor"/> to use to visit each concrete option.
     /// </param>
     public PluginOptionDefinitionVisitorExecutor(IPluginOptionDefinitionVisitor visitor)
     {
