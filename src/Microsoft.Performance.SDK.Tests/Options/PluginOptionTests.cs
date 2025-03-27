@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -21,7 +22,7 @@ public class PluginOptionTests
     {
         var value = true;
         var option = TestPluginOption.BooleanOption(value);
-        option.CurrentValue = !value;
+        option.SetValue(!value);
 
         Assert.IsFalse(option.IsUsingDefault);
     }
@@ -35,7 +36,7 @@ public class PluginOptionTests
     {
         var value = true;
         var option = TestPluginOption.BooleanOption(value);
-        option.CurrentValue = value;
+        option.SetValue(value);
 
         Assert.IsFalse(option.IsUsingDefault);
     }
@@ -48,7 +49,7 @@ public class PluginOptionTests
     public void CallingApplyDefault_UpdatesIsUsingDefault()
     {
         var option = TestPluginOption.FieldOption("Default");
-        option.CurrentValue = "Non default";
+        option.SetValue("Non default");
         option.ApplyDefault();
 
         Assert.IsTrue(option.IsUsingDefault);
@@ -63,10 +64,10 @@ public class PluginOptionTests
     {
         string defaultValue = "Default";
         var option = TestPluginOption.FieldOption(defaultValue);
-        option.CurrentValue = "Non default";
+        option.SetValue("Non default");
         option.ApplyDefault();
 
-        Assert.AreEqual(defaultValue, option.CurrentValue);
+        Assert.AreEqual(defaultValue, option.Value.CurrentValue);
     }
 
     [TestMethod]
@@ -76,9 +77,9 @@ public class PluginOptionTests
     {
         var option = TestPluginOption.BooleanOption(defaultValue);
         var raised = false;
-        option.OptionChanged += (s, e) => raised = true;
+        option.Value.OptionChanged += (s, e) => raised = true;
 
-        option.CurrentValue = newValue;
+        option.SetValue(newValue);
 
         Assert.IsTrue(raised);
     }
@@ -87,8 +88,8 @@ public class PluginOptionTests
     public void OptionsChangedHandler_ThrowingException_DoesNotThrow()
     {
         var option = TestPluginOption.BooleanOption(true);
-        option.OptionChanged += (s, e) => throw new Exception();
+        option.Value.OptionChanged += (s, e) => throw new Exception();
 
-        option.CurrentValue = false;
+        option.SetValue(false);
     }
 }

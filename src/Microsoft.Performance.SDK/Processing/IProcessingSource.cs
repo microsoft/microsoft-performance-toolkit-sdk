@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Definitions;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -45,9 +47,13 @@ namespace Microsoft.Performance.SDK.Processing
         IEnumerable<Option> CommandLineOptions { get; }
 
         /// <summary>
-        ///     Gets the plugin options that are supported by this <see cref="IProcessingSource"/>.
+        ///     Gets the <see cref="PluginOptionDefinition"/>s for plugin options that are supported by this <see cref="IProcessingSource"/>.
         /// </summary>
-        IEnumerable<PluginOption> PluginOptions { get; }
+        /// <remarks>
+        ///     Plugins can obtain a <see cref="PluginOptionValue"/> for each <see cref="PluginOptionDefinition"/> returned by
+        ///     this property by querying <see cref="IApplicationEnvironmentV3.TryGetPluginOption{T}"/>.
+        /// </remarks>
+        IEnumerable<PluginOptionDefinition> PluginOptions { get; }
 
         /// <summary>
         ///     Gets information about this <see cref="IProcessingSource"/>.

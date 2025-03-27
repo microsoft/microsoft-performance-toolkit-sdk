@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Processing;
 
 namespace Microsoft.Performance.SDK.Runtime.Options;
@@ -31,11 +30,15 @@ internal sealed class ProcessingSourcePluginOptionsProvider
     /// <inheritdoc />
     public IEnumerable<PluginOption> GetOptions()
     {
+        var visitor = new PluginOptionCreator();
+        var executor = new PluginOptionDefinitionVisitorExecutor(visitor);
+
         foreach (var processingSource in this.processingSources)
         {
             foreach (var option in processingSource.PluginOptions)
             {
-                yield return option.CloneT();
+                executor.Visit(option);
+                yield return visitor.LastCreatedOption;
             }
         }
     }

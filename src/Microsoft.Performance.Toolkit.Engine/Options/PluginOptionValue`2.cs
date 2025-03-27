@@ -6,5 +6,5 @@ using Microsoft.Performance.SDK.Options;
 
 namespace Microsoft.Performance.Toolkit.Engine.Options;
 
-internal record PluginOptionValue<T, TValue>(Guid Guid, TValue Value) : PluginOptionValue(Guid)
-    where T : PluginOption<TValue>;
+internal record EnginePluginOptionValue<T, TValue>(Guid Guid, TValue Value) : EnginePluginOptionValue(Guid)
+    where T : Microsoft.Performance.SDK.Options.Values.PluginOptionValue<TValue>;

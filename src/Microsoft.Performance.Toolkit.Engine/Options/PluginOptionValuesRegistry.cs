@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.SDK.Runtime.Options.Serialization.DTO;
@@ -12,9 +13,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Options;
 
 internal class PluginOptionValuesRegistry
 {
-    private readonly List<PluginOptionValue> values = new();
+    private readonly List<EnginePluginOptionValue> values = new();
 
-    public void Add(PluginOptionValue value)
+    public void Add(EnginePluginOptionValue value)
     {
         this.values.Add(value);
     }
@@ -52,7 +53,7 @@ internal class PluginOptionValuesRegistry
     private class Visitor
         : IPluginOptionVisitor
     {
-        private readonly List<PluginOptionValue> values;
+        private readonly List<EnginePluginOptionValue> values;
 
         public List<BooleanPluginOptionDto> BooleanOptions { get; } = new();
 
@@ -60,14 +61,14 @@ internal class PluginOptionValuesRegistry
 
         public List<FieldArrayPluginOptionDto> FieldArrayOptions { get; } = new();
 
-        public Visitor(List<PluginOptionValue> values)
+        public Visitor(List<EnginePluginOptionValue> values)
         {
             this.values = values;
         }
 
         public void Visit(BooleanOption option)
         {
-            var optionValue = this.values.OfType<PluginOptionValue<BooleanOption, bool>>().FirstOrDefault(x => x.Guid == option.Guid);
+            var optionValue = this.values.OfType<EnginePluginOptionValue<BooleanOptionValue, bool>>().FirstOrDefault(x => x.Guid == option.Guid);
 
             if (optionValue != null)
             {
@@ -82,7 +83,7 @@ internal class PluginOptionValuesRegistry
 
         public void Visit(FieldOption option)
         {
-            var optionValue = this.values.OfType<PluginOptionValue<FieldOption, string>>().FirstOrDefault(x => x.Guid == option.Guid);
+            var optionValue = this.values.OfType<EnginePluginOptionValue<FieldOptionValue, string>>().FirstOrDefault(x => x.Guid == option.Guid);
 
             if (optionValue != null)
             {
@@ -97,7 +98,7 @@ internal class PluginOptionValuesRegistry
 
         public void Visit(FieldArrayOption option)
         {
-            var optionValue = this.values.OfType<PluginOptionValue<FieldArrayOption, IReadOnlyList<string>>>().FirstOrDefault(x => x.Guid == option.Guid);
+            var optionValue = this.values.OfType<EnginePluginOptionValue<FieldArrayOptionValue, IReadOnlyList<string>>>().FirstOrDefault(x => x.Guid == option.Guid);
 
             if (optionValue != null)
             {

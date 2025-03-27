@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Options;
-
 namespace Microsoft.Performance.SDK.Runtime.Options;
 
 /// <summary>

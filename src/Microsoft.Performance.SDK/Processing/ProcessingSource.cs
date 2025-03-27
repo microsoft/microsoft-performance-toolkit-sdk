@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Definitions;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -83,7 +84,7 @@ namespace Microsoft.Performance.SDK.Processing
         public virtual IEnumerable<Option> CommandLineOptions => Enumerable.Empty<Option>();
 
         /// <inheritdoc />
-        public virtual IEnumerable<PluginOption> PluginOptions => Enumerable.Empty<PluginOption>();
+        public virtual IEnumerable<PluginOptionDefinition> PluginOptions => Enumerable.Empty<PluginOptionDefinition>();
 
         /// <summary>
         ///     Gets a mapping of <see cref="TableDescriptor"/> to the concrete

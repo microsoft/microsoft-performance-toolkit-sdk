@@ -57,7 +57,7 @@ public sealed class PluginOptionsRegistryToDtoConverter
                 {
                     Guid = option.Guid,
                     IsDefault = option.IsUsingDefault,
-                    Value = option.CurrentValue,
+                    Value = option.Value.CurrentValue,
                 });
         }
 
@@ -68,7 +68,7 @@ public sealed class PluginOptionsRegistryToDtoConverter
                 {
                     Guid = option.Guid,
                     IsDefault = option.IsUsingDefault,
-                    Value = option.CurrentValue,
+                    Value = option.Value.CurrentValue,
                 });
         }
 
@@ -79,7 +79,7 @@ public sealed class PluginOptionsRegistryToDtoConverter
                 {
                     Guid = option.Guid,
                     IsDefault = option.IsUsingDefault,
-                    Value = option.CurrentValue.ToArray(),
+                    Value = option.Value.CurrentValue.ToArray(),
                 });
         }
     }

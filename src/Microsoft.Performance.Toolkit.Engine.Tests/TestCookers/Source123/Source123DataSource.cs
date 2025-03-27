@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Definitions;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.Testing.SDK;
 
 namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
@@ -74,9 +76,9 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                    Path.GetExtension(dataSource.Uri.LocalPath));
         }
 
-        public override IEnumerable<PluginOption> PluginOptions =>
+        public override IEnumerable<PluginOptionDefinition> PluginOptions =>
         [
-            new FieldOption()
+            new FieldOptionDefinition()
             {
                 Guid = FieldOptionGuid,
                 Name = "Test Option",
@@ -84,7 +86,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
                 Category = "Test Option Category",
                 DefaultValue = FieldOptionDefaultValue,
             },
-            new BooleanOption()
+            new BooleanOptionDefinition()
             {
                 Guid = BooleanOptionGuid,
                 Name = "Test Boolean Option",

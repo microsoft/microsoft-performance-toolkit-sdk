@@ -8,8 +8,10 @@ using System.Linq;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Auth;
 using Microsoft.Performance.SDK.Options;
+using Microsoft.Performance.SDK.Options.Values;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime;
+using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.Toolkit.Engine.Options;
 
 namespace Microsoft.Performance.Toolkit.Engine
@@ -172,8 +174,8 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     The value to set for the <see cref="PluginOption"/>.
         /// </param>
         /// <typeparam name="T">
-        ///     The concrete type of the <see cref="PluginOption"/> whose value should be set (e.g. <see cref="BooleanOption"/>
-        ///     or <see cref="FieldOption"/>).
+        ///     The concrete type of the <see cref="PluginOptionValue"/> whose value should be set (e.g. <see cref="BooleanOptionValue"/>
+        ///     or <see cref="FieldOptionValue"/>).
         /// </typeparam>
         /// <typeparam name="TValue">
         ///     The type of the value of the <see cref="PluginOption"/>.
@@ -185,11 +187,11 @@ namespace Microsoft.Performance.Toolkit.Engine
         ///     <paramref name="value"/> is <c>null</c>.
         /// </exception>
         public EngineCreateInfo WithPluginOptionValue<T, TValue>(Guid optionGuid, TValue value)
-            where T : PluginOption<TValue>
+            where T : PluginOptionValue<TValue>
         {
             Guard.NotNull(value, nameof(value));
 
-            this.RegisteredPluginOptions.Add(new PluginOptionValue<T, TValue>(optionGuid, value));
+            this.RegisteredPluginOptions.Add(new EnginePluginOptionValue<T, TValue>(optionGuid, value));
             return this;
         }
 

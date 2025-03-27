@@ -132,7 +132,7 @@ public sealed class PluginOptionsRegistry
             dtoFieldArrayOptions,
             (option, dto) =>
             {
-                option.CurrentValue = dto.Value;
+                option.SetValue(dto.Value);
                 this.logger.Verbose($"Plugin option {option} was updated to the saved value [{string.Join(", ", dto.Value)}].");
             });
     }
@@ -143,7 +143,7 @@ public sealed class PluginOptionsRegistry
             dtoFieldOptions,
             (option, dto) =>
             {
-                option.CurrentValue = dto.Value;
+                option.SetValue(dto.Value);
                 this.logger.Verbose($"Plugin option {option} was updated to the saved value {dto.Value}.");
             });
     }
@@ -154,7 +154,7 @@ public sealed class PluginOptionsRegistry
             dtoBooleanOptions,
             (option, dto) =>
             {
-                option.CurrentValue = dto.Value;
+                option.SetValue(dto.Value);
                 this.logger.Verbose($"Plugin option {option} was updated to the saved value {dto.Value}.");
             });
     }
