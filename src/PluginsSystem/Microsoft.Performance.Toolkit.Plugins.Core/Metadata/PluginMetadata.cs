@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
@@ -44,7 +46,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
             ulong installedSize,
             string displayName,
             string description,
-            Version sdkVersion,
+            SemanticVersion sdkVersion,
             Uri projectUrl,
             IEnumerable<PluginOwnerInfo> owners)
         {
@@ -85,7 +87,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <summary>
         ///     Gets the version of the performance SDK which this plugin depends upon.
         /// </summary>
-        public Version SdkVersion { get; }
+        [JsonConverter(typeof(SemanticVersionJsonConverter))]
+        public SemanticVersion SdkVersion { get; }
 
         /// <summary>
         ///     Gets the owners information of this plugin.

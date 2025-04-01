@@ -27,10 +27,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Validation
 
         public ErrorInfo[] GetValidationErrors(PluginMetadata pluginMetadata)
         {
-            SemanticVersion pluginSdkVersion = new SemanticVersion(
-                pluginMetadata.SdkVersion.Major,
-                pluginMetadata.SdkVersion.Minor,
-                pluginMetadata.SdkVersion.Build);
+            SemanticVersion pluginSdkVersion = pluginMetadata.SdkVersion;
 
             bool valid = versionChecker.IsVersionSupported(pluginSdkVersion);
 

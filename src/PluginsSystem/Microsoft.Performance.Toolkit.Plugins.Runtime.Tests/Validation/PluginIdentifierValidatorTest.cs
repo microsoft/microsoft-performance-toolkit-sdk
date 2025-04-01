@@ -6,6 +6,7 @@ using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Validation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests.Validation;
 
@@ -38,7 +39,7 @@ public class PluginIdentifierValidatorTest
 
     private PluginMetadata CreatePluginMetadata(string pluginId)
     {
-        var stubVersion = new Version(1, 2, 3);
+        var stubVersion = new SemanticVersion(1, 2, 3);
 
         var pluginIdentity = new PluginIdentity(pluginId, stubVersion);
 

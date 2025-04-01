@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Performance.SDK;
+using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <param name="version">
         ///     The version of this plugin.
         /// </param>
-        public PluginIdentity(string id, Version version)
+        public PluginIdentity(string id, SemanticVersion version)
         {
             Guard.NotNull(id, nameof(id));
             Guard.NotNull(version, nameof(version));
@@ -43,7 +44,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         /// <summary>
         ///     Gets the version of this plugin.
         /// </summary>
-        public Version Version { get; }
+        public SemanticVersion Version { get; }
 
         /// <inheritdoc />
         public bool Equals(PluginIdentity other)
@@ -77,7 +78,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
             }
 
             return string.Equals(a.Id, b.Id, StringComparison.Ordinal) &&
-                Version.Equals(a.Version, b.Version);
+                SemanticVersion.Equals(a.Version, b.Version);
         }
 
         /// <inheritdoc />

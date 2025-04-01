@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using NuGet.Versioning;
+using System.Text.Json.Serialization;
+
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
     /// <summary>
@@ -19,7 +23,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         /// </param>
         public PluginIdentityManifest(
             string id,
-            Version version)
+            SemanticVersion version)
         {
             this.Id = id;
             this.Version = version;
@@ -33,6 +37,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         /// <summary>
         ///     Gets or sets the version of this plugin.
         /// </summary>
-        public Version Version { get; }
+        [JsonConverter(typeof(SemanticVersionJsonConverter))]
+        public SemanticVersion Version { get; }
     }
 }

@@ -12,6 +12,7 @@ using AutoFixture;
 using Fixture = AutoFixture.Fixture;
 using Microsoft.Performance.Toolkit.Plugins.Core;
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
+using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 {
@@ -567,7 +568,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 new PluginMetadata(
                     new PluginIdentity(
                         plugin.Metadata.Identity.Id,
-                        new Version(plugin.Metadata.Identity.Version.Major + 1, 0, 0, 0)),
+                        new SemanticVersion(plugin.Metadata.Identity.Version.Major + 1, 0, 0, "alpha")),
                     plugin.Metadata.InstalledSize,
                     plugin.Metadata.DisplayName,
                     plugin.Metadata.Description,
