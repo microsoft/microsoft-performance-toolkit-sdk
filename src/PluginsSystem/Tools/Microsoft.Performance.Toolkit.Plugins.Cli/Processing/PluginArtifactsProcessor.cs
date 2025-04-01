@@ -200,14 +200,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Processing
             ulong installedSize = (ulong)processedDir.PluginSize;
             IEnumerable<PluginOwnerInfo> owners = manifest.Owners.Select(
                 o => new PluginOwnerInfo(o.Name, o.Address, o.EmailAddresses.ToArray(), o.PhoneNumbers.ToArray()));
-            Version convertedSDKVersion = new(sdkVersion.Major, sdkVersion.Minor, sdkVersion.Patch);
 
             PluginMetadata metadata = new(
                 identity,
                 installedSize,
                 manifest.DisplayName,
                 manifest.Description,
-                convertedSDKVersion,
+                sdkVersion,
                 manifest.ProjectUrl, owners);
 
             return metadata;

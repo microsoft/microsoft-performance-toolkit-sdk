@@ -19,7 +19,7 @@ public class PluginIdentityTest
     [DataRow("Test\nPlugin")]
     public void HasValidId_InvalidCharacters_ReturnFalse(string id)
     {
-        var sut = new PluginIdentity(id, new Version(1, 2, 3));
+        var sut = new PluginIdentity(id, new PluginVersion(1, 2, 3));
         Assert.IsFalse(sut.HasValidId(out string _));
     }
 
@@ -31,14 +31,14 @@ public class PluginIdentityTest
     [DataRow("Test.Plugin-1.2")]
     public void HasValidId_ValidId_ReturnTrue(string id)
     {
-        var sut = new PluginIdentity(id, new Version(1, 2, 3));
+        var sut = new PluginIdentity(id, new PluginVersion(1, 2, 3));
         Assert.IsTrue(sut.HasValidId(out string _));
     }
 
     [TestMethod]
     public void HasValidId_LongId_ReturnFalse()
     {
-        var sut = new PluginIdentity(new string('A', PluginIdentity.MaxIdLength + 1), new Version(1, 2, 3));
+        var sut = new PluginIdentity(new string('A', PluginIdentity.MaxIdLength + 1), new PluginVersion(1, 2, 3));
         Assert.IsFalse(sut.HasValidId(out string _));
     }
 }
