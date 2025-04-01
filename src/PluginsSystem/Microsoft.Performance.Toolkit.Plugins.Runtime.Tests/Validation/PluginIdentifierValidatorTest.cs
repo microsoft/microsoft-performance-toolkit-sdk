@@ -41,7 +41,7 @@ public class PluginIdentifierValidatorTest
     {
         var stubVersion = new SemanticVersion(1, 2, 3);
 
-        var pluginIdentity = new PluginIdentity(pluginId, stubVersion);
+        var pluginIdentity = new PluginIdentity(pluginId, PluginVersion.Parse(stubVersion.ToString()));
 
         return new PluginMetadata(
             pluginIdentity,

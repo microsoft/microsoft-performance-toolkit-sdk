@@ -13,7 +13,6 @@ using Microsoft.Performance.Toolkit.Plugins.Runtime.Exceptions;
 using Microsoft.Performance.Toolkit.Plugins.Runtime.Installation;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NuGet.Versioning;
 using Fixture = AutoFixture.Fixture;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
@@ -363,7 +362,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fakeSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
-            var fakePluginIdentity = new PluginIdentity("foo", new SemanticVersion(1, 0, 0));
+            var fakePluginIdentity = new PluginIdentity("foo", new PluginVersion(1, 0, 0));
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             fakeDir.Setup(d => d.GetRootDirectory(fakePluginIdentity)).Returns(this.tempDirectory);
@@ -404,7 +403,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             fakeSerializer.Setup(x => x.DeserializeAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>())).ReturnsAsync(fakeContentsInfo);
 
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
-            var fakePluginIdentity = new PluginIdentity("foo", new SemanticVersion(1, 0, 0));
+            var fakePluginIdentity = new PluginIdentity("foo", new PluginVersion(1, 0, 0));
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");
@@ -438,7 +437,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var fakeSerializer = new Mock<ISerializer<PluginContentsMetadata>>();
             var fakeChecksumCalculator = new Mock<IDirectoryChecksumCalculator>();
-            var fakePluginIdentity = new PluginIdentity("foo", new SemanticVersion(1, 0, 0));
+            var fakePluginIdentity = new PluginIdentity("foo", new PluginVersion(1, 0, 0));
 
             var fakeDir = new Mock<IPluginsStorageDirectory>();
             string contentsFileDestPath = Path.Combine(this.tempDirectory, "contents.txt");

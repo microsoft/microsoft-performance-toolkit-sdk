@@ -12,7 +12,7 @@ internal static class FakeMetadata
     public static PluginMetadata GetFakeMetadataWithOnlyIdentityAndSdkVersion()
     {
         return new PluginMetadata(
-            new PluginIdentity("fake_id", SemanticVersion.Parse("1.0.0")),
+            new PluginIdentity("fake_id", PluginVersion.Parse("1.0.0")),
             0,
             null,
             null,
