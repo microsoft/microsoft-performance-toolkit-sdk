@@ -37,7 +37,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         /// <summary>
         ///     Gets or sets the version of this plugin.
         /// </summary>
-        [JsonConverter(typeof(PluginVersionJsonConverter))]
         public PluginVersion Version { get; }
     }
 }
