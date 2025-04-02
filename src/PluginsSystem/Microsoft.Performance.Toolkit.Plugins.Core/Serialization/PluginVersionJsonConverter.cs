@@ -14,7 +14,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
     {
         /// <inheritdoc/>
         public override PluginVersion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {            
+        {
             var versionString = reader.GetString();
             return versionString is null ? null : PluginVersion.Parse(versionString);
         }
