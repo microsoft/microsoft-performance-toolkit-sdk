@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK;
-using NuGet.Versioning;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Microsoft.Performance.SDK;
+using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
 {
