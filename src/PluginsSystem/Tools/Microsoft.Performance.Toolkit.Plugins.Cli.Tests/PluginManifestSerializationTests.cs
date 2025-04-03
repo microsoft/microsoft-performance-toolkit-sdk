@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AutoFixture;
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
-using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
+using Microsoft.Performance.Toolkit.Plugins.Core.Tests;
 using Fixture = AutoFixture.Fixture;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Tests;
@@ -22,18 +21,6 @@ public sealed class PluginManifestSerializationTest
     [TestMethod]
     public void PluginManifest_Serialization_RoundTrip()
     {
-        ISerializer<PluginManifest> manifestSerializer = SerializationUtils.GetJsonSerializer<PluginManifest>(Program.PluginManifestSerializerDefaultOptions);
-
-        PluginManifest pluginManifest = this.fixture.Create<PluginManifest>();
-
-        using var stream = new MemoryStream();
-        manifestSerializer.Serialize(stream, pluginManifest);
-
-        stream.Position = 0;
-
-        PluginManifest deserializedPluginManifest = manifestSerializer.Deserialize(stream);
-
-        Assert.IsNotNull(deserializedPluginManifest);
-        Assert.IsTrue(pluginManifest.Equals(deserializedPluginManifest));
+        SerializationTestsHelper.RunSerializationTest<PluginManifest>(this.fixture!);
     }
 }

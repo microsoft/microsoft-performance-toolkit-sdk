@@ -25,6 +25,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
             string id,
             PluginVersion version)
         {
+            Guard.NotNull(id, nameof(id));
+            Guard.NotNull(version, nameof(version));
+
             this.Id = id;
             this.Version = version;
         }
@@ -84,8 +87,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
-               this.Id?.GetHashCode() ?? 0,
-               this.Version?.GetHashCode() ?? 0);
+               this.Id.GetHashCode(),
+               this.Version.GetHashCode());
         }
     }
 }
