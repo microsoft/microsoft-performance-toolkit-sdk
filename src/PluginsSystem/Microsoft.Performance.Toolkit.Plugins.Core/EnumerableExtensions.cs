@@ -11,7 +11,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
     /// <summary>
     ///     Provides extension methods for <see cref="IEnumerable{T}"/>.
     /// </summary>
-    internal static class EnumerableExtensions
+    public static class EnumerableExtensions
     {
         /// <summary>
         ///     Determines whether two sequences are equal by comparing their elements by using the default equality comparer for their type.

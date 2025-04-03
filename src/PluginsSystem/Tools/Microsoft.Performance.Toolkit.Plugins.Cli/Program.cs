@@ -33,10 +33,20 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
         /// </returns>
         public static int Main(string[] args)
         {
-            return CreatPluginsCli().Run(args);
+            return CreatePluginsCli().Run(args);
         }
 
-        private static PluginsCli CreatPluginsCli()
+        public static readonly JsonSerializerOptions PluginManifestSerializerDefaultOptions = new()
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters =
+            {
+                new PluginVersionJsonConverter(),
+            }
+        };
+
+        private static PluginsCli CreatePluginsCli()
         {
             ServiceProvider serviceProvider = new ServiceCollection()
                 .AddLogging(x => x.AddConsole())
@@ -47,15 +57,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli
                 .AddSingleton<IOptionsValidator<MetadataGenOptions, MetadataGenArgs>, MetadataGenOptionsValidator>()
                 .AddSingleton<IPluginArtifactsProcessor, PluginArtifactsProcessor>()
                 .AddSingleton<IPackageBuilder, ZipPluginPackageBuilder>()
-                .AddSingleton<ISerializer<PluginManifest>>(SerializationUtils.GetJsonSerializer<PluginManifest>(new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters =
-                    {
-                        new PluginVersionJsonConverter(),
-                    }
-                }))
+                .AddSingleton<ISerializer<PluginManifest>>(SerializationUtils.GetJsonSerializer<PluginManifest>(PluginManifestSerializerDefaultOptions))
                 .AddSingleton<ISerializer<PluginMetadata>>(SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginMetadata>())
                 .AddSingleton<ISerializer<PluginContentsMetadata>>(SerializationUtils.GetJsonSerializerWithDefaultOptions<PluginContentsMetadata>())
                 .AddSingleton<IManifestFileReader, ManifestReader>()

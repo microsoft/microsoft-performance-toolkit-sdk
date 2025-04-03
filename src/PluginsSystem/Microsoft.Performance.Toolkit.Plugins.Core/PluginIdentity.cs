@@ -84,8 +84,8 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         public override int GetHashCode()
         {
             return HashCodeUtils.CombineHashCodeValues(
-               this.Id.GetHashCode(),
-               this.Version.GetHashCode());
+               this.Id?.GetHashCode() ?? 0,
+               this.Version?.GetHashCode() ?? 0);
         }
 
         /// <inheritdoc />

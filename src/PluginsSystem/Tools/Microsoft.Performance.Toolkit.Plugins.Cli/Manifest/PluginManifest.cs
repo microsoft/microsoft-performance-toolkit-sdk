@@ -1,12 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.Toolkit.Plugins.Core;
+using Microsoft.Performance.SDK;
+using System.Text.Json.Serialization;
+
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
 {
     /// <summary>
     ///     Represents the manifest for a plugin.
     /// </summary>
     public sealed class PluginManifest
+        : IEquatable<PluginManifest>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="PluginManifest"/>s
@@ -26,6 +31,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         /// <param name="projectUrl">
         ///     The URL of the project that owns this plugin.
         /// </param>
+        [JsonConstructor]
         public PluginManifest(
             PluginIdentityManifest identity,
             string displayName,
@@ -65,5 +71,51 @@ namespace Microsoft.Performance.Toolkit.Plugins.Cli.Manifest
         ///     Gets the URL of the project that owns this plugin.
         /// </summary>
         public Uri ProjectUrl { get; }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as PluginManifest);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(PluginManifest? other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return this.Identity.Equals(other.Identity)
+                && this.DisplayName == other.DisplayName
+                && this.Description == other.Description
+                && this.Owners.EnumerableEqual(other.Owners)
+                && this.ProjectUrl == other.ProjectUrl;
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            int result = HashCodeUtils.CombineHashCodeValues(
+                this.Identity?.GetHashCode() ?? 0,
+                this.DisplayName?.GetHashCode() ?? 0,
+                this.Description?.GetHashCode() ?? 0,
+                this.ProjectUrl?.GetHashCode() ?? 0);
+
+            if (this.Owners != null)
+            {
+                foreach (PluginOwnerInfoManifest owner in this.Owners)
+                {
+                    result = HashCodeUtils.CombineHashCodeValues(result, owner?.GetHashCode() ?? 0);
+                }
+            }
+
+            return result;
+        }
     }
 }
