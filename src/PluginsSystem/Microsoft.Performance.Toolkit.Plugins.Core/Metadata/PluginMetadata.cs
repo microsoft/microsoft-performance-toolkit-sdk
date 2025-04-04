@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Microsoft.Performance.SDK;
-using Microsoft.Performance.Toolkit.Plugins.Core.Serialization;
 using NuGet.Versioning;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
@@ -87,7 +86,6 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Metadata
         /// <summary>
         ///     Gets the version of the performance SDK which this plugin depends upon.
         /// </summary>
-        [JsonConverter(typeof(SemanticVersionJsonConverter))]
         public SemanticVersion SdkVersion { get; }
 
         /// <summary>

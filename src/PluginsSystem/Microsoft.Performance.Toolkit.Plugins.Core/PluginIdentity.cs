@@ -36,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core
         }
 
         /// <summary>
-        ///     Gets the identifer of this plugin.
+        ///     Gets the identifier of this plugin.
         /// </summary>
         public string Id { get; }
 

@@ -54,28 +54,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Core.Serialization
             Converters =
             {
                 new JsonStringEnumConverter(),
-                new VersionStringConverter(),
+                new PluginVersionJsonConverter(),
+                new SemanticVersionJsonConverter(),
             }
         };
-
-        internal class VersionStringConverter
-            : JsonConverter<Version>
-        {
-            public override Version Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-            {
-                if (reader.TokenType == JsonTokenType.String)
-                {
-                    string stringValue = reader.GetString();
-                    return new Version(stringValue);
-                }
-
-                throw new JsonException();
-            }
-
-            public override void Write(Utf8JsonWriter writer, Version value, JsonSerializerOptions options)
-            {
-                writer.WriteStringValue(value.ToString());
-            }
-        }
     }
 }
