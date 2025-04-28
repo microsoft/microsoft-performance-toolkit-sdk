@@ -72,12 +72,13 @@ namespace Microsoft.Performance.SDK.Processing
         ///     Callback when the tables are finished updated post change.
         /// </param>
         /// <param name="requestInitialFilterReevaluation">
-        ///     Reset initial filter from table configuration.
+        ///     Reset table filters that depend on the changed columns.
         /// </param>
         void SubmitColumnChangeRequest(
             Func<IProjectionDescription, bool> predicate,
             Action onReadyForChange,
             Action onChangeComplete,
+            // TODO: rename to requestFilterReevaluation in 2.0
             bool requestInitialFilterReevaluation = false);
     }
 }
