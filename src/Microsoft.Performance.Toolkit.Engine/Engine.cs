@@ -794,7 +794,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 pluginOptionsSystem.TryLoadAsync()
                     .ConfigureAwait(false)
                     .GetAwaiter()
-                    .GetResult();;
+                    .GetResult();
 
                 instance.applicationEnvironment = new EngineApplicationEnvironment(
                     applicationName: applicationName,
@@ -1117,7 +1117,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                         x => ConsoleLogger.Create(x.GetType()), // todo: this shouldn't be using a console logger by default
                         processingSource,
                         dsg, // todo #214
-                        processingSource.Instance.MetadataTables,
+                        [],
                         this.CreateInfo.ProcessEnvironmentFactory.CreateProcessorEnvironment(processingSource.Guid, dsg),
                         processorOptions);
 
