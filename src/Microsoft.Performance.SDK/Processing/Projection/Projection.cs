@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -1960,25 +1961,24 @@ with anonymous methods for small tables.");
               IVisibleDomainSensitiveProjection
               where TGenerator : IProjection<int, T>
         {
-            const byte byteTrue = 1;
-            const byte byteFalse = 0;
-
-            private readonly T[] cache;
-            private readonly byte[] isCached;
-            private TGenerator generator;
+            private readonly int rowCount;
+            private readonly Lazy<Cache> lazyCache;
+            private readonly TGenerator generator;
 
             public CachedOnFirstUseColumnGenerator(int rowCount, TGenerator generator)
             {
-                this.cache = new T[rowCount];
-                this.isCached = new byte[rowCount];
+                this.rowCount = rowCount;
                 this.generator = generator;
+
+                // Lazy is thread-safe by default
+                this.lazyCache = new Lazy<Cache>(() => new Cache(new T[rowCount], new BitArray(rowCount)));
             }
 
             private void ResetCache()
             {
-                for (int i = 0; i < this.cache.Length; ++i)
+                if (this.lazyCache.IsValueCreated)
                 {
-                    this.isCached[i] = byteFalse;
+                    this.lazyCache.Value.Reset();
                 }
             }
 
@@ -1986,13 +1986,7 @@ with anonymous methods for small tables.");
             {
                 get
                 {
-                    if (this.isCached[value] != byteTrue)
-                    {
-                        this.cache[value] = this.generator[value];
-                        this.isCached[value] = byteTrue;
-                    }
-
-                    return this.cache[value];
+                    return this.lazyCache.Value.Get(value, this.generator);
                 }
             }
 
@@ -2017,7 +2011,7 @@ with anonymous methods for small tables.");
                 if (this.DependsOnVisibleDomain)
                 {
                     return new CachedOnFirstUseColumnGenerator<T, TGenerator>(
-                        this.cache.Length,
+                        this.rowCount,
                         this.generator.CloneIfVisibleDomainSensitive());
                 }
                 else
@@ -2038,6 +2032,24 @@ with anonymous methods for small tables.");
             }
 
             public bool DependsOnVisibleDomain => this.generator.DependsOnVisibleDomain();
+
+            private readonly record struct Cache(T[] Values, BitArray IsCached)
+            {
+                public void Reset()
+                {
+                    this.IsCached.SetAll(false);
+                }
+
+                public T Get(int index, TGenerator generator)
+                {
+                    if (!this.IsCached[index])
+                    {
+                        this.Values[index] = generator[index];
+                        this.IsCached[index] = true;
+                    }
+                    return this.Values[index];
+                }
+            }
         }
 
         private static class CacheVisibleDomainColumn
