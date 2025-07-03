@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -1962,13 +1963,15 @@ with anonymous methods for small tables.");
         {
             private readonly int rowCount;
             private readonly Lazy<Cache> lazyCache;
-            private TGenerator generator;
+            private readonly TGenerator generator;
 
             public CachedOnFirstUseColumnGenerator(int rowCount, TGenerator generator)
             {
                 this.rowCount = rowCount;
                 this.generator = generator;
-                this.lazyCache = new Lazy<Cache>(() => new Cache(new T[rowCount], new byte[rowCount]), isThreadSafe: false);
+
+                // Lazy is thread-safe by default
+                this.lazyCache = new Lazy<Cache>(() => new Cache(new T[rowCount], new BitArray(rowCount)));
             }
 
             private void ResetCache()
@@ -2030,21 +2033,19 @@ with anonymous methods for small tables.");
 
             public bool DependsOnVisibleDomain => this.generator.DependsOnVisibleDomain();
 
-            private readonly record struct Cache(T[] Values, byte[] IsCached)
+            private readonly record struct Cache(T[] Values, BitArray IsCached)
             {
-                const byte byteTrue = 1;
-
                 public void Reset()
                 {
-                    Array.Clear(this.IsCached, 0, this.IsCached.Length);
+                    this.IsCached.SetAll(false);
                 }
 
                 public T Get(int index, TGenerator generator)
                 {
-                    if (this.IsCached[index] != byteTrue)
+                    if (!this.IsCached[index])
                     {
                         this.Values[index] = generator[index];
-                        this.IsCached[index] = byteTrue;
+                        this.IsCached[index] = true;
                     }
                     return this.Values[index];
                 }
