@@ -1960,25 +1960,22 @@ with anonymous methods for small tables.");
               IVisibleDomainSensitiveProjection
               where TGenerator : IProjection<int, T>
         {
-            const byte byteTrue = 1;
-            const byte byteFalse = 0;
-
-            private readonly T[] cache;
-            private readonly byte[] isCached;
+            private readonly int rowCount;
+            private readonly Lazy<Cache> lazyCache;
             private TGenerator generator;
 
             public CachedOnFirstUseColumnGenerator(int rowCount, TGenerator generator)
             {
-                this.cache = new T[rowCount];
-                this.isCached = new byte[rowCount];
+                this.rowCount = rowCount;
                 this.generator = generator;
+                this.lazyCache = new Lazy<Cache>(() => new Cache(new T[rowCount], new byte[rowCount]), isThreadSafe: false);
             }
 
             private void ResetCache()
             {
-                for (int i = 0; i < this.cache.Length; ++i)
+                if (this.lazyCache.IsValueCreated)
                 {
-                    this.isCached[i] = byteFalse;
+                    this.lazyCache.Value.Reset();
                 }
             }
 
@@ -1986,13 +1983,7 @@ with anonymous methods for small tables.");
             {
                 get
                 {
-                    if (this.isCached[value] != byteTrue)
-                    {
-                        this.cache[value] = this.generator[value];
-                        this.isCached[value] = byteTrue;
-                    }
-
-                    return this.cache[value];
+                    return this.lazyCache.Value.Get(value, this.generator);
                 }
             }
 
@@ -2017,7 +2008,7 @@ with anonymous methods for small tables.");
                 if (this.DependsOnVisibleDomain)
                 {
                     return new CachedOnFirstUseColumnGenerator<T, TGenerator>(
-                        this.cache.Length,
+                        this.rowCount,
                         this.generator.CloneIfVisibleDomainSensitive());
                 }
                 else
@@ -2038,6 +2029,26 @@ with anonymous methods for small tables.");
             }
 
             public bool DependsOnVisibleDomain => this.generator.DependsOnVisibleDomain();
+
+            private readonly record struct Cache(T[] Values, byte[] IsCached)
+            {
+                const byte byteTrue = 1;
+
+                public void Reset()
+                {
+                    Array.Clear(this.IsCached, 0, this.IsCached.Length);
+                }
+
+                public T Get(int index, TGenerator generator)
+                {
+                    if (this.IsCached[index] != byteTrue)
+                    {
+                        this.Values[index] = generator[index];
+                        this.IsCached[index] = byteTrue;
+                    }
+                    return this.Values[index];
+                }
+            }
         }
 
         private static class CacheVisibleDomainColumn
