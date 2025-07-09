@@ -148,13 +148,57 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables
             Type candidateType,
             out ITableExtensionReference reference)
         {
-            Guard.NotNull(candidateType, nameof(candidateType));
+            return TryCreateReference(candidateType, null, out reference);
+        }
+
+        /// <summary>
+        ///     Tries to create an instance of <see cref="ITableExtensionReference"/> based on the
+        ///     <paramref name="candidateType"/>.
+        ///     <para/>
+        ///     A <see cref="Type"/> must satisfy the following criteria in order to 
+        ///     be eligible as a reference:
+        ///     <list type="bullet">
+        ///         <item>
+        ///             must expose a valid <see cref="TableDescriptor"/>.
+        ///             See <see cref="TableDescriptorFactory.TryCreate(Type, ITableConfigurationsSerializer, out TableDescriptor)"/>
+        ///             for details on how a table is to expose a descriptor.
+        ///         </item>
+        ///     </list>
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Candidate <see cref="Type"/> for the <see cref="ITableExtensionReference"/>
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <param name="reference">
+        ///     Out <see cref="ITableExtensionReference"/>
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if the <paramref name="candidateType"/> is valid and can create a instance of <see cref="ISourceDataCookerReference"/>;
+        ///     <c>false</c> otherwise.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="candidateType"/> is <c>null</c>.
+        /// </exception>
+        internal static bool TryCreateReference(
+            Type candidateType,
+            ILogger logger,
+            out ITableExtensionReference reference)
+        {
+            Debug.Assert(candidateType != null, $"{nameof(candidateType)} cannot be null.");
 
             reference = null;
+
+            if (logger == null)
+            {
+                logger = Logger.Create<TableExtensionReference>();
+            }
 
             if (TableDescriptorFactory.TryCreate(
                     candidateType,
                     tableConfigSerializer,
+                    logger,
                     out var tableDescriptor,
                     out var tableBuildAction,
                     out var tableIsDataAvailableFunc))

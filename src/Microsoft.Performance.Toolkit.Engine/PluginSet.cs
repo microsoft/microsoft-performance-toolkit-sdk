@@ -355,7 +355,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 var factory = new DataExtensionFactory();
                 repo = factory.CreateDataExtensionRepository();
 
-                var reflector = new DataExtensionReflector(assemblyDiscovery, repo);
+                var reflector = new DataExtensionReflector(assemblyDiscovery, repo, logger);
 
                 assemblyDiscovery.ProcessAssemblies(extensionDirectoriesFullPaths, out var discoveryError);
 
