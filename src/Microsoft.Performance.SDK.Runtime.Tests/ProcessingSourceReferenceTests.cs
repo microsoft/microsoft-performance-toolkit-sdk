@@ -8,11 +8,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Performance.SDK.Options;
 using Microsoft.Performance.SDK.Options.Definitions;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.DataSourceGrouping;
-using Microsoft.Performance.SDK.Runtime.Options;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -634,7 +632,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         }
 
         [ProcessingSource("{2D5E3373-88DA-4640-BD19-99FA8C437EB1}", "What", "Test")]
-        [FileDataSource("ext")]
+        [FileDataSource("ext1")]
+        [FileDataSource("ext2")]
         [ExtensionlessFileDataSource("No description")]
         [DirectoryDataSource("No description")]
         public class MultiDataSourceCds
