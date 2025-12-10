@@ -219,6 +219,19 @@ namespace Microsoft.Performance.SDK
         private static unsafe int _wcstcmpWithNumericExceptions<TCharTraits>(char* string1, char* string2)
             where TCharTraits : ICharTraits, new()
         {
+            if (string1 == string2)
+            {
+                return firstEqualsSecond;
+            }
+            else if (string1 == null)
+            {
+                return firstLessThanSecond;
+            }
+            else if (string2 == null)
+            {
+                return secondLessThanFirst;
+            }
+
             var charTraits = new TCharTraits();
 
             bool fTreatAsNegative = false;
