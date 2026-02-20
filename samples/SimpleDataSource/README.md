@@ -15,5 +15,5 @@ See `SampleTextFile.txt` for an example of a file with this format.
 2. [.NET Standard 2.0](https://dotnet.microsoft.com/download/visual-studio-sdks)
 
 # Instructions
-Please refer to [Using the SDK/Creating a Simple SDK Plugin](../../documentaiton/Using-the-SDK/Creating-a-simple-sdk-plugin.md) for details 
+Please refer to [Using the SDK/Creating a Simple SDK Plugin](../../documentation/Using-the-SDK/Creating-a-simple-sdk-plugin.md) for details 
 on how to implement this source code.

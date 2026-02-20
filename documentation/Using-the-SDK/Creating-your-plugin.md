@@ -47,7 +47,7 @@ Please refer to the links above to download and install the necessary requiremen
 1) Launch Visual Studio
 2) Click "Create new project"  
  ![VS2019_Create_New_Project.PNG](./.attachments/VS2019_CreateProject_Markup.png)
-3) Select .NET Standard on the left, and choose "Class Library (.NET Standard)." Make sure that you are using .NET Standard 2.0, or a .NET version that supports .NET Standard 2.0 (such as .NET Core 3.1, .NET 6, etc.).
+3) Select .NET Standard on the left, and choose "Class Library (.NET Standard)." Make sure that you are using .NET Standard 2.0, or a .NET version that supports .NET Standard 2.0 (such as .NET 8). The .NET version cannot be higher than WPA's .NET version (.NET 8).
  ![VS2019_New_DotNetStandard_20_Project.PNG](./.attachments/VS2019_CreateProject_ClassLibrary_Markup.png)
 4) Name your project
 5) Click "Create"

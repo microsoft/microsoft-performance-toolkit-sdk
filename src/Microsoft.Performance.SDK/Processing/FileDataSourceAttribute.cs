@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     files of a specific type. This is used to instruct callers to route files
     ///     with a given extension to the decorated <see cref="IProcessingSource"/> for processing.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class FileDataSourceAttribute
         : DataSourceAttribute,
           IEquatable<FileDataSourceAttribute>

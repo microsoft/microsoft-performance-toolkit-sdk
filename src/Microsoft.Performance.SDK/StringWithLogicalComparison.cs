@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+#nullable enable
+
 using System;
 
 namespace Microsoft.Performance.SDK
@@ -14,7 +16,7 @@ namespace Microsoft.Performance.SDK
           IComparable,
           IFormattable
     {
-        private readonly string source;
+        private readonly string? source;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="StringWithLogicalComparison"/>
@@ -83,13 +85,13 @@ namespace Microsoft.Performance.SDK
         /// <inheritdoc />
         public override string ToString()
         {
-            return this.source;
+            return this.source ?? string.Empty;
         }
 
         /// <inheritdoc />
         public string ToString(string format, IFormatProvider formatProvider)
         {
-            return this.source;
+            return ToString();
         }
     }
 }
