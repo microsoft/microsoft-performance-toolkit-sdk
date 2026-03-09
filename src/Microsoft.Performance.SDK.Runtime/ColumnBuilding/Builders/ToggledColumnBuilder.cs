@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -69,7 +69,7 @@ internal class ToggledColumnBuilder
                     new DataColumn<T>(
                         new ColumnConfiguration(this.baseColumn.Configuration)
                         {
-                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name },
                         },
                         projection))
             ).ToList(),
@@ -88,17 +88,17 @@ internal class ToggledColumnBuilder
         Guard.NotNull(collectionProvider, nameof(collectionProvider));
 
         return new ToggledColumnBuilder(
-            [
+            this.toggles.Append(
                 new AddedToggle(
                     toggleDescriptor,
                     new HierarchicalDataColumn<T>(
                         new ColumnConfiguration(this.baseColumn.Configuration)
                         {
-                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                            Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name },
                         },
                         projection,
-                        collectionProvider)),
-            ],
+                        collectionProvider))
+                ).ToList(),
             baseColumn,
             processor);
     }
