@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK
 {
     /// <summary>
     /// Abstract helper for Time based objects
-    /// <see cref="Timestamp"/>, <see cref="TimestampDelta"/>, <see cref="TimeRange"/>.
+    /// <see cref="Timestamp"/>, <see cref="TimestampDelta"/>, <see cref="TimeRange"/>, <see cref="ResourceTimeRange"/>.
     /// <inheritdoc cref="IFormatProvider"/>
     /// </summary>
     [DefaultFormat(TimestampFormatter.FormatSecondsGrouped)]
@@ -37,6 +37,11 @@ namespace Microsoft.Performance.SDK
             {
                 var timeRange = (TimeRange)arg;
                 return TimestampFormatter.ToString(timeRange.Duration.ToNanoseconds, format, formatProvider);
+            }
+            else if (arg is ResourceTimeRange)
+            {
+                var resourceTimeRange = (ResourceTimeRange)arg;
+                return TimestampFormatter.ToString(resourceTimeRange.Duration.ToNanoseconds, format, formatProvider);
             }
             else if (arg is TimestampDelta)
             {
@@ -75,4 +80,10 @@ namespace Microsoft.Performance.SDK
     /// <inheritdoc cref="IFormatProvider"/>
     /// </summary>
     public sealed class TimeRangeFormatProvider : TimeFormatProvider { }
+
+    /// <summary>
+    /// Format Provider for <see cref="ResourceTimeRange"/>.
+    /// <inheritdoc cref="IFormatProvider"/>
+    /// </summary>
+    public sealed class ResourceTimeRangeFormatProvider : TimeFormatProvider { }
 }
