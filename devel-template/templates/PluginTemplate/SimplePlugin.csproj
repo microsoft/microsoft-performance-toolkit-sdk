@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+		<PluginToolVersion>0.1.48-preview.g2c726e2004</PluginToolVersion>
+		<PluginToolFeed>https://pkgs.dev.azure.com/perftoolkit/_packaging/PerfToolKit.Developer/nuget/v3/index.json</PluginToolFeed>
+    </PropertyGroup>
+	
+    <ItemGroup>
+      <Compile Remove="scripts\**" />
+      <EmbeddedResource Remove="scripts\**" />
+      <None Remove="scripts\**" />
+    </ItemGroup>
+    <ItemGroup>
+	  <ContentWithTargetPath Include="pluginManifest.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <TargetPath>pluginManifest.json</TargetPath>
+      </ContentWithTargetPath>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Performance.SDK" Version="1.1.13" />
+    </ItemGroup>
+
+	<Target Name="PackageToPlugin" BeforeTargets="Pack">
+		<Exec Command="scripts\PackageToPlugin.cmd $(OutputPath) $(PluginToolVersion) $(PluginToolFeed) $(PackageOutputPath)" />
+	</Target>
+</Project>
