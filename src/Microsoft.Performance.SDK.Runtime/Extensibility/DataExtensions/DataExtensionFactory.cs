@@ -7,7 +7,6 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -19,13 +18,13 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
     public class DataExtensionFactory
         : IDataExtensionFactory
     {
-        private static readonly DataExtensionRepository SingletonRepository 
+        private static readonly DataExtensionRepository SingletonRepository
             = new DataExtensionRepository();
 
         /// <summary>
         ///     Gets a singleton instance of this class.
         /// </summary>
-        public IDataExtensionRepositoryBuilder SingletonDataExtensionRepository 
+        public IDataExtensionRepositoryBuilder SingletonDataExtensionRepository
             => DataExtensionFactory.SingletonRepository;
 
         /// <summary>
@@ -44,9 +43,32 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ISourceDataCookerReference reference)
         {
+            return TryCreateSourceDataCookerReference(candidateType, null, out reference);
+        }
+
+        /// <summary>
+        ///     Generate a source data cooker reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Data extension type.
+        /// </param>
+        /// <param name="reference">
+        ///     Data extension reference.
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if succeeded, <c>false</c> otherwise.
+        /// </returns>
+        public bool TryCreateSourceDataCookerReference(
+            Type candidateType,
+            ILogger logger,
+            out ISourceDataCookerReference reference)
+        {
             Guard.NotNull(candidateType, nameof(candidateType));
 
-            return SourceDataCookerReference.TryCreateReference(candidateType, out reference);
+            return SourceDataCookerReference.TryCreateReference(candidateType, logger, out reference);
         }
 
         /// <summary>
@@ -65,9 +87,32 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ICompositeDataCookerReference reference)
         {
+            return TryCreateCompositeDataCookerReference(candidateType, null, out reference);
+        }
+
+        /// <summary>
+        ///     Generate a composite data cooker reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Data extension type.
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <param name="reference">
+        ///     Data extension reference.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if succeeded, <c>false</c> otherwise.
+        /// </returns>
+        public bool TryCreateCompositeDataCookerReference(
+            Type candidateType,
+            ILogger logger,
+            out ICompositeDataCookerReference reference)
+        {
             Guard.NotNull(candidateType, nameof(candidateType));
 
-            return CompositeDataCookerReference.TryCreateReference(candidateType, out reference);
+            return CompositeDataCookerReference.TryCreateReference(candidateType, logger, out reference);
         }
 
         // TODO: __SDK_DP__
@@ -109,9 +154,32 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
             Type candidateType,
             out ITableExtensionReference reference)
         {
+            return TryCreateTableReference(candidateType, null, out reference);
+        }
+
+        /// <summary>
+        ///     Generate a table reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        ///     Data extension type.
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <param name="reference">
+        ///     Data extension reference.
+        /// </param>
+        /// <returns>
+        ///     <c>true</c> if succeeded, <c>false</c> otherwise.
+        /// </returns>
+        public bool TryCreateTableReference(
+            Type candidateType,
+            ILogger logger,
+            out ITableExtensionReference reference)
+        {
             Guard.NotNull(candidateType, nameof(candidateType));
 
-            return TableExtensionReference.TryCreateReference(candidateType, out reference);
+            return TableExtensionReference.TryCreateReference(candidateType, logger, out reference);
         }
 
         /// <summary>
