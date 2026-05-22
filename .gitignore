@@ -351,3 +351,7 @@ MigrationBackup/
 
 # Jetbrains IDEs
 src/.idea
+
+# Generated XML documentation files
+src/Microsoft.Performance.SDK/Microsoft.Performance.SDK.xml
+src/Microsoft.Performance.Toolkit.Engine/Microsoft.Performance.Toolkit.Engine.xml
