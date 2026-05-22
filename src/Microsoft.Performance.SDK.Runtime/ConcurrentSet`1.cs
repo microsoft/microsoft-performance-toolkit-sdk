@@ -22,8 +22,22 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     that is empty and uses the default equality comparer for the set type.
         /// </summary>
         public ConcurrentSet()
+            : this(comparer: null)
         {
-            this.items = new ConcurrentDictionary<T, object>();
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ConcurrentSet{T}"/> class
+        ///     that is empty and uses the specified equality comparer for the set type.
+        /// </summary>
+        /// <param name="comparer">
+        ///     The <see cref="IEqualityComparer{T}"/> implementation to use when comparing
+        ///     values in the set, or <c>null</c> to use the default equality comparer for
+        ///     the type.
+        /// </param>
+        public ConcurrentSet(IEqualityComparer<T> comparer)
+        {
+            this.items = new ConcurrentDictionary<T, object>(comparer);
         }
 
         /// <summary>
@@ -36,8 +50,27 @@ namespace Microsoft.Performance.SDK.Runtime
         ///     The collection whose elements are copied to the new set.
         /// </param>
         public ConcurrentSet(IEnumerable<T> items)
+            : this(items, null)
         {
-            this.items = new ConcurrentDictionary<T, object>();
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ConcurrentSet{T}"/> class
+        ///     that uses the specified equality comparer for the set type, contains elements copied
+        ///     from the specified collection, and has sufficient capacity to accommodate the
+        ///     number of elements copied.
+        /// </summary>
+        /// <param name="items">
+        ///     The collection whose elements are copied to the new set.
+        /// </param>
+        /// <param name="comparer">
+        ///     The <see cref="IEqualityComparer{T}"/> implementation to use when comparing
+        ///     values in the set, or <c>null</c> to use the default equality comparer for
+        ///     the type.
+        /// </param>
+        public ConcurrentSet(IEnumerable<T> items, IEqualityComparer<T> comparer)
+        {
+            this.items = new ConcurrentDictionary<T, object>(comparer);
             foreach (T item in items)
             {
                 Add(item);
