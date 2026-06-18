@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using Microsoft.Performance.SDK.Processing;
@@ -66,7 +66,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.GetAllAsync(CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<RepositoryCorruptedException>(() => sut.GetAllAsync(CancellationToken.None));
         }
 
         [TestMethod]
@@ -95,7 +95,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
                 var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-                await Assert.ThrowsExceptionAsync<RepositoryDataAccessException>(() => sut.GetAllAsync(CancellationToken.None));
+                await Assert.ThrowsExactlyAsync<RepositoryDataAccessException>(() => sut.GetAllAsync(CancellationToken.None));
             }
         }
 
@@ -117,7 +117,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeSerializer.Object,
                 fakeLoggerFactory);
 
-            RepositoryCorruptedException e = await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.GetAllAsync(CancellationToken.None));
+            RepositoryCorruptedException e = await Assert.ThrowsExactlyAsync<RepositoryCorruptedException>(() => sut.GetAllAsync(CancellationToken.None));
             Assert.AreSame(exception, e.InnerException);
             fakeLogger.Verify(l => l.Error(exception, It.IsAny<string>()));
         }
@@ -199,7 +199,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<RepositoryCorruptedException>(() => sut.TryGetByIdAsync(fakeInstalledPluginInfo.Metadata.Identity.Id, CancellationToken.None));
         }
 
         #endregion
@@ -255,7 +255,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<RepositoryCorruptedException>(() => sut.ExistsAsync(fakeInstalledPluginInfo, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<RepositoryCorruptedException>(() => sut.ExistsAsync(fakeInstalledPluginInfo, CancellationToken.None));
         }
 
         #endregion
@@ -327,7 +327,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.AddAsync(plugin1, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => sut.AddAsync(plugin1, CancellationToken.None));
         }
 
         #endregion
@@ -343,7 +343,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 () => sut.DeleteAsync(fakeInstalledPluginInfo, CancellationToken.None));
         }
 
@@ -394,7 +394,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.DeleteAsync(plugin2, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => sut.DeleteAsync(plugin2, CancellationToken.None));
         }
 
 
@@ -417,7 +417,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.DeleteAsync(plugin2, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => sut.DeleteAsync(plugin2, CancellationToken.None));
         }
 
         #endregion
@@ -435,7 +435,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 () => sut.UpdateAsync(fakeInstalledPluginInfo, fakeUpdatedPluginInfo, CancellationToken.None));
         }
 
@@ -450,7 +450,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(
                 () => sut.UpdateAsync(fakeInstalledPluginInfo, toUpdate, CancellationToken.None));
         }
 
@@ -469,7 +469,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.UpdateAsync(current, toUpdate, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => sut.UpdateAsync(current, toUpdate, CancellationToken.None));
         }
 
         [TestMethod]
@@ -490,7 +490,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
 
             var sut = new FileBackedPluginRegistry(this.registryRoot, fakeSerializer.Object);
 
-            await Assert.ThrowsExceptionAsync<InvalidOperationException>(() => sut.UpdateAsync(current, toUpdate, CancellationToken.None));
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(() => sut.UpdateAsync(current, toUpdate, CancellationToken.None));
         }
 
         [TestMethod]

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void NullDescriptionThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new ExtensionlessFileDataSourceAttribute(null));
         }
 
@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void WhitespaceDescriptionThrows()
         {
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => new ExtensionlessFileDataSourceAttribute(string.Empty));
         }
 

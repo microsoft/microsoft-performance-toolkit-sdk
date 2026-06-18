@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using Microsoft.CodeAnalysis;
@@ -115,7 +115,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
                         // If this Assert is hit, the SDK was likely updated to break
                         // the processing source definitions used to test this class
-                        Assert.Fail("ProcessingSource {0} failed to compile", plugin);
+                        Assert.Fail($"ProcessingSource {plugin} failed to compile");
                     }
                     else
                     {
@@ -130,7 +130,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public void NullDirectoryThrows()
         {
             (var loader, _) = Setup(true);
-            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugin(null, out _));
+            Assert.ThrowsExactly<ArgumentNullException>(() => loader.TryLoadPlugin(null, out _));
         }
         
         [TestMethod]
@@ -138,7 +138,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public async Task NullDirectoryThrowsAsync()
         {
             (var loader, _) = Setup(true);
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => loader.TryLoadPluginAsync(null));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => loader.TryLoadPluginAsync(null));
         }
 
         [TestMethod]
@@ -146,7 +146,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public void NullDirectoriesThrows()
         {
             (var loader, _) = Setup(true);
-            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugins(null, out _));
+            Assert.ThrowsExactly<ArgumentNullException>(() => loader.TryLoadPlugins(null, out _));
         }
         
         [TestMethod]
@@ -154,7 +154,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public async Task NullDirectoriesThrowsAsync()
         {
             (var loader, _) = Setup(true);
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => loader.TryLoadPluginsAsync(null));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => loader.TryLoadPluginsAsync(null));
         }
         
         [TestMethod]
@@ -162,7 +162,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public void NullDirectoryInDirectoriesThrows()
         {
             (var loader, _) = Setup(true);
-            Assert.ThrowsException<ArgumentNullException>(() => loader.TryLoadPlugins(new List<string>() { "foo", null }, out _));
+            Assert.ThrowsExactly<ArgumentNullException>(() => loader.TryLoadPlugins(new List<string>() { "foo", null }, out _));
         }
         
         [TestMethod]
@@ -170,7 +170,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         public async Task NullDirectoryInDirectoriesThrowsAsync()
         {
             (var loader, _) = Setup(true);
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => loader.TryLoadPluginsAsync(new List<string>() { "foo", null }));
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(() => loader.TryLoadPluginsAsync(new List<string>() { "foo", null }));
         }
         
         [TestMethod]
@@ -635,9 +635,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             // Assert blocking observed first plugin
             Assert.AreEqual(expected0.Length,
                 blockingConsumer.ObservedDataSources.Count,
-                "Blocking consumer observed {0} data sources but should have observed {1}",
-                blockingConsumer.ObservedDataSources.Count,
-                expected0.Length);
+                $"Blocking consumer observed {blockingConsumer.ObservedDataSources.Count} data sources but should have observed {expected0.Length}");
             AssertObservedCDSs(expected0, blockingConsumer);
 
             // Allow InvalidB to be processed
@@ -660,16 +658,16 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
             {
                 sut.Dispose();
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.LoadedProcessingSources);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.LoadedProcessingSources);
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Subscribe(new MockPluginsConsumer()));
-                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.SubscribeAsync(new MockPluginsConsumer()));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugin(Any.FilePath(), out _));
-                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginAsync(Any.FilePath()));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryLoadPlugins(new[] { Any.FilePath(), }, out _));
-                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.TryLoadPluginsAsync(new[] { Any.FilePath(), }));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Unsubscribe(new MockPluginsConsumer()));
-                await Assert.ThrowsExceptionAsync<ObjectDisposedException>(() => sut.UnsubscribeAsync(new MockPluginsConsumer()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Subscribe(new MockPluginsConsumer()));
+                await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => sut.SubscribeAsync(new MockPluginsConsumer()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryLoadPlugin(Any.FilePath(), out _));
+                await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => sut.TryLoadPluginAsync(Any.FilePath()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryLoadPlugins(new[] { Any.FilePath(), }, out _));
+                await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => sut.TryLoadPluginsAsync(new[] { Any.FilePath(), }));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Unsubscribe(new MockPluginsConsumer()));
+                await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() => sut.UnsubscribeAsync(new MockPluginsConsumer()));
             }
         }
 
@@ -741,17 +739,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
         {
             Assert.AreEqual(expected,
                 loader.LoadedProcessingSources.Count(),
-                "The plugins loader reports having loaded {0} instead of {1} processing sources",
-                loader.LoadedProcessingSources.Count(),
-                expected);
+                $"The plugins loader reports having loaded {loader.LoadedProcessingSources.Count()} instead of {expected} processing sources");
             foreach (var consumer in consumers)
             {
                 Assert.AreEqual(expected,
                     consumer.ObservedDataSources.Count,
-                    "Consumer {0} observed {1} instead of {2} processing sources",
-                    consumer,
-                    consumer.ObservedDataSources.Count,
-                    expected);
+                    $"Consumer {consumer} observed {consumer.ObservedDataSources.Count} instead of {expected} processing sources");
             }
         }
 
@@ -794,22 +787,13 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins.Tests
 
                 Assert.AreEqual(expected.Guid,
                     actual.Guid,
-                    "The loaded ProcessingSource at index {0} had the GUID {1} instead of {2}",
-                    i,
-                    actual.Guid,
-                    expected.Guid);
+                    $"The loaded ProcessingSource at index {i} had the GUID {actual.Guid} instead of {expected.Guid}");
                 Assert.AreEqual(expected.Name,
                     actual.Name,
-                    "ProcessingSource {0} was loaded with the name {1} instead of {2}",
-                    actual.Guid,
-                    actual.Name,
-                    expected.Name);
+                    $"ProcessingSource {actual.Guid} was loaded with the name {actual.Name} instead of {expected.Name}");
                 Assert.AreEqual(expected.Description,
                     actual.Description,
-                    "ProcessingSource {0} was loaded with the description {1} instead of {2}",
-                    actual.Guid,
-                    actual.Description,
-                    expected.Description);
+                    $"ProcessingSource {actual.Guid} was loaded with the description {actual.Description} instead of {expected.Description}");
             }
         }
 

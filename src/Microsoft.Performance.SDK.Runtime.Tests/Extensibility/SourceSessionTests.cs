@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void Constructor_NullSourceParser_Throws()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new SourceProcessingSession<TestRecord, TestParserContext, int>(null));
         }
 
@@ -88,7 +88,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             var sourceParser = new TestSourceParser();
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser));
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var sourceParser = new TestSourceParser() { Id = "TestSourceParser" };
             var sourceSession = new SourceProcessingSession<TestRecord, TestParserContext, int>(sourceParser);
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => sourceSession.RegisterSourceDataCooker(null));
         }
 

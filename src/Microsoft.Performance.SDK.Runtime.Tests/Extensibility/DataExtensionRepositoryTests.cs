@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -33,19 +33,19 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         {
             this.Sut.Dispose();
 
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.CompositeDataCookers);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.CompositeDataCookers);
             // TODO: __SDK_DP__
             // Redesign Data Processor API
-            ////Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.DataProcessors);
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.SourceDataCookers);
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.TablesById);
+            ////Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.DataProcessors);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.SourceDataCookers);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.TablesById);
 
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetCompositeDataCookerReference(new DataCookerPath()));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.GetCompositeDataCookerReference(new DataCookerPath()));
             // TODO: __SDK_DP__
             // Redesign Data Processor API
-            ////Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetDataProcessorReference(new DataProcessorId()));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetSourceDataCookerFactory(new DataCookerPath()));
-            Assert.ThrowsException<ObjectDisposedException>(() => this.Sut.GetSourceDataCookerReference(new DataCookerPath()));
+            ////Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.GetDataProcessorReference(new DataProcessorId()));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.GetSourceDataCookerFactory(new DataCookerPath()));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => this.Sut.GetSourceDataCookerReference(new DataCookerPath()));
         }
 
         [TestMethod]

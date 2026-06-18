@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -38,7 +38,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSource_NullFile_Throws()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSource(null, typeof(Source123DataSource)));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddDataSource(null, typeof(Source123DataSource)));
         }
 
         [TestMethod]
@@ -46,7 +46,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void AddDataSource_NullType_Throws()
         {
             var file = CreateTestFile(".txt");
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSource(file, null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddDataSource(file, null));
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(this.Sut.Plugins.ProcessingSourceReferences.Any(x => x.Instance is Source123DataSource));
 
             var file = CreateTestFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedProcessingSourceException>(() => this.Sut.AddDataSource(file, typeof(ToolkitEngineTests)));
+            var e = Assert.ThrowsExactly<UnsupportedProcessingSourceException>(() => this.Sut.AddDataSource(file, typeof(ToolkitEngineTests)));
             Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedProcessingSource);
         }
 
@@ -71,7 +71,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(this.Sut.Plugins.ProcessingSourceReferences.Any(x => x.Instance is Source123DataSource));
 
             var file = CreateTestFile(".380298502");
-            var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => this.Sut.AddDataSource(file, typeof(Source123DataSource)));
+            var e = Assert.ThrowsExactly<UnsupportedDataSourceException>(() => this.Sut.AddDataSource(file, typeof(Source123DataSource)));
             Assert.AreEqual(file.Uri.ToString(), e.DataSource);
             Assert.AreEqual(typeof(Source123DataSource).FullName, e.RequestedProcessingSource);
         }
@@ -117,7 +117,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSourceOnly_Null_Throws()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSource(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddDataSource(null));
         }
 
         [TestMethod]
@@ -132,7 +132,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             {
 
                 var file = CreateTestFile(".380298502");
-                var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => this.Sut.AddDataSource(file));
+                var e = Assert.ThrowsExactly<UnsupportedDataSourceException>(() => this.Sut.AddDataSource(file));
                 Assert.AreEqual(file.Uri.ToString(), e.DataSource);
                 Assert.IsNull(e.RequestedProcessingSource);
             }
@@ -287,7 +287,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_NullFiles_Throws()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSources(null, typeof(Source123DataSource)));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddDataSources(null, typeof(Source123DataSource)));
         }
 
 
@@ -295,14 +295,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [IntegrationTest]
         public void AddDataSources_EmptyFiles_Throws()
         {
-            Assert.ThrowsException<ArgumentException>(() => this.Sut.AddDataSources(new IDataSource[0], typeof(Source123DataSource)));
+            Assert.ThrowsExactly<ArgumentException>(() => this.Sut.AddDataSources(new IDataSource[0], typeof(Source123DataSource)));
         }
 
         [TestMethod]
         [IntegrationTest]
         public void AddDataSources_ContainsNullFiles_Throws()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSources(new[] { (IDataSource)null, }, typeof(Source123DataSource)));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddDataSources(new[] { (IDataSource)null, }, typeof(Source123DataSource)));
         }
 
         [TestMethod]
@@ -310,7 +310,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         public void AddDataSources_NullType_Throws()
         {
             var file = CreateTestFile(".txt");
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddDataSources(new[] { file, }, null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddDataSources(new[] { file, }, null));
         }
 
         [TestMethod]
@@ -320,7 +320,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             Assert.IsTrue(this.Sut.Plugins.ProcessingSourceReferences.Any(x => x.Instance is Source123DataSource));
 
             var file = CreateTestFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedProcessingSourceException>(() => this.Sut.AddDataSources(new[] { file, }, typeof(ToolkitEngineTests)));
+            var e = Assert.ThrowsExactly<UnsupportedProcessingSourceException>(() => this.Sut.AddDataSources(new[] { file, }, typeof(ToolkitEngineTests)));
             Assert.AreEqual(typeof(ToolkitEngineTests).FullName, e.RequestedProcessingSource);
         }
 
@@ -332,7 +332,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var file1 = CreateTestFile(Source123DataSource.Extension);
             var file2 = CreateTestFile(Source123DataSource.Extension);
-            var e = Assert.ThrowsException<UnsupportedDataSourceException>(() => this.Sut.AddDataSources(new[] { file1, file2, }, typeof(Source4DataSource)));
+            var e = Assert.ThrowsExactly<UnsupportedDataSourceException>(() => this.Sut.AddDataSources(new[] { file1, file2, }, typeof(Source4DataSource)));
 
             Assert.AreEqual(file1.Uri.ToString(), e.DataSource);
             Assert.AreEqual(typeof(Source4DataSource).FullName, e.RequestedProcessingSource);

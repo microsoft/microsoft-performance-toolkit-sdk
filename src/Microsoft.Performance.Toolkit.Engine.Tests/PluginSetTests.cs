@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -43,7 +43,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var file = Path.Combine(this.Scratch.FullName, "test.txt");
             File.WriteAllText(file, "test");
 
-            var e = Assert.ThrowsException<InvalidExtensionDirectoryException>(() => PluginSet.Load(file));
+            var e = Assert.ThrowsExactly<InvalidExtensionDirectoryException>(() => PluginSet.Load(file));
             Assert.AreEqual(file, e.Path);
         }
 
@@ -53,7 +53,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         {
             var doesNotExist = Path.Combine(this.Scratch.FullName, "doesNotExist");
 
-            var e = Assert.ThrowsException<InvalidExtensionDirectoryException>(() => PluginSet.Load(doesNotExist));
+            var e = Assert.ThrowsExactly<InvalidExtensionDirectoryException>(() => PluginSet.Load(doesNotExist));
             Assert.AreEqual(doesNotExist, e.Path);
         }
 
@@ -100,7 +100,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var dir1 = this.Scratch.CreateSubdirectory("Dir1");
             var dirDoesNotExist = Path.Combine(this.Scratch.FullName, "doesNotExist");
 
-            var e = Assert.ThrowsException<InvalidExtensionDirectoryException>(() => PluginSet.Load(new[] { dir1.FullName, dirDoesNotExist }));
+            var e = Assert.ThrowsExactly<InvalidExtensionDirectoryException>(() => PluginSet.Load(new[] { dir1.FullName, dirDoesNotExist }));
             Assert.AreEqual(dirDoesNotExist, e.Path);
         }
 

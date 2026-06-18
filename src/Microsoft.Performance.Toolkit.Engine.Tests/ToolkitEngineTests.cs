@@ -50,20 +50,20 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
         [UnitTest]
         public void Create_NullParameters_Throw()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Engine.Create((EngineCreateInfo)null));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Engine.Create((IDataSource)null));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Engine.Create((IDataSource)null, typeof(Source123Processor)));
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Engine.Create(Any.DataSource(), null));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Engine.Create((IEnumerable<IDataSource>)null, typeof(Source123Processor)));
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Engine.Create(new[] { Any.DataSource(), }, null));
         }
 
@@ -87,7 +87,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             var info = new EngineCreateInfo(dataSources.AsReadOnly());
             using var sut = Engine.Create(info);
 
-            Assert.AreNotSame(dataSources, sut.DataSourcesToProcess);
+            Assert.AreNotSame<object>(dataSources, sut.DataSourcesToProcess);
             Assert.AreEqual(1, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Count());
             Assert.AreEqual(file, sut.DataSourcesToProcess.FreeDataSourcesToProcess.Single());
         }
@@ -236,7 +236,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var cooker = DataCookerPath.ForComposite("not-there-id");
 
-            var e = Assert.ThrowsException<CookerNotFoundException>(() => sut.EnableCooker(cooker));
+            var e = Assert.ThrowsExactly<CookerNotFoundException>(() => sut.EnableCooker(cooker));
             Assert.AreEqual(cooker, e.DataCookerPath);
         }
 
@@ -248,7 +248,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             sut.Process();
 
-            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableCooker(this.DefaultSet.Plugins.AllCookers.First()));
+            Assert.ThrowsExactly<InstanceAlreadyProcessedException>(() => sut.EnableCooker(this.DefaultSet.Plugins.AllCookers.First()));
         }
 
         [TestMethod]
@@ -260,7 +260,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             using var sut = Engine.Create(createInfo);
 
-            Assert.ThrowsException<NoDataSourceException>(() => sut.EnableCooker(Source4DataCooker.DataCookerPath));
+            Assert.ThrowsExactly<NoDataSourceException>(() => sut.EnableCooker(Source4DataCooker.DataCookerPath));
         }
 
         #endregion Enable Cooker
@@ -369,7 +369,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             var table = new TableDescriptor(Guid.NewGuid(), "Unknown Table", "Unknown Table");
 
-            var e = Assert.ThrowsException<TableNotFoundException>(() => sut.EnableTable(table));
+            var e = Assert.ThrowsExactly<TableNotFoundException>(() => sut.EnableTable(table));
             Assert.AreEqual(table, e.Descriptor);
         }
 
@@ -381,7 +381,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             sut.Process();
 
-            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.EnableTable(sut.AvailableTables.First()));
+            Assert.ThrowsExactly<InstanceAlreadyProcessedException>(() => sut.EnableTable(sut.AvailableTables.First()));
         }
 
         #endregion EnableTable
@@ -652,7 +652,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             foreach (var throwingTable in testCase.ThrowingTables)
             {
-                Assert.ThrowsException<TableNotEnabledException>(() => result.BuildTable(sut.AvailableTables.Single(x => x.Guid == Guid.Parse(throwingTable))));
+                Assert.ThrowsExactly<TableNotEnabledException>(() => result.BuildTable(sut.AvailableTables.Single(x => x.Guid == Guid.Parse(throwingTable))));
             }
         }
 
@@ -753,7 +753,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             sut.Process();
 
-            Assert.ThrowsException<InstanceAlreadyProcessedException>(() => sut.Process());
+            Assert.ThrowsExactly<InstanceAlreadyProcessedException>(() => sut.Process());
         }
 
         [TestMethod]
@@ -789,13 +789,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForSource(cooker.SourceParserId, cooker.DataCookerId);
-                Assert.IsTrue(sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+                Assert.IsTrue(sut.TryEnableCooker(cookerPath), $"Unable to enable cooker '{cookerPath}'");
             }
 
             foreach (var cooker in testCase.CompositeCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForComposite(cooker.DataCookerId);
-                Assert.IsTrue(sut.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+                Assert.IsTrue(sut.TryEnableCooker(cookerPath), $"Unable to enable cooker '{cookerPath}'");
             }
 
             var results = sut.Process();
@@ -808,16 +808,14 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 var enumerableData = data as IEnumerable;
                 Assert.IsNotNull(
                     enumerableData,
-                    "Test output data must implement IEnumerable<> (type wasn't enumerable): '{0}'",
-                    data.GetType());
+                    $"Test output data must implement IEnumerable<> (type wasn't enumerable): '{data.GetType()}'");
                 var enumerableType = enumerableData.GetType();
                 var eInterface = enumerableType.GetInterface(typeof(IEnumerable<>).Name);
                 Assert.IsNotNull(
                     eInterface,
-                    "Test output data must implement IEnumerable<> (interface wasn't found): {0}",
-                    string.Join(", ", data.GetType().GetInterfaces().Select(x => x.FullName)));
+                    $"Test output data must implement IEnumerable<> (interface wasn't found): {string.Join(", ", data.GetType().GetInterfaces().Select(x => x.FullName))}");
                 var collectionType = eInterface.GetGenericArguments()[0];
-                Assert.IsNotNull(collectionType, "Unable to retrieve collection type for {0}", data.GetType());
+                Assert.IsNotNull(collectionType, $"Unable to retrieve collection type for {data.GetType()}");
 
                 var enumeratedData = new List<object>();
                 foreach (var o in enumerableData)
@@ -828,8 +826,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 Assert.AreEqual(
                     expectedDataPoints.Length,
                     enumeratedData.Count,
-                    "The processor did not process the correct amount of data: {0}",
-                    dataOutputPath);
+                    $"The processor did not process the correct amount of data: {dataOutputPath}");
 
                 var properties = collectionType.GetProperties()
                     .ToDictionary(x => x.Name, x => x, StringComparer.InvariantCultureIgnoreCase);
@@ -859,19 +856,16 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
                 Assert.IsTrue(
                     results.TryQueryOutput(dataOutputPath, out object data),
-                    "Output for {0} not found.",
-                    dataOutputPathRaw);
-                Assert.IsNotNull(data, "output for {0} was null ???", dataOutputPathRaw);
+                    $"Output for {dataOutputPathRaw} not found.");
+                Assert.IsNotNull(data, $"output for {dataOutputPathRaw} was null ???");
                 assertOutput(expectedDataPoints, data, dataOutputPath);
 
                 Assert.IsTrue(
                     results.TryGetCookedData(dataOutputPath.CookerPath, out var co),
-                    "Unable to retrieve CookerOutput: {0}",
-                    dataOutputPath.CookerPath);
+                    $"Unable to retrieve CookerOutput: {dataOutputPath.CookerPath}");
                 Assert.IsTrue(
                     co.TryQueryOutput(dataOutputPath.OutputId, out data),
-                    "Output on CookedData {0} not found.",
-                    dataOutputPathRaw);
+                    $"Output on CookedData {dataOutputPathRaw} not found.");
                 assertOutput(expectedDataPoints, data, dataOutputPath);
             }
 
@@ -891,16 +885,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
                 Assert.IsFalse(
                     results.TryQueryOutput(dataOutputPath, out var _),
-                    "Output should not have been available: {0}",
-                    dataOutputPathRaw);
+                    $"Output should not have been available: {dataOutputPathRaw}");
                 Assert.IsTrue(
                     results.TryGetCookedData(dataOutputPath.CookerPath, out var co),
-                    "Source Output should have been available: {0}",
-                    dataOutputPathRaw);
+                    $"Source Output should have been available: {dataOutputPathRaw}");
                 Assert.IsFalse(
                     co.TryQueryOutput(dataOutputPath.OutputId, out var _),
-                    "Output should not have been available: {0}",
-                    dataOutputPathRaw);
+                    $"Output should not have been available: {dataOutputPathRaw}");
             }
 
             foreach (var kvp in throwingCompositePaths)
@@ -910,12 +901,10 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
                 Assert.IsFalse(
                     results.TryQueryOutput(dataOutputPath, out var _),
-                    "Output should not have been available: {0}",
-                    dataOutputPathRaw);
+                    $"Output should not have been available: {dataOutputPathRaw}");
                 Assert.IsFalse(
                     results.TryGetCookedData(dataOutputPath.CookerPath, out var _),
-                    "Composite Output should not have been available: {0}",
-                    dataOutputPathRaw);
+                    $"Composite Output should not have been available: {dataOutputPathRaw}");
             }
         }
 
@@ -965,13 +954,13 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             foreach (var cooker in testCase.SourceCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForSource(cooker.SourceParserId, cooker.DataCookerId);
-                Assert.IsTrue(runtime.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+                Assert.IsTrue(runtime.TryEnableCooker(cookerPath), $"Unable to enable cooker '{cookerPath}'");
             }
 
             foreach (var cooker in testCase.CompositeCookersToEnable ?? Array.Empty<EngineProcessDataCookerPathDto>())
             {
                 var cookerPath = DataCookerPath.ForComposite(cooker.DataCookerId);
-                Assert.IsTrue(runtime.TryEnableCooker(cookerPath), "Unable to enable cooker '{0}'", cookerPath);
+                Assert.IsTrue(runtime.TryEnableCooker(cookerPath), $"Unable to enable cooker '{cookerPath}'");
             }
 
             var results = runtime.Process();
@@ -983,22 +972,20 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 DataOutputPath dataOutputPath = Parse(dataOutputPathRaw);
 
                 Assert.IsTrue(
-                    results.TryQueryOutput(dataOutputPath, out object data), "Output for {0} not found.", dataOutputPathRaw);
-                Assert.IsNotNull(data, "output for {0} was null ???", dataOutputPathRaw);
+                    results.TryQueryOutput(dataOutputPath, out object data), $"Output for {dataOutputPathRaw} not found.");
+                Assert.IsNotNull(data, $"output for {dataOutputPathRaw} was null ???");
 
                 var enumerableData = data as IEnumerable;
                 Assert.IsNotNull(
                     enumerableData,
-                    "Test output data must implement IEnumerable<> (type wasn't enumerable): '{0}'",
-                    data.GetType());
+                    $"Test output data must implement IEnumerable<> (type wasn't enumerable): '{data.GetType()}'");
                 var enumerableType = enumerableData.GetType();
                 var eInterface = enumerableType.GetInterface(typeof(IEnumerable<>).Name);
                 Assert.IsNotNull(
                     eInterface,
-                    "Test output data must implement IEnumerable<> (interface wasn't found): {0}",
-                    string.Join(", ", data.GetType().GetInterfaces().Select(x => x.FullName)));
+                    $"Test output data must implement IEnumerable<> (interface wasn't found): {string.Join(", ", data.GetType().GetInterfaces().Select(x => x.FullName))}");
                 var collectionType = eInterface.GetGenericArguments()[0];
-                Assert.IsNotNull(collectionType, "Unable to retrieve collection type for {0}", data.GetType());
+                Assert.IsNotNull(collectionType, $"Unable to retrieve collection type for {data.GetType()}");
 
                 var enumeratedData = new List<object>();
                 foreach (var o in enumerableData)
@@ -1009,8 +996,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 Assert.AreEqual(
                     expectedDataPoints.Length,
                     enumeratedData.Count,
-                    "The processor did not process the correct amount of data: {0}",
-                    dataOutputPath);
+                    $"The processor did not process the correct amount of data: {dataOutputPath}");
 
                 var properties = collectionType.GetProperties()
                     .ToDictionary(x => x.Name, x => x, StringComparer.InvariantCultureIgnoreCase);
@@ -1036,8 +1022,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 DataOutputPath dataOutputPath = Parse(dataOutputPathRaw);
                 Assert.IsFalse(
                     results.TryQueryOutput(dataOutputPath, out var _),
-                    "Output should not have been available: {0}",
-                    dataOutputPathRaw);
+                    $"Output should not have been available: {dataOutputPathRaw}");
             }
         }
 
@@ -1053,17 +1038,17 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
 
             sut.Dispose();
 
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.AvailableTables);
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateInfo);
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.DataSourcesToProcess);
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.EnabledCookers);
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.EnabledTables);
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.IsProcessed);
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.Plugins);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.AvailableTables);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.CreateInfo);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.DataSourcesToProcess);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.EnabledCookers);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.EnabledTables);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.IsProcessed);
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Plugins);
 
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.EnableCooker(Any.DataCookerPath()));
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.Process());
-            Assert.ThrowsException<ObjectDisposedException>(() => sut.TryEnableCooker(Any.DataCookerPath()));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.EnableCooker(Any.DataCookerPath()));
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Process());
+            Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryEnableCooker(Any.DataCookerPath()));
         }
 
         [TestMethod]

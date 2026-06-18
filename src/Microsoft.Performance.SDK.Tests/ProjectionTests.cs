@@ -17,7 +17,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void CacheThrowsWithNullArgument()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.CacheOnFirstUse<object>(1, null));
         }
 
@@ -25,7 +25,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void CacheThrowsWithNegativeArgument()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                 () => Projection.CacheOnFirstUse(-1, Projection.Identity<int>()));
         }
 
@@ -82,15 +82,15 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void ComposeThrowsWithNullArguments()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Compose<int, object, object>(null, i => i));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Compose(
                     Projection.Identity<int>(),
                     (Func<int, object>)null));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Compose(
                     Projection.Identity<int>(),
                     (IProjection<int, object>)null));
@@ -173,10 +173,10 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void CreateThrowsForNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Create<object>((Func<int, object>)null));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Create<object, object>((Func<object, object>)null));
         }
 
@@ -186,85 +186,85 @@ namespace Microsoft.Performance.SDK.Tests
         {
             // int, T
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyPrivateMethodIntToObject));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyPrivateMethodIntToObjectStatic));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyProtectedMethodIntToObject));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyProtectedMethodIntToObjectStatic));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyInternalMethodIntToObject));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyInternalMethodIntToObjectStatic));
 
             // T1,T2
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyGenericPrivateMethod<int, object>));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyGenericPrivateMethodStatic<int, object>));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyGenericProtectedMethod<int, object>));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyGenericProtectedMethodStatic<int, object>));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyGenericInternalMethod<int, object>));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(MyGenericInternalMethodStatic<int, object>));
 
             // non-public nested
 
             var internalInstance = new InternalNestedType();
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(internalInstance.Method));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(InternalNestedType.MethodStatic));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(internalInstance.MethodGeneric<int, object>));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(InternalNestedType.MethodGenericStatic<int, object>));
 
             var protectedInstance = new ProtectedNestedType();
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(protectedInstance.Method));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(ProtectedNestedType.MethodStatic));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(protectedInstance.MethodGeneric<int, object>));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(ProtectedNestedType.MethodGenericStatic<int, object>));
 
             var privateInstance = new PrivateNestedType();
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(privateInstance.Method));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(PrivateNestedType.MethodStatic));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(privateInstance.MethodGeneric<int, object>));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create(PrivateNestedType.MethodGenericStatic<int, object>));
 
             // anonymous
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create<int, object>(i => i));
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Create<DateTime, string>(x => x.ToString()));
         }
 
@@ -326,7 +326,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void IndexThrowsOnNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Index((IReadOnlyList<object>)null));
         }
 
@@ -374,7 +374,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void PrepopulatedCacheThrowsWithNullArgument()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.PrepopulatedCache<object>(1, null));
         }
 
@@ -382,7 +382,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void PrepopulatedCacheThrowsWithNegativeArgument()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                 () => Projection.PrepopulatedCache(-1, Projection.Identity<int>()));
         }
 
@@ -448,12 +448,12 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_1_ThrowsForNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, string>(
                     null,
                     Project_1_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, string>(
                     Projection.Constant(DateTime.UtcNow),
                     null));
@@ -463,7 +463,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_1_ThrowsIfNonStaticFuncGiven()
         {
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Project<int, DateTime, string>(
                     Projection.Constant(DateTime.UtcNow),
                     x => x.ToString()));
@@ -495,19 +495,19 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_2_ThrowsForNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, string>(
                     null,
                     Projection.Constant(Guid.NewGuid()),
                     Project_2_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, string>(
                     Projection.Constant(DateTime.UtcNow),
                     null,
                     Project_2_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
@@ -518,7 +518,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_2_ThrowsIfNonStaticFuncGiven()
         {
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Project<int, DateTime, Guid, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
@@ -554,28 +554,28 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_3_ThrowsForNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, string>(
                     null,
                     Projection.Constant(Guid.NewGuid()),
                     Projection.Constant(TimeSpan.Zero),
                     Project_3_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, string>(
                     Projection.Constant(DateTime.UtcNow),
                     null,
                     Projection.Constant(TimeSpan.Zero),
                     Project_3_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
                     null,
                     Project_3_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
@@ -587,7 +587,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_3_ThrowsIfNonStaticFuncGiven()
         {
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
@@ -627,7 +627,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_4_ThrowsForNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, DateTimeOffset, string>(
                     null,
                     Projection.Constant(Guid.NewGuid()),
@@ -635,7 +635,7 @@ namespace Microsoft.Performance.SDK.Tests
                     Projection.Constant(DateTimeOffset.MaxValue),
                     Project_4_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, DateTimeOffset, string>(
                     Projection.Constant(DateTime.UtcNow),
                     null,
@@ -643,7 +643,7 @@ namespace Microsoft.Performance.SDK.Tests
                     Projection.Constant(DateTimeOffset.MaxValue),
                     Project_4_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, DateTimeOffset, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
@@ -651,7 +651,7 @@ namespace Microsoft.Performance.SDK.Tests
                     Projection.Constant(DateTimeOffset.MaxValue),
                     Project_4_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, DateTimeOffset, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
@@ -659,7 +659,7 @@ namespace Microsoft.Performance.SDK.Tests
                     null,
                     Project_4_Projector));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, DateTimeOffset, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),
@@ -672,7 +672,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void Project_4_ThrowsIfNonStaticFuncGiven()
         {
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => Projection.Project<int, DateTime, Guid, TimeSpan, DateTimeOffset, string>(
                     Projection.Constant(DateTime.UtcNow),
                     Projection.Constant(Guid.NewGuid()),

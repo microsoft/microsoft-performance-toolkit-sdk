@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System.Collections.Specialized;
@@ -94,7 +94,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var repo = new PluginSourceRepository();
 
             PluginSource? pluginSource = null;
-            Assert.ThrowsException<ArgumentNullException>(() => repo.Add(pluginSource));
+            Assert.ThrowsExactly<ArgumentNullException>(() => repo.Add(pluginSource));
         }
         #endregion
 
@@ -179,7 +179,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var repo = new PluginSourceRepository();
 
             PluginSource[]? pluginSources = null;
-            Assert.ThrowsException<ArgumentNullException>(() => repo.Add(pluginSources));
+            Assert.ThrowsExactly<ArgumentNullException>(() => repo.Add(pluginSources));
         }
 
         #endregion
@@ -270,7 +270,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var repo = new PluginSourceRepository();
 
             PluginSource? pluginSource = null;
-            Assert.ThrowsException<ArgumentNullException>(() => repo.Remove(pluginSource));
+            Assert.ThrowsExactly<ArgumentNullException>(() => repo.Remove(pluginSource));
         }
 
         #endregion
@@ -364,7 +364,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             var repo = new PluginSourceRepository();
 
             PluginSource[]? pluginSources = null;
-            Assert.ThrowsException<ArgumentNullException>(() => repo.Remove(pluginSources));
+            Assert.ThrowsExactly<ArgumentNullException>(() => repo.Remove(pluginSources));
         }
 
         #endregion

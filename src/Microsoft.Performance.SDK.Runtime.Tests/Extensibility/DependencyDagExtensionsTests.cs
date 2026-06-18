@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -26,8 +26,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
             var dag = DependencyDag.Create(catalog, repo);
 
-            Assert.ThrowsException<ArgumentNullException>(() => DependencyDagExtensions.DependentWalk(null, x => { }));
-            Assert.ThrowsException<ArgumentNullException>(() => dag.DependentWalk(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => DependencyDagExtensions.DependentWalk(null, x => { }));
+            Assert.ThrowsExactly<ArgumentNullException>(() => dag.DependentWalk(null));
         }
 
         [TestMethod]

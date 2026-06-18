@@ -15,24 +15,24 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void NegativeStartThrows()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new DataSourceInfo(-1, 0, DateTime.UnixEpoch));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new DataSourceInfo(-1, 0, DateTime.UnixEpoch));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new DataSourceInfo(-1, 0, DateTime.UnixEpoch));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new DataSourceInfo(-1, 0, DateTime.UnixEpoch));
         }
 
         [TestMethod]
         [UnitTest]
         public void NegativeEndThrows()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new DataSourceInfo(0, -1, DateTime.UnixEpoch));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new DataSourceInfo(0, -1, DateTime.UnixEpoch));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new DataSourceInfo(0, -1, DateTime.UnixEpoch));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new DataSourceInfo(0, -1, DateTime.UnixEpoch));
         }
 
         [TestMethod]
         [UnitTest]
         public void StopLessThanStartThrows()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new DataSourceInfo(1, 0, DateTime.UnixEpoch));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new DataSourceInfo(1, 0, DateTime.UnixEpoch));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new DataSourceInfo(1, 0, DateTime.UnixEpoch));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new DataSourceInfo(1, 0, DateTime.UnixEpoch));
         }
 
         [TestMethod]

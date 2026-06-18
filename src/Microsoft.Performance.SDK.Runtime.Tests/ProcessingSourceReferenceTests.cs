@@ -25,7 +25,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void TryCreateReferenceForNullTypeThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => ProcessingSourceReference.TryCreateReference(
                     null,
                     out ProcessingSourceReference _));
@@ -139,29 +139,29 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
                 sut.Dispose();
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.AssemblyPath);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.AvailableTables);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.CommandLineOptions);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TrackedProcessors);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.DataSources);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Description);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Guid);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Instance);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Name);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Type);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Version);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.AssemblyPath);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.AvailableTables);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.CommandLineOptions);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TrackedProcessors);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.DataSources);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Description);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Guid);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Instance);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Name);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Type);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Version);
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.AreDirectoriesSupported());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.AreExtensionlessFilesSupported());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Clone());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.CloneT());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateProcessor((IDataSourceGroup)null, null, null));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Supports(Any.DataSource()));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetCanonicalFileExtensions());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetDirectoryDescription());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetExtensionlessFileDescription());
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetFileDescription(".txt"));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TryGetFileExtensions());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.AreDirectoriesSupported());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.AreExtensionlessFilesSupported());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Clone());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.CloneT());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.CreateProcessor((IDataSourceGroup)null, null, null));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Supports(Any.DataSource()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryGetCanonicalFileExtensions());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryGetDirectoryDescription());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryGetExtensionlessFileDescription());
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryGetFileDescription(".txt"));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TryGetFileExtensions());
             }
             finally
             {

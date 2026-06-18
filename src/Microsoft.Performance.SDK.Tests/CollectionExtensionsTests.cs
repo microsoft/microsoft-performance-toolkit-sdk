@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void AsReadOnlyArrayThrowsForNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => CollectionExtensions.AsReadOnly<object>((object[])null));
         }
 
@@ -40,7 +40,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void AsReadOnlyIListThrowsForNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => CollectionExtensions.AsReadOnly<object>((IList<object>)null));
         }
 

@@ -57,7 +57,7 @@ public class StreamPluginOptionsSaverTests
         var success = await sut.TrySaveAsync(TestPluginOptionDto.PluginOptionsDto());
 
         Assert.IsTrue(success);
-        Assert.ThrowsException<ObjectDisposedException>(() => stream.Position);
+        Assert.ThrowsExactly<ObjectDisposedException>(() => stream.Position);
         Assert.IsFalse(stream.CanRead);
         Assert.IsFalse(stream.CanSeek);
         Assert.IsFalse(stream.CanWrite);

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -35,14 +35,14 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void Constructor_NullParam_Throws()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => new ProcessingSystemCompositeCookers(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => new ProcessingSystemCompositeCookers(null));
         }
 
         [TestMethod]
         [UnitTest]
         public void Initialize_NullParam_Throws()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.Initialize(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.Initialize(null));
         }
 
         [TestMethod]

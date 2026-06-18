@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -112,7 +112,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void QueryAsWrongTypeThrows()
         {
-            Assert.ThrowsException<InvalidCastException>(
+            Assert.ThrowsExactly<InvalidCastException>(
                 () => testReflector.QueryOutput<bool>(
                     new DataOutputPath(TestCookedDataReflector.DefaultCookerPath, nameof(TestCookedDataReflector.AddFunc))));
         }
@@ -133,7 +133,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void QueryNonExistentPathThrows()
         {
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => testReflector.QueryOutput<bool>(
                     new DataOutputPath(TestCookedDataReflector.DefaultCookerPath, "DoesNotExist")));
         }

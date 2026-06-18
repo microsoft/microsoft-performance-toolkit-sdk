@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System;
@@ -34,20 +34,20 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
                 sut.Dispose();
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Availability);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.DependencyReferences);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Description);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.InitialAvailability);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Name);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Path);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataCookers);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Availability);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.DependencyReferences);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Description);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.InitialAvailability);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Name);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Path);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.RequiredDataCookers);
                 // TODO: __SDK_DP__
                 // Redesign Data Processor API
-                // Assert.ThrowsException<ObjectDisposedException>(() => sut.RequiredDataProcessors);
+                // Assert.ThrowsExactly<ObjectDisposedException>(() => sut.RequiredDataProcessors);
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.CreateInstance(new FakeRetrieval()));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.PerformAdditionalDataExtensionValidation(new FakeSupport(), new FakeReference()));
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.CreateInstance(new FakeRetrieval()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.PerformAdditionalDataExtensionValidation(new FakeSupport(), new FakeReference()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
             }
             finally
             {
