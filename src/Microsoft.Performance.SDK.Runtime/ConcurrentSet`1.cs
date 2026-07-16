@@ -44,6 +44,16 @@ namespace Microsoft.Performance.SDK.Runtime
             }
         }
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ConcurrentSet{T}"/> class
+        ///     with the specified equality comparer.
+        /// </summary>
+        /// <param name="comparer">The equality comparer to use when comparing values in the set.</param>
+        public ConcurrentSet(IEqualityComparer<T> comparer)
+        {
+            this.items = new ConcurrentDictionary<T, object>(comparer);
+        }
+
         /// <inheritdoc cref="HashSet{T}.Add(T)"/>
         public bool Add(T item)
         {
