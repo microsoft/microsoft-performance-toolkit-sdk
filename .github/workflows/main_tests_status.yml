@@ -18,11 +18,11 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '8.x'
+        dotnet-version: '10.x'
     - name: Setup NBGV
-      uses: dotnet/nbgv@v0.4
+      uses: dotnet/nbgv@v0.5.1
       with:
-        toolVersion: 3.6.143
+        toolVersion: 3.9.50
     - name: Restore dependencies
       run: dotnet restore "${{ github.workspace }}/src/SDK.sln"
     - name: Build solution
