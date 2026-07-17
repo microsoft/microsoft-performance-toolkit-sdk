@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void IsStaticThrowsOnNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => TypeExtensions.IsStatic(null));
         }
 
@@ -64,7 +64,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void IsConcreteThrowsOnNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => TypeExtensions.IsConcrete(null));
         }
 
@@ -79,9 +79,9 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void IsThrowsOnNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => TypeExtensions.Is(null, typeof(ConcreteType)));
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => TypeExtensions.Is(typeof(ConcreteType), null));
         }
 
@@ -124,7 +124,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void IsGenericThrowsOnNull()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => TypeExtensions.Is<ConcreteType>(null));
         }
 

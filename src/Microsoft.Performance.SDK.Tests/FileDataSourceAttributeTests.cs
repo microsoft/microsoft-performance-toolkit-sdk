@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void NullExtensionThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new FileDataSourceAttribute(null));
         }
 
@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void WhitespaceExtensionThrows()
         {
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => new FileDataSourceAttribute(string.Empty));
         }
 
@@ -31,7 +31,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void NullDescriptionThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new FileDataSourceAttribute("ext", null));
         }
 
@@ -39,7 +39,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void WhitespaceDescriptionThrows()
         {
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => new FileDataSourceAttribute("ext", string.Empty));
         }
 

@@ -28,13 +28,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
 
                 sut.Dispose();
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.Availability);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.BuildTableAction);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.DependencyReferences);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.IsDataAvailableFunc);
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.TableDescriptor);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.Availability);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.BuildTableAction);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.DependencyReferences);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.IsDataAvailableFunc);
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.TableDescriptor);
 
-                Assert.ThrowsException<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
+                Assert.ThrowsExactly<ObjectDisposedException>(() => sut.ProcessDependencies(new TestDataExtensionRepository()));
             }
             finally
             {

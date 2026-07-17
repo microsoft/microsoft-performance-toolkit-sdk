@@ -20,7 +20,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void ConstructorThrowsForNullDependencyTarget()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new DataExtensionDependencyState((IDataExtensionDependencyTarget)null));
         }
 
@@ -28,7 +28,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void ConstructorThrowsForNullOther()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new DataExtensionDependencyState((DataExtensionDependencyState)null));
         }
 

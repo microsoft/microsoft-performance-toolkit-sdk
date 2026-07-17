@@ -134,7 +134,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Discovery
         [UnitTest]
         public void ProcessAssemblies_NullDirectoryPath()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Discovery.ProcessAssemblies((string)null, out _));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Discovery.ProcessAssemblies((string)null, out _));
         }
 
         [TestMethod]

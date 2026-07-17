@@ -127,7 +127,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             using var dataSourceSet = DataSourceSet.Create();
             var sut = new EngineCreateInfo(dataSourceSet.AsReadOnly());
             IProcessingOptionsResolver resolver = null;
-            Assert.ThrowsException<ArgumentNullException>(() => sut.WithProcessorOptions(resolver));
+            Assert.ThrowsExactly<ArgumentNullException>(() => sut.WithProcessorOptions(resolver));
         }
     }
 }
