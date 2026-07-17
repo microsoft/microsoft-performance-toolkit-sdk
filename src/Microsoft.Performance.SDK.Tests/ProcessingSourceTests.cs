@@ -95,7 +95,7 @@ namespace Microsoft.Performance.SDK.Tests
             };
             sut.SetApplicationEnvironment(applicationEnvironment);
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => sut.CreateProcessor(dataSource, Any.ProcessorEnvironment(), ProcessorOptions.Default));
         }
 
@@ -132,7 +132,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             sut.SetApplicationEnvironment(applicationEnvironment);
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => sut.CreateProcessor(dataSources, Any.ProcessorEnvironment(), ProcessorOptions.Default));
         }
 
@@ -176,7 +176,7 @@ namespace Microsoft.Performance.SDK.Tests
         public void WhenTableDiscoveryProvidedIsNull_DiscoveryThrows()
         {
             var sut = new CreateTableProviderBasedStubDataSource(null);
-            Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
+            Assert.ThrowsExactly<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
         [TestMethod]
@@ -226,7 +226,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             var sut = new CreateTableProviderBasedStubDataSource(discovery);
 
-            Assert.ThrowsException<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
+            Assert.ThrowsExactly<InvalidOperationException>(() => sut.SetApplicationEnvironment(applicationEnvironment));
         }
 
         [TestMethod]

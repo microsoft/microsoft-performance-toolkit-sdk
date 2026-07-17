@@ -41,7 +41,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void ExecuteWithNullExecutionContextThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => this.Sut.InitializeCustomDataProcessor(null));
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Any.ProcessorEnvironment(),
                 ProcessorOptions.Default);
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => this.Sut.InitializeCustomDataProcessor(executionContext));
         }
 

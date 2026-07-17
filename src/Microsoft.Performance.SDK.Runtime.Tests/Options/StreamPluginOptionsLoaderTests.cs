@@ -63,7 +63,7 @@ public class StreamPluginOptionsLoaderTests
 
         await sut.TryLoadAsync();
 
-        Assert.ThrowsException<ObjectDisposedException>(() => stream.Position);
+        Assert.ThrowsExactly<ObjectDisposedException>(() => stream.Position);
         Assert.IsFalse(stream.CanRead);
         Assert.IsFalse(stream.CanSeek);
         Assert.IsFalse(stream.CanWrite);

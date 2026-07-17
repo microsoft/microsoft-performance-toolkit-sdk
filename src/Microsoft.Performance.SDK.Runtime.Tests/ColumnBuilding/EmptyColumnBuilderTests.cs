@@ -23,7 +23,7 @@ public class EmptyColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithToggle(null, Projection.Constant(1f));
         });
@@ -34,7 +34,7 @@ public class EmptyColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithToggle<int>(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }), null);
         });
@@ -45,7 +45,7 @@ public class EmptyColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
                 null,
@@ -59,7 +59,7 @@ public class EmptyColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
                 new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
@@ -73,7 +73,7 @@ public class EmptyColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalToggle(
                 new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
@@ -87,7 +87,7 @@ public class EmptyColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() => { builder.WithToggledModes(null, builder => builder); });
+        Assert.ThrowsExactly<ArgumentNullException>(() => { builder.WithToggledModes(null, builder => builder); });
     }
 
     [TestMethod]
@@ -103,7 +103,7 @@ public class EmptyColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() => { builder.WithModes(null, builder => builder); });
+        Assert.ThrowsExactly<ArgumentNullException>(() => { builder.WithModes(null, builder => builder); });
     }
 
     [TestMethod]

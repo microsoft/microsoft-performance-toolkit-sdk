@@ -49,7 +49,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void SetRowCountDoesNotAllowNegativeNumber()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(
                 () => this.Sut.SetRowCount(-1));
         }
 
@@ -57,7 +57,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AddColumnDoesNotAllowNulls()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => this.Sut.AddColumn(null));
         }
 
@@ -96,7 +96,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => this.Sut.ReplaceColumn(null, column));
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
               new UIHints { Width = 200, },
               Projection.CreateUsingFuncAdaptor(i => "test"));
 
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => this.Sut.ReplaceColumn(column, null));
         }
 
@@ -194,12 +194,12 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AddTableCommandInvalidArgumentsThrow()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand(null, _ => { }));
-            Assert.ThrowsException<ArgumentException>(() => this.Sut.AddTableCommand(string.Empty, _ => { }));
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand("test", null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddTableCommand(null, _ => { }));
+            Assert.ThrowsExactly<ArgumentException>(() => this.Sut.AddTableCommand(string.Empty, _ => { }));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddTableCommand("test", null));
 
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand2("test", null, (context) => { }));
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand2("test", (context) => true, null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddTableCommand2("test", null, (context) => { }));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddTableCommand2("test", (context) => true, null));
         }
 
         [TestMethod]
@@ -207,7 +207,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public void AddTableCommandDuplicateNameThrows()
         {
             this.Sut.AddTableCommand("test", _ => { });
-            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddTableCommand("test", _ => { }));
+            Assert.ThrowsExactly<InvalidOperationException>(() => this.Sut.AddTableCommand("test", _ => { }));
         }
 
         [TestMethod]
@@ -215,7 +215,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public void AddTableCommandDuplicateNameThrowsIrrespectiveOfCase()
         {
             this.Sut.AddTableCommand("test", _ => { });
-            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddTableCommand("tEsT", _ => { }));
+            Assert.ThrowsExactly<InvalidOperationException>(() => this.Sut.AddTableCommand("tEsT", _ => { }));
         }
 
         [TestMethod]
@@ -223,7 +223,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public void AddTableCommandDuplicateNameThrowsIrrespectiveOfPadding()
         {
             this.Sut.AddTableCommand("test", _ => { });
-            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddTableCommand(" test\t  ", _ => { }));
+            Assert.ThrowsExactly<InvalidOperationException>(() => this.Sut.AddTableCommand(" test\t  ", _ => { }));
         }
 
         [TestMethod]

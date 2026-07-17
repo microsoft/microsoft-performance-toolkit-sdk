@@ -27,7 +27,7 @@ public class ModalColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithMode(null, Projection.Constant(1f));
         });
@@ -38,7 +38,7 @@ public class ModalColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithMode<int>(modeDescriptor, null);
         });
@@ -57,7 +57,7 @@ public class ModalColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalMode(
                 null,
@@ -71,7 +71,7 @@ public class ModalColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalMode<float>(
                 modeDescriptor,
@@ -85,7 +85,7 @@ public class ModalColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             builder.WithHierarchicalMode<float>(
                 modeDescriptor,
@@ -111,7 +111,7 @@ public class ModalColumnBuilderTests
     {
         var builder = CreateSut();
 
-        Assert.ThrowsException<ArgumentException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             builder.WithDefaultMode(Guid.NewGuid());
         });

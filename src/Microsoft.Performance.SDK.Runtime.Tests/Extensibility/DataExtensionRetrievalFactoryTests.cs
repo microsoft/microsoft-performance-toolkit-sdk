@@ -34,7 +34,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var sourceCookerData = CreateSourceCookerData();
             var compositeCookerData = CreateCompositeCookerData(dataExtensionRepository);
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 new DataExtensionRetrievalFactory(sourceCookerData, compositeCookerData, null));
         }
 
@@ -45,7 +45,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataExtensionRepository = new TestDataExtensionRepository();
             var compositeCookerData = CreateCompositeCookerData(dataExtensionRepository);
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 new DataExtensionRetrievalFactory(null, compositeCookerData, dataExtensionRepository));
         }
 
@@ -56,7 +56,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataExtensionRepository = new TestDataExtensionRepository();
             var sourceCookerData = CreateSourceCookerData();
 
-            Assert.ThrowsException<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
                 new DataExtensionRetrievalFactory(sourceCookerData, null, dataExtensionRepository));
         }
 
@@ -112,7 +112,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataExtensionRetrievalFactory =
                 new DataExtensionRetrievalFactory(sourceCookerData, compositeCookerData, dataExtensionRepository);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(cookerPath));
         }
 
@@ -135,7 +135,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataExtensionRetrievalFactory =
                 new DataExtensionRetrievalFactory(sourceCookerData, compositeCookerData, dataExtensionRepository);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForCompositeDataCooker(dataCookerReference.Path));
         }
 
@@ -199,7 +199,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataExtensionRetrievalFactory =
                 new DataExtensionRetrievalFactory(sourceCookerData, compositeCookerData, dataExtensionRepository);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForTable(tableId));
         }
 
@@ -230,7 +230,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var dataExtensionRetrievalFactory =
                 new DataExtensionRetrievalFactory(sourceCookerData, compositeCookerData, dataExtensionRepository);
 
-            Assert.ThrowsException<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
                 dataExtensionRetrievalFactory.CreateDataRetrievalForTable(tableReference.TableDescriptor.Guid));
         }
     }

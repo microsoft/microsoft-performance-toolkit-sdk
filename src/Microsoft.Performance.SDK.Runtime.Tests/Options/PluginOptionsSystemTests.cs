@@ -102,7 +102,7 @@ public class PluginOptionsSystemTests
     [DataRow(@"C:\Foo\:bar.json")]
     public void BadFilePath_ThrowsArgumentException(string filePath)
     {
-        Assert.ThrowsException<ArgumentException>(() =>
+        Assert.ThrowsExactly<ArgumentException>(() =>
         {
             PluginOptionsSystem.CreateForFile(null, (_) => new NullLogger());
         });
@@ -111,7 +111,7 @@ public class PluginOptionsSystemTests
     [TestMethod]
     public void LongFilePath_ThrowsPathTooLongException()
     {
-        Assert.ThrowsException<PathTooLongException>(() =>
+        Assert.ThrowsExactly<PathTooLongException>(() =>
         {
             PluginOptionsSystem.CreateForFile(Path.Combine(@"C:\", new string('a', 50000), "foo.json"), (_) => new NullLogger());
         });
@@ -120,7 +120,7 @@ public class PluginOptionsSystemTests
     [TestMethod]
     public void UnknownNetworkPath_ThrowsDirectoryNotFoundException()
     {
-        Assert.ThrowsException<DirectoryNotFoundException>(() =>
+        Assert.ThrowsExactly<DirectoryNotFoundException>(() =>
         {
             PluginOptionsSystem.CreateForFile(@"\\randomServer\C$\foo.json", (_) => new NullLogger());
         });

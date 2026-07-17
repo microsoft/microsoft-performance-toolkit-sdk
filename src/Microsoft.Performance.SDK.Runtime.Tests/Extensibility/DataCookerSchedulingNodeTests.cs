@@ -137,7 +137,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void ConstructorThrowsWithoutDependencySupportInDataCooker()
         {
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => DataCookerSchedulingNode.CreateSchedulingNode(new DataCookerWithoutDependencies()));
         }
 
@@ -245,7 +245,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             scheduler.AddNode(cookerWithCircularDependency2Node);
             scheduler.AddNode(cookerWithCircularDependency3Node);
 
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => cookerWithCircularDependency1Node.Schedule(scheduler, null));
         }
 
@@ -1287,7 +1287,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             scheduler.AddNode(node);
             scheduler.AddNode(asRequiredNode);
 
-            Assert.ThrowsException<InvalidOperationException>(() => node.Schedule(scheduler, null));
+            Assert.ThrowsExactly<InvalidOperationException>(() => node.Schedule(scheduler, null));
         }
 
         [TestMethod]
@@ -1321,7 +1321,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             scheduler.AddNode(node2);
             scheduler.AddNode(asRequiredNode);
 
-            Assert.ThrowsException<InvalidOperationException>(() => node1.Schedule(scheduler, null));
+            Assert.ThrowsExactly<InvalidOperationException>(() => node1.Schedule(scheduler, null));
         }
     }
 }

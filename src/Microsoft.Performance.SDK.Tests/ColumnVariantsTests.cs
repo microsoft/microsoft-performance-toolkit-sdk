@@ -265,7 +265,7 @@ public class ColumnVariantsTests
         var tableBuilder = new TableBuilder();
         tableBuilder.SetRowCount(1);
 
-        Assert.ThrowsException<InvalidOperationException>(() =>
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
             tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
@@ -281,7 +281,7 @@ public class ColumnVariantsTests
     {
         var tableBuilder = new TableBuilder().SetRowCount(1);
 
-        Assert.ThrowsException<ArgumentNullException>(() =>
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
         {
             tableBuilder.AddColumnWithVariants(null, (builder) => builder);
         });
@@ -314,7 +314,7 @@ public class ColumnVariantsTests
         var tableBuilder = new TableBuilder();
         tableBuilder.SetRowCount(1);
 
-        Assert.ThrowsException<InvalidOperationException>(() =>
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
         {
             tableBuilder.AddColumnWithVariants(baseConfig, utcProj, builder =>
             {
