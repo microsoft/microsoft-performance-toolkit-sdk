@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.TableCommands;
+using Microsoft.Performance.SDK.Runtime.TableCommands;
+using Microsoft.Performance.Testing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
@@ -242,10 +244,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(1, this.Sut.Commands.Count);
             var command = this.Sut.Commands.Single();
             Assert.IsNotNull(command);
+            Assert.IsInstanceOfType(command, typeof(TableCommandCallbackAdapter));
             Assert.AreEqual(name, command.CommandName);
 
             var testList = new List<int> { 1, 2, 3, }.AsReadOnly();
-            command.OnExecute(new TableCommandContext(null, null, testList));
+            ((TableCommandCallbackAdapter)command).Execute(new TableCommandContext(null, null, testList));
 
             Assert.IsNotNull(capturedRows);
             Assert.AreEqual(testList, capturedRows);
@@ -268,10 +271,11 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(1, this.Sut.Commands.Count);
             var command = this.Sut.Commands.Single();
             Assert.IsNotNull(command);
+            Assert.IsInstanceOfType(command, typeof(TableCommandCallbackAdapter));
             Assert.AreEqual(expectedName, command.CommandName);
 
             var testList = new List<int> { 1, 2, 3, }.AsReadOnly();
-            command.OnExecute(new TableCommandContext(null, null, testList));
+            ((TableCommandCallbackAdapter)command).Execute(new TableCommandContext(null, null, testList));
 
             Assert.IsNotNull(capturedRows);
             Assert.AreEqual(testList, capturedRows);
@@ -308,7 +312,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsNotNull(command1);
             Assert.AreEqual(name1, command1.CommandName);
             var test1 = new List<int> { 1, 2, 3, }.AsReadOnly();
-            command1.OnExecute(new TableCommandContext(null, null, test1));
+            ((TableCommandCallbackAdapter)command1).Execute(new TableCommandContext(null, null, test1));
 
             Assert.AreEqual(captured1, test1);
 
@@ -316,15 +320,101 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsNotNull(command2);
             Assert.AreEqual(name2, command2.CommandName);
             var test2 = new List<int> { 1, 2, 3, }.AsReadOnly();
-            command2.OnExecute(new TableCommandContext(null, null, test2));
+            ((TableCommandCallbackAdapter)command2).Execute(new TableCommandContext(null, null, test2));
             Assert.AreEqual(captured2, test2);
 
             var command3 = this.Sut.Commands.SingleOrDefault(x => x.CommandName == name3);
             Assert.IsNotNull(command3);
             Assert.AreEqual(name3, command3.CommandName);
             var test3 = new List<int> { 1, 2, 3, }.AsReadOnly();
-            command3.OnExecute(new TableCommandContext(null, null, test3));
+            ((TableCommandCallbackAdapter)command3).Execute(new TableCommandContext(null, null, test3));
             Assert.AreEqual(captured3, test3);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AddTableCommand2WrapsInTableCommand2Adapter()
+        {
+            var name = "test";
+            TableCommandContext capturedCanContext = null;
+            TableCommandContext capturedOnContext = null;
+
+            this.Sut.AddTableCommand2(
+                name,
+                ctx => { capturedCanContext = ctx; return true; },
+                ctx => { capturedOnContext = ctx; });
+
+            Assert.AreEqual(1, this.Sut.Commands.Count);
+            var command = this.Sut.Commands.Single();
+            Assert.IsInstanceOfType(command, typeof(TableCommand2Adapter));
+            Assert.AreEqual(name, command.CommandName);
+
+            var adapter = (TableCommand2Adapter)command;
+            var ctxIn = new TableCommandContext(null, null, new List<int> { 5 });
+
+            Assert.IsTrue(adapter.CanExecute(ctxIn));
+            Assert.AreSame(ctxIn, capturedCanContext);
+
+            var result = adapter.Execute(ctxIn);
+            Assert.AreSame(ctxIn, capturedOnContext);
+            Assert.AreEqual(VoidTableCommandResult.Default, result);
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AddTableCommand3AddsCommand()
+        {
+            var cmd = new TestTableCommand("cmd1");
+
+            var ret = this.Sut.AddTableCommand3(cmd);
+
+            Assert.AreSame(this.Sut, ret);
+            Assert.AreEqual(1, this.Sut.Commands.Count);
+            Assert.AreSame(cmd, this.Sut.Commands.Single());
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AddTableCommand3NullThrows()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand3(null));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AddTableCommand3DuplicateNameThrows()
+        {
+            this.Sut.AddTableCommand3(new TestTableCommand("dup"));
+            Assert.ThrowsException<InvalidOperationException>(
+                () => this.Sut.AddTableCommand3(new TestTableCommand("DUP")));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AddTableCommand3DuplicateAgainstLegacyThrows()
+        {
+            this.Sut.AddTableCommand("legacy", _ => { });
+            Assert.ThrowsException<InvalidOperationException>(
+                () => this.Sut.AddTableCommand3(new TestTableCommand("LEGACY")));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void CommandsPreservesInsertionOrder()
+        {
+            this.Sut.AddTableCommand("a", _ => { });
+            this.Sut.AddTableCommand2("b", _ => true, _ => { });
+            this.Sut.AddTableCommand3(new TestTableCommand("c"));
+
+            var names = this.Sut.Commands.Select(x => x.CommandName).ToList();
+            CollectionAssert.AreEqual(new[] { "a", "b", "c" }, names);
+        }
+
+        private sealed class TestTableCommand : TableCommand3<TableCommandContext, int>
+        {
+            public TestTableCommand(string name) : base(name) { }
+            public override bool CanExecute(TableCommandContext context) => true;
+            public override int Execute(TableCommandContext context) => 42;
         }
     }
 }
