@@ -29,6 +29,27 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
             Guard.NotNull(uri, nameof(uri));
 
             this.Uri = uri;
+            this.Success = true;
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="OpenUriResult"/>
+        ///     class representing a failure. <see cref="Success"/> will be
+        ///     <c>false</c> and <see cref="Uri"/> will be <c>null</c>.
+        /// </summary>
+        /// <param name="errorMessage">
+        ///     A human-readable message describing why the command did not
+        ///     produce a usable URI.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="errorMessage"/> is <c>null</c>.
+        /// </exception>
+        public OpenUriResult(string errorMessage)
+        {
+            Guard.NotNull(errorMessage, nameof(errorMessage));
+
+            this.ErrorMessage = errorMessage;
+            this.Success = false;
         }
 
         /// <summary>
@@ -49,6 +70,6 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
         /// <summary>
         ///     Gets the URI that the host should open.
         /// </summary>
-        public Uri Uri { get; }
+        public Uri? Uri { get; }
     }
 }
