@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.TableCommands;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.SDK.Runtime.TableCommands
 {
@@ -64,10 +66,11 @@ namespace Microsoft.Performance.SDK.Runtime.TableCommands
         }
 
         /// <inheritdoc />
-        public override VoidTableCommandResult Execute(TableCommandContext context)
+        public override Task<VoidTableCommandResult> ExecuteAsync(TableCommandContext context, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             this.OnExecuteAction(context);
-            return VoidTableCommandResult.Default;
+            return Task.FromResult(VoidTableCommandResult.Default);
         }
     }
 }

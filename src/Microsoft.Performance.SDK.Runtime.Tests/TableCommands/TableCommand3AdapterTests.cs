@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.TableCommands;
 using Microsoft.Performance.SDK.Runtime.TableCommands;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
 {
@@ -49,13 +51,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
 
         [TestMethod]
         [UnitTest]
-        public void TableCommandCallbackAdapterExecuteForwardsSelectedRows()
+        public async Task TableCommandCallbackAdapterExecuteForwardsSelectedRows()
         {
             IReadOnlyList<int> captured = null;
             var sut = new TableCommandCallbackAdapter("n", rows => captured = rows);
             var rows = new List<int> { 1, 2 }.AsReadOnly();
 
-            var result = sut.Execute(new TableCommandContext(null, null, rows));
+            var result = await sut.ExecuteAsync(new TableCommandContext(null, null, rows), CancellationToken.None);
 
             Assert.AreSame(rows, captured);
             Assert.AreEqual(VoidTableCommandResult.Default, result);
@@ -71,7 +73,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
 
         [TestMethod]
         [UnitTest]
-        public void TableCommand2AdapterForwardsPredicateAndAction()
+        public async Task TableCommand2AdapterForwardsPredicateAndAction()
         {
             TableCommandContext canCtx = null;
             TableCommandContext execCtx = null;
@@ -84,7 +86,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
             Assert.IsFalse(sut.CanExecute(input));
             Assert.AreSame(input, canCtx);
 
-            var result = sut.Execute(input);
+            var result = await sut.ExecuteAsync(input, CancellationToken.None);
             Assert.AreSame(input, execCtx);
             Assert.AreEqual(VoidTableCommandResult.Default, result);
         }

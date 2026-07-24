@@ -9,6 +9,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests
 {
@@ -230,7 +232,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public void AddTableCommandAdds()
+        public async Task AddTableCommandAdds()
         {
             var name = "test";
             IReadOnlyList<int> capturedRows = null;
@@ -248,7 +250,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(name, command.CommandName);
 
             var testList = new List<int> { 1, 2, 3, }.AsReadOnly();
-            ((TableCommandCallbackAdapter)command).Execute(new TableCommandContext(null, null, testList));
+            await ((TableCommandCallbackAdapter)command).ExecuteAsync(new TableCommandContext(null, null, testList), CancellationToken.None);
 
             Assert.IsNotNull(capturedRows);
             Assert.AreEqual(testList, capturedRows);
@@ -256,7 +258,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public void AddTableCommandAddsWithTrimmedName()
+        public async Task AddTableCommandAddsWithTrimmedName()
         {
             var name = "   test\r \t\n  ";
             var expectedName = name.Trim();
@@ -275,7 +277,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(expectedName, command.CommandName);
 
             var testList = new List<int> { 1, 2, 3, }.AsReadOnly();
-            ((TableCommandCallbackAdapter)command).Execute(new TableCommandContext(null, null, testList));
+            await ((TableCommandCallbackAdapter)command).ExecuteAsync(new TableCommandContext(null, null, testList), CancellationToken.None);
 
             Assert.IsNotNull(capturedRows);
             Assert.AreEqual(testList, capturedRows);
@@ -292,7 +294,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
 
         [TestMethod]
         [UnitTest]
-        public void AddTableCommandMultipleCommandsCanBeAdded()
+        public async Task AddTableCommandMultipleCommandsCanBeAdded()
         {
             var name1 = "test1";
             var name2 = "test2";
@@ -312,7 +314,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsNotNull(command1);
             Assert.AreEqual(name1, command1.CommandName);
             var test1 = new List<int> { 1, 2, 3, }.AsReadOnly();
-            ((TableCommandCallbackAdapter)command1).Execute(new TableCommandContext(null, null, test1));
+            await ((TableCommandCallbackAdapter)command1).ExecuteAsync(new TableCommandContext(null, null, test1), CancellationToken.None);
 
             Assert.AreEqual(captured1, test1);
 
@@ -320,20 +322,20 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsNotNull(command2);
             Assert.AreEqual(name2, command2.CommandName);
             var test2 = new List<int> { 1, 2, 3, }.AsReadOnly();
-            ((TableCommandCallbackAdapter)command2).Execute(new TableCommandContext(null, null, test2));
+            await ((TableCommandCallbackAdapter)command2).ExecuteAsync(new TableCommandContext(null, null, test2), CancellationToken.None);
             Assert.AreEqual(captured2, test2);
 
             var command3 = this.Sut.Commands.SingleOrDefault(x => x.CommandName == name3);
             Assert.IsNotNull(command3);
             Assert.AreEqual(name3, command3.CommandName);
             var test3 = new List<int> { 1, 2, 3, }.AsReadOnly();
-            ((TableCommandCallbackAdapter)command3).Execute(new TableCommandContext(null, null, test3));
+            await ((TableCommandCallbackAdapter)command3).ExecuteAsync(new TableCommandContext(null, null, test3), CancellationToken.None);
             Assert.AreEqual(captured3, test3);
         }
 
         [TestMethod]
         [UnitTest]
-        public void AddTableCommand2WrapsInTableCommand2Adapter()
+        public async Task AddTableCommand2WrapsInTableCommand2Adapter()
         {
             var name = "test";
             TableCommandContext capturedCanContext = null;
@@ -355,7 +357,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.IsTrue(adapter.CanExecute(ctxIn));
             Assert.AreSame(ctxIn, capturedCanContext);
 
-            var result = adapter.Execute(ctxIn);
+            var result = await adapter.ExecuteAsync(ctxIn, CancellationToken.None);
             Assert.AreSame(ctxIn, capturedOnContext);
             Assert.AreEqual(VoidTableCommandResult.Default, result);
         }
@@ -414,7 +416,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         {
             public TestTableCommand(string name) : base(name) { }
             public override bool CanExecute(TableCommandContext context) => true;
-            public override int Execute(TableCommandContext context) => 42;
+            public override Task<int> ExecuteAsync(TableCommandContext context, CancellationToken cancellationToken) => Task.FromResult(42);
         }
     }
 }

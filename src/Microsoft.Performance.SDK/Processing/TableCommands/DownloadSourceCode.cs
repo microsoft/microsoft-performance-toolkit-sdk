@@ -16,7 +16,7 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
     ///     "download source code" commands. Concrete implementations supply
     ///     the command name and the logic for
     ///     <see cref="TableCommand3{TContext, TResult}.CanExecute"/> and
-    ///     <see cref="TableCommand3{TContext, TResult}.Execute"/>.
+    ///     <see cref="TableCommand3{TContext, TResult}.ExecuteAsync"/>.
     /// </remarks>
     public abstract class DownloadSourceCode
         : TableCommand3<DownloadSourceCodeContext, OpenUriResult>

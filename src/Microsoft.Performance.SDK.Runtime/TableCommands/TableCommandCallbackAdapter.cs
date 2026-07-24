@@ -3,6 +3,8 @@
 
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.TableCommands;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Performance.SDK.Runtime.TableCommands
 {
@@ -12,8 +14,8 @@ namespace Microsoft.Performance.SDK.Runtime.TableCommands
     ///     as a <see cref="TableCommand3{TContext, TResult}"/>.
     /// </summary>
     /// <remarks>
-    ///     <see cref="CanExecute"/> always returns <c>true</c>, matching the
-    ///     historical behavior of <c>AddTableCommand</c>.
+    ///     <see cref="CanExecute"/> always returns <c>true</c>, matching
+    ///     the historical behavior of <c>AddTableCommand</c>.
     /// </remarks>
     public sealed class TableCommandCallbackAdapter
         : TableCommand3<TableCommandContext, VoidTableCommandResult>
@@ -48,12 +50,13 @@ namespace Microsoft.Performance.SDK.Runtime.TableCommands
         public override bool CanExecute(TableCommandContext context) => true;
 
         /// <inheritdoc />
-        public override VoidTableCommandResult Execute(TableCommandContext context)
+        public override Task<VoidTableCommandResult> ExecuteAsync(TableCommandContext context, CancellationToken cancellationToken)
         {
             Guard.NotNull(context, nameof(context));
+            cancellationToken.ThrowIfCancellationRequested();
 
             this.Callback(context.SelectedRows);
-            return VoidTableCommandResult.Default;
+            return Task.FromResult(VoidTableCommandResult.Default);
         }
     }
 }
