@@ -11,6 +11,7 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
+using Microsoft.Performance.SDK.Processing.TableCommands;
 using Microsoft.Performance.SDK.Runtime;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
@@ -18,6 +19,7 @@ using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
 using Microsoft.Performance.SDK.Runtime.Extensibility;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
+using Microsoft.Performance.SDK.Runtime.TableCommands;
 
 namespace Microsoft.Performance.Toolkit.Engine
 {
@@ -534,6 +536,8 @@ namespace Microsoft.Performance.Toolkit.Engine
 
             private readonly List<TableCommand2> tableCommands2;
 
+            private readonly List<TableCommand3> tableCommands3;
+
             internal TableBuilder()
             {
                 this.columns = new List<IDataColumn>();
@@ -547,6 +551,9 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 this.tableCommands2 = new List<TableCommand2>();
                 this.TableCommands2 = new ReadOnlyCollection<TableCommand2>(this.tableCommands2);
+
+                this.tableCommands3 = new List<TableCommand3>();
+                this.TableCommands3 = new ReadOnlyCollection<TableCommand3>(this.tableCommands3);
 
                 this.variantsRegistrar = new ColumnVariantsRegistrar();
             }
@@ -571,7 +578,10 @@ namespace Microsoft.Performance.Toolkit.Engine
             [Obsolete("This property will be removed by 2.0. Use TableCommands2 instead.")]
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
+            [Obsolete("This property will be removed by 2.0. Use TableCommands3 instead.")]
             public IReadOnlyCollection<TableCommand2> TableCommands2 { get; }
+
+            public IReadOnlyCollection<TableCommand3> TableCommands3 { get; }
 
             public Func<int, IEnumerable<TableRowDetailEntry>> TableRowDetailsGenerator { get; private set; }
 
@@ -599,6 +609,29 @@ namespace Microsoft.Performance.Toolkit.Engine
 
                 this.tableCommands.TryAdd(commandName, (rows) => onExecute(new TableCommandContext(null, null, rows ?? ArraySegment<int>.Empty)));
                 this.tableCommands2.Add(new TableCommand2(commandName, canExecute, onExecute));
+                this.tableCommands3.Add(new TableCommand2Adapter(canonicalName, canExecute, onExecute));
+                return this;
+            }
+
+            /// <summary>
+            ///     Registers a <see cref="TableCommand3"/> against this table.
+            /// </summary>
+            /// <param name="command">
+            ///     The command to register.
+            /// </param>
+            /// <returns>
+            ///     This instance of the builder.
+            /// </returns>
+            public ITableBuilder AddTableCommand3(TableCommand3 command)
+            {
+                Guard.NotNull(command, nameof(command));
+
+                if (this.tableCommands3.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, command.CommandName)))
+                {
+                    throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {command.CommandName}");
+                }
+
+                this.tableCommands3.Add(command);
                 return this;
             }
 

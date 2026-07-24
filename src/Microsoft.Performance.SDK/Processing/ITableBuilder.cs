@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
+using Microsoft.Performance.SDK.Processing.TableCommands;
 using System;
 using System.Collections.Generic;
-using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -86,6 +87,24 @@ namespace Microsoft.Performance.SDK.Processing
             string commandName,
             Predicate<TableCommandContext> canExecute,
             Action<TableCommandContext> onExecute);
+
+        /// <summary>
+        ///     Registers a <see cref="TableCommand3"/> against this table.
+        /// </summary>
+        /// <param name="command">
+        ///     The command to register.
+        /// </param>
+        /// <returns>
+        ///     This instance of the builder.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="command"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     A command with the same <see cref="TableCommand3.CommandName"/>
+        ///     has already been added to this instance (case-insensitive).
+        /// </exception>
+        ITableBuilder AddTableCommand3(TableCommand3 command);
 
         /// <summary>
         ///     Adds a configuration for this table to the builder.

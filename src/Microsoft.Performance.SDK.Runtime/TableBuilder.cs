@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
+using Microsoft.Performance.SDK.Processing.TableCommands;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
+using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
+using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
+using Microsoft.Performance.SDK.Runtime.TableCommands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Processing.ColumnBuilding;
-using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
-using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
-using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
@@ -31,7 +33,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private readonly List<IDataColumn> columns;
         private readonly ReadOnlyCollection<IDataColumn> columnsRO;
         private readonly List<TableConfiguration> builtInTableConfigurations;
-        private readonly List<TableCommand2> commands2;
+        private readonly List<TableCommand3> commands;
         private readonly ColumnVariantsRegistrar variantsRegistrar;
 
         // Maps a row to a collection of row detail entry
@@ -47,8 +49,8 @@ namespace Microsoft.Performance.SDK.Runtime
             this.builtInTableConfigurations = new List<TableConfiguration>();
             this.columnsRO = new ReadOnlyCollection<IDataColumn>(this.columns);
 
-            this.commands2 = new List<TableCommand2>();
-            this.Commands = this.commands2;
+            this.commands = new List<TableCommand3>();
+            this.Commands = this.commands.AsReadOnly();
 
             this.variantsRegistrar = new ColumnVariantsRegistrar();
 
@@ -68,7 +70,14 @@ namespace Microsoft.Performance.SDK.Runtime
         /// <inheritdoc />
         public int RowCount { get; private set; }
 
-        public IReadOnlyList<TableCommand2> Commands { get; }
+        /// <summary>
+        ///     Gets the collection of commands registered against this table.
+        ///     Commands are stored as instances of the abstract
+        ///     <see cref="TableCommand3"/> base type; hosts should inspect the
+        ///     runtime type of each command to determine whether they recognize
+        ///     it. Unknown command types may be safely ignored.
+        /// </summary>
+        public IReadOnlyList<TableCommand3> Commands { get; }
 
         /// <summary>
         ///     Gets the <see cref="IColumnVariantsRegistrar"/> that can be used to find
@@ -94,14 +103,13 @@ namespace Microsoft.Performance.SDK.Runtime
         }
 
         /// <inheritdoc />
-        public ITableBuilder AddTableCommand(string name, TableCommandCallback callback)
+        public ITableBuilder AddTableCommand(string commandName, TableCommandCallback callback)
         {
+            Guard.NotNullOrWhiteSpace(commandName, nameof(commandName));
             Guard.NotNull(callback, nameof(callback));
 
-           return AddTableCommand2(
-               name,
-               (_) => true,
-               (context) => callback(context.SelectedRows));
+            AddCommandCore(new TableCommandCallbackAdapter(commandName, callback));
+            return this;
         }
 
         /// <inheritdoc />
@@ -111,15 +119,27 @@ namespace Microsoft.Performance.SDK.Runtime
             Guard.NotNull(canExecute, nameof(canExecute));
             Guard.NotNull(onExecute, nameof(onExecute));
 
-            var canonicalName = commandName.Trim();
-            if (this.commands2.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, canonicalName)))
+            AddCommandCore(new TableCommand2Adapter(commandName, canExecute, onExecute));
+            return this;
+        }
+
+        /// <inheritdoc />
+        public ITableBuilder AddTableCommand3(TableCommand3 command)
+        {
+            Guard.NotNull(command, nameof(command));
+
+            AddCommandCore(command);
+            return this;
+        }
+
+        private void AddCommandCore(TableCommand3 command)
+        {
+            if (this.commands.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, command.CommandName)))
             {
-                throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {canonicalName}");
+                throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {command.CommandName}");
             }
 
-            this.commands2.Add(new TableCommand2(canonicalName, canExecute, onExecute));
-
-            return this;
+            this.commands.Add(command);
         }
 
         /// <inheritdoc />
