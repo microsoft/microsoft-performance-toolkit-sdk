@@ -412,11 +412,13 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             CollectionAssert.AreEqual(new[] { "a", "b", "c" }, names);
         }
 
-        private sealed class TestTableCommand : TableCommand3<TableCommandContext, int>
+        private sealed class TestTableCommand : TableCommand3<TableCommandContext, CommandResult>
         {
             public TestTableCommand(string name) : base(name) { }
             public override bool CanExecute(TableCommandContext context) => true;
-            public override Task<int> ExecuteAsync(TableCommandContext context, CancellationToken cancellationToken) => Task.FromResult(42);
+            public override Task<CommandResult> ExecuteAsync(TableCommandContext context, CancellationToken cancellationToken) => Task.FromResult(new CommandResult(42));
         }
+
+        private record CommandResult(int Result) : ITableCommand3Result;
     }
 }

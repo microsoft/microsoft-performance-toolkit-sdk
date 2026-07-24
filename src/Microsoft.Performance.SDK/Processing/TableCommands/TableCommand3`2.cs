@@ -25,6 +25,8 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
     /// </typeparam>
     public abstract class TableCommand3<TContext, TResult>
         : TableCommand3
+          where TContext : ITableCommand3Context
+          where TResult : ITableCommand3Result
     {
         /// <summary>
         ///     Initializes a new instance of the

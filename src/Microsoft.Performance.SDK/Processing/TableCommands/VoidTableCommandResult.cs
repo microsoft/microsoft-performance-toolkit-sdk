@@ -8,7 +8,7 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
     ///     <see cref="TableCommand3{TContext, TResult}"/> implementations that
     ///     do not produce a meaningful return value.
     /// </summary>
-    public readonly struct VoidTableCommandResult
+    public readonly struct VoidTableCommandResult : ITableCommand3Result
     {
         /// <summary>
         ///     The single, canonical instance of <see cref="VoidTableCommandResult"/>.

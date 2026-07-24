@@ -10,7 +10,7 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
     ///     identifying the specific cell (and optional sub-row) for which
     ///     source code should be downloaded.
     /// </summary>
-    public sealed class DownloadSourceCodeContext
+    public sealed class DownloadSourceCodeContext : ITableCommand3Context
     {
         /// <summary>
         ///     Initializes a new instance of the

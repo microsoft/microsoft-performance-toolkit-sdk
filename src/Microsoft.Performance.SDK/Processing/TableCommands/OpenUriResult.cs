@@ -12,7 +12,7 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
     ///     are expected to launch <see cref="Uri"/> using the appropriate
     ///     platform mechanism (for example, a web browser for HTTP(S) URIs).
     /// </summary>
-    public class OpenUriResult
+    public class OpenUriResult : ITableCommand3Result
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="OpenUriResult"/>
