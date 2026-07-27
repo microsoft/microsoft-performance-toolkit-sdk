@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Processing.TableCommands;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.Performance.SDK.Runtime.TableCommands
+namespace Microsoft.Performance.SDK.Processing.TableCommands
 {
     /// <summary>
     ///     Wraps the <see cref="Predicate{T}"/> and <see cref="Action{T}"/>

@@ -7,7 +7,6 @@ using Microsoft.Performance.SDK.Processing.TableCommands;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
-using Microsoft.Performance.SDK.Runtime.TableCommands;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

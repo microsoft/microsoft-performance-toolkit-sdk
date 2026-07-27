@@ -44,4 +44,8 @@
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TableCommands\" />
+  </ItemGroup>
+
 </Project>
