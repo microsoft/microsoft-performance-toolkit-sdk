@@ -9,10 +9,44 @@ using System.Collections.Generic;
 namespace Microsoft.Performance.SDK.Processing
 {
     /// <summary>
+    ///     Defines the members common to both <see cref="ITableBuilder"/> and
+    ///     <see cref="ITableBuilderWithRowCount"/>. These are the table-builder
+    ///     operations that do not depend on whether the table's row count has
+    ///     been set, allowing callers to invoke them at any stage of the
+    ///     table-building pipeline.
+    /// </summary>
+    /// <remarks>
+    ///     This interface is not intended to be implemented directly by
+    ///     plugin authors. Instances are supplied by the runtime through
+    ///     <see cref="ITableBuilder"/> and <see cref="ITableBuilderWithRowCount"/>.
+    /// </remarks>
+    public interface ITableBuilderCore
+    {
+        /// <summary>
+        ///     Registers a <see cref="TableCommand3"/> against this table.
+        /// </summary>
+        /// <param name="command">
+        ///     The command to register.
+        /// </param>
+        /// <returns>
+        ///     This instance of the builder.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="command"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     A command with the same <see cref="TableCommand3.CommandName"/>
+        ///     has already been added to this instance (case-insensitive).
+        /// </exception>
+        ITableBuilder AddTableCommand3(TableCommand3 command);
+    }
+
+    /// <summary>
     ///     ITableBuilder is the only way to get ITableBuilderWithRowCount to force the
     ///     <see cref="IProcessingSource"/> to set a row count.
     /// </summary>
     public interface ITableBuilder
+        : ITableBuilderCore
     {
         /// <summary>
         ///     Gets the collection of <see cref="TableConfiguration"/>s that
@@ -89,24 +123,6 @@ namespace Microsoft.Performance.SDK.Processing
             Action<TableCommandContext> onExecute);
 
         /// <summary>
-        ///     Registers a <see cref="TableCommand3"/> against this table.
-        /// </summary>
-        /// <param name="command">
-        ///     The command to register.
-        /// </param>
-        /// <returns>
-        ///     This instance of the builder.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        ///     <paramref name="command"/> is <c>null</c>.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        ///     A command with the same <see cref="TableCommand3.CommandName"/>
-        ///     has already been added to this instance (case-insensitive).
-        /// </exception>
-        ITableBuilder AddTableCommand3(TableCommand3 command);
-
-        /// <summary>
         ///     Adds a configuration for this table to the builder.
         /// </summary>
         /// <param name="configuration">
@@ -152,6 +168,7 @@ namespace Microsoft.Performance.SDK.Processing
     ///     Provides a means of adding columns to a data table.
     /// </summary>
     public interface ITableBuilderWithRowCount
+        : ITableBuilderCore
     {
         /// <summary>
         ///     Gets the count of rows in the table.
