@@ -29,11 +29,20 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
         ///     values. Use <c>null</c> when the row does not have sub-rows or
         ///     when no specific sub-row is being targeted.
         /// </param>
+        /// <param name="columnVariantId">
+        ///     The optional identifier of the active column variant whose
+        ///     value the source code is being requested for. This corresponds
+        ///     to <see cref="Microsoft.Performance.SDK.Processing.ColumnBuilding.ColumnVariantDescriptor.Guid"/>
+        ///     and is unique within the column identified by
+        ///     <paramref name="columnId"/>. Use <c>null</c> when the base
+        ///     column's projection is the active one (i.e., no variant is
+        ///     selected).
+        /// </param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     <paramref name="rowIndex"/> is negative, or
         ///     <paramref name="subRowIndex"/> has a value that is negative.
         /// </exception>
-        public DownloadSourceCodeContext(Guid columnId, int rowIndex, int? subRowIndex = null)
+        public DownloadSourceCodeContext(Guid columnId, int rowIndex, int? subRowIndex = null, Guid? columnVariantId = null)
         {
             if (rowIndex < 0)
             {
@@ -48,6 +57,7 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
             this.ColumnId = columnId;
             this.RowIndex = rowIndex;
             this.SubRowIndex = subRowIndex;
+            this.ColumnVariantId = columnVariantId;
         }
 
         /// <summary>
@@ -55,6 +65,16 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
         ///     which source code is being requested.
         /// </summary>
         public Guid ColumnId { get; }
+
+        /// <summary>
+        ///     Gets the optional identifier of the active column variant
+        ///     whose value the source code is being requested for, or
+        ///     <c>null</c> when the base column's projection is the active
+        ///     one. This corresponds to
+        ///     <see cref="Microsoft.Performance.SDK.Processing.ColumnBuilding.ColumnVariantDescriptor.Guid"/>
+        ///     and is unique within <see cref="ColumnId"/>.
+        /// </summary>
+        public Guid? ColumnVariantId { get; }
 
         /// <summary>
         ///     Gets the zero-based index of the row containing the value.
