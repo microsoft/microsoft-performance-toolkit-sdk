@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Performance.SDK.Processing.TableCommands
 {
     /// <summary>
-    ///     The context supplied to a <see cref="DownloadSourceCode"/> command
+    ///     The context supplied to a <see cref="DownloadSourceCodeCommand"/> command
     ///     identifying the specific cell (and optional sub-row) for which
     ///     source code should be downloaded.
     /// </summary>
