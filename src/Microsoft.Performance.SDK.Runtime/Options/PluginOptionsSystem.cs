@@ -64,6 +64,8 @@ public sealed class PluginOptionsSystem
         string filePath,
         Func<Type, ILogger> loggerFactory)
     {
+        ValidateFilePath(filePath);
+
         var directory = Path.GetDirectoryName(filePath);
 
         if (string.IsNullOrEmpty(directory))
@@ -78,6 +80,43 @@ public sealed class PluginOptionsSystem
         var registry = new PluginOptionsRegistry(loggerFactory(typeof(PluginOptionsRegistry)));
 
         return new PluginOptionsSystem(loader, saver, registry);
+    }
+
+    /// <summary>
+    ///     Validates that <paramref name="filePath"/> is well-formed, throwing an
+    ///     <see cref="ArgumentException"/> if it contains invalid characters or is
+    ///     otherwise malformed. This check is performed up-front so that malformed
+    ///     paths consistently result in an <see cref="ArgumentException"/> instead of
+    ///     leaking lower-level exceptions (e.g. <see cref="IOException"/>) or, worse,
+    ///     silently succeeding.
+    /// </summary>
+    private static void ValidateFilePath(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            throw new ArgumentException("File path cannot be null, empty, or consist only of white-space characters.", nameof(filePath));
+        }
+
+        if (filePath.IndexOfAny(Path.GetInvalidPathChars()) >= 0)
+        {
+            throw new ArgumentException("The file path contains invalid characters.", nameof(filePath));
+        }
+
+        string fileName = Path.GetFileName(filePath);
+        if (!string.IsNullOrEmpty(fileName) && fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+        {
+            throw new ArgumentException("The file name portion of the file path contains invalid characters.", nameof(filePath));
+        }
+
+        // A ':' is only valid as the drive-letter separator (e.g. "C:\..."). Anywhere
+        // else it produces a malformed path (e.g. ":C:\foo" or "C:\foo\:bar.json"),
+        // which some file system APIs surface as an IOException rather than an
+        // ArgumentException.
+        int colonIndex = filePath.IndexOf(':');
+        if (colonIndex >= 0 && colonIndex != 1)
+        {
+            throw new ArgumentException("The file path contains a ':' character in a position other than a drive letter separator.", nameof(filePath));
+        }
     }
 
     /// <summary>

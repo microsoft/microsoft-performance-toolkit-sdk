@@ -104,7 +104,7 @@ public class PluginOptionsSystemTests
     {
         Assert.ThrowsExactly<ArgumentException>(() =>
         {
-            PluginOptionsSystem.CreateForFile(null, (_) => new NullLogger());
+            PluginOptionsSystem.CreateForFile(filePath, (_) => new NullLogger());
         });
     }
 

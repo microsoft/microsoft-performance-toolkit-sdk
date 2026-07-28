@@ -28,6 +28,6 @@ jobs:
     - name: Build solution
       run: dotnet build "${{ github.workspace }}/src/SDK.sln" --no-restore -c Release
     - name: Run tests
-      run: dotnet test "${{ github.workspace }}/src/SDK.sln" -c Release --filter "TestCategory~Unit|TestCategory~Integration|TestCategory~Functional" --no-build --verbosity normal
+      run: dotnet test "${{ github.workspace }}/src/SDK.sln" -c Release --no-build --verbosity normal
     - name: Build samples
       run: ls "${{ github.workspace }}/samples/**/*.sln" | % { dotnet build $_.FullName -c Release }

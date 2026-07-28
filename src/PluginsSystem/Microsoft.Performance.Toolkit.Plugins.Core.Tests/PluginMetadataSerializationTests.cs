@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using Microsoft.Performance.Toolkit.Plugins.Core.Metadata;
+using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Fixture = AutoFixture.Fixture;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Core.Tests;
 
 [TestClass]
+[UnitTest]
 public sealed class PluginMetadataSerializationTests
 {
     private Fixture? fixture = null;

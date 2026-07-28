@@ -3,11 +3,13 @@
 
 using Microsoft.Performance.Toolkit.Plugins.Cli.Manifest;
 using Microsoft.Performance.Toolkit.Plugins.Core.Tests;
+using Microsoft.Performance.Testing;
 using Fixture = AutoFixture.Fixture;
 
 namespace Microsoft.Performance.Toolkit.Plugins.Cli.Tests;
 
 [TestClass]
+[UnitTest]
 public sealed class PluginManifestSerializationTest
 {
     private Fixture? fixture = null;
