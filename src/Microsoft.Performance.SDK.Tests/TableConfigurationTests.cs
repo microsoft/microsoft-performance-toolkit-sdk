@@ -80,7 +80,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void AddingColumnCollectionRightLeftOfLeftThrows()
         {
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => this.Sut.Columns = new[]
                 {
                     TableConfiguration.RightFreezeColumn,
@@ -92,7 +92,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void AddingColumnCollectionGraphLeftOfPivotThrows()
         {
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => this.Sut.Columns = new[]
                 {
                     TableConfiguration.GraphColumn,
@@ -112,7 +112,7 @@ namespace Microsoft.Performance.SDK.Tests
                     c,
                 };
 
-                Assert.ThrowsException<InvalidOperationException>(
+                Assert.ThrowsExactly<InvalidOperationException>(
                    () => this.Sut.Columns = testCase);
             }
         }
@@ -124,7 +124,7 @@ namespace Microsoft.Performance.SDK.Tests
             foreach (var c in TableConfiguration.AllMetadataColumns)
             {
                 var r = ColumnRole.Duration;
-                Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddColumnRole(r, c.Metadata.Guid));
+                Assert.ThrowsExactly<InvalidOperationException>(() => this.Sut.AddColumnRole(r, c.Metadata.Guid));
             }
         }        
 
@@ -172,7 +172,7 @@ namespace Microsoft.Performance.SDK.Tests
 
             this.Sut.AddColumnRole(r1, c.Metadata.Guid);
 
-            Assert.ThrowsException<InvalidOperationException>(() => this.Sut.AddColumnRole(r2, c.Metadata.Guid));
+            Assert.ThrowsExactly<InvalidOperationException>(() => this.Sut.AddColumnRole(r2, c.Metadata.Guid));
         }
 
         [TestMethod]

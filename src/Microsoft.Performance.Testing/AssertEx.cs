@@ -17,9 +17,7 @@ namespace Microsoft.Performance.Testing
             var areEqual = comparer.Equals(expected, actual);
             Assert.IsTrue(
                 areEqual, 
-                "AssertEx.AreEqual failed. Expected:<{0}>. Actual:<{1}>.",
-                expected,
-                actual);
+                $"AssertEx.AreEqual failed. Expected:<{expected}>. Actual:<{actual}>.");
         }
 
         public static void IsInstanceOfType<T>(object obj)
@@ -37,7 +35,7 @@ namespace Microsoft.Performance.Testing
             string message, 
             params object[] paramters)
         {
-            Assert.IsInstanceOfType(obj, typeof(T), message, paramters);
+            Assert.IsInstanceOfType(obj, typeof(T), string.Format(message, paramters));
         }
     }
 }

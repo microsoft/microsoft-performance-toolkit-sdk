@@ -36,7 +36,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
             }
             catch (Exception e)
             {
-                Assert.Fail("Initialize: Unable to create scratch directory `{0}`: {1}", this.Scratch.FullName, e);
+                Assert.Fail($"Initialize: Unable to create scratch directory `{this.Scratch.FullName}`: {e}");
             }
 
             this.OnInitialize();
@@ -57,10 +57,7 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests
                 }
                 catch (Exception e)
                 {
-                    Assert.Fail(
-                        "Cleanup: Unable to delete scratch directory `{0}`: {1}",
-                        this.Scratch.FullName,
-                        e);
+                    Assert.Fail($"Cleanup: Unable to delete scratch directory `{this.Scratch.FullName}`: {e}");
                 }
             }
             else

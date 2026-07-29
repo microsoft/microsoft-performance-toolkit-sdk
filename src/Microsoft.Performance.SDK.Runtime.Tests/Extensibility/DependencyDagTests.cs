@@ -24,8 +24,8 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
         [UnitTest]
         public void Create_NullParameters_Throw()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => DependencyDag.Create(null, new TestDataExtensionRepository()));
-            Assert.ThrowsException<ArgumentNullException>(() => DependencyDag.Create(new TestProcessingSourceCatalog(), null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => DependencyDag.Create(null, new TestDataExtensionRepository()));
+            Assert.ThrowsExactly<ArgumentNullException>(() => DependencyDag.Create(new TestProcessingSourceCatalog(), null));
         }
 
         [TestMethod]
@@ -36,7 +36,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             var repo = new DataExtensionRepository();
             repo.FinalizeDataExtensions();
 
-            Assert.ThrowsException<ArgumentException>(() => DependencyDag.Create(catalog, repo));
+            Assert.ThrowsExactly<ArgumentException>(() => DependencyDag.Create(catalog, repo));
         }
 
         [TestMethod]
@@ -543,7 +543,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             repo.TryAddReference(r0d3);
             repo.FinalizeDataExtensions();
 
-            var e = Assert.ThrowsException<InvalidOperationException>(() => DependencyDag.Create(catalog, repo));
+            var e = Assert.ThrowsExactly<InvalidOperationException>(() => DependencyDag.Create(catalog, repo));
 
             var expectedCycleString = string.Format(
                 "Cycle: {0} -> {1} -> {2} -> {0}",
@@ -586,7 +586,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             repo.TryAddReference(r0d3);
             repo.FinalizeDataExtensions();
 
-            var e = Assert.ThrowsException<InvalidOperationException>(() => DependencyDag.Create(catalog, repo));
+            var e = Assert.ThrowsExactly<InvalidOperationException>(() => DependencyDag.Create(catalog, repo));
 
             var expectedCycleString = string.Format(
                 "Cycle: {0} -> {1} -> {2} -> {0}",

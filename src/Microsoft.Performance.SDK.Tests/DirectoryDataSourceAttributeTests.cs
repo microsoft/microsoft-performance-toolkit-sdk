@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void NullDescriptionThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new DirectoryDataSourceAttribute(null));
         }
 
@@ -23,7 +23,7 @@ namespace Microsoft.Performance.SDK.Tests
         [UnitTest]
         public void WhitespaceDescriptionThrows()
         {
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => new DirectoryDataSourceAttribute(string.Empty));
         }
 

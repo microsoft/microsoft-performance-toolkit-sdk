@@ -39,13 +39,11 @@ namespace Microsoft.Performance.SDK.Tests.TestClasses
                         serializer,
                         out TableDescriptor expected,
                         out Action<ITableBuilder, IDataExtensionRetrieval> buildTableAction),
-                    "Unable to create table descriptor for type `{0}`",
-                    types[i]);
+                    $"Unable to create table descriptor for type `{types[i]}`");
 
                 Assert.IsNotNull(
                     expected,
-                    "TableDescriptorFactory.TryCreate for type `{0}` returned true but yielded null.",
-                    types[i]);
+                    $"TableDescriptorFactory.TryCreate for type `{types[i]}` returned true but yielded null.");
 
                 descriptors.Add(expected);
                 buildActions.Add(buildTableAction);

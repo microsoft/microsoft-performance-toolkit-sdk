@@ -301,7 +301,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                 fakeLoggerFactory);
 
             // Act
-            PluginPackageExtractionException e = await Assert.ThrowsExceptionAsync<PluginPackageExtractionException>(
+            PluginPackageExtractionException e = await Assert.ThrowsExactlyAsync<PluginPackageExtractionException>(
                 async () => await sut.AddAsync(fakePluginPackage.Object, CancellationToken.None, null));
 
             // Assert

@@ -75,10 +75,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             Assert.AreEqual(
                 expected,
                 result,
-                "{0} SHOULD{1} HAVE BEEN SUPPORTED BY {2}",
-                candidateSemVer,
-                expected ? string.Empty : " NOT",
-                sdkSemVer);
+                $"{candidateSemVer} SHOULD{(expected ? string.Empty : " NOT")} HAVE BEEN SUPPORTED BY {sdkSemVer}");
         }
 
         private static VersionChecker CreateSut(

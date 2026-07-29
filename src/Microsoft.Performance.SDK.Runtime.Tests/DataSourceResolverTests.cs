@@ -24,7 +24,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_NullDataSourcesThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => DataSourceResolver.Assign(null, Array.Empty<ProcessingSourceReference>()));
         }
 
@@ -32,7 +32,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void Assign_NullProcessingSourcesThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => DataSourceResolver.Assign(Array.Empty<IDataSource>(), null));
         }
 
@@ -161,7 +161,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 var ecds = kvp.Key;
                 var eds = kvp.Value.ToList();
 
-                Assert.IsTrue(actual.ContainsKey(ecds), "'{0}' is not found in the assignment.", ecds);
+                Assert.IsTrue(actual.ContainsKey(ecds), $"'{ecds}' is not found in the assignment.");
                 var ads = actual[ecds].ToList();
 
                 CollectionAssert.AreEquivalent(eds, ads);
