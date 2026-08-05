@@ -8,10 +8,10 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
     /// <summary>
     ///     A table command that, given a
     ///     <see cref="DownloadSourceCodeContext"/> identifying a specific
-    ///     cell (column, row, and optional sub-row), produces an
-    ///     <see cref="OpenUriResult"/> whose <see cref="OpenUriResult.Uri"/>
-    ///     points to source code that can be downloaded for the value at that
-    ///     location.
+    ///     cell (column, row, and optional sub-row), produces a
+    ///     <see cref="DownloadSourceCodeResult"/> whose
+    ///     <see cref="DownloadSourceCodeResult.Uri"/> points to source code
+    ///     that has been downloaded for the value at that location.
     /// </summary>
     /// <remarks>
     ///     This class fixes the context and result shape for
@@ -25,7 +25,7 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
     ///     <see cref="TableCommand3{TContext, TResult}.CanExecute"/>.
     /// </remarks>
     public abstract class DownloadSourceCodeCommand
-        : TableCommand3<DownloadSourceCodeContext, OpenUriResult>,
+        : TableCommand3<DownloadSourceCodeContext, DownloadSourceCodeResult>,
           IColumnTableCommand
     {
         /// <summary>

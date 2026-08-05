@@ -8,23 +8,26 @@ using System;
 namespace Microsoft.Performance.SDK.Processing.TableCommands
 {
     /// <summary>
-    ///     A table command result that instructs the host to open a URI. Hosts
-    ///     are expected to launch <see cref="Uri"/> using the appropriate
-    ///     platform mechanism (for example, a web browser for HTTP(S) URIs).
+    ///     The result of a <see cref="DownloadSourceCodeCommand"/>. On success,
+    ///     exposes a <see cref="Uri"/> that points to the downloaded source
+    ///     code (typically a local file URI) that the host can open using the
+    ///     appropriate platform mechanism.
     /// </summary>
-    public class OpenUriResult : ITableCommand3Result
+    public class DownloadSourceCodeResult : ITableCommand3Result
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="OpenUriResult"/>
-        ///     class.
+        ///     Initializes a new instance of the
+        ///     <see cref="DownloadSourceCodeResult"/> class representing a
+        ///     successful download.
         /// </summary>
         /// <param name="uri">
-        ///     The URI that the host should open.
+        ///     The URI pointing to the downloaded source code that the host
+        ///     should open.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="uri"/> is <c>null</c>.
         /// </exception>
-        public OpenUriResult(Uri uri)
+        public DownloadSourceCodeResult(Uri uri)
         {
             Guard.NotNull(uri, nameof(uri));
 
@@ -33,22 +36,29 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="OpenUriResult"/>
-        ///     class representing a failure. <see cref="Success"/> will be
-        ///     <c>false</c> and <see cref="Uri"/> will be <c>null</c>.
+        ///     Initializes a new instance of the
+        ///     <see cref="DownloadSourceCodeResult"/> class representing a
+        ///     failure. <see cref="Success"/> will be <c>false</c>.
         /// </summary>
         /// <param name="errorMessage">
-        ///     A human-readable message describing why the command did not
-        ///     produce a usable URI.
+        ///     A human-readable message describing why the source code could
+        ///     not be downloaded.
+        /// </param>
+        /// <param name="uri">
+        ///     An optional URI associated with the failure. Because this
+        ///     constructor represents a failure case, this URI does not refer
+        ///     to a successfully downloaded local resource. Its meaning, when
+        ///     not <c>null</c>, is the attempted download URI.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="errorMessage"/> is <c>null</c>.
         /// </exception>
-        public OpenUriResult(string errorMessage)
+        public DownloadSourceCodeResult(string errorMessage, Uri? uri)
         {
             Guard.NotNull(errorMessage, nameof(errorMessage));
 
             this.ErrorMessage = errorMessage;
+            Uri = uri;
             this.Success = false;
         }
 
@@ -62,13 +72,14 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
 
         /// <summary>
         ///     Gets an optional human-readable error message describing why
-        ///     the command did not produce a usable URI, or <c>null</c> when
+        ///     the source code could not be downloaded, or <c>null</c> when
         ///     no error occurred.
         /// </summary>
         public string? ErrorMessage { get; } = null;
 
         /// <summary>
-        ///     Gets the URI that the host should open.
+        ///     Gets the URI pointing to the downloaded source code that the
+        ///     host should open.
         /// </summary>
         public Uri? Uri { get; }
     }
