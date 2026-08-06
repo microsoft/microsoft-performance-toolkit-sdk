@@ -87,6 +87,13 @@ tableBuilderWithRowCount.AddColumn(this.wordCountColumn, wordCountProjection);
 
 Note that _every_ column a table provides must be added through a call to `ITableBuilderWithRowCount.AddColumn`, even if they're not used in a `TableConfiguration` (see below).
 
+### Deprecating a column
+
+Removing a column can break existing saved configurations that reference it: they will silently lose the column, and filters depending on it will become invalid.
+To retire a column gradually, set `IsDeprecated` on its `ColumnMetadata`. Keep adding the column via `AddColumn` with its `Guid` and projection unchanged.
+This will hide it from certain UI surfaces, but saved configurations that reference it continue to load and render as before.
+It is recommended to update the column's `ShortDescription` with the rationale or the alternatives.
+
 ## Adding TableConfigurations
 
 Some tables may have _many_ columns available. In these situations, it is not useful for a user to be shown every single column at once. A `TableConfiguration` describes groupings of columns that should be used together, along with metadata information such as `ColumnRoles`. Every `Table` must provide at least one `TableConfiguration`.

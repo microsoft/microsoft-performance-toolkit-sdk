@@ -147,6 +147,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.IsNameConstant = other.IsNameConstant;
             this.IsPercent = other.IsPercent;
             this.IsDynamic = other.IsDynamic;
+            this.IsDeprecated = other.IsDeprecated;
             this.FormatProvider = other.FormatProvider;
         }
 
@@ -216,6 +217,13 @@ namespace Microsoft.Performance.SDK.Processing
         ///     column if it is available.
         /// </summary>
         public bool IsDynamic { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a value indicating whether this column is deprecated.
+        ///     Deprecated columns can be hidden from certain user interface
+        ///     but remain fully functional when deserialized.
+        /// </summary>
+        public bool IsDeprecated { get; set; }
 
         /// <summary>
         ///     Gets or sets the format provider to use to format the
