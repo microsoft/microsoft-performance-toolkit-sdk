@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.Processing;
-using Microsoft.Performance.SDK.Processing.TableCommands;
-using Microsoft.Performance.Testing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.TableCommands;
+using Microsoft.Performance.Testing;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
 {

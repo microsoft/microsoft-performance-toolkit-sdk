@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Processing.TableCommands;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.Registrar;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace Microsoft.Performance.SDK.Runtime
 {
