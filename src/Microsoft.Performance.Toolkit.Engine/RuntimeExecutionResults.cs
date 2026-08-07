@@ -534,6 +534,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             private readonly ReadOnlyDictionary<string, TableCommandCallback> tableCommandsRO;
 
             private readonly List<TableCommand2> tableCommands2;
+            private readonly ReadOnlyCollection<TableCommand2> tableCommands2RO;
 
             private readonly List<TableCommand3> tableCommands3;
 
@@ -549,7 +550,7 @@ namespace Microsoft.Performance.Toolkit.Engine
                 this.tableCommandsRO = new ReadOnlyDictionary<string, TableCommandCallback>(this.tableCommands);
 
                 this.tableCommands2 = new List<TableCommand2>();
-                this.TableCommands2 = new ReadOnlyCollection<TableCommand2>(this.tableCommands2);
+                this.tableCommands2RO = new ReadOnlyCollection<TableCommand2>(this.tableCommands2);
 
                 this.tableCommands3 = new List<TableCommand3>();
                 this.TableCommands3 = new ReadOnlyCollection<TableCommand3>(this.tableCommands3);
@@ -578,7 +579,7 @@ namespace Microsoft.Performance.Toolkit.Engine
             public IReadOnlyDictionary<string, TableCommandCallback> TableCommands => this.tableCommandsRO;
 
             [Obsolete("This property will be removed by 2.0. Use TableCommands3 instead.")]
-            public IReadOnlyCollection<TableCommand2> TableCommands2 { get; }
+            public IReadOnlyCollection<TableCommand2> TableCommands2 => this.tableCommands2RO;
 
             public IReadOnlyCollection<TableCommand3> TableCommands3 { get; }
 

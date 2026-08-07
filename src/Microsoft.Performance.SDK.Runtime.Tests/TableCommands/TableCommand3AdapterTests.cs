@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
         [UnitTest]
         public void TableCommand3NullNameThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new TableCommandCallbackAdapter(null, _ => { }));
         }
 
@@ -27,7 +27,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
         [UnitTest]
         public void TableCommand3WhitespaceNameThrows()
         {
-            Assert.ThrowsException<ArgumentException>(
+            Assert.ThrowsExactly<ArgumentException>(
                 () => new TableCommandCallbackAdapter("   ", _ => { }));
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
         [UnitTest]
         public void TableCommandCallbackAdapterNullCallbackThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new TableCommandCallbackAdapter("n", null));
         }
 
@@ -94,9 +94,9 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.TableCommands
         [UnitTest]
         public void TableCommand2AdapterNullDelegatesThrow()
         {
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new TableCommand2Adapter("n", null, _ => { }));
-            Assert.ThrowsException<ArgumentNullException>(
+            Assert.ThrowsExactly<ArgumentNullException>(
                 () => new TableCommand2Adapter("n", _ => true, null));
         }
     }

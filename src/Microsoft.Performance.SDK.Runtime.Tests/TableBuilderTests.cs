@@ -378,7 +378,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         [UnitTest]
         public void AddTableCommand3NullThrows()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand3(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => this.Sut.AddTableCommand3(null));
         }
 
         [TestMethod]
@@ -386,7 +386,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public void AddTableCommand3DuplicateNameThrows()
         {
             this.Sut.AddTableCommand3(new TestTableCommand("dup"));
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => this.Sut.AddTableCommand3(new TestTableCommand("DUP")));
         }
 
@@ -395,7 +395,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
         public void AddTableCommand3DuplicateAgainstLegacyThrows()
         {
             this.Sut.AddTableCommand("legacy", _ => { });
-            Assert.ThrowsException<InvalidOperationException>(
+            Assert.ThrowsExactly<InvalidOperationException>(
                 () => this.Sut.AddTableCommand3(new TestTableCommand("LEGACY")));
         }
 
