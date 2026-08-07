@@ -38,11 +38,24 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
         ///     column's projection is the active one (i.e., no variant is
         ///     selected).
         /// </param>
+        /// <param name="downloadPath">
+        ///     The path under which the source code file should be
+        ///     downloaded. The implementation may place the file directly
+        ///     under this path, or create additional sub-folders beneath it
+        ///     as needed.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="downloadPath"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="downloadPath"/> is empty or consists only of
+        ///     white-space characters.
+        /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     <paramref name="rowIndex"/> is negative, or
         ///     <paramref name="subRowIndex"/> has a value that is negative.
         /// </exception>
-        public DownloadSourceCodeContext(Guid columnId, int rowIndex, int? subRowIndex = null, Guid? columnVariantId = null)
+        public DownloadSourceCodeContext(Guid columnId, string downloadPath, int rowIndex, int? subRowIndex = null, Guid? columnVariantId = null)
         {
             if (rowIndex < 0)
             {
@@ -54,10 +67,21 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
                 throw new ArgumentOutOfRangeException(nameof(subRowIndex), subRowIndex, "Sub-row index must be non-negative when specified.");
             }
 
+            if (downloadPath == null)
+            {
+                throw new ArgumentNullException(nameof(downloadPath));
+            }
+
+            if (string.IsNullOrWhiteSpace(downloadPath))
+            {
+                throw new ArgumentException("Download path must not be empty or white-space.", nameof(downloadPath));
+            }
+
             this.ColumnId = columnId;
             this.RowIndex = rowIndex;
             this.SubRowIndex = subRowIndex;
             this.ColumnVariantId = columnVariantId;
+            this.DownloadPath = downloadPath;
         }
 
         /// <summary>
@@ -87,5 +111,13 @@ namespace Microsoft.Performance.SDK.Processing.TableCommands
         ///     sub-row is being targeted.
         /// </summary>
         public int? SubRowIndex { get; }
+
+        /// <summary>
+        ///     Gets the path under which the source code file should be
+        ///     downloaded. The implementation is free to place the file
+        ///     directly under this path or to create additional sub-folders
+        ///     beneath it as part of the download.
+        /// </summary>
+        public string DownloadPath { get; }
     }
 }
