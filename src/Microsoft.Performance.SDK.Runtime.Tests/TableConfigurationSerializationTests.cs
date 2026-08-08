@@ -164,7 +164,10 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                 Assert.AreEqual(preV1config.Columns.Count(), newConfig.Columns.Count());
                 CompareInnerValues(preV1config.Columns.Select(x => x.Metadata.Guid), newConfig.Columns.Select(x => x.Metadata.Guid));
                 CompareInnerValues(preV1config.Columns.Select(x => x.Metadata.Name), newConfig.Columns.Select(x => x.Metadata.Name));
-                CompareInnerValues(preV1config.Columns.Select(x => x.Metadata.Description), newConfig.Columns.Select(x => x.Metadata.Description));
+
+                // ColumnMetadata.Description and ColumnMetadata.ShortDescription are aliases of a single value,
+                // with ShortDescription overwriting the value, so both round-trip to the short description.
+                CompareInnerValues(preV1config.Columns.Select(x => x.Metadata.ShortDescription), newConfig.Columns.Select(x => x.Metadata.Description));
                 CompareInnerValues(preV1config.Columns.Select(x => x.Metadata.ShortDescription), newConfig.Columns.Select(x => x.Metadata.ShortDescription));
                 CompareInnerValues(preV1config.Columns.Select(x => x.DisplayHints.AggregationMode.ToString()), newConfig.Columns.Select(x => x.DisplayHints.AggregationMode.ToString()));
                 CompareInnerValues(preV1config.Columns.Select(x => x.DisplayHints.CellFormat), newConfig.Columns.Select(x => x.DisplayHints.CellFormat));

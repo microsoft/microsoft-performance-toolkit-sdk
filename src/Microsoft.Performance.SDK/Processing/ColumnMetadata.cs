@@ -142,7 +142,6 @@ namespace Microsoft.Performance.SDK.Processing
             this.NameProjection = other.NameProjection;
 
             this.Guid = other.Guid;
-            this.ShortDescription = other.ShortDescription;
             this.Description = other.Description;
             this.IsNameConstant = other.IsNameConstant;
             this.IsPercent = other.IsPercent;
@@ -196,14 +195,27 @@ namespace Microsoft.Performance.SDK.Processing
         public IProjection<int, string> NameProjection { get; }
 
         /// <summary>
-        /// Gets the user friendly short description of this column.
+        ///     Gets or sets the user friendly description of this column.
+        ///     This is an alias of <see cref="Description"/>.
         /// </summary>
-        public string ShortDescription { get; set; }
+        public string ShortDescription
+        {
+            get { return this.Description; }
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    this.Description = value;
+                }
+            }
+        }
 
         /// <summary>
         ///     Gets the user friendly description of this column.
+        ///     Defaults to <see cref="Name"/>.
+        ///     This is an alias of <see cref="ShortDescription"/>.
         /// </summary>
-        public string Description { get; }
+        public string Description { get; private set; }
 
         /// <summary>
         ///     Gets or sets a value indicating whether this column

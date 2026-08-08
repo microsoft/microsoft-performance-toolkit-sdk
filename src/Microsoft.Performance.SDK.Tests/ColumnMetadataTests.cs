@@ -116,5 +116,23 @@ namespace Microsoft.Performance.SDK.Tests
 
             Assert.IsTrue(copy.IsDeprecated);
         }
+
+        [TestMethod]
+        public void NullShortDescription_DoesNotClearDescription()
+        {
+            var metadata = new ColumnMetadata(this.ColumnGuid, "name", "long")
+            {
+                ShortDescription = null,
+            };
+
+            Assert.AreEqual("long", metadata.Description);
+
+            var fallback = new ColumnMetadata(this.ColumnGuid, "name")
+            {
+                ShortDescription = null,
+            };
+
+            Assert.AreEqual("name", fallback.Description);
+        }
     }
 }
