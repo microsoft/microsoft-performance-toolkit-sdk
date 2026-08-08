@@ -11,7 +11,15 @@ namespace Microsoft.Performance.SDK.Processing
     public class ColumnMetadata
         : ICloneable<ColumnMetadata>
     {
+        // Only truncate the auto-populated short description to the given length if it exceeds the threshold
+        private const int ShortDescriptionLength = 40;
+        private const int ShortDescriptionTruncationThreshold = 50;
+
+        private const string Ellipsis = "\u2026";
+
         private readonly string name;
+
+        private string shortDescription;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ColumnMetadata"/>
@@ -117,11 +125,12 @@ namespace Microsoft.Performance.SDK.Processing
 
             this.Guid = guid;
             this.Description = description;
-            this.IsNameConstant = Projection.IsConstant(nameProjection);
 
             this.NameProjection = nameProjection;
             this.IsNameConstant = Projection.IsConstant(this.NameProjection);
             this.Name = defaultName;
+
+            this.shortDescription = GenerateShortDescription(description, defaultName);
         }
 
         /// <summary>
@@ -142,7 +151,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.NameProjection = other.NameProjection;
 
             this.Guid = other.Guid;
-            this.ShortDescription = other.ShortDescription;
+            this.shortDescription = other.shortDescription;
             this.Description = other.Description;
             this.IsNameConstant = other.IsNameConstant;
             this.IsPercent = other.IsPercent;
@@ -196,14 +205,40 @@ namespace Microsoft.Performance.SDK.Processing
         public IProjection<int, string> NameProjection { get; }
 
         /// <summary>
-        /// Gets the user friendly short description of this column.
+        ///     Gets or sets a brief, user friendly description of this column,
+        ///     suitable for places with little room such as a tooltip.
+        ///     By default, this is initialized from <see cref="Description"/>, truncated if too long.
+        ///     Setting this will also update <see cref="Description"/> if <see cref="Description"/> isn't already set.
         /// </summary>
-        public string ShortDescription { get; set; }
+        public string ShortDescription
+        {
+            get
+            {
+                return this.shortDescription;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    return;
+                }
+
+                this.shortDescription = value;
+
+                // Overwite the description if the current value isn't informative
+                if (string.Equals(this.Description, this.Name, StringComparison.Ordinal))
+                {
+                    this.Description = value;
+                }
+            }
+        }
 
         /// <summary>
-        ///     Gets the user friendly description of this column.
+        ///     Gets the full user friendly description of this column.
+        ///     Defaults to <see cref="Name"/> when none was supplied.
         /// </summary>
-        public string Description { get; }
+        public string Description { get; private set; }
 
         /// <summary>
         ///     Gets or sets a value indicating whether this column
@@ -241,6 +276,24 @@ namespace Microsoft.Performance.SDK.Processing
         public ColumnMetadata CloneT()
         {
             return new ColumnMetadata(this);
+        }
+
+        private static string GenerateShortDescription(string description, string name)
+        {
+            if (string.Equals(description, name, StringComparison.Ordinal))
+            {
+                // Nothing useful to show as a short description
+                return null;
+            }
+
+            if (description.Length <= ShortDescriptionTruncationThreshold)
+            {
+                return description;
+            }
+
+            return string.Concat(
+                description.Substring(0, ShortDescriptionLength - Ellipsis.Length).TrimEnd(),
+                Ellipsis);
         }
     }
 }
