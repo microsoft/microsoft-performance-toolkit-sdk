@@ -207,7 +207,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <summary>
         ///     Gets or sets a brief, user friendly description of this column,
         ///     suitable for places with little room such as a tooltip.
-        ///     By default, this is initialized from <see cref="Description"/>, truncated if too long.
+        ///     By default, this is initialized from <see cref="Description"/>, truncated if over 50 characters.
         ///     Setting this will also update <see cref="Description"/> if <see cref="Description"/> isn't already set.
         /// </summary>
         public string ShortDescription
