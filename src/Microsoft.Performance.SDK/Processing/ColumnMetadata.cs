@@ -226,7 +226,7 @@ namespace Microsoft.Performance.SDK.Processing
 
                 this.shortDescription = value;
 
-                // Overwite the description if the current value isn't informative
+                // Overwrite the description if the current value isn't informative
                 if (string.Equals(this.Description, this.Name, StringComparison.Ordinal))
                 {
                     this.Description = value;
