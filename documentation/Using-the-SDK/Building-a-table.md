@@ -60,6 +60,13 @@ public sealed class WordTable
 }
 ```
 
+`ColumnMetadata` carries two user-facing descriptions:
+* `Description` is the full explanation of the column, shown where there is room for it and exposed via programmatic APIs such as MCP.
+* `ShortDescription` is a brief form, shown where there is not — a tooltip, for example.
+
+For best user experience, it is recommended to provide both `Description` and `ShortDescription`.
+However, if only one is provided, the SDK will populate the other based on the one provided.
+
 ### Defining column projections
 
 
@@ -92,7 +99,7 @@ Note that _every_ column a table provides must be added through a call to `ITabl
 Removing a column can break existing saved configurations that reference it: they will silently lose the column, and filters depending on it will become invalid.
 To retire a column gradually, set `IsDeprecated` on its `ColumnMetadata`. Keep adding the column via `AddColumn` with its `Guid` and projection unchanged.
 This will hide it from certain UI surfaces, but saved configurations that reference it continue to load and render as before.
-It is recommended to update the column's `ShortDescription` with the rationale or the alternatives.
+It is recommended to update the column's `Description` and `ShortDescription` with the rationale or the alternatives.
 
 ## Adding TableConfigurations
 

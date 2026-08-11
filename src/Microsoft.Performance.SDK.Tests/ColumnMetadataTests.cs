@@ -116,5 +116,78 @@ namespace Microsoft.Performance.SDK.Tests
 
             Assert.IsTrue(copy.IsDeprecated);
         }
+
+        [TestMethod]
+        public void NoDescription_ShortDescriptionIsNull()
+        {
+            var metadata = new ColumnMetadata(this.ColumnGuid, "name");
+
+            Assert.AreEqual("name", metadata.Description);
+            Assert.IsNull(metadata.ShortDescription);
+        }
+
+        [TestMethod]
+        public void ShortDescriptionIsDerivedFromDescription()
+        {
+            var metadata = new ColumnMetadata(this.ColumnGuid, "name", "a real description");
+
+            Assert.AreEqual("a real description", metadata.Description);
+            Assert.AreEqual("a real description", metadata.ShortDescription);
+        }
+
+        [TestMethod]
+        public void DescriptionOverThreshold_IsTruncatedWithEllipsis()
+        {
+            var description = new string('a', 51);
+            var metadata = new ColumnMetadata(this.ColumnGuid, "name", description);
+
+            Assert.AreEqual(description, metadata.Description);
+            Assert.AreEqual(40, metadata.ShortDescription.Length);
+            Assert.AreEqual(new string('a', 39) + "\u2026", metadata.ShortDescription);
+        }
+
+        [TestMethod]
+        public void SettingShortDescription_PopulatesAbsentDescription()
+        {
+            var metadata = new ColumnMetadata(this.ColumnGuid, "name")
+            {
+                ShortDescription = "a tooltip",
+            };
+
+            Assert.AreEqual("a tooltip", metadata.ShortDescription);
+            Assert.AreEqual("a tooltip", metadata.Description);
+        }
+
+        [TestMethod]
+        public void SettingShortDescription_DoesNotOverwriteRealDescription()
+        {
+            var metadata = new ColumnMetadata(this.ColumnGuid, "name", "a real description")
+            {
+                ShortDescription = "short",
+            };
+
+            Assert.AreEqual("a real description", metadata.Description);
+            Assert.AreEqual("short", metadata.ShortDescription);
+        }
+
+        [TestMethod]
+        public void NullShortDescription_DoesNotClearDescription()
+        {
+            var metadata = new ColumnMetadata(this.ColumnGuid, "name", "long")
+            {
+                ShortDescription = null,
+            };
+
+            Assert.AreEqual("long", metadata.Description);
+            Assert.AreEqual("long", metadata.ShortDescription);
+
+            // Doesn't overwrite default description either
+            var fallback = new ColumnMetadata(this.ColumnGuid, "name")
+            {
+                ShortDescription = null,
+            };
+
+            Assert.AreEqual("name", fallback.Description);
+        }
     }
 }
