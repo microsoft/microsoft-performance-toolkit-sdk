@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.TableCommands;
 using Microsoft.Performance.Testing;
 using Microsoft.Performance.Testing.SDK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -174,6 +175,11 @@ namespace Microsoft.Performance.SDK.Tests
             }
 
             public ITableBuilder AddTableCommand2(string commandName, Predicate<TableCommandContext> canExecute, Action<TableCommandContext> onExecute)
+            {
+                throw new NotImplementedException();
+            }
+
+            public ITableBuilder AddTableCommand3(TableCommand3 command)
             {
                 throw new NotImplementedException();
             }

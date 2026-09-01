@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.Processing.TableCommands;
 using System;
 using System.Collections.Generic;
 
@@ -23,4 +24,4 @@ namespace Microsoft.Performance.SDK.Processing;
 public record TableCommandContext(
     Guid? Column,
     TableConfiguration Configuration,
-    IReadOnlyList<int> SelectedRows);
+    IReadOnlyList<int> SelectedRows) : ITableCommand3Context;
