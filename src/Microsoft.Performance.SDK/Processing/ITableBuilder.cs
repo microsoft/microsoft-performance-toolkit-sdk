@@ -88,6 +88,47 @@ namespace Microsoft.Performance.SDK.Processing
             Action<TableCommandContext> onExecute);
 
         /// <summary>
+        ///     Registers a command that users can execute against this table.
+        ///     <para/>
+        ///     Compared to <see cref="AddTableCommand2(string, Predicate{TableCommandContext}, Action{TableCommandContext})"/>,
+        ///     this overload uses <see cref="TableCommandContext2"/>, whose selected rows
+        ///     also carry sub-row indices for hierarchical columns, and expects the callback
+        ///     to return a <see cref="TableCommandResult"/> asynchronously.
+        /// </summary>
+        /// <param name="commandName">
+        ///     The human-readable name to associate with the command.
+        /// </param>
+        /// <param name="canExecute">
+        ///     The callback to execute to determine if the user can choose this command.
+        /// </param>
+        /// <param name="onExecute">
+        ///     The asynchronous callback to execute when the user chooses this command.
+        ///     Callbacks that do not need to return a value should return
+        ///     <see cref="VoidTableCommandResult.Instance"/>.
+        /// </param>
+        /// <returns>
+        ///     This instance of the builder.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="commandName"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="canExecute"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="onExecute"/> is <c>null</c>.
+        /// </exception>
+        /// <exception cref="System.ArgumentException">
+        ///     <paramref name="commandName"/> is whitespace.
+        /// </exception>
+        /// <exception cref="System.InvalidOperationException">
+        ///     A command with <paramref name="commandName"/> has already been added
+        ///     to this instance via <see cref="AddTableCommand3"/>, irrespective of casing.
+        /// </exception>
+        ITableBuilder AddTableCommand3(
+            string commandName,
+            Predicate<TableCommandContext2> canExecute,
+            TableCommandCallback2 onExecute);
+
+        /// <summary>
         ///     Adds a configuration for this table to the builder.
         /// </summary>
         /// <param name="configuration">

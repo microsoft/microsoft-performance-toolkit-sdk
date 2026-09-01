@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -326,5 +328,121 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
             command3.OnExecute(new TableCommandContext(null, null, test3));
             Assert.AreEqual(captured3, test3);
         }
+
+		[TestMethod]
+		[UnitTest]
+		public void AddTableCommand3InvalidArgumentsThrow()
+		{
+			TableCommandCallback2 noop = (_, __) => Task.FromResult<TableCommandResult>(VoidTableCommandResult.Instance);
+
+			Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand3(null, _ => true, noop));
+			Assert.ThrowsException<ArgumentException>(() => this.Sut.AddTableCommand3(string.Empty, _ => true, noop));
+			Assert.ThrowsException<ArgumentException>(() => this.Sut.AddTableCommand3("   ", _ => true, noop));
+			Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand3("test", null, noop));
+			Assert.ThrowsException<ArgumentNullException>(() => this.Sut.AddTableCommand3("test", _ => true, null));
+		}
+
+		[TestMethod]
+		[UnitTest]
+		public void AddTableCommand3DuplicateNameThrows()
+		{
+			TableCommandCallback2 noop = (_, __) => Task.FromResult<TableCommandResult>(VoidTableCommandResult.Instance);
+
+			this.Sut.AddTableCommand3("test", _ => true, noop);
+
+			Assert.ThrowsException<InvalidOperationException>(
+				() => this.Sut.AddTableCommand3("TEST", _ => true, noop));
+			Assert.ThrowsException<InvalidOperationException>(
+				() => this.Sut.AddTableCommand3(" test ", _ => true, noop));
+		}
+
+		[TestMethod]
+		[UnitTest]
+		public void AddTableCommand3ReturnsBuilderAndTrimsName()
+		{
+			TableCommandCallback2 noop = (_, __) => Task.FromResult<TableCommandResult>(VoidTableCommandResult.Instance);
+
+			var ret = this.Sut.AddTableCommand3("  test  ", _ => true, noop);
+
+			Assert.AreEqual(this.Sut, ret);
+			Assert.AreEqual(1, this.Sut.Commands3.Count);
+			Assert.AreEqual("test", this.Sut.Commands3.Single().CommandName);
+		}
+
+		[TestMethod]
+		[UnitTest]
+		public async Task AddTableCommand3RoundTripsVoidResult()
+		{
+			TableCommandCallback2 callback = (_, __) => Task.FromResult<TableCommandResult>(VoidTableCommandResult.Instance);
+
+			this.Sut.AddTableCommand3("void", _ => true, callback);
+			var command = this.Sut.Commands3.Single();
+
+			var context = new TableCommandContext2(
+				null,
+				null,
+				new[] { new SelectedTableRow(5, new[] { 0, 1, 2 }) });
+
+			var result = await command.OnExecute(context, CancellationToken.None);
+
+			Assert.AreSame(VoidTableCommandResult.Instance, result);
+		}
+
+		[TestMethod]
+		[UnitTest]
+		public async Task AddTableCommand3RoundTripsOpenUrisResult()
+		{
+			var uris = new[] { new Uri("https://example.com"), new Uri("file:///c:/tmp") };
+			TableCommandContext2 captured = null;
+			TableCommandCallback2 callback = (ctx, __) =>
+			{
+				captured = ctx;
+				return Task.FromResult<TableCommandResult>(new OpenUrisTableCommandResult(uris));
+			};
+
+			this.Sut.AddTableCommand3("openUris", _ => true, callback);
+			var command = this.Sut.Commands3.Single();
+
+			var selected = new[]
+			{
+				new SelectedTableRow(0, Array.Empty<int>()),
+				new SelectedTableRow(7, new[] { 3 }),
+			};
+			var context = new TableCommandContext2(Guid.NewGuid(), null, selected);
+
+			var result = await command.OnExecute(context, CancellationToken.None);
+
+			Assert.AreSame(context, captured);
+			var openUris = result as OpenUrisTableCommandResult;
+			Assert.IsNotNull(openUris);
+			CollectionAssert.AreEqual(uris, openUris.Uris.ToArray());
+		}
+
+		[TestMethod]
+		[UnitTest]
+		public void SelectedTableRowNullSubRowIndicesNormalizedToEmpty()
+		{
+			var row = new SelectedTableRow(3, null);
+
+			Assert.IsNotNull(row.SubRowIndices);
+			Assert.AreEqual(0, row.SubRowIndices.Count);
+		}
+
+		[TestMethod]
+		[UnitTest]
+		public void SelectedTableRowSingleArgConstructorUsesEmptySubRows()
+		{
+			var row = new SelectedTableRow(42);
+
+			Assert.AreEqual(42, row.RowIndex);
+			Assert.AreEqual(0, row.SubRowIndices.Count);
+		}
+
+		[TestMethod]
+		[UnitTest]
+		public void OpenUrisTableCommandResultNullUrisThrows()
+		{
+			Assert.ThrowsException<ArgumentNullException>(() => new OpenUrisTableCommandResult(null));
+		}
     }
 }

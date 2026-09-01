@@ -32,6 +32,7 @@ namespace Microsoft.Performance.SDK.Runtime
         private readonly ReadOnlyCollection<IDataColumn> columnsRO;
         private readonly List<TableConfiguration> builtInTableConfigurations;
         private readonly List<TableCommand2> commands2;
+        private readonly List<TableCommand3> commands3;
         private readonly ColumnVariantsRegistrar variantsRegistrar;
 
         // Maps a row to a collection of row detail entry
@@ -49,6 +50,9 @@ namespace Microsoft.Performance.SDK.Runtime
 
             this.commands2 = new List<TableCommand2>();
             this.Commands = this.commands2;
+
+            this.commands3 = new List<TableCommand3>();
+            this.Commands3 = this.commands3;
 
             this.variantsRegistrar = new ColumnVariantsRegistrar();
 
@@ -69,6 +73,12 @@ namespace Microsoft.Performance.SDK.Runtime
         public int RowCount { get; private set; }
 
         public IReadOnlyList<TableCommand2> Commands { get; }
+
+        /// <summary>
+        ///     Gets the collection of asynchronous, result-returning commands registered
+        ///     via <see cref="AddTableCommand3"/>.
+        /// </summary>
+        public IReadOnlyList<TableCommand3> Commands3 { get; }
 
         /// <summary>
         ///     Gets the <see cref="IColumnVariantsRegistrar"/> that can be used to find
@@ -118,6 +128,27 @@ namespace Microsoft.Performance.SDK.Runtime
             }
 
             this.commands2.Add(new TableCommand2(canonicalName, canExecute, onExecute));
+
+            return this;
+        }
+
+        /// <inheritdoc />
+        public ITableBuilder AddTableCommand3(
+            string commandName,
+            Predicate<TableCommandContext2> canExecute,
+            TableCommandCallback2 onExecute)
+        {
+            Guard.NotNullOrWhiteSpace(commandName, nameof(commandName));
+            Guard.NotNull(canExecute, nameof(canExecute));
+            Guard.NotNull(onExecute, nameof(onExecute));
+
+            var canonicalName = commandName.Trim();
+            if (this.commands3.Any(x => StringComparer.CurrentCultureIgnoreCase.Equals(x.CommandName, canonicalName)))
+            {
+                throw new InvalidOperationException($"Duplicate command names are not allowed. Duplicate: {canonicalName}");
+            }
+
+            this.commands3.Add(new TableCommand3(canonicalName, canExecute, onExecute));
 
             return this;
         }
