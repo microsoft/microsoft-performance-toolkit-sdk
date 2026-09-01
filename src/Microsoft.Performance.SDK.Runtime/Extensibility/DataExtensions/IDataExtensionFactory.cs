@@ -7,7 +7,6 @@ using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataCookers;
-using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.DataProcessors;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Repository;
 using Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions.Tables;
 
@@ -38,6 +37,45 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         bool TryCreateSourceDataCookerReference(
             Type candidateType,
             out ISourceDataCookerReference reference);
+
+        /// <summary>
+        ///     Generate a source data cooker reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        ///     data extension type.
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <param name="reference">
+        ///     data extension reference.
+        /// </param>
+        /// <returns>
+        ///     true if succeeded.
+        /// </returns>
+        bool TryCreateSourceDataCookerReference(
+            Type candidateType,
+            ILogger logger,
+            out ISourceDataCookerReference reference);
+
+        /// <summary>
+        ///     Generate a composite data cooker reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        /// data extension type</param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <param name="reference">
+        ///     Data extension reference.
+        /// </param>
+        /// <returns>
+        ///     true if succeeded.
+        /// </returns>
+        bool TryCreateCompositeDataCookerReference(
+            Type candidateType,
+            ILogger logger,
+            out ICompositeDataCookerReference reference);
 
         /// <summary>
         ///     Generate a composite data cooker reference from a given type.
@@ -86,6 +124,26 @@ namespace Microsoft.Performance.SDK.Runtime.Extensibility.DataExtensions
         /// </returns>
         bool TryCreateTableReference(
             Type candidateType,
+            out ITableExtensionReference reference);
+
+        /// <summary>
+        ///     Generate a table reference from a given type.
+        /// </summary>
+        /// <param name="candidateType">
+        ///     data extension type.
+        /// </param>
+        /// <param name="reference">
+        ///     data extension reference.
+        /// </param>
+        /// <param name="logger">
+        ///     Logs messages during reference creation.
+        /// </param>
+        /// <returns>
+        ///     true if succeeded.
+        /// </returns>
+        bool TryCreateTableReference(
+            Type candidateType,
+            ILogger logger,
             out ITableExtensionReference reference);
 
         /// <summary>

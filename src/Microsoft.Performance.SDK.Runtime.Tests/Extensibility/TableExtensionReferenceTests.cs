@@ -22,6 +22,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 var result = TableExtensionReference.TryCreateReference(
                     typeof(TestTableExtension),
+                    Logger.Null,
                     out sut);
 
                 Assert.IsTrue(result);
@@ -51,6 +52,7 @@ namespace Microsoft.Performance.SDK.Runtime.Tests.Extensibility
             {
                 var result = TableExtensionReference.TryCreateReference(
                     typeof(TestTableExtension),
+                    Logger.Null,
                     out sut);
 
                 Assert.IsTrue(result);

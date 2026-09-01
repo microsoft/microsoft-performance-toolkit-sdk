@@ -109,7 +109,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             // The constructor for this object hooks up the repository to the extension provider
             // (the ExtensionDiscovery in this case). We do not need to hold onto this object
             // explicitly, only call its constructor.
-            new DataExtensionReflector(this.extensionDiscovery, extensionRepository);
+            new DataExtensionReflector(this.extensionDiscovery, extensionRepository, logger);
 
             this.isDisposed = false;
             this.logger = logger;
@@ -254,7 +254,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
             {
                 Guard.NotNull(dir, nameof(directories));
             }
-            
+
             failed = new Dictionary<string, ErrorInfo>();
 
             if (!directories.Any())
@@ -280,21 +280,21 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Plugins
                         failed.Add(dir, emptyErrorInfo);
                         continue;
                     }
-                    
+
                     if (!this.extensionDiscovery.ProcessAssemblies(dir, out var error))
                     {
                         failed.Add(dir, error);
                         continue;
                     }
                 }
-                
+
                 // If nothing was able to be loaded above, skip finalizing 
                 if (this.extensionRoot.IsLoaded)
                 {
                     // TODO (#223): this does redundant work re-finalizing processing sources
                     // loaded by previous calls to this method. The extension repository
                     // should get refactored to avoid this redundant work.
-                    
+
                     this.extensionRoot.FinalizeDataExtensions();
                 }
 
