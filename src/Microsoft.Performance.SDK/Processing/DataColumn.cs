@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.ColumnCommands;
 using System;
 
 namespace Microsoft.Performance.SDK.Processing
@@ -13,7 +14,8 @@ namespace Microsoft.Performance.SDK.Processing
     ///     The <see cref="Type"/> of data projected by this column.
     /// </typeparam>
     public class DataColumn<T>
-        : IDataColumn<T>
+        : IDataColumn<T>,
+          IDataColumnCommands<T>
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataColumn{T}" />
@@ -80,6 +82,8 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <inheritdoc />
         public IProjection<int, T> Projector { get; }
+
+        public DataColumnCommands<T> Commands { get; internal set; }
 
         /// <summary>
         ///     Projects the data in this column for the given row.
