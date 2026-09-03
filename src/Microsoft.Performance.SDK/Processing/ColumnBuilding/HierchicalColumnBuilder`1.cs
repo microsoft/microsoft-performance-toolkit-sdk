@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+#nullable enable
+
+using Microsoft.Performance.SDK.ColumnCommands;
+
 namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 public sealed class HierchicalColumnBuilder<T>
@@ -18,8 +22,8 @@ public sealed class HierchicalColumnBuilder<T>
         this.infoProvider = infoProvider;
     }
 
-    protected override DataColumn<T> BuildColumn()
+    protected override DataColumn<T> BuildColumn(DataColumnCommands<T>? commands)
     {
-        return new HierarchicalDataColumn<T>(this.Configuration, this.Projection, this.infoProvider);
+        return new HierarchicalDataColumn<T>(this.Configuration, this.Projection, this.infoProvider, commands);
     }
 }

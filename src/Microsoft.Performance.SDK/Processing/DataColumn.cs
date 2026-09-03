@@ -62,6 +62,32 @@ namespace Microsoft.Performance.SDK.Processing
         public DataColumn(
             ColumnConfiguration configuration,
             IProjection<int, T> projection)
+            : this(configuration, projection, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="DataColumn{T}" />
+        ///     class.
+        /// </summary>
+        /// <param name="configuration">
+        ///     The configuration of this column.
+        /// </param>
+        /// <param name="projection">
+        ///     The projection that projects the data in the column.
+        /// </param>
+        /// <param name="dataColumnCommands">
+        ///     The commands supported by this column. May be <c>null</c>.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="configuration"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="projection"/> is <c>null</c>.
+        /// </exception>
+        public DataColumn(
+            ColumnConfiguration configuration,
+            IProjection<int, T> projection,
+            DataColumnCommands<T> dataColumnCommands)
         {
             Guard.NotNull(configuration, nameof(configuration));
             Guard.NotNull(projection, nameof(projection));
@@ -69,6 +95,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.Configuration = configuration;
             this.ProjectorInterface = projection.GetType();
             this.Projector = projection;
+            this.Commands = dataColumnCommands;
         }
 
         /// <inheritdoc />
@@ -83,7 +110,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <inheritdoc />
         public IProjection<int, T> Projector { get; }
 
-        public DataColumnCommands<T> Commands { get; internal set; }
+        public DataColumnCommands<T> Commands { get; }
 
         /// <summary>
         ///     Projects the data in this column for the given row.

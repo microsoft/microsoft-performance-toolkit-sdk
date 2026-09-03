@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+#nullable enable
+
 namespace Microsoft.Performance.SDK.ColumnCommands;
 
 public sealed class DataColumnCommands<T>
@@ -9,5 +11,5 @@ public sealed class DataColumnCommands<T>
     {
     }
 
-    public DownloadSourceCodeCommand<T> DownloadSourceCodeCommand { get; internal set; }
+    public DownloadSourceCodeCommand<T>? DownloadSourceCodeCommand { get; init; } = null;
 }
