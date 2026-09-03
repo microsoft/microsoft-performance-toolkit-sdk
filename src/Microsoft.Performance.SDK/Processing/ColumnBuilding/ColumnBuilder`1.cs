@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+#nullable enable
+
 using Microsoft.Performance.SDK.ColumnCommands;
 using System;
 
@@ -36,9 +38,9 @@ public class ColumnBuilder<T>
 
     protected IProjection<int, T> Projection { get; }
 
-    protected DownloadSourceCodeCommand<T> DownloadSourceCommand { get; set; } = null;
+    protected DownloadSourceCodeCommand<T>? DownloadSourceCommand { get; set; } = null;
 
-    protected Func<RootColumnBuilder, ColumnBuilder> VariantOptions { get; set; } = null;
+    protected Func<RootColumnBuilder, ColumnBuilder>? VariantOptions { get; set; } = null;
 
     public ColumnBuilder<T> WithDownloadSourceCodeCommand(
         DownloadSourceCodeCommand<T> downloadSourceCommand)
@@ -56,8 +58,9 @@ public class ColumnBuilder<T>
 
     public ITableBuilderWithRowCount AddColumn(ITableBuilderWithRowCount tableBuilder)
     {
-        DataColumn<T> dataColumn = BuildColumn();
-        dataColumn.Commands.DownloadSourceCodeCommand = this.DownloadSourceCommand;
+        DataColumnCommands<T> commands = new() { DownloadSourceCodeCommand = this.DownloadSourceCommand };
+
+        DataColumn<T> dataColumn = BuildColumn(commands);
 
         if (this.VariantOptions is not null)
         {
@@ -67,8 +70,8 @@ public class ColumnBuilder<T>
         return tableBuilder.AddColumn(dataColumn);
     }
 
-    protected virtual DataColumn<T> BuildColumn()
+    protected virtual DataColumn<T> BuildColumn(DataColumnCommands<T>? commands)
     {
-        return new(this.Configuration, this.Projection);
+        return new(this.Configuration, this.Projection, commands);
     }
 }
