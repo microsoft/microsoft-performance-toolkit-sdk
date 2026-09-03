@@ -1,15 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using Microsoft.Performance.SDK.ColumnCommands;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -96,6 +97,16 @@ internal class ModalColumnWithModesBuilder
         IProjection<int, T> projection,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
+        return WithMode(modeDescriptor, projection, default, builder);
+    }
+
+    /// <inheritdoc />
+    public override ModalColumnBuilder WithMode<T>(
+        ColumnVariantDescriptor modeDescriptor,
+        IProjection<int, T> projection,
+        DataColumnCommands<T> dataColumnCommands,
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder)
+    {
         Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
         Guard.NotNull(projection, nameof(projection));
 
@@ -104,9 +115,10 @@ internal class ModalColumnWithModesBuilder
             new DataColumn<T>(
                 new ColumnConfiguration(this.baseColumn.Configuration)
                 {
-                    Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = modeDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                    Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = modeDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name },
                 },
-                projection),
+                projection,
+                dataColumnCommands),
             builder);
 
         return WithMode(newMode);
@@ -126,6 +138,16 @@ internal class ModalColumnWithModesBuilder
         ICollectionInfoProvider<T> collectionProvider,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
+        return WithHierarchicalMode(modeDescriptor, projection, collectionProvider, null, builder);
+    }
+
+    public override ModalColumnBuilder WithHierarchicalMode<T>(
+        ColumnVariantDescriptor modeDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        DataColumnCommands<T> dataColumnCommands,
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder)
+    {
         Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
         Guard.NotNull(projection, nameof(projection));
         Guard.NotNull(collectionProvider, nameof(collectionProvider));
@@ -135,10 +157,11 @@ internal class ModalColumnWithModesBuilder
             new HierarchicalDataColumn<T>(
                 new ColumnConfiguration(this.baseColumn.Configuration)
                 {
-                    Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = modeDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
+                    Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = modeDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name },
                 },
                 projection,
-                collectionProvider),
+                collectionProvider,
+                dataColumnCommands),
             builder);
 
         return WithMode(newMode);

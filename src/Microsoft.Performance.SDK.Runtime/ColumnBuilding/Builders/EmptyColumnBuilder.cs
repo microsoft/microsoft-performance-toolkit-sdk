@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
+using Microsoft.Performance.SDK.ColumnCommands;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -48,6 +49,15 @@ public sealed class EmptyColumnBuilder
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection)
     {
+        return WithToggle(toggleDescriptor, projection, default);
+    }
+
+    /// <inheritdoc />
+    public override ToggleableColumnBuilder WithToggle<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        DataColumnCommands<T> dataColumnCommands)
+    {
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
 
@@ -59,7 +69,8 @@ public sealed class EmptyColumnBuilder
                         {
                             Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
                         },
-                        projection)),
+                        projection,
+                        dataColumnCommands)),
             ],
             baseColumn,
             processor);
@@ -70,6 +81,16 @@ public sealed class EmptyColumnBuilder
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider)
+    {
+        return WithHierarchicalToggle(toggleDescriptor, projection, collectionProvider, default);
+    }
+
+    /// <inheritdoc />
+    public override ToggleableColumnBuilder WithHierarchicalToggle<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        DataColumnCommands<T> dataColumnCommands)
     {
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
@@ -84,7 +105,8 @@ public sealed class EmptyColumnBuilder
                             Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name},
                         },
                         projection,
-                        collectionProvider)),
+                        collectionProvider,
+                        dataColumnCommands)),
             ],
             baseColumn,
             processor);

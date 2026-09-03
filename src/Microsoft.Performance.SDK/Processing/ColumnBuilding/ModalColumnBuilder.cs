@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Microsoft.Performance.SDK.ColumnCommands;
 using System;
 
 namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
@@ -95,6 +96,37 @@ public abstract class ModalColumnBuilder
         Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 
     /// <summary>
+    ///     Adds a mode to the column.
+    /// </summary>
+    /// <param name="modeDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode.
+    /// </param>
+    /// <param name="projection">
+    ///     The projection that will be used to generate the column for this mode.
+    /// </param>
+    /// <param name="dataColumnCommands">
+    ///     Data column commands.
+    /// </param>
+    /// <param name="builder">
+    ///     A callback that builds sub-variants of the added mode and returns its final column configuration.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The type of data that the projection will produce.
+    /// </typeparam>
+    /// <returns>
+    ///     A new instance of <see cref="ModalColumnBuilder"/> that has been
+    ///     configured with the new mode.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="modeDescriptor"/> or <paramref name="projection"/> is <c>null</c>.
+    /// </exception>
+    public abstract ModalColumnBuilder WithMode<T>(
+        ColumnVariantDescriptor modeDescriptor,
+        IProjection<int, T> projection,
+        DataColumnCommands<T> dataColumnCommands,
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder);
+
+    /// <summary>
     ///     Adds a hierarchical mode to the column.
     /// </summary>
     /// <param name="modeDescriptor">
@@ -124,6 +156,42 @@ public abstract class ModalColumnBuilder
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
+        Func<ToggleableColumnBuilder, ColumnBuilder> builder);
+
+    /// <summary>
+    ///     Adds a hierarchical mode to the column.
+    /// </summary>
+    /// <param name="modeDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the mode.
+    /// </param>
+    /// <param name="projection">
+    ///     The projection that will be used to generate the column for this mode.
+    /// </param>
+    /// <param name="collectionProvider">
+    ///     The collection provider for the column.
+    /// </param>
+    /// <param name="dataColumnCommands">
+    ///     Data column commands.
+    /// </param>
+    /// <param name="builder">
+    ///     A callback that builds sub-variants of the added mode and returns its final column configuration.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The type of data that the projection will produce.
+    /// </typeparam>
+    /// <returns>
+    ///     A new instance of <see cref="ModalColumnBuilder"/> that has been
+    ///     configured with the new mode.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="modeDescriptor"/>, <paramref name="projection"/>,
+    ///     or <paramref name="collectionProvider"/> is <c>null</c>.
+    /// </exception>
+    public abstract ModalColumnBuilder WithHierarchicalMode<T>(
+        ColumnVariantDescriptor modeDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        DataColumnCommands<T> dataColumnCommands,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 
     /// <summary>
