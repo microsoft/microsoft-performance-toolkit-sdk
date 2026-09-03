@@ -22,6 +22,15 @@ public sealed class HierchicalColumnBuilder<T>
         this.infoProvider = infoProvider;
     }
 
+    public HierchicalColumnBuilder(
+            ColumnConfiguration columnConfiguration,
+            IProjection<int, T> projection,
+            ICollectionInfoProvider<T> infoProvider)
+        : base(columnConfiguration, projection)
+    {
+        this.infoProvider = infoProvider;
+    }
+
     protected override DataColumn<T> BuildColumn(DataColumnCommands<T>? commands)
     {
         return new HierarchicalDataColumn<T>(this.Configuration, this.Projection, this.infoProvider, commands);
