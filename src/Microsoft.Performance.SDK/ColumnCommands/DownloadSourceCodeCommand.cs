@@ -12,7 +12,9 @@ public abstract class DownloadSourceCodeCommand<T>
 
     public string CommandName { get; }
 
-    public abstract bool CanExecute(T rowValue);
+    public abstract bool CanExecute(Context context);
 
-    public abstract System.Threading.Tasks.Task<DownloadSourceCodeResult> ExecuteAsync(T rowValue, System.Threading.CancellationToken cancellationToken);
+    public abstract System.Threading.Tasks.Task<DownloadSourceCodeResult> ExecuteAsync(Context context, System.Threading.CancellationToken cancellationToken);
+
+    public record Context(T Value, string DownloadPath);
 }
