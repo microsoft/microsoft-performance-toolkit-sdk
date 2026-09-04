@@ -5,6 +5,11 @@ namespace Microsoft.Performance.SDK.ColumnCommands;
 
 public abstract class DownloadSourceCodeCommand<T>
 {
+    protected DownloadSourceCodeCommand(string commandName)
+    {
+        CommandName = commandName;
+    }
+
     public string CommandName { get; }
 
     public abstract bool CanExecute(T rowValue);
