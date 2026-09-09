@@ -3,7 +3,7 @@
 
 namespace Microsoft.Performance.SDK.ColumnCommands;
 
-public abstract class DownloadSourceCodeCommand<T>
+public abstract class DownloadSourceCodeCommand
 {
     protected DownloadSourceCodeCommand(string commandName)
     {
@@ -12,9 +12,10 @@ public abstract class DownloadSourceCodeCommand<T>
 
     public string CommandName { get; }
 
-    public abstract bool CanExecute(Context context);
+    public abstract bool CanExecute(object value, string downloadPath);
 
-    public abstract System.Threading.Tasks.Task<DownloadSourceCodeResult> ExecuteAsync(Context context, System.Threading.CancellationToken cancellationToken);
-
-    public record Context(T Value, string DownloadPath);
+    public abstract System.Threading.Tasks.Task<DownloadSourceCodeResult> ExecuteAsync(
+        object value,
+        string downloadPath,
+        System.Threading.CancellationToken cancellationToken);
 }

@@ -10,7 +10,7 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 public class ColumnBuilder<T>
 {
-    private object? downloadSourceCommand = null;
+    private DownloadSourceCodeCommand? downloadSourceCommand = null;
 
     public ColumnBuilder(
             ColumnMetadata metadata,
@@ -42,8 +42,8 @@ public class ColumnBuilder<T>
 
     protected Func<RootColumnBuilder, ColumnBuilder>? VariantOptions { get; set; } = null;
 
-    public ColumnBuilder<T> WithDownloadSourceCodeCommand<TDownload>(
-        DownloadSourceCodeCommand<TDownload> downloadSourceCommand)
+    public ColumnBuilder<T> WithDownloadSourceCodeCommand(
+        DownloadSourceCodeCommand downloadSourceCommand)
     {
         this.downloadSourceCommand = downloadSourceCommand;
         return this;
@@ -58,7 +58,7 @@ public class ColumnBuilder<T>
 
     public ITableBuilderWithRowCount AddColumn(ITableBuilderWithRowCount tableBuilder)
     {
-        DataColumnCommands commands = DataColumnCommands.Create(this.downloadSourceCommand);
+        DataColumnCommands commands = new(this.downloadSourceCommand);
 
         DataColumn<T> dataColumn = BuildColumn(commands);
 

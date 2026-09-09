@@ -3,7 +3,6 @@
 
 #nullable enable
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Performance.SDK.ColumnCommands;
@@ -18,60 +17,18 @@ namespace Microsoft.Performance.SDK.ColumnCommands;
 /// </remarks>
 public sealed class DataColumnCommands
 {
-    public static readonly DataColumnCommands Empty = new(new EmptyCommandsImpl());
+    public static readonly DataColumnCommands Empty = new(null);
 
-    private readonly DataColumnCommandsImpl commands;
+    private readonly DownloadSourceCodeCommand? downloadSourceCodeCommand;
 
-    private DataColumnCommands(DataColumnCommandsImpl commands)
+    public DataColumnCommands(DownloadSourceCodeCommand? downloadSourceCodeCommand)
     {
-        this.commands = commands;
+        this.downloadSourceCodeCommand = downloadSourceCodeCommand;
     }
 
-    public bool TryGetDownloadSourceCodeCommand<T>([NotNullWhen(true)] out DownloadSourceCodeCommand<T>? command)
+    public bool TryGetDownloadSourceCodeCommand([NotNullWhen(true)] out DownloadSourceCodeCommand? command)
     {
-        return this.commands.TryGetDownloadSourceCodeCommand(out command);
-    }
-
-    public static DataColumnCommands Create(object? downloadSourceCommand)
-    {
-        if (downloadSourceCommand is null)
-        {
-            return Empty;
-        }
-
-        var commandsType = typeof(DataColumnCommandsImpl<>).MakeGenericType(downloadSourceCommand.GetType());
-        return (DataColumnCommands)Activator.CreateInstance(commandsType, [downloadSourceCommand]);
-    }
-
-    private abstract class DataColumnCommandsImpl
-    {
-        public abstract bool TryGetDownloadSourceCodeCommand<T>([NotNullWhen(true)] out DownloadSourceCodeCommand<T>? command);
-    }
-
-    private sealed class EmptyCommandsImpl
-        : DataColumnCommandsImpl
-    {
-        public override bool TryGetDownloadSourceCodeCommand<T>([NotNullWhen(true)] out DownloadSourceCodeCommand<T>? command)
-        {
-            command = null;
-            return false;
-        }
-    }
-
-    private sealed class DataColumnCommandsImpl<TDownloadSource>
-        : DataColumnCommandsImpl
-    {
-        DownloadSourceCodeCommand<TDownloadSource>? downloadSourceCommand = null;
-
-        public DataColumnCommandsImpl(DownloadSourceCodeCommand<TDownloadSource>? downloadSourceCommand)
-        {
-            this.downloadSourceCommand = downloadSourceCommand;
-        }
-
-        public override bool TryGetDownloadSourceCodeCommand<T>([NotNullWhen(true)] out DownloadSourceCodeCommand<T>? command)
-        {
-            command = this.downloadSourceCommand as DownloadSourceCodeCommand<T>;
-            return command is not null;
-        }
+        command = this.downloadSourceCodeCommand;
+        return command is not null;
     }
 }
