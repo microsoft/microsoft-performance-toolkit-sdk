@@ -78,7 +78,7 @@ namespace Microsoft.Performance.SDK.Processing
             ColumnConfiguration configuration,
             IProjection<int, T> projection,
             ICollectionInfoProvider<T> collectionProvider,
-            DataColumnCommands<T> dataColumnCommands)
+            DataColumnCommands dataColumnCommands)
             : base(configuration, projection, dataColumnCommands)
         {
             Guard.NotNull(collectionProvider, nameof(collectionProvider));

@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// </typeparam>
     public class DataColumn<T>
         : IDataColumn<T>,
-          IDataColumnCommands<T>
+          IDataColumnCommands
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataColumn{T}" />
@@ -87,7 +87,7 @@ namespace Microsoft.Performance.SDK.Processing
         public DataColumn(
             ColumnConfiguration configuration,
             IProjection<int, T> projection,
-            DataColumnCommands<T> dataColumnCommands)
+            DataColumnCommands dataColumnCommands)
         {
             Guard.NotNull(configuration, nameof(configuration));
             Guard.NotNull(projection, nameof(projection));
@@ -110,7 +110,7 @@ namespace Microsoft.Performance.SDK.Processing
         /// <inheritdoc />
         public IProjection<int, T> Projector { get; }
 
-        public DataColumnCommands<T> Commands { get; }
+        public DataColumnCommands Commands { get; }
 
         /// <summary>
         ///     Projects the data in this column for the given row.

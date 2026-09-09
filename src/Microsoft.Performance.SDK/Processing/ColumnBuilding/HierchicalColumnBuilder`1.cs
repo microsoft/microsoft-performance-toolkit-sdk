@@ -31,7 +31,7 @@ public sealed class HierchicalColumnBuilder<T>
         this.infoProvider = infoProvider;
     }
 
-    protected override DataColumn<T> BuildColumn(DataColumnCommands<T>? commands)
+    protected override DataColumn<T> BuildColumn(DataColumnCommands? commands)
     {
         return new HierarchicalDataColumn<T>(this.Configuration, this.Projection, this.infoProvider, commands);
     }

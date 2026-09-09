@@ -5,8 +5,8 @@ using Microsoft.Performance.SDK.ColumnCommands;
 
 namespace Microsoft.Performance.SDK.Processing
 {
-    public interface IDataColumnCommands<T>
+    public interface IDataColumnCommands
     {
-        DataColumnCommands<T> Commands { get; }
+        DataColumnCommands Commands { get; }
     }
 }

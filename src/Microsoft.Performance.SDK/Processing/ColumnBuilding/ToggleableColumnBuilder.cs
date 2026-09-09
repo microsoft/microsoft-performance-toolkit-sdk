@@ -72,7 +72,7 @@ public abstract class ToggleableColumnBuilder
     public abstract ToggleableColumnBuilder WithToggle<T>(
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
-        DataColumnCommands<T> dataColumnCommands);
+        DataColumnCommands dataColumnCommands);
 
     /// <summary>
     ///     Adds a new toggleable variant to the column. The added toggleable variant
@@ -140,7 +140,7 @@ public abstract class ToggleableColumnBuilder
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        DataColumnCommands<T> dataColumnCommands);
+        DataColumnCommands dataColumnCommands);
 
     /// <summary>
     ///     Adds a set of modes to the column that are nested inside of a toggle with no

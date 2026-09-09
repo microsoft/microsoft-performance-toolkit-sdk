@@ -67,7 +67,7 @@ internal class ToggledColumnBuilder
     public override ToggleableColumnBuilder WithToggle<T>(
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
-        DataColumnCommands<T> dataColumnCommands)
+        DataColumnCommands dataColumnCommands)
     {
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
@@ -102,7 +102,7 @@ internal class ToggledColumnBuilder
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        DataColumnCommands<T> dataColumnCommands)
+        DataColumnCommands dataColumnCommands)
     {
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));

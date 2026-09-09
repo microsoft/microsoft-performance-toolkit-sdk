@@ -123,7 +123,7 @@ public abstract class ModalColumnBuilder
     public abstract ModalColumnBuilder WithMode<T>(
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
-        DataColumnCommands<T> dataColumnCommands,
+        DataColumnCommands dataColumnCommands,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 
     /// <summary>
@@ -191,7 +191,7 @@ public abstract class ModalColumnBuilder
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        DataColumnCommands<T> dataColumnCommands,
+        DataColumnCommands dataColumnCommands,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder);
 
     /// <summary>

@@ -10,6 +10,8 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 public class ColumnBuilder<T>
 {
+    private object? downloadSourceCommand = null;
+
     public ColumnBuilder(
             ColumnMetadata metadata,
             UIHints displayHints,
@@ -38,14 +40,12 @@ public class ColumnBuilder<T>
 
     protected IProjection<int, T> Projection { get; }
 
-    protected DownloadSourceCodeCommand<T>? DownloadSourceCommand { get; set; } = null;
-
     protected Func<RootColumnBuilder, ColumnBuilder>? VariantOptions { get; set; } = null;
 
-    public ColumnBuilder<T> WithDownloadSourceCodeCommand(
-        DownloadSourceCodeCommand<T> downloadSourceCommand)
+    public ColumnBuilder<T> WithDownloadSourceCodeCommand<TDownload>(
+        DownloadSourceCodeCommand<TDownload> downloadSourceCommand)
     {
-        this.DownloadSourceCommand = downloadSourceCommand;
+        this.downloadSourceCommand = downloadSourceCommand;
         return this;
     }
 
@@ -58,7 +58,7 @@ public class ColumnBuilder<T>
 
     public ITableBuilderWithRowCount AddColumn(ITableBuilderWithRowCount tableBuilder)
     {
-        DataColumnCommands<T> commands = new() { DownloadSourceCodeCommand = this.DownloadSourceCommand };
+        DataColumnCommands commands = DataColumnCommands.Create(this.downloadSourceCommand);
 
         DataColumn<T> dataColumn = BuildColumn(commands);
 
@@ -70,7 +70,7 @@ public class ColumnBuilder<T>
         return tableBuilder.AddColumn(dataColumn);
     }
 
-    protected virtual DataColumn<T> BuildColumn(DataColumnCommands<T>? commands)
+    protected virtual DataColumn<T> BuildColumn(DataColumnCommands? commands)
     {
         return new(this.Configuration, this.Projection, commands);
     }

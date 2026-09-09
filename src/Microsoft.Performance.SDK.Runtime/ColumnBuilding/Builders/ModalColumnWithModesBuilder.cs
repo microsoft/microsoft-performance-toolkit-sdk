@@ -104,7 +104,7 @@ internal class ModalColumnWithModesBuilder
     public override ModalColumnBuilder WithMode<T>(
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
-        DataColumnCommands<T> dataColumnCommands,
+        DataColumnCommands dataColumnCommands,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
         Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
@@ -145,7 +145,7 @@ internal class ModalColumnWithModesBuilder
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider,
-        DataColumnCommands<T> dataColumnCommands,
+        DataColumnCommands dataColumnCommands,
         Func<ToggleableColumnBuilder, ColumnBuilder> builder)
     {
         Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
