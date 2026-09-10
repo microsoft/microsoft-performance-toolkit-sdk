@@ -1,0 +1,161 @@
+# Adding Column Commands
+
+Column commands let a plugin advertise operations that a host can perform on individual column values. A host may expose these operations in its user interface, such as in a context menu. Support is host-dependent, so a table must remain usable when a host does not expose column commands.
+
+Commands are collected in a `DataColumnCommands` instance and attached to a `DataColumn<T>`, a `HierarchicalDataColumn<T>`, or an individual [column variant](./Adding-Column-Variants.md). Columns without commands expose `DataColumnCommands.Empty` through `IDataColumnCommands`.
+
+## Downloading Source Code
+
+`DownloadSourceCodeCommand` is a column command for retrieving the source code represented by a row value. Implement it for the value type projected by the column:
+
+```cs
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Performance.SDK.ColumnCommands;
+
+public sealed class DownloadSourceCommand
+    : DownloadSourceCodeCommand
+{
+    private static readonly HttpClient httpClient = new HttpClient();
+
+    public DownloadSourceCommand()
+        : base("Download source code")
+    {
+    }
+
+    public override bool CanExecute(object value, string downloadPath)
+    {
+        return value is Uri sourceUri
+            && (sourceUri.Scheme == Uri.UriSchemeHttp || sourceUri.Scheme == Uri.UriSchemeHttps)
+            && !string.IsNullOrWhiteSpace(downloadPath);
+    }
+
+    public override async Task<DownloadSourceCodeResult> ExecuteAsync(
+        object value,
+        string downloadPath,
+        CancellationToken cancellationToken)
+    {
+        if (!CanExecute(value, downloadPath))
+        {
+            return new DownloadSourceCodeResult(
+                "The selected value does not identify downloadable source code.",
+                value as Uri);
+        }
+
+        var sourceUri = (Uri)value;
+        var fileName = Path.GetFileName(sourceUri.LocalPath);
+        var destinationPath = Path.Combine(downloadPath, fileName);
+
+        try
+        {
+            Directory.CreateDirectory(downloadPath);
+
+            using (HttpResponseMessage response =
+                await httpClient.GetAsync(sourceUri, cancellationToken).ConfigureAwait(false))
+            {
+                response.EnsureSuccessStatusCode();
+
+                using (Stream source = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                using (var destination = File.Create(destinationPath))
+                {
+                    await source.CopyToAsync(destination, 81920, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+            }
+
+            return new DownloadSourceCodeResult(new Uri(destinationPath));
+        }
+        catch (Exception error) when (!(error is OperationCanceledException))
+        {
+            return new DownloadSourceCodeResult(error.Message, sourceUri);
+        }
+    }
+}
+```
+
+The host passes the projected row value and a local download directory to `CanExecute`. Return `false` for values the command cannot resolve or paths it cannot use. A host should call `CanExecute` before invoking `ExecuteAsync`, but implementations should still validate or safely reject their inputs.
+
+`ExecuteAsync` controls the file layout beneath `downloadPath`. On success, return a `DownloadSourceCodeResult` containing the URI of the downloaded file. On failure, return an error message and, optionally, the remote source URI. Allow cancellation to propagate as an `OperationCanceledException`.
+
+Command implementations can be invoked on an arbitrary thread. They must be thread-safe, avoid accessing UI-thread state, honor the cancellation token, and use asynchronous I/O for downloads.
+
+## Attaching Commands to a Column
+
+Create the command collection once and pass it to the column:
+
+```cs
+var commands = new DataColumnCommands(new DownloadSourceCommand());
+
+tableBuilderWithRowCount.AddColumn(
+    new DataColumn<Uri>(sourceColumnConfiguration, sourceProjection, commands));
+```
+
+The strongly typed `ColumnBuilder<T>` provides an equivalent fluent form and can also configure variants:
+
+```cs
+new ColumnBuilder<Uri>(sourceColumnConfiguration, sourceProjection)
+    .WithCommands(commands)
+    .AddColumnToTable(tableBuilderWithRowCount);
+```
+
+`ColumnBuilder<T>` is mutable: `WithCommands` returns the same builder instance and may be chained as shown above. This differs from the functional builders used inside `AddColumnWithVariants` callbacks, where every method returns a new builder that must be returned or chained.
+
+## Commands on Column Variants
+
+Commands belong to the specific base column or variant to which they are attached. They are not inherited by related variants. Use the overloads that accept `DataColumnCommands` to attach commands to a toggle, mode, hierarchical toggle, or hierarchical mode:
+
+```cs
+tableBuilderWithRowCount.AddColumnWithVariants(
+    sourceColumnConfiguration,
+    sourceProjection,
+    builder => builder.WithToggle(
+        localSourceDescriptor,
+        localSourceProjection,
+        commands));
+```
+
+For a mode with child variants, pass the commands before the builder callback:
+
+```cs
+return modesBuilder.WithMode(
+    sourceModeDescriptor,
+    sourceProjection,
+    commands,
+    modeBuilder => modeBuilder.WithToggle(
+        alternateSourceDescriptor,
+        alternateSourceProjection));
+```
+
+Attach commands only to variants whose projected values the command understands.
+
+## Hierarchical Columns
+
+For a `HierarchicalDataColumn<T>`, the value supplied to `CanExecute` and `ExecuteAsync` is the value displayed for the selected row. When the column uses an `ICollectionAccessProvider<T, TElement>`, this may be a `TElement` rather than the column's declared `T`. A command for a hierarchical column should therefore handle every displayed value type on which it can operate and return `false` from `CanExecute` for unsupported values.
+
+## Host Discovery
+
+A host discovers commands by testing whether an `IDataColumn` implements `IDataColumnCommands`, then querying its `Commands` property:
+
+```cs
+if (column is IDataColumnCommands columnWithCommands &&
+    columnWithCommands.Commands.TryGetDownloadSourceCodeCommand(out var command) &&
+    command.CanExecute(value, downloadPath))
+{
+    DownloadSourceCodeResult result =
+        await command.ExecuteAsync(value, downloadPath, cancellationToken);
+
+    if (result.Success)
+    {
+        Open(result.Uri);
+    }
+    else
+    {
+        ShowError(result.ErrorMessage);
+    }
+}
+```
+
+Hosts should use `CommandName` as the user-facing action name. A failed result's `Uri` may identify the remote source, but it is not a successfully downloaded resource and should not be opened as one.

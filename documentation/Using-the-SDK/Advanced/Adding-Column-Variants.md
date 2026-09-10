@@ -332,4 +332,6 @@ Registered column variants are exposed as `IDataColumn` instances where
 
 For information on how to obtain `IDataColumn`s for column variants via the SDK Engine, please refer to the "Using Column Variants" section of the [Using the Engine](../Using-the-engine.md#using-column-variants) documentation.
 
+Individual variants can also advertise commands by using the builder overloads that accept `DataColumnCommands`. Commands are associated only with the variant to which they are supplied and are not inherited by related variants. See [Adding Column Commands](./Adding-Column-Commands.md#commands-on-column-variants) for examples.
+
 
