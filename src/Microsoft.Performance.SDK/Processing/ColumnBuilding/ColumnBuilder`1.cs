@@ -10,7 +10,7 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
 public class ColumnBuilder<T>
 {
-    private DownloadSourceCodeCommand? downloadSourceCommand = null;
+    private DataColumnCommands? commands = null;
 
     public ColumnBuilder(
             ColumnMetadata metadata,
@@ -42,10 +42,10 @@ public class ColumnBuilder<T>
 
     protected Func<RootColumnBuilder, ColumnBuilder>? VariantOptions { get; set; } = null;
 
-    public ColumnBuilder<T> WithDownloadSourceCodeCommand(
-        DownloadSourceCodeCommand downloadSourceCommand)
+    public ColumnBuilder<T> WithCommands(
+        DataColumnCommands commands)
     {
-        this.downloadSourceCommand = downloadSourceCommand;
+        this.commands = commands;
         return this;
     }
 
@@ -56,11 +56,10 @@ public class ColumnBuilder<T>
         return this;
     }
 
-    public ITableBuilderWithRowCount AddColumn(ITableBuilderWithRowCount tableBuilder)
+    public ITableBuilderWithRowCount AddToTable(
+        ITableBuilderWithRowCount tableBuilder)
     {
-        DataColumnCommands commands = new(this.downloadSourceCommand);
-
-        DataColumn<T> dataColumn = BuildColumn(commands);
+        DataColumn<T> dataColumn = BuildColumn(this.commands);
 
         if (this.VariantOptions is not null)
         {
@@ -70,7 +69,8 @@ public class ColumnBuilder<T>
         return tableBuilder.AddColumn(dataColumn);
     }
 
-    protected virtual DataColumn<T> BuildColumn(DataColumnCommands? commands)
+    protected virtual DataColumn<T> BuildColumn(
+        DataColumnCommands? commands)
     {
         return new(this.Configuration, this.Projection, commands);
     }
