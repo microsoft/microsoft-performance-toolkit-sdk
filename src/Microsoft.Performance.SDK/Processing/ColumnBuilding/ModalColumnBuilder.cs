@@ -105,7 +105,7 @@ public abstract class ModalColumnBuilder
     ///     The projection that will be used to generate the column for this mode.
     /// </param>
     /// <param name="dataColumnCommands">
-    ///     Data column commands.
+    ///     The commands supported by this column variant. May be <c>null</c>.
     /// </param>
     /// <param name="builder">
     ///     A callback that builds sub-variants of the added mode and returns its final column configuration.
@@ -171,7 +171,7 @@ public abstract class ModalColumnBuilder
     ///     The collection provider for the column.
     /// </param>
     /// <param name="dataColumnCommands">
-    ///     Data column commands.
+    ///     The commands supported by this column variant. May be <c>null</c>.
     /// </param>
     /// <param name="builder">
     ///     A callback that builds sub-variants of the added mode and returns its final column configuration.

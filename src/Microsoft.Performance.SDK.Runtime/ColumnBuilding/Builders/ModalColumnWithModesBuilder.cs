@@ -124,6 +124,7 @@ internal class ModalColumnWithModesBuilder
         return WithMode(newMode);
     }
 
+    /// <inheritdoc/>
     public override ModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
@@ -132,6 +133,7 @@ internal class ModalColumnWithModesBuilder
         return WithHierarchicalMode(modeDescriptor, projection, collectionProvider, null);
     }
 
+    /// <inheritdoc/>
     public override ModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,
@@ -141,6 +143,7 @@ internal class ModalColumnWithModesBuilder
         return WithHierarchicalMode(modeDescriptor, projection, collectionProvider, null, builder);
     }
 
+    /// <inheritdoc/>
     public override ModalColumnBuilder WithHierarchicalMode<T>(
         ColumnVariantDescriptor modeDescriptor,
         IProjection<int, T> projection,

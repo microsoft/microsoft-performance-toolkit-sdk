@@ -57,7 +57,7 @@ public abstract class ToggleableColumnBuilder
     ///     The projection that will be used to generate the column when this toggle is on.
     /// </param>
     /// <param name="dataColumnCommands">
-    ///     Data column commands.
+    ///     The commands supported by this column variant. May be <c>null</c>.
     /// </param>
     /// <typeparam name="T">
     ///     The type of data that the projection will produce.
@@ -123,7 +123,7 @@ public abstract class ToggleableColumnBuilder
     ///     The collection provider for the column.
     /// </param>
     /// <param name="dataColumnCommands">
-    ///     Data column commands.
+    ///     The commands supported by this column variant. May be <c>null</c>.
     /// </param>
     /// <typeparam name="T">
     ///     The type of data that the projection will produce.
