@@ -3,8 +3,8 @@
 
 #nullable enable
 
-using Microsoft.Performance.SDK.ColumnCommands;
 using System;
+using Microsoft.Performance.SDK.ColumnCommands;
 
 namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 

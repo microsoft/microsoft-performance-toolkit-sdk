@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Microsoft.Performance.SDK.ColumnCommands;
 using System;
+using Microsoft.Performance.SDK.ColumnCommands;
 
 namespace Microsoft.Performance.SDK.Processing
 {
