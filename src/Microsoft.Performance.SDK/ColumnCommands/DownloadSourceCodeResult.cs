@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+#nullable enable
+
 using System;
 
 namespace Microsoft.Performance.SDK.ColumnCommands;
@@ -45,8 +47,11 @@ public class DownloadSourceCodeResult
     /// <param name="uri">
     ///     An optional URI associated with the failure. Because this
     ///     constructor represents a failure case, this URI does not refer
-    ///     to a successfully downloaded local resource. Its meaning, when
-    ///     not <c>null</c>, is the attempted download URI.
+    ///     to a successfully downloaded local resource. When not
+    ///     <c>null</c>, it typically represents the remote URI that
+    ///     corresponds to the row value (for example, the source location
+    ///     the command attempted to download from), which the host may
+    ///     choose to surface to the user as a fallback.
     /// </param>
     /// <exception cref="ArgumentNullException">
     ///     <paramref name="errorMessage"/> is <c>null</c>.
@@ -76,21 +81,14 @@ public class DownloadSourceCodeResult
     public string? ErrorMessage { get; } = null;
 
     /// <summary>
-    ///     Gets the URI pointing to the downloaded source code that the
-    ///     host should open.
+    ///     Gets the URI associated with this result. When
+    ///     <see cref="Success"/> is <c>true</c>, this is the URI of the
+    ///     downloaded source code (typically a local file URI) that the
+    ///     host should open. When <see cref="Success"/> is <c>false</c>,
+    ///     this value may be <c>null</c> or may be the remote URI
+    ///     corresponding to the row value that the command attempted to
+    ///     download from; in the failure case hosts should not treat it as
+    ///     a successfully downloaded local resource.
     /// </summary>
     public Uri? Uri { get; }
 }
-
-
-/// Decision: Where to add the column commands.
-/// A. Directly to the IDataColumn or IDataColumn&lt;T&gt;
-/// B. In the ITableBuilder
-/// 
-/// Reasons for A:
-/// This is column data in much the same way the ColumnConfiguration or the Projection is.
-/// 
-/// Reasons for B:
-/// We've never added data to IColumnData types, but we have added to ITableBuilder.
-/// This would follow the same behavior as column variants.
-/// 

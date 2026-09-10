@@ -95,7 +95,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.Configuration = configuration;
             this.ProjectorInterface = projection.GetType();
             this.Projector = projection;
-            this.Commands = dataColumnCommands;
+            this.Commands = dataColumnCommands ?? DataColumnCommands.Empty;
         }
 
         /// <inheritdoc />
