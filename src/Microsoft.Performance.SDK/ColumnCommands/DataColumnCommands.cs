@@ -15,10 +15,10 @@ namespace Microsoft.Performance.SDK.ColumnCommands;
 ///     that a host may perform against the column's row values.
 /// </summary>
 /// <remarks>
-///     This class works with both <see cref="IDataColumn{T}"/> and
-///     <see cref="IHierarchicalDataColumn{T}"/>. Note that with the latter,
+///     This class works with both <see cref="Processing.IDataColumn{T}"/> and
+///     <see cref="Processing.IHierarchicalDataColumn{T}"/>. Note that with the latter,
 ///     the column's row value might be different than <c>T</c> because of an
-///     <see cref="ICollectionAccessProvider{T, TOut}"/> on the column. For
+///     <see cref="Processing.ICollectionAccessProvider{T, TOut}"/> on the column. For
 ///     this reason, individual command APIs operate on <see cref="object"/>
 ///     rather than a generic value type.
 /// </remarks>
