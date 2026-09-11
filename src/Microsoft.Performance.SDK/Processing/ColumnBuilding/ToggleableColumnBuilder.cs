@@ -22,9 +22,7 @@ public abstract class ToggleableColumnBuilder
     ///     added via calls to this method.
     /// </summary>
     /// <param name="toggleDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle. The
-    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of the toggled
-    ///     on variant.
+    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle.
     /// </param>
     /// <param name="projection">
     ///     The projection that will be used to generate the column when this toggle is on.
@@ -49,9 +47,7 @@ public abstract class ToggleableColumnBuilder
     ///     added via calls to this method.
     /// </summary>
     /// <param name="toggleDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle. The
-    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of the toggled
-    ///     on variant.
+    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle.
     /// </param>
     /// <param name="projection">
     ///     The projection that will be used to generate the column when this toggle is on.
@@ -110,9 +106,7 @@ public abstract class ToggleableColumnBuilder
     ///     added via calls to this method.
     /// </summary>
     /// <param name="toggleDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle. The
-    ///     <see cref="ColumnVariantDescriptor.Name"/> represents the name of the toggled
-    ///     on variant.
+    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle.
     /// </param>
     /// <param name="projection">
     ///     The projection that will be used to generate the column when this toggle is on.

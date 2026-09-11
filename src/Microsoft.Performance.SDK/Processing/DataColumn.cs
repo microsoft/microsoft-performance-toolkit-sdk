@@ -15,7 +15,7 @@ namespace Microsoft.Performance.SDK.Processing
     /// </typeparam>
     public class DataColumn<T>
         : IDataColumn<T>,
-          IDataColumnCommands
+          IDataColumnWithCommands
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataColumn{T}" />
@@ -110,6 +110,11 @@ namespace Microsoft.Performance.SDK.Processing
         /// <inheritdoc />
         public IProjection<int, T> Projector { get; }
 
+        /// <summary>
+        ///     Gets the collection of commands supported by this column.
+        ///     This will be <see cref="DataColumnCommands.Empty"/> if no
+        ///     commands were provided when this column was constructed.
+        /// </summary>
         public DataColumnCommands Commands { get; }
 
         /// <summary>

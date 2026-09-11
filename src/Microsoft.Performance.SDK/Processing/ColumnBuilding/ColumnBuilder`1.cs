@@ -102,7 +102,7 @@ public class ColumnBuilder<T>
     ///     Associates the specified <see cref="DataColumnCommands"/> with
     ///     the column being built. Hosts can later retrieve these commands
     ///     from the resulting <see cref="DataColumn{T}"/> via
-    ///     <see cref="IDataColumnCommands"/>.
+    ///     <see cref="IDataColumnWithCommands"/>.
     /// </summary>
     /// <param name="commands">
     ///     The commands to attach to the column.

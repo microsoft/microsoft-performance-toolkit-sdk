@@ -14,7 +14,7 @@ namespace Microsoft.Performance.SDK.Processing;
 ///     to discover the commands the plugin has associated with the
 ///     column.
 /// </summary>
-public interface IDataColumnCommands
+public interface IDataColumnWithCommands
 {
     /// <summary>
     ///     Gets the <see cref="DataColumnCommands"/> associated with
