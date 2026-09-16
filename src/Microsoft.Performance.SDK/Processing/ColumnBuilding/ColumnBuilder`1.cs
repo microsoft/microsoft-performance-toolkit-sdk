@@ -12,8 +12,9 @@ namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 ///     Builds a strongly-typed <see cref="DataColumn{T}"/> and adds it to an
 ///     <see cref="ITableBuilderWithRowCount"/>. Plugins configure the column's
 ///     metadata, projection, commands, and optional variants on an instance
-///     of this class and then call <see cref="AddColumnToTable"/> to materialize
-///     the column on a table.
+///     of this class and then pass it to
+///     <see cref="ITableBuilderWithRowCount.AddColumn{T}(ColumnBuilder{T})"/>
+///     to materialize the column on a table.
 /// </summary>
 /// <typeparam name="T">
 ///     The type of data produced by the column's projection.
@@ -96,7 +97,7 @@ public class ColumnBuilder<T>
     ///     the built column, or <c>null</c> if no variants have been
     ///     configured via <see cref="WithVariants"/>.
     /// </summary>
-    protected Func<RootColumnBuilder, ColumnBuilder>? VariantOptions { get; set; } = null;
+    protected Func<RootColumnBuilder, ColumnBuilder>? VariantOptions { get; private set; } = null;
 
     /// <summary>
     ///     Associates the specified <see cref="DataColumnCommands"/> with
@@ -151,7 +152,7 @@ public class ColumnBuilder<T>
     ///     The <paramref name="tableBuilder"/>, to allow chaining additional
     ///     table-building calls.
     /// </returns>
-    public ITableBuilderWithRowCount AddColumnToTable(
+    internal ITableBuilderWithRowCount AddColumnToTable(
         ITableBuilderWithRowCount tableBuilder)
     {
         DataColumn<T> dataColumn = BuildColumn(this.commands);

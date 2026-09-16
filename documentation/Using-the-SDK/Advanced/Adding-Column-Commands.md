@@ -102,12 +102,12 @@ tableBuilderWithRowCount.AddColumn(
     new DataColumn<Uri>(sourceColumnConfiguration, sourceProjection, commands));
 ```
 
-The strongly typed `ColumnBuilder<T>` provides an equivalent fluent form and can also configure variants:
+The strongly typed `ColumnBuilderBuilder<T>` can be used with `ITableBuilderWithRowCount` to add a column to a table:
 
 ```cs
-new ColumnBuilder<Uri>(sourceColumnConfiguration, sourceProjection)
-    .WithCommands(commands)
-    .AddColumnToTable(tableBuilderWithRowCount);
+tableBuilderWithRowCount.AddColumn(
+    new ColumnBuilder<Uri>(sourceColumnConfiguration, sourceProjection)
+        .WithCommands(commands));
 ```
 
 `ColumnBuilder<T>` is mutable: `WithCommands` returns the same builder instance and may be chained as shown above. This differs from the functional builders used inside `AddColumnWithVariants` callbacks, where every method returns a new builder that must be returned or chained.

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -85,6 +86,29 @@ namespace Microsoft.Performance.SDK.Runtime.Tests
                Projection.CreateUsingFuncAdaptor(i => "test"));
 
             Assert.AreEqual(this.Sut, this.Sut.AddColumn(column));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AddColumnBuilderBuildsColumnAndReturnsBuilder()
+        {
+            var columnBuilder = new ColumnBuilder<string>(
+                new ColumnMetadata(Guid.NewGuid(), "name"),
+                new UIHints { Width = 200, },
+                Projection.CreateUsingFuncAdaptor(i => "test"));
+
+            var result = this.Sut.AddColumn(columnBuilder);
+
+            Assert.AreEqual(this.Sut, result);
+            Assert.AreEqual("test", ((DataColumn<string>)this.Sut.Columns.Single()).Project(0));
+        }
+
+        [TestMethod]
+        [UnitTest]
+        public void AddColumnBuilderDoesNotAllowNulls()
+        {
+            Assert.ThrowsExactly<ArgumentNullException>(
+                () => this.Sut.AddColumn((ColumnBuilder<string>)null));
         }
 
         [TestMethod]
