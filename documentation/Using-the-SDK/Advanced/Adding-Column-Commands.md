@@ -33,16 +33,19 @@ public sealed class DownloadSourceCommand
             && !string.IsNullOrWhiteSpace(downloadPath);
     }
 
-    public override async Task<DownloadSourceCodeResult> ExecuteAsync(
+    public override async Task<DownloadSourceCodeResult[]> ExecuteAsync(
         object value,
         string downloadPath,
         CancellationToken cancellationToken)
     {
         if (!CanExecute(value, downloadPath))
         {
-            return new DownloadSourceCodeResult(
-                "The selected value does not identify downloadable source code.",
-                value as Uri);
+            return new[]
+            {
+                new DownloadSourceCodeResult(
+                    "The selected value does not identify downloadable source code.",
+                    value as Uri),
+            };
         }
 
         var sourceUri = (Uri)value;
@@ -66,11 +69,17 @@ public sealed class DownloadSourceCommand
                 }
             }
 
-            return new DownloadSourceCodeResult(new Uri(destinationPath));
+            return new[]
+            {
+                new DownloadSourceCodeResult(new Uri(destinationPath)),
+            };
         }
         catch (Exception error) when (!(error is OperationCanceledException))
         {
-            return new DownloadSourceCodeResult(error.Message, sourceUri);
+            return new[]
+            {
+                new DownloadSourceCodeResult(error.Message, sourceUri),
+            };
         }
     }
 }
@@ -78,7 +87,7 @@ public sealed class DownloadSourceCommand
 
 The host passes the projected row value and a local download directory to `CanExecute`. Return `false` for values the command cannot resolve or paths it cannot use. A host should call `CanExecute` before invoking `ExecuteAsync`, but implementations should still validate or safely reject their inputs.
 
-`ExecuteAsync` controls the file layout beneath `downloadPath`. On success, return a `DownloadSourceCodeResult` containing the URI of the downloaded file. On failure, return an error message and, optionally, the remote source URI. Allow cancellation to propagate as an `OperationCanceledException`.
+`ExecuteAsync` controls the file layout beneath `downloadPath`. A row value may resolve to multiple source files, such as when it represents a stack frame containing inlined functions. Return one `DownloadSourceCodeResult` for each attempted download. The returned array may contain both successful and failed results: each success contains the URI of a downloaded file, while each failure contains its own error message and, optionally, the corresponding remote source URI. Allow cancellation to propagate as an `OperationCanceledException`.
 
 Command implementations can be invoked on an arbitrary thread. They must be thread-safe, avoid accessing UI-thread state, honor the cancellation token, and use asynchronous I/O for downloads.
 
@@ -144,18 +153,21 @@ if (column is IDataColumnCommands columnWithCommands &&
     columnWithCommands.Commands.TryGetDownloadSourceCodeCommand(out var command) &&
     command.CanExecute(value, downloadPath))
 {
-    DownloadSourceCodeResult result =
+    DownloadSourceCodeResult[] results =
         await command.ExecuteAsync(value, downloadPath, cancellationToken);
 
-    if (result.Success)
+    foreach (DownloadSourceCodeResult result in results)
     {
-        Open(result.Uri);
-    }
-    else
-    {
-        ShowError(result.ErrorMessage);
+        if (result.Success)
+        {
+            Open(result.Uri);
+        }
+        else
+        {
+            ShowError(result.ErrorMessage);
+        }
     }
 }
 ```
 
-Hosts should use `CommandName` as the user-facing action name. A failed result's `Uri` may identify the remote source, but it is not a successfully downloaded resource and should not be opened as one.
+Hosts should use `CommandName` as the user-facing action name and process every returned result independently. A failed result's `Uri` may identify the remote source, but it is not a successfully downloaded resource and should not be opened as one.

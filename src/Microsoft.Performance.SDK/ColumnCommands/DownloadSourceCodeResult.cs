@@ -8,10 +8,11 @@ using System;
 namespace Microsoft.Performance.SDK.ColumnCommands;
 
 /// <summary>
-///     The result of a <see cref="DownloadSourceCodeCommand"/>. On success,
-///     exposes a <see cref="Uri"/> that points to the downloaded source
-///     code (typically a local file URI) that the host can open using the
-///     appropriate platform mechanism.
+///     The result of one source code download attempted by a
+///     <see cref="DownloadSourceCodeCommand"/>. On success, exposes a
+///     <see cref="Uri"/> that points to the downloaded source code (typically
+///     a local file URI) that the host can open using the appropriate platform
+///     mechanism.
 /// </summary>
 public class DownloadSourceCodeResult
 {
@@ -66,7 +67,7 @@ public class DownloadSourceCodeResult
     }
 
     /// <summary>
-    ///     Gets a value indicating whether the command completed
+    ///     Gets a value indicating whether this download attempt completed
     ///     successfully and <see cref="Uri"/> is safe to open. When
     ///     <c>false</c>, hosts should not attempt to open <see cref="Uri"/>
     ///     and should surface <see cref="ErrorMessage"/> instead.

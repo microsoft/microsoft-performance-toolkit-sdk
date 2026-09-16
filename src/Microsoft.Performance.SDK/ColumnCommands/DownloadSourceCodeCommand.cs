@@ -7,9 +7,8 @@ namespace Microsoft.Performance.SDK.ColumnCommands;
 ///     Represents a command that a plugin advertises on a column to download
 ///     the source code associated with a given row value. Hosts discover this
 ///     command via <see cref="DataColumnCommands.TryGetDownloadSourceCodeCommand"/>
-///     and invoke <see cref="ExecuteAsync"/> to obtain a
-///     <see cref="DownloadSourceCodeResult"/> whose
-///     <see cref="DownloadSourceCodeResult.Uri"/> the host can then open.
+///     and invoke <see cref="ExecuteAsync"/> to obtain the results of the
+///     source code download attempts.
 /// </summary>
 /// <remarks>
 ///     Implementations must be safe to call from a host on an arbitrary
@@ -61,7 +60,7 @@ public abstract class DownloadSourceCodeCommand
     public abstract bool CanExecute(object value, string downloadPath);
 
     /// <summary>
-    ///     Asynchronously downloads the source code associated with the
+    ///     Asynchronously downloads the source code files associated with the
     ///     specified row value to the specified location.
     /// </summary>
     /// <param name="value">
@@ -71,21 +70,22 @@ public abstract class DownloadSourceCodeCommand
     /// <param name="downloadPath">
     ///     The local path under which the source code should be
     ///     downloaded. Implementations decide the exact file layout beneath
-    ///     this path and return the resulting URI via
-    ///     <see cref="DownloadSourceCodeResult.Uri"/>.
+    ///     this path and return the resulting URIs via the
+    ///     <see cref="DownloadSourceCodeResult.Uri"/> properties.
     /// </param>
     /// <param name="cancellationToken">
     ///     A token that may be used to cancel the download operation.
     /// </param>
     /// <returns>
-    ///     A task that produces a <see cref="DownloadSourceCodeResult"/>
-    ///     describing either the successful download (with a
-    ///     <see cref="DownloadSourceCodeResult.Uri"/> the host can open) or
-    ///     the failure (with an
-    ///     <see cref="DownloadSourceCodeResult.ErrorMessage"/> the host can
-    ///     surface).
+    ///     A task that produces one <see cref="DownloadSourceCodeResult"/> for
+    ///     each attempted source code download. The returned array may contain
+    ///     both successful and failed results. Hosts should process each result
+    ///     independently, opening the <see cref="DownloadSourceCodeResult.Uri"/>
+    ///     of each successful result and surfacing the
+    ///     <see cref="DownloadSourceCodeResult.ErrorMessage"/> of each failed
+    ///     result.
     /// </returns>
-    public abstract System.Threading.Tasks.Task<DownloadSourceCodeResult> ExecuteAsync(
+    public abstract System.Threading.Tasks.Task<DownloadSourceCodeResult[]> ExecuteAsync(
         object value,
         string downloadPath,
         System.Threading.CancellationToken cancellationToken);
