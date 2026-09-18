@@ -108,6 +108,7 @@ internal class ToggledColumnBuilder
     {
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(buildVariant, nameof(buildVariant));
 
         return CreateFromBuilder(toggleDescriptor, projection, null, buildVariant);
     }
@@ -122,6 +123,7 @@ internal class ToggledColumnBuilder
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
         Guard.NotNull(collectionProvider, nameof(collectionProvider));
+        Guard.NotNull(buildVariant, nameof(buildVariant));
 
         return CreateFromBuilder(toggleDescriptor, projection, collectionProvider, buildVariant);
     }
@@ -168,9 +170,7 @@ internal class ToggledColumnBuilder
         variantBuilder = buildVariant(variantBuilder);
 
         return new ToggledColumnBuilder(
-            [
-                variantBuilder.CreateVariant(this.baseColumn),
-            ],
+            this.toggles.Append(variantBuilder.CreateVariant(this.baseColumn)).ToList(),
             baseColumn,
             processor);
     }

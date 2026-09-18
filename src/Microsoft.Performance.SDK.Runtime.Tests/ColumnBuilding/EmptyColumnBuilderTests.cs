@@ -114,6 +114,105 @@ public class EmptyColumnBuilderTests
         Assert.IsTrue(true);
     }
 
+    [TestMethod]
+    public void WithToggleableBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithToggleableBuilder(null, Projection.Constant(1f), variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithToggleableBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithToggleableBuilder<int>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                null,
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithToggleableBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithToggleableBuilder(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                Projection.Constant(1f),
+                null);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder(
+                null,
+                Projection.Constant(1f),
+                new StubCollectionAccessProvider<float>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder<float>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                null,
+                new StubCollectionAccessProvider<float>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullCollectionInfoThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder<float>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                Projection.Constant(1f),
+                null,
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder<float>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                Projection.Constant(1f),
+                new StubCollectionAccessProvider<float>(),
+                null);
+        });
+    }
+
     private EmptyColumnBuilder CreateSut()
     {
         return new EmptyColumnBuilder(

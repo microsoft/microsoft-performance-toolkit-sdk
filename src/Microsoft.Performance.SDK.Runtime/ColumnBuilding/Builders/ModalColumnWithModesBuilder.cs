@@ -146,6 +146,10 @@ internal class ModalColumnWithModesBuilder
         IProjection<int, T> projection,
         Func<ModalVariantBuilder, ModalVariantBuilder> buildVariant)
     {
+        Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(buildVariant, nameof(buildVariant));
+
         ModalVariantBuilder variantBuilder = new ModalVariantBuilder<T>(modeDescriptor, projection);
         variantBuilder = buildVariant(variantBuilder);
 
@@ -158,6 +162,11 @@ internal class ModalColumnWithModesBuilder
         ICollectionInfoProvider<T> collectionProvider,
         Func<ModalVariantBuilder, ModalVariantBuilder> buildVariant)
     {
+        Guard.NotNull(modeDescriptor, nameof(modeDescriptor));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(collectionProvider, nameof(collectionProvider));
+        Guard.NotNull(buildVariant, nameof(buildVariant));
+
         ModalVariantBuilder variantBuilder = new ModalVariantBuilder<T>(modeDescriptor, projection, collectionProvider);
         variantBuilder = buildVariant(variantBuilder);
 

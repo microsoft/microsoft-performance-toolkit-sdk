@@ -117,6 +117,99 @@ public class ModalColumnBuilderTests
         });
     }
 
+    [TestMethod]
+    public void WithModalBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithModalBuilder(null, modeProjection, variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithModalBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithModalBuilder<int>(modeDescriptor, null, variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithModalBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithModalBuilder(modeDescriptor, modeProjection, null);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder(
+                null,
+                modeProjection,
+                new StubCollectionAccessProvider<int>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder<int>(
+                modeDescriptor,
+                null,
+                new StubCollectionAccessProvider<int>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullCollectionInfoThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder<int>(
+                modeDescriptor,
+                modeProjection,
+                null,
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder<int>(
+                modeDescriptor,
+                modeProjection,
+                new StubCollectionAccessProvider<int>(),
+                null);
+        });
+    }
+
     private ModalColumnBuilder CreateSut()
     {
         return new ModalColumnWithModesBuilder(

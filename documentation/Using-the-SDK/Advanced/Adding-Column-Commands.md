@@ -2,7 +2,7 @@
 
 Column commands let a plugin advertise operations that a host can perform on individual column values. A host may expose these operations in its user interface, such as in a context menu. Support is host-dependent, so a table must remain usable when a host does not expose column commands.
 
-Commands are collected in a `DataColumnCommands` instance and attached to a `DataColumn<T>`, a `HierarchicalDataColumn<T>`, or an individual [column variant](./Adding-Column-Variants.md). Columns without commands expose `DataColumnCommands.Empty` through `IDataColumnCommands`.
+Commands are collected in a `DataColumnCommands` instance and attached to a `DataColumn<T>`, a `HierarchicalDataColumn<T>`, or an individual [column variant](./Adding-Column-Variants.md). Columns without commands expose `DataColumnCommands.Empty` through `IDataColumnWithCommands`.
 
 ## Downloading Source Code
 
@@ -114,31 +114,32 @@ tableBuilderWithRowCount.AddColumn(
 
 ## Commands on Column Variants
 
-Commands belong to the specific base column or variant to which they are attached. They are not inherited by related variants. Use the overloads that accept `DataColumnCommands` to attach commands to a toggle, mode, hierarchical toggle, or hierarchical mode:
+Commands belong to the specific base column or variant to which they are attached. They are not inherited by related variants. To attach commands to a variant, use the builder overloads that supply a *variant builder* and call `WithCommands` on it. `WithToggleableBuilder` configures a toggle through a `ToggleableVariantBuilder`, and `WithModalBuilder` configures a mode through a `ModalVariantBuilder`:
 
 ```cs
 tableBuilderWithRowCount.AddColumnWithVariants(
     sourceColumnConfiguration,
     sourceProjection,
-    builder => builder.WithToggle(
+    builder => builder.WithToggleableBuilder(
         localSourceDescriptor,
         localSourceProjection,
-        commands));
+        variantBuilder => variantBuilder.WithCommands(commands)));
 ```
 
-For a mode with child variants, pass the commands before the builder callback:
+For a mode with child variants, chain `WithCommands` with `WithBuilder` on the `ModalVariantBuilder`. `WithBuilder` adds the nested toggles; `WithCommands` attaches the commands to the mode itself:
 
 ```cs
-return modesBuilder.WithMode(
+return modesBuilder.WithModalBuilder(
     sourceModeDescriptor,
     sourceProjection,
-    commands,
-    modeBuilder => modeBuilder.WithToggle(
-        alternateSourceDescriptor,
-        alternateSourceProjection));
+    variantBuilder => variantBuilder
+        .WithCommands(commands)
+        .WithBuilder(modeBuilder => modeBuilder.WithToggle(
+            alternateSourceDescriptor,
+            alternateSourceProjection)));
 ```
 
-Attach commands only to variants whose projected values the command understands.
+Hierarchical variants use the same pattern through `WithHierarchicalToggleableBuilder` and `WithHierarchicalModalBuilder`, which additionally take an `ICollectionInfoProvider<T>`. Attach commands only to variants whose projected values the command understands.
 
 ## Hierarchical Columns
 
@@ -146,10 +147,10 @@ For a `HierarchicalDataColumn<T>`, the value supplied to `CanExecute` and `Execu
 
 ## Host Discovery
 
-A host discovers commands by testing whether an `IDataColumn` implements `IDataColumnCommands`, then querying its `Commands` property:
+A host discovers commands by testing whether an `IDataColumn` implements `IDataColumnWithCommands`, then querying its `Commands` property:
 
 ```cs
-if (column is IDataColumnCommands columnWithCommands &&
+if (column is IDataColumnWithCommands columnWithCommands &&
     columnWithCommands.Commands.TryGetDownloadSourceCodeCommand(out var command) &&
     command.CanExecute(value, downloadPath))
 {

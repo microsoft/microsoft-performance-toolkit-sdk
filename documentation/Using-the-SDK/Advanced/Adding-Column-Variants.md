@@ -225,6 +225,31 @@ where "With DST" is a child of "Local" but not "UTC." Depending on the SDK drive
 
 If desired, it is also possible to define new sub-modes of a given mode using `WithToggledModes` in the callback.
 
+## Variant Builders
+
+The `WithMode` and `WithToggle` overloads shown above are the simplest way to add a variant when that variant has no commands of its own. When a variant needs to advertise [column commands](./Adding-Column-Commands.md), use the *variant builder* overloads instead. These overloads take a callback that receives a variant builder and returns it after configuration:
+
+* `WithToggleableBuilder` supplies a `ToggleableVariantBuilder`, whose `WithCommands` method attaches commands to the toggle.
+* `WithModalBuilder` supplies a `ModalVariantBuilder`, whose `WithCommands` method attaches commands to the mode and whose `WithBuilder` method nests additional toggleable variants underneath the mode (equivalent to the `Func<ToggleableColumnBuilder, ColumnBuilder>` callback taken by `WithMode`).
+
+For example, this adds a "Local" mode that both advertises commands and nests a "With DST" toggle:
+
+```cs
+return builder
+        .WithModes("UTC")
+        .WithModalBuilder(
+            new ColumnVariantDescriptor(new Guid("..."), "Local"),
+            asLocal,
+            variantBuilder => variantBuilder
+                .WithCommands(commands)
+                .WithBuilder(modeBuilder => modeBuilder
+                    .WithToggle(
+                        new ColumnVariantDescriptor(new Guid("..."), "With DST"),
+                        asLocal.Compose(local => FixDST(local)))));
+```
+
+Both APIs have hierarchical counterparts, `WithHierarchicalToggleableBuilder` and `WithHierarchicalModalBuilder`, that additionally accept an `ICollectionInfoProvider<T>`. See [Adding Column Commands](./Adding-Column-Commands.md#commands-on-column-variants) for more command examples.
+
 > ❗ The ability to recursively define column variants within a mode makes it possible to define arbitrarily complex trees of column variants. For a better user experience, it is recommended to limit the number of levels of column variants; **if your column has a complex tree of variants, you should consider creating new columns instead**.
 
 # Defining Default Column Variants
@@ -332,6 +357,6 @@ Registered column variants are exposed as `IDataColumn` instances where
 
 For information on how to obtain `IDataColumn`s for column variants via the SDK Engine, please refer to the "Using Column Variants" section of the [Using the Engine](../Using-the-engine.md#using-column-variants) documentation.
 
-Individual variants can also advertise commands by using the builder overloads that accept `DataColumnCommands`. Commands are associated only with the variant to which they are supplied and are not inherited by related variants. See [Adding Column Commands](./Adding-Column-Commands.md#commands-on-column-variants) for examples.
+Individual variants can also advertise commands by using the variant builder overloads `WithToggleableBuilder` and `WithModalBuilder` (and their hierarchical counterparts) and calling `WithCommands` on the supplied variant builder. Commands are associated only with the variant to which they are supplied and are not inherited by related variants. See [Adding Column Commands](./Adding-Column-Commands.md#commands-on-column-variants) for examples.
 
 
