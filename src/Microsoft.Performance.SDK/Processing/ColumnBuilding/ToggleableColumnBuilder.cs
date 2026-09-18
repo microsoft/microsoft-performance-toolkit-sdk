@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.Performance.SDK.ColumnCommands;
 
 namespace Microsoft.Performance.SDK.Processing.ColumnBuilding;
 
@@ -52,35 +51,6 @@ public abstract class ToggleableColumnBuilder
     /// <param name="projection">
     ///     The projection that will be used to generate the column when this toggle is on.
     /// </param>
-    /// <param name="dataColumnCommands">
-    ///     The commands supported by this column variant. May be <c>null</c>.
-    /// </param>
-    /// <typeparam name="T">
-    ///     The type of data that the projection will produce.
-    /// </typeparam>
-    /// <returns>
-    ///     A new instance of <see cref="ToggleableColumnBuilder"/> that has been
-    ///     configured with the added toggle.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    ///     <paramref name="toggleDescriptor"/> or <paramref name="projection"/> is <c>null</c>.
-    /// </exception>
-    public abstract ToggleableColumnBuilder WithToggle<T>(
-        ColumnVariantDescriptor toggleDescriptor,
-        IProjection<int, T> projection,
-        DataColumnCommands dataColumnCommands);
-
-    /// <summary>
-    ///     Adds a new toggleable variant to the column. The added toggleable variant
-    ///     is nested at the "end" of the chain of toggleable variants already
-    ///     added via calls to this method.
-    /// </summary>
-    /// <param name="toggleDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle.
-    /// </param>
-    /// <param name="projection">
-    ///     The projection that will be used to generate the column when this toggle is on.
-    /// </param>
     /// <param name="collectionProvider">
     ///     The collection provider for the column.
     /// </param>
@@ -99,40 +69,6 @@ public abstract class ToggleableColumnBuilder
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider);
-
-    /// <summary>
-    ///     Adds a new toggleable variant to the column. The added toggleable variant
-    ///     is nested at the "end" of the chain of toggleable variants already
-    ///     added via calls to this method.
-    /// </summary>
-    /// <param name="toggleDescriptor">
-    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle.
-    /// </param>
-    /// <param name="projection">
-    ///     The projection that will be used to generate the column when this toggle is on.
-    /// </param>
-    /// <param name="collectionProvider">
-    ///     The collection provider for the column.
-    /// </param>
-    /// <param name="dataColumnCommands">
-    ///     The commands supported by this column variant. May be <c>null</c>.
-    /// </param>
-    /// <typeparam name="T">
-    ///     The type of data that the projection will produce.
-    /// </typeparam>
-    /// <returns>
-    ///     A new instance of <see cref="ToggleableColumnBuilder"/> that has been
-    ///     configured with the added toggle.
-    /// </returns>
-    /// <exception cref="ArgumentNullException">
-    ///     <paramref name="toggleDescriptor"/>, <paramref name="projection"/>,
-    ///     or <paramref name="collectionProvider"/> is <c>null</c>.
-    /// </exception>
-    public abstract ToggleableColumnBuilder WithHierarchicalToggle<T>(
-        ColumnVariantDescriptor toggleDescriptor,
-        IProjection<int, T> projection,
-        ICollectionInfoProvider<T> collectionProvider,
-        DataColumnCommands dataColumnCommands);
 
     /// <summary>
     ///     Adds a set of modes to the column that are nested inside of a toggle with no
@@ -154,4 +90,70 @@ public abstract class ToggleableColumnBuilder
     public abstract ColumnBuilder WithToggledModes(
         string toggleText,
         Func<ModalColumnBuilder, ColumnBuilder> builder);
+
+    /// <summary>
+    ///     Adds a new toggleable variant to the column whose nested variants are built by a
+    ///     <see cref="ToggleableVariantBuilder"/>. The added toggleable variant is nested at
+    ///     the "end" of the chain of toggleable variants already added.
+    /// </summary>
+    /// <param name="toggleDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle.
+    /// </param>
+    /// <param name="projection">
+    ///     The projection that will be used to generate the column when this toggle is on.
+    /// </param>
+    /// <param name="buildVariant">
+    ///     A callback that builds the nested variants of the added toggle and returns its final
+    ///     <see cref="ToggleableVariantBuilder"/> configuration.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The type of data that the projection will produce.
+    /// </typeparam>
+    /// <returns>
+    ///     A new instance of <see cref="ToggleableColumnBuilder"/> that has been
+    ///     configured with the added toggle.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="toggleDescriptor"/>, <paramref name="projection"/>, or
+    ///     <paramref name="buildVariant"/> is <c>null</c>.
+    /// </exception>
+    public abstract ToggleableColumnBuilder WithToggleableBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant);
+
+    /// <summary>
+    ///     Adds a new hierarchical toggleable variant to the column whose nested variants are built
+    ///     by a <see cref="ToggleableVariantBuilder"/>. The added toggleable variant is nested at
+    ///     the "end" of the chain of toggleable variants already added.
+    /// </summary>
+    /// <param name="toggleDescriptor">
+    ///     The <see cref="ColumnVariantDescriptor"/> for the toggle.
+    /// </param>
+    /// <param name="projection">
+    ///     The projection that will be used to generate the column when this toggle is on.
+    /// </param>
+    /// <param name="collectionProvider">
+    ///     The collection provider for the column.
+    /// </param>
+    /// <param name="buildVariant">
+    ///     A callback that builds the nested variants of the added toggle and returns its final
+    ///     <see cref="ToggleableVariantBuilder"/> configuration.
+    /// </param>
+    /// <typeparam name="T">
+    ///     The type of data that the projection will produce.
+    /// </typeparam>
+    /// <returns>
+    ///     A new instance of <see cref="ToggleableColumnBuilder"/> that has been
+    ///     configured with the added toggle.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    ///     <paramref name="toggleDescriptor"/>, <paramref name="projection"/>,
+    ///     <paramref name="collectionProvider"/>, or <paramref name="buildVariant"/> is <c>null</c>.
+    /// </exception>
+    public abstract ToggleableColumnBuilder WithHierarchicalToggleableBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant);
 }

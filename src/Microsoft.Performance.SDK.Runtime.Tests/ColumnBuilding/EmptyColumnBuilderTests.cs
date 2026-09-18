@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.Tests.Fixtures;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using ColumnConfiguration = Microsoft.Performance.SDK.Processing.ColumnConfiguration;
 using ColumnMetadata = Microsoft.Performance.SDK.Processing.ColumnMetadata;
 using Projection = Microsoft.Performance.SDK.Processing.Projection;

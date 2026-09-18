@@ -1,15 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Performance.SDK.ColumnCommands;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -19,11 +18,8 @@ namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 internal class ToggledColumnBuilder
     : ToggleableColumnBuilder
 {
-    internal record AddedToggle(
-        ColumnVariantDescriptor ToggleDescriptor,
-        IDataColumn column);
 
-    private readonly IReadOnlyCollection<AddedToggle> toggles;
+    private readonly IReadOnlyCollection<ToggleableVariant> toggles;
     private readonly IDataColumn baseColumn;
     private readonly IColumnVariantsProcessor processor;
 
@@ -40,7 +36,7 @@ internal class ToggledColumnBuilder
     ///     The <see cref="IColumnVariantsProcessor" /> to invoke once the column variants are built.
     /// </param>
     public ToggledColumnBuilder(
-        IReadOnlyCollection<AddedToggle> toggles,
+        IReadOnlyCollection<ToggleableVariant> toggles,
         IDataColumn baseColumn,
         IColumnVariantsProcessor processor)
     {
@@ -60,29 +56,19 @@ internal class ToggledColumnBuilder
         ColumnVariantDescriptor toggleDescriptor,
         IProjection<int, T> projection)
     {
-        return WithToggle(toggleDescriptor, projection, default);
-    }
-
-    /// <inheritdoc />
-    public override ToggleableColumnBuilder WithToggle<T>(
-        ColumnVariantDescriptor toggleDescriptor,
-        IProjection<int, T> projection,
-        DataColumnCommands dataColumnCommands)
-    {
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
 
         return new ToggledColumnBuilder(
             this.toggles.Append(
-                new AddedToggle(
+                new ToggleableVariant(
                     toggleDescriptor,
                     new DataColumn<T>(
                         new ColumnConfiguration(this.baseColumn.Configuration)
                         {
                             Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name },
                         },
-                        projection,
-                        dataColumnCommands))
+                        projection))
             ).ToList(),
             this.baseColumn,
             this.processor);
@@ -94,23 +80,13 @@ internal class ToggledColumnBuilder
         IProjection<int, T> projection,
         ICollectionInfoProvider<T> collectionProvider)
     {
-        return WithHierarchicalToggle(toggleDescriptor, projection, collectionProvider, default);
-    }
-
-    /// <inheritdoc />
-    public override ToggleableColumnBuilder WithHierarchicalToggle<T>(
-        ColumnVariantDescriptor toggleDescriptor,
-        IProjection<int, T> projection,
-        ICollectionInfoProvider<T> collectionProvider,
-        DataColumnCommands dataColumnCommands)
-    {
         Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
         Guard.NotNull(projection, nameof(projection));
         Guard.NotNull(collectionProvider, nameof(collectionProvider));
 
         return new ToggledColumnBuilder(
             this.toggles.Append(
-                new AddedToggle(
+                new ToggleableVariant(
                     toggleDescriptor,
                     new HierarchicalDataColumn<T>(
                         new ColumnConfiguration(this.baseColumn.Configuration)
@@ -118,11 +94,36 @@ internal class ToggledColumnBuilder
                             Metadata = new ColumnMetadata(this.baseColumn.Configuration.Metadata) { Name = toggleDescriptor.Properties.ColumnName ?? this.baseColumn.Configuration.Metadata.Name },
                         },
                         projection,
-                        collectionProvider,
-                        dataColumnCommands))
+                        collectionProvider))
                 ).ToList(),
             baseColumn,
             processor);
+    }
+
+    /// <inheritdoc />
+    public override ToggleableColumnBuilder WithToggleableBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant)
+    {
+        Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
+        Guard.NotNull(projection, nameof(projection));
+
+        return CreateFromBuilder(toggleDescriptor, projection, null, buildVariant);
+    }
+
+    /// <inheritdoc />
+    public override ToggleableColumnBuilder WithHierarchicalToggleableBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant)
+    {
+        Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(collectionProvider, nameof(collectionProvider));
+
+        return CreateFromBuilder(toggleDescriptor, projection, collectionProvider, buildVariant);
     }
 
     /// <inheritdoc />
@@ -146,7 +147,7 @@ internal class ToggledColumnBuilder
 
         foreach (var toggle in this.toggles.Reverse())
         {
-            variantsTreeNode = new ToggleableColumnVariantsTreeNode(toggle.ToggleDescriptor, toggle.column, variantsTreeNode);
+            variantsTreeNode = new ToggleableColumnVariantsTreeNode(toggle.ToggleDescriptor, toggle.Column, variantsTreeNode);
         }
 
         return variantsTreeNode;
@@ -155,5 +156,22 @@ internal class ToggledColumnBuilder
     protected virtual IColumnVariantsTreeNode GetRootVariant()
     {
         return NullColumnVariantsTreeNode.Instance;
+    }
+
+    private ToggleableColumnBuilder CreateFromBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant)
+    {
+        ToggleableVariantBuilder variantBuilder = new ToggledVariantBuilder<T>(toggleDescriptor, projection, collectionProvider);
+        variantBuilder = buildVariant(variantBuilder);
+
+        return new ToggledColumnBuilder(
+            [
+                variantBuilder.CreateVariant(this.baseColumn),
+            ],
+            baseColumn,
+            processor);
     }
 }
