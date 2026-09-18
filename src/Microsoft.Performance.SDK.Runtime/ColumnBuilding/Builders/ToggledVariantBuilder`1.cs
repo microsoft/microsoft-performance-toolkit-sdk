@@ -125,7 +125,8 @@ internal sealed class ToggledVariantBuilder<T>
                 {
                     Metadata = new ColumnMetadata(baseColumn.Configuration.Metadata) { Name = this.toggleDescriptor.Properties.ColumnName ?? baseColumn.Configuration.Metadata.Name },
                 },
-                projection,
-                collectionProvider));
+                this.projection,
+                this.collectionProvider,
+                this.commands));
     }
 }
