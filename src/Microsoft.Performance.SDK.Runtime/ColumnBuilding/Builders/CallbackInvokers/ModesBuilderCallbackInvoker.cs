@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 
@@ -47,7 +47,7 @@ internal readonly struct ModesBuilderCallbackInvoker
         var processor = new BuiltColumnVariantReflector();
         var builder = new ModalColumnWithModesBuilder(
             processor,
-            new List<ModalColumnWithModesBuilder.AddedMode>(),
+            new List<ModalVariant>(),
             this.baseColumn,
             null);
 

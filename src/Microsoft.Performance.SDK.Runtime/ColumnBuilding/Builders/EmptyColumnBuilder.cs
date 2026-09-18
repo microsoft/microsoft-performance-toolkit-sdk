@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Performance.SDK.ColumnCommands;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -144,7 +144,7 @@ public sealed class EmptyColumnBuilder
         return new ModalColumnWithModesBuilder(
             processor,
             [
-                new ModalColumnWithModesBuilder.AddedMode(
+                new ModalVariant(
                     new ColumnVariantDescriptor(baseColumn.Configuration.Metadata.Guid, baseProjectionProperties),
                     baseColumn,
                     builder),
