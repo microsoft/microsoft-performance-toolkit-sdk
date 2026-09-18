@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
@@ -9,6 +8,7 @@ using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers
 using Microsoft.Performance.SDK.Runtime.Tests.Fixtures;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using ColumnConfiguration = Microsoft.Performance.SDK.Processing.ColumnConfiguration;
 using ColumnMetadata = Microsoft.Performance.SDK.Processing.ColumnMetadata;
 using Projection = Microsoft.Performance.SDK.Processing.Projection;
@@ -31,7 +31,7 @@ public class ToggledColumnWithToggledModesBuilderTests
                 new ColumnMetadata(Guid.NewGuid(), "toggle")), Projection.Constant<int, int>(1));
 
         return new ToggledColumnWithToggledModesBuilder(
-            new []{ new ToggledColumnBuilder.AddedToggle(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }), initialToggle) },
+            new[] { new ToggleableVariant(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }), initialToggle) },
             baseColumn,
             new TestColumnVariantsProcessor(),
             new ModesBuilderCallbackInvoker((modesBuilder) => modesBuilder, baseColumn),

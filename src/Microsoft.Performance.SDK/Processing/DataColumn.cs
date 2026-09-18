@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.Performance.SDK.ColumnCommands;
 
 namespace Microsoft.Performance.SDK.Processing
 {
@@ -13,7 +14,8 @@ namespace Microsoft.Performance.SDK.Processing
     ///     The <see cref="Type"/> of data projected by this column.
     /// </typeparam>
     public class DataColumn<T>
-        : IDataColumn<T>
+        : IDataColumn<T>,
+          IDataColumnWithCommands
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="DataColumn{T}" />
@@ -60,6 +62,32 @@ namespace Microsoft.Performance.SDK.Processing
         public DataColumn(
             ColumnConfiguration configuration,
             IProjection<int, T> projection)
+            : this(configuration, projection, null)
+        {
+        }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="DataColumn{T}" />
+        ///     class.
+        /// </summary>
+        /// <param name="configuration">
+        ///     The configuration of this column.
+        /// </param>
+        /// <param name="projection">
+        ///     The projection that projects the data in the column.
+        /// </param>
+        /// <param name="dataColumnCommands">
+        ///     The commands supported by this column. May be <c>null</c>.
+        /// </param>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="configuration"/> is <c>null</c>.
+        ///     - or -
+        ///     <paramref name="projection"/> is <c>null</c>.
+        /// </exception>
+        public DataColumn(
+            ColumnConfiguration configuration,
+            IProjection<int, T> projection,
+            DataColumnCommands dataColumnCommands)
         {
             Guard.NotNull(configuration, nameof(configuration));
             Guard.NotNull(projection, nameof(projection));
@@ -67,6 +95,7 @@ namespace Microsoft.Performance.SDK.Processing
             this.Configuration = configuration;
             this.ProjectorInterface = projection.GetType();
             this.Projector = projection;
+            this.Commands = dataColumnCommands ?? DataColumnCommands.Empty;
         }
 
         /// <inheritdoc />
@@ -80,6 +109,13 @@ namespace Microsoft.Performance.SDK.Processing
 
         /// <inheritdoc />
         public IProjection<int, T> Projector { get; }
+
+        /// <summary>
+        ///     Gets the collection of commands supported by this column.
+        ///     This will be <see cref="DataColumnCommands.Empty"/> if no
+        ///     commands were provided when this column was constructed.
+        /// </summary>
+        public DataColumnCommands Commands { get; }
 
         /// <summary>
         ///     Projects the data in this column for the given row.

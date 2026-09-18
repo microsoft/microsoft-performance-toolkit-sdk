@@ -160,6 +160,23 @@ namespace Microsoft.Performance.SDK.Processing
         ITableBuilderWithRowCount AddColumn(IDataColumn column);
 
         /// <summary>
+        ///     Builds the specified column and adds it to this builder instance.
+        /// </summary>
+        /// <typeparam name="T">
+        ///     The type of data produced by the column's projection.
+        /// </typeparam>
+        /// <param name="columnBuilder">
+        ///     The column builder to build and add.
+        /// </param>
+        /// <returns>
+        ///     This instance of the builder.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        ///     <paramref name="columnBuilder"/> is <c>null</c>.
+        /// </exception>
+        ITableBuilderWithRowCount AddColumn<T>(ColumnBuilder<T> columnBuilder);
+
+        /// <summary>
         ///     Adds a column that can be configured with multiple variants to this builder instance.
         /// </summary>
         /// <param name="column">

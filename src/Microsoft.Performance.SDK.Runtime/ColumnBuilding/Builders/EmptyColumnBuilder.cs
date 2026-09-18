@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -53,7 +53,7 @@ public sealed class EmptyColumnBuilder
 
         return new ToggledColumnBuilder(
             [
-                new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
+                new ToggleableVariant(toggleDescriptor,
                     new DataColumn<T>(
                         new ColumnConfiguration(this.baseColumn.Configuration)
                         {
@@ -77,7 +77,7 @@ public sealed class EmptyColumnBuilder
 
         return new ToggledColumnBuilder(
             [
-                new ToggledColumnBuilder.AddedToggle(toggleDescriptor,
+                new ToggleableVariant(toggleDescriptor,
                     new HierarchicalDataColumn<T>(
                         new ColumnConfiguration(this.baseColumn.Configuration)
                         {
@@ -91,6 +91,34 @@ public sealed class EmptyColumnBuilder
     }
 
     /// <inheritdoc />
+    public override ToggleableColumnBuilder WithToggleableBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant)
+    {
+        Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(buildVariant, nameof(buildVariant));
+
+        return CreateFromBuilder(toggleDescriptor, projection, null, buildVariant);
+    }
+
+    /// <inheritdoc />
+    public override ToggleableColumnBuilder WithHierarchicalToggleableBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant)
+    {
+        Guard.NotNull(toggleDescriptor, nameof(toggleDescriptor));
+        Guard.NotNull(projection, nameof(projection));
+        Guard.NotNull(collectionProvider, nameof(collectionProvider));
+        Guard.NotNull(buildVariant, nameof(buildVariant));
+
+        return CreateFromBuilder(toggleDescriptor, projection, collectionProvider, buildVariant);
+    }
+
+    /// <inheritdoc />
     public override ColumnBuilder WithToggledModes(
         string toggleText,
         Func<ModalColumnBuilder, ColumnBuilder> builder)
@@ -98,7 +126,7 @@ public sealed class EmptyColumnBuilder
         Guard.NotNull(toggleText, nameof(toggleText));
 
         return new ToggledColumnWithToggledModesBuilder(
-            new List<ToggledColumnBuilder.AddedToggle>(),
+            new List<ToggleableVariant>(),
             baseColumn,
             processor,
             new ModesBuilderCallbackInvoker(builder, baseColumn),
@@ -122,12 +150,29 @@ public sealed class EmptyColumnBuilder
         return new ModalColumnWithModesBuilder(
             processor,
             [
-                new ModalColumnWithModesBuilder.AddedMode(
+                new ModalVariant(
                     new ColumnVariantDescriptor(baseColumn.Configuration.Metadata.Guid, baseProjectionProperties),
                     baseColumn,
                     builder),
             ],
             baseColumn,
             null);
+    }
+
+    private ToggleableColumnBuilder CreateFromBuilder<T>(
+        ColumnVariantDescriptor toggleDescriptor,
+        IProjection<int, T> projection,
+        ICollectionInfoProvider<T> collectionProvider,
+        Func<ToggleableVariantBuilder, ToggleableVariantBuilder> buildVariant)
+    {
+        ToggleableVariantBuilder variantBuilder = new ToggledVariantBuilder<T>(toggleDescriptor, projection, collectionProvider);
+        variantBuilder = buildVariant(variantBuilder);
+
+        return new ToggledColumnBuilder(
+            [
+                variantBuilder.CreateVariant(this.baseColumn),
+            ],
+            baseColumn,
+            processor);
     }
 }
