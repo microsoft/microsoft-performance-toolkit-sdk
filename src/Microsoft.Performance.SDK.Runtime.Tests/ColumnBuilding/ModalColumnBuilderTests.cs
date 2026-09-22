@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.Tests.Fixtures;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 using ColumnConfiguration = Microsoft.Performance.SDK.Processing.ColumnConfiguration;
 using ColumnMetadata = Microsoft.Performance.SDK.Processing.ColumnMetadata;
 using Projection = Microsoft.Performance.SDK.Processing.Projection;
@@ -117,11 +117,104 @@ public class ModalColumnBuilderTests
         });
     }
 
+    [TestMethod]
+    public void WithModalBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithModalBuilder(null, modeProjection, variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithModalBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithModalBuilder<int>(modeDescriptor, null, variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithModalBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithModalBuilder(modeDescriptor, modeProjection, null);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder(
+                null,
+                modeProjection,
+                new StubCollectionAccessProvider<int>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder<int>(
+                modeDescriptor,
+                null,
+                new StubCollectionAccessProvider<int>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullCollectionInfoThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder<int>(
+                modeDescriptor,
+                modeProjection,
+                null,
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalModalBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalModalBuilder<int>(
+                modeDescriptor,
+                modeProjection,
+                new StubCollectionAccessProvider<int>(),
+                null);
+        });
+    }
+
     private ModalColumnBuilder CreateSut()
     {
         return new ModalColumnWithModesBuilder(
             new TestColumnVariantsProcessor(),
-            new List<ModalColumnWithModesBuilder.AddedMode>(),
+            new List<ModalVariant>(),
             new DataColumn<int>(
                 new ColumnConfiguration(
                     new ColumnMetadata(Guid.NewGuid(), "foo")), Projection.Constant<int, int>(1)),

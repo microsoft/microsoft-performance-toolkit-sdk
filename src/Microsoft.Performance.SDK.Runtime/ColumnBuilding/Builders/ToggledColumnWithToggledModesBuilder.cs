@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Collections.Generic;
 using Microsoft.Performance.SDK.Processing;
+using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders.CallbackInvokers;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Processors;
 using Microsoft.Performance.SDK.Runtime.ColumnVariants.TreeNodes;
+using System.Collections.Generic;
 
 namespace Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 
@@ -38,7 +39,7 @@ internal sealed class ToggledColumnWithToggledModesBuilder
     ///     The text to display for the final toggle for the modes.
     /// </param>
     public ToggledColumnWithToggledModesBuilder(
-        IReadOnlyCollection<AddedToggle> toggles,
+        IReadOnlyCollection<ToggleableVariant> toggles,
         IDataColumn baseColumn,
         IColumnVariantsProcessor processor,
         ModesBuilderCallbackInvoker modesBuilderCallbackActionInvoker,

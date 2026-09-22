@@ -631,6 +631,14 @@ namespace Microsoft.Performance.Toolkit.Engine
             }
 
             /// <inheritdoc />
+            public ITableBuilderWithRowCount AddColumn<T>(ColumnBuilder<T> columnBuilder)
+            {
+                Guard.NotNull(columnBuilder, nameof(columnBuilder));
+
+                return columnBuilder.AddColumnToTable(this);
+            }
+
+            /// <inheritdoc />
             public ITableBuilderWithRowCount AddColumnWithVariants(
                 IDataColumn column,
                 Func<RootColumnBuilder, ColumnBuilder> options)

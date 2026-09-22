@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime.ColumnBuilding.Builders;
 using Microsoft.Performance.SDK.Runtime.Tests.Fixtures;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using ColumnConfiguration = Microsoft.Performance.SDK.Processing.ColumnConfiguration;
 using ColumnMetadata = Microsoft.Performance.SDK.Processing.ColumnMetadata;
 using Projection = Microsoft.Performance.SDK.Processing.Projection;
@@ -98,6 +98,105 @@ public class ToggledColumnBuilderTests
         Assert.IsTrue(true);
     }
 
+    [TestMethod]
+    public void WithToggleableBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithToggleableBuilder(null, Projection.Constant(1f), variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithToggleableBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithToggleableBuilder<int>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                null,
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithToggleableBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithToggleableBuilder(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                Projection.Constant(1f),
+                null);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullIdentifierThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder(
+                null,
+                Projection.Constant(1f),
+                new StubCollectionAccessProvider<float>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullProjectionThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder<float>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                null,
+                new StubCollectionAccessProvider<float>(),
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullCollectionInfoThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder<float>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                Projection.Constant(1f),
+                null,
+                variantBuilder => variantBuilder);
+        });
+    }
+
+    [TestMethod]
+    public void WithHierarchicalToggleableBuilder_NullBuildVariantThrows()
+    {
+        var builder = CreateSut();
+
+        Assert.ThrowsExactly<ArgumentNullException>(() =>
+        {
+            builder.WithHierarchicalToggleableBuilder<float>(
+                new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }),
+                Projection.Constant(1f),
+                new StubCollectionAccessProvider<float>(),
+                null);
+        });
+    }
+
     protected virtual ToggleableColumnBuilder CreateSut()
     {
         var baseColumn = new DataColumn<float>(
@@ -109,7 +208,7 @@ public class ToggledColumnBuilderTests
                 new ColumnMetadata(Guid.NewGuid(), "toggle")), Projection.Constant<int, int>(1));
 
         return new ToggledColumnBuilder(
-            new []{ new ToggledColumnBuilder.AddedToggle(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }), initialToggle) },
+            new[] { new ToggleableVariant(new ColumnVariantDescriptor(Guid.NewGuid(), new ColumnVariantProperties { Label = "Foo" }), initialToggle) },
             baseColumn,
             new TestColumnVariantsProcessor());
     }

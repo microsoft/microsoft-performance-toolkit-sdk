@@ -3,6 +3,9 @@
 
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Performance.SDK.ColumnCommands;
 using Microsoft.Performance.SDK.Processing;
 using Microsoft.Performance.SDK.Processing.ColumnBuilding;
 using Microsoft.Performance.SDK.Runtime;
@@ -379,6 +382,81 @@ public class ColumnVariantsTests
         Assert.AreEqual(local.Properties.ColumnName, localMode.ModeColumn.Configuration.Metadata.Name);
     }
 
+    [TestMethod]
+    public void ToggleableBuilder_WithCommands_CommandsAttachedToToggle()
+    {
+        var commands = new DataColumnCommands(new StubDownloadCommand());
+
+        var tableBuilder = new TableBuilder();
+        tableBuilder
+            .SetRowCount(1)
+            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            {
+                return builder
+                    .WithToggleableBuilder(projectAsDateTime, utcProj, variantBuilder => variantBuilder.WithCommands(commands));
+            });
+
+        var expected = Toggle(projectAsDateTime);
+        AssertCorrectColumnVariants(expected, tableBuilder);
+
+        var toggleNode = GetTreeNode(tableBuilder) as ToggleableColumnVariantsTreeNode;
+        Assert.IsNotNull(toggleNode);
+        var columnWithCommands = toggleNode.ToggledColumn as IDataColumnWithCommands;
+        Assert.IsNotNull(columnWithCommands);
+        Assert.AreSame(commands, columnWithCommands.Commands);
+    }
+
+    [TestMethod]
+    public void ToggleableBuilder_AfterToggle_PreservesExistingToggle()
+    {
+        var tableBuilder = new TableBuilder();
+        tableBuilder
+            .SetRowCount(1)
+            .AddColumnWithVariants(baseConfig, baseProj, builder =>
+            {
+                return builder
+                    .WithToggle(projectAsDateTime, utcProj)
+                    .WithToggleableBuilder(utc, utcProj, variantBuilder => variantBuilder);
+            });
+
+        var expected = Toggle(
+            projectAsDateTime,
+            Toggle(utc));
+        AssertCorrectColumnVariants(expected, tableBuilder);
+    }
+
+    [TestMethod]
+    public void ModalBuilder_WithCommandsAndNestedToggle_AttachesBoth()
+    {
+        var commands = new DataColumnCommands(new StubDownloadCommand());
+
+        var tableBuilder = new TableBuilder();
+        tableBuilder
+            .SetRowCount(1)
+            .AddColumnWithVariants(baseConfig, utcProj, builder =>
+            {
+                return builder
+                    .WithModes(utc.Properties)
+                    .WithModalBuilder(local, localProj, variantBuilder => variantBuilder
+                        .WithCommands(commands)
+                        .WithBuilder(modeBuilder => modeBuilder.WithToggle(showFloat, floatProj)));
+            });
+
+        var expected = Modes(
+            0,
+            Mode(utc),
+            Mode(local,
+                Toggle(showFloat)));
+        AssertCorrectColumnVariants(expected, tableBuilder);
+
+        var modesNode = GetTreeNode(tableBuilder) as ModesColumnVariantsTreeNode;
+        Assert.IsNotNull(modesNode);
+        var localMode = modesNode.Modes.Cast<ModeColumnVariantsTreeNode>().Single(m => m.ModeDescriptor.Guid == local.Guid);
+        var columnWithCommands = localMode.ModeColumn as IDataColumnWithCommands;
+        Assert.IsNotNull(columnWithCommands);
+        Assert.AreSame(commands, columnWithCommands.Commands);
+    }
+
     private void AssertCorrectColumnVariants(
         IColumnVariantsTreeNode expectedRoot, TableBuilder builtTable)
     {
@@ -411,5 +489,27 @@ public class ColumnVariantsTests
     private ToggleableColumnVariantsTreeNode Toggle(ColumnVariantDescriptor descriptor, IColumnVariantsTreeNode subVariantsTreeNode = null)
     {
         return new ToggleableColumnVariantsTreeNode(descriptor, null, subVariantsTreeNode ?? NullColumnVariantsTreeNode.Instance);
+    }
+
+    private sealed class StubDownloadCommand
+        : DownloadSourceCodeCommand
+    {
+        public StubDownloadCommand()
+            : base("Stub")
+        {
+        }
+
+        public override bool CanExecute(object value, string downloadPath)
+        {
+            return false;
+        }
+
+        public override Task<DownloadSourceCodeResult[]> ExecuteAsync(
+            object value,
+            string downloadPath,
+            CancellationToken cancellationToken)
+        {
+            return Task.FromResult(Array.Empty<DownloadSourceCodeResult>());
+        }
     }
 }

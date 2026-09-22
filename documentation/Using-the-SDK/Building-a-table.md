@@ -94,6 +94,12 @@ tableBuilderWithRowCount.AddColumn(this.wordCountColumn, wordCountProjection);
 
 Note that _every_ column a table provides must be added through a call to `ITableBuilderWithRowCount.AddColumn`, even if they're not used in a `TableConfiguration` (see below).
 
+### Adding commands to a column
+
+A column can advertise commands that a supporting host may invoke for a row value. For example, a source-location column can provide a command that downloads the source code represented by the selected value. Commands can be attached when constructing a `DataColumn<T>` or by using `ColumnBuilder<T>.WithCommands`.
+
+See [Adding Column Commands](./Advanced/Adding-Column-Commands.md) for the command contract, download implementation, column variants, and host integration.
+
 ### Deprecating a column
 
 Removing a column can break existing saved configurations that reference it: they will silently lose the column, and filters depending on it will become invalid.

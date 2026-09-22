@@ -4,7 +4,7 @@
 // See https://stackoverflow.com/a/64749403
 namespace System.Runtime.CompilerServices
 {
-    internal static class IsExternalInit {}
+    internal static class IsExternalInit { }
 
     internal class ExtensionAttribute : Attribute { }
 
@@ -18,5 +18,19 @@ namespace System.Runtime.CompilerServices
 
 namespace System.Diagnostics.CodeAnalysis
 {
-    internal class SetsRequiredMembersAttribute : Attribute {}
+    internal class SetsRequiredMembersAttribute : Attribute { }
+}
+
+namespace System.Diagnostics.CodeAnalysis
+{
+    [AttributeUsage(AttributeTargets.Parameter, Inherited = false)]
+    internal sealed class NotNullWhenAttribute : Attribute
+    {
+        public NotNullWhenAttribute(bool returnValue)
+        {
+            this.ReturnValue = returnValue;
+        }
+
+        public bool ReturnValue { get; }
+    }
 }
