@@ -102,7 +102,7 @@ tableBuilderWithRowCount.AddColumn(
     new DataColumn<Uri>(sourceColumnConfiguration, sourceProjection, commands));
 ```
 
-The strongly typed `ColumnBuilderBuilder<T>` can be used with `ITableBuilderWithRowCount` to add a column to a table:
+The strongly typed `ColumnBuilder<T>` can be used with `ITableBuilderWithRowCount` to add a column to a table:
 
 ```cs
 tableBuilderWithRowCount.AddColumn(
