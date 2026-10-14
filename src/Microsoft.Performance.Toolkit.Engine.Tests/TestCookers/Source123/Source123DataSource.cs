@@ -28,9 +28,11 @@ namespace Microsoft.Performance.Toolkit.Engine.Tests.TestCookers.Source123
         public static Guid Guid = Guid.Parse(GuidAsString);
         public const string Extension = ".s123d";
 
-        public Source123DataSource()
-            : base(new Discovery())
+        private readonly IProcessingSourceTableProvider tableProvider = new Discovery();
+
+        protected override IProcessingSourceTableProvider CreateTableProvider()
         {
+            return this.tableProvider;
         }
 
         protected override ICustomDataProcessor CreateProcessorCore(

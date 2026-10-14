@@ -154,7 +154,9 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
                     var sut = new ZipPluginPackage(info, contents, archive, fakeLoggerFactory);
 
                     using var openedStream = sut.Entries.Single().Open();
-                    using var expectedStream = archive.GetEntry("foo.txt")?.Open();
+                    var expectedEntry = archive.GetEntry("foo.txt")
+                        ?? throw new AssertFailedException("The expected ZIP entry foo.txt is missing.");
+                    using var expectedStream = expectedEntry.Open();
 
                     using (var streamReader1 = new StreamReader(openedStream))
                     using (var streamReader2 = new StreamReader(expectedStream))

@@ -20,14 +20,13 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
     [TestClass]
     public class FileSystemInstalledPluginStorageTests
     {
-        private string tempDirectory;
+        private readonly string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
-        public TestContext TestContext { get; set; }
+        public TestContext? TestContext { get; set; }
 
         [TestInitialize]
         public void Setup()
         {
-            this.tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(this.tempDirectory);
         }
 
@@ -43,7 +42,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             }
             catch (Exception e)
             {
-                this.TestContext.WriteLine($"Failed to delete {this.tempDirectory}: {e}");
+                this.TestContext?.WriteLine($"Failed to delete {this.tempDirectory}: {e}");
             }
         }
 

@@ -18,22 +18,18 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
     [TestClass]
     public class FileSystemPluginRegistryTests
     {
-        private string tempDirectory;
+        private readonly string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
-        public TestContext TestContext { get; set; }
+        public TestContext? TestContext { get; set; }
 
-        private string registryRoot;
+        private string registryRoot => this.tempDirectory;
 
-        private string registryFilePath;
+        private string registryFilePath => Path.GetFullPath(Path.Combine(this.registryRoot, FileBackedPluginRegistry.RegistryFileName));
 
         [TestInitialize]
         public void Setup()
         {
-            this.tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             Directory.CreateDirectory(this.tempDirectory);
-
-            this.registryRoot = this.tempDirectory;
-            this.registryFilePath = Path.GetFullPath(Path.Combine(this.registryRoot, FileBackedPluginRegistry.RegistryFileName));
         }
 
         [TestCleanup]
@@ -48,7 +44,7 @@ namespace Microsoft.Performance.Toolkit.Plugins.Runtime.Tests
             }
             catch (Exception e)
             {
-                this.TestContext.WriteLine($"Failed to delete {this.tempDirectory}: {e}");
+                this.TestContext?.WriteLine($"Failed to delete {this.tempDirectory}: {e}");
             }
         }
 

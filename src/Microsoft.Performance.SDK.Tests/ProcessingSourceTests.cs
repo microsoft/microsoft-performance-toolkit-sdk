@@ -160,7 +160,10 @@ namespace Microsoft.Performance.SDK.Tests
                 expectedDescriptors[4],
             };
 
-            var sut = new DeprecatedStubDataSource(discovery);
+            // Exercise the retained obsolete constructor without a statically bound obsolete call.
+            var sut = (DeprecatedStubDataSource)Activator.CreateInstance(
+                typeof(DeprecatedStubDataSource),
+                discovery);
             sut.SetApplicationEnvironment(applicationEnvironment);
 
             Assert.AreEqual(5, sut.AllTablesExposed.Count);
@@ -242,6 +245,7 @@ namespace Microsoft.Performance.SDK.Tests
                     new List<Tuple<IEnumerable<IDataSource>, IProcessorEnvironment, ProcessorOptions>>();
             }
 
+            [Obsolete("Exercises the legacy ProcessingSource table-provider constructor.")]
             protected StubDataSource(IProcessingSourceTableProvider tableProvider)
                 : base(tableProvider)
             {
@@ -332,6 +336,7 @@ namespace Microsoft.Performance.SDK.Tests
         private sealed class DeprecatedStubDataSource
             : StubDataSource
         {
+            [Obsolete("Exercises the legacy ProcessingSource table-provider constructor.")]
             public DeprecatedStubDataSource(IProcessingSourceTableProvider tableProvider)
                 : base(tableProvider)
             {
