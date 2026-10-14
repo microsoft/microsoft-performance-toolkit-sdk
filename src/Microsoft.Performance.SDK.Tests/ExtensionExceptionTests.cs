@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Performance.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -39,28 +38,18 @@ namespace Microsoft.Performance.SDK.Tests
 
             using (var stream = new MemoryStream())
             {
-                var formatter = new BinaryFormatter();
-                try
-                {
-                    formatter.Serialize(stream, exception);
-                }
-                catch (Exception e)
-                {
-                    Assert.Fail(e.Message);
-                }
-
+                var serializer = new DataContractSerializer(
+                    typeof(ExtensionException),
+                    new[] { typeof(TestError), typeof(ErrorInfo), typeof(ErrorInfo[]) });
+                serializer.WriteObject(stream, exception);
                 stream.Seek(0, SeekOrigin.Begin);
-                ExtensionException deserialized = null;
-                try
-                {
-                    deserialized = (ExtensionException)formatter.Deserialize(stream);
-                }
-                catch (Exception e)
-                {
-                    Assert.Fail(e.Message);
-                }
+                var deserialized = (ExtensionException)serializer.ReadObject(stream);
 
                 Assert.AreEqual(exception.ToString(), deserialized.ToString());
+                Assert.AreEqual(exception.Message, deserialized.Message);
+                Assert.IsInstanceOfType(deserialized.Error, typeof(TestError));
+                Assert.AreEqual(info.Data, ((TestError)deserialized.Error).Data);
+                Assert.AreEqual(info.Details[0].Details[0].Code, deserialized.Error.Details[0].Details[0].Code);
             }
         }
 
