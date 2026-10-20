@@ -19,7 +19,7 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
     ///     Used to load assemblies into isolated contexts.
     ///     <para/>
     ///     Assemblies loaded through this class do not have any security
-    ///     boundary guarantees. For more information, refer to <see cref="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.1"/>
+    ///     boundary guarantees. For more information, refer to <see cref="https://learn.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=net-10.0"/>
     /// </summary>
     public sealed class IsolationAssemblyLoader
         : AssemblyLoaderBase

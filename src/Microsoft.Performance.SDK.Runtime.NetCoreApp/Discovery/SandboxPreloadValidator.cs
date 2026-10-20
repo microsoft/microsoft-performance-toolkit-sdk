@@ -10,7 +10,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+#if NETFRAMEWORK
 using System.Security.Permissions;
+#endif
 using Microsoft.Performance.SDK.Runtime.Discovery;
 using NuGet.Versioning;
 
@@ -207,9 +209,12 @@ namespace Microsoft.Performance.SDK.Runtime.NetCoreApp.Discovery
 
             public SemanticVersion HostedSdkVersion { get; }
 
+            // CAS link demands are honored only on .NET Framework, not modern .NET.
+#if NETFRAMEWORK
             [SecurityPermission(
                 SecurityAction.LinkDemand,
                 Flags = SecurityPermissionFlag.SerializationFormatter)]
+#endif
             public override void GetObjectData(SerializationInfo info, StreamingContext context)
             {
                 base.GetObjectData(info, context);
